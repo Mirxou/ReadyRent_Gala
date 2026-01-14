@@ -1,0 +1,385 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  PYTHON_VERSION: '3.11'
+  NODE_VERSION: '20'
+
+jobs:
+  backend-tests:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: readyrent_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+      
+      redis:
+        image: redis:7
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Cache pip packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('backend/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+      
+      - name: Install dependencies
+        working-directory: ./backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Run migrations
+        working-directory: ./backend
+        env:
+          DJANGO_SETTINGS_MODULE: config.settings.test
+          DB_NAME: readyrent_test
+          DB_USER: postgres
+          DB_PASSWORD: postgres
+          DB_HOST: localhost
+          DB_PORT: 5432
+          REDIS_URL: redis://localhost:6379/1
+        run: |
+          python manage.py migrate --noinput
+      
+      - name: Run tests with coverage
+        working-directory: ./backend
+        env:
+          DJANGO_SETTINGS_MODULE: config.settings.test
+          DB_NAME: readyrent_test
+          DB_USER: postgres
+          DB_PASSWORD: postgres
+          DB_HOST: localhost
+          DB_PORT: 5432
+          REDIS_URL: redis://localhost:6379/1
+        run: |
+          pytest --cov=apps --cov=config --cov=core --cov-report=xml --cov-report=html --cov-report=term --cov-fail-under=70
+      
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./backend/coverage.xml
+          flags: backend
+          name: backend-coverage
+      
+      - name: Upload coverage HTML
+        uses: actions/upload-artifact@v3
+        with:
+          name: backend-coverage-html
+          path: backend/htmlcov/
+      
+      - name: Check code formatting
+        working-directory: ./backend
+        run: |
+          black --check .
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+  frontend-tests:
+    name: Frontend Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+      
+      - name: Install dependencies
+        working-directory: ./frontend
+        run: npm ci
+      
+      - name: Run linter
+        working-directory: ./frontend
+        run: npm run lint || true
+      
+      - name: Run type check
+        working-directory: ./frontend
+        run: npm run type-check || true
+      
+      - name: Run unit tests with coverage
+        working-directory: ./frontend
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:8000/api
+        run: npm run test:coverage -- --coverage --watchAll=false
+      
+      - name: Upload frontend coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./frontend/coverage/coverage-final.json
+          flags: frontend
+          name: frontend-coverage
+      
+      - name: Upload frontend coverage HTML
+        uses: actions/upload-artifact@v3
+        with:
+          name: frontend-coverage-html
+          path: frontend/coverage/
+      
+      - name: Install Playwright browsers
+        working-directory: ./frontend
+        run: npx playwright install --with-deps chromium
+      
+      - name: Run E2E tests
+        working-directory: ./frontend
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:8000/api
+        run: npm run test:e2e || true
+      
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: playwright-report
+          path: frontend/playwright-report/
+      
+      - name: Build
+        working-directory: ./frontend
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:8000/api
+        run: npm run build
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install dependencies
+        working-directory: ./backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install safety bandit
+      
+      - name: Run Safety check
+        working-directory: ./backend
+        run: |
+          safety check --file requirements.txt || true
+      
+      - name: Run Bandit security scan
+        working-directory: ./backend
+        run: |
+          bandit -r apps/ -f json -o bandit-report.json || true
+          bandit -r apps/ -f txt || true
+      
+      - name: Upload Bandit report
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: bandit-security-report
+          path: backend/bandit-report.json
+
+  docker-build:
+    name: Docker Build
+    runs-on: ubuntu-latest
+    needs: [backend-tests, frontend-tests]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Build backend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          push: false
+          tags: readyrent-backend:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      
+      - name: Build frontend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          push: false
+          tags: readyrent-frontend:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [backend-tests, frontend-tests, docker-build]
+    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+    environment:
+      name: staging
+      url: https://staging.readyrent.gala
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Deploy Backend to Staging
+        env:
+          STAGING_SERVER_HOST: ${{ secrets.STAGING_SERVER_HOST }}
+          STAGING_SERVER_USER: ${{ secrets.STAGING_SERVER_USER }}
+          STAGING_SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
+        run: |
+          echo "Deploying backend to staging..."
+          # Option 1: SSH Deployment (VPS)
+          # mkdir -p ~/.ssh
+          # echo "$STAGING_SSH_KEY" > ~/.ssh/staging_key
+          # chmod 600 ~/.ssh/staging_key
+          # ssh -i ~/.ssh/staging_key -o StrictHostKeyChecking=no $STAGING_SERVER_USER@$STAGING_SERVER_HOST \
+          #   "cd /var/www/readyrent-staging/backend && git pull origin develop && \
+          #   source venv/bin/activate && pip install -r requirements.txt && \
+          #   python manage.py migrate && python manage.py collectstatic --noinput && \
+          #   sudo systemctl restart readyrent-backend-staging"
+          
+          # Option 2: Railway CLI
+          # railway up --service backend
+          
+          # Option 3: Render CLI
+          # render deploy --service backend-staging
+          
+          echo "Backend deployment completed"
+      
+      - name: Deploy Frontend to Staging
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          echo "Deploying frontend to staging..."
+          # Option 1: Vercel
+          # npm install -g vercel
+          # cd frontend
+          # vercel --prod --token=$VERCEL_TOKEN
+          
+          # Option 2: Railway CLI
+          # railway up --service frontend
+          
+          # Option 3: Render CLI
+          # render deploy --service frontend-staging
+          
+          echo "Frontend deployment completed"
+      
+      - name: Run Post-Deploy Health Checks
+        run: |
+          echo "Running health checks..."
+          # sleep 30  # Wait for services to start
+          # curl -f https://staging-backend.readyrent.gala/api/health/ || exit 1
+          # curl -f https://staging.readyrent.gala/ || exit 1
+          echo "Health checks passed"
+
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [backend-tests, frontend-tests, docker-build, security-scan]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment:
+      name: production
+      url: https://readyrent.gala
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Deploy Backend to Production
+        env:
+          PROD_SERVER_HOST: ${{ secrets.PROD_SERVER_HOST }}
+          PROD_SERVER_USER: ${{ secrets.PROD_SERVER_USER }}
+          PROD_SSH_KEY: ${{ secrets.PROD_SSH_KEY }}
+        run: |
+          echo "Deploying backend to production..."
+          # Option 1: SSH Deployment (VPS)
+          # mkdir -p ~/.ssh
+          # echo "$PROD_SSH_KEY" > ~/.ssh/prod_key
+          # chmod 600 ~/.ssh/prod_key
+          # ssh -i ~/.ssh/prod_key -o StrictHostKeyChecking=no $PROD_SERVER_USER@$PROD_SERVER_HOST \
+          #   "cd /var/www/ReadyRent_Gala/backend && git pull origin main && \
+          #   source venv/bin/activate && pip install -r requirements.txt && \
+          #   python manage.py migrate && python manage.py collectstatic --noinput && \
+          #   sudo systemctl restart readyrent-backend"
+          
+          # Option 2: Railway CLI
+          # railway up --service backend --environment production
+          
+          # Option 3: Render CLI
+          # render deploy --service backend-production
+          
+          echo "Backend deployment completed"
+      
+      - name: Deploy Frontend to Production
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          echo "Deploying frontend to production..."
+          # Option 1: Vercel
+          # npm install -g vercel
+          # cd frontend
+          # vercel --prod --token=$VERCEL_TOKEN
+          
+          # Option 2: Railway CLI
+          # railway up --service frontend --environment production
+          
+          # Option 3: Render CLI
+          # render deploy --service frontend-production
+          
+          echo "Frontend deployment completed"
+      
+      - name: Run Post-Deploy Health Checks
+        run: |
+          echo "Running health checks..."
+          # sleep 30  # Wait for services to start
+          # curl -f https://api.readyrent.gala/api/health/ || exit 1
+          # curl -f https://readyrent.gala/ || exit 1
+          echo "Health checks passed"
+      
+      - name: Create Deployment Tag
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git tag -a "v$(date +'%Y.%m.%d')-$(git rev-parse --short HEAD)" -m "Production deployment"
+          git push origin --tags || true

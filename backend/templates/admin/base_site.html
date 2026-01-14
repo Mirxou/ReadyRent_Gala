@@ -1,0 +1,84 @@
+{% extends "admin/base.html" %}
+{% load i18n static %}
+
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">
+    <a href="{% url 'admin:index' %}">{{ site_header|default:_('Django administration') }}</a>
+</h1>
+{% endblock %}
+
+{% block userlinks %}
+    {% get_current_language as CURRENT_LANGUAGE %}
+    {% get_language_info_list for LANGUAGES as language_list %}
+    {% if language_list|length > 1 %}
+    <span class="language-selector-wrapper">
+        <form action="{% url 'set_language' %}" method="post" id="language-form" class="language-form">
+            {% csrf_token %}
+            <input name="next" type="hidden" value="{{ request.get_full_path|escape }}" />
+            <select name="language" id="language-select" title="{% trans 'Select language' %}" onchange="this.form.submit();" class="language-select">
+                {% for language in language_list %}
+                    <option value="{{ language.code }}" {% if language.code == CURRENT_LANGUAGE %}selected{% endif %}>
+                        {{ language.name_local }} ({{ language.code }})
+                    </option>
+                {% endfor %}
+            </select>
+        </form>
+    </span>
+    {% endif %}
+    {{ block.super }}
+{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+    #header {
+        background: #417690;
+        color: #fff;
+    }
+    #branding h1, #branding h1 a:link, #branding h1 a:visited {
+        color: #fff;
+    }
+    .module h2, .module caption, .inline-group h2 {
+        background: #79aec8;
+        color: #fff;
+    }
+    div.breadcrumbs {
+        background: #417690;
+        color: #c4dce8;
+    }
+    div.breadcrumbs a {
+        color: #fff;
+    }
+    /* Language selector styles */
+    .language-selector-wrapper {
+        margin-right: 15px;
+        vertical-align: middle;
+        display: inline-block;
+    }
+    .language-form {
+        display: inline-block;
+        margin: 0;
+        padding: 0;
+    }
+    .language-select {
+        padding: 4px 8px;
+        background: #417690;
+        color: white;
+        border: 1px solid #205067;
+        border-radius: 3px;
+        cursor: pointer;
+        font-size: 12px;
+        height: 26px;
+        vertical-align: middle;
+    }
+    .language-select option {
+        background: white;
+        color: #333;
+    }
+    .language-select:hover {
+        background: #205067;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,985 @@
+# Django Arabic Translation File
+# This file contains translations for Django Admin interface
+# Language: Arabic (ar)
+msgid ""
+msgstr ""
+"Project-Id-Version: ReadyRent.Gala\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-01-09 10:00:00+0100\n"
+"PO-Revision-Date: 2026-01-09 10:00:00+0100\n"
+"Last-Translator: \n"
+"Language-Team: Arabic\n"
+"Language: ar\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=6; plural=(n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5);\n"
+
+# Admin interface translations
+msgid "Add"
+msgstr "إضافة"
+
+msgid "Change"
+msgstr "تعديل"
+
+msgid "Delete"
+msgstr "حذف"
+
+msgid "Save"
+msgstr "حفظ"
+
+msgid "Save and add another"
+msgstr "حفظ وإضافة آخر"
+
+msgid "Save and continue editing"
+msgstr "حفظ ومتابعة التعديل"
+
+msgid "Search"
+msgstr "بحث"
+
+msgid "Filter"
+msgstr "تصفية"
+
+msgid "Actions"
+msgstr "إجراءات"
+
+msgid "Go"
+msgstr "تنفيذ"
+
+msgid "Yes, I'm sure"
+msgstr "نعم، أنا متأكد"
+
+msgid "No, take me back"
+msgstr "لا، أرجعني"
+
+msgid "View on site"
+msgstr "عرض على الموقع"
+
+msgid "History"
+msgstr "السجل"
+
+msgid "Home"
+msgstr "الرئيسية"
+
+msgid "Welcome,"
+msgstr "مرحباً،"
+
+msgid "View site"
+msgstr "عرض الموقع"
+
+msgid "Change password"
+msgstr "تغيير كلمة المرور"
+
+msgid "Log out"
+msgstr "تسجيل الخروج"
+
+msgid "Site administration"
+msgstr "إدارة الموقع"
+
+msgid "Django administration"
+msgstr "إدارة Django"
+
+msgid "Select %(name)s to change"
+msgstr "اختر %(name)s للتعديل"
+
+msgid "Add %(name)s"
+msgstr "إضافة %(name)s"
+
+msgid "Change %(name)s"
+msgstr "تعديل %(name)s"
+
+msgid "Delete %(name)s"
+msgstr "حذف %(name)s"
+
+msgid "The %(name)s \"%(obj)s\" was added successfully."
+msgstr "تمت إضافة %(name)s \"%(obj)s\" بنجاح."
+
+msgid "The %(name)s \"%(obj)s\" was changed successfully."
+msgstr "تم تعديل %(name)s \"%(obj)s\" بنجاح."
+
+msgid "The %(name)s \"%(obj)s\" was deleted successfully."
+msgstr "تم حذف %(name)s \"%(obj)s\" بنجاح."
+
+msgid "Please correct the errors below."
+msgstr "يرجى تصحيح الأخطاء أدناه."
+
+msgid "All"
+msgstr "الكل"
+
+msgid "None"
+msgstr "لا شيء"
+
+msgid "Select all"
+msgstr "تحديد الكل"
+
+msgid "Clear all"
+msgstr "مسح الكل"
+
+msgid "Remove"
+msgstr "إزالة"
+
+msgid "Add another"
+msgstr "إضافة آخر"
+
+msgid "Delete selected"
+msgstr "حذف المحدد"
+
+msgid "Are you sure?"
+msgstr "هل أنت متأكد؟"
+
+msgid "Select language"
+msgstr "اختر اللغة"
+
+msgid "Django site admin"
+msgstr "إدارة موقع Django"
+
+# Return Status Choices
+msgid "Requested"
+msgstr "مطلوب"
+
+msgid "Approved"
+msgstr "موافق عليه"
+
+msgid "Scheduled for Pickup"
+msgstr "مجدول للاستلام"
+
+msgid "In Transit"
+msgstr "قيد النقل"
+
+msgid "Received"
+msgstr "تم الاستلام"
+
+msgid "Under Inspection"
+msgstr "قيد الفحص"
+
+msgid "Accepted"
+msgstr "مقبول"
+
+msgid "Damaged"
+msgstr "تالف"
+
+msgid "Rejected"
+msgstr "مرفوض"
+
+msgid "Completed"
+msgstr "مكتمل"
+
+# Product Status Choices
+msgid "Available"
+msgstr "متاح"
+
+msgid "Rented"
+msgstr "مؤجر"
+
+msgid "Under Maintenance"
+msgstr "قيد الصيانة"
+
+msgid "Unavailable"
+msgstr "غير متاح"
+
+# Hygiene Status Choices
+msgid "Pending"
+msgstr "قيد الانتظار"
+
+msgid "In Progress"
+msgstr "قيد التنفيذ"
+
+msgid "Verified"
+msgstr "تم التحقق"
+
+msgid "Failed Inspection"
+msgstr "فشل الفحص"
+
+# Cleaning Type Choices
+msgid "Standard Cleaning"
+msgstr "تنظيف عادي"
+
+msgid "Deep Cleaning"
+msgstr "تنظيف عميق"
+
+msgid "Sanitization"
+msgstr "تعقيم"
+
+msgid "Sterilization"
+msgstr "تعقيم كامل"
+
+msgid "Dry Cleaning"
+msgstr "تنظيف جاف"
+
+# Chatbot Status Choices
+msgid "Active"
+msgstr "نشط"
+
+msgid "Resolved"
+msgstr "تم الحل"
+
+msgid "Escalated to Human"
+msgstr "تم التصعيد للإنسان"
+
+msgid "Closed"
+msgstr "مغلق"
+
+# Review Status Choices
+msgid "Pending Moderation"
+msgstr "قيد المراجعة"
+
+# Booking Status Choices
+msgid "Confirmed"
+msgstr "مؤكد"
+
+msgid "Cancelled"
+msgstr "ملغى"
+
+# Return Status Choices
+msgid "Requested"
+msgstr "مطلوب"
+
+msgid "Approved"
+msgstr "موافق عليه"
+
+msgid "Scheduled for Pickup"
+msgstr "مجدول للاستلام"
+
+msgid "In Transit"
+msgstr "قيد النقل"
+
+msgid "Received"
+msgstr "تم الاستلام"
+
+msgid "Under Inspection"
+msgstr "قيد الفحص"
+
+msgid "Accepted"
+msgstr "مقبول"
+
+msgid "Damaged"
+msgstr "تالف"
+
+msgid "Rejected"
+msgstr "مرفوض"
+
+msgid "Completed"
+msgstr "مكتمل"
+
+# Product Status Choices
+msgid "Available"
+msgstr "متاح"
+
+msgid "Rented"
+msgstr "مؤجر"
+
+msgid "Under Maintenance"
+msgstr "قيد الصيانة"
+
+msgid "Unavailable"
+msgstr "غير متاح"
+
+# Hygiene Status Choices
+msgid "Pending"
+msgstr "قيد الانتظار"
+
+msgid "In Progress"
+msgstr "قيد التنفيذ"
+
+msgid "Verified"
+msgstr "تم التحقق"
+
+msgid "Failed Inspection"
+msgstr "فشل الفحص"
+
+# Cleaning Type Choices
+msgid "Standard Cleaning"
+msgstr "تنظيف عادي"
+
+msgid "Deep Cleaning"
+msgstr "تنظيف عميق"
+
+msgid "Sanitization"
+msgstr "تعقيم"
+
+msgid "Sterilization"
+msgstr "تعقيم كامل"
+
+msgid "Dry Cleaning"
+msgstr "تنظيف جاف"
+
+# Chatbot Status Choices
+msgid "Active"
+msgstr "نشط"
+
+msgid "Resolved"
+msgstr "تم الحل"
+
+msgid "Escalated to Human"
+msgstr "تم التصعيد للإنسان"
+
+msgid "Closed"
+msgstr "مغلق"
+
+# Review Status Choices
+msgid "Pending Moderation"
+msgstr "قيد المراجعة"
+
+# Booking Status Choices
+msgid "Confirmed"
+msgstr "مؤكد"
+
+msgid "Cancelled"
+msgstr "ملغى"
+
+# Booking Status Choices
+msgid "In Use"
+msgstr "قيد الاستخدام"
+
+# Return Item Condition Choices
+msgid "Excellent"
+msgstr "ممتاز"
+
+msgid "Good"
+msgstr "جيد"
+
+msgid "Fair"
+msgstr "مقبول"
+
+msgid "Lost"
+msgstr "Ù…ÙÙ‚ÙˆØ¯"
+
+# Refund Type Choices
+msgid "Full Refund"
+msgstr "استرداد كامل"
+
+msgid "Partial Refund"
+msgstr "استرداد جزئي"
+
+msgid "Damage Fee Deduction"
+msgstr "خصم رسوم التلف"
+
+msgid "Late Fee Deduction"
+msgstr "خصم رسوم التأخير"
+
+# Refund Status Choices
+msgid "Processed"
+msgstr "تمت المعالجة"
+
+# Maintenance Type Choices
+msgid "Repair"
+msgstr "إصلاح"
+
+# Maintenance Status Choices
+msgid "Scheduled"
+msgstr "مجدول"
+
+# Packaging Size Choices
+msgid "Small"
+msgstr "صغير"
+
+msgid "Medium"
+msgstr "متوسط"
+
+msgid "Large"
+msgstr "كبير"
+
+msgid "Extra Large"
+msgstr "كبير Ø¬Ø¯Ø§Ù‹"
+
+msgid "Custom"
+msgstr "مخصص"
+
+# Field names translations
+msgid "name"
+msgstr "الاسم"
+
+msgid "name (Arabic)"
+msgstr "الاسم (Ø¹Ø±Ø¨ÙŠ)"
+
+msgid "slug"
+msgstr "الرابط"
+
+msgid "description"
+msgstr "الوصف"
+
+msgid "description (Arabic)"
+msgstr "الوصف (Ø¹Ø±Ø¨ÙŠ)"
+
+msgid "status"
+msgstr "الحالة"
+
+msgid "price per day"
+msgstr "السعر اليومي"
+
+msgid "size"
+msgstr "الحجم"
+
+msgid "color"
+msgstr "اللون"
+
+msgid "color hex"
+msgstr "Ø±Ù…Ø² اللون"
+
+msgid "featured"
+msgstr "مميز"
+
+msgid "rating"
+msgstr "التقييم"
+
+msgid "total rentals"
+msgstr "إجمالي الإيجارات"
+
+msgid "created at"
+msgstr "تاريخ الإنشاء"
+
+msgid "updated at"
+msgstr "تاريخ التحديث"
+
+msgid "start date"
+msgstr "تاريخ البدء"
+
+msgid "end date"
+msgstr "تاريخ الانتهاء"
+
+msgid "total days"
+msgstr "إجمالي الأيام"
+
+msgid "total price"
+msgstr "السعر الإجمالي"
+
+msgid "notes"
+msgstr "ملاحظات"
+
+msgid "booking"
+msgstr "الحجز"
+
+msgid "requested at"
+msgstr "تاريخ الطلب"
+
+msgid "scheduled pickup date"
+msgstr "تاريخ الاستلام Ø§Ù„مجدول"
+
+msgid "actual pickup date"
+msgstr "تاريخ الاستلام Ø§Ù„ÙØ¹Ù„ÙŠ"
+
+msgid "received at"
+msgstr "تاريخ الاستلام"
+
+msgid "inspection date"
+msgstr "ØªØ§Ø±ÙŠØ® Ø§Ù„ÙØ­Øµ"
+
+msgid "inspection notes"
+msgstr "ملاحظات Ø§Ù„ÙØ­Øµ"
+
+msgid "inspector"
+msgstr "Ø§Ù„Ù…ÙØªØ´"
+
+msgid "damage assessment"
+msgstr "تقييم التلف"
+
+msgid "damage cost"
+msgstr "ØªÙƒÙ„ÙØ© Ø§Ù„ØªÙ„Ù"
+
+msgid "return notes"
+msgstr "ملاحظات Ø§Ù„Ø¥Ø±Ø¬Ø§Ø¹"
+
+msgid "completed at"
+msgstr "تاريخ الإكمال"
+
+msgid "quantity returned"
+msgstr "الكمية المرجعة"
+
+msgid "condition"
+msgstr "الحالة"
+
+msgid "return request"
+msgstr "طلب الإرجاع"
+
+msgid "product"
+msgstr "المنتج"
+
+msgid "refund type"
+msgstr "نوع الاسترداد"
+
+msgid "amount"
+msgstr "المبلغ"
+
+msgid "reason"
+msgstr "السبب"
+
+msgid "processed at"
+msgstr "تاريخ المعالجة"
+
+msgid "transaction reference"
+msgstr "مرجع المعاملة"
+
+msgid "maintenance type"
+msgstr "نوع الصيانة"
+
+msgid "duration (hours)"
+msgstr "المدة (ساعات)"
+
+msgid "required between rentals"
+msgstr "مطلوب بين الإيجارات"
+
+msgid "active"
+msgstr "نشط"
+
+msgid "scheduled start"
+msgstr "Ø¨Ø¯Ø§ÙŠØ© مجدولØ©"
+
+msgid "scheduled end"
+msgstr "Ù†Ù‡Ø§ÙŠØ© مجدولØ©"
+
+msgid "actual start"
+msgstr "Ø§Ù„Ø¨Ø¯Ø§ÙŠØ© Ø§Ù„ÙØ¹Ù„ÙŠØ©"
+
+msgid "actual end"
+msgstr "Ø§Ù„Ù†Ù‡Ø§ÙŠØ© Ø§Ù„ÙØ¹Ù„ÙŠØ©"
+
+msgid "assigned to"
+msgstr "مخصص Ù„Ù€"
+
+msgid "related booking"
+msgstr "الحجز Ø§Ù„Ù…Ø±ØªØ¨Ø·"
+
+msgid "cost"
+msgstr "Ø§Ù„ØªÙƒÙ„ÙØ©"
+
+msgid "duration minutes"
+msgstr "المدة بالدقائق"
+
+msgid "total quantity"
+msgstr "الكمية الإجمالية"
+
+msgid "available quantity"
+msgstr "الكمية المتاحة"
+
+msgid "rented quantity"
+msgstr "الكمية المؤجرة"
+
+msgid "maintenance quantity"
+msgstr "الكمية قيد الصيانة"
+
+msgid "low stock threshold"
+msgstr "Ø­Ø¯ Ø§Ù„Ù…Ø®Ø²ÙˆÙ† Ø§Ù„Ù…Ù†Ø®ÙØ¶"
+
+msgid "last restocked"
+msgstr "آخر إعادة تخزين"
+
+msgid "title"
+msgstr "العنوان"
+
+msgid "comment"
+msgstr "التعليق"
+
+msgid "verified purchase"
+msgstr "شراء موثق"
+
+msgid "helpful count"
+msgstr "عدد المساعدات"
+
+msgid "sentiment score"
+msgstr "نقاط المشاعر"
+
+msgid "sentiment label"
+msgstr "تسمية المشاعر"
+
+# Help text translations
+msgid "Cost for any damages found"
+msgstr "ØªÙƒÙ„ÙØ© Ø£ÙŠ Ø£Ø¶Ø±Ø§Ø± ØªÙ… Ø§Ù„Ø¹Ø«ÙˆØ± Ø¹Ù„ÙŠÙ‡Ø§"
+
+msgid "Refund amount (negative for charges)"
+msgstr "مبلغ الاسترداد (سالب للرسوم)"
+
+msgid "Payment gateway transaction reference"
+msgstr "مرجع معاملة بوابة الدفعØ¹"
+
+msgid "Duration in hours needed for maintenance"
+msgstr "المدة بالساعات المطلوبة للصيانة"
+
+msgid "Whether this maintenance is required between each rental"
+msgstr "ما إذا كانت هذه الصيانة مطلوبة بين كل إيجار"
+
+msgid "Total quantity available in inventory"
+msgstr "Ø¥Ø¬Ù…Ø§Ù„ÙŠ الكمية المتاحة ÙÙŠ Ø§Ù„Ù…Ø®Ø²ÙˆÙ†"
+
+msgid "Quantity currently available for rent"
+msgstr "الكمية المتاحة Ø­Ø§Ù„ÙŠØ§Ù‹ Ù„Ù„Ø¥ÙŠØ¬Ø§Ø±"
+
+msgid "Quantity currently rented"
+msgstr "الكمية المؤجرة Ø­Ø§Ù„ÙŠØ§Ù‹"
+
+msgid "Quantity under maintenance"
+msgstr "الكمية قيد الصيانة"
+
+msgid "Alert when available quantity falls below this"
+msgstr "ØªÙ†Ø¨ÙŠÙ‡ Ø¹Ù†Ø¯Ù…Ø§ ØªÙ†Ø®ÙØ¶ الكمية المتاحة Ø¹Ù† Ù‡Ø°Ø§ Ø§Ù„Ø­Ø¯"
+
+msgid "Sentiment score from -1 (negative) to 1 (positive)"
+msgstr "نقاط المشاعر Ù…Ù† -1 (Ø³Ù„Ø¨ÙŠ) Ø¥Ù„Ù‰ 1 (Ø¥ÙŠØ¬Ø§Ø¨ÙŠ)"
+
+msgid "Hex color code (e.g., #FF5733)"
+msgstr "Ø±Ù…Ø² اللون Ø§Ù„Ø³Ø¯Ø§Ø³ÙŠ (Ù…Ø«Ø§Ù„: #FF5733)"
+
+msgid "Icon name or emoji"
+msgstr "اسم الأيقونة أو الإيموجي"
+
+msgid "XS"
+msgstr "XS"
+
+msgid "S"
+msgstr "S"
+
+msgid "M"
+msgstr "M"
+
+msgid "L"
+msgstr "L"
+
+msgid "XL"
+msgstr "XL"
+
+msgid "XXL"
+msgstr "XXL"
+
+msgid "XXXL"
+msgstr "XXXL"
+
+msgid "e.g., \"Size M - Red\""
+msgstr "مثال: \"حجم M - أحمر\""
+
+msgid "Override product price if set"
+msgstr "تجاوز سعر المنتج إذا تم تعيينه"
+
+msgid "Internal note not visible to user"
+msgstr "ملاحظة داخلية غير مرئية للمستخدم"
+
+msgid "Icon class or URL"
+msgstr "فئة الأيقونة أو الرابط"
+
+msgid "Risk score from 0-100"
+msgstr "نقاط المخاطر من 0-100"
+
+msgid "Review Details"
+msgstr "تفاصيل التقييم"
+
+msgid "Status"
+msgstr "الحالة"
+
+msgid "Timestamps"
+msgstr "الطوابع الزمنية"
+
+msgid "Basic Information"
+msgstr "المعلومات الأساسية"
+
+msgid "Basic Info"
+msgstr "المعلومات الأساسية"
+
+msgid "Description"
+msgstr "الوصف"
+
+msgid "Contact"
+msgstr "جهات الاتصال"
+
+msgid "Location"
+msgstr "الموقع"
+
+msgid "Pricing"
+msgstr "التسعير"
+
+msgid "Media"
+msgstr "الوسائط"
+
+msgid "Product"
+msgstr "المنتج"
+
+msgid "Stock Information"
+msgstr "معلومات المخزون"
+
+msgid "Variant"
+msgstr "المتغير"
+
+msgid "Booking"
+msgstr "الحجز"
+
+msgid "Pickup Information"
+msgstr "معلومات الاستلام"
+
+msgid "Inspection"
+msgstr "الفحص"
+
+msgid "Notes"
+msgstr "ملاحظات"
+
+msgid "Completion"
+msgstr "الإكمال"
+
+msgid "Session Info"
+msgstr "معلومات الجلسة"
+
+msgid "Context"
+msgstr "السياق"
+
+msgid "Conditions"
+msgstr "الشروط"
+
+msgid "Acknowledged"
+msgstr "معترف به"
+
+msgid "Alert type"
+msgstr "نوع التنبيه"
+
+msgid "Message"
+msgstr "الرسالة"
+
+msgid "Inspection date"
+msgstr "تاريخ الفحص"
+
+msgid "Inspector"
+msgstr "المفتش"
+
+msgid "Inspection notes"
+msgstr "ملاحظات الفحص"
+
+msgid "Low Stock"
+msgstr "مخزون منخفض"
+
+msgid "Out of Stock"
+msgstr "نفد المخزون"
+
+msgid "Payment Details"
+msgstr "تفاصيل الدفع"
+
+msgid "Transaction"
+msgstr "المعاملة"
+
+msgid "user"
+msgstr "المستخدم"
+
+msgid "category"
+msgstr "الفئة"
+
+msgid "price"
+msgstr "السعر"
+
+msgid "quantity"
+msgstr "الكمية"
+
+msgid "date"
+msgstr "التاريخ"
+
+msgid "time"
+msgstr "الوقت"
+
+msgid "type"
+msgstr "النوع"
+
+msgid "message"
+msgstr "الرسالة"
+
+msgid "email"
+msgstr "البريد الإلكتروني"
+
+msgid "phone"
+msgstr "الهاتف"
+
+msgid "address"
+msgstr "العنوان"
+
+msgid "city"
+msgstr "المدينة"
+
+msgid "location"
+msgstr "الموقع"
+
+msgid "image"
+msgstr "الصورة"
+
+msgid "file"
+msgstr "الملف"
+
+msgid "verified"
+msgstr "موثق"
+
+msgid "content"
+msgstr "المحتوى"
+
+msgid "order"
+msgstr "الترتيب"
+
+msgid "priority"
+msgstr "الأولوية"
+
+msgid "reference"
+msgstr "المرجع"
+
+msgid "transaction"
+msgstr "المعاملة"
+
+msgid "payment"
+msgstr "الدفع"
+
+msgid "refund"
+msgstr "الاسترداد"
+
+msgid "return"
+msgstr "الإرجاع"
+
+msgid "inventory"
+msgstr "المخزون"
+
+msgid "stock"
+msgstr "المخزون"
+
+msgid "alert"
+msgstr "التنبيه"
+
+msgid "movement"
+msgstr "الحركة"
+
+msgid "variant"
+msgstr "المتغير"
+
+msgid "maintenance"
+msgstr "الصيانة"
+
+msgid "hygiene"
+msgstr "النظافة"
+
+msgid "cleaning"
+msgstr "التنظيف"
+
+msgid "packaging"
+msgstr "التغليف"
+
+msgid "warranty"
+msgstr "الضمان"
+
+msgid "insurance"
+msgstr "التأمين"
+
+msgid "claim"
+msgstr "المطالبة"
+
+msgid "dispute"
+msgstr "النزاع"
+
+msgid "review"
+msgstr "التقييم"
+
+msgid "bundle"
+msgstr "الباقة"
+
+msgid "artisan"
+msgstr "الحرفي"
+
+msgid "vendor"
+msgstr "البائع"
+
+msgid "branch"
+msgstr "الفرع"
+
+msgid "delivery"
+msgstr "التوصيل"
+
+msgid "pickup"
+msgstr "الاستلام"
+
+msgid "notification"
+msgstr "الإشعار"
+
+msgid "chatbot"
+msgstr "المساعد الذكي"
+
+msgid "analytics"
+msgstr "التحليلات"
+
+msgid "cms"
+msgstr "إدارة المحتوى"
+
+msgid "ID"
+msgstr "المعرف"
+
+msgid "password"
+msgstr "كلمة المرور"
+
+msgid "last login"
+msgstr "آخر تسجيل دخول"
+
+msgid "superuser status"
+msgstr "حالة المستخدم الخارق"
+
+msgid "username"
+msgstr "اسم المستخدم"
+
+msgid "first name"
+msgstr "الاسم الأول"
+
+msgid "last name"
+msgstr "اسم العائلة"
+
+msgid "staff status"
+msgstr "حالة الموظف"
+
+msgid "date joined"
+msgstr "تاريخ الانضمام"
+
+msgid "email address"
+msgstr "عنوان البريد الإلكتروني"
+
+msgid "phone number"
+msgstr "رقم الهاتف"
+
+msgid "groups"
+msgstr "المجموعات"
+
+msgid "user permissions"
+msgstr "صلاحيات المستخدم"
+
+msgid "customer"
+msgstr "العميل"
+
+msgid "admin"
+msgstr "المدير"
+
+msgid "staff"
+msgstr "الموظف"
+
+msgid "avatar"
+msgstr "الصورة الشخصية"
+
+msgid "role"
+msgstr "الدور"
+
+msgid "first name (Arabic)"
+msgstr "الاسم الأول (عربي)"
+
+msgid "last name (Arabic)"
+msgstr "اسم العائلة (عربي)"
+
+msgid "postal code"
+msgstr "الرمز البريدي"
+
+msgid "date of birth"
+msgstr "تاريخ الميلاد"
+
+msgid "preferred language"
+msgstr "اللغة المفضلة"
+
+msgid "Customer"
+msgstr "العميل"
+
+msgid "Admin"
+msgstr "المدير"
+
+msgid "Staff"
+msgstr "الموظف"
+
+msgid "Administrator"
+msgstr "المدير"
+
+msgid "Manager"
+msgstr "المدير"
+
+msgid "Delivery Staff"
+msgstr "موظف التوصيل"
+
+msgid "Support Staff"
+msgstr "موظف الدعم"
