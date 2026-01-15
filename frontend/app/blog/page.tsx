@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { cmsApi } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Search, Calendar, User, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
@@ -34,7 +35,7 @@ export default function BlogPage() {
   return (
     <div className="relative min-h-screen">
       <ParticleField />
-      
+
       <div className="container mx-auto px-4 py-12 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -42,7 +43,7 @@ export default function BlogPage() {
           className="mb-12 text-center"
         >
           <div className="mb-6" style={{ overflow: 'visible', width: '100%' }}>
-            <h1 
+            <h1
               className="text-5xl md:text-7xl font-bold mb-6"
               style={{
                 background: 'linear-gradient(to right, #8B5CF6, #EC4899, #F59E0B)',
