@@ -95,6 +95,8 @@ export const authApi = {
   register: (data: any) => api.post('/auth/register/', data),
   logout: () => api.post('/auth/logout/'),
   me: () => api.get('/auth/profile/'),
+  passwordResetRequest: (email: string) => api.post('/auth/password-reset/', { email }),
+  passwordResetConfirm: (token: string, uid: string, password: string, passwordConfirm: string) => api.post('/auth/password-reset/confirm/', { token, uid, password, password_confirm: passwordConfirm }),
 };
 
 export const verificationApi = {
