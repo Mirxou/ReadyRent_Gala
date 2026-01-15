@@ -3,6 +3,12 @@
  * Handles registration and sending of push notifications
  */
 
+export interface NotificationAction {
+  action: string;
+  title: string;
+  icon?: string;
+}
+
 export interface PushNotificationPayload {
   title: string;
   body: string;
