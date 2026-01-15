@@ -49,7 +49,7 @@ export default function AdminHygienePage() {
   });
 
   const createMutation = useMutation({
-    mutationFn: (data: any) => hygieneApi.createHygieneRecord(data),
+    mutationFn: (data: any) => hygieneApi.createRecord(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['hygiene-records'] });
       toast.success('تم إضافة السجل بنجاح');
@@ -60,7 +60,7 @@ export default function AdminHygienePage() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: any }) => hygieneApi.updateHygieneRecord(id, data),
+    mutationFn: ({ id, data }: { id: number; data: any }) => hygieneApi.updateRecord(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['hygiene-records'] });
       toast.success('تم التحديث بنجاح');
@@ -71,7 +71,7 @@ export default function AdminHygienePage() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => hygieneApi.deleteHygieneRecord(id),
+    mutationFn: (id: number) => hygieneApi.deleteRecord(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['hygiene-records'] });
       toast.success('تم الحذف بنجاح');
@@ -116,7 +116,7 @@ export default function AdminHygienePage() {
       verified: { label: 'تم التحقق', variant: 'default' },
       failed: { label: 'فشل الفحص', variant: 'destructive' },
     };
-    
+
     const config = statusConfig[status] || { label: status, variant: 'outline' };
     return <Badge variant={config.variant}>{config.label}</Badge>;
   };
