@@ -49,12 +49,12 @@ export default function FAQPage() {
 
   const categories = Array.from(
     new Set(filteredFAQs.map((faq: any) => faq.category).filter(Boolean))
-  );
+  ) as string[];
 
   return (
     <div className="relative min-h-screen">
       <ParticleField />
-      
+
       <div className="container mx-auto px-4 py-12 relative z-10 max-w-4xl">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -65,7 +65,7 @@ export default function FAQPage() {
             <HelpCircle className="h-10 w-10 text-gala-purple" />
           </div>
           <div className="mb-6" style={{ overflow: 'visible', width: '100%' }}>
-            <h1 
+            <h1
               className="text-5xl md:text-7xl font-bold mb-6"
               style={{
                 background: 'linear-gradient(to right, #8B5CF6, #EC4899, #F59E0B)',
