@@ -21,7 +21,7 @@ export default function CheckoutPage() {
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const { isAuthenticated } = useAuthStore();
-  
+
   const bookingId = searchParams.get('booking_id') ? parseInt(searchParams.get('booking_id')!) : null;
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
   const [paymentCompleted, setPaymentCompleted] = useState(false);
@@ -43,7 +43,7 @@ export default function CheckoutPage() {
   // Get booking details if booking_id is provided
   const { data: booking } = useQuery({
     queryKey: ['booking', bookingId],
-    queryFn: () => bookingsApi.getById(bookingId!).then((res) => res.data),
+    queryFn: () => bookingsApi.getById(String(bookingId!)).then((res) => res.data),
     enabled: !!bookingId && isAuthenticated,
   });
 
@@ -52,7 +52,7 @@ export default function CheckoutPage() {
   const handlePaymentCompleted = () => {
     setPaymentCompleted(true);
     queryClient.invalidateQueries({ queryKey: ['bookings', 'cart'] });
-    
+
     // Redirect to bookings page after 2 seconds
     setTimeout(() => {
       router.push('/dashboard/bookings');
