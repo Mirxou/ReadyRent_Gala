@@ -50,7 +50,7 @@ export function ProductFilters({
   // Only reset if the value actually changed, not if user just entered the same value
   useEffect(() => {
     if (!isPriceMinFocused) {
-      const currentMin = priceMinInput !== null 
+      const currentMin = priceMinInput !== null
         ? (priceMinInput === '' ? 0 : Number(priceMinInput) || 0)
         : null;
       // Only update if the value actually changed from external source
@@ -63,7 +63,7 @@ export function ProductFilters({
       }
     }
     if (!isPriceMaxFocused) {
-      const currentMax = priceMaxInput !== null 
+      const currentMax = priceMaxInput !== null
         ? (priceMaxInput === '' ? maxPrice : Number(priceMaxInput) || maxPrice)
         : null;
       // Only update if the value actually changed from external source
@@ -116,7 +116,7 @@ export function ProductFilters({
       setSearchSuggestions([]);
       setShowSuggestions(false);
     }
-    
+
     // Always call onSearchChange, even if empty - search works with all filters
     onSearchChange(value);
   };
@@ -392,7 +392,7 @@ export function ProductFilters({
             } else {
               currentMin = priceRange[0];
             }
-            
+
             let currentMax: number;
             if (priceMaxInput !== null) {
               // If user is typing, use the typed value (even if empty, treat as maxPrice for display)
@@ -404,7 +404,7 @@ export function ProductFilters({
             } else {
               currentMax = priceRange[1];
             }
-            
+
             // Show warning if max is still at default and user is not typing
             if (currentMax === maxPrice && priceMaxInput === null && !isPriceMaxFocused) {
               return (
@@ -413,11 +413,11 @@ export function ProductFilters({
                 </div>
               );
             }
-            
+
             // Always show range if user is typing or if values are different from defaults
             const isTyping = priceMinInput !== null || priceMaxInput !== null || isPriceMinFocused || isPriceMaxFocused;
             const hasCustomValues = currentMin > 0 || currentMax !== maxPrice;
-            
+
             if (isTyping || hasCustomValues) {
               return (
                 <div className="text-xs text-muted-foreground pt-1 text-center">
@@ -425,7 +425,7 @@ export function ProductFilters({
                 </div>
               );
             }
-            
+
             return null;
           })()}
         </div>
@@ -434,7 +434,7 @@ export function ProductFilters({
         <div className="space-y-2">
           <label className="text-sm font-medium">المقاسات</label>
           <div className="flex flex-wrap gap-2">
-            {SIZE_OPTIONS.map((size) => (
+            {SIZE_OPTIONS.map((size: string) => (
               <Button
                 key={size}
                 variant={sizes.includes(size) ? 'default' : 'outline'}
@@ -482,7 +482,7 @@ export function ProductFilters({
               أخرى
             </Button>
           </div>
-          
+
           {/* Custom Color Input */}
           {showCustomColorInput && (
             <div className="flex gap-2 items-center">
