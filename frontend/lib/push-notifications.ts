@@ -84,7 +84,7 @@ class PushNotificationService {
         userVisibleOnly: true,
         applicationServerKey: this.urlBase64ToUint8Array(
           process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || ''
-        ),
+        ) as any,
       });
 
       // Send subscription to backend
@@ -138,7 +138,7 @@ class PushNotificationService {
           data: payload.data,
           tag: payload.tag,
           requireInteraction: payload.requireInteraction,
-        });
+        } as any);
       }
       return;
     }
@@ -152,7 +152,7 @@ class PushNotificationService {
       tag: payload.tag,
       requireInteraction: payload.requireInteraction,
       actions: payload.actions,
-    });
+    } as any);
   }
 
   private urlBase64ToUint8Array(base64String: string): Uint8Array {
