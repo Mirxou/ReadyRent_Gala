@@ -1,0 +1,291 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/* Tailwind CSS v4 Configuration & Plugins */
+@plugin "tailwindcss-animate";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  /* Vibrant 2026 Palette - "Gala Vivant" */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  /* Vibrant Accent Colors */
+  --color-gala-purple: #8B5CF6;
+  --color-gala-pink: #EC4899;
+  --color-gala-gold: #F59E0B;
+  --color-gala-cyan: #06B6D4;
+
+  /* Spacing Scale */
+  --spacing-section: 8rem;
+
+  /* Dynamic Animations */
+  @keyframes gradient-shift {
+
+    0%,
+    100% {
+      background-position: 0% 50%;
+    }
+
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+
+  @keyframes pulse-glow {
+
+    0%,
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    50% {
+      opacity: 0.8;
+      transform: scale(1.05);
+    }
+  }
+
+  @keyframes soft-pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.3;
+    }
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: -1000px 0;
+    }
+
+    100% {
+      background-position: 1000px 0;
+    }
+  }
+
+  @keyframes float {
+
+    0%,
+    100% {
+      transform: translateY(0px);
+    }
+
+    50% {
+      transform: translateY(-20px);
+    }
+  }
+
+  @keyframes rotate-border {
+    0% {
+      transform: rotate(0deg);
+    }
+
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes spin-reverse {
+    0% {
+      transform: rotate(360deg);
+    }
+
+    100% {
+      transform: rotate(0deg);
+    }
+  }
+}
+
+:root {
+  --font-cairo: "Cairo", sans-serif;
+  --font-inter: "Inter", sans-serif;
+  --radius: 0.75rem;
+
+  /* Light: "Vibrant Gallery" */
+  --background: oklch(0.99 0.01 280);
+  --foreground: oklch(0.15 0.02 280);
+
+  --card: oklch(1 0 0 / 0.6);
+  --card-foreground: oklch(0.15 0.02 280);
+
+  /* Primary: "Electric Purple" */
+  --primary: oklch(0.6 0.25 290);
+  --primary-foreground: oklch(1 0 0);
+
+  --muted: oklch(0.95 0.02 280);
+  --muted-foreground: oklch(0.5 0.02 280);
+
+  --border: oklch(0.88 0.02 280);
+  --accent: oklch(0.7 0.2 340);
+}
+
+.dark {
+  /* Dark: "Neon Luxury" */
+  --background: oklch(0.08 0.03 280);
+  --foreground: oklch(0.98 0.01 280);
+
+  --card: oklch(0.12 0.03 280 / 0.8);
+  --card-foreground: oklch(0.98 0.01 280);
+
+  --primary: oklch(0.75 0.25 290);
+  --primary-foreground: oklch(0.1 0.03 280);
+
+  --muted: oklch(0.15 0.03 280);
+  --muted-foreground: oklch(0.65 0.02 280);
+
+  --border: oklch(0.25 0.03 280);
+  --accent: oklch(0.7 0.2 340);
+}
+
+@layer base {
+  body {
+    @apply bg-background text-foreground antialiased selection:bg-gala-purple/30 selection:text-gala-purple;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply tracking-tight font-bold;
+  }
+}
+
+/* Vibrant Utilities */
+
+/* Mega Type with Gradient */
+@utility text-mega {
+  font-size: clamp(3rem, 8vw, 8rem);
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  background: linear-gradient(135deg, #8B5CF6, #EC4899, #F59E0B);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Fluid Body */
+@utility text-fluid-body {
+  font-size: clamp(1rem, 1.2vw, 1.25rem);
+  line-height: 1.6;
+  font-weight: 300;
+}
+
+/* Glassmorphism Card */
+@utility card-glass {
+  @apply bg-background/95 dark:bg-black/20 backdrop-blur-xl border border-gray-200 dark:border-white/20 rounded-2xl shadow-2xl;
+}
+
+/* Gradient Border */
+@utility border-gradient {
+  position: relative;
+  border: 2px solid transparent;
+  background: linear-gradient(var(--background), var(--background)) padding-box,
+    linear-gradient(135deg, #8B5CF6, #EC4899, #F59E0B) border-box;
+}
+
+/* Glow Effect */
+@utility glow-purple {
+  box-shadow: 0 0 40px rgba(139, 92, 246, 0.5),
+    0 0 80px rgba(139, 92, 246, 0.3);
+}
+
+/* Glow Pink */
+@utility glow-pink {
+  box-shadow: 0 0 40px rgba(236, 72, 153, 0.5),
+    0 0 80px rgba(236, 72, 153, 0.3);
+}
+
+/* Animated Gradient Background */
+@utility bg-gradient-animated {
+  background: linear-gradient(135deg, #8B5CF6, #EC4899, #F59E0B, #06B6D4);
+  background-size: 400% 400%;
+  animation: gradient-shift 15s ease infinite;
+}
+
+/* Shimmer Effect */
+@utility shimmer {
+  background: linear-gradient(90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.3) 50%,
+      transparent 100%);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* Floating Animation */
+@utility animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+@utility animate-spin-reverse {
+  animation: spin-reverse 1s linear infinite;
+}
+
+/* Pulse Glow */
+@utility animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+/* Soft Pulse */
+@utility animate-soft-pulse {
+  animation: soft-pulse 2.1s ease-in-out infinite;
+}
+
+@utility magnetic-hover {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  &:hover {
+    transform: scale(1.05) translateY(-5px);
+  }
+}
+
+.bg-gala-cyan {
+  background-color: #06B6D4;
+}
+
+/* Ripple Effect */
+span.ripple {
+  position: absolute;
+  border-radius: 50%;
+  transform: scale(0);
+  animation: ripple 600ms linear;
+  background-color: rgba(255, 255, 255, 0.7);
+  pointer-events: none;
+}
+
+@keyframes ripple {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* Input Glow on Focus */
+input:focus,
+textarea:focus {
+  outline: none;
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+  border-color: #8B5CF6;
+  transition: all 0.3s ease;
+}
+
+/* Next.js Portal Styles */
+nextjs-portal {
+  left: 1px !important;
+  top: -1px !important;
+}
