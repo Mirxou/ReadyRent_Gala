@@ -456,7 +456,7 @@ export function ProductFilters({
         <div className="space-y-2">
           <label className="text-sm font-medium">الألوان</label>
           <div className="flex flex-wrap gap-2">
-            {COLOR_OPTIONS.map((color) => (
+            {COLOR_OPTIONS.map((color: any) => (
               <Button
                 key={color.value}
                 variant={colors.includes(color.value) ? 'default' : 'outline'}
@@ -519,10 +519,10 @@ export function ProductFilters({
           )}
 
           {/* Display Custom Colors */}
-          {colors.filter((c) => !COLOR_OPTIONS.find((co) => co.value === c)).length > 0 && (
+          {colors.filter((c) => !COLOR_OPTIONS.find((co: any) => co.value === c)).length > 0 && (
             <div className="flex flex-wrap gap-2 mt-2">
               {colors
-                .filter((c) => !COLOR_OPTIONS.find((co) => co.value === c))
+                .filter((c) => !COLOR_OPTIONS.find((co: any) => co.value === c))
                 .map((customColor) => (
                   <Badge
                     key={customColor}
