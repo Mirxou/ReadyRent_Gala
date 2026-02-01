@@ -9,7 +9,6 @@ import { Label } from '@/components/ui/label';
 import { useQuery } from '@tanstack/react-query';
 import { bookingsApi, api, locationsApi } from '@/lib/api';
 import { CalendarIcon, Clock, Zap } from 'lucide-react';
-// @ts-expect-error - hijri-date-converter has incorrect TypeScript definitions
 const HijriDate = require('hijri-date-converter');
 
 interface BookingCalendarProps {
