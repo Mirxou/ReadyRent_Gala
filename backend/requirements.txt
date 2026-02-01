@@ -147,3 +147,4 @@ Django>=5.0
 djangorestframework
 celery
 sentry-sdk
+django-environ
