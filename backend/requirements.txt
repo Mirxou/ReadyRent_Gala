@@ -152,3 +152,4 @@ django-cors-headers
 drf-spectacular
 djangorestframework-simplejwt
 django-filter
+channels
