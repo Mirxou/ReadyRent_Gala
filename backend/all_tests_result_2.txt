@@ -1,0 +1,55 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.9, pytest-9.0.2, pluggy-1.6.0 -- C:\Users\pc\Desktop\ReadyRent_Gala\backend\venv\Scripts\python.exe
+cachedir: .pytest_cache
+django: version: 5.2.9, settings: config.test_settings (from ini)
+rootdir: C:\Users\pc\Desktop\ReadyRent_Gala\backend
+configfile: pytest.ini
+plugins: anyio-4.12.0, locust-2.43.0, cov-7.0.0, django-4.11.1, mock-3.15.1
+collecting ... collected 30 items
+
+tests/unit/test_payments_serializers.py::TestPaymentMethodSerializer::test_payment_method_serialization PASSED [  3%]
+tests/unit/test_payments_serializers.py::TestPaymentCreateSerializer::test_payment_create_validation_baridimob PASSED [  6%]
+tests/unit/test_payments_serializers.py::TestPaymentCreateSerializer::test_payment_create_validation_bank_card PASSED [ 10%]
+tests/unit/test_payments_serializers.py::TestPaymentSerializer::test_payment_serialization PASSED [ 13%]
+tests/unit/test_payments_views.py::TestPaymentViewSet::test_list_payments_requires_auth PASSED [ 16%]
+tests/unit/test_payments_views.py::TestPaymentViewSet::test_list_payments_authenticated PASSED [ 20%]
+tests/unit/test_payments_views.py::TestPaymentViewSet::test_payment_status_access PASSED [ 23%]
+tests/unit/test_payments_views.py::TestPaymentCreateView::test_create_payment_success PASSED [ 26%]
+tests/unit/test_payments_views.py::TestPaymentCreateView::test_create_payment_validation_error PASSED [ 30%]
+tests/unit/test_returns_serializers.py::TestReturnItemSerializer::test_return_item_serialization PASSED [ 33%]
+tests/unit/test_returns_serializers.py::TestReturnItemSerializer::test_return_item_validation PASSED [ 36%]
+tests/unit/test_returns_serializers.py::TestRefundSerializer::test_refund_serialization PASSED [ 40%]
+tests/unit/test_returns_serializers.py::TestRefundSerializer::test_refund_validation PASSED [ 43%]
+tests/unit/test_returns_serializers.py::TestReturnSerializer::test_return_serialization PASSED [ 46%]
+tests/unit/test_returns_serializers.py::TestReturnSerializer::test_return_with_items PASSED [ 50%]
+tests/unit/test_returns_serializers.py::TestReturnSerializer::test_return_with_refund PASSED [ 53%]
+tests/unit/test_returns_serializers.py::TestReturnSerializer::test_return_is_late_property PASSED [ 56%]
+tests/unit/test_returns_views.py::TestReturnViewSet::test_list_returns_requires_auth PASSED [ 60%]
+tests/unit/test_returns_views.py::TestReturnViewSet::test_list_returns_authenticated PASSED [ 63%]
+tests/unit/test_returns_views.py::TestReturnViewSet::test_create_return_requires_auth PASSED [ 66%]
+tests/unit/test_returns_views.py::TestReturnViewSet::test_create_return PASSED [ 70%]
+tests/unit/test_returns_views.py::TestReturnViewSet::test_retrieve_return PASSED [ 73%]
+tests/unit/test_returns_views.py::TestReturnViewSet::test_approve_return_requires_admin PASSED [ 76%]
+tests/unit/test_returns_views.py::TestReturnViewSet::test_approve_return_admin PASSED [ 80%]
+tests/unit/test_returns_views.py::TestReturnViewSet::test_mark_received PASSED [ 83%]
+tests/unit/test_returns_views.py::TestReturnViewSet::test_complete_inspection PASSED [ 86%]
+tests/unit/test_returns_views.py::TestReturnViewSet::test_my_returns FAILED [ 90%]
+tests/unit/test_returns_views.py::TestRefundViewSet::test_list_refunds_requires_admin PASSED [ 93%]
+tests/unit/test_returns_views.py::TestRefundViewSet::test_list_refunds_admin PASSED [ 96%]
+tests/unit/test_returns_views.py::TestRefundViewSet::test_process_refund PASSED [100%]
+
+================================== FAILURES ===================================
+______________________ TestReturnViewSet.test_my_returns ______________________
+tests\unit\test_returns_views.py:331: in test_my_returns
+    assert response.status_code == status.HTTP_200_OK
+E   assert 403 == 200
+E    +  where 403 = <Response status_code=403, "application/json">.status_code
+E    +  and   200 = status.HTTP_200_OK
+------------------------------ Captured log call ------------------------------
+WARNING  core.exception_handler:exception_handler.py:70 Client error: \u0644\u064a\u0633 \u0644\u062f\u064a\u0643 \u0635\u0644\u0627\u062d\u064a\u0629 \u0644\u0644\u0642\u064a\u0627\u0645 \u0628\u0647\u0630\u0627 \u0627\u0644\u0625\u062c\u0631\u0627\u0621.\nWARNING  django.request:log.py:253 Forbidden: /api/returns/returns/my_returns/
+=========================== short test summary info ===========================
+FAILED tests/unit/test_returns_views.py::TestReturnViewSet::test_my_returns
+======================== 1 failed, 29 passed in 2.38s =========================
+Sentry is attempting to send 1 pending events
+Waiting up to 2 seconds
+Press Ctrl-Break to quit

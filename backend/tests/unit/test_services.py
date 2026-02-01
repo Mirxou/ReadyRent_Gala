@@ -47,7 +47,7 @@ class TestBookingServices:
         
         # This should raise validation error
         with pytest.raises(Exception):
-            Booking.objects.create(
+            booking = Booking(
                 user=regular_user,
                 product=product,
                 start_date=start_date,
@@ -56,6 +56,8 @@ class TestBookingServices:
                 total_price=Decimal('0.00'),
                 status='pending'
             )
+            booking.full_clean()
+            booking.save()
 
 
 @pytest.mark.unit
@@ -121,8 +123,9 @@ class TestHealthCheck:
         response = client.get('/api/health/')
         
         assert response.status_code == 200
-        assert 'status' in response.data
-        assert 'database' in response.data
-        assert 'cache' in response.data
-        assert response.data['status'] in ['healthy', 'unhealthy']
+        data = response.json()
+        assert 'status' in data
+        assert 'database' in data
+        assert 'cache' in data
+        assert data['status'] in ['healthy', 'unhealthy']
 

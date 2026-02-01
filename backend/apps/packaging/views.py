@@ -1,7 +1,7 @@
 from rest_framework import viewsets, filters, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db import models
 from .models import PackagingType, PackagingMaterial, PackagingRule, PackagingInstance
@@ -17,7 +17,7 @@ class PackagingTypeViewSet(viewsets.ReadOnlyModelViewSet):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_fields = ['size']
     search_fields = ['name', 'name_ar']
-    permission_classes = []
+    permission_classes = [AllowAny]
 
 
 class PackagingMaterialViewSet(viewsets.ReadOnlyModelViewSet):
@@ -46,7 +46,7 @@ class PackagingInstanceViewSet(viewsets.ModelViewSet):
     ordering = ['-prepared_at']
     
     def get_permissions(self):
-        if self.action in ['list', 'retrieve']:
+        if self.action in ['list', 'retrieve', 'suggested_for_booking']:
             return [IsAuthenticated()]
         return [IsAdminUser()]
     

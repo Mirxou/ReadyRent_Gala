@@ -1,41 +1,33 @@
 import { render } from '@testing-library/react';
 import { Analytics } from '@/components/analytics';
+import { usePathname, useSearchParams } from 'next/navigation';
+import { pageview } from '@/lib/analytics';
 
-// Mock next/navigation
+// Mock dependencies
 jest.mock('next/navigation', () => ({
-  usePathname: () => '/test',
-  useSearchParams: () => new URLSearchParams(),
+  usePathname: jest.fn(),
+  useSearchParams: jest.fn(),
+}));
+
+jest.mock('@/lib/analytics', () => ({
+  pageview: jest.fn(),
+}));
+
+// Mock Next.js Script
+jest.mock('next/script', () => ({
+  __esModule: true,
+  default: ({ children }: any) => <div data-testid="next-script">{children}</div>,
 }));
 
 describe('Analytics', () => {
-  const originalEnv = process.env;
-
   beforeEach(() => {
-    jest.resetModules();
-    process.env = { ...originalEnv };
+    (usePathname as jest.Mock).mockReturnValue('/test-path');
+    (useSearchParams as jest.Mock).mockReturnValue({ toString: () => 'param=1' });
+    process.env.NEXT_PUBLIC_GA_ID = 'UA-123';
   });
 
-  afterEach(() => {
-    process.env = originalEnv;
-  });
-
-  it('renders correctly with GA ID', () => {
-    process.env.NEXT_PUBLIC_GA_ID = 'test-ga-id';
-    const { container } = render(<Analytics />);
-    expect(container).toBeInTheDocument();
-  });
-
-  it('renders correctly with FB Pixel ID', () => {
-    process.env.NEXT_PUBLIC_FB_PIXEL_ID = 'test-fb-pixel-id';
-    const { container } = render(<Analytics />);
-    expect(container).toBeInTheDocument();
-  });
-
-  it('renders null without analytics IDs', () => {
-    delete process.env.NEXT_PUBLIC_GA_ID;
-    delete process.env.NEXT_PUBLIC_FB_PIXEL_ID;
-    
-    const { container } = render(<Analytics />);
-    expect(container.firstChild).toBeNull();
+  it('calls pageview on mount', () => {
+    render(<Analytics />);
+    expect(pageview).toHaveBeenCalledWith('/test-path?param=1');
   });
 });

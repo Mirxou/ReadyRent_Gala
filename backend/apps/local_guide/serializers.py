@@ -18,7 +18,7 @@ class ServiceReviewSerializer(serializers.ModelSerializer):
             'rating', 'comment', 'is_verified',
             'created_at', 'updated_at'
         ]
-        read_only_fields = ['created_at', 'updated_at']
+        read_only_fields = ['user', 'created_at', 'updated_at']
 
 
 class LocalServiceSerializer(serializers.ModelSerializer):

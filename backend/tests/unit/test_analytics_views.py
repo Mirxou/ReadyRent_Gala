@@ -40,7 +40,7 @@ class TestAnalyticsEventViewSet:
             'event_type': 'page_view',
             'session_id': 'test_session',
             'event_data': {'page': '/products'}
-        })
+        }, format='json')
         assert response.status_code == status.HTTP_201_CREATED
 
 
@@ -116,13 +116,13 @@ class TestAdminDashboardStatsView:
     def test_dashboard_stats_requires_admin(self, api_client, regular_user):
         """Test dashboard stats requires admin"""
         api_client.force_authenticate(user=regular_user)
-        response = api_client.get('/api/analytics/admin/dashboard-stats/')
+        response = api_client.get('/api/analytics/admin/dashboard/')
         assert response.status_code == status.HTTP_403_FORBIDDEN
     
     def test_dashboard_stats_as_admin(self, api_client, admin_user):
         """Test dashboard stats as admin"""
         api_client.force_authenticate(user=admin_user)
-        response = api_client.get('/api/analytics/admin/dashboard-stats/')
+        response = api_client.get('/api/analytics/admin/dashboard/')
         assert response.status_code == status.HTTP_200_OK
         assert 'overall' in response.data
         assert 'this_month' in response.data

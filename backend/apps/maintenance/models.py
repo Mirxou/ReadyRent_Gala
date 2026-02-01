@@ -101,8 +101,8 @@ class MaintenanceRecord(models.Model):
         null=True,
         blank=True,
         related_name='maintenance_records',
-        help_text=_('Booking that triggered this maintenance',
-        verbose_name=_('related_booking'))
+        help_text=_('Booking that triggered this maintenance'),
+        verbose_name=_('related_booking')
     )
     created_at = models.DateTimeField(_('created at'), auto_now_add=True)
     updated_at = models.DateTimeField(_('updated at'), auto_now=True)

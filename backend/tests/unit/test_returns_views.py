@@ -14,6 +14,9 @@ from apps.bookings.models import Booking
 
 User = get_user_model()
 
+@pytest.fixture
+def api_client():
+    return APIClient()
 
 @pytest.mark.unit
 @pytest.mark.django_db
@@ -28,7 +31,8 @@ class TestReturnViewSet:
     def test_list_returns_authenticated(self, api_client):
         """Test listing returns for authenticated user"""
         user = User.objects.create_user(
-            email='test@example.com',
+            username='test_v1',
+            email='test_v1@example.com',
             password='testpass123'
         )
         api_client.force_authenticate(user=user)
@@ -45,18 +49,19 @@ class TestReturnViewSet:
     def test_create_return(self, api_client):
         """Test creating return"""
         user = User.objects.create_user(
-            email='test@example.com',
+            username='test_v2',
+            email='test_v2@example.com',
             password='testpass123'
         )
         category = Category.objects.create(
             name='Dresses',
             name_ar='فساتين',
-            slug='dresses'
+            slug='dresses_v2'
         )
         product = Product.objects.create(
             name='Test Dress',
             name_ar='فستان تجريبي',
-            slug='test-dress',
+            slug='test-dress-v2',
             category=category,
             price_per_day=1000.00
         )
@@ -83,18 +88,19 @@ class TestReturnViewSet:
     def test_retrieve_return(self, api_client):
         """Test retrieving return"""
         user = User.objects.create_user(
-            email='test@example.com',
+            username='test_v3',
+            email='test_v3@example.com',
             password='testpass123'
         )
         category = Category.objects.create(
             name='Dresses',
             name_ar='فساتين',
-            slug='dresses'
+            slug='dresses_v3'
         )
         product = Product.objects.create(
             name='Test Dress',
             name_ar='فستان تجريبي',
-            slug='test-dress',
+            slug='test-dress-v3',
             category=category,
             price_per_day=1000.00
         )
@@ -121,18 +127,19 @@ class TestReturnViewSet:
     def test_approve_return_requires_admin(self, api_client):
         """Test approving return requires admin"""
         user = User.objects.create_user(
-            email='test@example.com',
+            username='test_v4',
+            email='test_v4@example.com',
             password='testpass123'
         )
         category = Category.objects.create(
             name='Dresses',
             name_ar='فساتين',
-            slug='dresses'
+            slug='dresses_v4'
         )
         product = Product.objects.create(
             name='Test Dress',
             name_ar='فستان تجريبي',
-            slug='test-dress',
+            slug='test-dress-v4',
             category=category,
             price_per_day=1000.00
         )
@@ -158,18 +165,19 @@ class TestReturnViewSet:
     def test_approve_return_admin(self, api_client, admin_user):
         """Test approving return as admin"""
         user = User.objects.create_user(
-            email='test@example.com',
+            username='test_v5',
+            email='test_v5@example.com',
             password='testpass123'
         )
         category = Category.objects.create(
             name='Dresses',
             name_ar='فساتين',
-            slug='dresses'
+            slug='dresses_v5'
         )
         product = Product.objects.create(
             name='Test Dress',
             name_ar='فستان تجريبي',
-            slug='test-dress',
+            slug='test-dress-v5',
             category=category,
             price_per_day=1000.00
         )
@@ -199,18 +207,19 @@ class TestReturnViewSet:
     def test_mark_received(self, api_client, admin_user):
         """Test marking return as received"""
         user = User.objects.create_user(
-            email='test@example.com',
+            username='test_v6',
+            email='test_v6@example.com',
             password='testpass123'
         )
         category = Category.objects.create(
             name='Dresses',
             name_ar='فساتين',
-            slug='dresses'
+            slug='dresses_v6'
         )
         product = Product.objects.create(
             name='Test Dress',
             name_ar='فستان تجريبي',
-            slug='test-dress',
+            slug='test-dress-v6',
             category=category,
             price_per_day=1000.00
         )
@@ -239,18 +248,19 @@ class TestReturnViewSet:
     def test_complete_inspection(self, api_client, admin_user):
         """Test completing inspection"""
         user = User.objects.create_user(
-            email='test@example.com',
+            username='test_v7',
+            email='test_v7@example.com',
             password='testpass123'
         )
         category = Category.objects.create(
             name='Dresses',
             name_ar='فساتين',
-            slug='dresses'
+            slug='dresses_v7'
         )
         product = Product.objects.create(
             name='Test Dress',
             name_ar='فستان تجريبي',
-            slug='test-dress',
+            slug='test-dress-v7',
             category=category,
             price_per_day=1000.00
         )
@@ -284,18 +294,19 @@ class TestReturnViewSet:
     def test_my_returns(self, api_client):
         """Test my_returns action"""
         user = User.objects.create_user(
-            email='test@example.com',
+            username='test_v8',
+            email='test_v8@example.com',
             password='testpass123'
         )
         category = Category.objects.create(
             name='Dresses',
             name_ar='فساتين',
-            slug='dresses'
+            slug='dresses_v8'
         )
         product = Product.objects.create(
             name='Test Dress',
             name_ar='فستان تجريبي',
-            slug='test-dress',
+            slug='test-dress-v8',
             category=category,
             price_per_day=1000.00
         )
@@ -329,7 +340,8 @@ class TestRefundViewSet:
     def test_list_refunds_requires_admin(self, api_client):
         """Test listing refunds requires admin"""
         user = User.objects.create_user(
-            email='test@example.com',
+            username='test_v9',
+            email='test_v9@example.com',
             password='testpass123'
         )
         api_client.force_authenticate(user=user)
@@ -347,18 +359,19 @@ class TestRefundViewSet:
     def test_process_refund(self, api_client, admin_user):
         """Test processing refund"""
         user = User.objects.create_user(
-            email='test@example.com',
+            username='test_v10',
+            email='test_v10@example.com',
             password='testpass123'
         )
         category = Category.objects.create(
             name='Dresses',
             name_ar='فساتين',
-            slug='dresses'
+            slug='dresses_v10'
         )
         product = Product.objects.create(
             name='Test Dress',
             name_ar='فستان تجريبي',
-            slug='test-dress',
+            slug='test-dress-v10',
             category=category,
             price_per_day=1000.00
         )
@@ -392,4 +405,3 @@ class TestRefundViewSet:
         assert response.status_code == status.HTTP_200_OK
         assert response.data['status'] == 'processed'
         assert 'processed_at' in response.data
-

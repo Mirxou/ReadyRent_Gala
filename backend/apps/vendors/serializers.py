@@ -22,7 +22,7 @@ class VendorSerializer(serializers.ModelSerializer):
             'created_at', 'updated_at'
         ]
         read_only_fields = [
-            'total_products', 'total_sales', 'total_commission', 'rating',
+            'user', 'total_products', 'total_sales', 'total_commission', 'rating',
             'verified_at', 'created_at', 'updated_at'
         ]
 

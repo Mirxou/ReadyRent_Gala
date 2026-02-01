@@ -18,7 +18,8 @@ class ReturnFlowTest(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(
             email='test@example.com',
-            password='testpass123'
+            password='testpass123',
+            username='testuser'
         )
         
         self.category = Category.objects.create(
@@ -58,12 +59,11 @@ class ReturnFlowTest(TestCase):
         # 1. Create return request
         return_obj = Return.objects.create(
             booking=self.booking,
-            reason='No longer needed',
-            condition='good'
+            return_notes='No longer needed'
         )
         
         self.assertEqual(return_obj.booking, self.booking)
-        self.assertEqual(return_obj.status, 'pending')
+        self.assertEqual(return_obj.status, 'requested')
         
         # 2. Approve return
         return_obj.status = 'approved'

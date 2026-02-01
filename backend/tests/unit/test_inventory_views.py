@@ -19,7 +19,7 @@ class TestInventoryItemViewSet:
     
     def test_list_requires_auth(self, api_client):
         """Test listing inventory requires authentication"""
-        response = api_client.get('/api/inventory/inventory/')
+        response = api_client.get('/api/inventory/items/')
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
     
     def test_list_as_admin(self, api_client, admin_user, product):
@@ -31,7 +31,7 @@ class TestInventoryItemViewSet:
         )
         
         api_client.force_authenticate(user=admin_user)
-        response = api_client.get('/api/inventory/inventory/')
+        response = api_client.get('/api/inventory/items/')
         
         assert response.status_code == status.HTTP_200_OK
     
@@ -39,7 +39,7 @@ class TestInventoryItemViewSet:
         """Test creating inventory item requires admin"""
         api_client.force_authenticate(user=regular_user)
         
-        response = api_client.post('/api/inventory/inventory/', {
+        response = api_client.post('/api/inventory/items/', {
             'product': product.id,
             'quantity_total': 10,
             'quantity_available': 10

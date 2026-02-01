@@ -19,7 +19,6 @@ class TestBundleCategoryModel:
             name_ar='باقات الأعراس',
             slug='wedding-packages',
             description='Wedding packages',
-            description_ar='باقات أعراس',
             is_active=True
         )
         
@@ -48,6 +47,8 @@ class TestBundleModel:
             description='Complete wedding package',
             description_ar='باقة عرس كاملة',
             category=bundle_category,
+            base_price=Decimal('1000.00'),
+            bundle_price=Decimal('850.00'),
             discount_type='percentage',
             discount_value=Decimal('15.00'),
             is_active=True
@@ -78,7 +79,9 @@ class TestBundleItemModel:
             slug='test-bundle',
             description='Test',
             description_ar='تجريبي',
-            category=bundle_category
+            category=bundle_category,
+            base_price=Decimal('1000.00'),
+            bundle_price=Decimal('900.00')
         )
         
         product = Product.objects.create(

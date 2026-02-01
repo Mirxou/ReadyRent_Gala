@@ -45,7 +45,7 @@ class TestInventoryViews:
             quantity_total=10,
             quantity_available=8
         )
-        api_client.force_authenticate(user=admin_user)
+        api_client.force_login(user=admin_user)
         response = api_client.get('/api/inventory/items/')
         assert response.status_code == status.HTTP_200_OK
     
@@ -67,7 +67,7 @@ class TestMaintenanceViews:
             maintenance_type='cleaning',
             duration_hours=2
         )
-        api_client.force_authenticate(user=admin_user)
+        api_client.force_login(user=admin_user)
         response = api_client.get('/api/maintenance/schedules/')
         assert response.status_code == status.HTTP_200_OK
 
@@ -121,7 +121,7 @@ class TestLocationsViews:
             radius_km=10,
             delivery_fee=500.00
         )
-        response = api_client.get('/api/locations/zones/')
+        response = api_client.get('/api/locations/delivery-zones/')
         assert response.status_code == status.HTTP_200_OK
 
 
@@ -137,7 +137,7 @@ class TestPackagingViews:
             name_ar='صندوق قياسي',
             size='medium'
         )
-        api_client.force_authenticate(user=admin_user)
+        api_client.force_login(user=admin_user)
         response = api_client.get('/api/packaging/types/')
         assert response.status_code == status.HTTP_200_OK
 
@@ -149,7 +149,7 @@ class TestHygieneViews:
     
     def test_list_hygiene_records_requires_auth(self, api_client):
         """Test listing hygiene records requires authentication"""
-        response = api_client.get('/api/hygiene/records/')
+        response = api_client.get('/api/hygiene/hygiene-records/')
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
@@ -171,7 +171,7 @@ class TestNotificationsViews:
             title='Booking Confirmed',
             message='Your booking has been confirmed'
         )
-        api_client.force_authenticate(user=regular_user)
+        api_client.force_login(user=regular_user)
         response = api_client.get('/api/notifications/')
         assert response.status_code == status.HTTP_200_OK
 
@@ -188,7 +188,7 @@ class TestChatbotViews:
     
     def test_create_chat_session_authenticated(self, api_client, regular_user):
         """Test creating chat session when authenticated"""
-        api_client.force_authenticate(user=regular_user)
+        api_client.force_login(user=regular_user)
         response = api_client.post('/api/chatbot/sessions/', {
             'language': 'ar'
         })
@@ -202,12 +202,12 @@ class TestDisputesViews:
     
     def test_list_disputes_requires_auth(self, api_client):
         """Test listing disputes requires authentication"""
-        response = api_client.get('/api/disputes/')
+        response = api_client.get('/api/disputes/disputes/')
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
     
     def test_create_dispute_requires_auth(self, api_client, booking):
         """Test creating dispute requires authentication"""
-        response = api_client.post('/api/disputes/', {
+        response = api_client.post('/api/disputes/disputes/', {
             'booking': booking.id,
             'title': 'Test Dispute',
             'description': 'Test description'
@@ -242,7 +242,7 @@ class TestLocalGuideViews:
             name='Wedding Photography',
             name_ar='تصوير الأعراس',
             description='Professional wedding photography',
-            contact_phone='+123456789',
+            phone='+123456789',
             is_active=True
         )
         response = api_client.get('/api/local-guide/services/')
@@ -264,6 +264,7 @@ class TestArtisansViews:
             specialty='Dress Design',
             is_active=True
         )
+        api_client.force_authenticate(user=regular_user)
         response = api_client.get('/api/artisans/')
         assert response.status_code == status.HTTP_200_OK
 
@@ -283,7 +284,7 @@ class TestBundlesViews:
         response = api_client.get('/api/bundles/categories/')
         assert response.status_code == status.HTTP_200_OK
     
-    def test_list_bundles(self, api_client, product):
+    def test_list_bundles(self, api_client, product, regular_user):
         """Test listing bundles (public)"""
         category = BundleCategory.objects.create(
             name='Wedding Bundles',
@@ -293,11 +294,15 @@ class TestBundlesViews:
             name='Bride Package',
             slug='bride-package',
             category=category,
-            price=2500.00,
-            discount_percentage=10.0,
+            base_price=2777.77,
+            bundle_price=2500.00,
+            discount_type='percentage',
+            discount_value=10.0,
             is_active=True
         )
-        bundle.products.add(product)
+        from apps.bundles.models import BundleItem
+        BundleItem.objects.create(bundle=bundle, product=product, quantity=1)
+        api_client.force_authenticate(user=regular_user)
         response = api_client.get('/api/bundles/')
         assert response.status_code == status.HTTP_200_OK
 
@@ -313,7 +318,7 @@ class TestWarrantiesViews:
             name='Basic Coverage',
             description='Basic coverage plan',
             price=50.00,
-            coverage_percentage=50,
+            max_coverage_amount=5000.00,
             is_active=True
         )
         response = api_client.get('/api/warranties/plans/')
@@ -332,14 +337,14 @@ class TestReviewsViews:
             product=product,
             rating=5,
             comment='Excellent!',
-            is_approved=True
+            status='approved'
         )
         response = api_client.get(f'/api/reviews/?product={product.id}')
         assert response.status_code == status.HTTP_200_OK
     
     def test_create_review_requires_auth(self, api_client, product):
         """Test creating review requires authentication"""
-        response = api_client.post('/api/reviews/', {
+        response = api_client.post('/api/reviews/create/', {
             'product': product.id,
             'rating': 5,
             'comment': 'Great!'
@@ -354,13 +359,13 @@ class TestAnalyticsViews:
     
     def test_analytics_requires_admin(self, api_client, regular_user):
         """Test analytics endpoints require admin"""
-        api_client.force_authenticate(user=regular_user)
+        api_client.force_login(user=regular_user)
         response = api_client.get('/api/analytics/admin/dashboard/')
         assert response.status_code == status.HTTP_403_FORBIDDEN
     
     def test_analytics_admin_access(self, api_client, admin_user):
         """Test analytics endpoints with admin access"""
-        api_client.force_authenticate(user=admin_user)
+        api_client.force_login(user=admin_user)
         response = api_client.get('/api/analytics/admin/dashboard/')
         assert response.status_code == status.HTTP_200_OK
 
@@ -374,11 +379,11 @@ class TestVendorsViews:
         """Test listing vendors (public)"""
         Vendor.objects.create(
             user=regular_user,
-            name='Fashion Boutique',
-            contact_email='vendor@example.com',
-            phone_number='+123456789',
+            business_name='Fashion Boutique',
+            email='vendor@example.com',
+            phone='+123456789',
             address='123 Main St',
-            is_active=True
+            status='active'
         )
         response = api_client.get('/api/vendors/')
         assert response.status_code == status.HTTP_200_OK
@@ -403,8 +408,9 @@ class TestBranchesViews:
         Branch.objects.create(
             name='Main Branch',
             name_ar='الفرع الرئيسي',
+            code='BR001',
             address='123 Branch St',
-            phone_number='+1122334455',
+            phone='+1122334455',
             email='main@example.com',
             is_active=True
         )
@@ -449,7 +455,7 @@ class TestCMSViews:
             content='Blog post content',
             status='published'
         )
-        response = api_client.get('/api/cms/blogposts/')
+        response = api_client.get('/api/cms/blog/')
         assert response.status_code == status.HTTP_200_OK
     
     def test_list_banners(self, api_client):

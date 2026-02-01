@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Smartphone, Lock } from 'lucide-react';
 import { toast } from 'sonner';
+import { paymentsApi } from '@/lib/api';
 
 interface BaridiMobFormProps {
   amount: number;
@@ -31,7 +32,7 @@ export function BaridiMobForm({
 
   const handlePhoneSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!phoneNumber || phoneNumber.length < 9) {
       toast.error('يرجى إدخال رقم هاتف صحيح');
       return;
@@ -39,7 +40,6 @@ export function BaridiMobForm({
 
     setIsLoading(true);
     try {
-      const { paymentsApi } = await import('@/lib/api');
       const response = await paymentsApi.create({
         payment_method: 'baridimob',
         amount,
@@ -65,7 +65,7 @@ export function BaridiMobForm({
 
   const handleOtpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!otpCode || otpCode.length !== 6) {
       toast.error('يرجى إدخال رمز التحقق المكون من 6 أرقام');
       return;
@@ -78,7 +78,6 @@ export function BaridiMobForm({
 
     setIsLoading(true);
     try {
-      const { paymentsApi } = await import('@/lib/api');
       const response = await paymentsApi.verifyOtp(paymentId, otpCode);
 
       if (response.data.success) {

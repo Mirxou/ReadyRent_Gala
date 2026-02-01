@@ -28,7 +28,7 @@ class ChatSessionSerializer(serializers.ModelSerializer):
     messages = ChatMessageSerializer(many=True, read_only=True)
     user_email = serializers.EmailField(source='user.email', read_only=True)
     escalated_to_email = serializers.EmailField(source='escalated_to.email', read_only=True)
-    message_count = serializers.IntegerField(read_only=True)
+    message_count = serializers.SerializerMethodField()
     
     class Meta:
         model = ChatSession
@@ -40,6 +40,9 @@ class ChatSessionSerializer(serializers.ModelSerializer):
             'context_data', 'messages', 'message_count'
         ]
         read_only_fields = ['started_at', 'resolved_at', 'escalated_at', 'session_id']
+    
+    def get_message_count(self, obj):
+        return obj.messages.count()
 
 
 class ChatbotConfigurationSerializer(serializers.ModelSerializer):

@@ -1,0 +1,519 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.13.9, pytest-9.0.2, pluggy-1.6.0 -- C:\Users\pc\Desktop\ReadyRent_Gala\backend\venv\Scripts\python.exe
+cachedir: .pytest_cache
+django: version: 5.2.9, settings: config.test_settings (from ini)
+rootdir: C:\Users\pc\Desktop\ReadyRent_Gala\backend
+configfile: pytest.ini
+plugins: anyio-4.12.0, locust-2.43.0, cov-7.0.0, django-4.11.1, mock-3.15.1
+collecting ... collected 352 items
+
+tests/unit/test_analytics_serializers.py::TestAnalyticsEventSerializer::test_analytics_event_serialization PASSED [  0%]
+tests/unit/test_analytics_serializers.py::TestAnalyticsEventSerializer::test_analytics_event_validation PASSED [  0%]
+tests/unit/test_analytics_serializers.py::TestProductAnalyticsSerializer::test_product_analytics_serialization PASSED [  0%]
+tests/unit/test_analytics_serializers.py::TestDailyAnalyticsSerializer::test_daily_analytics_serialization PASSED [  1%]
+tests/unit/test_analytics_serializers.py::TestUserBehaviorSerializer::test_user_behavior_serialization PASSED [  1%]
+tests/unit/test_analytics_serializers.py::TestForecastSerializer::test_forecast_serialization PASSED [  1%]
+tests/unit/test_analytics_views.py::TestAnalyticsEventViewSet::test_list_requires_admin PASSED [  1%]
+tests/unit/test_analytics_views.py::TestAnalyticsEventViewSet::test_list_as_admin PASSED [  2%]
+tests/unit/test_analytics_views.py::TestAnalyticsEventViewSet::test_create_event_as_admin PASSED [  2%]
+tests/unit/test_analytics_views.py::TestProductAnalyticsViewSet::test_list_requires_admin PASSED [  2%]
+tests/unit/test_analytics_views.py::TestProductAnalyticsViewSet::test_list_as_admin PASSED [  3%]
+tests/unit/test_analytics_views.py::TestProductAnalyticsViewSet::test_top_products PASSED [  3%]
+tests/unit/test_analytics_views.py::TestDailyAnalyticsViewSet::test_list_requires_admin PASSED [  3%]
+tests/unit/test_analytics_views.py::TestDailyAnalyticsViewSet::test_summary_endpoint PASSED [  3%]
+tests/unit/test_analytics_views.py::TestAdminDashboardStatsView::test_dashboard_stats_requires_admin PASSED [  4%]
+tests/unit/test_analytics_views.py::TestAdminDashboardStatsView::test_dashboard_stats_as_admin PASSED [  4%]
+tests/unit/test_analytics_views.py::TestAdminRevenueView::test_revenue_view_requires_admin PASSED [  4%]
+tests/unit/test_analytics_views.py::TestAdminRevenueView::test_revenue_view_as_admin PASSED [  5%]
+tests/unit/test_analytics_views.py::TestAdminSalesReportView::test_sales_report_requires_admin PASSED [  5%]
+tests/unit/test_analytics_views.py::TestAdminSalesReportView::test_sales_report_as_admin PASSED [  5%]
+tests/unit/test_artisans_serializers.py::TestArtisanSerializer::test_artisan_serialization PASSED [  5%]
+tests/unit/test_artisans_serializers.py::TestArtisanSerializer::test_artisan_with_portfolio PASSED [  6%]
+tests/unit/test_artisans_serializers.py::TestArtisanPortfolioSerializer::test_portfolio_serialization PASSED [  6%]
+tests/unit/test_artisans_serializers.py::TestArtisanReviewSerializer::test_review_serialization PASSED [  6%]
+tests/unit/test_artisans_views.py::TestArtisanViewSet::test_list_artisans PASSED [  7%]
+tests/unit/test_artisans_views.py::TestArtisanViewSet::test_retrieve_artisan PASSED [  7%]
+tests/unit/test_artisans_views.py::TestArtisanViewSet::test_filter_by_specialty PASSED [  7%]
+tests/unit/test_artisans_views.py::TestArtisanReviewViewSet::test_list_reviews_requires_auth PASSED [  7%]
+tests/unit/test_artisans_views.py::TestArtisanReviewViewSet::test_create_review PASSED [  8%]
+tests/unit/test_branches_models.py::TestBranchModel::test_create_branch PASSED [  8%]
+tests/unit/test_branches_models.py::TestBranchModel::test_branch_str PASSED [  8%]
+tests/unit/test_branches_models.py::TestBranchInventoryModel::test_create_branch_inventory PASSED [  9%]
+tests/unit/test_branches_models.py::TestBranchInventoryModel::test_branch_inventory_is_low_stock PASSED [  9%]
+tests/unit/test_branches_models.py::TestBranchInventoryModel::test_branch_inventory_is_in_stock PASSED [  9%]
+tests/unit/test_branches_models.py::TestBranchStaffModel::test_create_branch_staff PASSED [  9%]
+tests/unit/test_branches_serializers.py::TestBranchSerializer::test_serializer_output_fields PASSED [ 10%]
+tests/unit/test_branches_serializers.py::TestBranchSerializer::test_serializer_read_only_fields PASSED [ 10%]
+tests/unit/test_branches_serializers.py::TestBranchInventorySerializer::test_serializer_availability_status PASSED [ 10%]
+tests/unit/test_branches_serializers.py::TestBranchStaffSerializer::test_serializer_fields PASSED [ 11%]
+tests/unit/test_branches_serializers.py::TestBranchPerformanceSerializer::test_serializer_metrics PASSED [ 11%]
+tests/unit/test_branches_views.py::TestBranchListView::test_list_active_branches PASSED [ 11%]
+tests/unit/test_branches_views.py::TestBranchListView::test_list_branches_no_auth_required PASSED [ 11%]
+tests/unit/test_branches_views.py::TestBranchInventoryViews::test_list_inventory_authenticated PASSED [ 12%]
+tests/unit/test_branches_views.py::TestBranchInventoryViews::test_filter_inventory_by_branch PASSED [ 12%]
+tests/unit/test_branches_views.py::TestBranchStaffViews::test_list_staff_assignments PASSED [ 12%]
+tests/unit/test_branches_views.py::TestBranchStatsView::test_get_branch_stats PASSED [ 13%]
+tests/unit/test_branches_views.py::TestBranchStatsView::test_stats_nonexistent_branch PASSED [ 13%]
+tests/unit/test_branches_views.py::TestAdminBranchViews::test_create_branch_admin PASSED [ 13%]
+tests/unit/test_branches_views.py::TestAdminBranchViews::test_create_branch_regular_user PASSED [ 13%]
+tests/unit/test_branches_views.py::TestAdminBranchViews::test_admin_update_branch PASSED [ 14%]
+tests/unit/test_bundles_models.py::TestBundleCategoryModel::test_create_bundle_category PASSED [ 14%]
+tests/unit/test_bundles_models.py::TestBundleModel::test_create_bundle PASSED [ 14%]
+tests/unit/test_bundles_models.py::TestBundleItemModel::test_create_bundle_item PASSED [ 15%]
+tests/unit/test_bundles_serializers.py::TestBundleSerializer::test_bundle_serialization PASSED [ 15%]
+tests/unit/test_bundles_serializers.py::TestBundleItemSerializer::test_bundle_item_serialization PASSED [ 15%]
+tests/unit/test_bundles_serializers.py::TestBundleBookingSerializer::test_bundle_booking_serialization PASSED [ 15%]
+tests/unit/test_bundles_views.py::TestBundleViewSet::test_list_bundles PASSED [ 16%]
+tests/unit/test_bundles_views.py::TestBundleViewSet::test_calculate_price PASSED [ 16%]
+tests/unit/test_bundles_views.py::TestBundleBookingViewSet::test_create_booking_requires_auth PASSED [ 16%]
+tests/unit/test_bundles_views.py::TestBundleBookingViewSet::test_create_booking FAILED [ 17%]
+tests/unit/test_bundles_views.py::TestBundleBookingViewSet::test_my_bookings FAILED [ 17%]
+tests/unit/test_chatbot_serializers.py::TestChatSessionSerializer::test_chat_session_serialization PASSED [ 17%]
+tests/unit/test_chatbot_serializers.py::TestChatMessageSerializer::test_chat_message_serialization PASSED [ 17%]
+tests/unit/test_chatbot_serializers.py::TestChatIntentSerializer::test_chat_intent_serialization PASSED [ 18%]
+tests/unit/test_chatbot_views.py::TestChatSessionViewSet::test_list_requires_auth PASSED [ 18%]
+tests/unit/test_chatbot_views.py::TestChatSessionViewSet::test_create_session PASSED [ 18%]
+tests/unit/test_chatbot_views.py::TestChatSessionViewSet::test_create_anonymous_session PASSED [ 19%]
+tests/unit/test_chatbot_views.py::TestChatSessionViewSet::test_list_user_sessions PASSED [ 19%]
+tests/unit/test_cms_models.py::TestPageModel::test_create_page PASSED    [ 19%]
+tests/unit/test_cms_models.py::TestPageModel::test_page_str PASSED       [ 19%]
+tests/unit/test_cms_models.py::TestBlogPostModel::test_create_blog_post PASSED [ 20%]
+tests/unit/test_cms_models.py::TestBlogPostModel::test_blog_post_view_count PASSED [ 20%]
+tests/unit/test_cms_models.py::TestBannerModel::test_create_banner PASSED [ 20%]
+tests/unit/test_cms_models.py::TestBannerModel::test_banner_click_tracking PASSED [ 21%]
+tests/unit/test_cms_models.py::TestFAQModel::test_create_faq PASSED      [ 21%]
+tests/unit/test_cms_models.py::TestFAQModel::test_faq_helpful_count PASSED [ 21%]
+tests/unit/test_disputes_serializers.py::TestDisputeMessageSerializer::test_dispute_message_serialization PASSED [ 21%]
+tests/unit/test_disputes_serializers.py::TestDisputeSerializer::test_dispute_serialization PASSED [ 22%]
+tests/unit/test_disputes_serializers.py::TestDisputeSerializer::test_dispute_with_messages PASSED [ 22%]
+tests/unit/test_disputes_serializers.py::TestSupportTicketSerializer::test_support_ticket_serialization PASSED [ 22%]
+tests/unit/test_disputes_serializers.py::TestTicketMessageSerializer::test_ticket_message_serialization PASSED [ 23%]
+tests/unit/test_disputes_views.py::TestDisputeViews::test_create_dispute_requires_auth PASSED [ 23%]
+tests/unit/test_disputes_views.py::TestDisputeViews::test_create_dispute PASSED [ 23%]
+tests/unit/test_disputes_views.py::TestDisputeViews::test_list_disputes_requires_auth PASSED [ 23%]
+tests/unit/test_disputes_views.py::TestDisputeViews::test_list_disputes_authenticated PASSED [ 24%]
+tests/unit/test_disputes_views.py::TestDisputeViews::test_retrieve_dispute PASSED [ 24%]
+tests/unit/test_disputes_views.py::TestDisputeViews::test_add_message_to_dispute PASSED [ 24%]
+tests/unit/test_disputes_views.py::TestSupportTicketViews::test_create_ticket_requires_auth PASSED [ 25%]
+tests/unit/test_disputes_views.py::TestSupportTicketViews::test_create_ticket PASSED [ 25%]
+tests/unit/test_disputes_views.py::TestSupportTicketViews::test_list_tickets_requires_auth PASSED [ 25%]
+tests/unit/test_disputes_views.py::TestSupportTicketViews::test_list_tickets_authenticated PASSED [ 25%]
+tests/unit/test_disputes_views.py::TestSupportTicketViews::test_add_message_to_ticket PASSED [ 26%]
+tests/unit/test_disputes_views.py::TestAdminDisputeViews::test_dispute_stats_requires_admin PASSED [ 26%]
+tests/unit/test_disputes_views.py::TestAdminDisputeViews::test_dispute_stats_admin PASSED [ 26%]
+tests/unit/test_disputes_views.py::TestAdminDisputeViews::test_ticket_stats_admin PASSED [ 26%]
+tests/unit/test_hygiene_serializers.py::TestHygieneRecordSerializer::test_hygiene_record_serialization PASSED [ 27%]
+tests/unit/test_hygiene_serializers.py::TestHygieneChecklistSerializer::test_checklist_serialization PASSED [ 27%]
+tests/unit/test_hygiene_serializers.py::TestHygieneCertificateSerializer::test_certificate_serialization PASSED [ 27%]
+tests/unit/test_hygiene_views.py::TestHygieneRecordViewSet::test_list_requires_auth PASSED [ 28%]
+tests/unit/test_hygiene_views.py::TestHygieneRecordViewSet::test_list_as_authenticated PASSED [ 28%]
+tests/unit/test_hygiene_views.py::TestHygieneRecordViewSet::test_create_requires_admin PASSED [ 28%]
+tests/unit/test_hygiene_views.py::TestHygieneRecordViewSet::test_start_cleaning PASSED [ 28%]
+tests/unit/test_inventory_serializers.py::TestInventoryItemSerializer::test_inventory_item_serialization PASSED [ 29%]
+tests/unit/test_inventory_serializers.py::TestStockAlertSerializer::test_stock_alert_serialization PASSED [ 29%]
+tests/unit/test_inventory_serializers.py::TestStockMovementSerializer::test_stock_movement_serialization PASSED [ 29%]
+tests/unit/test_inventory_views.py::TestInventoryItemViewSet::test_list_requires_auth PASSED [ 30%]
+tests/unit/test_inventory_views.py::TestInventoryItemViewSet::test_list_as_admin PASSED [ 30%]
+tests/unit/test_inventory_views.py::TestInventoryItemViewSet::test_create_requires_admin PASSED [ 30%]
+tests/unit/test_inventory_views.py::TestStockAlertViewSet::test_list_alerts_requires_admin PASSED [ 30%]
+tests/unit/test_inventory_views.py::TestStockAlertViewSet::test_list_alerts_as_admin PASSED [ 31%]
+tests/unit/test_local_guide_serializers.py::TestServiceCategorySerializer::test_category_serialization PASSED [ 31%]
+tests/unit/test_local_guide_serializers.py::TestLocalServiceSerializer::test_service_serialization PASSED [ 31%]
+tests/unit/test_local_guide_serializers.py::TestServiceReviewSerializer::test_review_serialization PASSED [ 32%]
+tests/unit/test_local_guide_views.py::TestServiceCategoryViewSet::test_list_categories PASSED [ 32%]
+tests/unit/test_local_guide_views.py::TestLocalServiceViewSet::test_list_services PASSED [ 32%]
+tests/unit/test_local_guide_views.py::TestLocalServiceViewSet::test_filter_by_service_type PASSED [ 32%]
+tests/unit/test_local_guide_views.py::TestServiceReviewViewSet::test_create_review_requires_auth PASSED [ 33%]
+tests/unit/test_local_guide_views.py::TestServiceReviewViewSet::test_create_review PASSED [ 33%]
+tests/unit/test_locations_serializers.py::TestAddressSerializer::test_address_serialization PASSED [ 33%]
+tests/unit/test_locations_serializers.py::TestAddressSerializer::test_address_validation PASSED [ 34%]
+tests/unit/test_locations_serializers.py::TestDeliveryZoneSerializer::test_delivery_zone_serialization PASSED [ 34%]
+tests/unit/test_locations_serializers.py::TestDeliveryRequestSerializer::test_delivery_request_serialization PASSED [ 34%]
+tests/unit/test_locations_views.py::TestAddressViewSet::test_list_requires_auth PASSED [ 34%]
+tests/unit/test_locations_views.py::TestAddressViewSet::test_create_address PASSED [ 35%]
+tests/unit/test_locations_views.py::TestAddressViewSet::test_list_user_addresses PASSED [ 35%]
+tests/unit/test_locations_views.py::TestDeliveryZoneViewSet::test_list_zones PASSED [ 35%]
+tests/unit/test_locations_views.py::TestDeliveryRequestViewSet::test_list_requires_auth PASSED [ 36%]
+tests/unit/test_locations_views.py::TestDeliveryRequestViewSet::test_create_delivery_request FAILED [ 36%]
+tests/unit/test_maintenance_serializers.py::TestMaintenanceScheduleSerializer::test_schedule_serialization PASSED [ 36%]
+tests/unit/test_maintenance_serializers.py::TestMaintenanceRecordSerializer::test_record_serialization PASSED [ 36%]
+tests/unit/test_maintenance_serializers.py::TestMaintenancePeriodSerializer::test_period_serialization PASSED [ 37%]
+tests/unit/test_maintenance_views.py::TestMaintenanceScheduleViewSet::test_list_requires_admin PASSED [ 37%]
+tests/unit/test_maintenance_views.py::TestMaintenanceScheduleViewSet::test_create_schedule PASSED [ 37%]
+tests/unit/test_maintenance_views.py::TestMaintenanceRecordViewSet::test_list_requires_admin PASSED [ 38%]
+tests/unit/test_maintenance_views.py::TestMaintenanceRecordViewSet::test_create_record PASSED [ 38%]
+tests/unit/test_management_commands.py::TestManagementCommands::test_create_demo_admin_command FAILED [ 38%]
+tests/unit/test_management_commands.py::TestManagementCommands::test_seed_data_command PASSED [ 38%]
+tests/unit/test_management_commands.py::TestManagementCommands::test_reset_demo_data_command PASSED [ 39%]
+tests/unit/test_management_commands.py::TestManagementCommands::test_check_security_command PASSED [ 39%]
+tests/unit/test_notifications_serializers.py::TestNotificationSerializer::test_serializer_with_valid_data PASSED [ 39%]
+tests/unit/test_notifications_serializers.py::TestNotificationSerializer::test_serializer_read_only_fields PASSED [ 40%]
+tests/unit/test_notifications_serializers.py::TestNotificationSerializer::test_serializer_required_fields PASSED [ 40%]
+tests/unit/test_notifications_serializers.py::TestNotificationSerializer::test_serializer_invalid_type PASSED [ 40%]
+tests/unit/test_notifications_serializers.py::TestNotificationSerializer::test_serializer_mark_as_read PASSED [ 40%]
+tests/unit/test_notifications_serializers.py::TestNotificationSerializer::test_serializer_output_fields PASSED [ 41%]
+tests/unit/test_notifications_serializers.py::TestNotificationSerializer::test_serializer_all_notification_types PASSED [ 41%]
+tests/unit/test_notifications_views.py::TestNotificationListView::test_list_notifications_authenticated PASSED [ 41%]
+tests/unit/test_notifications_views.py::TestNotificationListView::test_list_notifications_unauthenticated PASSED [ 42%]
+tests/unit/test_notifications_views.py::TestNotificationListView::test_list_notifications_filters_by_user PASSED [ 42%]
+tests/unit/test_notifications_views.py::TestNotificationListView::test_list_notifications_ordering PASSED [ 42%]
+tests/unit/test_notifications_views.py::TestNotificationMarkReadView::test_mark_notification_as_read PASSED [ 42%]
+tests/unit/test_notifications_views.py::TestNotificationMarkReadView::test_mark_read_unauthenticated PASSED [ 43%]
+tests/unit/test_notifications_views.py::TestNotificationMarkReadView::test_mark_read_other_users_notification PASSED [ 43%]
+tests/unit/test_notifications_views.py::TestNotificationMarkReadView::test_mark_read_nonexistent_notification PASSED [ 43%]
+tests/unit/test_notifications_views.py::TestNotificationMarkAllReadView::test_mark_all_notifications_as_read PASSED [ 44%]
+tests/unit/test_notifications_views.py::TestNotificationMarkAllReadView::test_mark_all_read_unauthenticated PASSED [ 44%]
+tests/unit/test_notifications_views.py::TestNotificationMarkAllReadView::test_mark_all_read_only_affects_own_notifications PASSED [ 44%]
+tests/unit/test_notifications_views.py::TestNotificationMarkAllReadView::test_mark_all_read_no_unread_notifications PASSED [ 44%]
+tests/unit/test_packaging_serializers.py::TestPackagingTypeSerializer::test_serializer_output_fields PASSED [ 45%]
+tests/unit/test_packaging_serializers.py::TestPackagingMaterialSerializer::test_serializer_fields PASSED [ 45%]
+tests/unit/test_packaging_serializers.py::TestPackagingRuleSerializer::test_serializer_with_category_rule PASSED [ 45%]
+tests/unit/test_packaging_serializers.py::TestPackagingInstanceSerializer::test_serializer_with_materials PASSED [ 46%]
+tests/unit/test_packaging_serializers.py::TestPackagingMaterialUsageSerializer::test_serializer_calculates_total PASSED [ 46%]
+tests/unit/test_packaging_views.py::TestPackagingTypeViewSet::test_list_active_types PASSED [ 46%]
+tests/unit/test_packaging_views.py::TestPackagingTypeViewSet::test_list_types_no_auth_required PASSED [ 46%]
+tests/unit/test_packaging_views.py::TestPackagingMaterialViewSet::test_list_active_materials PASSED [ 47%]
+tests/unit/test_packaging_views.py::TestPackagingMaterialViewSet::test_filter_by_type PASSED [ 47%]
+tests/unit/test_packaging_views.py::TestPackagingRuleViewSet::test_list_rules_admin_only PASSED [ 47%]
+tests/unit/test_packaging_views.py::TestPackagingInstanceViewSet::test_list_instances_authenticated PASSED [ 48%]
+tests/unit/test_packaging_views.py::TestPackagingInstanceViewSet::test_suggested_packaging_for_product PASSED [ 48%]
+tests/unit/test_packaging_views.py::TestPackagingInstanceViewSet::test_suggested_packaging_default PASSED [ 48%]
+tests/unit/test_packaging_views.py::TestPackagingInstanceViewSet::test_create_instance_admin_only PASSED [ 48%]
+tests/unit/test_payments_serializers.py::TestPaymentMethodSerializer::test_payment_method_serialization PASSED [ 49%]
+tests/unit/test_payments_serializers.py::TestPaymentCreateSerializer::test_payment_create_validation_baridimob PASSED [ 49%]
+tests/unit/test_payments_serializers.py::TestPaymentCreateSerializer::test_payment_create_validation_bank_card PASSED [ 49%]
+tests/unit/test_payments_serializers.py::TestPaymentSerializer::test_payment_serialization PASSED [ 50%]
+tests/unit/test_payments_views.py::TestPaymentViewSet::test_list_payments_requires_auth PASSED [ 50%]
+tests/unit/test_payments_views.py::TestPaymentViewSet::test_list_payments_authenticated PASSED [ 50%]
+tests/unit/test_payments_views.py::TestPaymentViewSet::test_payment_status_access PASSED [ 50%]
+tests/unit/test_payments_views.py::TestPaymentCreateView::test_create_payment_success PASSED [ 51%]
+tests/unit/test_payments_views.py::TestPaymentCreateView::test_create_payment_validation_error PASSED [ 51%]
+tests/unit/test_returns_serializers.py::TestReturnItemSerializer::test_return_item_serialization PASSED [ 51%]
+tests/unit/test_returns_serializers.py::TestReturnItemSerializer::test_return_item_validation PASSED [ 51%]
+tests/unit/test_returns_serializers.py::TestRefundSerializer::test_refund_serialization PASSED [ 52%]
+tests/unit/test_returns_serializers.py::TestRefundSerializer::test_refund_validation PASSED [ 52%]
+tests/unit/test_returns_serializers.py::TestReturnSerializer::test_return_serialization PASSED [ 52%]
+tests/unit/test_returns_serializers.py::TestReturnSerializer::test_return_with_items PASSED [ 53%]
+tests/unit/test_returns_serializers.py::TestReturnSerializer::test_return_with_refund PASSED [ 53%]
+tests/unit/test_returns_serializers.py::TestReturnSerializer::test_return_is_late_property PASSED [ 53%]
+tests/unit/test_returns_views.py::TestReturnViewSet::test_list_returns_requires_auth PASSED [ 53%]
+tests/unit/test_returns_views.py::TestReturnViewSet::test_list_returns_authenticated PASSED [ 54%]
+tests/unit/test_returns_views.py::TestReturnViewSet::test_create_return_requires_auth PASSED [ 54%]
+tests/unit/test_returns_views.py::TestReturnViewSet::test_create_return PASSED [ 54%]
+tests/unit/test_returns_views.py::TestReturnViewSet::test_retrieve_return PASSED [ 55%]
+tests/unit/test_returns_views.py::TestReturnViewSet::test_approve_return_requires_admin PASSED [ 55%]
+tests/unit/test_returns_views.py::TestReturnViewSet::test_approve_return_admin PASSED [ 55%]
+tests/unit/test_returns_views.py::TestReturnViewSet::test_mark_received PASSED [ 55%]
+tests/unit/test_returns_views.py::TestReturnViewSet::test_complete_inspection PASSED [ 56%]
+tests/unit/test_returns_views.py::TestReturnViewSet::test_my_returns PASSED [ 56%]
+tests/unit/test_returns_views.py::TestRefundViewSet::test_list_refunds_requires_admin PASSED [ 56%]
+tests/unit/test_returns_views.py::TestRefundViewSet::test_list_refunds_admin PASSED [ 57%]
+tests/unit/test_returns_views.py::TestRefundViewSet::test_process_refund PASSED [ 57%]
+tests/unit/test_reviews_models.py::TestReviewModel::test_create_review PASSED [ 57%]
+tests/unit/test_reviews_models.py::TestReviewModel::test_review_rating_range PASSED [ 57%]
+tests/unit/test_reviews_models.py::TestReviewModel::test_review_moderation PASSED [ 58%]
+tests/unit/test_reviews_serializers.py::TestReviewSerializer::test_serializer_read_fields PASSED [ 58%]
+tests/unit/test_reviews_serializers.py::TestReviewSerializer::test_serializer_with_images PASSED [ 58%]
+tests/unit/test_reviews_serializers.py::TestReviewSerializer::test_serializer_read_only_fields PASSED [ 59%]
+tests/unit/test_reviews_serializers.py::TestReviewCreateSerializer::test_create_serializer_valid_data PASSED [ 59%]
+tests/unit/test_reviews_serializers.py::TestReviewCreateSerializer::test_create_serializer_required_fields PASSED [ 59%]
+tests/unit/test_reviews_serializers.py::TestReviewCreateSerializer::test_create_serializer_with_booking PASSED [ 59%]
+tests/unit/test_reviews_serializers.py::TestReviewCreateSerializer::test_create_serializer_invalid_rating PASSED [ 60%]
+tests/unit/test_reviews_serializers.py::TestReviewImageSerializer::test_image_serializer_fields PASSED [ 60%]
+tests/unit/test_reviews_views.py::TestReviewCreateView::test_create_review_authenticated PASSED [ 60%]
+tests/unit/test_reviews_views.py::TestReviewCreateView::test_create_review_unauthenticated PASSED [ 61%]
+tests/unit/test_reviews_views.py::TestReviewCreateView::test_create_review_with_booking PASSED [ 61%]
+tests/unit/test_reviews_views.py::TestReviewCreateView::test_create_review_invalid_data PASSED [ 61%]
+tests/unit/test_reviews_views.py::TestReviewListView::test_list_approved_reviews PASSED [ 61%]
+tests/unit/test_reviews_views.py::TestReviewListView::test_list_reviews_filter_by_product PASSED [ 62%]
+tests/unit/test_reviews_views.py::TestReviewListView::test_list_reviews_no_auth_required PASSED [ 62%]
+tests/unit/test_reviews_views.py::TestReviewModerationView::test_moderate_review_as_admin PASSED [ 62%]
+tests/unit/test_reviews_views.py::TestReviewModerationView::test_moderate_review_non_admin PASSED [ 63%]
+tests/unit/test_reviews_views.py::TestReviewModerationView::test_moderate_review_unauthenticated PASSED [ 63%]
+tests/unit/test_reviews_views.py::TestReviewModerationView::test_moderate_review_invalid_status PASSED [ 63%]
+tests/unit/test_reviews_views.py::TestReviewModerationView::test_moderate_review_reject PASSED [ 63%]
+tests/unit/test_serializers.py::TestProductSerializer::test_product_serialization FAILED [ 64%]
+tests/unit/test_serializers.py::TestProductSerializer::test_product_list_serialization PASSED [ 64%]
+tests/unit/test_serializers.py::TestCMSSerializers::test_page_serialization PASSED [ 64%]
+tests/unit/test_serializers.py::TestCMSSerializers::test_faq_serialization PASSED [ 65%]
+tests/unit/test_serializers_extended.py::TestBookingSerializers::test_booking_serializer_validation PASSED [ 65%]
+tests/unit/test_serializers_extended.py::TestBookingSerializers::test_booking_serializer_invalid_dates PASSED [ 65%]
+tests/unit/test_serializers_extended.py::TestBookingSerializers::test_cart_serializer PASSED [ 65%]
+tests/unit/test_serializers_extended.py::TestInventorySerializers::test_inventory_item_serializer PASSED [ 66%]
+tests/unit/test_serializers_extended.py::TestMaintenanceSerializers::test_maintenance_schedule_serializer PASSED [ 66%]
+tests/unit/test_serializers_extended.py::TestReturnsSerializers::test_return_serializer PASSED [ 66%]
+tests/unit/test_serializers_extended.py::TestLocationsSerializers::test_address_serializer_validation PASSED [ 67%]
+tests/unit/test_serializers_extended.py::TestLocationsSerializers::test_address_serializer_invalid_coords PASSED [ 67%]
+tests/unit/test_serializers_extended.py::TestPackagingSerializers::test_packaging_type_serializer PASSED [ 67%]
+tests/unit/test_serializers_extended.py::TestHygieneSerializers::test_hygiene_record_serializer PASSED [ 67%]
+tests/unit/test_serializers_extended.py::TestNotificationsSerializers::test_notification_serializer PASSED [ 68%]
+tests/unit/test_serializers_extended.py::TestChatbotSerializers::test_chat_session_serializer PASSED [ 68%]
+tests/unit/test_serializers_extended.py::TestDisputesSerializers::test_dispute_serializer PASSED [ 68%]
+tests/unit/test_serializers_extended.py::TestLocalGuideSerializers::test_service_category_serializer PASSED [ 69%]
+tests/unit/test_serializers_extended.py::TestArtisansSerializers::test_artisan_serializer PASSED [ 69%]
+tests/unit/test_serializers_extended.py::TestBundlesSerializers::test_bundle_serializer PASSED [ 69%]
+tests/unit/test_serializers_extended.py::TestWarrantiesSerializers::test_warranty_plan_serializer PASSED [ 69%]
+tests/unit/test_serializers_extended.py::TestReviewsSerializers::test_review_serializer PASSED [ 70%]
+tests/unit/test_serializers_extended.py::TestAnalyticsSerializers::test_analytics_event_serializer PASSED [ 70%]
+tests/unit/test_serializers_extended.py::TestVendorsSerializers::test_vendor_serializer PASSED [ 70%]
+tests/unit/test_serializers_extended.py::TestBranchesSerializers::test_branch_serializer PASSED [ 71%]
+tests/unit/test_serializers_extended.py::TestCMSSerializers::test_page_serializer PASSED [ 71%]
+tests/unit/test_serializers_extended.py::TestCMSSerializers::test_faq_serializer PASSED [ 71%]
+tests/unit/test_services.py::TestBookingServices::test_calculate_booking_price PASSED [ 71%]
+tests/unit/test_services.py::TestBookingServices::test_booking_date_validation FAILED [ 72%]
+tests/unit/test_services.py::TestNotificationServices::test_create_notification PASSED [ 72%]
+tests/unit/test_services.py::TestNotificationServices::test_mark_notification_as_read PASSED [ 72%]
+tests/unit/test_services.py::TestProductServices::test_product_availability PASSED [ 73%]
+tests/unit/test_services.py::TestProductServices::test_product_featured PASSED [ 73%]
+tests/unit/test_services.py::TestHealthCheck::test_health_check_endpoint FAILED [ 73%]
+tests/unit/test_users_models.py::TestUserProfileModel::test_create_user_profile PASSED [ 73%]
+tests/unit/test_users_models.py::TestStaffRoleModel::test_create_staff_role PASSED [ 74%]
+tests/unit/test_users_models.py::TestActivityLogModel::test_create_activity_log PASSED [ 74%]
+tests/unit/test_users_models.py::TestShiftModel::test_create_shift PASSED [ 74%]
+tests/unit/test_users_models.py::TestPerformanceReviewModel::test_create_performance_review PASSED [ 75%]
+tests/unit/test_utils.py::TestDateUtilities::test_date_range_calculation PASSED [ 75%]
+tests/unit/test_utils.py::TestDateUtilities::test_future_date_validation PASSED [ 75%]
+tests/unit/test_utils.py::TestPriceCalculations::test_daily_price_calculation PASSED [ 75%]
+tests/unit/test_utils.py::TestPriceCalculations::test_discount_calculation PASSED [ 76%]
+tests/unit/test_utils.py::TestStringUtilities::test_slug_generation PASSED [ 76%]
+tests/unit/test_utils.py::TestStringUtilities::test_arabic_text_handling PASSED [ 76%]
+tests/unit/test_vendors_models.py::TestVendorModel::test_create_vendor PASSED [ 76%]
+tests/unit/test_vendors_models.py::TestVendorModel::test_vendor_str PASSED [ 77%]
+tests/unit/test_vendors_models.py::TestVendorProductModel::test_create_vendor_product PASSED [ 77%]
+tests/unit/test_vendors_models.py::TestVendorProductModel::test_vendor_product_get_commission_rate PASSED [ 77%]
+tests/unit/test_vendors_models.py::TestCommissionModel::test_create_commission PASSED [ 78%]
+tests/unit/test_vendors_serializers.py::TestVendorSerializer::test_serializer_output_fields PASSED [ 78%]
+tests/unit/test_vendors_serializers.py::TestVendorSerializer::test_serializer_read_only_fields PASSED [ 78%]
+tests/unit/test_vendors_serializers.py::TestVendorSerializer::test_serializer_commission_rate_validation PASSED [ 78%]
+tests/unit/test_vendors_serializers.py::TestVendorProductSerializer::test_serializer_fields PASSED [ 79%]
+tests/unit/test_vendors_serializers.py::TestVendorProductSerializer::test_serializer_custom_commission_rate PASSED [ 79%]
+tests/unit/test_vendors_serializers.py::TestCommissionSerializer::test_serializer_fields PASSED [ 79%]
+tests/unit/test_vendors_serializers.py::TestVendorPerformanceSerializer::test_serializer_fields PASSED [ 80%]
+tests/unit/test_vendors_views.py::TestVendorRegistrationView::test_register_vendor_authenticated PASSED [ 80%]
+tests/unit/test_vendors_views.py::TestVendorRegistrationView::test_register_vendor_unauthenticated PASSED [ 80%]
+tests/unit/test_vendors_views.py::TestVendorListView::test_list_active_vendors PASSED [ 80%]
+tests/unit/test_vendors_views.py::TestVendorListView::test_list_vendors_admin_sees_all PASSED [ 81%]
+tests/unit/test_vendors_views.py::TestVendorDashboardView::test_dashboard_as_vendor PASSED [ 81%]
+tests/unit/test_vendors_views.py::TestVendorDashboardView::test_dashboard_non_vendor PASSED [ 81%]
+tests/unit/test_vendors_views.py::TestAdminVendorViewSet::test_approve_vendor_as_admin PASSED [ 82%]
+tests/unit/test_vendors_views.py::TestAdminVendorViewSet::test_approve_vendor_non_admin PASSED [ 82%]
+tests/unit/test_vendors_views.py::TestAdminVendorViewSet::test_suspend_vendor PASSED [ 82%]
+tests/unit/test_vendors_views.py::TestAdminCommissionProcessView::test_process_commission_as_admin PASSED [ 82%]
+tests/unit/test_vendors_views.py::TestAdminCommissionProcessView::test_process_commission_invalid_status PASSED [ 83%]
+tests/unit/test_views.py::TestProductViews::test_list_products PASSED    [ 83%]
+tests/unit/test_views.py::TestProductViews::test_product_detail PASSED   [ 83%]
+tests/unit/test_views.py::TestProductViews::test_product_search PASSED   [ 84%]
+tests/unit/test_views.py::TestBookingViews::test_list_bookings_requires_auth PASSED [ 84%]
+tests/unit/test_views.py::TestBookingViews::test_create_booking_requires_auth PASSED [ 84%]
+tests/unit/test_views.py::TestCMSViews::test_list_pages PASSED           [ 84%]
+tests/unit/test_views.py::TestCMSViews::test_list_faqs PASSED            [ 85%]
+tests/unit/test_views.py::TestCMSViews::test_health_check PASSED         [ 85%]
+tests/unit/test_views_extended.py::TestInventoryViews::test_list_inventory_items PASSED [ 85%]
+tests/unit/test_views_extended.py::TestInventoryViews::test_inventory_items_require_auth PASSED [ 86%]
+tests/unit/test_views_extended.py::TestMaintenanceViews::test_list_maintenance_schedules PASSED [ 86%]
+tests/unit/test_views_extended.py::TestReturnsViews::test_list_returns_requires_auth PASSED [ 86%]
+tests/unit/test_views_extended.py::TestReturnsViews::test_create_return_requires_auth PASSED [ 86%]
+tests/unit/test_views_extended.py::TestLocationsViews::test_list_addresses_requires_auth PASSED [ 87%]
+tests/unit/test_views_extended.py::TestLocationsViews::test_create_address_requires_auth PASSED [ 87%]
+tests/unit/test_views_extended.py::TestLocationsViews::test_list_delivery_zones FAILED [ 87%]
+tests/unit/test_views_extended.py::TestPackagingViews::test_list_packaging_types PASSED [ 88%]
+tests/unit/test_views_extended.py::TestHygieneViews::test_list_hygiene_records_requires_auth FAILED [ 88%]
+tests/unit/test_views_extended.py::TestNotificationsViews::test_list_notifications_requires_auth PASSED [ 88%]
+tests/unit/test_views_extended.py::TestNotificationsViews::test_list_notifications_authenticated PASSED [ 88%]
+tests/unit/test_views_extended.py::TestChatbotViews::test_create_chat_session_requires_auth PASSED [ 89%]
+tests/unit/test_views_extended.py::TestChatbotViews::test_create_chat_session_authenticated PASSED [ 89%]
+tests/unit/test_views_extended.py::TestDisputesViews::test_list_disputes_requires_auth FAILED [ 89%]
+tests/unit/test_views_extended.py::TestDisputesViews::test_create_dispute_requires_auth FAILED [ 90%]
+tests/unit/test_views_extended.py::TestLocalGuideViews::test_list_service_categories PASSED [ 90%]
+tests/unit/test_views_extended.py::TestLocalGuideViews::test_list_local_services PASSED [ 90%]
+tests/unit/test_views_extended.py::TestArtisansViews::test_list_artisans FAILED [ 90%]
+tests/unit/test_views_extended.py::TestBundlesViews::test_list_bundle_categories PASSED [ 91%]
+tests/unit/test_views_extended.py::TestBundlesViews::test_list_bundles FAILED [ 91%]
+tests/unit/test_views_extended.py::TestWarrantiesViews::test_list_warranty_plans PASSED [ 91%]
+tests/unit/test_views_extended.py::TestReviewsViews::test_list_reviews PASSED [ 92%]
+tests/unit/test_views_extended.py::TestReviewsViews::test_create_review_requires_auth PASSED [ 92%]
+tests/unit/test_views_extended.py::TestAnalyticsViews::test_analytics_requires_admin PASSED [ 92%]
+tests/unit/test_views_extended.py::TestAnalyticsViews::test_analytics_admin_access PASSED [ 92%]
+tests/unit/test_views_extended.py::TestVendorsViews::test_list_vendors PASSED [ 93%]
+tests/unit/test_views_extended.py::TestVendorsViews::test_vendor_registration_requires_auth PASSED [ 93%]
+tests/unit/test_views_extended.py::TestBranchesViews::test_list_branches PASSED [ 93%]
+tests/unit/test_views_extended.py::TestCMSViews::test_list_pages PASSED  [ 94%]
+tests/unit/test_views_extended.py::TestCMSViews::test_list_faqs PASSED   [ 94%]
+tests/unit/test_views_extended.py::TestCMSViews::test_list_blog_posts PASSED [ 94%]
+tests/unit/test_views_extended.py::TestCMSViews::test_list_banners PASSED [ 94%]
+tests/unit/test_warranties_models.py::TestWarrantyPlanModel::test_create_warranty_plan PASSED [ 95%]
+tests/unit/test_warranties_models.py::TestWarrantyPlanModel::test_warranty_plan_calculate_price_fixed PASSED [ 95%]
+tests/unit/test_warranties_models.py::TestWarrantyPlanModel::test_warranty_plan_calculate_price_percentage PASSED [ 95%]
+tests/unit/test_warranties_serializers.py::TestWarrantyPlanSerializer::test_serializer_output_fields PASSED [ 96%]
+tests/unit/test_warranties_serializers.py::TestWarrantyPlanSerializer::test_serializer_read_only_fields PASSED [ 96%]
+tests/unit/test_warranties_serializers.py::TestWarrantyPurchaseSerializer::test_serializer_with_booking_details PASSED [ 96%]
+tests/unit/test_warranties_serializers.py::TestWarrantyClaimSerializer::test_serializer_fields PASSED [ 96%]
+tests/unit/test_warranties_serializers.py::TestInsurancePlanSerializer::test_serializer_basic_fields PASSED [ 97%]
+tests/unit/test_warranties_serializers.py::TestInsurancePlanSerializer::test_serializer_with_product_value_context PASSED [ 97%]
+tests/unit/test_warranties_views.py::TestWarrantyPlanViewSet::test_list_active_plans PASSED [ 97%]
+tests/unit/test_warranties_views.py::TestWarrantyPlanViewSet::test_calculate_price PASSED [ 98%]
+tests/unit/test_warranties_views.py::TestWarrantyPurchaseViewSet::test_list_purchases_as_user PASSED [ 98%]
+tests/unit/test_warranties_views.py::TestWarrantyPurchaseViewSet::test_list_purchases_unauthenticated PASSED [ 98%]
+tests/unit/test_warranties_views.py::TestWarrantyClaimViewSet::test_create_claim_authenticated PASSED [ 98%]
+tests/unit/test_warranties_views.py::TestWarrantyClaimViewSet::test_approve_claim_as_admin PASSED [ 99%]
+tests/unit/test_warranties_views.py::TestWarrantyClaimViewSet::test_approve_claim_non_admin PASSED [ 99%]
+tests/unit/test_warranties_views.py::TestInsurancePlanViews::test_list_insurance_plans PASSED [ 99%]
+tests/unit/test_warranties_views.py::TestInsurancePlanViews::test_insurance_calculator PASSED [100%]
+
+================================== FAILURES ===================================
+________________ TestBundleBookingViewSet.test_create_booking _________________
+tests\unit\test_bundles_views.py:121: in test_create_booking
+    assert response.status_code == status.HTTP_201_CREATED
+E   assert 400 == 201
+E    +  where 400 = <Response status_code=400, "application/json">.status_code
+E    +  and   201 = status.HTTP_201_CREATED
+------------------------------ Captured log call ------------------------------
+WARNING  core.exception_handler:exception_handler.py:70 Client error: {'user': [ErrorDetail(string='┘çÏ░Ïº Ïº┘äÏ¡┘é┘ä ┘àÏÀ┘ä┘êÏ¿.', code='required')], 'base_price': [ErrorDetail(string='┘çÏ░Ïº Ïº┘äÏ¡┘é┘ä ┘àÏÀ┘ä┘êÏ¿.', code='required')], 'total_price': [ErrorDetail(string='┘çÏ░Ïº Ïº┘äÏ¡┘é┘ä ┘àÏÀ┘ä┘êÏ¿.', code='required')]}
+WARNING  django.request:log.py:253 Bad Request: /api/bundles/bookings/
+__________________ TestBundleBookingViewSet.test_my_bookings __________________
+tests\unit\test_bundles_views.py:128: in test_my_bookings
+    assert response.status_code == status.HTTP_200_OK
+E   assert 403 == 200
+E    +  where 403 = <Response status_code=403, "application/json">.status_code
+E    +  and   200 = status.HTTP_200_OK
+------------------------------ Captured log call ------------------------------
+WARNING  core.exception_handler:exception_handler.py:70 Client error: ┘ä┘èÏ│ ┘äÏ»┘è┘â ÏÁ┘äÏºÏ¡┘èÏ® ┘ä┘ä┘é┘èÏº┘à Ï¿┘çÏ░Ïº Ïº┘äÏÑÏ¼Ï▒ÏºÏí.
+WARNING  django.request:log.py:253 Forbidden: /api/bundles/bookings/my_bookings/
+___________ TestDeliveryRequestViewSet.test_create_delivery_request ___________
+tests\unit\test_locations_views.py:119: in test_create_delivery_request
+    assert response.status_code == status.HTTP_201_CREATED
+E   assert 403 == 201
+E    +  where 403 = <Response status_code=403, "application/json">.status_code
+E    +  and   201 = status.HTTP_201_CREATED
+------------------------------ Captured log call ------------------------------
+WARNING  core.exception_handler:exception_handler.py:70 Client error: ┘ä┘èÏ│ ┘äÏ»┘è┘â ÏÁ┘äÏºÏ¡┘èÏ® ┘ä┘ä┘é┘èÏº┘à Ï¿┘çÏ░Ïº Ïº┘äÏÑÏ¼Ï▒ÏºÏí.
+WARNING  django.request:log.py:253 Forbidden: /api/locations/deliveries/
+____________ TestManagementCommands.test_create_demo_admin_command ____________
+tests\unit\test_management_commands.py:28: in test_create_demo_admin_command
+    assert User.objects.filter(email='demo_admin@readyrent.gala').exists()
+E   AssertionError: assert False
+E    +  where False = exists()
+E    +    where exists = <QuerySet []>.exists
+E    +      where <QuerySet []> = filter(email='demo_admin@readyrent.gala')
+E    +        where filter = <django.contrib.auth.models.UserManager object at 0x0000012717C49950>.filter
+E    +          where <django.contrib.auth.models.UserManager object at 0x0000012717C49950> = User.objects
+______________ TestProductSerializer.test_product_serialization _______________
+tests\unit\test_serializers.py:19: in test_product_serialization
+    assert response.status_code == status.HTTP_200_OK
+E   assert 404 == 200
+E    +  where 404 = <Response status_code=404, "application/json">.status_code
+E    +  and   200 = status.HTTP_200_OK
+------------------------------ Captured log call ------------------------------
+WARNING  core.exception_handler:exception_handler.py:70 Client error: No Product matches the given query.
+WARNING  django.request:log.py:253 Not Found: /api/products/1/
+______________ TestBookingServices.test_booking_date_validation _______________
+tests\unit\test_services.py:49: in test_booking_date_validation
+    with pytest.raises(Exception):
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE <class 'Exception'>
+_________________ TestHealthCheck.test_health_check_endpoint __________________
+tests\unit\test_services.py:124: in test_health_check_endpoint
+    assert 'status' in response.data
+                       ^^^^^^^^^^^^^
+E   AttributeError: 'JsonResponse' object has no attribute 'data'
+_________________ TestLocationsViews.test_list_delivery_zones _________________
+tests\unit\test_views_extended.py:125: in test_list_delivery_zones
+    assert response.status_code == status.HTTP_200_OK
+E   assert 404 == 200
+E    +  where 404 = <HttpResponseNotFound status_code=404, "text/html; charset=utf-8">.status_code
+E    +  and   200 = status.HTTP_200_OK
+------------------------------ Captured log call ------------------------------
+WARNING  django.request:log.py:253 Not Found: /api/locations/zones/
+__________ TestHygieneViews.test_list_hygiene_records_requires_auth ___________
+tests\unit\test_views_extended.py:153: in test_list_hygiene_records_requires_auth
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+E   assert 404 == 401
+E    +  where 404 = <HttpResponseNotFound status_code=404, "text/html; charset=utf-8">.status_code
+E    +  and   401 = status.HTTP_401_UNAUTHORIZED
+------------------------------ Captured log call ------------------------------
+WARNING  django.request:log.py:253 Not Found: /api/hygiene/records/
+_____________ TestDisputesViews.test_list_disputes_requires_auth ______________
+tests\unit\test_views_extended.py:206: in test_list_disputes_requires_auth
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+E   assert 404 == 401
+E    +  where 404 = <HttpResponseNotFound status_code=404, "text/html; charset=utf-8">.status_code
+E    +  and   401 = status.HTTP_401_UNAUTHORIZED
+------------------------------ Captured log call ------------------------------
+WARNING  django.request:log.py:253 Not Found: /api/disputes/
+_____________ TestDisputesViews.test_create_dispute_requires_auth _____________
+tests\unit\test_views_extended.py:215: in test_create_dispute_requires_auth
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+E   assert 404 == 401
+E    +  where 404 = <HttpResponseNotFound status_code=404, "text/html; charset=utf-8">.status_code
+E    +  and   401 = status.HTTP_401_UNAUTHORIZED
+------------------------------ Captured log call ------------------------------
+WARNING  django.request:log.py:253 Not Found: /api/disputes/
+____________________ TestArtisansViews.test_list_artisans _____________________
+tests\unit\test_views_extended.py:268: in test_list_artisans
+    assert response.status_code == status.HTTP_200_OK
+E   assert 401 == 200
+E    +  where 401 = <Response status_code=401, "application/json">.status_code
+E    +  and   200 = status.HTTP_200_OK
+------------------------------ Captured log call ------------------------------
+WARNING  core.exception_handler:exception_handler.py:70 Client error: ┘ä┘à ┘èÏ¬┘à Ï¬Ï▓┘ê┘èÏ» Ï¿┘èÏº┘åÏºÏ¬ Ïº┘äÏ»Ï«┘ê┘ä.
+WARNING  django.request:log.py:253 Unauthorized: /api/artisans/
+_____________________ TestBundlesViews.test_list_bundles ______________________
+tests\unit\test_views_extended.py:305: in test_list_bundles
+    assert response.status_code == status.HTTP_200_OK
+E   assert 401 == 200
+E    +  where 401 = <Response status_code=401, "application/json">.status_code
+E    +  and   200 = status.HTTP_200_OK
+------------------------------ Captured log call ------------------------------
+WARNING  core.exception_handler:exception_handler.py:70 Client error: ┘ä┘à ┘èÏ¬┘à Ï¬Ï▓┘ê┘èÏ» Ï¿┘èÏº┘åÏºÏ¬ Ïº┘äÏ»Ï«┘ê┘ä.
+WARNING  django.request:log.py:253 Unauthorized: /api/bundles/
+============================== warnings summary ===============================
+tests/unit/test_analytics_views.py::TestAdminDashboardStatsView::test_dashboard_stats_as_admin
+tests/unit/test_views_extended.py::TestAnalyticsViews::test_analytics_admin_access
+  C:\Users\pc\Desktop\ReadyRent_Gala\backend\venv\Lib\site-packages\django\db\models\fields\__init__.py:1612: RuntimeWarning: DateTimeField User.date_joined received a naive datetime (2026-01-01 00:00:00) while time zone support is active.
+    warnings.warn(
+
+tests/unit/test_analytics_views.py::TestAdminDashboardStatsView::test_dashboard_stats_as_admin
+tests/unit/test_views_extended.py::TestAnalyticsViews::test_analytics_admin_access
+  C:\Users\pc\Desktop\ReadyRent_Gala\backend\venv\Lib\site-packages\django\db\models\fields\__init__.py:1612: RuntimeWarning: DateTimeField Booking.created_at received a naive datetime (2026-01-01 00:00:00) while time zone support is active.
+    warnings.warn(
+
+tests/unit/test_warranties_serializers.py::TestWarrantyPurchaseSerializer::test_serializer_with_booking_details
+  C:\Users\pc\Desktop\ReadyRent_Gala\backend\venv\Lib\site-packages\django\db\models\fields\__init__.py:1671: RuntimeWarning: DateTimeField WarrantyPurchase.expires_at received a naive datetime (2026-02-24 17:29:43.424572) while time zone support is active.
+    warnings.warn(
+
+tests/unit/test_warranties_serializers.py::TestWarrantyClaimSerializer::test_serializer_fields
+  C:\Users\pc\Desktop\ReadyRent_Gala\backend\venv\Lib\site-packages\django\db\models\fields\__init__.py:1671: RuntimeWarning: DateTimeField WarrantyPurchase.expires_at received a naive datetime (2026-02-24 17:29:43.434375) while time zone support is active.
+    warnings.warn(
+
+tests/unit/test_warranties_views.py::TestWarrantyPurchaseViewSet::test_list_purchases_as_user
+  C:\Users\pc\Desktop\ReadyRent_Gala\backend\venv\Lib\site-packages\django\db\models\fields\__init__.py:1671: RuntimeWarning: DateTimeField WarrantyPurchase.expires_at received a naive datetime (2026-02-24 17:29:43.487612) while time zone support is active.
+    warnings.warn(
+
+tests/unit/test_warranties_views.py::TestWarrantyClaimViewSet::test_create_claim_authenticated
+  C:\Users\pc\Desktop\ReadyRent_Gala\backend\venv\Lib\site-packages\django\db\models\fields\__init__.py:1671: RuntimeWarning: DateTimeField WarrantyPurchase.expires_at received a naive datetime (2026-02-24 17:29:43.518561) while time zone support is active.
+    warnings.warn(
+
+tests/unit/test_warranties_views.py::TestWarrantyClaimViewSet::test_approve_claim_as_admin
+  C:\Users\pc\Desktop\ReadyRent_Gala\backend\venv\Lib\site-packages\django\db\models\fields\__init__.py:1671: RuntimeWarning: DateTimeField WarrantyPurchase.expires_at received a naive datetime (2026-02-24 17:29:43.544784) while time zone support is active.
+    warnings.warn(
+
+tests/unit/test_warranties_views.py::TestWarrantyClaimViewSet::test_approve_claim_non_admin
+  C:\Users\pc\Desktop\ReadyRent_Gala\backend\venv\Lib\site-packages\django\db\models\fields\__init__.py:1671: RuntimeWarning: DateTimeField WarrantyPurchase.expires_at received a naive datetime (2026-02-24 17:29:43.572706) while time zone support is active.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/unit/test_bundles_views.py::TestBundleBookingViewSet::test_create_booking
+FAILED tests/unit/test_bundles_views.py::TestBundleBookingViewSet::test_my_bookings
+FAILED tests/unit/test_locations_views.py::TestDeliveryRequestViewSet::test_create_delivery_request
+FAILED tests/unit/test_management_commands.py::TestManagementCommands::test_create_demo_admin_command
+FAILED tests/unit/test_serializers.py::TestProductSerializer::test_product_serialization
+FAILED tests/unit/test_services.py::TestBookingServices::test_booking_date_validation
+FAILED tests/unit/test_services.py::TestHealthCheck::test_health_check_endpoint
+FAILED tests/unit/test_views_extended.py::TestLocationsViews::test_list_delivery_zones
+FAILED tests/unit/test_views_extended.py::TestHygieneViews::test_list_hygiene_records_requires_auth
+FAILED tests/unit/test_views_extended.py::TestDisputesViews::test_list_disputes_requires_auth
+FAILED tests/unit/test_views_extended.py::TestDisputesViews::test_create_dispute_requires_auth
+FAILED tests/unit/test_views_extended.py::TestArtisansViews::test_list_artisans
+FAILED tests/unit/test_views_extended.py::TestBundlesViews::test_list_bundles
+================ 13 failed, 339 passed, 10 warnings in 13.02s =================

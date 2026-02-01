@@ -1,0 +1,33 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.9, pytest-9.0.2, pluggy-1.6.0 -- C:\Users\pc\Desktop\ReadyRent_Gala\backend\venv\Scripts\python.exe
+cachedir: .pytest_cache
+django: version: 5.2.9, settings: config.test_settings (from ini)
+rootdir: C:\Users\pc\Desktop\ReadyRent_Gala\backend
+configfile: pytest.ini
+plugins: anyio-4.12.0, locust-2.43.0, cov-7.0.0, django-4.11.1, mock-3.15.1
+collecting ... collected 19 items
+
+tests/unit/test_disputes_serializers.py::TestDisputeMessageSerializer::test_dispute_message_serialization PASSED [  5%]
+tests/unit/test_disputes_serializers.py::TestDisputeSerializer::test_dispute_serialization PASSED [ 10%]
+tests/unit/test_disputes_serializers.py::TestDisputeSerializer::test_dispute_with_messages PASSED [ 15%]
+tests/unit/test_disputes_serializers.py::TestSupportTicketSerializer::test_support_ticket_serialization PASSED [ 21%]
+tests/unit/test_disputes_serializers.py::TestTicketMessageSerializer::test_ticket_message_serialization PASSED [ 26%]
+tests/unit/test_disputes_views.py::TestDisputeViews::test_create_dispute_requires_auth PASSED [ 31%]
+tests/unit/test_disputes_views.py::TestDisputeViews::test_create_dispute PASSED [ 36%]
+tests/unit/test_disputes_views.py::TestDisputeViews::test_list_disputes_requires_auth PASSED [ 42%]
+tests/unit/test_disputes_views.py::TestDisputeViews::test_list_disputes_authenticated PASSED [ 47%]
+tests/unit/test_disputes_views.py::TestDisputeViews::test_retrieve_dispute PASSED [ 52%]
+tests/unit/test_disputes_views.py::TestDisputeViews::test_add_message_to_dispute PASSED [ 57%]
+tests/unit/test_disputes_views.py::TestSupportTicketViews::test_create_ticket_requires_auth PASSED [ 63%]
+tests/unit/test_disputes_views.py::TestSupportTicketViews::test_create_ticket PASSED [ 68%]
+tests/unit/test_disputes_views.py::TestSupportTicketViews::test_list_tickets_requires_auth PASSED [ 73%]
+tests/unit/test_disputes_views.py::TestSupportTicketViews::test_list_tickets_authenticated PASSED [ 78%]
+tests/unit/test_disputes_views.py::TestSupportTicketViews::test_add_message_to_ticket PASSED [ 84%]
+tests/unit/test_disputes_views.py::TestAdminDisputeViews::test_dispute_stats_requires_admin PASSED [ 89%]
+tests/unit/test_disputes_views.py::TestAdminDisputeViews::test_dispute_stats_admin PASSED [ 94%]
+tests/unit/test_disputes_views.py::TestAdminDisputeViews::test_ticket_stats_admin PASSED [100%]
+
+============================= 19 passed in 1.45s ==============================
+Sentry is attempting to send 2 pending events
+Waiting up to 2 seconds
+Press Ctrl-Break to quit

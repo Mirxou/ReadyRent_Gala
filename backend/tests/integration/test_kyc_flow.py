@@ -3,7 +3,7 @@ Integration tests for KYC verification flow
 """
 import pytest
 from django.contrib.auth import get_user_model
-from apps.users.models import VerificationStatus, IdentityDocument
+from apps.users.models import VerificationStatus
 from rest_framework.test import APIClient
 from rest_framework import status
 

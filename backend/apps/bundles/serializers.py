@@ -21,9 +21,9 @@ class BundleItemSerializer(serializers.ModelSerializer):
 class BundleSerializer(serializers.ModelSerializer):
     category_name = serializers.CharField(source='category.name_ar', read_only=True)
     items = BundleItemSerializer(many=True, read_only=True)
-    discount_amount = serializers.DecimalField(read_only=True, max_digits=10, decimal_places=2)
-    savings = serializers.DecimalField(read_only=True, max_digits=10, decimal_places=2)
-    discount_percentage = serializers.DecimalField(read_only=True, max_digits=5, decimal_places=2)
+    discount_amount = serializers.DecimalField(source='get_discount_amount', read_only=True, max_digits=10, decimal_places=2)
+    savings = serializers.DecimalField(source='get_savings', read_only=True, max_digits=10, decimal_places=2)
+    discount_percentage = serializers.DecimalField(source='get_discount_percentage', read_only=True, max_digits=5, decimal_places=2)
     
     class Meta:
         model = Bundle
@@ -58,7 +58,7 @@ class BundleCategorySerializer(serializers.ModelSerializer):
 class BundleBookingSerializer(serializers.ModelSerializer):
     bundle_details = BundleSerializer(source='bundle', read_only=True)
     user_email = serializers.EmailField(source='user.email', read_only=True)
-    savings = serializers.DecimalField(read_only=True, max_digits=10, decimal_places=2)
+    savings = serializers.DecimalField(source='get_savings', read_only=True, max_digits=10, decimal_places=2)
     
     class Meta:
         model = BundleBooking
@@ -70,7 +70,7 @@ class BundleBookingSerializer(serializers.ModelSerializer):
             'status', 'individual_bookings', 'notes',
             'created_at', 'updated_at'
         ]
-        read_only_fields = ['created_at', 'updated_at']
+        read_only_fields = ['user', 'base_price', 'total_price', 'created_at', 'updated_at']
 
 
 class BundleReviewSerializer(serializers.ModelSerializer):

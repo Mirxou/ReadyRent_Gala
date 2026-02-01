@@ -38,7 +38,7 @@ class MaintenanceRecordViewSet(viewsets.ModelViewSet):
     ordering = ['-scheduled_start']
     
     def get_permissions(self):
-        if self.action in ['list', 'retrieve']:
+        if self.action in ['list', 'retrieve', 'upcoming']:
             return [IsAuthenticated()]
         return [IsAdminUser()]
     

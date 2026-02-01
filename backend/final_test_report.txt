@@ -1,0 +1,40 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.13.9, pytest-9.0.2, pluggy-1.6.0 -- C:\Users\pc\Desktop\ReadyRent_Gala\backend\venv\Scripts\python.exe
+cachedir: .pytest_cache
+django: version: 5.2.9, settings: config.test_settings (from ini)
+rootdir: C:\Users\pc\Desktop\ReadyRent_Gala\backend
+configfile: pytest.ini
+plugins: anyio-4.12.0, locust-2.43.0, cov-7.0.0, django-4.11.1, mock-3.15.1
+collecting ... collected 349 items / 1 error
+
+=================================== ERRORS ====================================
+_____________ ERROR collecting tests/unit/test_bundles_models.py ______________
+venv\Lib\site-packages\_pytest\python.py:507: in importtestmodule
+    mod = import_path(
+venv\Lib\site-packages\_pytest\pathlib.py:587: in import_path
+    importlib.import_module(module_name)
+C:\Program Files\Python313\Lib\importlib\__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1387: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1360: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1331: in _find_and_load_unlocked
+    ???
+<frozen importlib._bootstrap>:935: in _load_unlocked
+    ???
+venv\Lib\site-packages\_pytest\assertion\rewrite.py:188: in exec_module
+    source_stat, co = _rewrite_test(fn, self.config)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+venv\Lib\site-packages\_pytest\assertion\rewrite.py:359: in _rewrite_test
+    co = compile(tree, strfn, "exec", dont_inherit=True)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E     File "C:\Users\pc\Desktop\ReadyRent_Gala\backend\tests\unit\test_bundles_models.py", line 49
+E       description_ar='Ï¿Ïº┘éÏ® Ï╣Ï▒Ï│ ┘âÏº┘à┘äÏ®',
+E       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   SyntaxError: keyword argument repeated: description_ar
+=========================== short test summary info ===========================
+ERROR tests/unit/test_bundles_models.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+============================== 1 error in 5.52s ===============================

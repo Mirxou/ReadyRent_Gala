@@ -22,6 +22,7 @@ class BookingFlowTest(TestCase):
         self.user = User.objects.create_user(
             email='test@example.com',
             password='testpass123',
+            username='testuser',
             first_name='Test',
             last_name='User'
         )

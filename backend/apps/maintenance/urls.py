@@ -11,8 +11,8 @@ router.register(r'records', MaintenanceRecordViewSet, basename='maintenance-reco
 router.register(r'periods', MaintenancePeriodViewSet, basename='maintenance-period')
 
 urlpatterns = [
-    path('', include(router.urls)),
     path('periods/list/', MaintenancePeriodListView.as_view(), name='maintenance-period-list'),
     path('schedules/list/', MaintenanceScheduleView.as_view(), name='maintenance-schedule-list'),
+    path('', include(router.urls)),
 ]
 

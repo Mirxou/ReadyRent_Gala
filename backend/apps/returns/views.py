@@ -23,7 +23,7 @@ class ReturnViewSet(viewsets.ModelViewSet):
     ordering = ['-requested_at']
     
     def get_permissions(self):
-        if self.action in ['create', 'list', 'retrieve']:
+        if self.action in ['create', 'list', 'retrieve', 'my_returns']:
             return [IsAuthenticated()]
         return [IsAdminUser()]
     

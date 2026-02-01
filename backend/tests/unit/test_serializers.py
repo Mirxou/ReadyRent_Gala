@@ -15,7 +15,7 @@ class TestProductSerializer:
     
     def test_product_serialization(self, product, api_client):
         """Test product serialization"""
-        response = api_client.get(f'/api/products/{product.id}/')
+        response = api_client.get(f'/api/products/{product.slug}/')
         assert response.status_code == status.HTTP_200_OK
         assert 'name' in response.data
         assert 'name_ar' in response.data

@@ -33,7 +33,8 @@ class WarrantyPlanViewSet(viewsets.ReadOnlyModelViewSet):
         rental_price = request.query_params.get('rental_price', 0)
         
         try:
-            rental_price = float(rental_price)
+            from decimal import Decimal
+            rental_price = Decimal(str(rental_price))
             warranty_price = plan.calculate_price(rental_price)
             return Response({
                 'warranty_price': float(warranty_price),
@@ -158,7 +159,8 @@ class InsuranceCalculatorView(generics.GenericAPIView):
         
         try:
             plan = InsurancePlan.objects.get(pk=plan_id, is_active=True)
-            product_value = float(product_value)
+            from decimal import Decimal
+            product_value = Decimal(str(product_value))
             
             price = plan.calculate_price(product_value)
             coverage = plan.calculate_coverage(product_value)

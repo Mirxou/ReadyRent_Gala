@@ -19,7 +19,6 @@ class TestBranchModel:
             name_ar='الفرع الرئيسي',
             code='MAIN-001',
             address='123 Main St',
-            address_ar='123 شارع رئيسي',
             city='Constantine',
             phone='+213123456789',
             manager=admin_user,

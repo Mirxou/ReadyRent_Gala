@@ -211,7 +211,7 @@ export default function ProductDetailPage() {
                 </Badge>
               )}
               <div className="flex items-start justify-between gap-4 flex-wrap">
-                <h1 
+                <h1
                   className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-gala-purple via-gala-pink to-gala-gold bg-clip-text text-transparent pb-2 flex-1 min-w-0"
                   id="product-title"
                 >
@@ -351,6 +351,17 @@ export default function ProductDetailPage() {
             </div>
 
             {/* Bundles */}
+            <div className="py-6 border-t border-white/10">
+              <BookingCalendar
+                productId={Number(product.id)}
+                pricePerDay={Number(product.price_per_day)}
+                onDateSelect={(start, end) => {
+                  setSelectedStartDate(start);
+                  setSelectedEndDate(end);
+                }}
+              />
+            </div>
+
             <BundleSelector
               productId={product.id}
               startDate={selectedStartDate}

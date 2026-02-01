@@ -23,7 +23,7 @@ class HygieneRecordViewSet(viewsets.ModelViewSet):
     ordering = ['-scheduled_date']
     
     def get_permissions(self):
-        if self.action in ['list', 'retrieve']:
+        if self.action in ['list', 'retrieve', 'pending', 'latest_for_product']:
             return [IsAuthenticated()]
         return [IsAdminUser()]
     

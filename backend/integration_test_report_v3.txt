@@ -1,0 +1,27 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.13.9, pytest-9.0.2, pluggy-1.6.0 -- C:\Users\pc\Desktop\ReadyRent_Gala\backend\venv\Scripts\python.exe
+cachedir: .pytest_cache
+django: version: 5.2.9, settings: config.test_settings (from ini)
+rootdir: C:\Users\pc\Desktop\ReadyRent_Gala\backend
+configfile: pytest.ini
+plugins: anyio-4.12.0, locust-2.43.0, cov-7.0.0, django-4.11.1, mock-3.15.1
+collecting ... collected 7 items
+
+tests/integration/test_booking_flow.py::BookingFlowTest::test_complete_booking_flow PASSED [ 14%]
+tests/integration/test_dispute_flow.py::TestDisputeResolutionFlow::test_dispute_creation_flow PASSED [ 28%]
+tests/integration/test_dispute_flow.py::TestDisputeResolutionFlow::test_dispute_mediation_flow PASSED [ 42%]
+tests/integration/test_kyc_flow.py::TestKYCVerificationFlow::test_kyc_submission_flow PASSED [ 57%]
+tests/integration/test_kyc_flow.py::TestKYCVerificationFlow::test_kyc_rejection_flow PASSED [ 71%]
+tests/integration/test_kyc_flow.py::TestKYCVerificationFlow::test_blacklist_user PASSED [ 85%]
+tests/integration/test_return_flow.py::ReturnFlowTest::test_return_flow FAILED [100%]
+
+================================== FAILURES ===================================
+_______________________ ReturnFlowTest.test_return_flow _______________________
+tests\integration\test_return_flow.py:66: in test_return_flow
+    self.assertEqual(return_obj.status, 'pending')
+E   AssertionError: 'requested' != 'pending'
+E   - requested
+E   + pending
+=========================== short test summary info ===========================
+FAILED tests/integration/test_return_flow.py::ReturnFlowTest::test_return_flow
+========================= 1 failed, 6 passed in 5.89s =========================

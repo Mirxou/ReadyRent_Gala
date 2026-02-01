@@ -12,7 +12,7 @@ class AddressSerializer(serializers.ModelSerializer):
             'is_default', 'is_active',
             'created_at', 'updated_at'
         ]
-        read_only_fields = ['created_at', 'updated_at']
+        read_only_fields = ['user', 'created_at', 'updated_at']
     
     def validate(self, data):
         """Ensure coordinates are provided together"""

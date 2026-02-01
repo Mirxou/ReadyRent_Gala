@@ -21,7 +21,7 @@ class TestProductViews:
     
     def test_product_detail(self, product, api_client):
         """Test product detail view"""
-        response = api_client.get(f'/api/products/{product.id}/')
+        response = api_client.get(f'/api/products/{product.slug}/')
         assert response.status_code == status.HTTP_200_OK
     
     def test_product_search(self, api_client):
@@ -65,5 +65,6 @@ class TestCMSViews:
         """Test health check endpoint"""
         response = api_client.get('/api/health/')
         assert response.status_code == status.HTTP_200_OK
-        assert 'status' in response.data
+        data = response.json()
+        assert 'status' in data
 

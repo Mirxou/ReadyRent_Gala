@@ -41,7 +41,7 @@ class DeliveryZoneViewSet(viewsets.ReadOnlyModelViewSet):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_fields = ['city']
     search_fields = ['name', 'name_ar']
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     @action(detail=True, methods=['get'], permission_classes=[AllowAny])
     def check_same_day(self, request, pk=None):
@@ -66,7 +66,7 @@ class DeliveryRequestViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']
     
     def get_permissions(self):
-        if self.action in ['list', 'retrieve', 'update_tracking']:
+        if self.action in ['list', 'retrieve', 'update_tracking', 'create', 'my_deliveries']:
             return [IsAuthenticated()]
         return [IsAdminUser()]
     

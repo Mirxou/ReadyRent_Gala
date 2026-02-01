@@ -13,6 +13,10 @@ from apps.bookings.models import Booking
 
 User = get_user_model()
 
+@pytest.fixture
+def api_client():
+    return APIClient()
+
 
 @pytest.mark.unit
 @pytest.mark.django_db
@@ -213,7 +217,7 @@ class TestAdminDisputeViews:
         """Test dispute stats requires admin"""
         api_client.force_authenticate(user=regular_user)
         
-        response = api_client.get('/api/disputes/admin/stats/')
+        response = api_client.get('/api/disputes/admin/disputes/stats/')
         assert response.status_code == status.HTTP_403_FORBIDDEN
     
     def test_dispute_stats_admin(self, api_client, admin_user):

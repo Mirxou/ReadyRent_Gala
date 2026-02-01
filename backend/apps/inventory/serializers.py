@@ -5,7 +5,7 @@ from .models import InventoryItem, StockAlert, StockMovement
 class InventoryItemSerializer(serializers.ModelSerializer):
     product_name = serializers.CharField(source='product.name_ar', read_only=True)
     product_slug = serializers.CharField(source='product.slug', read_only=True)
-    availability_status = serializers.CharField(read_only=True)
+    availability_status = serializers.SerializerMethodField()
     
     class Meta:
         model = InventoryItem
@@ -17,6 +17,13 @@ class InventoryItemSerializer(serializers.ModelSerializer):
             'last_restocked', 'created_at', 'updated_at'
         ]
         read_only_fields = ['quantity_rented', 'created_at', 'updated_at']
+    
+    def get_availability_status(self, obj):
+        if obj.quantity_available > 0:
+            return 'available'
+        elif obj.quantity_total > 0:
+            return 'rented_out'
+        return 'out_of_stock'
 
 
 class StockAlertSerializer(serializers.ModelSerializer):

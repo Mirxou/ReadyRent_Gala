@@ -1,0 +1,124 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.9, pytest-9.0.2, pluggy-1.6.0 -- C:\Users\pc\Desktop\ReadyRent_Gala\backend\venv\Scripts\python.exe
+cachedir: .pytest_cache
+django: version: 5.2.9, settings: config.test_settings (from ini)
+rootdir: C:\Users\pc\Desktop\ReadyRent_Gala\backend
+configfile: pytest.ini
+plugins: anyio-4.12.0, locust-2.43.0, cov-7.0.0, django-4.11.1, mock-3.15.1
+collecting ... collected 30 items
+
+tests/unit/test_payments_serializers.py::TestPaymentMethodSerializer::test_payment_method_serialization PASSED [  3%]
+tests/unit/test_payments_serializers.py::TestPaymentCreateSerializer::test_payment_create_validation_baridimob PASSED [  6%]
+tests/unit/test_payments_serializers.py::TestPaymentCreateSerializer::test_payment_create_validation_bank_card PASSED [ 10%]
+tests/unit/test_payments_serializers.py::TestPaymentSerializer::test_payment_serialization PASSED [ 13%]
+tests/unit/test_payments_views.py::TestPaymentViewSet::test_list_payments_requires_auth PASSED [ 16%]
+tests/unit/test_payments_views.py::TestPaymentViewSet::test_list_payments_authenticated PASSED [ 20%]
+tests/unit/test_payments_views.py::TestPaymentViewSet::test_payment_status_access PASSED [ 23%]
+tests/unit/test_payments_views.py::TestPaymentCreateView::test_create_payment_success PASSED [ 26%]
+tests/unit/test_payments_views.py::TestPaymentCreateView::test_create_payment_validation_error PASSED [ 30%]
+tests/unit/test_returns_serializers.py::TestReturnItemSerializer::test_return_item_serialization PASSED [ 33%]
+tests/unit/test_returns_serializers.py::TestReturnItemSerializer::test_return_item_validation PASSED [ 36%]
+tests/unit/test_returns_serializers.py::TestRefundSerializer::test_refund_serialization FAILED [ 40%]
+tests/unit/test_returns_serializers.py::TestRefundSerializer::test_refund_validation PASSED [ 43%]
+tests/unit/test_returns_serializers.py::TestReturnSerializer::test_return_serialization PASSED [ 46%]
+tests/unit/test_returns_serializers.py::TestReturnSerializer::test_return_with_items FAILED [ 50%]
+tests/unit/test_returns_serializers.py::TestReturnSerializer::test_return_with_refund FAILED [ 53%]
+tests/unit/test_returns_serializers.py::TestReturnSerializer::test_return_is_late_property FAILED [ 56%]
+tests/unit/test_returns_views.py::TestReturnViewSet::test_list_returns_requires_auth PASSED [ 60%]
+tests/unit/test_returns_views.py::TestReturnViewSet::test_list_returns_authenticated FAILED [ 63%]
+tests/unit/test_returns_views.py::TestReturnViewSet::test_create_return_requires_auth PASSED [ 66%]
+tests/unit/test_returns_views.py::TestReturnViewSet::test_create_return FAILED [ 70%]
+tests/unit/test_returns_views.py::TestReturnViewSet::test_retrieve_return FAILED [ 73%]
+tests/unit/test_returns_views.py::TestReturnViewSet::test_approve_return_requires_admin FAILED [ 76%]
+tests/unit/test_returns_views.py::TestReturnViewSet::test_approve_return_admin FAILED [ 80%]
+tests/unit/test_returns_views.py::TestReturnViewSet::test_mark_received FAILED [ 83%]
+tests/unit/test_returns_views.py::TestReturnViewSet::test_complete_inspection FAILED [ 86%]
+tests/unit/test_returns_views.py::TestReturnViewSet::test_my_returns FAILED [ 90%]
+tests/unit/test_returns_views.py::TestRefundViewSet::test_list_refunds_requires_admin FAILED [ 93%]
+tests/unit/test_returns_views.py::TestRefundViewSet::test_list_refunds_admin FAILED [ 96%]
+tests/unit/test_returns_views.py::TestRefundViewSet::test_process_refund FAILED [100%]
+
+================================== FAILURES ===================================
+_______________ TestRefundSerializer.test_refund_serialization ________________
+tests\unit\test_returns_serializers.py:78: in test_refund_serialization
+    user = User.objects.create_user(
+E   TypeError: UserManager.create_user() missing 1 required positional argument: 'username'
+_________________ TestReturnSerializer.test_return_with_items _________________
+tests\unit\test_returns_serializers.py:193: in test_return_with_items
+    user = User.objects.create_user(
+E   TypeError: UserManager.create_user() missing 1 required positional argument: 'username'
+________________ TestReturnSerializer.test_return_with_refund _________________
+tests\unit\test_returns_serializers.py:239: in test_return_with_refund
+    user = User.objects.create_user(
+E   TypeError: UserManager.create_user() missing 1 required positional argument: 'username'
+______________ TestReturnSerializer.test_return_is_late_property ______________
+tests\unit\test_returns_serializers.py:287: in test_return_is_late_property
+    user = User.objects.create_user(
+E   TypeError: UserManager.create_user() missing 1 required positional argument: 'username'
+______________ TestReturnViewSet.test_list_returns_authenticated ______________
+tests\unit\test_returns_views.py:35: in test_list_returns_authenticated
+    api_client.force_authenticate(user=user)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'Client' object has no attribute 'force_authenticate'
+____________________ TestReturnViewSet.test_create_return _____________________
+tests\unit\test_returns_views.py:75: in test_create_return
+    api_client.force_authenticate(user=user)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'Client' object has no attribute 'force_authenticate'
+___________________ TestReturnViewSet.test_retrieve_return ____________________
+tests\unit\test_returns_views.py:87: in test_retrieve_return
+    user = User.objects.create_user(
+E   TypeError: UserManager.create_user() missing 1 required positional argument: 'username'
+____________ TestReturnViewSet.test_approve_return_requires_admin _____________
+tests\unit\test_returns_views.py:125: in test_approve_return_requires_admin
+    user = User.objects.create_user(
+E   TypeError: UserManager.create_user() missing 1 required positional argument: 'username'
+_________________ TestReturnViewSet.test_approve_return_admin _________________
+tests\unit\test_returns_views.py:162: in test_approve_return_admin
+    user = User.objects.create_user(
+E   TypeError: UserManager.create_user() missing 1 required positional argument: 'username'
+____________________ TestReturnViewSet.test_mark_received _____________________
+tests\unit\test_returns_views.py:203: in test_mark_received
+    user = User.objects.create_user(
+E   TypeError: UserManager.create_user() missing 1 required positional argument: 'username'
+_________________ TestReturnViewSet.test_complete_inspection __________________
+tests\unit\test_returns_views.py:243: in test_complete_inspection
+    user = User.objects.create_user(
+E   TypeError: UserManager.create_user() missing 1 required positional argument: 'username'
+______________________ TestReturnViewSet.test_my_returns ______________________
+tests\unit\test_returns_views.py:288: in test_my_returns
+    user = User.objects.create_user(
+E   TypeError: UserManager.create_user() missing 1 required positional argument: 'username'
+_____________ TestRefundViewSet.test_list_refunds_requires_admin ______________
+tests\unit\test_returns_views.py:333: in test_list_refunds_requires_admin
+    user = User.objects.create_user(
+E   TypeError: UserManager.create_user() missing 1 required positional argument: 'username'
+__________________ TestRefundViewSet.test_list_refunds_admin __________________
+tests\unit\test_returns_views.py:344: in test_list_refunds_admin
+    api_client.force_authenticate(user=admin_user)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'Client' object has no attribute 'force_authenticate'
+____________________ TestRefundViewSet.test_process_refund ____________________
+tests\unit\test_returns_views.py:351: in test_process_refund
+    user = User.objects.create_user(
+E   TypeError: UserManager.create_user() missing 1 required positional argument: 'username'
+=========================== short test summary info ===========================
+FAILED tests/unit/test_returns_serializers.py::TestRefundSerializer::test_refund_serialization
+FAILED tests/unit/test_returns_serializers.py::TestReturnSerializer::test_return_with_items
+FAILED tests/unit/test_returns_serializers.py::TestReturnSerializer::test_return_with_refund
+FAILED tests/unit/test_returns_serializers.py::TestReturnSerializer::test_return_is_late_property
+FAILED tests/unit/test_returns_views.py::TestReturnViewSet::test_list_returns_authenticated
+FAILED tests/unit/test_returns_views.py::TestReturnViewSet::test_create_return
+FAILED tests/unit/test_returns_views.py::TestReturnViewSet::test_retrieve_return
+FAILED tests/unit/test_returns_views.py::TestReturnViewSet::test_approve_return_requires_admin
+FAILED tests/unit/test_returns_views.py::TestReturnViewSet::test_approve_return_admin
+FAILED tests/unit/test_returns_views.py::TestReturnViewSet::test_mark_received
+FAILED tests/unit/test_returns_views.py::TestReturnViewSet::test_complete_inspection
+FAILED tests/unit/test_returns_views.py::TestReturnViewSet::test_my_returns
+FAILED tests/unit/test_returns_views.py::TestRefundViewSet::test_list_refunds_requires_admin
+FAILED tests/unit/test_returns_views.py::TestRefundViewSet::test_list_refunds_admin
+FAILED tests/unit/test_returns_views.py::TestRefundViewSet::test_process_refund
+======================== 15 failed, 15 passed in 4.73s ========================
+Sentry is attempting to send 2 pending events
+Waiting up to 2 seconds
+Press Ctrl-Break to quit

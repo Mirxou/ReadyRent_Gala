@@ -18,9 +18,7 @@ class TestReviewModel:
             product=product,
             rating=5,
             title='Great dress!',
-            title_ar='فسستان رائع!',
             comment='Very satisfied',
-            comment_ar='راضية جداً',
             status='approved'
         )
         
@@ -37,9 +35,7 @@ class TestReviewModel:
             product=product,
             rating=5,
             title='Test',
-            title_ar='تجريبي',
-            comment='Test',
-            comment_ar='تجريبي'
+            comment='Test'
         )
         
         assert 1 <= review.rating <= 5
@@ -52,9 +48,7 @@ class TestReviewModel:
             product=product,
             rating=5,
             title='Test',
-            title_ar='تجريبي',
             comment='Test',
-            comment_ar='تجريبي',
             status='pending'
         )
         

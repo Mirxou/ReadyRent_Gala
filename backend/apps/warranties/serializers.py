@@ -83,13 +83,15 @@ class InsurancePlanSerializer(serializers.ModelSerializer):
         """Calculate price for a product value"""
         product_value = self.context.get('product_value')
         if product_value:
-            return float(obj.calculate_price(product_value))
+            from decimal import Decimal
+            return float(obj.calculate_price(Decimal(str(product_value))))
         return None
     
     def get_calculated_coverage(self, obj):
         """Calculate coverage for a product value"""
         product_value = self.context.get('product_value')
         if product_value:
-            return float(obj.calculate_coverage(product_value))
+            from decimal import Decimal
+            return float(obj.calculate_coverage(Decimal(str(product_value))))
         return None
 

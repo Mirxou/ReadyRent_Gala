@@ -13,6 +13,7 @@ class UserModelTest(TestCase):
     
     def test_create_user(self):
         user = User.objects.create_user(
+            username='testuser',
             email='test@example.com',
             password='testpass123',
             first_name='Test',
@@ -27,6 +28,7 @@ class UserModelTest(TestCase):
     
     def test_create_superuser(self):
         admin_user = User.objects.create_superuser(
+            username='admin',
             email='admin@example.com',
             password='adminpass123'
         )
@@ -36,18 +38,21 @@ class UserModelTest(TestCase):
     
     def test_user_email_unique(self):
         User.objects.create_user(
+            username='testuser',
             email='test@example.com',
             password='testpass123'
         )
         
         with self.assertRaises(Exception):  # IntegrityError
             User.objects.create_user(
+                username='testuser2',
                 email='test@example.com',
                 password='testpass123'
             )
     
     def test_user_role_default(self):
         user = User.objects.create_user(
+            username='testuser3',
             email='test@example.com',
             password='testpass123'
         )

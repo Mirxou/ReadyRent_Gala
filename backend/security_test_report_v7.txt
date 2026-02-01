@@ -1,0 +1,42 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.13.9, pytest-9.0.2, pluggy-1.6.0 -- C:\Users\pc\Desktop\ReadyRent_Gala\backend\venv\Scripts\python.exe
+cachedir: .pytest_cache
+django: version: 5.2.9, settings: config.test_settings (from ini)
+rootdir: C:\Users\pc\Desktop\ReadyRent_Gala\backend
+configfile: pytest.ini
+plugins: anyio-4.12.0, locust-2.43.0, cov-7.0.0, django-4.11.1, mock-3.15.1
+collecting ... collected 19 items
+
+tests/security/test_authentication.py::TestAuthentication::test_login_with_valid_credentials PASSED [  5%]
+tests/security/test_authentication.py::TestAuthentication::test_login_with_invalid_credentials PASSED [ 10%]
+tests/security/test_authentication.py::TestAuthentication::test_login_without_credentials PASSED [ 15%]
+tests/security/test_authentication.py::TestAuthentication::test_access_protected_endpoint_without_auth PASSED [ 21%]
+tests/security/test_authentication.py::TestAuthentication::test_access_protected_endpoint_with_auth PASSED [ 26%]
+tests/security/test_authentication.py::TestAuthorization::test_admin_can_access_admin_endpoints PASSED [ 31%]
+tests/security/test_authentication.py::TestAuthorization::test_regular_user_cannot_access_admin_endpoints PASSED [ 36%]
+tests/security/test_authentication.py::TestAuthorization::test_user_can_only_access_own_data PASSED [ 42%]
+tests/security/test_authentication.py::TestPasswordSecurity::test_password_is_hashed PASSED [ 47%]
+tests/security/test_authentication.py::TestPasswordSecurity::test_password_validation PASSED [ 52%]
+tests/security/test_authentication.py::TestSessionSecurity::test_session_created_on_login PASSED [ 57%]
+tests/security/test_authentication.py::TestSessionSecurity::test_session_destroyed_on_logout PASSED [ 63%]
+tests/security/test_csrf.py::TestCSRFProtection::test_csrf_token_required_for_post FAILED [ 68%]
+tests/security/test_csrf.py::TestCSRFProtection::test_csrf_token_in_cookies PASSED [ 73%]
+tests/security/test_rate_limiting.py::TestRateLimiting::test_rate_limit_on_login PASSED [ 78%]
+tests/security/test_rate_limiting.py::TestRateLimiting::test_rate_limit_on_api_endpoints PASSED [ 84%]
+tests/security/test_xss.py::TestXSSProtection::test_xss_in_product_name PASSED [ 89%]
+tests/security/test_xss.py::TestXSSProtection::test_xss_in_product_description PASSED [ 94%]
+tests/security/test_xss.py::TestXSSProtection::test_sql_injection_in_search PASSED [100%]
+
+================================== FAILURES ===================================
+____________ TestCSRFProtection.test_csrf_token_required_for_post _____________
+tests\security\test_csrf.py:35: in test_csrf_token_required_for_post
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+E   assert 405 == 403
+E    +  where 405 = <Response status_code=405, "application/json">.status_code
+E    +  and   403 = status.HTTP_403_FORBIDDEN
+------------------------------ Captured log call ------------------------------
+WARNING  core.exception_handler:exception_handler.py:70 Client error: ÏÀÏ▒┘è┘éÏ® "POST" Ï║┘èÏ▒ ┘àÏ│┘à┘êÏ¡ Ï¿┘çÏº.
+WARNING  django.request:log.py:253 Method Not Allowed: /api/auth/profile/
+=========================== short test summary info ===========================
+FAILED tests/security/test_csrf.py::TestCSRFProtection::test_csrf_token_required_for_post
+======================== 1 failed, 18 passed in 2.53s =========================

@@ -1,0 +1,95 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.9, pytest-9.0.2, pluggy-1.6.0 -- C:\Users\pc\Desktop\ReadyRent_Gala\backend\venv\Scripts\python.exe
+cachedir: .pytest_cache
+django: version: 5.2.9, settings: config.test_settings (from ini)
+rootdir: C:\Users\pc\Desktop\ReadyRent_Gala\backend
+configfile: pytest.ini
+plugins: anyio-4.12.0, locust-2.43.0, cov-7.0.0, django-4.11.1, mock-3.15.1
+collecting ... collected 19 items
+
+tests/unit/test_disputes_serializers.py::TestDisputeMessageSerializer::test_dispute_message_serialization PASSED [  5%]
+tests/unit/test_disputes_serializers.py::TestDisputeSerializer::test_dispute_serialization PASSED [ 10%]
+tests/unit/test_disputes_serializers.py::TestDisputeSerializer::test_dispute_with_messages PASSED [ 15%]
+tests/unit/test_disputes_serializers.py::TestSupportTicketSerializer::test_support_ticket_serialization PASSED [ 21%]
+tests/unit/test_disputes_serializers.py::TestTicketMessageSerializer::test_ticket_message_serialization PASSED [ 26%]
+tests/unit/test_disputes_views.py::TestDisputeViews::test_create_dispute_requires_auth PASSED [ 31%]
+tests/unit/test_disputes_views.py::TestDisputeViews::test_create_dispute FAILED [ 36%]
+tests/unit/test_disputes_views.py::TestDisputeViews::test_list_disputes_requires_auth PASSED [ 42%]
+tests/unit/test_disputes_views.py::TestDisputeViews::test_list_disputes_authenticated FAILED [ 47%]
+tests/unit/test_disputes_views.py::TestDisputeViews::test_retrieve_dispute FAILED [ 52%]
+tests/unit/test_disputes_views.py::TestDisputeViews::test_add_message_to_dispute FAILED [ 57%]
+tests/unit/test_disputes_views.py::TestSupportTicketViews::test_create_ticket_requires_auth PASSED [ 63%]
+tests/unit/test_disputes_views.py::TestSupportTicketViews::test_create_ticket FAILED [ 68%]
+tests/unit/test_disputes_views.py::TestSupportTicketViews::test_list_tickets_requires_auth PASSED [ 73%]
+tests/unit/test_disputes_views.py::TestSupportTicketViews::test_list_tickets_authenticated FAILED [ 78%]
+tests/unit/test_disputes_views.py::TestSupportTicketViews::test_add_message_to_ticket FAILED [ 84%]
+tests/unit/test_disputes_views.py::TestAdminDisputeViews::test_dispute_stats_requires_admin FAILED [ 89%]
+tests/unit/test_disputes_views.py::TestAdminDisputeViews::test_dispute_stats_admin FAILED [ 94%]
+tests/unit/test_disputes_views.py::TestAdminDisputeViews::test_ticket_stats_admin FAILED [100%]
+
+================================== FAILURES ===================================
+____________________ TestDisputeViews.test_create_dispute _____________________
+tests\unit\test_disputes_views.py:51: in test_create_dispute
+    api_client.force_authenticate(user=regular_user)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'Client' object has no attribute 'force_authenticate'
+______________ TestDisputeViews.test_list_disputes_authenticated ______________
+tests\unit\test_disputes_views.py:69: in test_list_disputes_authenticated
+    api_client.force_authenticate(user=regular_user)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'Client' object has no attribute 'force_authenticate'
+___________________ TestDisputeViews.test_retrieve_dispute ____________________
+tests\unit\test_disputes_views.py:105: in test_retrieve_dispute
+    api_client.force_authenticate(user=regular_user)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'Client' object has no attribute 'force_authenticate'
+________________ TestDisputeViews.test_add_message_to_dispute _________________
+tests\unit\test_disputes_views.py:142: in test_add_message_to_dispute
+    api_client.force_authenticate(user=regular_user)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'Client' object has no attribute 'force_authenticate'
+__________________ TestSupportTicketViews.test_create_ticket __________________
+tests\unit\test_disputes_views.py:165: in test_create_ticket
+    api_client.force_authenticate(user=regular_user)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'Client' object has no attribute 'force_authenticate'
+___________ TestSupportTicketViews.test_list_tickets_authenticated ____________
+tests\unit\test_disputes_views.py:182: in test_list_tickets_authenticated
+    api_client.force_authenticate(user=regular_user)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'Client' object has no attribute 'force_authenticate'
+______________ TestSupportTicketViews.test_add_message_to_ticket ______________
+tests\unit\test_disputes_views.py:196: in test_add_message_to_ticket
+    api_client.force_authenticate(user=regular_user)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'Client' object has no attribute 'force_authenticate'
+___________ TestAdminDisputeViews.test_dispute_stats_requires_admin ___________
+tests\unit\test_disputes_views.py:214: in test_dispute_stats_requires_admin
+    api_client.force_authenticate(user=regular_user)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'Client' object has no attribute 'force_authenticate'
+_______________ TestAdminDisputeViews.test_dispute_stats_admin ________________
+tests\unit\test_disputes_views.py:221: in test_dispute_stats_admin
+    api_client.force_authenticate(user=admin_user)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'Client' object has no attribute 'force_authenticate'
+________________ TestAdminDisputeViews.test_ticket_stats_admin ________________
+tests\unit\test_disputes_views.py:230: in test_ticket_stats_admin
+    api_client.force_authenticate(user=admin_user)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'Client' object has no attribute 'force_authenticate'
+=========================== short test summary info ===========================
+FAILED tests/unit/test_disputes_views.py::TestDisputeViews::test_create_dispute
+FAILED tests/unit/test_disputes_views.py::TestDisputeViews::test_list_disputes_authenticated
+FAILED tests/unit/test_disputes_views.py::TestDisputeViews::test_retrieve_dispute
+FAILED tests/unit/test_disputes_views.py::TestDisputeViews::test_add_message_to_dispute
+FAILED tests/unit/test_disputes_views.py::TestSupportTicketViews::test_create_ticket
+FAILED tests/unit/test_disputes_views.py::TestSupportTicketViews::test_list_tickets_authenticated
+FAILED tests/unit/test_disputes_views.py::TestSupportTicketViews::test_add_message_to_ticket
+FAILED tests/unit/test_disputes_views.py::TestAdminDisputeViews::test_dispute_stats_requires_admin
+FAILED tests/unit/test_disputes_views.py::TestAdminDisputeViews::test_dispute_stats_admin
+FAILED tests/unit/test_disputes_views.py::TestAdminDisputeViews::test_ticket_stats_admin
+======================== 10 failed, 9 passed in 2.09s =========================
+Sentry is attempting to send 1 pending events
+Waiting up to 2 seconds
+Press Ctrl-Break to quit

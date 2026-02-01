@@ -40,7 +40,8 @@ class CancellationPolicy:
                 break
         
         # Calculate fee amount
-        fee_amount = booking.total_price * fee_percentage
+        from decimal import Decimal
+        fee_amount = booking.total_price * Decimal(str(fee_percentage))
         
         # Refund amount
         refund_amount = booking.total_price - fee_amount
@@ -95,8 +96,9 @@ class CancellationPolicy:
             }
         
         # Calculate refund per day
+        from decimal import Decimal
         price_per_day = booking.total_price / booking.total_days
-        refund_per_day = price_per_day * cls.EARLY_RETURN_REFUND_RATE
+        refund_per_day = price_per_day * Decimal(str(cls.EARLY_RETURN_REFUND_RATE))
         refund_amount = refund_per_day * unused_days
         
         return {

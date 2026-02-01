@@ -114,9 +114,7 @@ class TestPerformanceReviewModel:
             quality_rating=4,
             communication_rating=4,
             strengths='Good work',
-            strengths_ar='عمل جيد',
-            areas_for_improvement='Can improve',
-            areas_for_improvement_ar='يمكن التحسين'
+            areas_for_improvement='Can improve'
         )
         
         assert review.staff == staff_user

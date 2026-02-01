@@ -265,21 +265,12 @@ jobs:
           STAGING_SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
         run: |
           echo "Deploying backend to staging..."
-          # Option 1: SSH Deployment (VPS)
-          # mkdir -p ~/.ssh
-          # echo "$STAGING_SSH_KEY" > ~/.ssh/staging_key
-          # chmod 600 ~/.ssh/staging_key
-          # ssh -i ~/.ssh/staging_key -o StrictHostKeyChecking=no $STAGING_SERVER_USER@$STAGING_SERVER_HOST \
-          #   "cd /var/www/readyrent-staging/backend && git pull origin develop && \
-          #   source venv/bin/activate && pip install -r requirements.txt && \
-          #   python manage.py migrate && python manage.py collectstatic --noinput && \
-          #   sudo systemctl restart readyrent-backend-staging"
-          
-          # Option 2: Railway CLI
-          # railway up --service backend
-          
-          # Option 3: Render CLI
-          # render deploy --service backend-staging
+          # Option 1: SSH Deployment (VPS) - Enabled
+          mkdir -p ~/.ssh
+          echo "$STAGING_SSH_KEY" > ~/.ssh/staging_key
+          chmod 600 ~/.ssh/staging_key
+          ssh -i ~/.ssh/staging_key -o StrictHostKeyChecking=no $STAGING_SERVER_USER@$STAGING_SERVER_HOST \
+            "bash /var/www/readyrent-staging/backend/scripts/deploy.sh staging"
           
           echo "Backend deployment completed"
       
@@ -290,16 +281,10 @@ jobs:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
           echo "Deploying frontend to staging..."
-          # Option 1: Vercel
-          # npm install -g vercel
-          # cd frontend
-          # vercel --prod --token=$VERCEL_TOKEN
-          
-          # Option 2: Railway CLI
-          # railway up --service frontend
-          
-          # Option 3: Render CLI
-          # render deploy --service frontend-staging
+          # Option 1: Vercel - Enabled
+          npm install -g vercel
+          cd frontend
+          vercel --prod --token=$VERCEL_TOKEN
           
           echo "Frontend deployment completed"
       
@@ -331,21 +316,12 @@ jobs:
           PROD_SSH_KEY: ${{ secrets.PROD_SSH_KEY }}
         run: |
           echo "Deploying backend to production..."
-          # Option 1: SSH Deployment (VPS)
-          # mkdir -p ~/.ssh
-          # echo "$PROD_SSH_KEY" > ~/.ssh/prod_key
-          # chmod 600 ~/.ssh/prod_key
-          # ssh -i ~/.ssh/prod_key -o StrictHostKeyChecking=no $PROD_SERVER_USER@$PROD_SERVER_HOST \
-          #   "cd /var/www/ReadyRent_Gala/backend && git pull origin main && \
-          #   source venv/bin/activate && pip install -r requirements.txt && \
-          #   python manage.py migrate && python manage.py collectstatic --noinput && \
-          #   sudo systemctl restart readyrent-backend"
-          
-          # Option 2: Railway CLI
-          # railway up --service backend --environment production
-          
-          # Option 3: Render CLI
-          # render deploy --service backend-production
+          # Option 1: SSH Deployment (VPS) - Enabled
+          mkdir -p ~/.ssh
+          echo "$PROD_SSH_KEY" > ~/.ssh/prod_key
+          chmod 600 ~/.ssh/prod_key
+          ssh -i ~/.ssh/prod_key -o StrictHostKeyChecking=no $PROD_SERVER_USER@$PROD_SERVER_HOST \
+            "bash /var/www/ReadyRent_Gala/backend/scripts/deploy.sh production"
           
           echo "Backend deployment completed"
       
@@ -356,16 +332,10 @@ jobs:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
           echo "Deploying frontend to production..."
-          # Option 1: Vercel
-          # npm install -g vercel
-          # cd frontend
-          # vercel --prod --token=$VERCEL_TOKEN
-          
-          # Option 2: Railway CLI
-          # railway up --service frontend --environment production
-          
-          # Option 3: Render CLI
-          # render deploy --service frontend-production
+          # Option 1: Vercel - Enabled
+          npm install -g vercel
+          cd frontend
+          vercel --prod --token=$VERCEL_TOKEN
           
           echo "Frontend deployment completed"
       

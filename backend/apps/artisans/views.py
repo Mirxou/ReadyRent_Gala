@@ -1,5 +1,5 @@
 from rest_framework import viewsets, filters
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Avg
 from decimal import Decimal
@@ -15,7 +15,7 @@ class ArtisanViewSet(viewsets.ReadOnlyModelViewSet):
     search_fields = ['name', 'name_ar', 'bio', 'city']
     ordering_fields = ['rating', 'review_count', 'created_at']
     ordering = ['-is_featured', '-rating', 'name']
-    permission_classes = []
+    permission_classes = [AllowAny]
 
 
 class ArtisanReviewViewSet(viewsets.ModelViewSet):

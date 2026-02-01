@@ -24,7 +24,7 @@ class BookingSerializer(serializers.ModelSerializer):
             'start_date', 'end_date', 'total_days', 'total_price',
             'status', 'notes', 'created_at', 'updated_at'
         ]
-        read_only_fields = ['user', 'created_at', 'updated_at']
+        read_only_fields = ['user', 'total_days', 'total_price', 'created_at', 'updated_at']
     
     def validate(self, data):
         """Validate booking dates and status"""
@@ -185,7 +185,7 @@ class DamageAssessmentSerializer(serializers.ModelSerializer):
 
 class DamageClaimSerializer(serializers.ModelSerializer):
     """Serializer for Damage Claim"""
-    assessment = DamageAssessmentSerializer(read_only=True)
+    assessment = serializers.PrimaryKeyRelatedField(read_only=True)
     assessment_id = serializers.IntegerField(write_only=True, required=False)
     
     class Meta:

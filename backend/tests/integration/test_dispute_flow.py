@@ -36,9 +36,7 @@ class TestDisputeResolutionFlow:
             user=regular_user,
             booking=booking,
             title='Product damaged',
-            title_ar='المنتج تالف',
             description='The dress arrived damaged',
-            description_ar='الفسستان وصل تالف',
             status='open',
             priority='high'
         )
@@ -66,16 +64,14 @@ class TestDisputeResolutionFlow:
         # 3. Add messages
         message1 = DisputeMessage.objects.create(
             dispute=dispute,
-            sender=regular_user,
-            message='I want a refund',
-            message_ar='أريد استرداد المال'
+            user=regular_user,
+            message='I want a refund'
         )
         
         message2 = DisputeMessage.objects.create(
             dispute=dispute,
-            sender=admin_user,
-            message='We will investigate',
-            message_ar='سنقوم بالتحقيق'
+            user=admin_user,
+            message='We will investigate'
         )
         
         assert dispute.messages.count() == 2
@@ -83,7 +79,6 @@ class TestDisputeResolutionFlow:
         # 4. Admin resolves dispute
         dispute.status = 'resolved'
         dispute.resolution = 'Refund processed'
-        dispute.resolution_ar = 'تم استرداد المال'
         dispute.resolved_by = admin_user
         dispute.save()
         

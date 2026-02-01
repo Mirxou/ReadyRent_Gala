@@ -17,6 +17,18 @@ jest.mock('@tanstack/react-query', () => ({
   })),
 }))
 
+// Mock UI components
+jest.mock('@/components/ui/particle-field', () => ({
+  ParticleField: () => <div data-testid="particle-field" />,
+}));
+
+jest.mock('framer-motion', () => ({
+  motion: {
+    div: ({ children, ...props }: any) => <div {...props}>{children}</div>,
+  },
+  AnimatePresence: ({ children }: any) => <>{children}</>,
+}));
+
 // Mock API calls
 global.fetch = jest.fn(() =>
   Promise.resolve({
@@ -31,7 +43,7 @@ describe('Cart Integration', () => {
 
   it('displays empty cart message when cart is empty', async () => {
     render(<CartPage />)
-    
+
     await waitFor(() => {
       const emptyMessage = screen.queryByText(/empty|فارغة|no items/i)
       if (emptyMessage) {
@@ -54,7 +66,7 @@ describe('Cart Integration', () => {
     ) as jest.Mock
 
     render(<CartPage />)
-    
+
     await waitFor(() => {
       const removeButton = screen.queryByLabelText(/remove|حذف/i)
       if (removeButton) {

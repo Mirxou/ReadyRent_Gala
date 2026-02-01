@@ -16,7 +16,9 @@
    - Tests E2E
    - Security scan
    - Docker build
-   - **ملاحظة**: Deploy commands فارغة (تحتاج تكوين)
+   - Docker build
+   - **Deploy Commands**: Configured with `deploy.sh` script ✅
+   - **Secrets Documented**: See `SECRETS.md` ✅
 
 2. **Tests Frontend** ✅ (جزئياً)
    - 10 tests للـ Components
@@ -43,30 +45,32 @@
 
 #### Backend Apps (21 تطبيق)
 
-**✅ لديهم tests جزئية:**
-- ✅ `products` - Tests موجودة
-- ✅ `bookings` - Tests موجودة
-- ✅ `cms` - Tests موجودة
-- ✅ `users` - Tests موجودة
+**✅ لديهم tests (تم التحقق من الملفات):**
+- ✅ `products`
+- ✅ `bookings`
+- ✅ `cms`
+- ✅ `users`
+- ✅ `returns`
+- ✅ `disputes`
+- ✅ `analytics`
+- ✅ `artisans`
+- ✅ `bundles`
+- ✅ `chatbot`
+- ✅ `reviews`
+- ✅ `vendors`
+- ✅ `warranties`
+- ✅ `branches`
+- ✅ `hygiene`
+- ✅ `inventory`
+- ✅ `local_guide`
+- ✅ `locations`
+- ✅ `maintenance`
+- ✅ `notifications`
+- ✅ `packaging`
+- ✅ `payments`
 
-**❌ يحتاجون tests كاملة:**
-- ❌ `analytics` - يحتاج tests للـ serializers و views
-- ❌ `artisans` - يحتاج tests للـ serializers و views
-- ❌ `bundles` - يحتاج tests للـ serializers و views
-- ❌ `chatbot` - يحتاج tests للـ serializers و views
-- ❌ `disputes` - يحتاج tests للـ serializers و views
-- ❌ `hygiene` - يحتاج tests للـ serializers و views
-- ❌ `inventory` - يحتاج tests للـ serializers و views
-- ❌ `local_guide` - يحتاج tests للـ serializers و views
-- ❌ `locations` - يحتاج tests للـ serializers و views
-- ❌ `maintenance` - يحتاج tests للـ serializers و views
-- ❌ `notifications` - يحتاج tests للـ serializers و views
-- ❌ `packaging` - يحتاج tests للـ serializers و views
-- ❌ `returns` - يحتاج tests للـ serializers و views
-- ❌ `reviews` - يحتاج tests للـ serializers و views
-- ❌ `vendors` - يحتاج tests للـ serializers و views
-- ❌ `warranties` - يحتاج tests للـ serializers و views
-- ❌ `branches` - يحتاج tests للـ serializers و views
+**❌ تطبيقات تحتاج مراجعة إضافية:**
+- لا يوجد (تم التحقق من وجود ملفات tests لجميع التطبيقات)
 
 **خطة العمل:**
 1. إنشاء ملفات tests لكل تطبيق:
@@ -107,34 +111,34 @@
 - ✅ `WhatsAppButton`
 
 **❌ يحتاجون tests:**
-- ❌ `accessory-suggestions.tsx`
-- ❌ `analytics.tsx`
-- ❌ `booking-calendar.tsx` (قد يحتاج tests إضافية)
-- ❌ `branch-selector.tsx`
-- ❌ `bundle-selector.tsx`
-- ❌ `cancellation-policy.tsx`
-- ❌ `damage-inspection.tsx`
-- ❌ `dispute-form.tsx`
-- ❌ `error-boundary.tsx`
-- ❌ `forecast-chart.tsx`
-- ❌ `gps-tracker.tsx`
-- ❌ `hijri-calendar.tsx`
-- ❌ `id-upload.tsx`
-- ❌ `insurance-selector.tsx`
-- ❌ `map-location.tsx`
-- ❌ `notifications/realtime-notifications.tsx`
-- ❌ `role-selector.tsx`
-- ❌ `reviews/*` (3 مكونات)
-- ❌ جميع مكونات `admin/*` (8 مكونات)
-- ❌ جميع مكونات `ui/*` (24 مكون)
+- ✅ `accessory-suggestions.tsx` (Tested)
+- ✅ `analytics.tsx` (Tested)
+- ✅ `booking-calendar.tsx` (Tested)
+- ✅ `branch-selector.tsx` (Tested)
+- ✅ `bundle-selector.tsx` (Tested)
+- [x] `cancellation-policy.tsx` - Tests Implemented ✅
+- [x] `damage-inspection.tsx` - Tests Implemented ✅
+- [x] `dispute-form.tsx` - Tests Implemented ✅
+- [x] `error-boundary.tsx` - Tests Implemented ✅
+- [x] `forecast-chart.tsx` - Tests Implemented ✅
+- ✅ `gps-tracker.tsx` (Tested)
+- ✅ `hijri-calendar.tsx` (Tested)
+- ✅ `id-upload.tsx` (Tested)
+- ✅ `insurance-selector.tsx` (Tested)
+- ✅ `map-location.tsx` (Tested)
+- ✅ `notifications/realtime-notifications.tsx` (Tested)
+- ✅ `role-selector.tsx` (Tested)
+- [x] `reviews/*` (3 مكونات) - Tests Implemented ✅
+- [x] Admin Components: `stats-cards`, `quick-actions`, `booking-table` ✅
+- [x] Admin Charts: `revenue`, `sales-by-category`, `top-products` ✅
+- ⚠️ جميع مكونات `ui/*` (Tests covering core logic via parents)
 
 **Integration Tests:**
-- ✅ `cart.test.tsx` - موجود
-- ❌ يحتاج tests إضافية لـ:
-  - Booking flow
-  - Payment flow
-  - User authentication flow
-  - Admin dashboard interactions
+- ✅ `cart.test.tsx` - Passed
+- ✅ `booking-flow` - Passed & Bug Fixed
+- ✅ `auth-flow` - Passed
+- ✅ `checkout-flow` - Passed
+- ✅ `admin-flow` - Passed
 
 **E2E Tests:**
 - ✅ 10 tests موجودة
@@ -154,24 +158,13 @@
 
 ### 3. إعداد CI/CD كامل
 
-**الحالة الحالية**: Workflow موجود لكن Deploy commands فارغة
+**الحالة الحالية**: Workflow موجود وأوامر النشر (Deploy commands) مهيأة ✅
 
 **ما يحتاج إكمال:**
 
-#### Deploy Staging
-```yaml
-# في .github/workflows/ci.yml
-deploy-staging:
-  steps:
-    - name: Deploy to Staging
-      run: |
-        # TODO: إضافة أوامر النشر الفعلية
-        # مثال:
-        # - SSH إلى خادم Staging
-        # - Pull latest code
-        # - Run migrations
-        # - Restart services
-```
+- **تم الإكمال**: الأوامر مضافة للـ `ci.yml` وتستخدم `deploy.sh` في `backend/scripts/`.
+- **تم الإكمال**: دعم النشر لـ Vercel (Frontend) مضاف.
+- **تم الإكمال**: Health checks مضافة بشكل مبدئي.
 
 **الخيارات المتاحة:**
 1. **Vercel** (لـ Frontend):
@@ -224,10 +217,10 @@ deploy-staging:
 - [ ] Domain name لـ Staging (staging.readyrent.gala)
 
 #### 2. Configuration
-- [ ] ملف `.env.staging` للـ Backend
-- [ ] ملف `.env.local.staging` للـ Frontend
-- [ ] إعدادات Django للـ Staging
-- [ ] إعدادات Next.js للـ Staging
+- [x] ملف `.env.staging` للـ Backend (Created `.env.staging.example`)
+- [x] ملف `.env.local.staging` للـ Frontend (Created `.env.local.staging.example`)
+- [x] إعدادات Django للـ Staging (Environment aware `settings.py`)
+- [x] إعدادات Next.js للـ Staging (Environment variables)
 
 #### 3. CI/CD Integration
 - [ ] ربط Staging مع GitHub Actions
@@ -280,18 +273,18 @@ deploy-staging:
    - `bookings` ✅ (موجود)
    - `products` ✅ (موجود)
    - `users` ✅ (موجود)
-   - `returns` - يحتاج tests
-   - `disputes` - يحتاج tests
-   - `payments` - يحتاج tests
+   - `returns` ✅ (موجود)
+   - `disputes` ✅ (موجود)
+   - `payments` ✅ (موجود)
 
 2. ✅ Frontend Tests للمكونات الحرجة:
    - `BookingCalendar` ✅ (موجود)
    - `ProductCard` ✅ (موجود)
    - `Cart` ✅ (موجود)
-   - `PaymentForm` - يحتاج tests
-   - `CheckoutFlow` - يحتاج tests
+   - `PaymentForm` ✅ (موجود)
+   - `CheckoutFlow` ✅ (موجود)
 
-3. ⚠️ CI/CD Deploy Commands (مهم للإطلاق)
+3. ✅ CI/CD Deploy Commands (Configured)
 
 ### الأولوية المتوسطة (بعد الإطلاق التجريبي)
 1. Tests للتطبيقات المتبقية
@@ -308,7 +301,7 @@ deploy-staging:
 ## 📝 ملاحظات
 
 - معظم البنية التحتية للـ tests موجودة بالفعل
-- CI/CD workflow موجود لكن يحتاج تكوين Deploy
+- CI/CD workflow كامل مع أوامر النشر (Deploy commands configured) ✅
 - Staging environment يحتاج إعداد من الصفر
 - يمكن البدء بالإطلاق التجريبي مع Tests الأساسية الموجودة
 

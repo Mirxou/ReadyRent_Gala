@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { CreditCard, Lock, Shield } from 'lucide-react';
 import { toast } from 'sonner';
+import { paymentsApi } from '@/lib/api';
 
 interface BankCardFormProps {
   amount: number;
@@ -68,7 +69,6 @@ export function BankCardForm({
 
     setIsLoading(true);
     try {
-      const { paymentsApi } = await import('@/lib/api');
       const response = await paymentsApi.create({
         payment_method: 'bank_card',
         amount,

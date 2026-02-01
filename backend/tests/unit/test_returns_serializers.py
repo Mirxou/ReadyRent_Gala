@@ -27,6 +27,7 @@ class TestReturnItemSerializer:
         return_obj = Return.objects.create(
             booking=Booking.objects.create(
                 user=User.objects.create_user(
+                    username='test',
                     email='test@example.com',
                     password='testpass123'
                 ),
@@ -75,18 +76,19 @@ class TestRefundSerializer:
     def test_refund_serialization(self, admin_user, api_client):
         """Test refund serialization"""
         user = User.objects.create_user(
-            email='test@example.com',
+            username='test_refund',
+            email='test_refund@example.com',
             password='testpass123'
         )
         category = Category.objects.create(
             name='Dresses',
             name_ar='فساتين',
-            slug='dresses'
+            slug='dresses_refund'
         )
         product = Product.objects.create(
             name='Test Dress',
             name_ar='فستان تجريبي',
-            slug='test-dress',
+            slug='test-dress-refund',
             category=category,
             price_per_day=1000.00
         )
@@ -142,18 +144,19 @@ class TestReturnSerializer:
     def test_return_serialization(self, admin_user, api_client):
         """Test return serialization"""
         user = User.objects.create_user(
-            email='test@example.com',
+            username='test_s1',
+            email='test_s1@example.com',
             password='testpass123'
         )
         category = Category.objects.create(
             name='Dresses',
             name_ar='فساتين',
-            slug='dresses'
+            slug='dresses_s1'
         )
         product = Product.objects.create(
             name='Test Dress',
             name_ar='فستان تجريبي',
-            slug='test-dress',
+            slug='test-dress-s1',
             category=category,
             price_per_day=1000.00
         )
@@ -189,18 +192,19 @@ class TestReturnSerializer:
     def test_return_with_items(self, admin_user, api_client):
         """Test return serialization with items"""
         user = User.objects.create_user(
-            email='test@example.com',
+            username='test_s2',
+            email='test_s2@example.com',
             password='testpass123'
         )
         category = Category.objects.create(
             name='Dresses',
             name_ar='فساتين',
-            slug='dresses'
+            slug='dresses_s2'
         )
         product = Product.objects.create(
             name='Test Dress',
             name_ar='فستان تجريبي',
-            slug='test-dress',
+            slug='test-dress-s2',
             category=category,
             price_per_day=1000.00
         )
@@ -235,18 +239,19 @@ class TestReturnSerializer:
     def test_return_with_refund(self, admin_user, api_client):
         """Test return serialization with refund"""
         user = User.objects.create_user(
-            email='test@example.com',
+            username='test_s3',
+            email='test_s3@example.com',
             password='testpass123'
         )
         category = Category.objects.create(
             name='Dresses',
             name_ar='فساتين',
-            slug='dresses'
+            slug='dresses_s3'
         )
         product = Product.objects.create(
             name='Test Dress',
             name_ar='فستان تجريبي',
-            slug='test-dress',
+            slug='test-dress-s3',
             category=category,
             price_per_day=1000.00
         )
@@ -283,18 +288,19 @@ class TestReturnSerializer:
     def test_return_is_late_property(self, admin_user, api_client):
         """Test return is_late property"""
         user = User.objects.create_user(
-            email='test@example.com',
+            username='test_s4',
+            email='test_s4@example.com',
             password='testpass123'
         )
         category = Category.objects.create(
             name='Dresses',
             name_ar='فساتين',
-            slug='dresses'
+            slug='dresses_s4'
         )
         product = Product.objects.create(
             name='Test Dress',
             name_ar='فستان تجريبي',
-            slug='test-dress',
+            slug='test-dress-s4',
             category=category,
             price_per_day=1000.00
         )
@@ -319,4 +325,3 @@ class TestReturnSerializer:
         assert 'is_late' in data
         # Should be late if end_date passed and status not completed/accepted
         assert isinstance(data['is_late'], bool)
-

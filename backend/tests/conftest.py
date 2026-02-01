@@ -3,7 +3,7 @@ Pytest configuration and fixtures for ReadyRent.Gala tests
 """
 import pytest
 from django.contrib.auth import get_user_model
-from django.test import Client
+from rest_framework.test import APIClient
 from decimal import Decimal
 from datetime import date, timedelta
 from apps.products.models import Category, Product
@@ -17,7 +17,7 @@ User = get_user_model()
 @pytest.fixture
 def api_client():
     """API client for testing"""
-    return Client()
+    return APIClient()
 
 
 @pytest.fixture
@@ -117,7 +117,6 @@ def branch():
         name_ar='الفرع الرئيسي',
         code='MAIN-001',
         address='123 Test Street',
-        address_ar='123 شارع تجريبي',
         city='Constantine',
         phone='+213123456789',
         email='main@test.com',

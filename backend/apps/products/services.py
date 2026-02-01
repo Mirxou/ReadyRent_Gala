@@ -272,8 +272,9 @@ class RecommendationService:
         )
         
         # Get popular products in same category
+        from django.db.models import FloatField
         popular = similar.annotate(
-            popularity_score=Coalesce(Avg('rating'), 0) + (Count('bookings') * 0.1)
+            popularity_score=Coalesce(Avg('rating'), 0.0, output_field=FloatField()) + (Count('bookings') * 0.1)
         ).order_by('-popularity_score', '-rating', '-total_rentals')
         
         # Combine and deduplicate
@@ -346,11 +347,12 @@ class RecommendationService:
         exclude_product_id: Optional[int] = None
     ) -> List[Product]:
         """Get popular products in a category"""
+        from django.db.models import FloatField
         queryset = Product.objects.filter(
             category_id=category_id,
             status='available'
         ).annotate(
-            popularity=Coalesce(Avg('rating'), 0) + (Count('bookings') * 0.1)
+            popularity=Coalesce(Avg('rating'), 0.0, output_field=FloatField()) + (Count('bookings') * 0.1)
         ).order_by('-popularity', '-rating', '-total_rentals')
         
         if exclude_product_id:

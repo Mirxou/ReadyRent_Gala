@@ -1,7 +1,7 @@
 from rest_framework import viewsets, filters, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Avg
 from decimal import Decimal
@@ -34,7 +34,7 @@ class BundleViewSet(viewsets.ReadOnlyModelViewSet):
     search_fields = ['name', 'name_ar', 'description']
     ordering_fields = ['bundle_price', 'rating', 'created_at', 'total_bookings']
     ordering = ['-is_featured', '-created_at']
-    permission_classes = []
+    permission_classes = [AllowAny]
     
     @action(detail=True, methods=['get'], permission_classes=[])
     def calculate_price(self, request, pk=None):
@@ -100,7 +100,7 @@ class BundleBookingViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']
     
     def get_permissions(self):
-        if self.action in ['create', 'list', 'retrieve']:
+        if self.action in ['create', 'list', 'retrieve', 'my_bookings']:
             return [IsAuthenticated()]
         return [IsAdminUser()]
     

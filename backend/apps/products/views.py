@@ -6,7 +6,7 @@ from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAdminUser
 from django_filters.rest_framework import DjangoFilterBackend
-from django.db.models import Q, F, Max
+from django.db.models import Q, F, Max, Count
 from django.db.models.functions import Coalesce
 from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
 from django.db import connection

@@ -74,8 +74,8 @@ class HygieneRecord(models.Model):
         null=True,
         blank=True,
         related_name='hygiene_records',
-        help_text=_('Return that triggered this cleaning',
-        verbose_name=_('related_return'))
+        help_text=_('Return that triggered this cleaning'),
+        verbose_name=_('related_return')
     )
     
     # Details

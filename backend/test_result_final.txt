@@ -1,0 +1,20 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.9, pytest-9.0.2, pluggy-1.6.0 -- C:\Users\pc\Desktop\ReadyRent_Gala\backend\venv\Scripts\python.exe
+cachedir: .pytest_cache
+django: version: 5.2.9, settings: config.test_settings (from ini)
+rootdir: C:\Users\pc\Desktop\ReadyRent_Gala\backend
+configfile: pytest.ini
+plugins: anyio-4.12.0, locust-2.43.0, cov-7.0.0, django-4.11.1, mock-3.15.1
+collecting ... collected 9 items
+
+tests/unit/test_payments_serializers.py::TestPaymentMethodSerializer::test_payment_method_serialization PASSED [ 11%]
+tests/unit/test_payments_serializers.py::TestPaymentCreateSerializer::test_payment_create_validation_baridimob PASSED [ 22%]
+tests/unit/test_payments_serializers.py::TestPaymentCreateSerializer::test_payment_create_validation_bank_card PASSED [ 33%]
+tests/unit/test_payments_serializers.py::TestPaymentSerializer::test_payment_serialization PASSED [ 44%]
+tests/unit/test_payments_views.py::TestPaymentViewSet::test_list_payments_requires_auth PASSED [ 55%]
+tests/unit/test_payments_views.py::TestPaymentViewSet::test_list_payments_authenticated PASSED [ 66%]
+tests/unit/test_payments_views.py::TestPaymentViewSet::test_payment_status_access PASSED [ 77%]
+tests/unit/test_payments_views.py::TestPaymentCreateView::test_create_payment_success PASSED [ 88%]
+tests/unit/test_payments_views.py::TestPaymentCreateView::test_create_payment_validation_error PASSED [100%]
+
+============================== 9 passed in 1.99s ==============================
