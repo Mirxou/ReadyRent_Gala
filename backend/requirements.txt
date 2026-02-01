@@ -148,3 +148,4 @@ djangorestframework
 celery
 sentry-sdk
 django-environ
+django-cors-headers
