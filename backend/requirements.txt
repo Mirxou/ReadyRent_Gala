@@ -145,3 +145,5 @@ gunicorn
 psycopg2-binary==2.9.11
 Django>=5.0
 djangorestframework
+celery
+sentry-sdk
