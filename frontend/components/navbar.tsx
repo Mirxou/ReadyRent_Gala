@@ -12,6 +12,15 @@ import { Badge } from '@/components/ui/badge';
 import { useState, useEffect } from 'react';
 import { useTheme } from 'next-themes';
 import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
+import { motion, useScroll } from 'framer-motion';
+import {
   Dialog,
   DialogContent,
   DialogDescription,
