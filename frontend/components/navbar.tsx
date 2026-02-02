@@ -104,7 +104,7 @@ export function Navbar() {
           <div className="hidden md:flex items-center space-x-4">
             {/* Language Switcher */}
             <LanguageSwitcher />
-            
+
             {/* Theme Toggle */}
             {mounted && (
               <Button
@@ -139,7 +139,11 @@ export function Navbar() {
                   </Button>
                 </Link>
                 <Button
-                  onClick={logout}
+                  onClick={() => {
+                    if (window.confirm('هل أنت متأكد من تسجيل الخروج؟')) {
+                      logout();
+                    }
+                  }}
                   className="rounded-full bg-gradient-to-r from-gala-purple to-gala-pink hover:opacity-90 transition-all font-semibold"
                 >
                   تسجيل الخروج
