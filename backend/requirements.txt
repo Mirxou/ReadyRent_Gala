@@ -153,3 +153,4 @@ drf-spectacular
 djangorestframework-simplejwt
 django-filter
 channels
+openai
