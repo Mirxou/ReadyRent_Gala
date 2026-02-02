@@ -7,15 +7,15 @@ import { TiltCard } from "@/components/ui/tilt-card";
 import { ParticleField } from "@/components/ui/particle-field";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { ArrowDown, Sparkles, Zap, Star } from 'lucide-react';
-import { useInView } from 'react-intersection-observer';
+import { motion, useScroll, useTransform } from "framer-motion";
+import { ArrowDown, Sparkles, Zap, Star } from 'lucide-react';
 
 export default function HomePage() {
   const { scrollYProgress } = useScroll();
   const opacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
   const scale = useTransform(scrollYProgress, [0, 0.2], [1, 0.95]);
 
-  const [ref1, inView1] = useInView({ threshold: 0.1, triggerOnce: true });
-  const [ref2, inView2] = useInView({ threshold: 0.1, triggerOnce: true });
+
 
   return (
     <div className="flex flex-col min-h-screen relative">
@@ -95,12 +95,12 @@ export default function HomePage() {
 
       {/* SECTION 2: FEATURES WITH CARDS */}
       <section
-        ref={ref1}
         className="py-32 px-6 md:px-12 max-w-7xl mx-auto relative z-10"
       >
         <motion.div
           initial={{ opacity: 0, y: 50 }}
-          animate={inView1 ? { opacity: 1, y: 0 } : {}}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.8 }}
           className="text-center mb-20"
         >
@@ -133,7 +133,8 @@ export default function HomePage() {
             <motion.div
               key={index}
               initial={{ opacity: 0, y: 50 }}
-              animate={inView1 ? { opacity: 1, y: 0 } : {}}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
               transition={{ duration: 0.8, delay: index * 0.2 }}
             >
               <TiltCard className="h-full">
@@ -152,12 +153,12 @@ export default function HomePage() {
 
       {/* SECTION 3: PRODUCTS SHOWCASE */}
       <section
-        ref={ref2}
         className="py-32 px-6 md:px-12 bg-gradient-to-b from-background to-gala-purple/5 relative z-10"
       >
         <motion.div
           initial={{ opacity: 0, y: 50 }}
-          animate={inView2 ? { opacity: 1, y: 0 } : {}}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.8 }}
           className="max-w-7xl mx-auto"
         >
@@ -177,7 +178,8 @@ export default function HomePage() {
               <motion.div
                 key={item}
                 initial={{ opacity: 0, scale: 0.9 }}
-                animate={inView2 ? { opacity: 1, scale: 1 } : {}}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true, margin: "-50px" }}
                 transition={{ duration: 0.6, delay: item * 0.15 }}
               >
                 <InteractiveProductCard
