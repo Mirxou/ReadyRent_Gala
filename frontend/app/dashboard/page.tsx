@@ -77,7 +77,7 @@ export default function DashboardPage() {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: i * 0.1 }}
             >
-              <Card className="card-glass border-0 overflow-hidden group hover:glow-purple transition-all duration-500">
+              <Card className="card-glass border-0 overflow-hidden group hover:glow-purple transition-all duration-500 animate-medical-glow">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 blur-3xl -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-700" />
                 <CardContent className="p-6 relative z-10">
                   <div className="flex justify-between items-start mb-4">

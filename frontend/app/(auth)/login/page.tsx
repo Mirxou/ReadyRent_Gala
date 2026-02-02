@@ -93,7 +93,7 @@ export default function LoginPage() {
               <Input
                 id="password"
                 type={showPassword ? "text" : "password"}
-                className="h-14 rounded-2xl border-white/10 bg-white/5 focus:bg-white/10 focus:ring-gala-purple/30 transition-all text-lg pr-12" // Increased padding for icon
+                className="pr-10 h-14 bg-white/5 border-white/10 text-lg rounded-2xl focus:bg-white/10 transition-all animate-medical-glow"
                 {...register('password', { required: 'كلمة المرور مطلوبة' })}
               />
               <Button
