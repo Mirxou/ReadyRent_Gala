@@ -89,18 +89,18 @@ export default function RegisterPage() {
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="confirmPassword" className="text-sm font-bold mr-1">تأكيد كلمة المرور</Label>
+            <Label htmlFor="password_confirm" className="text-sm font-bold mr-1">تأكيد كلمة المرور</Label>
             <Input
-              id="confirmPassword"
+              id="password_confirm"
               type="password"
               className="h-14 rounded-2xl border-white/10 bg-white/5 focus:bg-white/10 focus:ring-gala-purple/30 transition-all text-lg"
-              {...register('confirmPassword', {
+              {...register('password_confirm', {
                 required: 'يجب تأكيد كلمة المرور',
                 validate: (value) => value === password || 'كلمة المرور غير متطابقة',
               })}
             />
-            {errors.confirmPassword && (
-              <p className="text-xs text-red-400 font-bold mr-1">{errors.confirmPassword.message as string}</p>
+            {errors.password_confirm && (
+              <p className="text-xs text-red-400 font-bold mr-1">{errors.password_confirm.message as string}</p>
             )}
           </div>
           <Button type="submit" className="w-full h-14 rounded-2xl bg-gradient-to-r from-gala-purple to-gala-pink hover:opacity-90 shadow-lg glow-purple font-black text-lg transition-all" disabled={isLoading}>
