@@ -14,8 +14,8 @@ export default function HomePage() {
   const opacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
   const scale = useTransform(scrollYProgress, [0, 0.2], [1, 0.95]);
 
-  const [ref1, inView1] = useInView({ threshold: 0.3, triggerOnce: true });
-  const [ref2, inView2] = useInView({ threshold: 0.3, triggerOnce: true });
+  const [ref1, inView1] = useInView({ threshold: 0.1, triggerOnce: true });
+  const [ref2, inView2] = useInView({ threshold: 0.1, triggerOnce: true });
 
   return (
     <div className="flex flex-col min-h-screen relative">
