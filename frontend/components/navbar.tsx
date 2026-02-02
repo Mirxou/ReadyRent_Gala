@@ -212,7 +212,11 @@ export function Navbar() {
                     <>
                       <Link href="/dashboard" className="text-2xl font-medium text-foreground dark:text-white/90 hover:text-gala-purple dark:hover:text-gala-purple transition-colors" onClick={() => setMobileMenuOpen(false)}>لوحة التحكم</Link>
                       <Link href="/profile" className="text-2xl font-medium text-foreground dark:text-white/90 hover:text-gala-purple dark:hover:text-gala-purple transition-colors" onClick={() => setMobileMenuOpen(false)}>الملف الشخصي</Link>
-                      <Button onClick={logout} className="w-full mt-8 rounded-full bg-gradient-to-r from-gala-purple to-gala-pink font-bold">تسجيل الخروج</Button>
+                      <Button onClick={() => {
+                        if (window.confirm('هل أنت متأكد من تسجيل الخروج؟')) {
+                          logout();
+                        }
+                      }} className="w-full mt-8 rounded-full bg-gradient-to-r from-gala-purple to-gala-pink font-bold">تسجيل الخروج</Button>
                     </>
                   ) : (
                     <div className="flex flex-col gap-4 mt-8">
