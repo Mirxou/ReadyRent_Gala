@@ -87,7 +87,7 @@ export function Navbar() {
             </Link>
 
             {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-8">
+            <div className="hidden xl:flex items-center space-x-8">
               {[
                 { label: 'المنتجات', href: '/products' },
                 { label: 'الحزم', href: '/bundles' },
@@ -116,7 +116,7 @@ export function Navbar() {
             </div>
 
             {/* Desktop Actions */}
-            <div className="hidden md:flex items-center space-x-4">
+            <div className="hidden xl:flex items-center space-x-4">
               {/* Language Switcher */}
               <LanguageSwitcher />
 
@@ -175,7 +175,7 @@ export function Navbar() {
             </div>
 
             {/* Mobile Menu Button */}
-            <div className="md:hidden flex items-center gap-2">
+            <div className="xl:hidden flex items-center gap-2">
               {mounted && (
                 <Button
                   variant="ghost"
