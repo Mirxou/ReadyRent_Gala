@@ -7,8 +7,6 @@ import { TiltCard } from "@/components/ui/tilt-card";
 import { ParticleField } from "@/components/ui/particle-field";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { ArrowDown, Sparkles, Zap, Star } from 'lucide-react';
-import { motion, useScroll, useTransform } from "framer-motion";
-import { ArrowDown, Sparkles, Zap, Star } from 'lucide-react';
 
 export default function HomePage() {
   const { scrollYProgress } = useScroll();
