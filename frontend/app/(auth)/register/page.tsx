@@ -56,7 +56,7 @@ export default function RegisterPage() {
             <Label htmlFor="username" className="text-sm font-bold mr-1">اسم المستخدم</Label>
             <Input
               id="username"
-              className="h-14 rounded-2xl border-white/10 bg-white/5 focus:bg-white/10 focus:ring-gala-purple/30 transition-all text-lg"
+              className="h-14 rounded-2xl border-white/10 bg-white/5 focus:bg-white/10 focus:ring-gala-purple/30 transition-all text-lg animate-medical-glow"
               {...register('username', { required: 'اسم المستخدم مطلوب' })}
             />
             {errors.username && (
@@ -69,7 +69,7 @@ export default function RegisterPage() {
               id="email"
               type="email"
               placeholder="name@example.com"
-              className="h-14 rounded-2xl border-white/10 bg-white/5 focus:bg-white/10 focus:ring-gala-purple/30 transition-all text-lg"
+              className="h-14 rounded-2xl border-white/10 bg-white/5 focus:bg-white/10 focus:ring-gala-purple/30 transition-all text-lg animate-medical-glow"
               {...register('email', { required: 'البريد الإلكتروني مطلوب' })}
             />
             {errors.email && (
@@ -82,7 +82,7 @@ export default function RegisterPage() {
               <Input
                 id="password"
                 type={showPassword ? "text" : "password"}
-                className="h-14 rounded-2xl border-white/10 bg-white/5 focus:bg-white/10 focus:ring-gala-purple/30 transition-all text-lg pr-12"
+                className="h-14 rounded-2xl border-white/10 bg-white/5 focus:bg-white/10 focus:ring-gala-purple/30 transition-all text-lg pr-12 animate-medical-glow"
                 {...register('password', {
                   required: 'كلمة المرور مطلوبة',
                   minLength: { value: 8, message: 'كلمة المرور يجب أن تكون 8 أحرف على الأقل' },
@@ -108,7 +108,7 @@ export default function RegisterPage() {
               <Input
                 id="password_confirm"
                 type={showConfirmPassword ? "text" : "password"}
-                className="h-14 rounded-2xl border-white/10 bg-white/5 focus:bg-white/10 focus:ring-gala-purple/30 transition-all text-lg pr-12"
+                className="h-14 rounded-2xl border-white/10 bg-white/5 focus:bg-white/10 focus:ring-gala-purple/30 transition-all text-lg pr-12 animate-medical-glow"
                 {...register('password_confirm', {
                   required: 'يجب تأكيد كلمة المرور',
                   validate: (value) => value === password || 'كلمة المرور غير متطابقة',

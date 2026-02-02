@@ -80,7 +80,7 @@ export default function LoginPage() {
               id="email"
               type="email"
               placeholder="name@example.com"
-              className="h-14 rounded-2xl border-white/10 bg-white/5 focus:bg-white/10 focus:ring-gala-purple/30 transition-all text-lg"
+              className="h-14 rounded-2xl border-white/10 bg-white/5 focus:bg-white/10 focus:ring-gala-purple/30 transition-all text-lg animate-medical-glow"
               {...register('email', { required: 'البريد الإلكتروني مطلوب' })}
             />
             {errors.email && (
