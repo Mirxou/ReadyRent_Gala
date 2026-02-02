@@ -224,7 +224,16 @@ export default function HomePage() {
             ابدأ رحلتك نحو الأناقة الاستثنائية اليوم
           </p>
           <MagneticButton variant="primary" withConfetti className="text-xl px-12 py-6">
-            <Link href="/register">ابدأ الآن</Link>
+            <button onClick={() => {
+              const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
+              if (token) {
+                window.location.href = '/products';
+              } else {
+                window.location.href = '/register';
+              }
+            }}>
+              ابدأ الآن
+            </button>
           </MagneticButton>
         </motion.div>
       </section>
