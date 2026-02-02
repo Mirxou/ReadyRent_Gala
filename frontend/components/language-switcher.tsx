@@ -7,6 +7,8 @@ import { useLanguageStore } from '@/lib/store';
 import { languages } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
+import { toast } from 'sonner';
+
 export function LanguageSwitcher() {
   const { language, setLanguage } = useLanguageStore();
   const [isOpen, setIsOpen] = useState(false);
@@ -53,6 +55,22 @@ export function LanguageSwitcher() {
                 <button
                   key={lang.code}
                   onClick={() => {
+                    if (lang.code === 'en') {
+                      toast.info('Coming Soon / قريباً', {
+                        description: 'We are crafting the English experience for you.',
+                        className: 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white border-0',
+                      });
+                      setIsOpen(false);
+                      return;
+                    }
+                    if (lang.code === 'fr') {
+                      toast.info('Bientôt Disponible / قريباً', {
+                        description: 'Nous préparons la version française.',
+                        className: 'bg-gradient-to-r from-pink-600 to-rose-600 text-white border-0',
+                      });
+                      setIsOpen(false);
+                      return;
+                    }
                     setLanguage(lang.code);
                     setIsOpen(false);
                   }}
