@@ -207,6 +207,7 @@ export function Navbar() {
                       { label: 'الحرفيات', href: '/artisans' },
                       { label: 'المدونة', href: '/blog' },
                       { label: 'الأسئلة الشائعة', href: '/faq' },
+                      { label: 'عن غالا', href: '/about' },
                       { label: 'الحجوزات', href: isAuthenticated ? '/dashboard/bookings' : '/login' },
                     ].map((link) => (
                       <Link
