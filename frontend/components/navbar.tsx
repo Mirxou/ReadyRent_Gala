@@ -115,8 +115,8 @@ export function Navbar() {
               )}
             </div>
 
-            {/* Desktop Actions */}
-            <div className="hidden xl:flex items-center space-x-4">
+            {/* Actions: Always visible, but some elements hidden on mobile */}
+            <div className="flex items-center space-x-2 xl:space-x-4">
               {/* Language Switcher */}
               <LanguageSwitcher />
 
@@ -155,19 +155,25 @@ export function Navbar() {
                   </Link>
                   <Button
                     onClick={() => setLogoutDialogOpen(true)}
-                    className="rounded-full bg-gradient-to-r from-gala-purple to-gala-pink hover:opacity-90 transition-all font-semibold"
+                    className="hidden xl:flex rounded-full bg-gradient-to-r from-gala-purple to-gala-pink hover:opacity-90 transition-all font-semibold"
                   >
                     تسجيل الخروج
                   </Button>
                 </div>
               ) : (
                 <div className="flex items-center space-x-2">
-                  <Link href="/login">
+                  <Link href="/login" className="hidden xl:block">
                     <Button variant="ghost" className="rounded-full hover:bg-gala-purple/10">تسجيل الدخول</Button>
                   </Link>
-                  <Link href="/register">
+                  <Link href="/register" className="hidden xl:block">
                     <Button className="rounded-full bg-gradient-to-r from-gala-purple to-gala-pink hover:opacity-90 shadow-lg glow-purple font-semibold">
                       التسجيل
+                    </Button>
+                  </Link>
+                  {/* Mobile Login Icon */}
+                  <Link href="/login" className="xl:hidden">
+                    <Button variant="ghost" size="icon" className="rounded-full hover:bg-gala-purple/10 text-foreground dark:text-white/90">
+                      <User className="h-5 w-5" />
                     </Button>
                   </Link>
                 </div>
