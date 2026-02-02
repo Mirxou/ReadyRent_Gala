@@ -10,10 +10,13 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { authApi } from '@/lib/api';
 import { toast } from 'sonner';
+import { Eye, EyeOff } from 'lucide-react';
 
 export default function RegisterPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const {
     register,
@@ -75,30 +78,52 @@ export default function RegisterPage() {
           </div>
           <div className="space-y-2">
             <Label htmlFor="password" className="text-sm font-bold mr-1">كلمة المرور</Label>
-            <Input
-              id="password"
-              type="password"
-              className="h-14 rounded-2xl border-white/10 bg-white/5 focus:bg-white/10 focus:ring-gala-purple/30 transition-all text-lg"
-              {...register('password', {
-                required: 'كلمة المرور مطلوبة',
-                minLength: { value: 8, message: 'كلمة المرور يجب أن تكون 8 أحرف على الأقل' },
-              })}
-            />
+            <div className="relative">
+              <Input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                className="h-14 rounded-2xl border-white/10 bg-white/5 focus:bg-white/10 focus:ring-gala-purple/30 transition-all text-lg pr-12"
+                {...register('password', {
+                  required: 'كلمة المرور مطلوبة',
+                  minLength: { value: 8, message: 'كلمة المرور يجب أن تكون 8 أحرف على الأقل' },
+                })}
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-white"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+              </Button>
+            </div>
             {errors.password && (
               <p className="text-xs text-red-400 font-bold mr-1">{errors.password.message as string}</p>
             )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="password_confirm" className="text-sm font-bold mr-1">تأكيد كلمة المرور</Label>
-            <Input
-              id="password_confirm"
-              type="password"
-              className="h-14 rounded-2xl border-white/10 bg-white/5 focus:bg-white/10 focus:ring-gala-purple/30 transition-all text-lg"
-              {...register('password_confirm', {
-                required: 'يجب تأكيد كلمة المرور',
-                validate: (value) => value === password || 'كلمة المرور غير متطابقة',
-              })}
-            />
+            <div className="relative">
+              <Input
+                id="password_confirm"
+                type={showConfirmPassword ? "text" : "password"}
+                className="h-14 rounded-2xl border-white/10 bg-white/5 focus:bg-white/10 focus:ring-gala-purple/30 transition-all text-lg pr-12"
+                {...register('password_confirm', {
+                  required: 'يجب تأكيد كلمة المرور',
+                  validate: (value) => value === password || 'كلمة المرور غير متطابقة',
+                })}
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-white"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              >
+                {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+              </Button>
+            </div>
             {errors.password_confirm && (
               <p className="text-xs text-red-400 font-bold mr-1">{errors.password_confirm.message as string}</p>
             )}

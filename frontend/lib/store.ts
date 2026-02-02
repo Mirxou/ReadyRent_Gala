@@ -14,7 +14,7 @@ interface AuthState {
   accessToken: string | null;
   refreshToken: string | null;
   isAuthenticated: boolean;
-  setAuth: (user: User | null, accessToken: string | null, refreshToken: string | null) => void;
+  setAuth: (user: User | null, accessToken: string | null, refreshToken: string | null, remember?: boolean) => void;
   logout: () => void;
 }
 
@@ -25,7 +25,7 @@ export const useAuthStore = create<AuthState>()(
       accessToken: null,
       refreshToken: null,
       isAuthenticated: false,
-      setAuth: (user, accessToken, refreshToken) => {
+      setAuth: (user, accessToken, refreshToken, remember = true) => {
         set({
           user,
           accessToken,
@@ -33,8 +33,17 @@ export const useAuthStore = create<AuthState>()(
           isAuthenticated: !!user && !!accessToken,
         });
         if (typeof window !== 'undefined') {
-          if (accessToken) localStorage.setItem('access_token', accessToken);
-          if (refreshToken) localStorage.setItem('refresh_token', refreshToken);
+          if (remember) {
+            if (accessToken) localStorage.setItem('access_token', accessToken);
+            if (refreshToken) localStorage.setItem('refresh_token', refreshToken);
+            sessionStorage.removeItem('access_token');
+            sessionStorage.removeItem('refresh_token');
+          } else {
+            if (accessToken) sessionStorage.setItem('access_token', accessToken);
+            if (refreshToken) sessionStorage.setItem('refresh_token', refreshToken);
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+          }
         }
       },
       logout: () => {
@@ -47,6 +56,8 @@ export const useAuthStore = create<AuthState>()(
         if (typeof window !== 'undefined') {
           localStorage.removeItem('access_token');
           localStorage.removeItem('refresh_token');
+          sessionStorage.removeItem('access_token');
+          sessionStorage.removeItem('refresh_token');
           window.location.href = '/';
         }
       },

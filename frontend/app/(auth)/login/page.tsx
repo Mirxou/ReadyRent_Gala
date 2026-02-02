@@ -8,14 +8,18 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { authApi } from '@/lib/api';
 import { useAuthStore } from '@/lib/store';
 import { toast } from 'sonner';
+import { Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
   const { setAuth } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
 
   const {
     register,
@@ -29,12 +33,12 @@ export default function LoginPage() {
       const response = await authApi.login(data.email, data.password);
       const { access, refresh, user } = response.data;
 
-      setAuth(user, access, refresh);
+      setAuth(user, access, refresh, rememberMe);
       toast.success('تم تسجيل الدخول بنجاح');
       router.push('/');
     } catch (error: any) {
       let errorMessage = 'حدث خطأ في تسجيل الدخول';
-      
+
       if (error.response) {
         // Server responded with error
         errorMessage = error.response.data?.error || error.response.data?.message || errorMessage;
@@ -45,7 +49,7 @@ export default function LoginPage() {
         // Something else happened
         errorMessage = error.message || errorMessage;
       }
-      
+
       toast.error(errorMessage);
       console.error('Login error:', {
         message: error.message,
@@ -85,21 +89,48 @@ export default function LoginPage() {
           </div>
           <div className="space-y-2">
             <Label htmlFor="password" className="text-sm font-bold mr-1">كلمة المرور</Label>
-            <Input
-              id="password"
-              type="password"
-              className="h-14 rounded-2xl border-white/10 bg-white/5 focus:bg-white/10 focus:ring-gala-purple/30 transition-all text-lg"
-              {...register('password', { required: 'كلمة المرور مطلوبة' })}
-            />
+            <div className="relative">
+              <Input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                className="h-14 rounded-2xl border-white/10 bg-white/5 focus:bg-white/10 focus:ring-gala-purple/30 transition-all text-lg pr-12" // Increased padding for icon
+                {...register('password', { required: 'كلمة المرور مطلوبة' })}
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-white"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+              </Button>
+            </div>
             {errors.password && (
               <p className="text-xs text-red-400 font-bold mr-1">{errors.password.message as string}</p>
             )}
           </div>
-          <div className="text-left">
+
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2 flex-row-reverse space-x-reverse">
+              <Checkbox
+                id="remember"
+                checked={rememberMe}
+                onCheckedChange={(checked: boolean | 'indeterminate') => setRememberMe(checked === true)}
+                className="border-white/20 data-[state=checked]:bg-gala-purple data-[state=checked]:border-gala-purple"
+              />
+              <label
+                htmlFor="remember"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-muted-foreground cursor-pointer"
+              >
+                تذكرني
+              </label>
+            </div>
             <Link href="/forgot-password" className="text-sm text-gala-purple hover:text-gala-pink transition-colors">
               نسيت كلمة المرور؟
             </Link>
           </div>
+
           <Button type="submit" className="w-full h-14 rounded-2xl bg-gradient-to-r from-gala-purple to-gala-pink hover:opacity-90 shadow-lg glow-purple font-black text-lg transition-all" disabled={isLoading}>
             {isLoading ? 'جاري التحقق...' : 'دخول ملكي'}
           </Button>
