@@ -5,7 +5,7 @@ nixPkgs = ["python311", "postgresql", "gcc"]
 cmds = ["python -m venv /opt/venv && . /opt/venv/bin/activate && pip install -r requirements.txt", "python manage.py collectstatic --noinput"]
 
 [phases.start]
-procfile = "web: gunicorn config.wsgi:application"
+procfile = "web: python manage.py migrate && gunicorn config.wsgi:application"
 
 [envs]
 PYTHON_VERSION = "3.11"
