@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\cms\serializers.py
+# hypothesis_version: 6.151.6
+
+['answer', 'answer_ar', 'author', 'author.email', 'author_email', 'banner_type', 'category', 'click_count', 'content', 'content_ar', 'created_at', 'created_by', 'created_by.email', 'created_by_email', 'description', 'description_ar', 'end_date', 'excerpt', 'excerpt_ar', 'featured_image', 'helpful_count', 'id', 'image', 'is_active', 'is_featured', 'link_text', 'link_text_ar', 'link_url', 'meta_description', 'meta_description_ar', 'order', 'page_type', 'position', 'published_at', 'question', 'question_ar', 'slug', 'start_date', 'status', 'title', 'title_ar', 'updated_at', 'updated_by', 'updated_by.email', 'updated_by_email', 'view_count']

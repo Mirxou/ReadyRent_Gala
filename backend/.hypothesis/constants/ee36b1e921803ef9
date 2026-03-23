@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\locations\migrations\0003_alter_address_options_alter_deliveryrequest_options_and_more.py
+# hypothesis_version: 6.151.6
+
+['-created_at', '-is_default', '-timestamp', '0002_initial', 'address', 'addresses', 'assigned_driver', 'booking', 'bookings', 'bookings.booking', 'delivery_address', 'delivery_assignments', 'delivery_request', 'delivery_requests', 'delivery_zone', 'deliveryrequest', 'deliverytracking', 'deliveryzone', 'locations', 'locations.address', 'name', 'ordering', 'pickup_address', 'pickup_requests', 'role', 'staff', 'tracking_history', 'user', 'verbose_name', 'verbose_name_plural', 'العناوين', 'العنوان', 'تتبع التوصيل', 'تتبع التوصيلات', 'طلب التوصيل', 'طلبات التوصيل', 'مناطق التوصيل', 'منطقة التوصيل']

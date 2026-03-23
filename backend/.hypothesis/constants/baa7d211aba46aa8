@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\disputes\migrations\0010_judgmentembedding.py
+# hypothesis_version: 6.151.6
+
+[100, '0009_judicialpanel', 'ID', 'JudgmentEmbedding', 'created_at', 'db_table', 'disputes', 'disputes.judgment', 'embedding', 'embedding vector', 'embedding_vector', 'id', 'indexes', 'judgment', 'judgment embedding', 'judgment embeddings', 'model version', 'model_version', 'normalized text', 'normalized_text', 'original text', 'original_text', 'updated_at', 'verbose_name', 'verbose_name_plural']

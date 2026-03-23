@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\standard_core\migrations\0005_alter_booking_locked_price.py
+# hypothesis_version: 6.151.6
+
+['0004_booking', 'booking', 'locked_price', 'standard_core']

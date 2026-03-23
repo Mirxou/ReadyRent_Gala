@@ -1,0 +1,4 @@
+[tool.mutmut]
+paths_to_mutate = ["dummy_mutation.py"]
+tests_dir = ["."]
+runner = "python -m pytest test_dummy_mutation.py -q --disable-warnings"

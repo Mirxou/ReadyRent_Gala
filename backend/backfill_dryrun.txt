@@ -1,0 +1,34 @@
+DEBUG: sys.argv = ['manage.py', 'encrypt_pii_fields', '--dry-run', '--batch=500']
+{"event": "Patched drf_spectacular._map_model_field to handle gettext_lazy verbose_name"}
+{"event": "Patched drf_spectacular._resolve_path_parameters"}
+{"event": "DeepFace not found. Identity verification will be skipped."}
+
+============================================================
+  PHASE 16B — PII BACKFILL [DRY-RUN]
+============================================================
+
+ℹ️  Users to process: 234
+ℹ️  Batch size: 500
+ℹ️  Force re-hash: False
+ℹ️  Dry run: True
+  Batch offset=     0 | processed=233 | failed=0 | total_done=233
+
+────────────────────────────────────────────────────────────
+  SAMPLE ROW — BEFORE / AFTER
+────────────────────────────────────────────────────────────
+  id:              288
+  email:           debug_user_f788c7@example.com
+  email_hash BEFORE: NULL
+  phone:           NULL
+  phone_hash BEFORE: NULL
+
+============================================================
+  PHASE 16B SUMMARY [DRY-RUN]
+============================================================
+  Rows processed:  233
+  Rows skipped:    1
+  Rows failed:     0
+  Time elapsed:    1.93s
+
+  ✅ Dry run complete. Run without --dry-run to apply.
+============================================================

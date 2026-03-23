@@ -49,11 +49,11 @@ export function Chatbot({ className = '' }: ChatbotProps) {
       const response = await chatbotApi.createSession({ language: 'ar' });
       const session = response.data;
       setSessionId(session.id);
-      
+
       // Add welcome message
       setMessages([{
         id: Date.now(),
-        content: 'مرحباً! أنا مساعد ReadyRent.Gala. كيف يمكنني مساعدتك اليوم؟',
+        content: 'مرحباً! أنا مساعد STANDARD.Rent. كيف يمكنني مساعدتك اليوم؟',
         sender: 'assistant',
         timestamp: new Date().toISOString(),
       }]);
@@ -83,7 +83,7 @@ export function Chatbot({ className = '' }: ChatbotProps) {
       if (sessionId) {
         const response = await chatbotApi.sendMessage(sessionId, inputMessage);
         const { user_message, assistant_message } = response.data;
-        
+
         setMessages((prev) => [
           ...prev,
           {
@@ -135,9 +135,8 @@ export function Chatbot({ className = '' }: ChatbotProps) {
       {/* Floating Button */}
       <Button
         onClick={() => setIsOpen(!isOpen)}
-        className={`fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-all ${
-          isOpen ? 'hidden' : 'block'
-        } ${className}`}
+        className={`fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-all ${isOpen ? 'hidden' : 'block'
+          } ${className}`}
         style={{ backgroundColor: '#25D366' }}
       >
         <MessageCircle className="h-6 w-6 text-white" />
@@ -150,7 +149,7 @@ export function Chatbot({ className = '' }: ChatbotProps) {
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b">
             <CardTitle className="flex items-center gap-2">
               <Bot className="h-5 w-5" />
-              مساعد ReadyRent.Gala
+              مساعد STANDARD.Rent
             </CardTitle>
             <Button
               variant="ghost"
@@ -176,11 +175,10 @@ export function Chatbot({ className = '' }: ChatbotProps) {
                   className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   <div
-                    className={`max-w-[80%] rounded-lg p-3 ${
-                      message.sender === 'user'
+                    className={`max-w-[80%] rounded-lg p-3 ${message.sender === 'user'
                         ? 'bg-primary text-primary-foreground'
                         : 'bg-muted'
-                    }`}
+                      }`}
                   >
                     <div className="flex items-start gap-2">
                       {message.sender === 'assistant' && (

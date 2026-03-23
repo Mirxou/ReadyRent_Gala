@@ -1,242 +1,169 @@
 "use client";
 
 import Link from 'next/link';
-import { InteractiveProductCard } from "@/components/ui/interactive-product-card";
-import { MagneticButton } from "@/components/ui/magnetic-button";
-import { TiltCard } from "@/components/ui/tilt-card";
-import { ParticleField } from "@/components/ui/particle-field";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { ArrowDown, Sparkles, Zap, Star } from 'lucide-react';
+import { SovereignButton } from "@/components/sovereign/sovereign-button";
+import { GlassPanel } from "@/components/sovereign/glass-panel";
+import { IdentityShield } from "@/components/sovereign/identity-shield";
+import { ShieldCheck, LockKeyhole, FileSignature, ArrowLeft } from 'lucide-react';
 
 export default function HomePage() {
   const { scrollYProgress } = useScroll();
   const opacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
   const scale = useTransform(scrollYProgress, [0, 0.2], [1, 0.95]);
 
-
-
   return (
-    <div className="flex flex-col min-h-screen relative">
-      {/* Particle Background */}
-      <ParticleField />
+    <div className="flex flex-col min-h-screen relative overflow-hidden">
 
-      {/* SECTION 1: VIBRANT HERO */}
-      <section className="h-screen w-full relative flex flex-col justify-center items-center overflow-hidden">
-        {/* Animated Gradient Background */}
-        <div className="absolute inset-0 z-0 bg-gradient-animated" />
+      {/* SECTION 1: THE SOVEREIGN GATE (Hero) */}
+      <section className="h-screen w-full relative flex flex-col justify-center items-center">
 
-        {/* Radial Glow */}
-        <div className="absolute inset-0 z-0">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gala-purple/30 rounded-full blur-3xl animate-pulse-glow" />
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gala-pink/30 rounded-full blur-3xl animate-pulse-glow" style={{ animationDelay: '1s' }} />
+        {/* Abstract Background (Quiet Authority) */}
+        <div className="absolute inset-0 z-0 bg-background">
+          <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-sovereign-blue/5 to-transparent dark:from-sovereign-gold/5" />
         </div>
 
-        {/* Content Layer */}
+        {/* Content */}
         <motion.div
           style={{ opacity, scale }}
-          className="z-20 text-center max-w-5xl px-6"
+          className="z-20 text-center max-w-4xl px-6 flex flex-col items-center"
         >
+          {/* Status Badge */}
           <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className="mb-8 inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white/10 dark:bg-white/10 backdrop-blur-xl border border-gray-200 dark:border-white/20"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, ease: "easeOut" }}
+            className="mb-8"
           >
-            <Sparkles className="w-5 h-5 text-gala-gold animate-pulse" />
-            <span className="text-gray-900 dark:text-white/90 font-medium drop-shadow-lg">مجموعة 2026 الحصرية</span>
+            <div className="px-4 py-1 rounded-full border border-sovereign-gold/30 bg-sovereign-gold/5 text-sovereign-gold text-xs font-bold tracking-[0.2em] uppercase">
+              The Algerian Standard
+            </div>
           </motion.div>
 
+          {/* Title */}
           <motion.h1
-            initial={{ y: 100, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-            className="text-mega mb-6 animate-float"
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+            className="text-6xl md:text-9xl font-black tracking-tighter text-foreground mb-6"
           >
-            READY RENT
+            STANDARD<span className="text-sovereign-gold">.</span>
           </motion.h1>
 
-          <motion.div
-            initial={{ y: 50, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.4, duration: 1, ease: "easeOut" }}
-            className="flex flex-col items-center gap-8"
+          {/* Subtitle */}
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5, duration: 1 }}
+            className="text-xl md:text-2xl text-muted-foreground font-light mb-12 tracking-wide"
           >
-            <p className="text-2xl md:text-4xl text-foreground dark:text-white/90 font-light tracking-widest">
-              أناقة لا تُنسى • تجربة استثنائية
-            </p>
+            السيادة. الفخامة. الثقة المطلقة.
+          </motion.p>
 
-            <div className="flex gap-4 mt-8">
-              <MagneticButton variant="primary" withConfetti>
-                <Link href="/products" className="flex items-center gap-2">
-                  <Zap className="w-5 h-5" />
-                  استكشف المجموعة
-                </Link>
-              </MagneticButton>
+          {/* Actions */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8, duration: 0.8 }}
+            className="flex flex-col md:flex-row gap-6 items-center"
+          >
+            <Link href="/products">
+              <SovereignButton size="xl" variant="primary" withShimmer>
+                تصفح المجموعة
+              </SovereignButton>
+            </Link>
 
-              <MagneticButton variant="outline">
-                <Link href="/about">تعرف علينا</Link>
-              </MagneticButton>
-            </div>
+            <Link href="/auth/register">
+              <SovereignButton size="lg" variant="secondary">
+                انضم إلى النخبة
+              </SovereignButton>
+            </Link>
           </motion.div>
         </motion.div>
 
-        {/* Scroll Indicator */}
+        {/* Scroll Hint */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 1, duration: 1 }}
-          className="absolute bottom-12 left-1/2 -translate-x-1/2 z-20 text-foreground dark:text-white/70 animate-bounce"
+          transition={{ delay: 2, duration: 1 }}
+          className="absolute bottom-12 text-sovereign-gold/50 animate-pulse"
         >
-          <ArrowDown className="w-6 h-6" />
+          <div className="h-16 w-[1px] bg-gradient-to-b from-transparent via-sovereign-gold to-transparent mx-auto" />
         </motion.div>
       </section>
 
-      {/* SECTION 2: FEATURES WITH CARDS */}
-      <section
-        className="py-32 px-6 md:px-12 max-w-7xl mx-auto relative z-10"
-      >
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.8 }}
-          className="text-center mb-20"
-        >
-          <h2 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-gala-purple via-gala-pink to-gala-gold bg-clip-text text-transparent">
-            لماذا ReadyRent؟
-          </h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            تجربة فريدة تجمع بين الأناقة والابتكار
-          </p>
-        </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {[
-            {
-              icon: <Star className="w-12 h-12 text-gala-gold" />,
-              title: "تشكيلة حصرية",
-              description: "فساتين مختارة بعناية من أرقى المصممين"
-            },
-            {
-              icon: <Zap className="w-12 h-12 text-gala-purple" />,
-              title: "تجربة سلسة",
-              description: "حجز سريع وتوصيل في نفس اليوم"
-            },
-            {
-              icon: <Sparkles className="w-12 h-12 text-gala-pink" />,
-              title: "أسعار مناسبة",
-              description: "أناقة فاخرة بأسعار معقولة"
-            }
-          ].map((feature, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.8, delay: index * 0.2 }}
-            >
-              <TiltCard className="h-full">
-                <div className="p-8 h-full flex flex-col items-center text-center gap-6">
-                  <div className="p-4 rounded-2xl bg-gradient-to-br from-gala-purple/20 to-gala-pink/20 glow-purple">
-                    {feature.icon}
-                  </div>
-                  <h3 className="text-2xl font-bold">{feature.title}</h3>
-                  <p className="text-muted-foreground">{feature.description}</p>
-                </div>
-              </TiltCard>
-            </motion.div>
-          ))}
-        </div>
-      </section>
-
-      {/* SECTION 3: PRODUCTS SHOWCASE */}
-      <section
-        className="py-32 px-6 md:px-12 bg-gradient-to-b from-background to-gala-purple/5 relative z-10"
-      >
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.8 }}
-          className="max-w-7xl mx-auto"
-        >
-          <div className="text-center mb-20">
-            <h2 className="text-5xl md:text-7xl font-bold mb-6">
-              <span className="bg-gradient-to-r from-gala-cyan via-gala-purple to-gala-pink bg-clip-text text-transparent">
-                مختارات الموسم
-              </span>
-            </h2>
-            <p className="text-xl text-muted-foreground">
-              اكتشف أحدث إضافاتنا
-            </p>
+      {/* SECTION 2: THE CONSTITUTION (Pillars) */}
+      <section className="py-32 px-6 relative z-10 bg-gradient-to-b from-background to-sovereign-blue/5">
+        <div className="max-w-7xl mx-auto">
+          <div className="mb-24 text-center">
+            <h2 className="text-3xl font-bold text-sovereign-blue dark:text-sovereign-white mb-4">دستور STANDARD</h2>
+            <div className="h-1 w-24 bg-sovereign-gold mx-auto rounded-full" />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[1, 2, 3].map((item) => (
-              <motion.div
-                key={item}
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ duration: 0.6, delay: item * 0.15 }}
-              >
-                <InteractiveProductCard
-                  product={{
-                    id: item,
-                    name_ar: `فستان سهرة فاخر ${item}`,
-                    price_per_day: 15000,
-                    primary_image: `https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=800&q=80&auto=format&fit=crop`,
-                    category: { name_ar: "فساتين" },
-                    is_featured: true
-                  }}
-                />
-              </motion.div>
-            ))}
-          </div>
+            {/* Pillar 1 */}
+            <GlassPanel className="p-10 flex flex-col items-center text-center gap-6 group hover:border-sovereign-gold/50 transition-colors duration-500">
+              <div className="p-4 rounded-full bg-sovereign-blue/5 text-sovereign-blue dark:text-sovereign-gold dark:bg-sovereign-gold/10">
+                <ShieldCheck className="w-8 h-8" />
+              </div>
+              <h3 className="text-xl font-bold">الهوية السيادية</h3>
+              <p className="text-muted-foreground leading-relaxed">
+                نظام تحقق صارم يضمن أن كل عضو هو "سيد" موثوق. شارتك الذهبية هي جواز مرورك.
+              </p>
+              <div className="mt-4 opacity-50 group-hover:opacity-100 transition-opacity">
+                <IdentityShield status="verified" showLabel={false} />
+              </div>
+            </GlassPanel>
 
-          <div className="text-center mt-16">
-            <MagneticButton variant="secondary" withConfetti>
-              <Link href="/products" className="flex items-center gap-2">
-                عرض جميع المنتجات
-                <ArrowDown className="w-5 h-5 rotate-[-90deg]" />
-              </Link>
-            </MagneticButton>
+            {/* Pillar 2 */}
+            <GlassPanel className="p-10 flex flex-col items-center text-center gap-6 group hover:border-sovereign-gold/50 transition-colors duration-500">
+              <div className="p-4 rounded-full bg-sovereign-blue/5 text-sovereign-blue dark:text-sovereign-gold dark:bg-sovereign-gold/10">
+                <LockKeyhole className="w-8 h-8" />
+              </div>
+              <h3 className="text-xl font-bold">تجميد القيمة</h3>
+              <p className="text-muted-foreground leading-relaxed">
+                عند الحجز، نجمد السعر والزمن. لا مفاجآت، لا مزايدات. كلمتك هي العقد.
+              </p>
+            </GlassPanel>
+
+            {/* Pillar 3 */}
+            <GlassPanel className="p-10 flex flex-col items-center text-center gap-6 group hover:border-sovereign-gold/50 transition-colors duration-500">
+              <div className="p-4 rounded-full bg-sovereign-blue/5 text-sovereign-blue dark:text-sovereign-gold dark:bg-sovereign-gold/10">
+                <FileSignature className="w-8 h-8" />
+              </div>
+              <h3 className="text-xl font-bold">العقد الذكي</h3>
+              <p className="text-muted-foreground leading-relaxed">
+                كل معاملة محمية بعقد رقمي ملزم. حقوق المالك والمستأجر محفوظة بقوة القانون.
+              </p>
+            </GlassPanel>
           </div>
-        </motion.div>
+        </div>
       </section>
 
-      {/* SECTION 4: CTA */}
-      <section className="py-32 px-6 relative z-10 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-animated opacity-20" />
-        <div className="absolute inset-0 glow-purple" />
+      {/* SECTION 3: THE CALL (CTA) */}
+      <section className="py-40 px-6 relative overflow-hidden">
+        {/* Background Glow */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-sovereign-gold/5 rounded-full blur-[120px]" />
 
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
-          className="max-w-4xl mx-auto text-center relative z-10"
-        >
-          <h2 className="text-5xl md:text-7xl font-bold mb-8 text-mega">
-            جاهز للتألق؟
+        <div className="max-w-4xl mx-auto text-center relative z-10">
+          <h2 className="text-5xl md:text-7xl font-bold mb-8 text-foreground tracking-tight">
+            ارتقِ بمعاييرك.
           </h2>
-          <p className="text-2xl text-muted-foreground mb-12">
-            ابدأ رحلتك نحو الأناقة الاستثنائية اليوم
+          <p className="text-xl text-muted-foreground mb-12 max-w-2xl mx-auto">
+            أنت لا تستأجر سيارة أو فستاناً. أنت تدخل عالماً لا يقبل إلا الأفضل.
           </p>
-          <MagneticButton variant="primary" withConfetti className="text-xl px-12 py-6">
-            <button onClick={() => {
-              const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
-              if (token) {
-                window.location.href = '/products';
-              } else {
-                window.location.href = '/register';
-              }
-            }}>
-              ابدأ الآن
-            </button>
-          </MagneticButton>
-        </motion.div>
+
+          <Link href="/products">
+            <SovereignButton size="xl" variant="primary" className="shadow-2xl shadow-sovereign-gold/20">
+              <span className="flex items-center gap-4">
+                ابدأ الرحلة <ArrowLeft className="w-6 h-6" />
+              </span>
+            </SovereignButton>
+          </Link>
+        </div>
       </section>
+
     </div>
   );
 }

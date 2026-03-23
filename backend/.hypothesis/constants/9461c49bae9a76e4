@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\locations\serializers.py
+# hypothesis_version: 6.151.6
+
+['assigned_driver', 'booking', 'booking_details', 'center_latitude', 'center_longitude', 'city', 'country', 'created_at', 'current_latitude', 'current_longitude', 'delivery_address', 'delivery_date', 'delivery_fee', 'delivery_request', 'delivery_time_slot', 'delivery_type', 'delivery_zone', 'delivery_zone_name', 'description', 'full_address', 'google_place_id', 'id', 'is_active', 'is_default', 'label', 'last_tracking_update', 'latitude', 'longitude', 'name', 'name_ar', 'notes', 'pickup_address', 'pickup_date', 'pickup_time_slot', 'postal_code', 'product_name', 'radius_km', 'state', 'status', 'street', 'timestamp', 'tracking_history', 'updated_at', 'user', 'user_email']

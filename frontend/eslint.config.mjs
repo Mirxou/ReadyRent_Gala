@@ -8,10 +8,12 @@ const eslintConfig = defineConfig([
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:
-    ".next/**",
+    "**/.next/**",
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // behavior_layer is an experimental “sandbox” area; exclude from CI lint gate.
+    "behavior_layer/**",
   ]),
 ]);
 

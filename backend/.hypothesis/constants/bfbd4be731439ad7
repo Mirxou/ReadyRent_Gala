@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\standard_core\migrations\0007_constitution.py
+# hypothesis_version: 6.151.6
+
+['10000.00', '5000.00', 'Constitution', 'ID', 'auto_approve_limit', 'high_value_threshold', 'id', 'is_active', 'is_halted', 'laws', 'standard_core', 'updated_at', 'verbose_name', 'verbose_name_plural']

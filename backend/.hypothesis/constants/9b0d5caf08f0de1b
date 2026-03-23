@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\maintenance\services.py
+# hypothesis_version: 6.151.6
+
+['in_progress', 'scheduled', 'scheduled_start']

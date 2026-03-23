@@ -118,6 +118,21 @@ class PaymentWebhook(models.Model):
         verbose_name=_('payment'))
     payment_method = models.CharField(_('payment method'), max_length=20)
     event_type = models.CharField(_('event type'), max_length=50)
+    
+    # 🔐 IDEMPOTENCY PROTECTION (Phase 16.1)
+    # CRITICAL: event_id MUST be provided by gateway
+    # null=False ensures uniqueness constraint works correctly in PostgreSQL
+    event_id = models.CharField(
+        _('event ID'),
+        max_length=150,
+        unique=True,
+        db_index=True,
+        null=False,  # ← ENFORCED: No null values allowed
+        blank=False,  # ← ENFORCED: Required in forms/serializers
+        default='legacy_event', # Temporary default for migration
+        help_text=_('Gateway event ID for idempotency protection')
+    )
+    
     payload = models.JSONField(_('payload'), default=dict)
     headers = models.JSONField(_('headers'), default=dict, blank=True)
     processed = models.BooleanField(_('processed'), default=False)
@@ -128,6 +143,128 @@ class PaymentWebhook(models.Model):
         verbose_name = _('Webhook الدفع')
         verbose_name_plural = _('Webhooks الدفع')
         ordering = ['-created_at']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['payment_method', 'event_id'],
+                name='unique_webhook_event'
+            )
+        ]
     
     def __str__(self):
         return f"Webhook {self.id} - {self.event_type} - {self.payment_method}"
+
+
+class Wallet(models.Model):
+    """
+    The Digital Vault.
+    Stores user funds.
+    CRITICAL: Never use float for balance.
+    """
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='wallet')
+    balance = models.DecimalField(_('Balance'), max_digits=12, decimal_places=2, default=0.00)
+    currency = models.CharField(max_length=3, default='DZD')
+    
+    is_frozen = models.BooleanField(default=False)
+    frozen_reason = models.CharField(max_length=255, blank=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f"Wallet ({self.user.email}): {self.balance} {self.currency}"
+
+from .states import EscrowState
+
+class EscrowHold(models.Model):
+    """
+    The Safety Lock.
+    Holds funds for a specific Booking or Dispute.
+    """
+    STATUS_CHOICES = [
+        ('held', _('Held')),
+        ('released', _('Released')),
+        ('refunded', _('Refunded')),
+        ('disputed', _('Disputed')),
+    ]
+    
+    wallet = models.ForeignKey(Wallet, on_delete=models.PROTECT, related_name='escrow_holds')
+    booking = models.OneToOneField('bookings.Booking', on_delete=models.PROTECT, related_name='escrow_hold')
+    
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    currency = models.CharField(max_length=3, default='DZD')
+    
+    # ⚠️ DEPRECATED: Use 'state' instead. Will be removed in Phase 3.
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='held')
+    
+    # ✅ CANONICAL STATE (Phase 2 Source of Truth)
+    # WARNING: Do not write directly to this field in business logic.
+    # Use EscrowEngine (Phase 3) or specific services.
+    state = models.CharField(
+        max_length=20,
+        choices=EscrowState.choices,
+        default=EscrowState.PENDING,
+        db_index=True
+    )
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    released_at = models.DateTimeField(null=True, blank=True)
+    
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['booking'],
+                name='unique_escrow_per_booking'
+            )
+        ]
+    
+    def save(self, *args, **kwargs):
+        from .context import EscrowEngineContext
+        
+        # Guard: Prevent Direct State Writse (Phase 3)
+        if self.pk:
+            current = EscrowHold.objects.get(pk=self.pk)
+            if current.state != self.state:
+                # State is changing
+                if not EscrowEngineContext.is_active():
+                    # We are changing state OUTSIDE the Engine!
+                    # For Phase 3 Migration (Strict Mode): RAISE ERROR
+                    raise ValueError(
+                        f"CRITICAL: Direct write to EscrowHold.state ({current.state} -> {self.state}) is FORBIDDEN. "
+                        "Must use EscrowEngine.transition()."
+                    )
+        
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Escrow #{self.id} ({self.amount}) - {self.state}"
+
+class WalletTransaction(models.Model):
+    """
+    The Immutable Ledger.
+    Tracks every single movement of funds.
+    """
+    TYPE_CHOICES = [
+        ('deposit', _('Deposit')),
+        ('withdrawal', _('Withdrawal')),
+        ('payment', _('Payment')),
+        ('refund', _('Refund')),
+        ('escrow_lock', _('Escrow Lock')),
+        ('escrow_release', _('Escrow Release')),
+        ('penalty', _('Penalty')),
+    ]
+    
+    wallet = models.ForeignKey(Wallet, on_delete=models.PROTECT, related_name='transactions')
+    amount = models.DecimalField(max_digits=12, decimal_places=2) # Positive or Negative
+    balance_after = models.DecimalField(max_digits=12, decimal_places=2)
+    
+    transaction_type = models.CharField(max_length=20, choices=TYPE_CHOICES)
+    reference_id = models.CharField(max_length=100, blank=True) # e.g. Payment ID, Booking ID
+    description = models.CharField(max_length=255)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        
+    def __str__(self):
+        return f"{self.transaction_type}: {self.amount} ({self.created_at})"

@@ -20,7 +20,7 @@ jest.mock('next/navigation', () => ({
 describe('Navbar', () => {
   it('renders logo', () => {
     render(<Navbar />)
-    const logo = screen.queryByAltText(/logo|readyrent/i)
+    const logo = screen.queryByAltText(/logo|standard/i)
     if (logo) {
       expect(logo).toBeInTheDocument()
     }
@@ -31,7 +31,7 @@ describe('Navbar', () => {
     // Check for common navigation links
     const productsLink = screen.queryByRole('link', { name: /products|المنتجات/i })
     const homeLink = screen.queryByRole('link', { name: /home|الرئيسية/i })
-    
+
     // At least one navigation link should exist
     expect(productsLink || homeLink).toBeTruthy()
   })

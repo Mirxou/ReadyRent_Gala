@@ -1,4 +1,4 @@
-# دليل إعداد بيئة Staging - ReadyRent.Gala
+# دليل إعداد بيئة Staging - STANDARD.Rent
 
 **التاريخ**: يناير 2026
 
@@ -13,7 +13,7 @@
 ## المتطلبات
 
 - خادم VPS أو حساب على منصة Cloud (Railway, Render, DigitalOcean, etc.)
-- Domain name لـ Staging (مثال: staging.readyrent.gala)
+- Domain name لـ Staging (مثال: staging.STANDARD.Rent)
 - إمكانية الوصول إلى قاعدة بيانات PostgreSQL
 - إمكانية الوصول إلى Redis
 
@@ -126,9 +126,9 @@
 2. **إعداد PostgreSQL**:
    ```bash
    sudo -u postgres psql
-   CREATE DATABASE readyrent_staging;
-   CREATE USER readyrent_user WITH PASSWORD 'your_password';
-   GRANT ALL PRIVILEGES ON DATABASE readyrent_staging TO readyrent_user;
+   CREATE DATABASE STANDARD_staging;
+   CREATE USER STANDARD_user WITH PASSWORD 'your_password';
+   GRANT ALL PRIVILEGES ON DATABASE STANDARD_staging TO STANDARD_user;
    \q
    ```
 
@@ -141,12 +141,12 @@
 4. **Deploy Backend**:
    ```bash
    # إنشاء مجلد للمشروع
-   sudo mkdir -p /var/www/readyrent-staging
-   sudo chown $USER:$USER /var/www/readyrent-staging
+   sudo mkdir -p /var/www/STANDARD-staging
+   sudo chown $USER:$USER /var/www/STANDARD-staging
    
    # Clone المشروع
-   cd /var/www/readyrent-staging
-   git clone https://github.com/yourusername/ReadyRent_Gala.git .
+   cd /var/www/STANDARD-staging
+   git clone https://github.com/yourusername/STANDARD_Rent.git .
    git checkout develop
    
    # إعداد Backend
@@ -169,20 +169,20 @@
 
 5. **إعداد Systemd Service**:
    ```bash
-   sudo nano /etc/systemd/system/readyrent-backend-staging.service
+   sudo nano /etc/systemd/system/STANDARD-backend-staging.service
    ```
    
    ```ini
    [Unit]
-   Description=ReadyRent Backend Staging
+   Description=STANDARD Backend Staging
    After=network.target
    
    [Service]
    User=www-data
    Group=www-data
-   WorkingDirectory=/var/www/readyrent-staging/backend
-   Environment="PATH=/var/www/readyrent-staging/backend/venv/bin"
-   ExecStart=/var/www/readyrent-staging/backend/venv/bin/gunicorn config.wsgi:application --bind 127.0.0.1:8000
+   WorkingDirectory=/var/www/STANDARD-staging/backend
+   Environment="PATH=/var/www/STANDARD-staging/backend/venv/bin"
+   ExecStart=/var/www/STANDARD-staging/backend/venv/bin/gunicorn config.wsgi:application --bind 127.0.0.1:8000
    
    [Install]
    WantedBy=multi-user.target
@@ -190,32 +190,32 @@
    
    ```bash
    sudo systemctl daemon-reload
-   sudo systemctl enable readyrent-backend-staging
-   sudo systemctl start readyrent-backend-staging
+   sudo systemctl enable STANDARD-backend-staging
+   sudo systemctl start STANDARD-backend-staging
    ```
 
 6. **Deploy Frontend**:
    ```bash
-   cd /var/www/readyrent-staging/frontend
+   cd /var/www/STANDARD-staging/frontend
    npm install
    npm run build
    
    # إعداد PM2
    npm install -g pm2
-   pm2 start npm --name "readyrent-frontend-staging" -- start
+   pm2 start npm --name "STANDARD-frontend-staging" -- start
    pm2 save
    pm2 startup
    ```
 
 7. **إعداد Nginx**:
    ```bash
-   sudo nano /etc/nginx/sites-available/readyrent-staging
+   sudo nano /etc/nginx/sites-available/STANDARD-staging
    ```
    
    ```nginx
    server {
        listen 80;
-       server_name staging.readyrent.gala;
+       server_name staging.STANDARD.Rent;
        
        # Frontend
        location / {
@@ -242,20 +242,20 @@
        
        # Media files
        location /media/ {
-           alias /var/www/readyrent-staging/backend/media/;
+           alias /var/www/STANDARD-staging/backend/media/;
            expires 30d;
        }
        
        # Static files
        location /static/ {
-           alias /var/www/readyrent-staging/backend/staticfiles/;
+           alias /var/www/STANDARD-staging/backend/staticfiles/;
            expires 30d;
        }
    }
    ```
    
    ```bash
-   sudo ln -s /etc/nginx/sites-available/readyrent-staging /etc/nginx/sites-enabled/
+   sudo ln -s /etc/nginx/sites-available/STANDARD-staging /etc/nginx/sites-enabled/
    sudo nginx -t
    sudo systemctl reload nginx
    ```
@@ -263,7 +263,7 @@
 8. **إعداد SSL**:
    ```bash
    sudo apt install certbot python3-certbot-nginx
-   sudo certbot --nginx -d staging.readyrent.gala
+   sudo certbot --nginx -d staging.STANDARD.Rent
    ```
 
 ---
@@ -276,11 +276,11 @@
 # Django Settings
 DEBUG=False
 SECRET_KEY=your-staging-secret-key
-ALLOWED_HOSTS=staging.readyrent.gala,staging-backend.readyrent.gala
+ALLOWED_HOSTS=staging.STANDARD.Rent,staging-backend.STANDARD.Rent
 
 # Database
-DB_NAME=readyrent_staging
-DB_USER=readyrent_user
+DB_NAME=STANDARD_staging
+DB_USER=STANDARD_user
 DB_PASSWORD=your-db-password
 DB_HOST=localhost
 DB_PORT=5432
@@ -305,12 +305,12 @@ SENTRY_DSN=your-staging-sentry-dsn
 ### Frontend (.env.local)
 
 ```env
-NEXT_PUBLIC_API_URL=https://staging-backend.readyrent.gala/api
-NEXT_PUBLIC_BASE_URL=https://staging.readyrent.gala
+NEXT_PUBLIC_API_URL=https://staging-backend.STANDARD.Rent/api
+NEXT_PUBLIC_BASE_URL=https://staging.STANDARD.Rent
 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your-staging-google-maps-key
 NEXT_PUBLIC_WHATSAPP_NUMBER=+213XXXXXXXXX
 NEXT_PUBLIC_PHONE_NUMBER=+213 XXX XXX XXX
-NEXT_PUBLIC_CONTACT_EMAIL=staging@readyrent.gala
+NEXT_PUBLIC_CONTACT_EMAIL=staging@STANDARD.Rent
 ```
 
 ---
@@ -347,13 +347,13 @@ source venv/bin/activate
 pip install -r requirements.txt
 python manage.py migrate
 python manage.py collectstatic --noinput
-sudo systemctl restart readyrent-backend-staging
+sudo systemctl restart STANDARD-backend-staging
 
 # Frontend
 cd ../frontend
 npm install
 npm run build
-pm2 restart readyrent-frontend-staging
+pm2 restart STANDARD-frontend-staging
 
 echo "Deployment completed!"
 ```
@@ -377,17 +377,17 @@ python manage.py create_demo_admin
 
 ### Health Checks
 
-- Backend: `https://staging-backend.readyrent.gala/api/health/`
-- Frontend: `https://staging.readyrent.gala/`
+- Backend: `https://staging-backend.STANDARD.Rent/api/health/`
+- Frontend: `https://staging.STANDARD.Rent/`
 
 ### Logs
 
 ```bash
 # Backend logs
-sudo journalctl -u readyrent-backend-staging -f
+sudo journalctl -u STANDARD-backend-staging -f
 
 # Frontend logs
-pm2 logs readyrent-frontend-staging
+pm2 logs STANDARD-frontend-staging
 
 # Nginx logs
 sudo tail -f /var/log/nginx/error.log
@@ -408,5 +408,6 @@ sudo tail -f /var/log/nginx/error.log
 
 ---
 
-**© 2026 ReadyRent.Gala. جميع الحقوق محفوظة.**
+**© 2026 STANDARD.Rent. جميع الحقوق محفوظة.**
+
 

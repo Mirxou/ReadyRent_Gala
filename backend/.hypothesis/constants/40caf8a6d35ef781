@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\maintenance\models.py
+# hypothesis_version: 6.151.6
+
+['-scheduled_start', 'Cancelled', 'Cleaning', 'Completed', 'Deep Cleaning', 'In Progress', 'Inspection', 'Repair', 'Scheduled', 'active', 'actual end', 'actual start', 'assigned_to', 'blocks bookings', 'bookings.Booking', 'cancelled', 'cleaning', 'completed', 'cost', 'created at', 'deep_clean', 'duration (hours)', 'end datetime', 'end_datetime', 'in_progress', 'inspection', 'maintenance type', 'maintenance_record', 'maintenance_records', 'maintenance_type', 'notes', 'period', 'product', 'products.Product', 'related_booking', 'repair', 'role', 'scheduled', 'scheduled end', 'scheduled start', 'scheduled_end', 'scheduled_start', 'staff', 'start datetime', 'start_datetime', 'status', 'updated at', 'جداول الصيانة', 'جدول الصيانة', 'سجل الصيانة', 'سجلات الصيانة', 'فترات الصيانة', 'فترة الصيانة']

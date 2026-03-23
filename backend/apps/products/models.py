@@ -56,6 +56,7 @@ class Product(models.Model):
         ('rented', _('Rented')),
         ('maintenance', _('Under Maintenance')),
         ('unavailable', _('Unavailable')),
+        ('coming_soon', _('Coming Soon')), # Viral Rollout
     ]
     
     name = models.CharField(_('name'), max_length=200)
@@ -69,14 +70,39 @@ class Product(models.Model):
         related_name='products',
         verbose_name=_('category')
     )
+    
+    # Geo-Intelligence Fields
+    from apps.core.utils.dz_geo import WILAYA_CHOICES
+    
+    wilaya = models.IntegerField(_('Wilaya'), choices=WILAYA_CHOICES, null=True, blank=True)
+    commune = models.CharField(_('Commune'), max_length=100, blank=True)
+    location_lat = models.DecimalField(_('Latitude'), max_digits=9, decimal_places=6, null=True, blank=True)
+    location_lng = models.DecimalField(_('Longitude'), max_digits=9, decimal_places=6, null=True, blank=True)
+    
+    # Delivery
+    delivery_policy = models.TextField(_('Delivery Policy'), blank=True, help_text=_('Describe your delivery options (e.g. Hand to hand, 58 Wilayas delivery...)'))
+    delivery_options = models.JSONField(_('Delivery Options'), default=dict, blank=True, help_text=_('Structured delivery settings (pickup, zones, costs)'))
+
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='owned_products',
+        verbose_name=_("المالك")
+    )
     price_per_day = models.DecimalField(_('price per day'), max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
     size = models.CharField(_('size'), max_length=10, choices=SIZE_CHOICES)
     color = models.CharField(_('color'), max_length=50)
     color_hex = models.CharField(_('color hex'), max_length=7, blank=True, help_text=_('Hex color code (e.g., #FF5733)'))
     status = models.CharField(_('status'), max_length=20, choices=STATUS_CHOICES, default='available')
     is_featured = models.BooleanField(_('featured'), default=False)
+    is_community_approved = models.BooleanField(_('community approved'), default=False)
     rating = models.DecimalField(_('rating'), max_digits=3, decimal_places=2, default=0, validators=[MinValueValidator(0), MaxValueValidator(5)])
     total_rentals = models.IntegerField(_('total rentals'), default=0)
+
+    @property
+    def daily_price(self):
+        """Alias for price_per_day to satisfy Standard Core Asset Interface"""
+        return self.price_per_day
     created_at = models.DateTimeField(_('created at'), auto_now_add=True)
     updated_at = models.DateTimeField(_('updated at'), auto_now=True)
     

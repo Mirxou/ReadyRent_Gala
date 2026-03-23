@@ -1,4 +1,4 @@
-# دليل اختبارات Frontend - ReadyRent.Gala
+# دليل اختبارات Frontend - STANDARD.Rent
 
 **التاريخ**: يناير 2026  
 **الحالة**: ✅ جاهز للاستخدام
@@ -7,7 +7,7 @@
 
 ## نظرة عامة
 
-هذا الدليل يوضح كيفية إعداد وتشغيل اختبارات Frontend لمنصة ReadyRent.Gala.
+هذا الدليل يوضح كيفية إعداد وتشغيل اختبارات Frontend لمنصة STANDARD.Rent.
 
 ---
 
@@ -191,7 +191,7 @@ import { test, expect } from '@playwright/test'
 
 test('should load homepage', async ({ page }) => {
   await page.goto('/')
-  await expect(page).toHaveTitle(/ReadyRent/i)
+  await expect(page).toHaveTitle(/STANDARD/i)
 })
 ```
 
@@ -266,5 +266,6 @@ test('should load homepage', async ({ page }) => {
 
 ---
 
-**© 2026 ReadyRent.Gala. جميع الحقوق محفوظة.**
+**© 2026 STANDARD.Rent. جميع الحقوق محفوظة.**
+
 

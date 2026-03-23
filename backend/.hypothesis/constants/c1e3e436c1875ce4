@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\hygiene\migrations\0002_initial.py
+# hypothesis_version: 6.151.6
+
+['0001_initial', 'admin', 'certificate', 'checked_by', 'checklist_items', 'cleaned_by', 'cleaning_records', 'hygiene', 'hygiene_record', 'hygiene_records', 'hygienecertificate', 'hygienechecklist', 'hygienerecord', 'product', 'products', 'products.product', 'related_return', 'returns', 'returns.return', 'role', 'role__in', 'scheduled_date', 'staff', 'status', 'verified_by']

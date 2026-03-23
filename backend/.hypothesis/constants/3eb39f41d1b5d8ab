@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\hygiene\admin.py
+# hypothesis_version: 6.151.6
+
+['Details', 'Personnel', 'Product', 'Quality', 'Schedule', 'Timestamps', 'certificate_number', 'chemicals_used', 'cleaned_by', 'cleaning_notes', 'cleaning_type', 'completed_at', 'created_at', 'expiry_date', 'fields', 'hygiene_record', 'inspection_notes', 'is_expired', 'is_overdue', 'is_valid', 'issued_date', 'passed_inspection', 'product', 'product__name', 'quality_score', 'related_return', 'scheduled_date', 'started_at', 'status', 'temperature', 'updated_at', 'verified_at', 'verified_by']

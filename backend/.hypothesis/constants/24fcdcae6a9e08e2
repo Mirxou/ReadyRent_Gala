@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\disputes\migrations\0018_phase_44_approval_workflow.py
+# hypothesis_version: 6.151.6
+
+['Approved At', 'Approved By', 'Rejected by Admin', 'Visibility Status', 'Visible to Parties', 'approved_at', 'approved_by', 'approved_offers', 'disputes', 'pending_review', 'rejected', 'settlementoffer', 'status', 'visible']

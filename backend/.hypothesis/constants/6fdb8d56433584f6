@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\payments\services.py
+# hypothesis_version: 6.151.6
+
+[200, '&', '+', '-', '/', '0', '0.01', '2', '213', '3', '3d_secure_required', '4', '5', 'Authorization', 'BANK_API_KEY', 'BANK_GATEWAY_URL', 'BANK_MERCHANT_ID', 'BANK_SECRET_KEY', 'BARIDIMOB_API_KEY', 'BARIDIMOB_API_URL', 'BARIDIMOB_SECRET_KEY', 'Content-Type', 'DZD', 'Dispute Resolution', 'HELD', 'RELEASED', 'amex', 'amount', 'application/json', 'bank_card', 'baridimob', 'callback_url', 'card_cvv', 'card_expiry', 'card_number', 'cardholder_name', 'completed', 'confirmed', 'currency', 'customer_phone', 'description', 'error', 'failed', 'mastercard', 'merchant_id', 'message', 'order_id', 'otp_code', 'otp_required', 'pending', 'phone_number', 'processing', 'redirect_url', 'refund_id', 'requires_3d_secure', 'signature', 'status', 'success', 'transaction_id', 'unknown', 'verified', 'visa']

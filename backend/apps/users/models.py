@@ -1,9 +1,49 @@
 """
 User models for ReadyRent.Gala
 """
-from django.contrib.auth.models import AbstractUser
-from django.db import models
-from django.utils.translation import gettext_lazy as _
+from django.contrib.auth.models import AbstractUser, BaseUserManager  # type: ignore
+from django.db import models  # type: ignore
+from django.utils.translation import gettext_lazy as _  # type: ignore
+from apps.core.crypto.hashing import compute_pii_hash, get_pii_hash_key  # type: ignore
+from apps.core.crypto.normalization import normalize_email, normalize_phone  # type: ignore
+from apps.core.crypto.fields import EncryptedCharField  # type: ignore
+
+
+class UserManager(BaseUserManager):
+    """
+    Custom manager that uses HMAC shadow columns for auth lookups.
+    Phase 16: All auth paths go through email_hash, never plaintext email.
+    """
+
+    def get_by_natural_key(self, username):
+        """
+        Override for hash-based email lookup.
+        Called by Django's ModelBackend during ALL auth paths:
+        - Login
+        - Admin login
+        - Password reset
+        - JWT token validation
+        """
+        email_hash = compute_pii_hash(
+            normalize_email(username),
+            get_pii_hash_key()
+        )
+        return self.get(email_hash=email_hash)
+
+    def create_user(self, email, password=None, **extra_fields):
+        if not email:
+            raise ValueError('Email is required.')
+        extra_fields.setdefault('is_staff', False)
+        extra_fields.setdefault('is_superuser', False)
+        user = self.model(email=email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, email, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+        return self.create_user(email, password, **extra_fields)
 
 
 class User(AbstractUser):
@@ -13,25 +53,81 @@ class User(AbstractUser):
         ('admin', _('Admin')),
         ('staff', _('Staff')),
     ]
-    
-    email = models.EmailField(_('email address'), unique=True)
+
+    objects = UserManager()
+
+    # Phase 16C.4a: email is now EncryptedCharField (AES at rest).
+    # plaintext backup is in email_plaintext_backup column (DB-only, no Python field).
+    # After 16C.4b the backup column will be dropped permanently.
+    # ⚠ DO NOT add email_plaintext_backup back to the model class.
+    # ⚠ DO NOT filter on this field directly — use email_hash for all lookups.
+    email = EncryptedCharField(_('email address'), unique=True)
+    supabase_user_id = models.UUIDField(_('Supabase User ID'), unique=True, null=True, blank=True)
     phone = models.CharField(_('phone number'), max_length=20, blank=True)
     role = models.CharField(_('role'), max_length=20, choices=ROLE_CHOICES, default='customer')
     avatar = models.ImageField(_('avatar'), upload_to='avatars/', blank=True, null=True)
     is_verified = models.BooleanField(_('verified'), default=False)
+
+    # Phase 16A: HMAC Shadow Columns (search index for encrypted fields)
+    # These are populated on every save(). Query via these, never via plaintext fields.
+    email_hash = models.CharField(
+        _('email hash'), max_length=88, null=True, blank=True, db_index=True,
+        help_text='HMAC-SHA256 of normalized email. NULL until backfill. Used for auth lookup.'
+    )
+    phone_hash = models.CharField(
+        _('phone hash'), max_length=88, null=True, blank=True, db_index=True,
+        help_text='HMAC-SHA256 of normalized phone. NULL until backfill. Used for OTP lookup.'
+    )
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # Phase 16C Shadow Encrypted Fields — CUTOVER COMPLETE (16C.4a)
+    # ─────────────────────────────────────────────────────────────────────────
+    # email_encrypted column has been renamed to `email` via migration 0011.
+    # This block intentionally left here as a historical comment.
+    # Stage 16C.4b: Drop email_plaintext_backup column (separate deploy).
+
+    # Sovereign Tracking Fields (Phase 31: Ethics as Data)
+    last_dispute_attempt_at = models.DateTimeField(_('last dispute attempt'), null=True, blank=True)
+    emotional_lock_until = models.DateTimeField(_('emotional lock until'), null=True, blank=True)
+    consecutive_emotional_attempts = models.IntegerField(_('consecutive emotional attempts'), default=0)
+    merit_score = models.IntegerField(_('merit score'), default=50)
+
     created_at = models.DateTimeField(_('created at'), auto_now_add=True)
     updated_at = models.DateTimeField(_('updated at'), auto_now=True)
-    
+
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
-    
+
     class Meta:
         verbose_name = _('المستخدم')
         verbose_name_plural = _('المستخدمون')
         ordering = ['-created_at']
-    
+
+    def save(self, *args, **kwargs):
+        """Compute HMAC shadow hashes before every save.
+
+        Phase 16C.4a: self.email is now an EncryptedCharField.
+        from_db_value() decrypts transparently on read, so self.email
+        returns the plaintext canonical value — hashing works unchanged.
+        """
+        try:
+            key = get_pii_hash_key()
+            if self.email:
+                self.email_hash = compute_pii_hash(normalize_email(self.email), key)
+            if self.phone:
+                self.phone_hash = compute_pii_hash(normalize_phone(self.phone), key)
+        except RuntimeError:
+            # PII_HASH_KEY not configured (e.g., during initial migrations).
+            self.email_hash = None
+            self.phone_hash = None
+        super().save(*args, **kwargs)
+
     def __str__(self):
-        return self.email
+        # Never expose email in repr to prevent log leakage
+        return f"User #{self.id}"
+
+    def __repr__(self):
+        return f"<User id={self.id}>"
 
 
 class UserProfile(models.Model):
@@ -82,6 +178,7 @@ class VerificationStatus(models.Model):
     id_number = models.CharField(_('ID number'), max_length=50, blank=True)
     id_front_image = models.ImageField(_('ID front image'), upload_to='verification/id_front/', blank=True, null=True)
     id_back_image = models.ImageField(_('ID back image'), upload_to='verification/id_back/', blank=True, null=True)
+    selfie = models.ImageField(_('selfie'), upload_to='verification/selfie/', blank=True, null=True)
     phone_verified = models.BooleanField(_('phone verified'), default=False)
     phone_verification_code = models.CharField(_('phone verification code'), max_length=10, blank=True)
     phone_verification_expires = models.DateTimeField(_('phone verification expires'), null=True, blank=True)

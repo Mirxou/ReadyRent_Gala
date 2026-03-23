@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\bookings\availability_service.py
+# hypothesis_version: 6.151.6
+
+[300, 'active_bookings', 'availability', 'available', 'category', 'confirmed', 'conflict', 'conflict_count', 'count', 'details', 'end_date', 'fully_booked', 'id', 'in_use', 'maintenance', 'message', 'out_of_stock', 'pending', 'product_id', 'product_not_found', 'product_unavailable', 'quantity_available', 'quantity_rented', 'reason', 'start_date', 'status', 'المنتج غير موجود', 'المنتج متاح', 'المنتج محجوز بالكامل']

@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\bundles\migrations\0002_initial.py
+# hypothesis_version: 6.151.6
+
+['0001_initial', 'bundle', 'bundle_booking', 'bundle_bookings', 'bundle_items', 'bundlebooking', 'bundleitem', 'bundlereview', 'bundles', 'bundles.bundle', 'category', 'end_date', 'is_active', 'is_featured', 'items', 'product', 'products', 'products.product', 'review', 'start_date', 'status', 'user']

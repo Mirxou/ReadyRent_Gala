@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\local_guide\migrations\0003_alter_localservice_options_and_more.py
+# hypothesis_version: 6.151.6
+
+['-created_at', '-is_featured', '-rating', '0002_initial', 'category', 'id', 'images', 'local_guide', 'localservice', 'name', 'order', 'ordering', 'reviews', 'service', 'service_reviews', 'servicecategory', 'serviceimage', 'servicereview', 'services', 'user', 'verbose_name', 'verbose_name_plural', 'الخدمات المحلية', 'الخدمة المحلية', 'صور الخدمات', 'صورة الخدمة', 'فئات الخدمات', 'فئة الخدمة', 'مراجعات الخدمات', 'مراجعة الخدمة']

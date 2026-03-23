@@ -6,6 +6,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     postgresql-client \
     gcc \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements
@@ -17,10 +18,13 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy project
 COPY . .
 
-# Collect static files
-RUN python manage.py collectstatic --noinput || true
+# Copy entrypoint script and make it executable
+RUN chmod +x entrypoint.sh
 
 EXPOSE 8000
 
-CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000"]
+# Use entrypoint script
+ENTRYPOINT ["./entrypoint.sh"]
 
+# Default command
+CMD ["gunicorn", "config.wsgi:application", "--config", "gunicorn_config.py"]

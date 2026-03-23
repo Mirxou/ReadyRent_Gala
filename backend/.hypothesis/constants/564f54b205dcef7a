@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\users\tests.py
+# hypothesis_version: 6.151.6
+
+['Test', 'User', 'admin', 'admin@example.com', 'adminpass123', 'customer', 'test@example.com', 'testpass123', 'testuser', 'testuser2', 'testuser3']

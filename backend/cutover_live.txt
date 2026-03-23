@@ -1,0 +1,55 @@
+DEBUG: sys.argv = ['manage.py', 'encrypt_pii_cutover', '--batch=500', '--verify']
+{"event": "Patched drf_spectacular._map_model_field to handle gettext_lazy verbose_name"}
+{"event": "Patched drf_spectacular._resolve_path_parameters"}
+{"event": "DeepFace not found. Identity verification will be skipped."}
+
+============================================================
+  PHASE 16C.2 — EMAIL ENCRYPTION BACKFILL [LIVE]
+============================================================
+
+ℹ️  Already encrypted:    0
+ℹ️  Needs encryption:     233
+ℹ️  Batch size:           500
+ℹ️  Verify after run:     True
+ℹ️  Dry run:              False
+  Batch offset=     0 | encrypted=233 | skipped=0 | failed=0 | total_done=233
+
+────────────────────────────────────────────────────────────
+  SAMPLE ROW — BEFORE / AFTER
+────────────────────────────────────────────────────────────
+  user id:              1
+  email_encrypted BEFORE: NULL
+  email_encrypted AFTER:  enc:v…[REDACTED]
+
+────────────────────────────────────────────────────────────
+  VERIFICATION GATE — 10 random decrypt checks
+────────────────────────────────────────────────────────────
+  ✅ id=70: decrypt matches canonical form
+  ✅ id=287: decrypt matches canonical form
+  ✅ id=113: decrypt matches canonical form
+  ✅ id=163: decrypt matches canonical form
+  ✅ id=19: decrypt matches canonical form
+  ✅ id=198: decrypt matches canonical form
+  ✅ id=281: decrypt matches canonical form
+  ✅ id=262: decrypt matches canonical form
+  ✅ id=114: decrypt matches canonical form
+  ✅ id=252: decrypt matches canonical form
+
+  Verification: 10/10 passed
+  ✅ All decrypt checks passed — 16C.3 gate cleared
+
+============================================================
+  PHASE 16C.2 SUMMARY [LIVE]
+============================================================
+  Rows encrypted:      233
+  Rows skipped:        0
+  Rows failed:         0
+  Time elapsed:        198.71s
+
+  Post-backfill state:
+  email_encrypted SET: 233
+  email_encrypted NULL (with email): 0  ✅ target reached
+
+  ✅ Encryption backfill complete.
+  ✅ All email rows encrypted — 16C.3 verification gate ready.
+============================================================

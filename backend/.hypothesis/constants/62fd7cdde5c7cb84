@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\inventory\serializers.py
+# hypothesis_version: 6.151.6
+
+['acknowledged_at', 'acknowledged_by', 'alert_type', 'availability_status', 'available', 'created_at', 'created_by', 'created_by.email', 'created_by_email', 'id', 'inventory_item', 'inventory_item_name', 'is_in_stock', 'is_low_stock', 'last_restocked', 'low_stock_threshold', 'message', 'movement_type', 'new_quantity', 'notes', 'out_of_stock', 'previous_quantity', 'product', 'product.name_ar', 'product.slug', 'product_name', 'product_slug', 'quantity', 'quantity_available', 'quantity_maintenance', 'quantity_rented', 'quantity_total', 'reference_id', 'reference_type', 'rented_out', 'status', 'updated_at']

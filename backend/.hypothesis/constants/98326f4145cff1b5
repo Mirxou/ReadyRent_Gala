@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\branches\models.py
+# hypothesis_version: 6.151.6
+
+[100, 200, '-assigned_at', '-period_end', 'Constantine', 'active', 'address', 'admin', 'assigned at', 'available quantity', 'average rating', 'branch', 'branch_assignments', 'branch_inventory', 'city', 'code', 'created at', 'email', 'inventory_items', 'is_active', 'last restocked', 'latitude', 'longitude', 'low stock threshold', 'maintenance quantity', 'managed_branches', 'manager', 'name', 'name (Arabic)', 'opening hours', 'performance_records', 'period end', 'period start', 'period_end', 'period_start', 'phone', 'postal code', 'product', 'products.Product', 'quantity_available', 'rented quantity', 'role', 'role__in', 'staff', 'staff_members', 'total bookings', 'total products', 'total quantity', 'total revenue', 'updated at', 'أداء الفرع', 'أداءات الفروع', 'الفرع', 'الفروع', 'مخزون الفرع', 'مخزونات الفروع', 'موظف الفرع', 'موظفو الفروع']

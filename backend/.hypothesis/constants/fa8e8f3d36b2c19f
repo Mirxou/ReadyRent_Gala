@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\analytics\admin.py
+# hypothesis_version: 6.151.6
+
+['active_users', 'bookings_created', 'category', 'category__name', 'category__name_ar', 'confidence_level', 'conversion_rate', 'created_at', 'date', 'event_type', 'forecast_date', 'forecast_end', 'forecast_start', 'forecast_type', 'new_users', 'predicted_demand', 'predicted_revenue', 'product', 'product__name', 'product__name_ar', 'session_id', 'timestamp', 'total_bookings', 'total_revenue', 'total_sessions', 'total_spent', 'total_views', 'updated_at', 'user', 'user__email']

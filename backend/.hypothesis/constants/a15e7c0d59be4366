@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\audit\migrations\0001_initial.py
+# hypothesis_version: 6.151.6
+
+[255, '-timestamp', 'Audit Log', 'Audit Logs', 'AuditLog', 'CREATE', 'Creation', 'DELETE', 'DISPUTE_ACTION', 'Deletion', 'Dispute Action', 'ESCROW_MOVE', 'Escrow Movement', 'ID', 'JSON diff of changes', 'LOGIN', 'LOGOUT', 'Login', 'Logout', 'RISK_FLAG', 'Risk Flag', 'SECURITY_ALERT', 'Security Alert', 'UPDATE', 'Update', 'action', 'actor', 'audit_logs', 'changes', 'content_type', 'contenttypes', 'id', 'indexes', 'ip_address', 'metadata', 'object_id', 'ordering', 'timestamp', 'verbose_name', 'verbose_name_plural']

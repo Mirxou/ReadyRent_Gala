@@ -1,4 +1,4 @@
-# مراجعة الأمان - ReadyRent.Gala
+# مراجعة الأمان - STANDARD.Rent
 
 **التاريخ**: يناير 2026  
 **الحالة**: ✅ مراجعة مكتملة
@@ -7,7 +7,7 @@
 
 ## نظرة عامة
 
-تم إجراء مراجعة شاملة لأمان منصة ReadyRent.Gala وفقاً لمعايير OWASP Top 10 ومعايير الأمان الحديثة.
+تم إجراء مراجعة شاملة لأمان منصة STANDARD.Rent وفقاً لمعايير OWASP Top 10 ومعايير الأمان الحديثة.
 
 ---
 
@@ -201,14 +201,14 @@
 
 2. **ALLOWED_HOSTS**:
    ```python
-   ALLOWED_HOSTS = ['readyrent.gala', 'www.readyrent.gala']
+   ALLOWED_HOSTS = ['STANDARD.Rent', 'www.STANDARD.Rent']
    ```
 
 3. **CORS_ALLOWED_ORIGINS**:
    ```python
    CORS_ALLOWED_ORIGINS = [
-       'https://readyrent.gala',
-       'https://www.readyrent.gala',
+       'https://STANDARD.Rent',
+       'https://www.STANDARD.Rent',
    ]
    ```
 
@@ -243,5 +243,6 @@
 
 ---
 
-**© 2026 ReadyRent.Gala. جميع الحقوق محفوظة.**
+**© 2026 STANDARD.Rent. جميع الحقوق محفوظة.**
+
 

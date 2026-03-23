@@ -7,3 +7,6 @@ class BookingsConfig(AppConfig):
     name = 'apps.bookings'
     verbose_name = _('الحجوزات')
 
+    def ready(self):
+        import apps.bookings.signals
+

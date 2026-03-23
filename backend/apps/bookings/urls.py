@@ -11,14 +11,19 @@ from .views import (
     DamageAssessmentCreateView, DamageAssessmentDetailView,
     DamagePhotoCreateView, InspectionChecklistCreateView,
     InspectionChecklistUpdateView, DamageClaimCreateView, DamageClaimDetailView,
-    CancellationPolicyView, EarlyReturnView, RefundListView
+    InspectionChecklistUpdateView, DamageClaimCreateView, DamageClaimDetailView,
+    CancellationPolicyView, EarlyReturnView, RefundListView,
+    InspectionChecklistUpdateView, DamageClaimCreateView, DamageClaimDetailView,
+    CancellationPolicyView, EarlyReturnView, RefundListView,
+    resolve_dispute_admin, generate_agreement_view, BookingCalculateDepositView
 )
 
 app_name = 'bookings'
 
 urlpatterns = [
     path('cart/', CartView.as_view(), name='cart'),
-    path('cart/items/', CartItemCreateView.as_view(), name='cart-item-create'),
+    path('calculate-deposit/', BookingCalculateDepositView.as_view(), name='calculate-deposit'),
+    path('cart/items/', CartItemCreateView.as_view(), name='cart-item-create'),    path('cart/items/', CartItemCreateView.as_view(), name='cart-item-create'),
     path('cart/items/<int:pk>/', CartItemDeleteView.as_view(), name='cart-item-delete'),
     path('create/', BookingCreateView.as_view(), name='booking-create'),
     path('', BookingListView.as_view(), name='booking-list'),
@@ -28,6 +33,8 @@ urlpatterns = [
     path('<int:pk>/cancel/', BookingCancelView.as_view(), name='booking-cancel'),
     path('<int:pk>/cancellation-policy/', CancellationPolicyView.as_view(), name='cancellation-policy'),
     path('<int:pk>/early-return/', EarlyReturnView.as_view(), name='early-return'),
+    path('<int:pk>/resolve_dispute/', resolve_dispute_admin, name='booking-resolve-dispute'),
+    path('<int:pk>/agreement/create/', generate_agreement_view, name='booking-agreement-create'),
     path('refunds/', RefundListView.as_view(), name='refund-list'),
     
     # Waitlist routes

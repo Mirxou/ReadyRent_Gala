@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\disputes\migrations\0021_dispute_claimed_amount.py
+# hypothesis_version: 6.151.6
+
+['Claimed Amount', 'claimed_amount', 'dispute', 'disputes']

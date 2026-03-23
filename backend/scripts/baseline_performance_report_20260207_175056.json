@@ -1,0 +1,103 @@
+{
+  "timestamp": "2026-02-07T17:50:56.250373",
+  "summary": {
+    "api_endpoints_tested": 3,
+    "db_queries_tested": 5,
+    "vector_search_tested": false,
+    "bottlenecks_found": 4
+  },
+  "api_endpoints": [
+    {
+      "name": "Public Judgment Ledger",
+      "url": "/api/disputes/public/judgments/",
+      "iterations": 5,
+      "p50": 4216.953992843628,
+      "p95": 4601.376581192017,
+      "p99": 4677.491769790649,
+      "min": 4196.876525878906,
+      "max": 4696.520566940308,
+      "mean": 4308.974075317383,
+      "median": 4216.953992843628
+    },
+    {
+      "name": "Metrics Dashboard",
+      "url": "/api/disputes/public/metrics/dashboard/",
+      "iterations": 5,
+      "p50": 4316.2853717803955,
+      "p95": 4331.454372406006,
+      "p99": 4331.459827423096,
+      "min": 4298.570871353149,
+      "max": 4331.461191177368,
+      "mean": 4316.9023513793945,
+      "median": 4316.2853717803955
+    },
+    {
+      "name": "Product List",
+      "url": "/api/products/",
+      "iterations": 5,
+      "p50": 34258.872509002686,
+      "p95": 43039.10722732544,
+      "p99": 43173.01309585571,
+      "min": 33275.402307510376,
+      "max": 43206.48956298828,
+      "mean": 37301.13863945007,
+      "median": 34258.872509002686
+    }
+  ],
+  "database_queries": [
+    {
+      "query": "Dispute.count()",
+      "duration_ms": 615.4360771179199
+    },
+    {
+      "query": "Judgment with select_related",
+      "duration_ms": 81.46119117736816
+    },
+    {
+      "query": "EvidenceLog.count()",
+      "duration_ms": 69.8707103729248
+    },
+    {
+      "query": "AnonymizedJudgment public ledger",
+      "duration_ms": 75.70743560791016
+    },
+    {
+      "query": "Complex prefetch pattern",
+      "query_count": 2
+    }
+  ],
+  "vector_search": null,
+  "bottlenecks": [
+    {
+      "type": "API Endpoint",
+      "location": "Public Judgment Ledger",
+      "issue": "P95 latency 4601ms exceeds 1s target",
+      "severity": "HIGH"
+    },
+    {
+      "type": "API Endpoint",
+      "location": "Metrics Dashboard",
+      "issue": "P95 latency 4331ms exceeds 1s target",
+      "severity": "HIGH"
+    },
+    {
+      "type": "API Endpoint",
+      "location": "Product List",
+      "issue": "P95 latency 43039ms exceeds 1s target",
+      "severity": "HIGH"
+    },
+    {
+      "type": "Database Query",
+      "location": "Dispute.count()",
+      "issue": "Query took 615ms",
+      "severity": "MEDIUM"
+    }
+  ],
+  "targets": {
+    "public_ledger_p95": "< 800ms",
+    "metrics_dashboard_p95": "< 1s",
+    "precedent_search_p95": "< 2s",
+    "dispute_creation_p95": "< 2s",
+    "judgment_finalization": "< 5s"
+  }
+}

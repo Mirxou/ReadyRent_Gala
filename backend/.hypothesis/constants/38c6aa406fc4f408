@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\packaging\migrations\0003_alter_packaginginstance_options_and_more.py
+# hypothesis_version: 6.151.6
+
+['-prepared_at', '-priority', '0002_initial', 'booking', 'bookings', 'bookings.booking', 'instances', 'material', 'material_type', 'name', 'ordering', 'packaging', 'packaging_instance', 'packaging_rules', 'packaging_type', 'packaginginstance', 'packagingmaterial', 'packagingrule', 'packagingtype', 'prepared_by', 'prepared_packaging', 'product', 'product_category', 'products', 'products.category', 'products.product', 'role', 'rules', 'size', 'staff', 'verbose_name', 'verbose_name_plural', 'أنواع التغليف', 'استخدام مادة التغليف', 'قاعدة التغليف', 'قواعد التغليف', 'مادة التغليف', 'مثيل التغليف', 'مثيلات التغليف', 'مواد التغليف', 'نوع التغليف']

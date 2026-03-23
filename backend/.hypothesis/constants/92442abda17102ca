@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\disputes\migrations\0020_dispute_judicial_panel.py
+# hypothesis_version: 6.151.6
+
+['0019_systemflag', 'Judicial Panel', 'dispute', 'disputes', 'judicial_panel']

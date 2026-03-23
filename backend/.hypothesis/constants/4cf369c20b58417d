@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\artisans\serializers.py
+# hypothesis_version: 6.151.6
+
+['address', 'artisan', 'bio', 'bio_ar', 'city', 'comment', 'cover_image', 'created_at', 'description', 'email', 'facebook', 'id', 'image', 'instagram', 'is_active', 'is_featured', 'is_verified', 'latitude', 'longitude', 'name', 'name_ar', 'order', 'phone', 'portfolio_items', 'profile_image', 'project_count', 'rating', 'review_count', 'reviews', 'specialty', 'title', 'title_ar', 'updated_at', 'user', 'user.email', 'user_email', 'whatsapp']

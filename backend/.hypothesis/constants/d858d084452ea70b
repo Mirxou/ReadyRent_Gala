@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\core\image_optimization.py
+# hypothesis_version: 6.151.6
+
+[150, 255, 300, 600, 1200, 1920, '.jpg', '.webp', 'CDN_DOMAIN', 'ImageField', 'JPEG', 'LA', 'P', 'RGB', 'RGBA', 'USE_WEBP_FORMAT', 'WEBP', 'image/jpeg', 'image/webp', 'large', 'medium', 'small', 'thumbnail']

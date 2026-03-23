@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\disputes\migrations\0012_alter_publicmetrics_metric_type.py
+# hypothesis_version: 6.151.6
+
+['Appeal Rate', 'Category Breakdown', 'Consistency Trend', 'Evidence Patterns', 'appeal_rate', 'avg_resolution_time', 'category_breakdown', 'consistency_trend', 'disputes', 'evidence_patterns', 'metric type', 'metric_type', 'publicmetrics', 'settlement_rate', 'verdict_balance']

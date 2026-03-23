@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# ReadyRent Gala - Backend Deployment Script
+# STANDARD.Rent - Backend Deployment Script
 # Usage: ./deploy.sh [environment]
 # Environment: 'staging' or 'production' (default: staging)
 

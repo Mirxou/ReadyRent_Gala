@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\maintenance\migrations\0003_alter_maintenanceperiod_options_and_more.py
+# hypothesis_version: 6.151.6
+
+['-scheduled_start', '0002_initial', 'assigned_to', 'bookings', 'bookings.booking', 'maintenance', 'maintenance_record', 'maintenance_records', 'maintenance_type', 'maintenanceperiod', 'maintenancerecord', 'maintenanceschedule', 'ordering', 'period', 'product', 'products', 'products.product', 'related_booking', 'role', 'staff', 'verbose_name', 'verbose_name_plural', 'جداول الصيانة', 'جدول الصيانة', 'سجل الصيانة', 'سجلات الصيانة', 'فترات الصيانة', 'فترة الصيانة']

@@ -3,7 +3,7 @@ REM Setup script for frontend development environment
 REM This script helps set up the frontend development environment
 
 echo ========================================
-echo ReadyRent.Gala Frontend - Setup
+echo STANDARD.Rent Frontend - Setup
 echo ========================================
 echo.
 
@@ -20,4 +20,5 @@ echo 1. Update frontend/.env.local with your actual values
 echo 2. Run: npm run dev
 echo.
 pause
+
 

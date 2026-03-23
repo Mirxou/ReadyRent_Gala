@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\bookings\policies.py
+# hypothesis_version: 6.151.6
+
+[0.0, 0.1, 0.25, 0.3, 0.5, 0.8, 1.0, 100, 3600, 'Cancellation', 'Contract not signed.', 'binding', 'can_retract', 'cancelled', 'completed', 'cooling', 'draft', 'fee_amount', 'fee_percentage', 'hours_until_start', 'in_use', 'message', 'penalty_rate', 'pending', 'processing', 'refund_amount', 'refund_per_day', 'state', 'unused_days']

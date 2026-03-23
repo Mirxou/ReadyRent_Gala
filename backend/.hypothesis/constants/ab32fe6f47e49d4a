@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\config\celery_app.py
+# hypothesis_version: 6.151.6
+
+['CELERY', 'config.settings', 'django.conf:settings', 'readyrent_gala']

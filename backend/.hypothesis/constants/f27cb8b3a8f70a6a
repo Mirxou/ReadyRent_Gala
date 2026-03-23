@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\standard_core\migrations\0004_booking.py
+# hypothesis_version: 6.151.6
+
+['ACTIVE', 'Active (Handover)', 'Booking', 'CANCELLED', 'COMPLETED', 'Cancelled', 'Completed', 'DISPUTED', 'Disputed', 'PENDING', 'Pending Approval', 'SECURED', 'asset', 'bookings', 'bookings_as_renter', 'created_at', 'end_date', 'id', 'locked_price', 'renter', 'smart_agreement_hash', 'standard_core', 'standard_core.asset', 'standard_core.user', 'start_date', 'status', 'total_price', 'updated_at']

@@ -1,4 +1,4 @@
-# دليل الإعداد والتشغيل - ReadyRent.Gala
+# دليل الإعداد والتشغيل - STANDARD.Rent
 
 **التاريخ**: يناير 2026  
 **الحالة**: ✅ ملفات البيئة محدثة
@@ -94,7 +94,7 @@ SENTRY_DSN=your-actual-sentry-dsn
 # استبدل هذه القيم بالقيم الفعلية:
 NEXT_PUBLIC_WHATSAPP_NUMBER=+213XXXXXXXXX  # رقم WhatsApp الفعلي
 NEXT_PUBLIC_PHONE_NUMBER=+213 XXX XXX XXX  # رقم الهاتف الفعلي
-NEXT_PUBLIC_CONTACT_EMAIL=info@readyrent.gala  # البريد الإلكتروني الفعلي
+NEXT_PUBLIC_CONTACT_EMAIL=info@STANDARD.Rent  # البريد الإلكتروني الفعلي
 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your-actual-google-maps-api-key
 NEXT_PUBLIC_GA_TRACKING_ID=your-actual-google-analytics-id
 NEXT_PUBLIC_FB_PIXEL_ID=your-actual-facebook-pixel-id
@@ -113,7 +113,7 @@ NEXT_PUBLIC_FB_PIXEL_ID=your-actual-facebook-pixel-id
 
 3. **NEXT_PUBLIC_CONTACT_EMAIL**:
    - استخدم البريد الإلكتروني الفعلي للاتصال
-   - مثال: `info@readyrent.gala` أو `contact@readyrent.gala`
+   - مثال: `info@STANDARD.Rent` أو `contact@STANDARD.Rent`
 
 4. **NEXT_PUBLIC_GOOGLE_MAPS_API_KEY**:
    - نفس المفتاح المستخدم في `backend/.env`
@@ -234,7 +234,7 @@ python manage.py createsuperuser
 
 **ملاحظة**: الافتراضي:
 
-- Email: `admin@readyrent.gala`
+- Email: `admin@STANDARD.Rent`
 - Username: `admin`
 - Password: `admin123`
 
@@ -491,9 +491,10 @@ npx lighthouse-ci --config=.lighthouserc.js
 
 للمساعدة أو الاستفسارات:
 
-- Email: [info@readyrent.gala](mailto:info@readyrent.gala)
+- Email: [info@STANDARD.Rent](mailto:info@STANDARD.Rent)
 - Documentation: راجع [`README.md`](README.md) و [`DEPLOYMENT.md`](DEPLOYMENT.md)
 
 ---
 
-**© 2026 ReadyRent.Gala. جميع الحقوق محفوظة.**
+**© 2026 STANDARD.Rent. جميع الحقوق محفوظة.**
+

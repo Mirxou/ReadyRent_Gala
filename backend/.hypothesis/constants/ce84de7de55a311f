@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\locations\admin.py
+# hypothesis_version: 6.151.6
+
+['Addresses', 'Assignment', 'Booking', 'GPS Tracking', 'Notes', 'Schedule', 'Timestamps', 'assigned_driver', 'booking', 'city', 'created_at', 'current_latitude', 'current_longitude', 'delivery_address', 'delivery_date', 'delivery_fee', 'delivery_request', 'delivery_time_slot', 'delivery_type', 'delivery_zone', 'fields', 'full_address', 'is_active', 'is_default', 'label', 'last_tracking_update', 'latitude', 'longitude', 'name', 'name_ar', 'notes', 'pickup_address', 'pickup_date', 'pickup_time_slot', 'status', 'street', 'timestamp', 'updated_at', 'user', 'user__email']

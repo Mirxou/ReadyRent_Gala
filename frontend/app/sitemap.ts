@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 import { productsApi, cmsApi, bundlesApi } from '@/lib/api';
 
-const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://readyrent.gala';
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://standard.rent';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Static pages
@@ -71,8 +71,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     // Fetch all products
     const productsResponse = await productsApi.getAll();
-    const products = Array.isArray(productsResponse.data) 
-      ? productsResponse.data 
+    const products = Array.isArray(productsResponse.data)
+      ? productsResponse.data
       : productsResponse.data?.results || [];
 
     // Generate product pages

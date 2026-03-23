@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\disputes\migrations\0013_userreputationlog_context_and_more.py
+# hypothesis_version: 6.151.6
+
+[100, 'PATTERN_DETECTED', 'Priority Downgraded', 'WARNING_ISSUED', 'Warning Issued', 'action', 'action taken', 'automatic', 'context', 'detection method', 'detection_method', 'disputes', 'emergency_abuse', 'escalation', 'event data', 'event type', 'event_data', 'event_type', 'frivolous_appeal', 'priority_downgrade', 'repeated_filing', 'scrutiny_increase', 'timestamp', 'userreputationlog', 'warning']

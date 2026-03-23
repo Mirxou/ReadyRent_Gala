@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\products\migrations\0008_alter_product_status.py
+# hypothesis_version: 6.151.6
+
+['Available', 'Coming Soon', 'Rented', 'Unavailable', 'Under Maintenance', 'available', 'coming_soon', 'maintenance', 'product', 'products', 'rented', 'status', 'unavailable']

@@ -30,11 +30,11 @@ interface BreadcrumbItem {
 /**
  * Generate Product structured data (JSON-LD) for SEO
  */
-export function generateProductSchema(product: Product, baseUrl: string = 'https://readyrent.gala') {
-  const primaryImage = product.primary_image || 
-                       product.images?.find(img => img.is_primary)?.image ||
-                       product.images?.[0]?.image ||
-                       `${baseUrl}/placeholder-dress.jpg`;
+export function generateProductSchema(product: Product, baseUrl: string = 'https://www.standard.rent') {
+  const primaryImage = product.primary_image ||
+    product.images?.find(img => img.is_primary)?.image ||
+    product.images?.[0]?.image ||
+    `${baseUrl}/placeholder-dress.jpg`;
 
   return {
     '@context': 'https://schema.org',
@@ -45,7 +45,7 @@ export function generateProductSchema(product: Product, baseUrl: string = 'https
     sku: `PROD-${product.id}`,
     brand: {
       '@type': 'Brand',
-      name: 'ReadyRent.Gala'
+      name: 'STANDARD.Rent'
     },
     category: product.category?.name_ar || product.category?.name || 'Dress Rental',
     offers: {
@@ -66,7 +66,7 @@ export function generateProductSchema(product: Product, baseUrl: string = 'https
 /**
  * Generate Breadcrumb structured data (JSON-LD)
  */
-export function generateBreadcrumbSchema(items: BreadcrumbItem[], baseUrl: string = 'https://readyrent.gala') {
+export function generateBreadcrumbSchema(items: BreadcrumbItem[], baseUrl: string = 'https://www.standard.rent') {
   return {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
@@ -82,14 +82,14 @@ export function generateBreadcrumbSchema(items: BreadcrumbItem[], baseUrl: strin
 /**
  * Generate Organization structured data (JSON-LD)
  */
-export function generateOrganizationSchema(baseUrl: string = 'https://readyrent.gala') {
+export function generateOrganizationSchema(baseUrl: string = 'https://www.standard.rent') {
   return {
     '@context': 'https://schema.org',
     '@type': 'Organization',
-    name: 'ReadyRent.Gala',
+    name: 'STANDARD.Rent',
     url: baseUrl,
     logo: `${baseUrl}/icons/icon-512x512.png`,
-    description: 'منصة متكاملة لكراء الفساتين ومستلزمات المناسبات في قسنطينة والجزائر',
+    description: 'المنصة الأولى لتداول الأزياء الفاخرة في الجزائر. نظام بيئي مجتمعي آمن.',
     address: {
       '@type': 'PostalAddress',
       addressLocality: 'Constantine',
@@ -104,12 +104,12 @@ export function generateOrganizationSchema(baseUrl: string = 'https://readyrent.
 /**
  * Generate LocalBusiness structured data
  */
-export function generateLocalBusinessSchema(baseUrl: string = 'https://readyrent.gala') {
+export function generateLocalBusinessSchema(baseUrl: string = 'https://www.standard.rent') {
   const phoneNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || process.env.NEXT_PUBLIC_PHONE_NUMBER || '+213XXXXXXXXX';
   return {
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
-    name: 'ReadyRent.Gala',
+    name: 'STANDARD.Rent',
     image: `${baseUrl}/icons/icon-512x512.png`,
     '@id': baseUrl,
     url: baseUrl,

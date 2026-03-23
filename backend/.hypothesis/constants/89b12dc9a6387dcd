@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\analytics\migrations\0002_initial.py
+# hypothesis_version: 6.151.6
+
+['0001_initial', 'analytics', 'analytics_events', 'analyticsevent', 'behavior', 'dailyanalytics', 'date', 'event_type', 'product', 'productanalytics', 'products', 'products.product', 'session_id', 'timestamp', 'user', 'userbehavior']

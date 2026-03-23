@@ -8,7 +8,7 @@ BASE_URL = "http://localhost:8000/api"
 
 def test_api():
     print("=" * 50)
-    print("Testing ReadyRent.Gala API")
+    print("Testing STANDARD.Rent API")
     print("=" * 50)
     
     # Test 1: Check if API is running

@@ -1,0 +1,4 @@
+DEBUG: sys.argv = ['manage.py', 'dbshell', '--', '-f', 'scripts\\burn_16c4b.sql']
+{"event": "Patched drf_spectacular._map_model_field to handle gettext_lazy verbose_name"}
+{"event": "Patched drf_spectacular._resolve_path_parameters"}
+CommandError: You appear not to have the 'psql' program installed or on your path.

@@ -1,0 +1,19 @@
+{
+    "exit_code_by_key": {
+        "backend.authentication.x\u01c1CookieJWTAuthentication\u01c1authenticate__mutmut_1": null,
+        "backend.authentication.x\u01c1CookieJWTAuthentication\u01c1authenticate__mutmut_2": null,
+        "backend.authentication.x\u01c1CookieJWTAuthentication\u01c1authenticate__mutmut_3": null,
+        "backend.authentication.x\u01c1CookieJWTAuthentication\u01c1authenticate__mutmut_4": null,
+        "backend.authentication.x\u01c1CookieJWTAuthentication\u01c1authenticate__mutmut_5": null,
+        "backend.authentication.x\u01c1CookieJWTAuthentication\u01c1authenticate__mutmut_6": null,
+        "backend.authentication.x\u01c1CookieJWTAuthentication\u01c1authenticate__mutmut_7": null,
+        "backend.authentication.x\u01c1CookieJWTAuthentication\u01c1authenticate__mutmut_8": null,
+        "backend.authentication.x\u01c1CookieJWTAuthentication\u01c1authenticate__mutmut_9": null,
+        "backend.authentication.x\u01c1CookieJWTAuthentication\u01c1authenticate__mutmut_10": null,
+        "backend.authentication.x\u01c1CookieJWTAuthentication\u01c1authenticate__mutmut_11": null,
+        "backend.authentication.x\u01c1CookieJWTAuthentication\u01c1authenticate__mutmut_12": null
+    },
+    "hash_by_function_name": {},
+    "durations_by_key": {},
+    "estimated_durations_by_key": {}
+}

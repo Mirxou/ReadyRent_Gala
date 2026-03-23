@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\inventory\migrations\0003_alter_inventoryitem_options_alter_stockalert_options_and_more.py
+# hypothesis_version: 6.151.6
+
+['-created_at', '0002_initial', 'ID', 'VariantInventory', 'acknowledged_alerts', 'acknowledged_by', 'alerts', 'available quantity', 'created at', 'created_at', 'created_by', 'id', 'indexes', 'inventory', 'inventory_item', 'inventoryitem', 'last restocked', 'last_restocked', 'low stock threshold', 'low_stock_threshold', 'maintenance quantity', 'movements', 'ordering', 'product', 'products', 'products.product', 'quantity_available', 'quantity_maintenance', 'quantity_rented', 'quantity_total', 'rented quantity', 'stockalert', 'stockmovement', 'total quantity', 'updated at', 'updated_at', 'variant', 'verbose_name', 'verbose_name_plural', 'تنبيه المخزون', 'تنبيهات المخزون', 'حركات المخزون', 'حركة المخزون', 'عناصر المخزون', 'عنصر المخزون', 'مخزون المتغير', 'مخزونات المتغيرات']

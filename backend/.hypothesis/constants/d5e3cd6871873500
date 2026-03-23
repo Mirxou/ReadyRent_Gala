@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\inventory\migrations\0002_initial.py
+# hypothesis_version: 6.151.6
+
+['0001_initial', 'acknowledged_alerts', 'acknowledged_by', 'alerts', 'created_at', 'created_by', 'inventory', 'inventory_item', 'inventoryitem', 'movements', 'quantity_available', 'reference_id', 'reference_type', 'status', 'stockalert', 'stockmovement']

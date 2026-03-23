@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\disputes\migrations\0016_mediationsession_settlementoffer.py
+# hypothesis_version: 6.151.6
+
+['-created_at', 'Accepted', 'Active', 'Cited Precedents', 'Current Round', 'Expired', 'Expires At', 'ID', 'Max Rounds', 'MediationSession', 'Offer Amount', 'Owner', 'Reasoning', 'Rejected', 'SettlementOffer', 'System AI', 'Tenant', 'accepted', 'active', 'amount', 'cited_precedents', 'created_at', 'current_round', 'dispute', 'disputes', 'disputes.dispute', 'disputes.judgment', 'expired', 'expires_at', 'id', 'is_accepted', 'max_rounds', 'mediation_session', 'offers', 'ordering', 'owner', 'reasoning', 'rejected', 'session', 'settlement_citations', 'source', 'started_at', 'status', 'system', 'tenant', 'verbose_name', 'verbose_name_plural', 'جلسات الوساطة', 'جلسة الوساطة', 'عرض التسوية', 'عروض التسوية']

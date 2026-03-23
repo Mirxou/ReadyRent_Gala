@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\disputes\migrations\0008_judgmentprecedent.py
+# hypothesis_version: 6.151.6
+
+['-created_at', 'Divergence Reason', 'ID', 'JudgmentPrecedent', 'Similarity Score', 'Was Followed?', 'created_at', 'current judgment', 'disputes', 'disputes.judgment', 'divergence_reason', 'historical precedent', 'id', 'judgment', 'linked at', 'ordering', 'precedent', 'precedents_cited', 'precedents_used', 'similarity_score', 'unique_together', 'verbose_name', 'verbose_name_plural', 'was_followed', 'السوابق القضائية', 'سابقة قضائية']

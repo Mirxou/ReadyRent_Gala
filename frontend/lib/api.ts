@@ -1,6 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from 'axios';
 
+// 🛡️ INVESTOR-GRADE SECURITY: Cookie-First Architecture
+// No localStorage, No Authorization headers.
+// Browser handles cookies automatically via 'withCredentials: true'
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
 export const api = axios.create({
@@ -8,7 +12,10 @@ export const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 10000, // 10 seconds timeout
+  timeout: 15000,
+  withCredentials: true, // Critical: Sends HttpOnly cookies
+  xsrfCookieName: 'csrftoken',
+  xsrfHeaderName: 'X-CSRFToken', // Protection against CSRF
   paramsSerializer: (params: any) => {
     // Convert arrays to Django getlist format: ?sizes=XXXL&sizes=XXL
     const searchParams = new URLSearchParams();
@@ -26,24 +33,7 @@ export const api = axios.create({
   },
 });
 
-// Request interceptor to add auth token
-api.interceptors.request.use(
-  (config) => {
-    let token = null;
-    if (typeof window !== 'undefined') {
-      token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
-    }
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
-// Response interceptor for error handling
+// Response Interceptor: Handle 401 & Refresh Token
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -61,45 +51,32 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
+    // Prevent infinite loops [Critical]
+    // If 401 happens, try to refresh via cookie
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
-      // Try to refresh token
-      let refreshToken = null;
-      if (typeof window !== 'undefined') {
-        refreshToken = localStorage.getItem('refresh_token') || sessionStorage.getItem('refresh_token');
-      }
+      try {
+        console.log('🔄 401 Detected: Attempting Silent Refresh via Cookie...');
+        // Call refresh endpoint - Backend reads 'refresh_token' cookie automatically
+        await api.post('/auth/token/refresh/');
 
-      if (refreshToken) {
-        try {
-          const response = await axios.post(`${API_BASE_URL}/auth/token/refresh/`, {
-            refresh: refreshToken,
-          });
-          const { access } = response.data;
-
-          if (typeof window !== 'undefined') {
-            // Update token in whichever storage it was found or default to session if both check passed but logic ambiguous (though we should respect where refresh token was found)
-            if (localStorage.getItem('refresh_token')) {
-              localStorage.setItem('access_token', access);
-            } else {
-              sessionStorage.setItem('access_token', access);
-            }
-          }
-
-          originalRequest.headers.Authorization = `Bearer ${access}`;
-          return api(originalRequest);
-        } catch (refreshError) {
-          // Refresh failed, redirect to login
-          if (typeof window !== 'undefined') {
-            localStorage.removeItem('access_token');
-            localStorage.removeItem('refresh_token');
-            sessionStorage.removeItem('access_token');
-            sessionStorage.removeItem('refresh_token');
-            window.location.href = '/login';
-          }
-          return Promise.reject(refreshError);
+        console.log('✅ Refresh Successful: Retrying original request');
+        // Retry original request (Browser sends new 'access_token' cookie)
+        return api(originalRequest);
+      } catch (refreshError) {
+        console.error('❌ Refresh Failed: Session expired or invalid');
+        // Optional: Redirect to login or clear client state
+        if (typeof window !== 'undefined' && !window.location.pathname.includes('/auth/login')) {
+          window.location.href = '/auth/login';
         }
+        return Promise.reject(refreshError);
       }
+    }
+
+    // Dignity Preserved Error Handling
+    if (error.response?.data?.dignity_preserved) {
+      // Handle specialized sovereign errors if needed
     }
 
     return Promise.reject(error);
@@ -113,8 +90,8 @@ export const authApi = {
   register: (data: any) => api.post('/auth/register/', data),
   logout: () => api.post('/auth/logout/'),
   me: () => api.get('/auth/profile/'),
-  passwordResetRequest: (email: string) => api.post('/auth/password-reset/', { email }),
-  passwordResetConfirm: (token: string, uid: string, password: string, passwordConfirm: string) => api.post('/auth/password-reset/confirm/', { token, uid, password, password_confirm: passwordConfirm }),
+  passwordResetRequest: (email: string) => api.post('/auth/password/reset/request/', { email }),
+  passwordResetConfirm: (token: string, uid: string, password: string, passwordConfirm: string) => api.post('/auth/password/reset/confirm/', { token, uid, password, password_confirm: passwordConfirm }),
 };
 
 export const verificationApi = {
@@ -198,6 +175,7 @@ export const bookingsApi = {
   getCancellationPolicy: (id: number) => api.get(`/bookings/${id}/cancellation-policy/`),
   earlyReturn: (id: number, data: any) => api.post(`/bookings/${id}/early-return/`, data),
   getRefunds: (params?: any) => api.get('/bookings/refunds/', { params }),
+  calculateDeposit: (productId: number) => api.get('/bookings/calculate-deposit/', { params: { product_id: productId } }),
 };
 
 export const damageAssessmentApi = {

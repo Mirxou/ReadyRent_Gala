@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\bookings\migrations\0005_smartagreement.py
+# hypothesis_version: 6.151.6
+
+['ID', 'SmartAgreement', 'agreements/audio/', 'audio_file', 'booking', 'bookings', 'bookings.booking', 'contract_text', 'created_at', 'id', 'is_signed_by_owner', 'is_signed_by_user', 'raw_text', 'signed_at', 'smart_agreement', 'structured_terms', 'updated_at', 'توقيع المؤجر', 'توقيع المستأجر', 'ملف الصوت', 'نص العقد القانوني']

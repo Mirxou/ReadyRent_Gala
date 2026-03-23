@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\reviews\migrations\0001_initial.py
+# hypothesis_version: 6.151.6
+
+[200, '-created_at', '0001_initial', '1', '2', '3', '4', '5', 'Approved', 'ID', 'Negative', 'Neutral', 'Pending Moderation', 'Positive', 'Rejected', 'Review', 'Review Image', 'Review Images', 'ReviewImage', 'Reviews', 'alt text', 'alt_text', 'approved', 'booking', 'bookings', 'bookings.booking', 'comment', 'created at', 'created_at', 'helpful count', 'helpful_count', 'id', 'image', 'is_verified_purchase', 'negative', 'neutral', 'order', 'ordering', 'pending', 'positive', 'product', 'products', 'products.product', 'rating', 'rejected', 'review', 'reviews', 'reviews/', 'sentiment label', 'sentiment score', 'sentiment_label', 'sentiment_score', 'status', 'title', 'updated at', 'updated_at', 'verbose_name', 'verbose_name_plural', 'verified purchase']

@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\standard_core\models.py
+# hypothesis_version: 6.151.6
+
+[50.0, 255, '0.00', '10000.00', '5000.00', 'ACTIVE', 'APARTMENT', 'ARCHIVED', 'Active', 'Active (Handover)', 'Archived', 'CANCELLED', 'COMPLETED', 'Cancelled', 'Completed', 'Constitution', 'DISPUTED', 'DRAFT', 'DZD', 'Disputed', 'Draft', 'EQUIPMENT', 'Equipment', 'FASHION', 'Fashion & Events', 'GASOLINE', 'GENERIC', 'HALTED', 'MAINTENANCE', 'MANUAL', 'Maintenance', 'Other', 'PENDING', 'PERSONAL', 'PROFESSIONAL', 'Pending Approval', 'REAL_ESTATE', 'RENTED', 'Real Estate', 'Rented', 'SECURED', 'VEHICLE', 'Vehicles', 'assets', 'auth.Group', 'auth.Permission', 'bookings', 'bookings_as_renter', 'email', 'email address', 'groups', 'phone number', 'phone_number', 'sovereign_user', 'sovereign_user_set', 'trust score', 'user permissions', 'verified identity']

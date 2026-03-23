@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\social\migrations\0001_initial.py
+# hypothesis_version: 6.151.6
+
+['ID', 'Receiver', 'Vouch', 'Voucher', 'created_at', 'id', 'receiver', 'unique_together', 'verbose_name', 'verbose_name_plural', 'voucher', 'vouchers_given', 'vouches_received', 'تزكيات', 'تزكية']

@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\disputes\api_schemas.py
+# hypothesis_version: 6.151.6
+
+[200, 201, 400, 404, '1500.00', '2026-02-12T18:00:00Z', '2026-02-12T19:00:00Z', '2026-02-15T19:00:00Z', '3000.00', '6000.00', 'Active Mediation', 'Broken Camera Lens', 'Disputes', 'File a new dispute', 'High-value claim', 'Mediation', 'Offer approved', 'Offer rejected', 'Offer rejected.', 'Pending Offers', 'Settlement Offers', 'Success', 'Success Response', 'active', 'admin_offers_approve', 'admin_offers_pending', 'admin_offers_reject', 'amount', 'application/json', 'booking', 'claimed_amount', 'created_at', 'current_round', 'description', 'dispute', 'disputes_create', 'example', 'expires_at', 'high', 'id', 'max_rounds', 'message', 'offers', 'open', 'pending_review', 'priority', 'reason', 'reasoning', 'session', 'source', 'status', 'system', 'title', 'visible']

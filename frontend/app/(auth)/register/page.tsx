@@ -1,145 +1,139 @@
-'use client';
+"use client";
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { SovereignButton } from '@/components/sovereign/sovereign-button';
+import { GlassPanel } from '@/components/sovereign/glass-panel';
 import { authApi } from '@/lib/api';
+import { useAuthStore } from '@/lib/store';
 import { toast } from 'sonner';
-import { Eye, EyeOff } from 'lucide-react';
+import { LockKeyhole, Mail, User, Phone } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { setAuth } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    watch,
-  } = useForm();
-
-  const password = watch('password');
+  const { register, handleSubmit } = useForm();
 
   const onSubmit = async (data: any) => {
     setIsLoading(true);
     try {
-      await authApi.register(data);
-      toast.success('تم إنشاء الحساب بنجاح! يمكنك تسجيل الدخول الآن');
-      router.push('/login');
+      const response = await authApi.register(data);
+      if (response.data?.user) {
+        // 🛡️ Security: Cookie-Based Auth
+        setAuth(response.data.user);
+        toast.success('تم إنشاء الهوية السيادية بنجاح');
+        router.push('/');
+      } else {
+        // Handle direct login if register returns tokens directly
+        router.push('/auth/login');
+      }
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'حدث خطأ في إنشاء الحساب');
+      toast.error('فشل إنشاء الهوية. تحقق من المدخلات.');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <Card className="card-glass border-0 rounded-[2.5rem] overflow-hidden">
-      <CardHeader className="p-8 pb-4">
-        <CardTitle className="text-4xl font-black text-center bg-gradient-to-r from-white via-white to-white/40 bg-clip-text text-transparent">
-          إنشاء حساب جديد
-        </CardTitle>
-        <CardDescription className="text-center text-lg font-medium text-muted-foreground/60">
-          ابدئي رحلتكِ في عالم الفخامة اليوم
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="p-8 pt-4">
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-          <div className="space-y-2">
-            <Label htmlFor="username" className="text-sm font-bold mr-1">اسم المستخدم</Label>
-            <Input
-              id="username"
-              className="h-14 rounded-2xl border-white/10 bg-white/5 focus:bg-white/10 focus:ring-gala-purple/30 transition-all text-lg animate-medical-glow"
-              {...register('username', { required: 'اسم المستخدم مطلوب' })}
-            />
-            {errors.username && (
-              <p className="text-xs text-red-400 font-bold mr-1">{errors.username.message as string}</p>
-            )}
+    <div className="min-h-screen w-full flex items-center justify-center relative overflow-hidden bg-sovereign-blue">
+      {/* Dynamic Background */}
+      <div className="absolute inset-0 bg-background">
+        <div className="absolute inset-0 bg-gradient-to-tl from-sovereign-charcoal via-background to-sovereign-blue opacity-90" />
+      </div>
+
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        className="w-full max-w-md p-6 relative z-10"
+      >
+        <GlassPanel gradientBorder className="p-10 border-sovereign-gold/20 shadow-2xl shadow-sovereign-black/50">
+
+          <div className="text-center mb-10">
+            <h1 className="text-3xl font-black tracking-tight mb-2 text-foreground">
+              انضم إلى النخبة
+            </h1>
+            <p className="text-sovereign-gold/80 text-xs font-medium tracking-widest uppercase">
+              Identity Creation Protocol
+            </p>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="email" className="text-sm font-bold mr-1">البريد الإلكتروني</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="name@example.com"
-              className="h-14 rounded-2xl border-white/10 bg-white/5 focus:bg-white/10 focus:ring-gala-purple/30 transition-all text-lg animate-medical-glow"
-              {...register('email', { required: 'البريد الإلكتروني مطلوب' })}
-            />
-            {errors.email && (
-              <p className="text-xs text-red-400 font-bold mr-1">{errors.email.message as string}</p>
-            )}
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="password" className="text-sm font-bold mr-1">كلمة المرور</Label>
-            <div className="relative">
-              <Input
-                id="password"
-                type={showPassword ? "text" : "password"}
-                className="h-14 rounded-2xl border-white/10 bg-white/5 focus:bg-white/10 focus:ring-gala-purple/30 transition-all text-lg pr-12 animate-medical-glow"
-                {...register('password', {
-                  required: 'كلمة المرور مطلوبة',
-                  minLength: { value: 8, message: 'كلمة المرور يجب أن تكون 8 أحرف على الأقل' },
-                })}
+
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+
+            {/* Name */}
+            <div className="relative group">
+              <User className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-sovereign-gold transition-colors" />
+              <input
+                {...register('first_name')}
+                type="text"
+                placeholder="الاسم الكامل"
+                className="w-full h-12 pr-12 pl-4 bg-background/50 border border-white/10 rounded-xl focus:border-sovereign-gold/50 focus:ring-1 focus:ring-sovereign-gold/50 outline-none transition-all text-right"
+                required
               />
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-white"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-              </Button>
             </div>
-            {errors.password && (
-              <p className="text-xs text-red-400 font-bold mr-1">{errors.password.message as string}</p>
-            )}
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="password_confirm" className="text-sm font-bold mr-1">تأكيد كلمة المرور</Label>
-            <div className="relative">
-              <Input
-                id="password_confirm"
-                type={showConfirmPassword ? "text" : "password"}
-                className="h-14 rounded-2xl border-white/10 bg-white/5 focus:bg-white/10 focus:ring-gala-purple/30 transition-all text-lg pr-12 animate-medical-glow"
-                {...register('password_confirm', {
-                  required: 'يجب تأكيد كلمة المرور',
-                  validate: (value) => value === password || 'كلمة المرور غير متطابقة',
-                })}
+
+            {/* Email */}
+            <div className="relative group">
+              <Mail className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-sovereign-gold transition-colors" />
+              <input
+                {...register('email')}
+                type="email"
+                placeholder="البريد الإلكتروني"
+                className="w-full h-12 pr-12 pl-4 bg-background/50 border border-white/10 rounded-xl focus:border-sovereign-gold/50 focus:ring-1 focus:ring-sovereign-gold/50 outline-none transition-all text-right"
+                required
               />
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-white"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              >
-                {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-              </Button>
             </div>
-            {errors.password_confirm && (
-              <p className="text-xs text-red-400 font-bold mr-1">{errors.password_confirm.message as string}</p>
-            )}
+
+            {/* Phone */}
+            <div className="relative group">
+              <Phone className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-sovereign-gold transition-colors" />
+              <input
+                {...register('phone_number')}
+                type="tel"
+                placeholder="رقم الهاتف (+213)"
+                className="w-full h-12 pr-12 pl-4 bg-background/50 border border-white/10 rounded-xl focus:border-sovereign-gold/50 focus:ring-1 focus:ring-sovereign-gold/50 outline-none transition-all text-right"
+                required
+              />
+            </div>
+
+            {/* Password */}
+            <div className="relative group">
+              <LockKeyhole className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-sovereign-gold transition-colors" />
+              <input
+                {...register('password')}
+                type="password"
+                placeholder="رمز المرور الآمن"
+                className="w-full h-12 pr-12 pl-4 bg-background/50 border border-white/10 rounded-xl focus:border-sovereign-gold/50 focus:ring-1 focus:ring-sovereign-gold/50 outline-none transition-all text-right font-sans"
+                required
+              />
+            </div>
+
+            <SovereignButton
+              type="submit"
+              variant="primary"
+              size="lg"
+              className="w-full mt-6"
+              isLoading={isLoading}
+              withShimmer
+            >
+              تأكيد الهوية
+            </SovereignButton>
+
+          </form>
+
+          <div className="mt-8 text-center text-sm">
+            <Link href="/auth/login" className="text-muted-foreground hover:text-sovereign-gold transition-colors">
+              لدي هوية بالفعل؟ تسجيل الدخول
+            </Link>
           </div>
-          <Button type="submit" className="w-full h-14 rounded-2xl bg-gradient-to-r from-gala-purple to-gala-pink hover:opacity-90 shadow-lg glow-purple font-black text-lg transition-all" disabled={isLoading}>
-            {isLoading ? 'جاري التحضير...' : 'انضمي للنخبة'}
-          </Button>
-        </form>
-        <div className="mt-8 text-center text-sm">
-          <span className="text-muted-foreground font-medium">لديك حساب بالفعل؟ </span>
-          <Link href="/login" className="text-gala-purple font-bold hover:text-gala-pink transition-colors">
-            سجلي دخولكِ هنا
-          </Link>
-        </div>
-      </CardContent>
-    </Card>
+
+        </GlassPanel>
+      </motion.div>
+    </div>
   );
 }
-

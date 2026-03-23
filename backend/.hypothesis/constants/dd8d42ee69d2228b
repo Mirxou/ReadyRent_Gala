@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\reviews\models.py
+# hypothesis_version: 6.151.6
+
+[200, '-created_at', '1', '2', '3', '4', '5', 'Approved', 'Negative', 'Neutral', 'Pending Moderation', 'Positive', 'Rejected', 'alt text', 'approved', 'booking', 'bookings.Booking', 'comment', 'created at', 'created_at', 'helpful count', 'image', 'images', 'negative', 'neutral', 'order', 'pending', 'positive', 'product', 'products.Product', 'rating', 'rejected', 'review', 'reviews', 'reviews/', 'sentiment label', 'sentiment score', 'status', 'title', 'updated at', 'user', 'verified purchase', 'المراجعات', 'المراجعة', 'صور المراجعات', 'صورة المراجعة']

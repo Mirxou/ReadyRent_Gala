@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\disputes\migrations\0014_add_judgment_evidence_indexes.py
+# hypothesis_version: 6.151.6
+
+['-created_at', '-finalized_at', '-timestamp', 'action', 'booking', 'bookings', 'dispute', 'disputes', 'evidencelog', 'judgment', 'status']

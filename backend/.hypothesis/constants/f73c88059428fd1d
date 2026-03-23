@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\chatbot\admin.py
+# hypothesis_version: 6.151.6
+
+['...', 'Content Preview', 'Context', 'Session Info', 'Timestamps', 'Value Preview', 'confidence', 'content', 'content_preview', 'context_data', 'created_at', 'description', 'escalated_at', 'escalated_to', 'fields', 'intent_type', 'is_active', 'key', 'language', 'model_used', 'resolved_at', 'role', 'session', 'session__session_id', 'session_id', 'started_at', 'status', 'tokens_used', 'updated_at', 'user', 'user__email', 'value_preview']

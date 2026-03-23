@@ -1,5 +1,5 @@
 /**
- * Simple i18n implementation for ReadyRent.Gala
+ * Simple i18n implementation for STANDARD.Rent
  * Supports Arabic (ar), French (fr), and English (en)
  */
 
@@ -160,3 +160,4 @@ export function getTranslation(key: string, lang: Language = 'ar'): string {
 export function t(key: string, lang: Language = 'ar'): string {
   return getTranslation(key, lang);
 }
+

@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\disputes\migrations\0002_evidencelog.py
+# hypothesis_version: 6.151.6
+
+[100, 128, '-timestamp', '0001_initial', 'Context Snapshot', 'Event Action', 'Event Metadata', 'EvidenceLog', 'ID', 'Integrity Hash', 'action', 'actor', 'booking', 'bookings', 'bookings.booking', 'context_snapshot', 'dispute', 'disputes', 'disputes.dispute', 'evidence_logs', 'evidence_trail', 'hash', 'id', 'metadata', 'ordering', 'timestamp', 'verbose_name', 'verbose_name_plural', 'سجل الأدلة']

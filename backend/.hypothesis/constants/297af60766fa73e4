@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\returns\migrations\0003_alter_refund_options_alter_return_options_and_more.py
+# hypothesis_version: 6.151.6
+
+['-created_at', '-requested_at', '0002_initial', 'admin', 'booking', 'bookings', 'bookings.booking', 'inspected_returns', 'inspector', 'items', 'ordering', 'product', 'products', 'products.product', 'refund', 'return', 'return request', 'return_items', 'return_request', 'returnitem', 'returns', 'returns.return', 'role__in', 'staff', 'verbose_name', 'verbose_name_plural', 'الإرجاع', 'الإرجاعات', 'الاسترداد', 'الاستردادات', 'عناصر الإرجاع', 'عنصر الإرجاع']

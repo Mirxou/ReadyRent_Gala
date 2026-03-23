@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\products\migrations\0010_alter_product_owner_not_null.py
+# hypothesis_version: 6.151.6
+
+['owned_products', 'owner', 'product', 'products', 'المالك']

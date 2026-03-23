@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\disputes\admin_service.py
+# hypothesis_version: 6.151.6
+
+['amount', 'offer_id', 'reason', 'rejection_reason']

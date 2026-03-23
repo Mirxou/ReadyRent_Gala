@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\artisans\models.py
+# hypothesis_version: 6.151.6
+
+[100, 200, '-created_at', '-is_featured', '-rating', 'Accessories Designer', 'Beading Specialist', 'Constantine', 'Dress Designer', 'Other', 'Tailor', 'accessories_designer', 'active', 'address', 'artisan', 'artisan_profile', 'artisan_reviews', 'artisans/covers/', 'artisans/portfolio/', 'artisans/profiles/', 'beading', 'bio', 'bio (Arabic)', 'city', 'comment', 'cover image', 'created at', 'description', 'dress_designer', 'email', 'embroidery', 'facebook', 'featured', 'image', 'instagram', 'is_active', 'latitude', 'longitude', 'name', 'name (Arabic)', 'order', 'other', 'phone', 'portfolio_items', 'profile image', 'project count', 'rating', 'review count', 'reviews', 'specialty', 'tailor', 'title', 'title (Arabic)', 'updated at', 'user', 'verified', 'whatsapp', 'الحرفي', 'الحرفيين', 'مراجعات الحرفيين', 'مراجعة الحرفي', 'معارض الحرفيين', 'معرض الحرفي']

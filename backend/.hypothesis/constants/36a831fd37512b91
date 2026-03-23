@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\maintenance\serializers.py
+# hypothesis_version: 6.151.6
+
+['actual_end', 'actual_start', 'assigned_to', 'assigned_to.email', 'assigned_to_email', 'blocks_bookings', 'cost', 'created_at', 'duration_hours', 'duration_minutes', 'end_datetime', 'id', 'is_active', 'is_overdue', 'maintenance_record', 'maintenance_type', 'notes', 'period', 'product', 'product.name_ar', 'product_name', 'related_booking', 'scheduled_end', 'scheduled_start', 'start_datetime', 'status', 'updated_at']

@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\payments\admin.py
+# hypothesis_version: 6.151.6
+
+['amount', 'booking', 'booking__id', 'card_brand', 'card_last_four', 'completed_at', 'created_at', 'currency', 'display_name', 'event_type', 'failure_reason', 'fields', 'gateway_response', 'headers', 'id', 'is_active', 'name', 'otp_code', 'payload', 'payment', 'payment_method', 'phone_number', 'processed', 'status', 'transaction_id', 'updated_at', 'user', 'user__email', 'الطوابع الزمنية', 'المعاملة', 'المعلومات الأساسية', 'تفاصيل الدفع']

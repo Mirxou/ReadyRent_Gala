@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\artisans\admin.py
+# hypothesis_version: 6.151.6
+
+['Basic Info', 'Contact', 'Location', 'Media', 'Status', 'Timestamps', 'User', 'address', 'artisan', 'artisan__name', 'bio', 'bio_ar', 'city', 'comment', 'cover_image', 'created_at', 'email', 'facebook', 'fields', 'instagram', 'is_active', 'is_featured', 'is_verified', 'latitude', 'longitude', 'name', 'name_ar', 'phone', 'profile_image', 'project_count', 'rating', 'review_count', 'specialty', 'updated_at', 'user', 'user__email', 'whatsapp']

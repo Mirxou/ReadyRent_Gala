@@ -17,7 +17,7 @@ export function Footer() {
               <div className="relative">
                 <div className="absolute -inset-1 bg-gradient-to-r from-gala-purple to-gala-pink rounded-full blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
                 <span className="relative text-5xl font-black tracking-tighter bg-gradient-to-r from-gala-purple via-gala-pink to-gala-gold dark:from-white dark:via-white dark:to-white/40 bg-clip-text text-transparent italic">
-                  GALA.
+                  STANDARD.
                 </span>
               </div>
             </Link>
@@ -87,7 +87,7 @@ export function Footer() {
 
         {/* 4. Bottom Signature */}
         <div className="flex flex-col md:flex-row justify-between items-center pt-12 border-t border-gray-200 dark:border-white/5 gap-8">
-          <p className="text-xs uppercase tracking-widest text-muted-foreground/40 font-bold">© 2026 ReadyRent Gala</p>
+          <p className="text-xs uppercase tracking-widest text-muted-foreground/40 font-bold">© 2026 STANDARD.Rent</p>
           <div className="flex gap-4 items-center">
             <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
             <p className="text-xs uppercase tracking-widest text-muted-foreground/40 font-bold">Designed for the future</p>

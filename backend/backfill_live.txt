@@ -1,0 +1,37 @@
+DEBUG: sys.argv = ['manage.py', 'encrypt_pii_fields', '--batch=500']
+{"event": "Patched drf_spectacular._map_model_field to handle gettext_lazy verbose_name"}
+{"event": "Patched drf_spectacular._resolve_path_parameters"}
+{"event": "DeepFace not found. Identity verification will be skipped."}
+
+============================================================
+  PHASE 16B — PII BACKFILL [LIVE]
+============================================================
+
+ℹ️  Users to process: 234
+ℹ️  Batch size: 500
+ℹ️  Force re-hash: False
+ℹ️  Dry run: False
+  Batch offset=     0 | processed=234 | failed=0 | total_done=234
+
+────────────────────────────────────────────────────────────
+  SAMPLE ROW — BEFORE / AFTER
+────────────────────────────────────────────────────────────
+  id:              288
+  email:           debug_user_f788c7@example.com
+  email_hash BEFORE: NULL
+  email_hash AFTER:  uu5fJRBCr04xAjVBQvi+QFCcpktVaXQb...
+  phone:           NULL
+  phone_hash BEFORE: NULL
+  phone_hash AFTER:  NULL
+
+============================================================
+  PHASE 16B SUMMARY [LIVE]
+============================================================
+  Rows processed:  234
+  Rows skipped:    0
+  Rows failed:     0
+  Time elapsed:    23.70s
+
+  ✅ Backfill complete. All rows processed successfully.
+  ✅ Phase 16B DONE — plaintext email_hash shadow is populated.
+============================================================

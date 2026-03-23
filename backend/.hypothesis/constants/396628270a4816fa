@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\packaging\migrations\0002_initial.py
+# hypothesis_version: 6.151.6
+
+['0001_initial', 'booking', 'instances', 'material', 'materials_used', 'packaging', 'packaging_instance', 'packaging_instances', 'packaging_rules', 'packaging_type', 'packaginginstance', 'packagingrule', 'prepared_by', 'prepared_packaging', 'product', 'product_category', 'products', 'products.category', 'products.product', 'role', 'rules', 'staff', 'status']

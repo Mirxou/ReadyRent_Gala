@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\users\migrations\0003_user_supabase_user_id.py
+# hypothesis_version: 6.151.6
+
+['Supabase User ID', 'supabase_user_id', 'user', 'users']

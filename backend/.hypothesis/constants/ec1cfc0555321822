@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\disputes\adjudication_service.py
+# hypothesis_version: 6.151.6
+
+['JUDGMENT_FINALIZED', 'JUDGMENT_ISSUED', 'SOVEREIGN_OVERRIDE', 'Sovereign Override', 'admissible', 'awarded', 'final', 'judgment_final', 'judgment_id', 'judgment_provisional', 'justification', 'provisional', 'under_review', 'verdict']

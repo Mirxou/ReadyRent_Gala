@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\disputes\migrations\0017_phase_43_explainability.py
+# hypothesis_version: 6.151.6
+
+['Confidence Maximum', 'Confidence Minimum', 'confidence_max', 'confidence_min', 'disputes', 'settlementoffer', 'v1-plain-language']

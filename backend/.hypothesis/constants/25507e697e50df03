@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\bookings\migrations\0004_booking_beneficiary_booking_escrow_status_and_more.py
+# hypothesis_version: 6.151.6
+
+[255, 'HELD', 'INITIATED', 'REFUNDED', 'RELEASED', 'beneficiary', 'booking', 'bookings', 'escrow_status', 'received_escrows', 'vault_address', 'المستفيد من الصرف', 'تم الشروع', 'تم الصرف', 'حالة الاحتجاز', 'عنوان الخزنة الرقمية', 'محجوز في الخزنة', 'مسترجع']

@@ -150,3 +150,63 @@ class RefundPolicy:
         return refund.status
 
 
+class TerminationPolicy:
+    """
+    The Timekeeper.
+    Manages the 'Point of No Return' logic for Smart Agreements.
+    """
+    
+    # The Golden Rule: 10 Minutes to change your mind
+    COOLING_WINDOW_MINUTES = 10
+    
+    # Financial Penalties (Asset Class)
+    PENALTY_TIERS_ASSET = {
+        48: 0.10,  # > 48h: 10%
+        24: 0.30,  # 24-48h: 30%
+        0: 1.0,    # < 24h: 100% (No Refund of Down Payment)
+    }
+    
+    @classmethod
+    def get_status(cls, booking, current_time=None):
+        """
+        Determines the current Sovereign State of the agreement.
+        """
+        if current_time is None:
+            current_time = timezone.now()
+            
+        if not booking.signed_at:
+            return {
+                'state': 'draft',
+                'can_retract': True,
+                'penalty_rate': 0.0,
+                'message': 'Contract not signed.'
+            }
+            
+        # Calculate time since signature
+        time_since_signature = (current_time - booking.signed_at).total_seconds() / 60
+        
+        # Phase 1: Cooling Window
+        if time_since_signature <= cls.COOLING_WINDOW_MINUTES:
+            return {
+                'state': 'cooling',
+                'can_retract': True,
+                'penalty_rate': 0.0,
+                'message': f'Cooling window active. {int(cls.COOLING_WINDOW_MINUTES - time_since_signature)}m remaining.'
+            }
+            
+        # Phase 2: Binding Commitment
+        # Check time until start
+        time_until_start = (booking.start_date - current_time.date()).total_seconds() / 3600
+        
+        penalty_rate = 1.0
+        for hours, rate in sorted(cls.PENALTY_TIERS_ASSET.items(), reverse=True):
+            if time_until_start >= hours:
+                penalty_rate = rate
+                break
+                
+        return {
+            'state': 'binding',
+            'can_retract': False,
+            'penalty_rate': penalty_rate,
+            'message': 'Agreement is binding. Termination requires penalty.'
+        }

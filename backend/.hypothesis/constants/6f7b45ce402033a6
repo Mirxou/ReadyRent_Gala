@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\disputes\engine.py
+# hypothesis_version: 6.151.6
+
+[0.5, 'BEHAVIORAL_HALT', 'DIGNITY_COOLING_OFF', 'DISPUTE_INITIATED', 'Emotional Flooding', 'GENERAL_POOL', 'JUDICIAL_REVIEW', 'LOCKED', 'NEW', 'PANEL_ASSIGNED', 'PROTECTIVE_48_HOURS', 'Temporary Pause', 'UNAFFILIATED_DISPUTE', 'angry', 'assigned_panel', 'body_ar', 'body_en', 'booking_id', 'capacity_load', 'code', 'context', 'current_load', 'description', 'dignity_preserved', 'dispute_id', 'document', 'emotional_lock_until', 'estimated_wait', 'lock_until', 'medium', 'min_count', 'panel_name', 'phase', 'precedents_found', 'priority', 'reason', 'requirements', 'sovereign_halt', 'sovereign_proceeding', 'status', 'title', 'title_ar', 'title_en', 'type', 'unlocks_at', 'verdict', 'visual_assets', 'إثبات واقعة', 'هدنة مؤقتة']

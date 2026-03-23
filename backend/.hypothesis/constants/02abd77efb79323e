@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\vendors\admin.py
+# hypothesis_version: 6.151.6
+
+['added_at', 'average_rating', 'business_name', 'business_name_ar', 'calculated_at', 'city', 'commission_amount', 'commission_rate', 'created_at', 'is_verified', 'paid_at', 'payment_reference', 'period_end', 'period_start', 'product', 'product__name', 'product__name_ar', 'rating', 'sale_amount', 'status', 'tax_id', 'total_bookings', 'total_commission', 'total_products', 'total_revenue', 'total_sales', 'updated_at', 'user', 'user__email', 'vendor', 'verified_at']

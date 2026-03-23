@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\config\constance_settings.py
+# hypothesis_version: 6.151.6
+
+[0.05, 'RRS_MAX_DISPUTES', 'RRS_MIN_TRANSACTIONS', 'SPF_OWNER_RATE', 'SPF_RENTER_RATE', 'electronics']

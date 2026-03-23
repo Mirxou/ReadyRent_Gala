@@ -5,7 +5,78 @@ import math
 from typing import List, Dict, Tuple, Optional
 from django.db.models import Q, Count, Avg
 from django.db.models.functions import Coalesce
+from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
 from .models import Product
+
+
+class ProductService:
+    """
+    Business Logic Layer for Product Management.
+    Decides based on data, not bias.
+    """
+
+    @staticmethod
+    def can_user_list_product(user) -> Tuple[bool, str]:
+        """
+        Intelligent Logic: Can this user list a product?
+        Relies entirely on 'risk_score' from the User's VerificationStatus.
+        """
+        try:
+            # Access the hidden gem: risk_score from the verification profile
+            # Safety: If logic is run before profile creation, assume pending/safe-defaults
+            verification = getattr(user, 'verification', None)
+            
+            # Default risk: 50 (Caution) if no verification profile found
+            risk_score = verification.risk_score if verification else 50
+        except ObjectDoesNotExist:
+             risk_score = 50
+
+        # --- Automation Rules ---
+        from django.conf import settings
+        
+        # 1. High Risk (Danger Zone)
+        if risk_score > settings.RISK_CONFIG['CRITICAL_THRESHOLD']:
+            return False, "درجة المخاطرة عالية جداً. يرجى التواصل مع الدعم لرفع مستوى الثقة."
+        
+        # 2. Safe Zone (Direct Community Vault)
+        if risk_score < settings.RISK_CONFIG['TRUSTED_THRESHOLD']:
+            return True, "موثوق: يمكن إدراج المنتجات فوراً في خزنة المجتمع."
+        
+        # 3. Grey Zone (Under Review)
+        # Caution: Allowed to upload, but requires manual approval
+        return True, "تحت المراجعة: المنتج سينتظر موافقة الإدارة قبل النشر."
+
+    @staticmethod
+    def create_community_product(user, product_data):
+        """
+        Create a community product with pre-emptive automated checks.
+        """
+        # First: Pass through the Intelligent Gateway
+        allowed, message = ProductService.can_user_list_product(user)
+        
+        if not allowed:
+            raise PermissionDenied(message)
+        
+        # Determine approval status based on risk score again (to be precise)
+        # We re-fetch or pass the logic. For now, re-calc is cheap.
+        try:
+            verification = getattr(user, 'verification', None)
+            risk_score = verification.risk_score if verification else 50
+        except ObjectDoesNotExist:
+            risk_score = 50
+
+        from django.conf import settings
+        is_trusted = risk_score < settings.RISK_CONFIG['TRUSTED_THRESHOLD']
+
+        # Second: Create the Product
+        # Explicitly handling the 'owner' and approval status
+        product = Product.objects.create(
+            **product_data,
+            owner=user,
+            is_community_approved=is_trusted 
+        )
+        
+        return product
 
 
 class ColorMatchingService:
@@ -303,6 +374,7 @@ class RecommendationService:
                     results.append(item)
                     result_ids.add(item.id)
         
+        # Return results
         return results[:limit]
     
     @staticmethod
@@ -359,4 +431,3 @@ class RecommendationService:
             queryset = queryset.exclude(id=exclude_product_id)
         
         return list(queryset.select_related('category').prefetch_related('images')[:limit])
-

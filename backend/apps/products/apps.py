@@ -5,5 +5,8 @@ from django.utils.translation import gettext_lazy as _
 class ProductsConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'apps.products'
+
+    def ready(self):
+        import apps.products.signals
     verbose_name = _('المنتجات')
 

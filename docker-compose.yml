@@ -2,145 +2,196 @@ version: '3.8'
 
 services:
   db:
-    image: postgres:15-alpine
-    container_name: readyrent_db
+    image: postgres:16
+    container_name: rentily_db
     environment:
-      POSTGRES_DB: readyrent_gala
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: rentily_production
+      POSTGRES_USER: rentily_admin
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    networks:
+      - rentily_network
+    restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U rentily_admin -d rentily_production"]
       interval: 10s
       timeout: 5s
       retries: 5
 
   redis:
     image: redis:7-alpine
-    container_name: readyrent_redis
-    ports:
-      - "6379:6379"
+    container_name: rentily_redis
+    restart: unless-stopped
+    command: redis-server /usr/local/etc/redis/redis.conf
     volumes:
       - redis_data:/data
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    ports:
+      - "6379:6379"
+    networks:
+      - rentily_network
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
-      timeout: 5s
+      timeout: 3s
       retries: 5
 
   backend:
-    build: ./backend
-    container_name: readyrent_backend
-    command: python manage.py runserver 0.0.0.0:8000
-    volumes:
-      - ./backend:/app
-      - backend_static:/app/staticfiles
-      - backend_media:/app/media
-    ports:
-      - "8000:8000"
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: rentily_backend
+    restart: unless-stopped
+    command: gunicorn config.wsgi:application --config gunicorn_config.py
     environment:
-      - DEBUG=1
-      - DB_NAME=readyrent_gala
-      - DB_USER=postgres
-      - DB_PASSWORD=postgres
+      - DEBUG=0
+      - DJANGO_SETTINGS_MODULE=config.settings
+      - DATABASE_URL=postgresql://rentily_admin:${DB_PASSWORD}@db:5432/rentily_production
+      - REDIS_URL=redis://redis:6379/1
+      - SECRET_KEY=${SECRET_KEY}
+      - DB_NAME=rentily_production
+      - DB_USER=rentily_admin
+      - DB_PASSWORD=${DB_PASSWORD}
       - DB_HOST=db
       - DB_PORT=5432
+    volumes:
+      - ./backend:/app
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - rentily_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  celery_worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: rentily_celery_worker
+    restart: unless-stopped
+    command: celery -A config worker -l info
+    environment:
+      - DEBUG=0
+      - DJANGO_SETTINGS_MODULE=config.settings
+      - DATABASE_URL=postgresql://rentily_admin:${DB_PASSWORD}@db:5432/rentily_production
       - REDIS_URL=redis://redis:6379/1
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - SECRET_KEY=${SECRET_KEY}
+      - DB_NAME=rentily_production
+      - DB_USER=rentily_admin
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=db
+      - DB_PORT=5432
+    volumes:
+      - ./backend:/app
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - rentily_network
+
+  celery_beat:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: rentily_celery_beat
+    restart: unless-stopped
+    command: celery -A config beat -l info
+    environment:
+      - DEBUG=0
+      - DJANGO_SETTINGS_MODULE=config.settings
+      - DATABASE_URL=postgresql://rentily_admin:${DB_PASSWORD}@db:5432/rentily_production
+      - REDIS_URL=redis://redis:6379/1
+      - SECRET_KEY=${SECRET_KEY}
+      - DB_NAME=rentily_production
+      - DB_USER=rentily_admin
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=db
+      - DB_PORT=5432
+    volumes:
+      - ./backend:/app
     depends_on:
       db:
         condition: service_healthy
       redis:
         condition: service_healthy
-    env_file:
-      - ./backend/.env
-    healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health/').read()"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+    networks:
+      - rentily_network
 
-  celery:
-    build: ./backend
-    container_name: readyrent_celery
-    command: celery -A config worker -l info
-    volumes:
-      - ./backend:/app
+  pgbouncer:
+    image: edoburu/pgbouncer:1.21.0
+    container_name: rentily_pgbouncer
     environment:
-      - DEBUG=1
-      - DB_NAME=readyrent_gala
-      - DB_USER=postgres
-      - DB_PASSWORD=postgres
-      - DB_HOST=db
-      - DB_PORT=5432
-      - REDIS_URL=redis://redis:6379/1
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
-    depends_on:
-      - db
-      - redis
-      - backend
-    env_file:
-      - ./backend/.env
-
-  celery-beat:
-    build: ./backend
-    container_name: readyrent_celery_beat
-    command: celery -A config beat -l info
+      - DATABASE_URL=postgresql://rentily_admin:${DB_PASSWORD}@db:5432/rentily_production
+      - POOL_MODE=transaction
+      - MAX_CLIENT_CONN=1000
+      - DEFAULT_POOL_SIZE=25
     volumes:
-      - ./backend:/app
-    environment:
-      - DEBUG=1
-      - DB_NAME=readyrent_gala
-      - DB_USER=postgres
-      - DB_PASSWORD=postgres
-      - DB_HOST=db
-      - DB_PORT=5432
-      - REDIS_URL=redis://redis:6379/1
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
-    depends_on:
-      - db
-      - redis
-      - backend
-    env_file:
-      - ./backend/.env
-
-  frontend:
-    build: ./frontend
-    container_name: readyrent_frontend
-    command: npm run dev
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-      - /app/.next
+      - ./pgbouncer/pgbouncer.ini:/etc/pgbouncer/pgbouncer.ini:ro
+      - ./pgbouncer/userlist.txt:/etc/pgbouncer/userlist.txt:ro
     ports:
-      - "3001:3001"
-    environment:
-      - NODE_ENV=development
-      - NEXT_PUBLIC_API_URL=http://localhost:8000/api
+      - "6543:6543"
     depends_on:
-      backend:
+      db:
         condition: service_healthy
-    env_file:
-      - ./frontend/.env.local
+    networks:
+      - rentily_network
     healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3001', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+      test: ["CMD", "pg_isready", "-h", "localhost", "-p", "6543"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Ingress Layer (Nginx + SSL)
+  # ─────────────────────────────────────────────────────────────────────────────
+  nginx:
+    image: nginx:alpine
+    container_name: rentily_nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./certbot/conf:/etc/letsencrypt:ro
+      - ./certbot/www:/var/www/certbot:ro
+      - static_volume:/var/www/rentily/static:ro
+      - media_volume:/var/www/rentily/media:ro
+    depends_on:
+      - backend
+    networks:
+      - rentily_network
+    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+
+  certbot:
+    image: certbot/certbot
+    container_name: rentily_certbot
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
 
 volumes:
   postgres_data:
   redis_data:
-  backend_static:
-  backend_media:
+  static_volume:
+  media_volume:
 
+networks:
+  rentily_network:
+    driver: bridge

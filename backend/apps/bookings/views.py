@@ -9,6 +9,9 @@ from django.utils import timezone
 from datetime import timedelta
 from django.db.models import Count, Sum, Q
 from django_filters.rest_framework import DjangoFilterBackend
+import logging
+
+logger = logging.getLogger(__name__)
 from .models import (
     Booking, Cart, CartItem, Waitlist,
     DamageAssessment, DamagePhoto, InspectionChecklist, DamageClaim,
@@ -26,6 +29,7 @@ from .policies import CancellationPolicy, RefundPolicy
 from apps.products.models import Product
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
+from standard_core.mixins import SovereignResponseMixin
 
 
 class CartView(generics.RetrieveAPIView):
@@ -61,14 +65,26 @@ class CartItemDeleteView(generics.DestroyAPIView):
         return CartItem.objects.filter(cart=cart)
 
 
-class BookingCreateView(generics.CreateAPIView):
+class BookingCreateView(SovereignResponseMixin, generics.CreateAPIView):
     """Create booking from cart"""
     serializer_class = BookingSerializer
     permission_classes = [IsAuthenticated]
     
     def create(self, request, *args, **kwargs):
+        # 1. Idempotency Check
+        idempotency_key = request.data.get('idempotency_key')
+        if idempotency_key:
+            existing_booking = Booking.objects.filter(idempotency_key=idempotency_key).first()
+            if existing_booking:
+                # Return existing booking without error (Success)
+                serializer = BookingSerializer([existing_booking], many=True)
+                return Response(
+                    {'bookings': serializer.data, 'message': 'Booking already processed (Idempotent)'}, 
+                    status=status.HTTP_200_OK
+                )
+
         cart, _ = Cart.objects.get_or_create(user=request.user)
-        items = cart.items.all()
+        items = cart.items.select_related('product').all()
         
         if not items.exists():
             return Response(
@@ -76,92 +92,119 @@ class BookingCreateView(generics.CreateAPIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # Get same-day delivery option from request data
-        same_day_delivery = request.data.get('same_day_delivery', False) if hasattr(request, 'data') else False
-        
+        same_day_delivery = request.data.get('same_day_delivery', False)
         bookings = []
-        for item in items:
-            # Check availability before creating booking
-            availability = AvailabilityService.check_availability(
-                product_id=item.product.id,
-                start_date=item.start_date,
-                end_date=item.end_date
-            )
-            
-            if not availability['available']:
-                return Response(
-                    {
-                        'error': availability['message'],
-                        'reason': availability['reason'],
-                        'product_id': item.product.id,
-                        'product_name': item.product.name_ar
-                    },
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            
-            # Calculate total days and price
-            total_days = (item.end_date - item.start_date).days + 1
-            total_price = item.product.price_per_day * total_days * item.quantity
-            
-            booking = Booking.objects.create(
-                user=request.user,
-                product=item.product,
-                start_date=item.start_date,
-                end_date=item.end_date,
-                total_days=total_days,
-                total_price=total_price,
-                status='pending'
-            )
-            bookings.append(booking)
-            
-            # Invalidate availability cache
-            AvailabilityService.invalidate_cache(
-                product_id=item.product.id,
-                start_date=item.start_date,
-                end_date=item.end_date
-            )
-            
-            # Create delivery request if same-day delivery is requested
-            if same_day_delivery:
-                from apps.locations.models import DeliveryRequest
-                from apps.locations.services import LocationService
-                
-                # Get user's default address
-                from apps.locations.models import Address
-                default_address = Address.objects.filter(
-                    user=request.user,
-                    is_default=True
-                ).first()
-                
-                if default_address and default_address.latitude and default_address.longitude:
-                    # Find delivery zone
-                    zone = LocationService.find_delivery_zone(
-                        float(default_address.latitude),
-                        float(default_address.longitude)
+        messages = []
+        
+        from django.db import transaction
+        from apps.products.models import Product
+
+        try:
+            with transaction.atomic():
+                for item in items:
+                    # 2. Concurrency Lock: Lock the Product row to prevent race conditions
+                    # This ensures no one else can book this product while we are checking/creating
+                    _locked_product = Product.objects.select_for_update().get(id=item.product.id)
+                    
+                    # --- SOVEREIGN LAUNCH CHECK ---
+                    from apps.bookings.launch_policy import SovereignLaunchPolicy
+                    SovereignLaunchPolicy.validate_booking(_locked_product)
+                    # ------------------------------
+                    
+                    # Check availability (now strictly serialized)
+                    availability = AvailabilityService.check_availability(
+                        product_id=item.product.id,
+                        start_date=item.start_date,
+                        end_date=item.end_date
                     )
                     
-                    # Check same-day availability
-                    same_day_info = None
-                    if zone:
-                        same_day_info = LocationService.check_same_day_delivery_available(zone)
+                    if not availability['available']:
+                        # Rollback everything if one item fails
+                         raise ValidationError({
+                            'error': availability['message'],
+                            'reason': availability['reason'],
+                            'product_id': item.product.id
+                        })
+
+                    # Calculate details
+                    total_days = (item.end_date - item.start_date).days + 1
+                    total_price = item.product.price_per_day * total_days * item.quantity
+
+                    # Create Booking via Service
+                    # Use idempotency key only for the first item if multiple? 
+                    # Usually cart -> single checkout. We can assign key to the first booking or unique keys per item.
+                    # Simplified: We assign the key to the first booking if multiple (or fail). 
+                    # Better: If multiple items, we rely on the specific logic. 
+                    # NOTE: Idempotency is tricky with carts. 
+                    # We will apply it to the first booking for now or assuming Single Item Checkout is common.
+                    current_key = idempotency_key if (idempotency_key and len(bookings) == 0) else None
+
+                    booking, auto_confirmed = BookingService.create_booking(
+                        user=request.user,
+                        product=item.product,
+                        start_date=item.start_date,
+                        end_date=item.end_date,
+                        total_days=total_days,
+                        total_price=total_price
+                    )
                     
-                    # Create delivery request
-                    if same_day_info and same_day_info.get('available'):
-                        DeliveryRequest.objects.create(
-                            booking=booking,
-                            delivery_type='delivery',
-                            delivery_address=default_address,
-                            delivery_zone=zone,
-                            delivery_date=item.start_date,
-                            delivery_fee=same_day_info.get('fee', 0),
-                            status='pending'
-                        )
+                    if current_key:
+                        booking.idempotency_key = current_key
+                        booking.save(update_fields=['idempotency_key'])
+                    
+                    bookings.append(booking)
+                    messages.append(BookingService.get_trust_reward_message(auto_confirmed))
+
+                    AvailabilityService.invalidate_cache(
+                        product_id=item.product.id,
+                        start_date=item.start_date,
+                        end_date=item.end_date
+                    )
+
+                    if same_day_delivery:
+                        self._handle_delivery(request.user, booking, item.start_date)
+
+                # Clear cart
+                items.delete()
         
-        # Clear cart
-        items.delete()
+        except ValidationError as e:
+            return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            logger.error(f"Booking creation failed: {str(e)}", exc_info=True)
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
         serializer = BookingSerializer(bookings, many=True)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        response_data = serializer.data
+        
+        if messages:
+             response_data = {
+                 'bookings': serializer.data,
+                 'message': messages[0]
+             }
+        
+        return Response(response_data, status=status.HTTP_201_CREATED)
+
+    def _handle_delivery(self, user, booking, start_date):
+        from apps.locations.models import DeliveryRequest, Address
+        from apps.locations.services import LocationService
+        
+        default_address = Address.objects.filter(user=user, is_default=True).first()
+        if default_address and default_address.latitude and default_address.longitude:
+            zone = LocationService.find_delivery_zone(
+                float(default_address.latitude), float(default_address.longitude)
+            )
+            if zone:
+                same_day = LocationService.check_same_day_delivery_available(zone)
+                if same_day and same_day.get('available'):
+                    DeliveryRequest.objects.create(
+                        booking=booking,
+                        delivery_type='delivery',
+                        delivery_address=default_address,
+                        delivery_zone=zone,
+                        delivery_date=start_date,
+                        delivery_fee=same_day.get('fee', 0),
+                        status='pending'
+                    )
 
 
 class BookingListView(generics.ListAPIView):
@@ -173,7 +216,7 @@ class BookingListView(generics.ListAPIView):
         return Booking.objects.filter(user=self.request.user).select_related('product', 'user')
 
 
-class BookingDetailView(generics.RetrieveAPIView):
+class BookingDetailView(SovereignResponseMixin, generics.RetrieveAPIView):
     """Get booking details"""
     serializer_class = BookingSerializer
     permission_classes = [IsAuthenticated]
@@ -291,7 +334,7 @@ class BookingStatusUpdateView(generics.GenericAPIView):
             )
 
 
-class BookingCancelView(generics.GenericAPIView):
+class BookingCancelView(SovereignResponseMixin, generics.GenericAPIView):
     """Cancel booking with refund processing"""
     permission_classes = [IsAuthenticated]
     
@@ -705,6 +748,103 @@ class DamageClaimDetailView(generics.RetrieveUpdateAPIView):
             for field in serializer.validated_data:
                 if field not in allowed_fields:
                     raise ValidationError(f'Cannot update {field}')
+            # Only allow updating claim_description
+            allowed_fields = ['claim_description']
+            for field in serializer.validated_data:
+                if field not in allowed_fields:
+                    raise ValidationError(f'Cannot update {field}')
         
         serializer.save()
+
+
+from rest_framework.decorators import api_view, permission_classes
+
+@api_view(['POST'])
+@permission_classes([IsAdminUser])
+def resolve_dispute_admin(request, pk):
+    """
+    The Court Endpoint (API).
+    Receives damage report and AI assessment, calls The Judge, and executes judgment.
+    """
+    from .services_dispute import DisputeService
+    
+    # 1. Get Data from Request
+    damage_report = request.data.get('damage_report', {})
+    ai_assessment = request.data.get('ai_assessment', {})
+
+    # 2. Call The Judge (AI Logic)
+    # We use the logic we built: resolve first, then execute.
+    verdict = DisputeService.resolve_dispute(pk, damage_report, ai_assessment)
+
+    if verdict == "ERROR_BOOKING_NOT_FOUND":
+            return Response({'error': 'Booking not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    # 3. Execute Judgment
+    final_status = DisputeService.execute_dispute_judgment(pk, verdict)
+
+    # 4. Response Messages
+    decision_messages = {
+        'RELEASE_TO_OWNER': 'Judgment: Release to Owner. (Damage Confirmed)',
+        'RELEASE_TO_CUSTOMER': 'Judgment: Release to Customer. (Minor Damage/No Fault)',
+        'FULL_REFUND': 'Judgment: Full Refund. (Critical Failure)',
+        'BLOCK_USER': 'Judgment: User Blocked. (Fraud Detected)',
+        'PARTIAL_REFUND': 'Judgment: Partial Refund Initiate.'
+    }
+
+    return Response({
+        "verdict": verdict,
+        "escrow_status": final_status,
+        "message": decision_messages.get(verdict, 'Judgment Executed.')
+    })
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def generate_agreement_view(request, pk):
+    """
+    Smart Agreement Pipeline Endpoint.
+    POST /bookings/{id}/agreement/create/
+    """
+    from .services_agreement import AgreementService
+
+    # 1. Get Inputs
+    raw_text = request.data.get('raw_text', '')
+    # Handle File Upload (Voice) if present
+    audio_file = request.FILES.get('audio_file')
+    
+    try:
+        # 2. Run Pipeline
+        agreement = AgreementService.create_agreement(pk, raw_text, audio_file)
+        
+        return Response({
+            'message': 'Agreement Generated Successfully.',
+            'contract_text': agreement.contract_text,
+            'is_signed': agreement.is_signed_by_user,
+            'agreement_id': agreement.id
+        })
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class BookingCalculateDepositView(generics.GenericAPIView):
+    """
+    Calculate required security deposit based on risk score.
+    GET /api/bookings/calculate_deposit/?product_id=123
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        product_id = request.query_params.get('product_id')
+        if not product_id:
+            return Response({'error': 'product_id is required'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        try:
+            product = Product.objects.get(pk=product_id)
+        except Product.DoesNotExist:
+            return Response({'error': 'Product not found'}, status=status.HTTP_404_NOT_FOUND)
+            
+        from .services_risk import RiskEngine
+        result = RiskEngine.calculate_deposit(request.user, product)
+        
+        return Response(result)
 

@@ -7,6 +7,7 @@ export interface User {
   role: 'customer' | 'admin' | 'staff';
   phone?: string;
   is_verified: boolean;
+  trust_score?: number;
 }
 
 export interface Category {
@@ -36,6 +37,7 @@ export interface Product {
   description_ar?: string;
   category: Category;
   price_per_day: number;
+  owner_id: number | null;
   size: string;
   color: string;
   color_hex?: string;
@@ -43,6 +45,11 @@ export interface Product {
   is_featured: boolean;
   rating: number;
   total_rentals: number;
+  wilaya?: number;
+  commune?: string;
+  location_lat?: number;
+  location_lng?: number;
+  delivery_policy?: string;
   images?: ProductImage[];
   primary_image?: string;
   created_at: string;

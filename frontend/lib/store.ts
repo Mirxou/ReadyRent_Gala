@@ -1,72 +1,67 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { languages } from './i18n';
+import { authApi } from './api';
 
 interface User {
   id: number;
   email: string;
   username: string;
   role: string;
+  is_verified?: boolean;
+  trust_score?: number;
 }
 
 interface AuthState {
   user: User | null;
-  accessToken: string | null;
-  refreshToken: string | null;
   isAuthenticated: boolean;
-  setAuth: (user: User | null, accessToken: string | null, refreshToken: string | null, remember?: boolean) => void;
-  logout: () => void;
+  setAuth: (user: User | null) => void;
+  logout: () => Promise<void>;
+  checkAuth: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       user: null,
-      accessToken: null,
-      refreshToken: null,
       isAuthenticated: false,
-      setAuth: (user, accessToken, refreshToken, remember = true) => {
+      setAuth: (user) => {
         set({
           user,
-          accessToken,
-          refreshToken,
-          isAuthenticated: !!user && !!accessToken,
+          isAuthenticated: !!user,
         });
-        if (typeof window !== 'undefined') {
-          if (remember) {
-            if (accessToken) localStorage.setItem('access_token', accessToken);
-            if (refreshToken) localStorage.setItem('refresh_token', refreshToken);
-            sessionStorage.removeItem('access_token');
-            sessionStorage.removeItem('refresh_token');
-          } else {
-            if (accessToken) sessionStorage.setItem('access_token', accessToken);
-            if (refreshToken) sessionStorage.setItem('refresh_token', refreshToken);
-            localStorage.removeItem('access_token');
-            localStorage.removeItem('refresh_token');
-          }
-        }
       },
-      logout: () => {
+      logout: async () => {
+        try {
+          await authApi.logout();
+        } catch (error) {
+          console.error('Logout failed', error);
+        }
         set({
           user: null,
-          accessToken: null,
-          refreshToken: null,
           isAuthenticated: false,
         });
         if (typeof window !== 'undefined') {
-          localStorage.removeItem('access_token');
-          localStorage.removeItem('refresh_token');
-          sessionStorage.removeItem('access_token');
-          sessionStorage.removeItem('refresh_token');
-          window.location.href = '/';
+          window.location.href = '/auth/login';
         }
       },
+      checkAuth: async () => {
+        try {
+          const { data } = await authApi.me();
+          set({ user: data, isAuthenticated: true });
+        } catch (error) {
+          set({ user: null, isAuthenticated: false });
+        }
+      }
     }),
     {
-      name: 'auth-storage',
+      name: 'auth-storage-v2', // Version bumped to invalidate old token storage
+      partialize: (state) => ({ user: state.user, isAuthenticated: state.isAuthenticated }),
     }
   )
 );
+
+// ... rest of the file (CartStore, NotificationStore, LanguageStore) ...
 
 interface CartItem {
   id: number;

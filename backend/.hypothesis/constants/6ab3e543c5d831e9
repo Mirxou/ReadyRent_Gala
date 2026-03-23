@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\vendors\serializers.py
+# hypothesis_version: 6.151.6
+
+['added_at', 'address', 'average_rating', 'booking', 'business_name', 'business_name_ar', 'calculated_at', 'city', 'commission_amount', 'commission_rate', 'created_at', 'description', 'description_ar', 'email', 'id', 'is_verified', 'logo', 'notes', 'paid_at', 'payment_reference', 'period_end', 'period_start', 'phone', 'product', 'product.name_ar', 'product_id', 'product_name', 'products_added', 'rating', 'registration_number', 'sale_amount', 'status', 'tax_id', 'total_bookings', 'total_commission', 'total_products', 'total_revenue', 'total_sales', 'updated_at', 'user', 'user.email', 'user_email', 'vendor', 'vendor_name', 'verified_at', 'verified_by', 'verified_by.email', 'verified_by_email', 'website']

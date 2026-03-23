@@ -5,7 +5,7 @@ test.describe('Homepage', () => {
     await page.goto('/')
     
     // Check if page loads
-    await expect(page).toHaveTitle(/ReadyRent/i)
+    await expect(page).toHaveTitle(/STANDARD/i)
     
     // Check for main navigation
     const nav = page.locator('nav')
@@ -32,11 +32,12 @@ test.describe('Homepage', () => {
     await page.goto('/')
     
     // Check if page loads on mobile
-    await expect(page).toHaveTitle(/ReadyRent/i)
+    await expect(page).toHaveTitle(/STANDARD/i)
     
     // Check if navigation is accessible (might be hamburger menu)
     const nav = page.locator('nav')
     await expect(nav).toBeVisible()
   })
 })
+
 

@@ -1,0 +1,8 @@
+DEBUG: sys.argv = ['manage.py', 'migrate', 'users', '0011_phase_16c4a_email_cutover']
+{"event": "Patched drf_spectacular._map_model_field to handle gettext_lazy verbose_name"}
+{"event": "Patched drf_spectacular._resolve_path_parameters"}
+{"event": "DeepFace not found. Identity verification will be skipped."}
+Operations to perform:
+  Target specific migration: 0011_phase_16c4a_email_cutover, from users
+Running migrations:
+  Applying users.0011_phase_16c4a_email_cutover... OK

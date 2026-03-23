@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\local_guide\serializers.py
+# hypothesis_version: 6.151.6
+
+['address', 'alt_text', 'category', 'category.name_ar', 'category_name', 'city', 'comment', 'cover_image', 'created_at', 'description', 'description_ar', 'email', 'icon', 'id', 'image', 'images', 'is_active', 'is_featured', 'is_primary', 'is_verified', 'latitude', 'logo', 'longitude', 'name', 'name_ar', 'order', 'phone', 'price_note', 'price_range_max', 'price_range_min', 'rating', 'review_count', 'reviews', 'service', 'service_type', 'services.count', 'services_count', 'slug', 'updated_at', 'user', 'user.email', 'user_email', 'website', 'whatsapp']

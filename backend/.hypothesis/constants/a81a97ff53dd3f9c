@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\contracts\services.py
+# hypothesis_version: 6.151.6
+
+['1.0', 'DZD', 'Defined in listing', 'P2P_RENTAL_AGREEMENT', 'STANDARD.Rent', 'asset', 'booking_id', 'category', 'condition', 'contract', 'contract_type', 'currency', 'email', 'end_date', 'id', 'is_verified', 'meta', 'name', 'owner', 'parties', 'platform', 'price_per_day', 'renter', 'start_date', 'terms', 'timestamp', 'total_days', 'username', 'utf-8', 'version']

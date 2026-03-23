@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\bookings\migrations\0008_booking_signature_proof_booking_signed_at.py
+# hypothesis_version: 6.151.6
+
+['Signature Proof', 'Signed At', 'booking', 'bookings', 'signature_proof', 'signed_at']

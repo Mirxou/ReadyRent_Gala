@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\bookings\migrations\0001_initial.py
+# hypothesis_version: 6.151.6
+
+['-created_at', '0001_initial', 'Booking', 'Bookings', 'Cancelled', 'Cart', 'Cart Item', 'Cart Items', 'CartItem', 'Carts', 'Completed', 'Confirmed', 'ID', 'In Use', 'Pending', 'Waitlist', 'Waitlists', 'bookings', 'cancelled', 'completed', 'confirmed', 'created at', 'created_at', 'end date', 'end_date', 'id', 'in_use', 'notes', 'notified', 'notified at', 'notified_at', 'ordering', 'pending', 'preferred end date', 'preferred start date', 'preferred_end_date', 'preferred_start_date', 'product', 'products', 'products.product', 'quantity', 'start date', 'start_date', 'status', 'total days', 'total price', 'total_days', 'total_price', 'updated at', 'updated_at', 'verbose_name', 'verbose_name_plural']

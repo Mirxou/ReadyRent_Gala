@@ -11,6 +11,8 @@ from apps.products.serializers import ProductListSerializer
 from django.utils import timezone
 
 
+from apps.bookings.services_financial import FinancialService
+
 class BookingSerializer(serializers.ModelSerializer):
     """Serializer for Booking"""
     product = ProductListSerializer(read_only=True)
@@ -21,10 +23,17 @@ class BookingSerializer(serializers.ModelSerializer):
         model = Booking
         fields = [
             'id', 'user', 'user_email', 'product', 'product_id',
-            'start_date', 'end_date', 'total_days', 'total_price',
-            'status', 'notes', 'created_at', 'updated_at'
+            'start_date', 'end_date', 'total_days', 
+            # --- The Treasury ---
+            'base_price', 'protection_fee', 'total_price',
+            # --------------------
+            # --- Financial Trust Fields ---
+            'escrow_status', 'vault_address', 'beneficiary',
+            # ------------------------------
+            'status', 'notes', 'qr_code_token', 'created_at', 'updated_at'
         ]
-        read_only_fields = ['user', 'total_days', 'total_price', 'created_at', 'updated_at']
+        read_only_fields = ['user', 'total_days', 'base_price', 'protection_fee', 'total_price', 'created_at', 'updated_at', 
+                            'escrow_status', 'vault_address', 'beneficiary', 'qr_code_token']
     
     def validate(self, data):
         """Validate booking dates and status"""
@@ -40,11 +49,7 @@ class BookingSerializer(serializers.ModelSerializer):
                         'end_date': 'End date must be after start date'
                     })
                 
-                # Calculate total days
-                total_days = (end_date - start_date).days + 1
-                data['total_days'] = total_days
-                
-                # Calculate total price if product exists
+                # Retrieve Product
                 product = instance.product if instance else None
                 if 'product_id' in data:
                     from apps.products.models import Product
@@ -53,8 +58,18 @@ class BookingSerializer(serializers.ModelSerializer):
                     except Product.DoesNotExist:
                         pass
                 
+                # --- The Treasury: Centralized Metric Calculation ---
                 if product:
-                    data['total_price'] = product.price_per_day * total_days
+                    breakdown = FinancialService.calculate_booking_breakdown(product, start_date, end_date)
+                    if breakdown:
+                        data['total_days'] = breakdown['total_days']
+                        data['base_price'] = breakdown['base_price']
+                        data['protection_fee'] = breakdown['protection_fee']
+                        data['total_price'] = breakdown['total_price']
+                        
+                        # Phase 17: Log debug info if needed
+                        # print(f"Treasury Calculated: {breakdown}")
+                # ----------------------------------------------------
         
         # Validate status transitions (basic validation)
         if 'status' in data and self.instance:

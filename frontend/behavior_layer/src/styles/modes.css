@@ -1,0 +1,42 @@
+/* src/styles/modes.css */
+
+/* Default Market Mode */
+:root {
+  --sovereign-bg: hsl(0, 0%, 100%);
+  --sovereign-text: hsl(220, 20%, 10%);
+  --sovereign-accent: hsl(217, 91%, 60%);
+  --sovereign-border: hsl(210, 20%, 90%);
+}
+
+/* Dispute Mode - Protective / Muted Slate */
+.mode-dispute {
+  --sovereign-bg: hsl(210, 40%, 98%);
+  --sovereign-text: hsl(215, 25%, 27%);
+  --sovereign-accent: hsl(215, 16%, 47%);
+  --sovereign-border: hsl(214, 32%, 91%);
+}
+
+/* Verdict Mode - Finality / Dignified Amber */
+.mode-verdict {
+  --sovereign-bg: hsl(48, 100%, 98%);
+  --sovereign-text: hsl(28, 75%, 15%);
+  --sovereign-accent: hsl(38, 92%, 50%);
+  --sovereign-border: hsl(48, 95%, 90%);
+}
+
+body {
+  background-color: var(--sovereign-bg);
+  color: var(--sovereign-text);
+  transition: background-color 0.8s cubic-bezier(0.4, 0, 0.2, 1),
+    color 0.5s ease;
+  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Glassmorphism for components while in sovereign modes */
+.mode-dispute .bg-white,
+.mode-verdict .bg-white {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--sovereign-border);
+}

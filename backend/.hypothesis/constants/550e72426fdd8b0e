@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\reviews\migrations\0003_alter_review_options_alter_reviewimage_options_and_more.py
+# hypothesis_version: 6.151.6
+
+['-created_at', '0002_initial', 'booking', 'bookings', 'bookings.booking', 'created_at', 'images', 'order', 'ordering', 'product', 'products', 'products.product', 'review', 'reviewimage', 'reviews', 'reviews.review', 'user', 'verbose_name', 'verbose_name_plural', 'المراجعات', 'المراجعة', 'صور المراجعات', 'صورة المراجعة']

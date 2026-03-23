@@ -1,5 +1,5 @@
 # Script to start Django Backend, Next.js Frontend, and ngrok
-# For ReadyRent.Gala project
+# For STANDARD.Rent project
 
 param(
     [switch]$NoNgrok
@@ -10,7 +10,7 @@ $ProjectRoot = Get-Location
 
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "  ReadyRent.Gala - Development Server" -ForegroundColor Cyan
+Write-Host "  STANDARD.Rent - Development Server" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 

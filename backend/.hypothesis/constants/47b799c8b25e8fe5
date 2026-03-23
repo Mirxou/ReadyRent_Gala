@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\disputes\migrations\0007_alter_appeal_bond_reference_alter_appeal_status.py
+# hypothesis_version: 6.151.6
+
+[100, 'Bond Reference', 'Pending Review', 'appeal', 'bond_reference', 'disputes', 'granted', 'pending', 'rejected', 'remanded', 'status']

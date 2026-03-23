@@ -24,14 +24,28 @@ class UserSerializer(serializers.ModelSerializer):
     profile = UserProfileSerializer(read_only=True)
     password = serializers.CharField(write_only=True, required=False, validators=[validate_password])
     
+    trust_score = serializers.SerializerMethodField()
+
     class Meta:
         model = User
         fields = [
             'id', 'email', 'username', 'phone', 'role', 'avatar',
-            'is_verified', 'profile', 'password', 'created_at'
+            'is_verified', 'trust_score', 'profile', 'password', 'created_at'
         ]
         read_only_fields = ['id', 'is_verified', 'created_at']
     
+    def get_trust_score(self, obj):
+        try:
+            if hasattr(obj, 'verification'):
+                # If not verified, trust is capped at 20
+                if obj.verification.status != 'verified':
+                    return 20
+                # Trust = 100 - Risk (Risk 0 = Trust 100)
+                return max(0, 100 - obj.verification.risk_score)
+            return 0
+        except Exception:
+            return 0
+
     def create(self, validated_data):
         password = validated_data.pop('password', None)
         user = User.objects.create(**validated_data)
@@ -76,8 +90,8 @@ class RegisterSerializer(serializers.ModelSerializer):
         validated_data.pop('password_confirm')
         user = User.objects.create_user(**validated_data)
         UserProfile.objects.create(user=user)
-        # Create verification status
-        VerificationStatus.objects.create(user=user)
+        # Create verification status (get_or_create to handle signal race condition)
+        VerificationStatus.objects.get_or_create(user=user)
         return user
 
 
@@ -118,17 +132,51 @@ class AddressVerificationSerializer(serializers.Serializer):
     postal_code = serializers.CharField(required=False, allow_blank=True)
 
 
+from apps.core.utils.image_firewall import ImageFirewall
+
 class IDUploadSerializer(serializers.ModelSerializer):
-    """Serializer for ID upload"""
+    """Serializer for ID upload with Image Firewall protection"""
+    selfie = serializers.ImageField(required=True)
     
     class Meta:
         model = VerificationStatus
-        fields = ['id_type', 'id_number', 'id_front_image', 'id_back_image']
+        fields = ['id_type', 'id_number', 'id_front_image', 'id_back_image', 'selfie']
     
     def validate_id_number(self, value):
         if not value:
             raise serializers.ValidationError('ID number is required')
         return value
+
+    def validate(self, attrs):
+        # 1. Scrub EXIF & Compress Images
+        if 'id_front_image' in attrs:
+            attrs['id_front_image'] = ImageFirewall.scrub_exif(attrs['id_front_image'])
+            attrs['id_front_image'] = ImageFirewall.compress_image(attrs['id_front_image'])
+            
+        if 'id_back_image' in attrs:
+            attrs['id_back_image'] = ImageFirewall.scrub_exif(attrs['id_back_image'])
+            attrs['id_back_image'] = ImageFirewall.compress_image(attrs['id_back_image'])
+
+        if 'selfie' in attrs:
+            attrs['selfie'] = ImageFirewall.scrub_exif(attrs['selfie'])
+            attrs['selfie'] = ImageFirewall.compress_image(attrs['selfie'])
+
+        # 2. Identity Verification (Face Match)
+        # Only run if both ID Front and Selfie are provided
+        if 'id_front_image' in attrs and 'selfie' in attrs:
+            # Note: Verification might take time, consider async task in production
+            is_match, message = ImageFirewall.verify_identity(
+                attrs['id_front_image'], 
+                attrs['selfie']
+            )
+            # Reset file pointers after reading in verify_identity
+            if hasattr(attrs['id_front_image'], 'seek'): attrs['id_front_image'].seek(0)
+            if hasattr(attrs['selfie'], 'seek'): attrs['selfie'].seek(0)
+            
+            if not is_match:
+                raise serializers.ValidationError({"selfie": f"Identity Verification Failed: {message}"})
+
+        return attrs
 
 
 class BlacklistSerializer(serializers.ModelSerializer):

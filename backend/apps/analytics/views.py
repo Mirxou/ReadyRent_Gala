@@ -661,3 +661,38 @@ class TrendAnalysisView(generics.GenericAPIView):
         
         return Response(trends)
 
+
+class ProductActivityView(generics.GenericAPIView):
+    """
+    Handle real-time product activity (Active Viewers).
+    """
+    permission_classes = [] 
+
+    def post(self, request, product_id):
+        """
+        Heartbeat: "I am viewing this product".
+        """
+        if request.user.is_authenticated:
+            distinct_id = f"user:{request.user.id}"
+        else:
+            x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+            if x_forwarded_for:
+                ip = x_forwarded_for.split(',')[0]
+            else:
+                ip = request.META.get('REMOTE_ADDR')
+            distinct_id = f"ip:{ip}"
+            
+        from .services_live import LiveAnalyticsService
+        LiveAnalyticsService.track_view(product_id, distinct_id)
+        
+        return Response({"status": "pulse_recorded"})
+
+    def get(self, request, product_id):
+        """
+        Get active viewer count (last 5 mins).
+        """
+        from .services_live import LiveAnalyticsService
+        count = LiveAnalyticsService.get_active_count(product_id)
+        display_count = max(1, count)
+        return Response({"active_viewers": display_count})
+

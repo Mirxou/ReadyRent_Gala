@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\disputes\migrations\0003_dispute_admissibility_report_and_more.py
+# hypothesis_version: 6.151.6
+
+['0002_evidencelog', 'Admissibility Report', 'Closed', 'Judgment Final', 'Judgment Provisional', 'Rejection Reason', 'admissibility_report', 'admissible', 'closed', 'dispute', 'disputes', 'filed', 'inadmissible', 'inadmissible_reason', 'judgment_final', 'judgment_provisional', 'status', 'under_review']

@@ -67,6 +67,69 @@ class ProductModelTest(TestCase):
     def test_product_color_hex(self):
         self.assertEqual(self.product.color_hex, '#FF0000')
 
+    def test_product_without_owner(self):
+        """Test creating a product without an owner (Platform Inventory)"""
+        product = Product.objects.create(
+            name='Platform Dress',
+            name_ar='فستان منصة',
+            slug='platform-dress',
+            description='Test',
+            category=self.category,
+            price_per_day=500,
+            size='S',
+            color='Blue',
+            owner=None
+        )
+        self.assertIsNone(product.owner)
+        self.assertTrue(Product.objects.filter(id=product.id).exists())
+
+    def test_product_with_owner(self):
+        """Test linking a product to an owner (P2P Future Feature)"""
+        user = User.objects.create_user(username='owner', email='owner@test.com', password='password')
+        
+        product = Product.objects.create(
+            name='User Dress',
+            name_ar='فستان مستخدم',
+            slug='user-dress',
+            description='Test',
+            category=self.category,
+            price_per_day=500,
+            size='S',
+            color='Green',
+            owner=user
+        )
+        self.assertEqual(product.owner, user)
+        self.assertEqual(user.owned_products.count(), 1)
+
+    def test_owner_deletion(self):
+        """Test on_delete=SET_NULL behavior"""
+        user = User.objects.create_user(username='todelete', email='delete@test.com', password='password')
+        
+        product = Product.objects.create(
+            name='Delete Test Dress',
+            name_ar='فستان للحذف',
+            slug='delete-test-dress',
+            description='Test',
+            category=self.category,
+            price_per_day=500,
+            size='S',
+            color='Black',
+            owner=user
+        )
+        
+        # Verify link exists
+        self.assertEqual(product.owner, user)
+        
+        # Delete user
+        user.delete()
+        
+        # Reload product
+        product.refresh_from_db()
+        
+        # Verify product still exists but owner is None
+        self.assertIsNone(product.owner)
+        self.assertTrue(Product.objects.filter(id=product.id).exists())
+
 
 class ProductImageModelTest(TestCase):
     """Test ProductImage model"""

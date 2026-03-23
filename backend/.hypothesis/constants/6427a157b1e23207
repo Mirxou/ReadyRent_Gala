@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\packaging\serializers.py
+# hypothesis_version: 6.151.6
+
+['booking', 'category_name', 'cost_per_unit', 'description', 'dimensions_height', 'dimensions_length', 'dimensions_width', 'id', 'is_active', 'is_reusable', 'material', 'material.name_ar', 'material_name', 'material_type', 'materials_used', 'max_rental_days', 'min_rental_days', 'name', 'name_ar', 'notes', 'packaging_cost', 'packaging_type', 'packaging_type_name', 'prepared_at', 'prepared_by', 'priority', 'product', 'product.name_ar', 'product_category', 'product_name', 'quantity', 'requires_protection', 'returned_at', 'size', 'status', 'total_cost', 'unit_cost', 'used_at', 'weight_capacity']

@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\returns\serializers.py
+# hypothesis_version: 6.151.6
+
+['actual_pickup_date', 'amount', 'booking', 'booking_details', 'completed_at', 'condition', 'created_at', 'damage_assessment', 'damage_cost', 'end_date', 'id', 'inspection_date', 'inspection_notes', 'inspector', 'inspector.email', 'inspector_email', 'is_late', 'items', 'notes', 'processed_at', 'product', 'product.name_ar', 'product_name', 'quantity_returned', 'reason', 'received_at', 'refund', 'refund_type', 'requested_at', 'return_notes', 'return_request', 'start_date', 'status', 'total_price', 'updated_at']

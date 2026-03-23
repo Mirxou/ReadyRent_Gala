@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\locations\migrations\0002_initial.py
+# hypothesis_version: 6.151.6
+
+['0001_initial', '0002_initial', 'address', 'addresses', 'assigned_driver', 'booking', 'bookings', 'bookings.booking', 'delivery_address', 'delivery_assignments', 'delivery_date', 'delivery_request', 'delivery_requests', 'delivery_zone', 'deliveryrequest', 'deliverytracking', 'is_default', 'latitude', 'locations', 'locations.address', 'longitude', 'pickup_address', 'pickup_requests', 'role', 'staff', 'status', 'timestamp', 'tracking_history', 'user']

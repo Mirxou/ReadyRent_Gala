@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\notifications\migrations\0002_initial.py
+# hypothesis_version: 6.151.6
+
+['0001_initial', 'is_read', 'notification', 'notifications', 'user']

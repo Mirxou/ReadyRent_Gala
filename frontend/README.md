@@ -1,4 +1,4 @@
-# ReadyRent.Gala Frontend
+# STANDARD.Rent Frontend
 
 Frontend application built with Next.js 16, TypeScript, Tailwind CSS, and shadcn/ui.
 
@@ -70,3 +70,4 @@ frontend/
 - Dark Mode Ready
 - TypeScript throughout
 - API Integration with Django Backend
+

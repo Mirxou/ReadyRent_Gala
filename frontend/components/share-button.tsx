@@ -18,7 +18,7 @@ interface ShareButtonProps {
 
 export function ShareButton({
   url,
-  title = 'ReadyRent.Gala',
+  title = 'STANDARD.Rent',
   description = 'اكتشفي أجمل فساتين المناسبات',
   image,
   className,
@@ -161,3 +161,4 @@ export function ShareButton({
     </div>
   );
 }
+

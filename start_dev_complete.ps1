@@ -1,4 +1,4 @@
-# Complete startup script for ReadyRent.Gala
+# Complete startup script for STANDARD.Rent
 # Handles virtual environment activation and starts all services
 
 param(
@@ -13,7 +13,7 @@ Set-Location $ProjectRoot
 
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "  ReadyRent.Gala - Complete Startup" -ForegroundColor Cyan
+Write-Host "  STANDARD.Rent - Complete Startup" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 
@@ -196,3 +196,4 @@ if (-not $NoNgrok) {
 Write-Host ""
 Write-Host "Press any key to exit this script (services will keep running)..." -ForegroundColor Gray
 $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+

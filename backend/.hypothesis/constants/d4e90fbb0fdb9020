@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\maintenance\migrations\0002_initial.py
+# hypothesis_version: 6.151.6
+
+['0001_initial', '0002_initial', 'assigned_to', 'bookings', 'bookings.booking', 'end_datetime', 'maintenance', 'maintenance_record', 'maintenance_records', 'maintenanceperiod', 'maintenancerecord', 'maintenanceschedule', 'period', 'product', 'products', 'products.product', 'related_booking', 'role', 'scheduled_end', 'scheduled_start', 'staff', 'start_datetime', 'status']

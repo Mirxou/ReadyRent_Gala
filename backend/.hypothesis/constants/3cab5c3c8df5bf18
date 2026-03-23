@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\notifications\models.py
+# hypothesis_version: 6.151.6
+
+[200, '-created_at', 'Booking Completed', 'Booking Confirmed', 'Booking Reminder', 'Product Available', 'Return Reminder', 'System Notification', 'booking_completed', 'booking_confirmed', 'booking_reminder', 'created at', 'is_read', 'message', 'notifications', 'product_available', 'read', 'return_reminder', 'system', 'title', 'type', 'user', 'الإشعار', 'الإشعارات']

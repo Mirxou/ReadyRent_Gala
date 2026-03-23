@@ -1,0 +1,14 @@
+[Unit]
+Description=gunicorn daemon for Sovereign Backend
+After=network.target
+
+[Service]
+User=sovereign
+Group=www-data
+WorkingDirectory=/home/sovereign/ReadyRent_Gala/backend
+ExecStart=/home/sovereign/ReadyRent_Gala/backend/venv/bin/gunicorn \
+          --config /home/sovereign/ReadyRent_Gala/backend/deployment/gunicorn_config.py \
+          config.wsgi:application
+
+[Install]
+WantedBy=multi-user.target

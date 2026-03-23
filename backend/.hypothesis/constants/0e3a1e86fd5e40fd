@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\packaging\admin.py
+# hypothesis_version: 6.151.6
+
+['booking', 'cost_per_unit', 'is_active', 'is_reusable', 'material', 'material_type', 'name', 'name_ar', 'packaging_cost', 'packaging_instance', 'packaging_type', 'prepared_at', 'prepared_by', 'priority', 'product', 'product__name', 'product_category', 'quantity', 'requires_protection', 'size', 'status', 'total_cost']

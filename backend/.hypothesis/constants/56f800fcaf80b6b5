@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\bundles\migrations\0003_alter_bundle_options_alter_bundlebooking_options_and_more.py
+# hypothesis_version: 6.151.6
+
+['-created_at', '-is_featured', '0002_initial', 'bookings', 'bundle', 'bundle_booking', 'bundle_bookings', 'bundle_items', 'bundlebooking', 'bundlecategory', 'bundleitem', 'bundlereview', 'bundles', 'bundles.bundle', 'category', 'id', 'items', 'name', 'order', 'ordering', 'product', 'products', 'products.product', 'review', 'user', 'verbose_name', 'verbose_name_plural', 'الحزم', 'الحزمة', 'حجز الحزمة', 'حجوزات الحزم', 'عناصر الحزم', 'عنصر الحزمة', 'فئات الحزم', 'فئة الحزمة', 'مراجعات الحزم', 'مراجعة الحزمة']

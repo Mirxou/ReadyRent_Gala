@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\chatbot\migrations\0003_alter_chatbotconfiguration_options_and_more.py
+# hypothesis_version: 6.151.6
+
+['-confidence', '-created_at', '-started_at', '0002_initial', 'admin', 'chat_sessions', 'chatbot', 'chatbot.chatmessage', 'chatbot.chatsession', 'chatbotconfiguration', 'chatintent', 'chatmessage', 'chatsession', 'created_at', 'escalated_chats', 'escalated_to', 'intents', 'message', 'messages', 'ordering', 'role__in', 'session', 'staff', 'user', 'verbose_name', 'verbose_name_plural', 'جلسات الدردشة', 'جلسة الدردشة', 'رسائل الدردشة', 'رسالة الدردشة', 'نيات الدردشة', 'نية الدردشة']

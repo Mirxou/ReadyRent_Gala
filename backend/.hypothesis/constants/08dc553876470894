@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\reviews\admin.py
+# hypothesis_version: 6.151.6
+
+['booking', 'comment', 'created_at', 'fields', 'helpful_count', 'is_verified_purchase', 'order', 'product', 'product__name', 'rating', 'review', 'review__title', 'status', 'title', 'updated_at', 'user', 'user__email', 'الحالة', 'الطوابع الزمنية', 'تفاصيل التقييم']

@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\payments\serializers.py
+# hypothesis_version: 6.151.6
+
+[100, 'amount', 'bank_card', 'baridimob', 'booking', 'booking_id', 'card_brand', 'card_cvv', 'card_expiry', 'card_last_four', 'card_number', 'cardholder_name', 'completed_at', 'created_at', 'currency', 'description', 'display_name', 'error_message', 'event_type', 'failure_reason', 'get_status_display', 'icon', 'id', 'is_active', 'name', 'otp_code', 'payload', 'payment', 'payment_method', 'phone_number', 'processed', 'status', 'status_display', 'transaction_id', 'updated_at', 'user', 'user.email', 'user_email']

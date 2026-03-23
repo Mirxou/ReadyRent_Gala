@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\bookings\tests.py
+# hypothesis_version: 6.151.6
+
+[1000.0, 3000.0, 'Dresses', 'M', 'Red', 'Test', 'Test Dress', 'User', 'dresses', 'pending', 'test-dress', 'test@example.com', 'testpass123', 'testuser', 'فساتين', 'فستان تجريبي']

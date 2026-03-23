@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\hygiene\serializers.py
+# hypothesis_version: 6.151.6
+
+['certificate', 'certificate_number', 'checked_at', 'checked_by', 'checked_by.email', 'checked_by_email', 'checklist_items', 'chemicals_used', 'cleaned_by', 'cleaned_by.email', 'cleaned_by_email', 'cleaning_notes', 'cleaning_type', 'completed_at', 'created_at', 'expiry_date', 'hygiene_record', 'id', 'inspection_notes', 'is_checked', 'is_expired', 'is_overdue', 'is_valid', 'issued_date', 'item_name', 'notes', 'passed_inspection', 'product', 'product.name_ar', 'product_name', 'qr_code', 'quality_score', 'related_return', 'scheduled_date', 'started_at', 'status', 'temperature', 'updated_at', 'verified_at', 'verified_by', 'verified_by.email', 'verified_by_email']

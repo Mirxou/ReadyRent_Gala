@@ -13,7 +13,7 @@ test.describe('Responsive Design', () => {
       await page.goto('/')
       
       // Check if page loads
-      await expect(page).toHaveTitle(/ReadyRent/i)
+      await expect(page).toHaveTitle(/STANDARD/i)
       
       // Check if main content is visible
       const mainContent = page.locator('main, [role="main"]')
@@ -34,4 +34,5 @@ test.describe('Responsive Design', () => {
     }
   })
 })
+
 

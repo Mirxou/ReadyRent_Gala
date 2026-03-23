@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\core\throttling.py
+# hypothesis_version: 6.151.6
+
+[',', '100/hour', '1000/hour', '20/minute', '30/minute', '5/minute', 'HTTP_X_FORWARDED_FOR', 'REMOTE_ADDR', 'anon', 'authenticated', 'chatbot', 'ident', 'login', 'product_search', 'register', 'scope']

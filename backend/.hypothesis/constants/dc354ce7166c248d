@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\hygiene\migrations\0003_alter_hygienecertificate_options_and_more.py
+# hypothesis_version: 6.151.6
+
+['-issued_date', '-scheduled_date', '0002_initial', 'admin', 'certificate', 'checked_by', 'checklist_items', 'cleaned_by', 'cleaning_records', 'hygiene', 'hygiene_record', 'hygiene_records', 'hygienecertificate', 'hygienechecklist', 'hygienerecord', 'id', 'ordering', 'product', 'products', 'products.product', 'related_return', 'returns', 'returns.return', 'role', 'role__in', 'staff', 'verbose_name', 'verbose_name_plural', 'verified_by', 'سجل النظافة', 'سجلات النظافة', 'شهادات النظافة', 'شهادة النظافة', 'عناصر قائمة النظافة', 'عنصر قائمة النظافة']

@@ -1,0 +1,39 @@
+DEBUG: sys.argv = ['manage.py', 'validate_auth_layer']
+{"event": "Patched drf_spectacular._map_model_field to handle gettext_lazy verbose_name"}
+{"event": "Patched drf_spectacular._resolve_path_parameters"}
+{"event": "DeepFace not found. Identity verification will be skipped."}
+
+============================================================
+  PHASE 16A.1 — AUTH HARDENING VALIDATION GATE
+============================================================
+
+[TEST 1] Normalization Consistency (incl. Unicode Cf canonicalization)
+  [uppercase           ] 'USER@EXAMPLE.COM'                         → j23RCx5Oc3q+3t64...
+  [lowercase           ] 'user@example.com'                         → j23RCx5Oc3q+3t64...
+  [whitespace          ] '  user@example.com  '                     → j23RCx5Oc3q+3t64...
+  [ZWS injected        ] 'USER\u200b@EXAMPLE.COM'                   → j23RCx5Oc3q+3t64...
+  [ZWJ injected        ] 'user\u200d@example.com'                   → j23RCx5Oc3q+3t64...
+  [BOM injected        ] '\ufeffuser@example.com'                   → j23RCx5Oc3q+3t64...
+  [fullwidth chars     ] 'ｕｓｅｒ@example.com'                         → j23RCx5Oc3q+3t64...
+  ✅ PASS: ALL 7 variants (incl. ZWS, ZWJ, BOM, fullwidth) → identical hash
+
+[TEST 2] email_hash Index & Constraint Check
+  ✅ PASS: email_hash index exists in PostgreSQL (found 3 index(es))
+  ✅ PASS: email_hash has null=True (allows NULL for pre-backfill users)
+  ✅ PASS: email_hash has db_index/unique=True in model definition
+
+[TEST 3] get_by_natural_key() Hash Lookup
+  email_hash computed: 7yzdo8UKASemR0KhpofwpYxc...
+  ✅ PASS: get_by_natural_key() correctly resolved via email_hash
+
+[TEST 4] authenticate() Function (Full Auth Stack)
+  ✅ PASS: authenticate() with correct credentials → User returned
+  ✅ PASS: authenticate() with wrong password → None (correct)
+  ✅ PASS: authenticate() with uppercase email → User returned (normalization works)
+
+[TEST 5] Save Guard (RuntimeError on missing PII_HASH_KEY)
+  ✅ PASS: save() with missing key → email_hash=None (safe fallback, NULL in DB)
+
+============================================================
+  🟢 ALL 5/5 GATES PASSED — 16B APPROVED
+============================================================

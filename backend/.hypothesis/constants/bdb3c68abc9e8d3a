@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\returns\migrations\0002_initial.py
+# hypothesis_version: 6.151.6
+
+['0001_initial', 'admin', 'booking', 'inspected_returns', 'inspector', 'items', 'product', 'products', 'products.product', 'refund', 'requested_at', 'return', 'return_items', 'return_request', 'returnitem', 'returns', 'returns.return', 'role__in', 'staff', 'status']

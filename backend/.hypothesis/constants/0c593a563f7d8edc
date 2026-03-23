@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\returns\admin.py
+# hypothesis_version: 6.151.6
+
+['Booking', 'Completion', 'Inspection', 'Notes', 'Pickup Information', 'Status', 'Timestamps', 'actual_pickup_date', 'amount', 'booking', 'completed_at', 'condition', 'created_at', 'damage_assessment', 'damage_cost', 'fields', 'inspection_date', 'inspection_notes', 'inspector', 'is_late', 'notes', 'product', 'product__name', 'quantity_returned', 'received_at', 'refund_type', 'requested_at', 'return_notes', 'return_request', 'status', 'updated_at']

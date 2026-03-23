@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\bundles\serializers.py
+# hypothesis_version: 6.151.6
+
+['base_price', 'bundle', 'bundle_booking', 'bundle_details', 'bundle_name', 'bundle_price', 'bundles.count', 'bundles_count', 'category', 'category.name_ar', 'category_name', 'comment', 'created_at', 'custom_description', 'custom_name', 'custom_price', 'description', 'description_ar', 'discount_amount', 'discount_percentage', 'discount_type', 'discount_value', 'end_date', 'get_discount_amount', 'get_savings', 'icon', 'id', 'image', 'individual_bookings', 'is_active', 'is_featured', 'is_required', 'item_name', 'item_price', 'item_type', 'items', 'max_days', 'min_days', 'name', 'name_ar', 'notes', 'order', 'product', 'product.name_ar', 'product_name', 'product_price', 'quantity', 'rating', 'savings', 'slug', 'start_date', 'status', 'total_bookings', 'total_days', 'total_price', 'updated_at', 'user', 'user.email', 'user_email']

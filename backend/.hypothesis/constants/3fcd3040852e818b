@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\local_guide\migrations\0002_initial.py
+# hypothesis_version: 6.151.6
+
+['0001_initial', 'city', 'is_active', 'local_guide', 'localservice', 'service', 'service_reviews', 'service_type', 'servicereview', 'user']

@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\products\admin.py
+# hypothesis_version: 6.151.6
+
+['alt_text', 'category', 'color', 'created_at', 'description', 'is_active', 'is_featured', 'is_primary', 'name', 'name_ar', 'order', 'price_per_day', 'product', 'product__name', 'product__name_ar', 'rating', 'size', 'sku', 'slug', 'status', 'updated_at']

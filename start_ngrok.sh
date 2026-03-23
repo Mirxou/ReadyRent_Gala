@@ -1,5 +1,5 @@
 #!/bin/bash
-# Script to start ngrok tunnel for ReadyRent.Gala
+# Script to start ngrok tunnel for STANDARD.Rent
 # Make sure ngrok is installed: https://ngrok.com/download
 
 echo "Starting ngrok tunnel for Django backend..."
@@ -70,3 +70,4 @@ trap "echo ''; echo 'Stopping ngrok...'; kill $NGROK_PID 2>/dev/null; exit" INT
 
 # Keep script running
 wait $NGROK_PID
+

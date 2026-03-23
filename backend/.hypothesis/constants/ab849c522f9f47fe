@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\audit\models.py
+# hypothesis_version: 6.151.6
+
+[255, '-timestamp', 'Audit Log', 'Audit Logs', 'CREATE', 'Creation', 'DELETE', 'DISPUTE_ACTION', 'Deletion', 'Dispute Action', 'ESCROW_MOVE', 'Escrow Movement', 'JSON diff of changes', 'LOGIN', 'LOGOUT', 'Login', 'Logout', 'RISK_FLAG', 'Risk Flag', 'SECURITY_ALERT', 'Security Alert', 'UPDATE', 'Update', 'action', 'actor', 'audit_logs', 'content_type', 'object_id', 'timestamp']

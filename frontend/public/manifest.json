@@ -1,6 +1,6 @@
 {
-  "name": "ReadyRent.Gala - منصة كراء الفساتين",
-  "short_name": "ReadyRent",
+  "name": "STANDARD.Rent - معيار الفخامة",
+  "short_name": "STANDARD",
   "description": "منصة متكاملة لكراء الفساتين ومستلزمات المناسبات في قسنطينة والجزائر",
   "start_url": "/",
   "display": "standalone",
@@ -29,7 +29,10 @@
       "purpose": "maskable"
     }
   ],
-  "categories": ["shopping", "lifestyle"],
+  "categories": [
+    "shopping",
+    "lifestyle"
+  ],
   "shortcuts": [
     {
       "name": "تصفح المنتجات",
@@ -57,4 +60,3 @@
     }
   ]
 }
-

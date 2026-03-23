@@ -1,8 +1,8 @@
-# دليل النشر - ReadyRent.Gala
+# دليل النشر - STANDARD.Rent
 
 ## نظرة عامة
 
-هذا الدليل يوضح خطوات نشر منصة ReadyRent.Gala على خادم إنتاج.
+هذا الدليل يوضح خطوات نشر منصة STANDARD.Rent على خادم إنتاج.
 
 ## المتطلبات الأساسية
 
@@ -61,12 +61,12 @@ npm install -g pm2
 sudo -u postgres psql
 
 -- في PostgreSQL prompt:
-CREATE DATABASE readyrent_gala;
-CREATE USER readyrent_user WITH PASSWORD 'your_secure_password';
-ALTER ROLE readyrent_user SET client_encoding TO 'utf8';
-ALTER ROLE readyrent_user SET default_transaction_isolation TO 'read committed';
-ALTER ROLE readyrent_user SET timezone TO 'Africa/Algiers';
-GRANT ALL PRIVILEGES ON DATABASE readyrent_gala TO readyrent_user;
+CREATE DATABASE STANDARD_Rent;
+CREATE USER STANDARD_user WITH PASSWORD 'your_secure_password';
+ALTER ROLE STANDARD_user SET client_encoding TO 'utf8';
+ALTER ROLE STANDARD_user SET default_transaction_isolation TO 'read committed';
+ALTER ROLE STANDARD_user SET timezone TO 'Africa/Algiers';
+GRANT ALL PRIVILEGES ON DATABASE STANDARD_Rent TO STANDARD_user;
 \q
 ```
 
@@ -76,8 +76,8 @@ GRANT ALL PRIVILEGES ON DATABASE readyrent_gala TO readyrent_user;
 
 ```bash
 cd /var/www
-git clone <repository-url> ReadyRent_Gala
-cd ReadyRent_Gala/backend
+git clone <repository-url> STANDARD_Rent
+cd STANDARD_Rent/backend
 ```
 
 ### إعداد البيئة الافتراضية
@@ -105,8 +105,8 @@ SECRET_KEY=your-production-secret-key-here
 ALLOWED_HOSTS=yourdomain.com,www.yourdomain.com
 
 # Database
-DB_NAME=readyrent_gala
-DB_USER=readyrent_user
+DB_NAME=STANDARD_Rent
+DB_USER=STANDARD_user
 DB_PASSWORD=your_secure_password
 DB_HOST=localhost
 DB_PORT=5432
@@ -127,7 +127,7 @@ EMAIL_PORT=587
 EMAIL_USE_TLS=True
 EMAIL_HOST_USER=your-email@gmail.com
 EMAIL_HOST_PASSWORD=your-app-password
-DEFAULT_FROM_EMAIL=noreply@readyrent.gala
+DEFAULT_FROM_EMAIL=noreply@STANDARD.Rent
 
 # Security
 SECURE_SSL_REDIRECT=True
@@ -147,7 +147,7 @@ IMAGE_QUALITY=85
 CDN_DOMAIN=cdn.yourdomain.com
 
 # Backup
-BACKUP_DIR=/var/www/ReadyRent_Gala/backups
+BACKUP_DIR=/var/www/STANDARD_Rent/backups
 BACKUP_RETENTION_DAYS=7
 
 # APIs
@@ -171,7 +171,7 @@ python manage.py createsuperuser
 ## 4. إعداد Frontend (Next.js)
 
 ```bash
-cd /var/www/ReadyRent_Gala/frontend
+cd /var/www/STANDARD_Rent/frontend
 npm install
 ```
 
@@ -202,7 +202,7 @@ npm run build
 ### إعداد Reverse Proxy
 
 ```bash
-sudo nano /etc/nginx/sites-available/readyrent
+sudo nano /etc/nginx/sites-available/STANDARD
 ```
 
 ```nginx
@@ -265,14 +265,14 @@ server {
 
     # Media files
     location /media/ {
-        alias /var/www/ReadyRent_Gala/backend/media/;
+        alias /var/www/STANDARD_Rent/backend/media/;
         expires 30d;
         add_header Cache-Control "public, immutable";
     }
 
     # Static files
     location /static/ {
-        alias /var/www/ReadyRent_Gala/backend/staticfiles/;
+        alias /var/www/STANDARD_Rent/backend/staticfiles/;
         expires 30d;
         add_header Cache-Control "public, immutable";
     }
@@ -286,7 +286,7 @@ server {
 ```
 
 ```bash
-sudo ln -s /etc/nginx/sites-available/readyrent /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/STANDARD /etc/nginx/sites-enabled/
 sudo nginx -t
 sudo systemctl reload nginx
 ```
@@ -303,7 +303,7 @@ sudo certbot --nginx -d yourdomain.com -d www.yourdomain.com
 ### Gunicorn (لـ WSGI - HTTP requests)
 
 ```bash
-cd /var/www/ReadyRent_Gala/backend
+cd /var/www/STANDARD_Rent/backend
 pip install gunicorn
 ```
 
@@ -327,20 +327,20 @@ max_requests_jitter = 50
 ### إنشاء Systemd Service
 
 ```bash
-sudo nano /etc/systemd/system/readyrent-backend.service
+sudo nano /etc/systemd/system/STANDARD-backend.service
 ```
 
 ```ini
 [Unit]
-Description=ReadyRent.Gala Backend (Gunicorn)
+Description=STANDARD.Rent Backend (Gunicorn)
 After=network.target
 
 [Service]
 User=www-data
 Group=www-data
-WorkingDirectory=/var/www/ReadyRent_Gala/backend
-Environment="PATH=/var/www/ReadyRent_Gala/backend/venv/bin"
-ExecStart=/var/www/ReadyRent_Gala/backend/venv/bin/gunicorn config.wsgi:application --config gunicorn_config.py
+WorkingDirectory=/var/www/STANDARD_Rent/backend
+Environment="PATH=/var/www/STANDARD_Rent/backend/venv/bin"
+ExecStart=/var/www/STANDARD_Rent/backend/venv/bin/gunicorn config.wsgi:application --config gunicorn_config.py
 
 [Install]
 WantedBy=multi-user.target
@@ -348,34 +348,34 @@ WantedBy=multi-user.target
 
 ```bash
 sudo systemctl daemon-reload
-sudo systemctl start readyrent-backend
-sudo systemctl enable readyrent-backend
+sudo systemctl start STANDARD-backend
+sudo systemctl enable STANDARD-backend
 ```
 
 ### Daphne (لـ ASGI - WebSocket)
 
 ```bash
-cd /var/www/ReadyRent_Gala/backend
+cd /var/www/STANDARD_Rent/backend
 pip install daphne
 ```
 
 إنشاء ملف Daphne service:
 
 ```bash
-sudo nano /etc/systemd/system/readyrent-daphne.service
+sudo nano /etc/systemd/system/STANDARD-daphne.service
 ```
 
 ```ini
 [Unit]
-Description=ReadyRent.Gala Daphne (ASGI/WebSocket)
+Description=STANDARD.Rent Daphne (ASGI/WebSocket)
 After=network.target
 
 [Service]
 User=www-data
 Group=www-data
-WorkingDirectory=/var/www/ReadyRent_Gala/backend
-Environment="PATH=/var/www/ReadyRent_Gala/backend/venv/bin"
-ExecStart=/var/www/ReadyRent_Gala/backend/venv/bin/daphne -b 127.0.0.1 -p 8001 config.asgi:application
+WorkingDirectory=/var/www/STANDARD_Rent/backend
+Environment="PATH=/var/www/STANDARD_Rent/backend/venv/bin"
+ExecStart=/var/www/STANDARD_Rent/backend/venv/bin/daphne -b 127.0.0.1 -p 8001 config.asgi:application
 
 [Install]
 WantedBy=multi-user.target
@@ -383,8 +383,8 @@ WantedBy=multi-user.target
 
 ```bash
 sudo systemctl daemon-reload
-sudo systemctl start readyrent-daphne
-sudo systemctl enable readyrent-daphne
+sudo systemctl start STANDARD-daphne
+sudo systemctl enable STANDARD-daphne
 ```
 
 **ملاحظة**: يمكن استخدام Daphne بدلاً من Gunicorn إذا كنت تريد دعم WebSocket فقط، أو استخدامهما معاً (Gunicorn للـ HTTP و Daphne للـ WebSocket).
@@ -394,20 +394,20 @@ sudo systemctl enable readyrent-daphne
 ### إعداد Celery Worker
 
 ```bash
-sudo nano /etc/systemd/system/readyrent-celery.service
+sudo nano /etc/systemd/system/STANDARD-celery.service
 ```
 
 ```ini
 [Unit]
-Description=ReadyRent.Gala Celery Worker
+Description=STANDARD.Rent Celery Worker
 After=network.target
 
 [Service]
 User=www-data
 Group=www-data
-WorkingDirectory=/var/www/ReadyRent_Gala/backend
-Environment="PATH=/var/www/ReadyRent_Gala/backend/venv/bin"
-ExecStart=/var/www/ReadyRent_Gala/backend/venv/bin/celery -A config worker -l info
+WorkingDirectory=/var/www/STANDARD_Rent/backend
+Environment="PATH=/var/www/STANDARD_Rent/backend/venv/bin"
+ExecStart=/var/www/STANDARD_Rent/backend/venv/bin/celery -A config worker -l info
 
 [Install]
 WantedBy=multi-user.target
@@ -416,20 +416,20 @@ WantedBy=multi-user.target
 ### إعداد Celery Beat
 
 ```bash
-sudo nano /etc/systemd/system/readyrent-celery-beat.service
+sudo nano /etc/systemd/system/STANDARD-celery-beat.service
 ```
 
 ```ini
 [Unit]
-Description=ReadyRent.Gala Celery Beat
+Description=STANDARD.Rent Celery Beat
 After=network.target
 
 [Service]
 User=www-data
 Group=www-data
-WorkingDirectory=/var/www/ReadyRent_Gala/backend
-Environment="PATH=/var/www/ReadyRent_Gala/backend/venv/bin"
-ExecStart=/var/www/ReadyRent_Gala/backend/venv/bin/celery -A config beat -l info
+WorkingDirectory=/var/www/STANDARD_Rent/backend
+Environment="PATH=/var/www/STANDARD_Rent/backend/venv/bin"
+ExecStart=/var/www/STANDARD_Rent/backend/venv/bin/celery -A config beat -l info
 
 [Install]
 WantedBy=multi-user.target
@@ -437,17 +437,17 @@ WantedBy=multi-user.target
 
 ```bash
 sudo systemctl daemon-reload
-sudo systemctl start readyrent-celery
-sudo systemctl start readyrent-celery-beat
-sudo systemctl enable readyrent-celery
-sudo systemctl enable readyrent-celery-beat
+sudo systemctl start STANDARD-celery
+sudo systemctl start STANDARD-celery-beat
+sudo systemctl enable STANDARD-celery
+sudo systemctl enable STANDARD-celery-beat
 ```
 
 ## 9. إعداد Next.js مع PM2
 
 ```bash
-cd /var/www/ReadyRent_Gala/frontend
-pm2 start npm --name "readyrent-frontend" -- start
+cd /var/www/STANDARD_Rent/frontend
+pm2 start npm --name "STANDARD-frontend" -- start
 pm2 save
 pm2 startup
 ```
@@ -459,7 +459,7 @@ pm2 startup
 للنسخ اليدوي:
 
 ```bash
-cd /var/www/ReadyRent_Gala/backend
+cd /var/www/STANDARD_Rent/backend
 source venv/bin/activate
 python manage.py backup_db
 python manage.py backup_media
@@ -471,18 +471,18 @@ python manage.py backup_media
 
 ```bash
 # Backend (Gunicorn)
-sudo systemctl status readyrent-backend
+sudo systemctl status STANDARD-backend
 
 # Daphne (WebSocket)
-sudo systemctl status readyrent-daphne
+sudo systemctl status STANDARD-daphne
 
 # Celery
-sudo systemctl status readyrent-celery
-sudo systemctl status readyrent-celery-beat
+sudo systemctl status STANDARD-celery
+sudo systemctl status STANDARD-celery-beat
 
 # Frontend
 pm2 status
-pm2 logs readyrent-frontend
+pm2 logs STANDARD-frontend
 
 # Nginx
 sudo systemctl status nginx
@@ -498,17 +498,17 @@ sudo systemctl status redis
 
 ```bash
 # Backend logs (Gunicorn)
-sudo journalctl -u readyrent-backend -f
+sudo journalctl -u STANDARD-backend -f
 
 # Daphne logs (WebSocket)
-sudo journalctl -u readyrent-daphne -f
+sudo journalctl -u STANDARD-daphne -f
 
 # Celery logs
-sudo journalctl -u readyrent-celery -f
-sudo journalctl -u readyrent-celery-beat -f
+sudo journalctl -u STANDARD-celery -f
+sudo journalctl -u STANDARD-celery-beat -f
 
 # Frontend logs
-pm2 logs readyrent-frontend
+pm2 logs STANDARD-frontend
 
 # Nginx logs
 sudo tail -f /var/log/nginx/access.log
@@ -520,7 +520,7 @@ sudo tail -f /var/log/nginx/error.log
 ### تحديث الكود
 
 ```bash
-cd /var/www/ReadyRent_Gala
+cd /var/www/STANDARD_Rent
 git pull origin main
 
 # Backend
@@ -529,14 +529,14 @@ source venv/bin/activate
 pip install -r requirements.txt
 python manage.py migrate
 python manage.py collectstatic --noinput
-sudo systemctl restart readyrent-backend
-sudo systemctl restart readyrent-daphne
+sudo systemctl restart STANDARD-backend
+sudo systemctl restart STANDARD-daphne
 
 # Frontend
 cd ../frontend
 npm install
 npm run build
-pm2 restart readyrent-frontend
+pm2 restart STANDARD-frontend
 ```
 
 ## 13. الأمان
@@ -571,4 +571,5 @@ sudo ufw enable
 للمزيد من المساعدة، راجع:
 - [Django Deployment Checklist](https://docs.djangoproject.com/en/stable/howto/deployment/checklist/)
 - [Next.js Deployment](https://nextjs.org/docs/deployment)
+
 

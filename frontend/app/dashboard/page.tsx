@@ -1,189 +1,193 @@
-'use client';
+"use client";
+
+import { useAuthStore } from '@/lib/store';
+import { useEffect } from 'react';
+import { motion } from 'framer-motion';
+import {
+  ShieldCheck,
+  FileSignature,
+  History,
+  CreditCard,
+  Car,
+  Home,
+  AlertTriangle
+} from 'lucide-react';
+import { GlassPanel } from '@/components/sovereign/glass-panel';
+import { IdentityShield } from '@/components/sovereign/identity-shield';
+import { SovereignButton } from '@/components/sovereign/sovereign-button';
+import { Badge } from '@/components/ui/badge';
+import Link from 'next/link';
 
 import { useQuery } from '@tanstack/react-query';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { bookingsApi, authApi } from '@/lib/api';
-import { Package, Calendar, Clock, TrendingUp, ShoppingCart, ArrowRight, User, Star, Bell } from 'lucide-react';
-import Link from 'next/link';
-import { Badge } from '@/components/ui/badge';
-import { ParticleField } from '@/components/ui/particle-field';
-import { motion, AnimatePresence } from 'framer-motion';
-import { MagneticButton } from '@/components/ui/magnetic-button';
-import { TiltCard } from '@/components/ui/tilt-card';
+import { format } from 'date-fns';
+import { ar } from 'date-fns/locale';
 
 export default function DashboardPage() {
-  const { data: bookings } = useQuery({
+  const { user, setAuth, isAuthenticated } = useAuthStore();
+
+  // Sync User Data
+  const { data: me } = useQuery({
+    queryKey: ['me'],
+    queryFn: () => authApi.me().then(res => res.data),
+    enabled: isAuthenticated,
+  });
+
+  useEffect(() => {
+    if (me) setAuth(me);
+  }, [me, setAuth]);
+
+  const { data: bookings = [], isLoading: isBookingsLoading } = useQuery({
     queryKey: ['bookings'],
-    queryFn: () => bookingsApi.getAll().then((res) => res.data),
+    queryFn: () => bookingsApi.getAll().then(res => res.data),
+    enabled: isAuthenticated
   });
 
-  const { data: cart } = useQuery({
-    queryKey: ['cart'],
-    queryFn: () => bookingsApi.getCart().then((res) => res.data),
-  });
+  const activeBookings = bookings.filter((b: any) => ['pending', 'confirmed', 'in_use'].includes(b.status));
 
-  const { data: user } = useQuery({
-    queryKey: ['user'],
-    queryFn: () => authApi.me().then((res) => res.data),
-  });
-
-  const pendingBookings = bookings?.filter((b: any) => b.status === 'pending').length || 0;
-  const activeBookings = bookings?.filter((b: any) =>
-    b.status === 'confirmed' || b.status === 'in_use'
-  ).length || 0;
-  const cartItems = cart?.items?.length || 0;
+  const trustScore = user?.trust_score || 0;
+  const isSovereign = trustScore >= 80;
 
   return (
-    <div className="relative min-h-screen pb-20">
-      <ParticleField />
+    <div className="space-y-8 min-h-screen text-right pb-20" dir="rtl">
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="container mx-auto px-4 py-12 relative z-10"
-      >
-        <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <div>
-            <h1 className="text-5xl md:text-6xl font-black mb-4 bg-gradient-to-r from-gala-purple via-gala-pink to-gala-gold bg-clip-text text-transparent">
-              مرحباً، {user?.email?.split('@')[0] || 'عزيزي'} ✨
-            </h1>
-            <p className="text-xl text-muted-foreground font-medium">
-              إليك نظرة سريعة على بستان جمالك وحجوزاتك
-            </p>
-          </div>
+      {/* 1. Header: The Greeting */}
+      <div className="flex flex-col gap-2 relative z-10">
+        <h1 className="text-4xl font-black tracking-tight flex items-center gap-3">
+          <span className="text-muted-foreground font-light text-2xl">غرفة القيادة /</span>
+          <span className="bg-gradient-to-l from-sovereign-gold to-foreground bg-clip-text text-transparent">
+            {user?.username || 'المواطن'}
+          </span>
+        </h1>
+        <p className="text-muted-foreground flex items-center gap-2 text-sm">
+          <ShieldCheck className="w-4 h-4 text-sovereign-gold" />
+          الهوية السيادية: {isSovereign ? "مفعلة (High Trust)" : "قيد البناء (Standard)"}
+        </p>
+      </div>
 
-          <div className="flex gap-4">
-            <Button size="lg" className="rounded-full bg-gradient-to-r from-gala-purple to-gala-pink border-0 shadow-lg hover:scale-105 transition-transform" asChild>
-              <Link href="/products">
-                <ShoppingCart className="ml-2 h-4 w-4" />
-                تسوقي الجديد
-              </Link>
-            </Button>
-          </div>
-        </div>
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          {[
-            { title: 'الحجوزات النشطة', value: activeBookings, icon: Calendar, color: 'purple', sub: 'قيد الاستخدام أو مؤكدة' },
-            { title: 'قيد الانتظار', value: pendingBookings, icon: Clock, color: 'pink', sub: 'في انتظار التأكيد' },
-            { title: 'السلة الملكية', value: cartItems, icon: ShoppingCart, color: 'gold', sub: 'منتج في حقيبتك' },
-            { title: 'إجمالي الحجوزات', value: bookings?.length || 0, icon: Package, color: 'cyan', sub: 'تاريخك معنا' },
-          ].map((stat, i) => (
-            <motion.div
-              key={stat.title}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: i * 0.1 }}
-            >
-              <Card className="card-glass border-0 overflow-hidden group hover:glow-purple transition-all duration-500 animate-medical-glow">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 blur-3xl -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-700" />
-                <CardContent className="p-6 relative z-10">
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="p-3 rounded-2xl bg-white/10 text-white group-hover:bg-gala-purple group-hover:text-white transition-colors">
-                      <stat.icon className="h-6 w-6" />
-                    </div>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">{stat.title}</p>
-                    <div className="text-4xl font-black">{stat.value}</div>
-                    <p className="text-xs text-muted-foreground/60 font-medium">{stat.sub}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* Quick Actions & Recent Bookings */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <Card className="card-glass border-0 rounded-[2.5rem] overflow-hidden">
-            <CardHeader className="p-8 pb-4">
-              <CardTitle className="text-2xl font-bold flex items-center gap-3">
-                <TrendingUp className="h-6 w-6 text-gala-pink" />
-                إجراءات سريعة
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-8 pt-0 space-y-4">
-              <Button variant="outline" className="w-full h-14 justify-start text-lg rounded-2xl border-white/10 hover:bg-white/5 transition-colors" asChild>
-                <Link href="/products">
-                  <Package className="h-5 w-5 ml-3 text-gala-purple" />
-                  تصفح المنتجات
-                  <ArrowRight className="h-5 w-5 mr-auto opacity-50" />
-                </Link>
-              </Button>
-              <Button variant="outline" className="w-full h-14 justify-start text-lg rounded-2xl border-white/10 hover:bg-white/5 transition-colors" asChild>
-                <Link href="/cart">
-                  <ShoppingCart className="h-5 w-5 ml-3 text-gala-pink" />
-                  عرض السلة الملكية ({cartItems})
-                  <ArrowRight className="h-5 w-5 mr-auto opacity-50" />
-                </Link>
-              </Button>
-              <Button variant="outline" className="w-full h-14 justify-start text-lg rounded-2xl border-white/10 hover:bg-white/5 transition-colors" asChild>
-                <Link href="/dashboard/bookings">
-                  <Calendar className="h-5 w-5 ml-3 text-gala-gold" />
-                  سجل الحجوزات
-                  <ArrowRight className="h-5 w-5 mr-auto opacity-50" />
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card className="lg:col-span-2 card-glass border-0 rounded-[2.5rem] overflow-hidden">
-            <CardHeader className="p-8 pb-4">
-              <CardTitle className="text-2xl font-bold flex items-center gap-3">
-                <Clock className="h-6 w-6 text-gala-cyan" />
-                الحجوزات الأخيرة
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-8 pt-0">
-              {bookings && bookings.length > 0 ? (
-                <div className="space-y-4">
-                  {bookings.slice(0, 3).map((booking: any) => (
-                    <div key={booking.id} className="flex items-center justify-between p-6 bg-white/5 rounded-3xl border border-white/5 hover:bg-white/10 transition-colors group">
-                      <div className="flex items-center gap-6">
-                        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-gala-purple/20 to-gala-pink/20 flex items-center justify-center">
-                          <Package className="h-8 w-8 text-gala-pink" />
-                        </div>
-                        <div>
-                          <p className="font-bold text-xl mb-1 group-hover:text-gala-purple transition-colors">{booking.product.name_ar}</p>
-                          <p className="text-sm text-muted-foreground flex items-center gap-2">
-                            <Calendar className="h-4 w-4" />
-                            {new Date(booking.start_date).toLocaleDateString('ar-DZ')} - {new Date(booking.end_date).toLocaleDateString('ar-DZ')}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-2xl font-black bg-gradient-to-r from-gala-gold to-yellow-500 bg-clip-text text-transparent">
-                          {Number(booking.total_price).toLocaleString('ar-DZ')} دج
-                        </p>
-                        <Badge variant="outline" className="mt-1 border-white/10 text-[10px] uppercase tracking-tighter opacity-70">
-                          {booking.status}
-                        </Badge>
-                      </div>
-                    </div>
-                  ))}
-                  {bookings.length > 3 && (
-                    <Button variant="ghost" className="w-full h-12 text-muted-foreground font-bold hover:text-white transition-colors" asChild>
-                      <Link href="/dashboard/bookings">مشاهدة جميع الحجوزات</Link>
-                    </Button>
-                  )}
-                </div>
+      {/* 2. The Sovereign Balance (Trust Score) */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
+        <GlassPanel className="md:col-span-2 p-8 relative overflow-hidden flex items-center justify-between min-h-[200px]" gradientBorder>
+          <div className="relative z-10">
+            <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">رصيد الثقة (Sovereign Balance)</h3>
+            <div className="text-7xl font-mono font-bold text-foreground tracking-tighter leading-none">
+              {trustScore} <span className="text-lg text-muted-foreground font-sans">/ 100</span>
+            </div>
+            <div className="mt-6 flex flex-wrap gap-2">
+              {isSovereign ? (
+                <Badge className="bg-sovereign-gold/20 text-sovereign-gold hover:bg-sovereign-gold/30 border-0 px-3 py-1 text-sm">
+                  <ShieldCheck className="w-3 h-3 ml-2" /> معفى من الضمانات
+                </Badge>
               ) : (
-                <div className="text-center py-12 bg-white/5 rounded-[2rem] border border-dashed border-white/10">
-                  <Package className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
-                  <p className="text-xl text-muted-foreground font-medium">لا توجد حجوزات في سجلاتنا حتى الآن</p>
-                  <Button variant="link" className="mt-4 text-gala-purple" asChild>
-                    <Link href="/products">ابدئي رحلة التألق الآن</Link>
-                  </Button>
-                </div>
+                <Badge variant="outline" className="text-muted-foreground border-white/10 px-3 py-1 text-sm">
+                  <AlertTriangle className="w-3 h-3 ml-2 text-yellow-500" /> مطلوب ضمان للعقود
+                </Badge>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
+
+          <div className="absolute left-10 top-1/2 -translate-y-1/2 opacity-10">
+            <IdentityShield status={isSovereign ? "verified" : "pending"} showLabel={false} className="w-48 h-48" />
+          </div>
+        </GlassPanel>
+
+        {/* Quick Actions */}
+        <div className="grid grid-rows-2 gap-6 h-full">
+          <GlassPanel className="p-6 flex items-center justify-between hover:bg-white/5 transition-colors cursor-pointer group">
+            <div>
+              <p className="font-bold text-lg">المحفظة المالية</p>
+              <p className="text-xs text-muted-foreground font-mono mt-1">DZD 0.00</p>
+            </div>
+            <CreditCard className="w-8 h-8 text-sovereign-gold group-hover:scale-110 transition-transform opacity-80" />
+          </GlassPanel>
+          <GlassPanel className="p-6 flex items-center justify-between hover:bg-white/5 transition-colors cursor-pointer group">
+            <div>
+              <p className="font-bold text-lg">سجل العقود</p>
+              <p className="text-xs text-muted-foreground mt-1">الأرشيف الكامل</p>
+            </div>
+            <History className="w-8 h-8 text-sovereign-blue group-hover:scale-110 transition-transform opacity-80" />
+          </GlassPanel>
         </div>
-      </motion.div>
+      </div>
+
+      {/* 3. Active Contracts (The Commitments) */}
+      <div className="space-y-6 relative z-10">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold flex items-center gap-3">
+            <FileSignature className="w-6 h-6 text-sovereign-gold" />
+            العقود النشطة
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+          {isBookingsLoading ? (
+            <div className="col-span-full flex justify-center p-12">
+              <span className="animate-pulse text-sovereign-gold">تحميل العقود السيادية...</span>
+            </div>
+          ) : activeBookings.length > 0 ? (
+            activeBookings.map((booking: any) => (
+              <GlassPanel key={booking.id} className="p-6 relative group hover:border-sovereign-gold/30 transition-colors" gradientBorder>
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h4 className="font-bold text-lg text-foreground">{booking.product_name || booking.product?.name_ar || 'Asset'}</h4>
+                    <p className="text-xs text-muted-foreground font-mono">ID: {booking.id.toString().padStart(6, '0')}</p>
+                  </div>
+                  <Badge variant="outline" className={
+                    booking.status === 'confirmed' ? "text-green-500 border-green-500/20 bg-green-500/10" :
+                      booking.status === 'in_use' ? "text-blue-500 border-blue-500/20 bg-blue-500/10" :
+                        "text-yellow-500 border-yellow-500/20 bg-yellow-500/10"
+                  }>
+                    {booking.status === 'confirmed' ? 'مؤكد (Confirmed)' :
+                      booking.status === 'in_use' ? 'قيد الاستخدام (Active)' : booking.status}
+                  </Badge>
+                </div>
+
+                <div className="space-y-2 text-sm text-muted-foreground mb-4">
+                  <div className="flex justify-between">
+                    <span>البداية:</span>
+                    <span className="font-mono text-foreground">{format(new Date(booking.start_date), 'dd MMM yyyy', { locale: ar })}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>النهاية:</span>
+                    <span className="font-mono text-foreground">{format(new Date(booking.end_date), 'dd MMM yyyy', { locale: ar })}</span>
+                  </div>
+                  <div className="flex justify-between border-t border-white/5 pt-2 mt-2">
+                    <span>القيمة الإجمالية:</span>
+                    <span className="font-mono text-sovereign-gold font-bold">{Number(booking.total_price).toLocaleString()} دج</span>
+                  </div>
+                </div>
+
+                <div className="flex gap-2 mt-4">
+                  <Link href={`/bookings/${booking.id}`} className="w-full">
+                    <SovereignButton size="sm" variant="secondary" className="w-full">
+                      عرض العقد
+                    </SovereignButton>
+                  </Link>
+                </div>
+              </GlassPanel>
+            ))
+          ) : (
+            /* Empty State / Discovery */
+            <GlassPanel className="col-span-full flex flex-col items-center justify-center p-16 text-center border-dashed border-white/10 bg-transparent min-h-[300px]">
+              <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mb-6">
+                <FileSignature className="w-10 h-10 text-muted-foreground/40" />
+              </div>
+              <h3 className="text-2xl font-bold text-foreground mb-2">لا توجد عقود نشطة حالياً</h3>
+              <p className="text-muted-foreground/60 mb-8 max-w-md mx-auto">
+                رصيدك السيادي جاهز. ابدأ رحلتك باكتشاف أصول النخبة المتاحة للكراء.
+              </p>
+              <div className="flex gap-4">
+                <Link href="/products">
+                  <SovereignButton variant="primary" size="lg" withShimmer>
+                    تصفح الأصول (Standard Assets)
+                  </SovereignButton>
+                </Link>
+              </div>
+            </GlassPanel>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
-

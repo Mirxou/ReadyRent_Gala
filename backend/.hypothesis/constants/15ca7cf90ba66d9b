@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\bookings\admin.py
+# hypothesis_version: 6.151.6
+
+['amount', 'approved_amount', 'assessed_at', 'assessed_by', 'assessment', 'booking', 'booking__user__email', 'cancellation_fee', 'cancelled_at', 'cancelled_by', 'cart', 'cart__user__email', 'checked_at', 'claim_description', 'claimed_amount', 'condition', 'created_at', 'damage_description', 'description', 'end_date', 'is_checked', 'item_description', 'item_name', 'notified', 'notified_at', 'photo_type', 'preferred_start_date', 'processed_at', 'product', 'product__name', 'product__name_ar', 'quantity', 'reason', 'refund_amount', 'repair_cost', 'resolved_at', 'reviewed_at', 'severity', 'start_date', 'status', 'total_price', 'transaction_id', 'updated_at', 'uploaded_at', 'user', 'user__email']

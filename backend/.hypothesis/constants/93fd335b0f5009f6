@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\warranties\serializers.py
+# hypothesis_version: 6.151.6
+
+['activated_at', 'approved_amount', 'base_price', 'booking', 'booking_details', 'calculated_coverage', 'calculated_price', 'claim_amount', 'claim_description', 'claim_type', 'claimed_at', 'coverage_amount', 'coverage_type', 'covers_damage', 'covers_loss', 'covers_normal_wear', 'covers_theft', 'created_at', 'deductible', 'description', 'description_ar', 'evidence_files', 'expires_at', 'id', 'is_active', 'is_featured', 'max_coverage_amount', 'name', 'name_ar', 'paid_at', 'plan_type', 'price', 'price_percentage', 'product_name', 'product_value', 'purchased_at', 'review_notes', 'reviewed_at', 'reviewed_by', 'reviewed_by.email', 'reviewed_by_email', 'status', 'submitted_at', 'total_price', 'updated_at', 'warranty_plan', 'warranty_price', 'warranty_purchase']

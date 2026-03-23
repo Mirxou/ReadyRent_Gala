@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\branches\serializers.py
+# hypothesis_version: 6.151.6
+
+['address', 'assigned_at', 'availability_status', 'average_rating', 'branch', 'branch.name_ar', 'branch_name', 'city', 'code', 'created_at', 'email', 'id', 'in_stock', 'is_active', 'last_restocked', 'latitude', 'longitude', 'low_stock', 'low_stock_threshold', 'manager', 'manager.email', 'manager_email', 'name', 'name_ar', 'opening_hours', 'out_of_stock', 'period_end', 'period_start', 'phone', 'postal_code', 'product', 'product_count', 'product_id', 'quantity_available', 'quantity_maintenance', 'quantity_rented', 'quantity_total', 'role', 'staff', 'staff.email', 'staff_count', 'staff_email', 'total_bookings', 'total_products', 'total_revenue', 'updated_at']

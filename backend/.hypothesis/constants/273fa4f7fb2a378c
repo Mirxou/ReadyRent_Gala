@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\local_guide\admin.py
+# hypothesis_version: 6.151.6
+
+['Basic Info', 'Contact', 'Description', 'Location', 'Media', 'Pricing', 'Status', 'Timestamps', 'address', 'category', 'city', 'comment', 'cover_image', 'created_at', 'description', 'description_ar', 'email', 'fields', 'is_active', 'is_featured', 'is_verified', 'latitude', 'logo', 'longitude', 'name', 'name_ar', 'phone', 'price_note', 'price_range_max', 'price_range_min', 'rating', 'review_count', 'service', 'service__name', 'service_type', 'slug', 'updated_at', 'user', 'user__email', 'website', 'whatsapp']

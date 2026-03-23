@@ -10,6 +10,57 @@ class BookingService:
     """Service for booking operations"""
     
     @staticmethod
+    def create_booking(user, product, start_date, end_date, total_days, total_price):
+        """
+        Create a new booking with intelligent automation.
+        Implements 'Tech Shock': Auto-confirm for high-trust users.
+        """
+        from standard_core.risk_engine import RiskEngine
+        
+        # 1. Evaluate Risk (Centralized)
+        # Note: 'product' here corresponds to 'Asset' in core engine terms
+        risk_decision = RiskEngine.evaluate(user, product)
+
+        if not risk_decision.allowed:
+            # If engine says NO (e.g. Critical Risk), we reject creation
+            # Or we could create as 'rejected'? For now, let's create as 'pending_review' or raise error?
+            # Better to create as 'pending' but flagged, OR raise ValueError if it's a hard block.
+            # RiskEngine.evaluate returns allowed=False for Critical/HighRisk+HighValue.
+            # Let's default to 'pending_risk_review' or just 'rejected'.
+            # Given the flow, let's set status to 'rejected' explicitly or strictly 'manual_review'.
+            initial_status = 'rejected' if risk_decision.risk_level == 'CRITICAL' else 'manual_review'
+            auto_confirmed = False
+        else:
+            # 2. Determine Status from Decision
+            if risk_decision.auto_confirm:
+                initial_status = 'confirmed'
+                auto_confirmed = True
+            else:
+                initial_status = 'pending'
+                auto_confirmed = False
+
+        # 3. Create Booking
+        booking = Booking.objects.create(
+            user=user,
+            product=product,
+            start_date=start_date,
+            end_date=end_date,
+            total_days=total_days,
+            total_price=total_price, # Base price
+            security_deposit=risk_decision.deposit_requirement, # Apply calculated deposit
+            status=initial_status
+        )
+        
+        return booking, auto_confirmed
+
+    @staticmethod
+    def get_trust_reward_message(auto_confirmed):
+        """Generate the 'Shock' message for the user"""
+        if auto_confirmed:
+            return "🌟 نظراً لسجلك الممتاز، تم تأكيد حجزك فوراً! شكراً لثقتك بنا."
+        return "تم استلام طلبك وهو قيد المراجعة."
+
+    @staticmethod
     def cancel_booking(booking, user, reason=''):
         """Cancel booking and process refund"""
         # Check if can cancel

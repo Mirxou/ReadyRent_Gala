@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\cms\admin.py
+# hypothesis_version: 6.151.6
+
+['answer', 'answer_ar', 'author', 'banner_type', 'category', 'click_count', 'content', 'content_ar', 'created_at', 'description', 'description_ar', 'helpful_count', 'is_active', 'is_featured', 'order', 'page_type', 'position', 'published_at', 'question', 'question_ar', 'slug', 'status', 'title', 'title_ar', 'updated_at', 'view_count']

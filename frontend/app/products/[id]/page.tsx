@@ -1,507 +1,316 @@
-'use client';
+"use client";
 
 import * as React from 'react';
 import Image from 'next/image';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { productsApi, bookingsApi, reviewsApi, hygieneApi, warrantiesApi } from '@/lib/api';
-import { Star, ShoppingCart, Calendar, MapPin, Shield, Sparkles, Eye } from 'lucide-react';
+import { SovereignButton } from '@/components/sovereign/sovereign-button';
+import { GlassPanel } from '@/components/sovereign/glass-panel';
+import { IdentityShield } from '@/components/sovereign/identity-shield';
+import { productsApi, bookingsApi, hygieneApi } from '@/lib/api';
+import { Star, ShieldCheck, MapPin, LockKeyhole, Info, Share2, Sparkles, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { BookingCalendar } from '@/components/booking-calendar';
 import { useAuthStore } from '@/lib/store';
-import Link from 'next/link';
-import { ReviewList } from '@/components/reviews/review-list';
-import { ReviewForm } from '@/components/reviews/review-form';
-import { RatingStars } from '@/components/reviews/rating-stars';
-import { WaitlistButton } from '@/components/waitlist-button';
-import { trackProductView, trackAddToCart } from '@/lib/analytics';
-import { BundleSelector } from '@/components/bundle-selector';
-import { AccessorySuggestions } from '@/components/accessory-suggestions';
-import { ProductRecommendations } from '@/components/product-recommendations';
-import { ShareButton } from '@/components/share-button';
-import { generateProductSchema, generateBreadcrumbSchema } from '@/lib/seo';
+import { motion } from 'framer-motion';
+import { Badge } from '@/components/ui/badge';
 import Lightbox from 'yet-another-react-lightbox';
 import 'yet-another-react-lightbox/styles.css';
 import Zoom from 'yet-another-react-lightbox/plugins/zoom';
-import Counter from 'yet-another-react-lightbox/plugins/counter';
-import Thumbnails from 'yet-another-react-lightbox/plugins/thumbnails';
-import 'yet-another-react-lightbox/plugins/thumbnails.css';
+import { TrustAssuranceChips } from '@/components/product/trust-chips';
+import { SovereignCheckoutModal } from '@/components/checkout/sovereign-checkout-modal';
 
-import { MagneticButton } from '@/components/ui/magnetic-button';
-import { TiltCard } from '@/components/ui/tilt-card';
-import { ParticleField } from '@/components/ui/particle-field';
-import { motion, AnimatePresence } from 'framer-motion';
-
-export default function ProductDetailPage() {
+export default function SovereignProductPage() {
   const params = useParams();
   const slug = params.id as string;
+  const { user, isAuthenticated } = useAuthStore();
+  const queryClient = useQueryClient();
+
+  const [selectedStartDate, setSelectedStartDate] = React.useState<Date | null>(null);
+  const [selectedEndDate, setSelectedEndDate] = React.useState<Date | null>(null);
+  const [lightboxOpen, setLightboxOpen] = React.useState(false);
+  const [lightboxIndex, setLightboxIndex] = React.useState(0);
+  const [isCheckoutOpen, setIsCheckoutOpen] = React.useState(false);
+
+  // Data Fetching
   const { data: product, isLoading } = useQuery({
     queryKey: ['product', slug],
     queryFn: () => productsApi.getBySlug(slug).catch(() => productsApi.getById(slug)).then((res) => res.data),
   });
 
-  if (isLoading) {
-    return (
-      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-4">
-          <div className="h-16 w-16 rounded-full border-t-4 border-gala-purple animate-spin"></div>
-          <p className="text-gala-purple animate-pulse font-bold">جاري كشف الجمال...</p>
-        </div>
-      </div>
-    );
-  }
+  const { data: hygieneData } = useQuery({
+    queryKey: ['hygiene', product?.id],
+    queryFn: () => hygieneApi.getLatestForProduct(product!.id).then((res: any) => res.data),
+    enabled: !!product?.id,
+  });
 
-  if (!product) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <ParticleField />
-        <div className="text-center z-10 card-glass p-12 rounded-3xl max-w-md">
-          <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-gala-purple to-gala-pink bg-clip-text text-transparent">404</h1>
-          <p className="text-muted-foreground mb-6">عذراً، لم نتمكن من العثور على هذه القطعة الفريدة.</p>
-          <MagneticButton asChild>
-            <Link href="/products">العودة للكتالوج</Link>
-          </MagneticButton>
-        </div>
-      </div>
-    );
-  }
-
-  const queryClient = useQueryClient();
-  const { isAuthenticated } = useAuthStore();
-  const [selectedStartDate, setSelectedStartDate] = React.useState<Date | null>(null);
-  const [selectedEndDate, setSelectedEndDate] = React.useState<Date | null>(null);
-  const [lightboxOpen, setLightboxOpen] = React.useState(false);
-  const [lightboxIndex, setLightboxIndex] = React.useState(0);
-
-  const primaryImage = product.images?.find((img: any) => img.is_primary)?.image ||
-    product.images?.[0]?.image ||
-    'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=800&q=80&auto=format&fit=crop';
-
-  // Prepare images for Lightbox
-  const lightboxImages = React.useMemo(() => {
-    if (!product.images || product.images.length === 0) {
-      return [{ src: primaryImage, alt: product.name_ar }];
-    }
-    return product.images.map((img: any) => ({
-      src: img.image,
-      alt: img.alt_text || `${product.name_ar} - ${img.id}`,
-    }));
-  }, [product.images, primaryImage, product.name_ar]);
-
-  const addToCartMutation = useMutation({
-    mutationFn: (data: any) => bookingsApi.addToCart(data),
+  const createBookingMutation = useMutation({
+    mutationFn: (data: any) => bookingsApi.create(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['cart'] });
-      toast.success('تم إضافة المنتج إلى السلة');
+      toast.success('تم إبرام العقد السيادي بنجاح (Contract Sealed)');
+      setIsCheckoutOpen(false);
+      // In a real app, redirect to dashboard
+      // router.push('/dashboard');
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.error || 'حدث خطأ أثناء إضافة المنتج');
+      toast.error(error.response?.data?.error || 'فشل في توثيق العقد');
     },
   });
 
-  const handleAddToCart = () => {
-    if (!selectedStartDate || !selectedEndDate) {
-      toast.error('يرجى اختيار تواريخ الكراء');
+  const handleReserve = () => {
+    if (!isAuthenticated) {
+      toast.error('يجب تسجيل الدخول لبدء معاملة سيادية');
       return;
     }
+    if (!selectedStartDate || !selectedEndDate) {
+      toast.error('يجب تحديد مدة العقد أولاً');
+      return;
+    }
+    setIsCheckoutOpen(true);
+  };
 
-    addToCartMutation.mutate({
+  const handleSovereignConfirm = (signatureData: string) => {
+    if (!product || !selectedStartDate || !selectedEndDate) return;
+
+    createBookingMutation.mutate({
       product_id: product.id,
       start_date: selectedStartDate.toISOString().split('T')[0],
       end_date: selectedEndDate.toISOString().split('T')[0],
+      signature_proof: signatureData,
     });
   };
 
-  const { data: hygieneData } = useQuery({
-    queryKey: ['hygiene', product.id],
-    queryFn: () => hygieneApi.getLatestForProduct(product.id).then((res: any) => res.data),
-    enabled: !!product.id,
+  // Calculate Total Price for Modal
+  const days = selectedStartDate && selectedEndDate
+    ? Math.ceil((selectedEndDate.getTime() - selectedStartDate.getTime()) / (1000 * 60 * 60 * 24))
+    : 0;
+  const totalPrice = days * Number(product?.price_per_day || 0);
+
+  if (isLoading) {
+    return <div className="min-h-screen flex items-center justify-center bg-background text-sovereign-gold animate-pulse">Initializing Standard Asset...</div>;
+  }
+
+  if (!product) {
+    return <div className="min-h-screen flex items-center justify-center bg-background text-muted-foreground">Asset Not Found</div>;
+  }
+
+  const { data: depositData } = useQuery({
+    queryKey: ['deposit', product?.id],
+    queryFn: () => bookingsApi.calculateDeposit(product!.id).then((res) => res.data),
+    enabled: !!product?.id && isAuthenticated,
   });
 
-  const { data: warrantyPlans } = useQuery({
-    queryKey: ['warranties'],
-    queryFn: () => warrantiesApi.getPlans().then((res: any) => res.data),
-  });
+  // Logic: Sovereign Trust Assessment
+  const trustScore = depositData?.trust_score ?? user?.trust_score ?? 0;
+  const isSovereign = depositData ? !depositData.deposit_required : (trustScore >= 80);
+  const isVerified = depositData?.is_verified ?? user?.is_verified ?? false;
 
-  React.useEffect(() => {
-    trackProductView(product.id, product.name_ar);
-  }, [product]);
+  const primaryImage = product?.images?.find((img: any) => img.is_primary)?.image || product?.images?.[0]?.image || '';
+  const lightboxImages = product.images?.map((img: any) => ({ src: img.image })) || [{ src: primaryImage }];
 
   return (
-    <div className="relative min-h-screen pb-20">
-      <ParticleField />
+    <div className="relative min-h-screen pb-20 bg-background overflow-hidden text-right" dir="rtl">
 
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.8 }}
-        className="container mx-auto px-4 py-12 relative z-10"
-      >
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Images */}
-          <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="space-y-6"
-          >
-            <TiltCard className="relative aspect-[3/4] w-full overflow-hidden rounded-3xl cursor-pointer hover:glow-purple group shadow-2xl">
-              <div
-                className="w-full h-full"
-                onClick={() => {
-                  setLightboxIndex(0);
-                  setLightboxOpen(true);
-                }}
-              >
-                <Image
-                  src={primaryImage}
-                  alt={product.name_ar}
-                  fill
-                  className="object-cover transition-transform duration-700 group-hover:scale-110"
-                  priority
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <div className="p-4 rounded-full bg-white/20 backdrop-blur-md">
-                    <Eye className="w-8 h-8 text-white" />
-                  </div>
-                </div>
-              </div>
-            </TiltCard>
+      {/* Background Ambience */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-sovereign-blue/5 rounded-full blur-[100px] opacity-30" />
+        <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-sovereign-gold/5 rounded-full blur-[100px] opacity-20" />
+      </div>
 
-            {product.images && product.images.length > 1 && (
-              <div className="grid grid-cols-4 gap-4">
-                {product.images.slice(0, 4).map((image: any, index: number) => (
-                  <motion.div
-                    key={index}
-                    whileHover={{ scale: 1.05, y: -5 }}
-                    className="relative aspect-square overflow-hidden rounded-2xl cursor-pointer border-2 border-transparent hover:border-gala-purple transition-all duration-300 shadow-lg"
-                    onClick={() => {
-                      const actualIndex = product.images.findIndex((img: any) => img.id === image.id || img.image === image.image);
-                      setLightboxIndex(actualIndex >= 0 ? actualIndex : index);
-                      setLightboxOpen(true);
-                    }}
-                  >
-                    <Image
-                      src={image.image}
-                      alt={`${product.name_ar} - ${index + 1}`}
-                      fill
-                      className="object-cover"
-                    />
-                  </motion.div>
-                ))}
-              </div>
-            )}
-          </motion.div>
+      <div className="container mx-auto px-6 py-12 relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-12">
 
-          {/* Product Info */}
-          <motion.div
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="space-y-8"
-          >
-            <div className="space-y-4">
-              {product.category && (
-                <Badge className="bg-gradient-to-r from-gala-purple to-gala-pink text-white border-0 px-4 py-1">
-                  {product.category.name_ar}
-                </Badge>
-              )}
-              <div className="flex items-start justify-between gap-4 flex-wrap">
-                <h1
-                  className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-gala-purple via-gala-pink to-gala-gold bg-clip-text text-transparent pb-2 flex-1 min-w-0"
-                  id="product-title"
+        {/* RIGHT COLUMN: Visual Authority (Images) - Span 7 */}
+        <div className="lg:col-span-7 space-y-6">
+          <GlassPanel className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl border-sovereign-gold/10 group cursor-pointer" onClick={() => setLightboxOpen(true)}>
+            <Image
+              src={primaryImage}
+              alt={product.name_ar}
+              fill
+              className="object-cover transition-transform duration-1000 group-hover:scale-105"
+              priority
+            />
+
+            {/* Sovereign Watermark */}
+            <div className="absolute top-6 left-6 flex gap-2">
+              <Badge variant="secondary" className="bg-background/80 backdrop-blur text-foreground border-white/10">
+                <Sparkles className="w-3 h-3 ml-1 text-sovereign-gold" />
+                Standard Verified
+              </Badge>
+            </div>
+          </GlassPanel>
+
+          {/* Gallery Grid */}
+          {product.images?.length > 1 && (
+            <div className="grid grid-cols-4 gap-4">
+              {product.images.slice(0, 4).map((img: any, idx: number) => (
+                <motion.div
+                  key={img.id}
+                  whileHover={{ y: -5 }}
+                  className="aspect-square rounded-xl overflow-hidden cursor-pointer border border-white/10 relative"
+                  onClick={() => { setLightboxIndex(idx); setLightboxOpen(true); }}
                 >
-                  {product.name_ar}
-                </h1>
-                <ShareButton
-                  url={typeof window !== 'undefined' ? window.location.href : ''}
-                  title={product.name_ar}
-                  description={product.description_ar || product.description}
-                  image={primaryImage}
-                  variant="outline"
-                  size="sm"
-                />
-              </div>
-              {product.rating && typeof product.rating === 'number' && (
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-1 bg-white/5 backdrop-blur px-3 py-1 rounded-full border border-white/10">
-                    <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                    <span className="font-bold text-lg">{Number(product.rating).toFixed(1)}</span>
+                  <Image src={img.image} alt="" fill className="object-cover" />
+                </motion.div>
+              ))}
+            </div>
+          )}
+
+          {/* Description - The Manuscript */}
+          <GlassPanel className="p-8 mt-8">
+            <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
+              <Info className="w-5 h-5 text-sovereign-gold" />
+              مواصفات الأصل
+            </h3>
+            <p className="text-muted-foreground leading-relaxed whitespace-pre-line text-lg">
+              {product.description_ar || product.description}
+            </p>
+          </GlassPanel>
+        </div>
+
+        {/* LEFT COLUMN: The Digital Contract (Span 5) */}
+        <div className="lg:col-span-5 space-y-8 sticky top-24 h-fit">
+
+          {/* Header */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="px-3 py-1 text-[10px] uppercase tracking-widest border border-sovereign-gold/50 text-sovereign-gold rounded-full bg-sovereign-gold/5">
+                {product.category?.name_ar || "Standard Asset"}
+              </span>
+              <ShareButton />
+            </div>
+
+            <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-foreground leading-tight">
+              {product.name_ar}
+            </h1>
+
+            <div className="flex items-center gap-6 text-sm text-muted-foreground border-b border-border pb-6">
+              <span className="flex items-center gap-1.5 min-w-fit">
+                <MapPin className="w-4 h-4 text-sovereign-gold" />
+                الجزائر العاصمة
+              </span>
+              <span className="flex items-center gap-1.5 min-w-fit">
+                <Star className="w-4 h-4 text-sovereign-gold fill-sovereign-gold" />
+                {Number(product.rating || 5).toFixed(1)}
+              </span>
+              <span className="flex items-center gap-1.5 min-w-fit">
+                <ShieldCheck className="w-4 h-4 text-green-500" />
+                {hygieneData ? "معقم ومجهز" : "جاهز للتسليم"}
+              </span>
+            </div>
+          </div>
+
+          {/* THE LOCKED PRICE ENGINE */}
+          <div className="relative group">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-sovereign-gold to-sovereign-blue opacity-20 rounded-2xl blur group-hover:opacity-40 transition duration-1000"></div>
+            <GlassPanel className="relative p-6 bg-background/90" gradientBorder>
+              <div className="flex justify-between items-start mb-6">
+                <div>
+                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1 flex items-center gap-1">
+                    <LockKeyhole className="w-3 h-3 text-sovereign-gold" /> القيمة المجمدة (Locked Price)
+                  </p>
+
+                  <div className="mb-4">
+                    <TrustAssuranceChips />
                   </div>
-                  <span className="text-muted-foreground font-medium">({product.total_rentals || 0} تأجير ناجح)</span>
+
+                  <div className="text-5xl font-mono font-bold text-foreground tracking-tight">
+                    {Number(product.price_per_day).toLocaleString('en-US')}
+                    <span className="text-lg font-sans font-normal text-muted-foreground mr-2">دج / يوم</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Trust Assessment UI */}
+              {isAuthenticated ? (
+                <div className={cn(
+                  "p-4 rounded-xl border mb-6 flex items-center justify-between",
+                  isSovereign
+                    ? "bg-sovereign-gold/5 border-sovereign-gold/20"
+                    : "bg-sovereign-blue/5 border-sovereign-blue/10"
+                )}>
+                  <div className="flex items-center gap-3">
+                    <IdentityShield status={isVerified ? "verified" : "pending"} showLabel={false} trustScore={trustScore} />
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-wider text-foreground">
+                        {isSovereign ? "مستوى سيادي (High Trust)" : "مستوى قياسي (Standard)"}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {isSovereign ? "تم إعفاء الضمان بالكامل." : "يتطلب ضماناً بقيمة رمزية."}
+                      </p>
+                    </div>
+                  </div>
+                  {isSovereign && <CheckCircle2 className="w-5 h-5 text-sovereign-gold" />}
+                </div>
+              ) : (
+                <div className="p-4 rounded-xl border border-dashed border-muted-foreground/30 bg-muted/5 mb-6 text-center">
+                  <p className="text-xs text-muted-foreground">سجل الدخول لعرض تقييم الثقة الخاص بك</p>
                 </div>
               )}
-            </div>
 
-            <div className="p-6 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-xl relative overflow-hidden group">
-              <div className="absolute inset-0 bg-gradient-animated opacity-5 group-hover:opacity-10 transition-opacity" />
-              <div className="relative z-10 flex items-center justify-between">
-                <div>
-                  <p className="text-4xl font-black bg-gradient-to-r from-gala-cyan to-gala-purple bg-clip-text text-transparent">
-                    {Number(product.price_per_day || 0).toLocaleString('ar-DZ')} دج
-                  </p>
-                  <p className="text-muted-foreground font-medium">للكراء اليومي الاستثنائي</p>
-                </div>
-                <div className="text-center p-3 rounded-2xl bg-gala-gold/10 border border-gala-gold/20">
-                  <Sparkles className="w-8 h-8 text-gala-gold animate-pulse" />
-                  <span className="text-xs font-bold text-gala-gold block mt-1 uppercase tracking-tighter">GALA EXCLUSIVE</span>
-                </div>
-              </div>
-            </div>
+              <div className="h-px w-full bg-gradient-to-r from-transparent via-border to-transparent my-6" />
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur card-glass flex items-center gap-4">
-                <div className="w-10 h-10 rounded-xl bg-gala-purple/20 flex items-center justify-center text-gala-purple">
-                  <Shield className="w-5 h-5" />
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground uppercase opacity-70">الحجم</p>
-                  <p className="font-bold">{product.size}</p>
-                </div>
+              {/* Date Selection */}
+              <div className="space-y-4">
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">تحديد مدة العقد</p>
+                <BookingCalendar
+                  productId={product.id}
+                  pricePerDay={Number(product.price_per_day)}
+                  onDateSelect={(start, end) => {
+                    setSelectedStartDate(start);
+                    setSelectedEndDate(end);
+                  }}
+                />
               </div>
-              <div className="p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur card-glass flex items-center gap-4">
-                <div className="w-10 h-10 rounded-xl bg-gala-pink/20 flex items-center justify-center text-gala-pink">
-                  <div
-                    className="w-5 h-5 rounded-full border border-white/20"
-                    style={{ backgroundColor: product.color_hex || '#fff' }}
-                  />
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground uppercase opacity-70">اللون</p>
-                  <p className="font-bold">{product.color}</p>
-                </div>
-              </div>
-            </div>
 
-            <div className="p-6 rounded-3xl card-glass border-0 overflow-hidden relative group">
-              <div className="absolute inset-0 bg-white/5 opacity-50" />
-              <div className="relative z-10">
-                <h3 className="text-lg font-bold mb-4 opacity-70 uppercase tracking-widest">تفاصيل القطعة</h3>
-                <p className="text-muted-foreground leading-relaxed whitespace-pre-line text-lg">
-                  {product.description_ar || product.description}
+              {/* Action */}
+              <div className="mt-8">
+                <SovereignButton
+                  size="xl"
+                  className="w-full text-lg shadow-2xl shadow-sovereign-gold/10"
+                  onClick={handleReserve}
+                  disabled={!product.status || product.status !== 'available'}
+                >
+                  {isAuthenticated
+                    ? (selectedStartDate && selectedEndDate ? "بدء إجراءات العقد" : "حدد التواريخ أولاً")
+                    : "تسجيل الدخول للحجز"
+                  }
+                </SovereignButton>
+                <p className="text-center text-[10px] text-muted-foreground mt-4 opacity-70">
+                  بالضغط على هذا الزر، أنت توافق على شروط "العقد الذكي" لـ Standard.
                 </p>
               </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
-              <div className="flex flex-col gap-2 w-full">
-                <MagneticButton
-                  size="lg"
-                  className={cn(
-                    "w-full h-16 text-xl font-bold shadow-2xl transition-all duration-500",
-                    product.status === 'available'
-                      ? "shadow-gala-purple/20 bg-gradient-to-r from-gala-purple to-gala-pink hover:scale-[1.02] active:scale-[0.98]"
-                      : "bg-muted text-muted-foreground grayscale cursor-not-allowed shadow-none"
-                  )}
-                  onClick={handleAddToCart}
-                  disabled={product.status !== 'available'}
-                  withConfetti={!!selectedStartDate && !!selectedEndDate}
-                >
-                  <ShoppingCart className="h-6 w-6 ml-3" />
-                  {product.status !== 'available'
-                    ? 'القطعة محجوزة حالياً'
-                    : (!selectedStartDate || !selectedEndDate)
-                      ? 'حددوا تواريخ التألق'
-                      : 'أضف إلى السلة'
-                  }
-                </MagneticButton>
-                {product.status === 'available' && (!selectedStartDate || !selectedEndDate) && (
-                  <motion.p
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="text-xs text-gala-pink font-bold text-center animate-pulse"
-                  >
-                    * يرجى اختيار التواريخ من التقويم أدناه للمتابعة
-                  </motion.p>
-                )}
-              </div>
-              <MagneticButton
-                size="lg"
-                variant="outline"
-                className="w-full h-16 text-xl font-bold border-2 border-white/10 backdrop-blur-md hover:bg-white/5"
-              >
-                <Calendar className="h-6 w-6 ml-3 text-gala-purple" />
-                احجز الآن
-              </MagneticButton>
-            </div>
-
-            <div className="grid grid-cols-3 gap-6 py-8 border-y border-white/10">
-              <motion.div whileHover={{ y: -5 }} className="text-center">
-                <div className="w-12 h-12 rounded-2xl bg-gala-cyan/10 flex items-center justify-center mx-auto mb-3 text-gala-cyan shadow-inner">
-                  <MapPin className="h-6 w-6" />
-                </div>
-                <p className="text-sm font-bold">توصيل سريع</p>
-              </motion.div>
-              <motion.div whileHover={{ y: -5 }} className="text-center">
-                <div className="w-12 h-12 rounded-2xl bg-gala-purple/10 flex items-center justify-center mx-auto mb-3 text-gala-purple shadow-inner">
-                  <Calendar className="h-6 w-6" />
-                </div>
-                <p className="text-sm font-bold">حجز مرن</p>
-              </motion.div>
-              <motion.div whileHover={{ y: -5 }} className="text-center">
-                <div className="w-12 h-12 rounded-2xl bg-gala-gold/10 flex items-center justify-center mx-auto mb-3 text-gala-gold shadow-inner">
-                  <Shield className="h-6 w-6" />
-                </div>
-                <p className="text-sm font-bold">ضمان Gala</p>
-              </motion.div>
-            </div>
-
-            {/* Bundles */}
-            <div className="py-6 border-t border-white/10">
-              <BookingCalendar
-                productId={Number(product.id)}
-                pricePerDay={Number(product.price_per_day)}
-                onDateSelect={(start, end) => {
-                  setSelectedStartDate(start);
-                  setSelectedEndDate(end);
-                }}
-              />
-            </div>
-
-            <BundleSelector
-              productId={product.id}
-              startDate={selectedStartDate}
-              endDate={selectedEndDate}
-              onSelectBundle={(bundleId: number) => {
-                toast.success('تم إضافة الباقة إلى السلة');
-              }}
-            />
-          </motion.div>
+            </GlassPanel>
+          </div>
         </div>
+      </div>
 
-        {/* Recommendations Section */}
-        <div className="mt-20 space-y-8 container mx-auto relative z-10 px-0">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <ProductRecommendations productId={product.id} limit={6} />
-          </motion.div>
-        </div>
-
-        {/* Reviews Section */}
-        <div className="mt-20 space-y-8 container mx-auto relative z-10 px-0">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <Card className="card-glass border-0 rounded-[2.5rem] overflow-hidden">
-              <CardHeader className="p-8 pb-4">
-                <CardTitle className="flex items-center justify-between">
-                  <span className="text-3xl font-bold bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">التقييمات والمراجعات</span>
-                  {product.rating && typeof product.rating === 'number' && (
-                    <div className="flex items-center gap-3">
-                      <RatingStars rating={Number(product.rating)} showValue size="lg" />
-                      <span className="text-lg text-muted-foreground">
-                        ({product.total_rentals || 0} تقييم)
-                      </span>
-                    </div>
-                  )}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-8 pt-0">
-                <ProductReviews productId={product.id} />
-              </CardContent>
-            </Card>
-          </motion.div>
-        </div>
-      </motion.div>
-
-      {/* Lightbox */}
       <Lightbox
         open={lightboxOpen}
         close={() => setLightboxOpen(false)}
         index={lightboxIndex}
         slides={lightboxImages}
-        plugins={[Zoom, Counter, Thumbnails]}
-        zoom={{
-          maxZoomPixelRatio: 3,
-          zoomInMultiplier: 2,
-          doubleTapDelay: 300,
-          doubleClickDelay: 300,
-          doubleClickMaxStops: 2,
-          keyboardMoveDistance: 50,
-          wheelZoomDistanceFactor: 100,
-          pinchZoomDistanceFactor: 100,
-          scrollToZoom: true,
-        }}
-        thumbnails={{
-          position: 'bottom',
-          width: 120,
-          height: 80,
-          border: 0,
-          borderRadius: 4,
-          padding: 4,
-          gap: 16,
-        }}
-        counter={{
-          container: {
-            style: {
-              top: 'unset',
-              bottom: 0,
-              left: 0,
-              right: 'unset',
-            },
-          },
-        }}
-        render={{
-          buttonPrev: () => null,
-          buttonNext: () => null,
-        }}
-        styles={{
-          container: { backgroundColor: 'rgba(0, 0, 0, .9)' },
-        }}
+        plugins={[Zoom]}
+      />
+
+      <SovereignCheckoutModal
+        isOpen={isCheckoutOpen}
+        onClose={() => setIsCheckoutOpen(false)}
+        product={product}
+        startDate={selectedStartDate}
+        endDate={selectedEndDate}
+        totalPrice={totalPrice}
+        onConfirm={handleSovereignConfirm}
+        isProcessing={createBookingMutation.isPending}
       />
     </div>
   );
 }
 
-function ProductReviews({ productId }: { productId: number }) {
-  const { data: reviews, isLoading } = useQuery({
-    queryKey: ['reviews', productId],
-    queryFn: () => reviewsApi.getAll({ product: productId }).then((res) => res.data),
-  });
-
-  const { isAuthenticated } = useAuthStore();
-  const [showForm, setShowForm] = React.useState(false);
-
-  if (isLoading) {
-    return <div className="text-center py-4 text-muted-foreground">جاري تحميل التقييمات...</div>;
-  }
-
-  const results = reviews?.results || reviews || [];
-
+function ShareButton() {
   return (
-    <div className="space-y-6">
-      {isAuthenticated && (
-        <div className="flex justify-end">
-          {!showForm ? (
-            <MagneticButton onClick={() => setShowForm(true)} variant="outline" size="sm">
-              إضافة تقييم
-            </MagneticButton>
-          ) : (
-            <Card className="bg-white/5 border-white/10 w-full">
-              <CardHeader>
-                <CardTitle>أضف تقييمك</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ReviewForm
-                  productId={productId}
-                  onSuccess={() => setShowForm(false)}
-                />
-              </CardContent>
-            </Card>
-          )}
-        </div>
-      )}
-
-      <ReviewList reviews={results} productId={productId} />
-    </div>
+    <button className="p-2 rounded-full hover:bg-muted transition-colors text-muted-foreground">
+      <Share2 className="w-5 h-5" />
+    </button>
   );
 }

@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\scripts\generate_tests.py
+# hypothesis_version: 6.151.6
+
+['..', '_', '__main__', 'analytics', 'artisans', 'bookings', 'branches', 'bundles', 'chatbot', 'cms', 'disputes', 'hygiene', 'inventory', 'local_guide', 'locations', 'maintenance', 'notifications', 'packaging', 'products', 'returns', 'reviews', 'tests', 'unit', 'users', 'utf-8', 'vendors', 'w', 'warranties']

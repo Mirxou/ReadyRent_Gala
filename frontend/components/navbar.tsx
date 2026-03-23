@@ -81,7 +81,7 @@ export function Navbar() {
               <div className="relative group">
                 <div className="absolute -inset-1 bg-gradient-to-r from-gala-purple to-gala-pink rounded-full blur opacity-40 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
                 <span className="relative text-2xl md:text-3xl font-black tracking-tighter bg-gradient-to-r from-gala-purple via-gala-pink to-gala-gold dark:from-white dark:via-white dark:to-white/40 bg-clip-text text-transparent group-hover:scale-105 transition-transform">
-                  READY RENT
+                  STANDARD
                 </span>
               </div>
             </Link>
@@ -201,7 +201,7 @@ export function Navbar() {
                 <SheetContent side="right" className="w-[80vw] sm:w-[400px] border-l border-gray-200 dark:border-white/10 bg-background dark:card-glass overflow-y-auto">
                   <SheetHeader className="flex-shrink-0">
                     <SheetTitle className="text-2xl font-bold bg-gradient-to-r from-gala-purple to-gala-pink bg-clip-text text-transparent">
-                      READY RENT
+                      STANDARD
                     </SheetTitle>
                     <SheetDescription className="text-muted-foreground">تصفح المجموعة الاستثنائية لعام 2026</SheetDescription>
                   </SheetHeader>

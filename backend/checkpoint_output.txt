@@ -1,0 +1,16 @@
+DEBUG: sys.argv = ['scripts\\plaintext_checkpoint.py']
+{"event": "Patched drf_spectacular._map_model_field to handle gettext_lazy verbose_name"}
+{"event": "Patched drf_spectacular._resolve_path_parameters"}
+
+============================================================
+  PHASE 16B→16C PLAINTEXT CHECKPOINT
+============================================================
+
+  Total users:            234
+  Plaintext email rows:   233  ← target: 0 after 16C
+  email_hash populated:   233
+  Plaintext phone rows:   0  ← target: 0 after 16C
+
+  Status: 🔴 Plaintext still present — 16C required
+============================================================
+

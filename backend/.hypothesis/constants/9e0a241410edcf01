@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\disputes\migrations\0009_judicialpanel.py
+# hypothesis_version: 6.151.6
+
+[100, 'Active', 'Current Load', 'Description', 'High Court', 'ID', 'JudicialPanel', 'Last Rotation', 'Panel Members', 'Panel Name', 'Panel Type', 'Routine Cases', 'Specialized Domain', 'Weekly Capacity', 'created at', 'created_at', 'current_load', 'description', 'disputes', 'high_court', 'id', 'is_active', 'judicial_panels', 'max_cases_per_week', 'members', 'name', 'ordering', 'panel_type', 'rotation_date', 'routine', 'specialized', 'updated at', 'updated_at', 'verbose_name', 'verbose_name_plural', 'اللجان القضائية', 'لجنة قضائية']

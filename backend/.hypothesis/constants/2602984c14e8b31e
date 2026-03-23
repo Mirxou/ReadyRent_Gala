@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\chatbot\migrations\0002_initial.py
+# hypothesis_version: 6.151.6
+
+['0001_initial', 'admin', 'chat_sessions', 'chatbot', 'chatbot.chatsession', 'chatintent', 'chatmessage', 'chatsession', 'created_at', 'escalated_chats', 'escalated_to', 'intents', 'messages', 'role__in', 'session', 'session_id', 'staff', 'status', 'user']

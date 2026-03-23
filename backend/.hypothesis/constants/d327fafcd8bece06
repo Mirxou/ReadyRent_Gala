@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\artisans\migrations\0003_alter_artisan_options_alter_artisanportfolio_options_and_more.py
+# hypothesis_version: 6.151.6
+
+['-created_at', '-is_featured', '-rating', '0002_initial', 'artisan', 'artisan_profile', 'artisan_reviews', 'artisanportfolio', 'artisanreview', 'artisans', 'artisans.artisan', 'name', 'order', 'ordering', 'portfolio_items', 'reviews', 'user', 'verbose_name', 'verbose_name_plural', 'الحرفي', 'الحرفيين', 'مراجعات الحرفيين', 'مراجعة الحرفي', 'معارض الحرفيين', 'معرض الحرفي']

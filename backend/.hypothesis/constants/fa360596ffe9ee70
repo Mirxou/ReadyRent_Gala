@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\artisans\migrations\0002_initial.py
+# hypothesis_version: 6.151.6
+
+['0001_initial', 'artisan', 'artisan_profile', 'artisan_reviews', 'artisanportfolio', 'artisanreview', 'artisans', 'artisans.artisan', 'city', 'is_active', 'portfolio_items', 'reviews', 'specialty', 'user']

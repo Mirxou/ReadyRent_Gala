@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\bookings\migrations\0010_verticalreadinessaudit.py
+# hypothesis_version: 6.151.6
+
+['Audit Notes', 'Guardian Role', 'ID', 'Legal Guardian', 'Sovereign Sign-off', 'Technical Guardian', 'Vertical Slug', 'bookings', 'guardian', 'id', 'legal', 'notes', 'role', 'signed_at', 'sovereign_signoffs', 'technical', 'unique_together', 'verbose_name', 'verbose_name_plural', 'vertical_slug']

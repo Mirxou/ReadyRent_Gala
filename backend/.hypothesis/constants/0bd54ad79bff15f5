@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\reviews\serializers.py
+# hypothesis_version: 6.151.6
+
+['alt_text', 'booking', 'booking_id', 'comment', 'completed', 'created_at', 'helpful_count', 'id', 'image', 'images', 'is_verified_purchase', 'order', 'product', 'product_id', 'rating', 'request', 'sentiment_label', 'sentiment_score', 'status', 'title', 'updated_at', 'user', 'user.email', 'user.username', 'user_email', 'user_username']

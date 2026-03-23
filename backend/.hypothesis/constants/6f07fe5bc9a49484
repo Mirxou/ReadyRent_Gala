@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\disputes\migrations\0005_appeal.py
+# hypothesis_version: 6.151.6
+
+[100, '-created_at', '0004_judgment', 'Appeal', 'Bond Reference', 'ID', 'Pending Review', 'appeal', 'appeals_filed', 'appeals_reviewed', 'appellant', 'bond_reference', 'created at', 'created_at', 'disputes', 'disputes.judgment', 'granted', 'high court judge', 'id', 'judgment', 'ordering', 'pending', 'reason', 'reason for appeal', 'rejected', 'review notes', 'review_notes', 'reviewed_by', 'status', 'updated at', 'updated_at', 'verbose_name', 'verbose_name_plural', 'الاستئناف', 'الاستئنافات']

@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\standard_core\managers.py
+# hypothesis_version: 6.151.6
+
+['is_active', 'is_staff', 'is_superuser', 'is_verified']

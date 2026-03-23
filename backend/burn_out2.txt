@@ -1,0 +1,107 @@
+DEBUG: sys.argv = ['manage.py', 'shell']
+{"event": "Patched drf_spectacular._map_model_field to handle gettext_lazy verbose_name"}
+{"event": "Patched drf_spectacular._resolve_path_parameters"}
+Python 3.13.9 (tags/v3.13.9:8183fa5, Oct 14 2025, 14:09:13) [MSC v.1944 64 bit (AMD64)] on win32
+Type "help", "copyright", "credits" or "license" for more information.
+(InteractiveConsole)
+127 objects imported automatically (use -v 2 for details).
+
+>>> >>> >>> >>> ============================================================
+>>>   PHASE 16C.4b — THE FINAL BURN
+>>> ============================================================
+>>> >>> ... ... ... ... ... ... ... ... Traceback (most recent call last):
+  File "C:\Users\pc\Desktop\ReadyRent_Gala\backend\venv\Lib\site-packages\django\db\backends\base\base.py", line 279, in ensure_connection
+    self.connect()
+    ~~~~~~~~~~~~^^
+  File "C:\Users\pc\Desktop\ReadyRent_Gala\backend\venv\Lib\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\pc\Desktop\ReadyRent_Gala\backend\venv\Lib\site-packages\django\db\backends\base\base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+                      ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\pc\Desktop\ReadyRent_Gala\backend\venv\Lib\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\pc\Desktop\ReadyRent_Gala\backend\venv\Lib\site-packages\django\db\backends\postgresql\base.py", line 332, in get_new_connection
+    connection = self.Database.connect(**conn_params)
+  File "C:\Users\pc\Desktop\ReadyRent_Gala\backend\venv\Lib\site-packages\psycopg2\__init__.py", line 135, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+psycopg2.OperationalError: connection to server at "aws-1-eu-central-1.pooler.supabase.com" (3.65.151.229), port 6543 failed: FATAL:  Tenant or user not found
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "<console>", line 1, in <module>
+  File "C:\Users\pc\Desktop\ReadyRent_Gala\backend\venv\Lib\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\pc\Desktop\ReadyRent_Gala\backend\venv\Lib\site-packages\django\db\backends\base\base.py", line 320, in cursor
+    return self._cursor()
+           ~~~~~~~~~~~~^^
+  File "C:\Users\pc\Desktop\ReadyRent_Gala\backend\venv\Lib\site-packages\django\db\backends\base\base.py", line 296, in _cursor
+    self.ensure_connection()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\pc\Desktop\ReadyRent_Gala\backend\venv\Lib\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\pc\Desktop\ReadyRent_Gala\backend\venv\Lib\site-packages\django\db\backends\base\base.py", line 278, in ensure_connection
+    with self.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\pc\Desktop\ReadyRent_Gala\backend\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\pc\Desktop\ReadyRent_Gala\backend\venv\Lib\site-packages\django\db\backends\base\base.py", line 279, in ensure_connection
+    self.connect()
+    ~~~~~~~~~~~~^^
+  File "C:\Users\pc\Desktop\ReadyRent_Gala\backend\venv\Lib\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\pc\Desktop\ReadyRent_Gala\backend\venv\Lib\site-packages\django\db\backends\base\base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+                      ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\pc\Desktop\ReadyRent_Gala\backend\venv\Lib\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\pc\Desktop\ReadyRent_Gala\backend\venv\Lib\site-packages\django\db\backends\postgresql\base.py", line 332, in get_new_connection
+    connection = self.Database.connect(**conn_params)
+  File "C:\Users\pc\Desktop\ReadyRent_Gala\backend\venv\Lib\site-packages\psycopg2\__init__.py", line 135, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+django.db.utils.OperationalError: connection to server at "aws-1-eu-central-1.pooler.supabase.com" (3.65.151.229), port 6543 failed: FATAL:  Tenant or user not found
+
+>>>   File "<console>", line 1
+    cursor.execute("""
+IndentationError: unexpected indent
+>>>   File "<console>", line 1
+    UPDATE users_user 
+IndentationError: unexpected indent
+>>>   File "<console>", line 1
+    SET email_plaintext_backup = NULL 
+IndentationError: unexpected indent
+>>>   File "<console>", line 1
+    WHERE email_plaintext_backup IS NOT NULL
+IndentationError: unexpected indent
+>>>   File "<console>", line 1
+    """)
+IndentationError: unexpected indent
+>>>   File "<console>", line 1
+    wiped_count = cursor.rowcount
+IndentationError: unexpected indent
+>>>   File "<console>", line 1
+    print(f"✅ [2] Plaintext wiped. Rows updated: {wiped_count}")
+IndentationError: unexpected indent
+>>> >>>   File "<console>", line 1
+    cursor.execute("SELECT COUNT(*) FROM users_user WHERE email_plaintext_backup IS NOT NULL")
+IndentationError: unexpected indent
+>>>   File "<console>", line 1
+    remaining = cursor.fetchone()[0]
+IndentationError: unexpected indent
+>>> >>>   File "<console>", line 1
+    if remaining > 0:
+IndentationError: unexpected indent
+>>>   File "<console>", line 1
+    print(f"❌ STOP: Wipe failed! {remaining} rows still have plaintext.")
+IndentationError: unexpected indent
+>>>   File "<console>", line 1
+    sys.exit(1)
+IndentationError: unexpected indent
+>>>   File "<console>", line 1
+    print("✅ [3] Wipe verified: 0 rows have plaintext.")
+IndentationError: unexpected indent
+>>> >>> ============================================================
+>>>   Ready for final migration (RemoveField).
+>>> 
+now exiting InteractiveConsole...

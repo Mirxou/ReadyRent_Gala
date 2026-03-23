@@ -1,0 +1,8 @@
+DEBUG: sys.argv = ['manage.py', 'migrate', 'users']
+{"event": "Patched drf_spectacular._map_model_field to handle gettext_lazy verbose_name"}
+{"event": "Patched drf_spectacular._resolve_path_parameters"}
+{"event": "DeepFace not found. Identity verification will be skipped."}
+Operations to perform:
+  Apply all migrations: users
+Running migrations:
+  Applying users.0010_add_email_encrypted_shadow... OK

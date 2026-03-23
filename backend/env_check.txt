@@ -1,0 +1,5 @@
+DEBUG: sys.argv = ['manage.py', 'check']
+{"event": "Patched drf_spectacular._map_model_field to handle gettext_lazy verbose_name"}
+{"event": "Patched drf_spectacular._resolve_path_parameters"}
+{"event": "DeepFace not found. Identity verification will be skipped."}
+System check identified no issues (0 silenced).

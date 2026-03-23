@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\products\tests.py
+# hypothesis_version: 6.151.6
+
+[1000.0, 500, '#FF0000', 'Black', 'Blue', 'Delete Test Dress', 'Dresses', 'Green', 'M', 'Platform Dress', 'Red', 'S', 'Test', 'Test Dress', 'Test category', 'Test description', 'User Dress', 'available', 'delete-test-dress', 'delete@test.com', 'dresses', 'owner', 'owner@test.com', 'password', 'platform-dress', 'test-dress', 'todelete', 'user-dress', 'فساتين', 'فستان تجريبي', 'فستان للحذف', 'فستان مستخدم', 'فستان منصة', 'وصف تجريبي']

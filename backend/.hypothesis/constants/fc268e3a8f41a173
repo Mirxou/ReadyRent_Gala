@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\disputes\migrations\0004_judgment.py
+# hypothesis_version: 6.151.6
+
+['-created_at', 'Awarded Amount', 'Dismissed', 'Favor Owner', 'Favor Tenant', 'Final (Enforceable)', 'ID', 'Judgment', 'Overturned (Void)', 'Split Decision', 'awarded_amount', 'created at', 'created_at', 'dismissed', 'dispute', 'disputes', 'disputes.dispute', 'favor_owner', 'favor_tenant', 'final', 'finalized at', 'finalized_at', 'id', 'judge', 'judgments', 'judgments_authored', 'ordering', 'overturned', 'provisional', 'ruling reasoning', 'ruling_text', 'split', 'status', 'verbose_name', 'verbose_name_plural', 'verdict', 'الأحكام', 'الحكم']

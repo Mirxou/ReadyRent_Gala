@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\bookings\migrations\0007_booking_idempotency_key.py
+# hypothesis_version: 6.151.6
+
+['booking', 'bookings', 'idempotency_key']

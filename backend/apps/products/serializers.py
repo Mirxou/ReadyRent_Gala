@@ -86,6 +86,7 @@ class ProductImageSerializer(serializers.ModelSerializer):
 
 class ProductSerializer(serializers.ModelSerializer):
     """Serializer for Product"""
+    owner_id = serializers.IntegerField(read_only=True)
     category = CategorySerializer(read_only=True)
     category_id = serializers.IntegerField(write_only=True)
     images = ProductImageSerializer(many=True, read_only=True)
@@ -93,34 +94,70 @@ class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = [
-            'id', 'name', 'name_ar', 'slug', 'description', 'description_ar',
-            'category', 'category_id', 'price_per_day', 'size', 'color', 'color_hex',
-            'status', 'is_featured', 'rating', 'total_rentals', 'images',
-            'created_at', 'updated_at'
+            'id', 'name', 'price_per_day', 'owner_id',
+            'name_ar', 'slug', 'description', 'description_ar',
+            'category', 'category_id', 'size', 'color', 'color_hex',
+            'status', 'is_featured', 'rating', 'total_rentals', 
+            'wilaya', 'commune', 'location_lat', 'location_lng', 
+            'delivery_policy', 'delivery_options',
+            'images', 'created_at', 'updated_at'
         ]
         read_only_fields = ['slug', 'rating', 'total_rentals', 'created_at', 'updated_at']
 
 
 class ProductListSerializer(serializers.ModelSerializer):
     """Lightweight serializer for product lists"""
+    owner_id = serializers.IntegerField(read_only=True)
     category = CategorySerializer(read_only=True)
     primary_image = serializers.SerializerMethodField()
     
     class Meta:
         model = Product
         fields = [
-            'id', 'name', 'name_ar', 'slug', 'category', 'price_per_day',
-            'size', 'color', 'status', 'is_featured', 'rating', 'primary_image'
+            'id', 'name', 'name_ar', 'slug', 'category', 'price_per_day', 'owner_id',
+            'size', 'color', 'status', 'is_featured', 'rating', 'wilaya', 'commune', 'primary_image'
         ]
     
     def get_primary_image(self, obj):
-        primary = obj.images.filter(is_primary=True).first()
-        if primary:
-            request = self.context.get('request')
-            if request:
-                return request.build_absolute_uri(primary.image.url)
-            return primary.image.url
+        # OPTIMIZED: Use prefetched images to avoid N+1 query
+        # Assumes queryset uses .prefetch_related('images')
+        images = getattr(obj, '_prefetched_objects_cache', {}).get('images')
+        if images is not None:
+            # Use prefetched images
+            for image in images:
+                if image.is_primary:
+                    request = self.context.get('request')
+                    if request:
+                        return request.build_absolute_uri(image.image.url)
+                    return image.image.url
+        else:
+            # Fallback to query if not prefetched
+            primary = obj.images.filter(is_primary=True).first()
+            if primary:
+                request = self.context.get('request')
+                if request:
+                    return request.build_absolute_uri(primary.image.url)
+                return primary.image.url
         return None
+
+
+class ProductUltraLightSerializer(serializers.ModelSerializer):
+    """
+    ULTRA-LIGHT serializer for maximum performance.
+    No nested serializers, no SerializerMethodFields, just flat data.
+    Use this for high-traffic list endpoints.
+    """
+    category_id = serializers.IntegerField(source='category.id', read_only=True)
+    category_name = serializers.CharField(source='category.name_ar', read_only=True)
+    
+    class Meta:
+        model = Product
+        fields = [
+            'id', 'name', 'name_ar', 'slug', 
+            'category_id', 'category_name',
+            'price_per_day', 'status', 'is_featured', 
+            'rating', 'wilaya'
+        ]
 
 
 class ProductVariantSerializer(serializers.ModelSerializer):

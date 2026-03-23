@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\chatbot\serializers.py
+# hypothesis_version: 6.151.6
+
+['confidence', 'content', 'context_data', 'created_at', 'description', 'escalated_at', 'escalated_to', 'escalated_to.email', 'escalated_to_email', 'extracted_entities', 'id', 'intent_type', 'is_active', 'key', 'language', 'message', 'message_count', 'messages', 'metadata', 'model_used', 'resolved_at', 'role', 'session_id', 'started_at', 'status', 'tokens_used', 'updated_at', 'user', 'user.email', 'user_email', 'value']

@@ -8,7 +8,7 @@ from .views import (
     AdminProductManagementViewSet, AdminCategoryManagementViewSet,
     search_suggestions, matching_accessories, product_metadata,
     ProductVariantListView, ProductVariantDetailView, AdminProductVariantViewSet,
-    WishlistViewSet, product_recommendations
+    WishlistViewSet, product_recommendations, ProductViewSet, ProductFastListView
 )
 
 app_name = 'products'
@@ -24,12 +24,14 @@ user_router = DefaultRouter()
 user_router.register(r'wishlist', WishlistViewSet, basename='wishlist')
 
 urlpatterns = [
+    path('community/create/', ProductViewSet.as_view({'post': 'create_community_product'}), name='community-product-create'),
     path('categories/', CategoryListView.as_view(), name='category-list'),
     path('metadata/', product_metadata, name='product-metadata'),
     path('search-suggestions/', search_suggestions, name='search-suggestions'),
     path('<int:pk>/matching-accessories/', matching_accessories, name='matching-accessories'),
     path('<int:product_id>/variants/', ProductVariantListView.as_view(), name='variant-list'),
     path('variants/<int:pk>/', ProductVariantDetailView.as_view(), name='variant-detail'),
+    path('fast/', ProductFastListView.as_view(), name='product-fast-list'),  # Performance test endpoint
     path('', ProductListView.as_view(), name='product-list'),
     path('<slug:slug>/', ProductDetailView.as_view(), name='product-detail'),
     path('<int:pk>/recommendations/', product_recommendations, name='product-recommendations'),

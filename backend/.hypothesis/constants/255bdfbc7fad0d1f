@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\products\migrations\0003_productvariant_wishlist_alter_category_options_and_more.py
+# hypothesis_version: 6.151.6
+
+[100, '-created_at', '0002_add_xxxl_size', 'ID', 'L', 'M', 'ProductVariant', 'S', 'SKU', 'Wishlist', 'XL', 'XS', 'XXL', 'XXXL', 'active', 'category', 'color', 'color hex', 'color_hex', 'created at', 'created_at', 'e.g., "Size M - Red"', 'id', 'images', 'is_active', 'name', 'name_ar', 'order', 'ordering', 'owned_products', 'owner', 'price per day', 'price_per_day', 'product', 'productimage', 'products', 'products.category', 'products.product', 'productvariant', 'rating', 'size', 'sku', 'status', 'style', 'total_rentals', 'updated at', 'updated_at', 'user', 'variants', 'verbose_name', 'verbose_name_plural', 'wishlist', 'wishlist_items', 'الفئات', 'الفئة', 'المالك', 'المنتج', 'المنتجات', 'صور المنتجات', 'صورة المنتج', 'عناصر قائمة الأمنيات', 'عنصر قائمة الأمنيات', 'متغير المنتج', 'متغيرات المنتجات']

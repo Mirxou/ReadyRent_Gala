@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\social\migrations\0002_vouch_relationship_vouch_trust_level.py
+# hypothesis_version: 6.151.6
+
+['0001_initial', 'Colleague', 'Community Member', 'Family', 'Friend', 'I guarantee for them', 'I highly trust them', 'I know them', 'I trust them', 'Neighbor', 'colleague', 'community', 'family', 'friend', 'neighbor', 'relationship', 'social', 'trust level', 'trust_level', 'vouch']

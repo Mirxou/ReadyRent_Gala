@@ -1,4 +1,4 @@
-# Script to start ngrok tunnel for ReadyRent.Gala
+# Script to start ngrok tunnel for STANDARD.Rent
 # Make sure ngrok is installed: https://ngrok.com/download
 
 Write-Host "Starting ngrok tunnel for Django backend..." -ForegroundColor Cyan

@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\maintenance\admin.py
+# hypothesis_version: 6.151.6
+
+['Assignment', 'Details', 'Product', 'Schedule', 'Timestamps', 'actual_end', 'actual_start', 'assigned_to', 'blocks_bookings', 'cost', 'created_at', 'duration_hours', 'duration_minutes', 'end_datetime', 'fields', 'is_active', 'is_overdue', 'maintenance_record', 'maintenance_type', 'notes', 'product', 'product__name', 'product__name_ar', 'related_booking', 'scheduled_end', 'scheduled_start', 'start_datetime', 'status', 'updated_at']

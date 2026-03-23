@@ -1,4 +1,4 @@
-# المهام المتبقية - ReadyRent.Gala
+# المهام المتبقية - STANDARD.Rent
 
 **التاريخ**: يناير 2026  
 **آخر تحديث**: بعد المراجعة الشاملة
@@ -191,8 +191,8 @@
      with:
        push: true
        tags: |
-         docker.io/username/readyrent-backend:${{ github.sha }}
-         docker.io/username/readyrent-frontend:${{ github.sha }}
+         docker.io/username/standard-backend:${{ github.sha }}
+         docker.io/username/standard-frontend:${{ github.sha }}
    ```
 
 **خطة العمل:**
@@ -214,7 +214,7 @@
 - [ ] خادم Staging (VPS, Railway, Render, أو خادم خاص)
 - [ ] قاعدة بيانات منفصلة لـ Staging
 - [ ] Redis منفصل لـ Staging
-- [ ] Domain name لـ Staging (staging.readyrent.gala)
+- [ ] Domain name لـ Staging (staging.standard.gala)
 
 #### 2. Configuration
 - [x] ملف `.env.staging` للـ Backend (Created `.env.staging.example`)
@@ -307,5 +307,6 @@
 
 ---
 
-**© 2026 ReadyRent.Gala. جميع الحقوق محفوظة.**
+**© 2026 STANDARD.Rent. جميع الحقوق محفوظة.**
+
 

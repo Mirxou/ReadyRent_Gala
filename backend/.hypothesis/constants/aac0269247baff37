@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\disputes\signals.py
+# hypothesis_version: 6.151.6
+
+['BOOKING_CREATED', 'DISPUTE_FILED', 'N/A', 'No precedents', 'State Change', 'admissibility', 'booking_id', 'changes', 'consistency_score', 'dispute_id', 'final', 'message', 'policy_version', 'priority', 'recommendation', 'risk_score_snapshot', 'status', 'title', 'total_price']

@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\disputes\migrations\0006_appeal_is_fund_frozen.py
+# hypothesis_version: 6.151.6
+
+['0005_appeal', 'Funds Frozen?', 'appeal', 'disputes', 'is_fund_frozen']

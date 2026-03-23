@@ -13,10 +13,15 @@ from drf_spectacular.views import (
 )
 from core.views import health_check
 from django.http import JsonResponse
+from apps.disputes.views import (
+    initiate_dispute, issue_verdict, get_dispute_status,
+    appeal_verdict, close_dispute, TribunalCaseDetailView,
+    PublicLedgerListView, PublicMetricsView
+)
 
 # Admin site headers and titles (translated)
-admin.site.site_header = _('إدارة ReadyRent.Gala')
-admin.site.site_title = _('إدارة ReadyRent.Gala')
+admin.site.site_header = _('إدارة STANDARD.Rent')
+admin.site.site_title = _('إدارة STANDARD.Rent')
 admin.site.index_title = _('لوحة التحكم')
 
 def root_view(request):
@@ -74,6 +79,20 @@ urlpatterns = [
     path('api/branches/', include('apps.branches.urls')),
     path('api/cms/', include('apps.cms.urls')),
     path('api/payments/', include('apps.payments.urls')),
+    
+    # Sovereign API Protocol (Phase 31/34)
+    path('api/v1/judicial/disputes/initiate/', initiate_dispute, name='sovereign-dispute-initiate'),
+    path('api/v1/judicial/disputes/<int:dispute_id>/verdict/', issue_verdict, name='sovereign-dispute-verdict'),
+    path('api/v1/judicial/disputes/<int:dispute_id>/status/', get_dispute_status, name='sovereign-dispute-status'),
+    path('api/v1/judicial/disputes/<int:dispute_id>/appeal/', appeal_verdict, name='sovereign-dispute-appeal'),
+    path('api/v1/judicial/disputes/<int:dispute_id>/close/', close_dispute, name='sovereign-dispute-close'),
+    
+    # Internal Tribunal Portal (Phase 36)
+    path('api/v1/tribunal/cases/<int:dispute_id>/', TribunalCaseDetailView.as_view(), name='tribunal-case-detail'),
+    
+    # Public Ledger & Transparency (Phase 38)
+    path('api/v1/public/ledger/', PublicLedgerListView.as_view(), name='public-ledger'),
+    path('api/v1/public/metrics/', PublicMetricsView.as_view(), name='public-metrics'),
 ]
 
 # Serve media files in development

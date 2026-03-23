@@ -54,7 +54,8 @@ class CartItemModelTest(TestCase):
             category=self.category,
             price_per_day=1000.00,
             size='M',
-            color='Red'
+            color='Red',
+            owner=self.user
         )
         
         self.start_date = timezone.now().date() + timedelta(days=1)
@@ -98,7 +99,8 @@ class BookingModelTest(TestCase):
             category=self.category,
             price_per_day=1000.00,
             size='M',
-            color='Red'
+            color='Red',
+            owner=self.user
         )
         
         self.start_date = timezone.now().date() + timedelta(days=1)

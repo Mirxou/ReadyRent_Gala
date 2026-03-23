@@ -1,0 +1,8 @@
+DEBUG: sys.argv = ['manage.py', 'migrate', 'users', '0012_email_plaintext_backup_nullable']
+{"event": "Patched drf_spectacular._map_model_field to handle gettext_lazy verbose_name"}
+{"event": "Patched drf_spectacular._resolve_path_parameters"}
+{"event": "DeepFace not found. Identity verification will be skipped."}
+Operations to perform:
+  Target specific migration: 0012_email_plaintext_backup_nullable, from users
+Running migrations:
+  Applying users.0012_email_plaintext_backup_nullable... OK

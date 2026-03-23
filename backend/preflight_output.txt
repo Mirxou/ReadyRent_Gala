@@ -1,0 +1,29 @@
+DEBUG: sys.argv = ['scripts\\preflight_16b.py']
+{"event": "Patched drf_spectacular._map_model_field to handle gettext_lazy verbose_name"}
+{"event": "Patched drf_spectacular._resolve_path_parameters"}
+
+============================================================
+  PHASE 16B PRE-FLIGHT CHECKS
+============================================================
+
+[CHECK 1] Existing User Hash State
+  Total users:          234
+  email_hash computed:  0 (0.0%)
+  email_hash missing:   234
+  phone_hash computed:  0
+
+[CHECK 2] Duplicate email_hash Detection
+  ✅ No duplicate email_hash values — canonicalization is clean
+
+[CHECK 3] Sample Row (Before State)
+  id:         1
+  email:      admin@readyrent.gala
+  email_hash: NULL
+  phone:      
+  phone_hash: NULL
+  created_at: 2026-02-03 04:55:00.742937+00:00
+
+============================================================
+  PRE-FLIGHT COMPLETE
+============================================================
+

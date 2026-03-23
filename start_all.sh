@@ -1,9 +1,9 @@
 #!/bin/bash
 # Script to start ngrok, Django backend, and Next.js frontend
-# For ReadyRent.Gala project
+# For STANDARD.Rent project
 
 echo "========================================"
-echo "  ReadyRent.Gala - Development Server"
+echo "  STANDARD.Rent - Development Server"
 echo "========================================"
 echo ""
 

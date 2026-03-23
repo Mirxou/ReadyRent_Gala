@@ -7,7 +7,7 @@ import { Footer } from '@/components/footer'
 describe('Footer Component', () => {
   it('renders footer with copyright', () => {
     render(<Footer />)
-    expect(screen.getByText(/readyrent.gala/i)).toBeInTheDocument()
+    expect(screen.getByText(/standard.rent/i)).toBeInTheDocument()
     expect(screen.getByText(/2026/i)).toBeInTheDocument()
   })
 

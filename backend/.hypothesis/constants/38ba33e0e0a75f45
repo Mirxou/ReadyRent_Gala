@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\standard_core\migrations\0002_asset_alter_user_options_fashionspec_asset_owner.py
+# hypothesis_version: 6.151.6
+
+[255, '0001_initial', 'ACTIVE', 'ARCHIVED', 'Active', 'Archived', 'Asset', 'DRAFT', 'DZD', 'Draft', 'EQUIPMENT', 'Equipment', 'FASHION', 'Fashion & Events', 'FashionSpec', 'GENERIC', 'MAINTENANCE', 'Maintenance', 'Other', 'REAL_ESTATE', 'RENTED', 'Real Estate', 'Rented', 'VEHICLE', 'Vehicles', 'asset', 'assets', 'brand', 'color_hex', 'created_at', 'currency', 'daily_price', 'description', 'id', 'material', 'owner', 'size', 'slug', 'standard_core', 'standard_core.asset', 'standard_core.user', 'status', 'title', 'updated_at', 'user', 'vertical_type']

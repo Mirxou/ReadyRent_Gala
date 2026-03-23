@@ -1,23 +1,24 @@
-# ReadyRent.Gala - منصة كراء الفساتين ومستلزمات المناسبات
+# STANDARD.Rent - معيار الفخامة
 
-منصة متكاملة لكراء الفساتين ومستلزمات المناسبات في قسنطينة والجزائر.
+المنصة الأولى لتداول الأزياء الفاخرة في الجزائر. نظام بيئي مجتمعي آمن.
 
-> **المقياس | شعارنا للأبد**  
-> Standard | Our Motto Forever
+> **المعيار | شعارنا للأبد**  
+> STANDARD | Our Motto Forever
 
 ## الرؤية
 
-أن نكون **الخيار الأول في كراء أزياء ومستلزمات المناسبات بمعايير عالية** تواكب تطلعات عام 2026 وما بعده.
+أن نكون **المعيار (STANDARD)** في كراء وتداول الأصول الفاخرة، وليس مجرد متجر. نحن نبني اقتصاداً تشاركياً (Sharing Economy) قائماً على الثقة.
 
 ## الرسالة
 
-توفير **تجربة كراء راقية، مرنة، وآمنة**، تضع الأناقة في متناول الجميع لكل مناسبة.
+تحويل الأصول الراكدة (الفساتين الفاخرة) إلى استثمارات، وتمكين الأفراد من الوصول إلى الفخامة بمعايير عالمية.
 
 ## البنية التقنية
 
 - **Backend**: Django 5.0+ (Python) مع Django REST Framework
 - **Frontend**: Next.js 16+ (React + TypeScript) مع App Router
-- **Database**: PostgreSQL + Redis
+- **Database**: PostgreSQL (Supabase) + Redis
+- **Identity**: DeepFace AI & Custom Verification
 - **Deployment**: Docker, Vercel (Frontend), Railway/Render (Backend)
 
 ## البدء السريع
@@ -85,7 +86,7 @@ npm run dev
 ## هيكل المشروع
 
 ```text
-ReadyRent_Gala/
+STANDARD_Rent/
 ├── backend/          # Django Backend
 │   ├── apps/        # التطبيقات
 │   ├── config/      # إعدادات Django
@@ -102,9 +103,9 @@ ReadyRent_Gala/
 
 ### Backend Apps (21 تطبيق)
 
-1. **users** - إدارة المستخدمين والمصادقة
+1. **users** - إدارة المستخدمين والمصادقة (Identity Shield)
 2. **products** - كتالوج المنتجات
-3. **bookings** - نظام الحجز
+3. **bookings** - نظام الحجز والعقود الذكية
 4. **inventory** - إدارة المخزون
 5. **maintenance** - الصيانة والتنظيف
 6. **returns** - الإرجاع والاسترداد
@@ -119,7 +120,7 @@ ReadyRent_Gala/
 15. **analytics** - التحليلات والتقارير
 16. **notifications** - نظام الإشعارات
 17. **reviews** - التقييمات والمراجعات
-18. **disputes** - إدارة النزاعات
+18. **disputes** - إدارة النزاعات (AI Jury)
 19. **vendors** - إدارة الموردين
 20. **branches** - إدارة الفروع المتعددة
 21. **cms** - إدارة المحتوى (الصفحات، المدونة، الشعارات، FAQ)
@@ -138,7 +139,7 @@ ReadyRent_Gala/
 ```env
 SECRET_KEY=your-secret-key
 DEBUG=True
-DB_NAME=readyrent_gala
+DB_NAME=standard_rent
 DB_USER=postgres
 DB_PASSWORD=postgres
 DB_HOST=localhost
@@ -164,7 +165,7 @@ NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your-google-maps-key
 - ✅ نظام تعقيم وتتبع النظافة
 - ✅ دليل المناسبات المحلية
 - ✅ قسم الحرفيات المحليات
-- ✅ نظام KYC/التحقق من الهوية
+- ✅ نظام KYC/التحقق من الهوية ( الهوية الرقمية)
 - ✅ نظام تقييم الأضرار والتوثيق
 - ✅ نظام إدارة النزاعات
 - ✅ نظام التأمين المتقدم
@@ -195,4 +196,4 @@ NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your-google-maps-key
 
 ## الترخيص
 
-جميع الحقوق محفوظة © 2026 ReadyRent.Gala
+جميع الحقوق محفوظة © 2026 STANDARD.Rent

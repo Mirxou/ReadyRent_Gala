@@ -1,0 +1,48 @@
+# ============================================
+# RENTILY MULTI-STAGE PRODUCTION DOCKERFILE
+# ============================================
+
+# STAGE 1: Builder
+FROM python:3.11-slim-bookworm as builder
+
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    libpq-dev \
+    gcc \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+RUN pip wheel --no-cache-dir --no-deps --wheel-dir /app/wheels -r requirements.txt
+
+
+# STAGE 2: Run
+FROM python:3.11-slim-bookworm
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq5 \
+    curl \
+    netcat-traditional \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /app/wheels /wheels
+COPY --from=builder /app/requirements.txt .
+
+RUN pip install --no-cache /wheels/*
+
+COPY . .
+
+RUN chmod +x scripts/entrypoint.sh
+
+# Security: Run as non-privileged user
+RUN useradd -m rentily && chown -R rentily:rentily /app
+USER rentily
+
+ENTRYPOINT ["scripts/entrypoint.sh"]

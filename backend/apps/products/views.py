@@ -5,6 +5,7 @@ from rest_framework import generics, filters, viewsets, status
 from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAdminUser
+from django.core.exceptions import PermissionDenied
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Q, F, Max, Count
 from django.db.models.functions import Coalesce
@@ -19,10 +20,12 @@ from core.throttling import ProductSearchThrottle
 from .models import Category, Product, ProductVariant, Wishlist
 from .serializers import (
     CategorySerializer, ProductSerializer, ProductListSerializer,
-    ProductVariantSerializer, ProductVariantListSerializer, WishlistSerializer
+    ProductVariantSerializer, ProductVariantListSerializer, WishlistSerializer,
+    ProductUltraLightSerializer
 )
-from .services import ColorMatchingService, RecommendationService
+from .services import ColorMatchingService, RecommendationService, ProductService
 from rest_framework.permissions import IsAuthenticated
+from .permissions import IsOwnerOrReadOnly
 
 
 @method_decorator(cache_page(60 * 15), name='dispatch')  # Cache for 15 minutes
@@ -39,6 +42,21 @@ class CategoryListView(generics.ListAPIView):
             queryset = Category.objects.filter(is_active=True)
             cache.set(cache_key, queryset, 60 * 15)  # Cache for 15 minutes
         return queryset
+
+
+class ProductFastListView(generics.ListAPIView):
+    """
+    ULTRA-FAST product list - for performance comparison.
+    No filters, no search, minimal serializer, maximum speed.
+    """
+    queryset = Product.objects.select_related('category').only(
+        'id', 'name', 'name_ar', 'slug', 'price_per_day', 
+        'status', 'is_featured', 'rating', 'wilaya',
+        'category__id', 'category__name_ar'
+    )
+    serializer_class = ProductUltraLightSerializer
+    permission_classes = [AllowAny]
+    # No filter_backends, no throttle, just raw speed
 
 
 @method_decorator(cache_page(60 * 5), name='dispatch')  # Cache for 5 minutes
@@ -274,6 +292,54 @@ class ProductDetailView(generics.RetrieveAPIView):
         response = super().dispatch(*args, **kwargs)
         response['Cache-Control'] = 'public, max-age=600'  # 10 minutes
         return response
+
+
+class ProductViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for public product actions (P2P)
+    """
+    serializer_class = ProductSerializer
+    queryset = Product.objects.all()
+    permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
+
+    def perform_create(self, serializer):
+        """Auto-assign owner on creation"""
+        serializer.save(owner=self.request.user)
+    
+    @action(detail=False, methods=['post'], url_path='community/create', permission_classes=[IsAuthenticated])
+    def create_community_product(self, request):
+        """
+        Custom endpoint for creating community products.
+        Delegates to Intelligent Trust Gateway (ProductService).
+        """
+        # Data from frontend (JSON)
+        product_data = request.data
+        
+        try:
+            # Delegate to Intelligent Logic
+            new_product = ProductService.create_community_product(
+                user=request.user, 
+                product_data=product_data
+            )
+            
+            # Return product with status
+            serializer = ProductSerializer(new_product)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            
+        except PermissionDenied as e:
+            # Trust Gateway Rejection (Bad Actor)
+            return Response(
+                {"detail": str(e)}, 
+                status=status.HTTP_403_FORBIDDEN
+            )
+        except Exception as e:
+            # System errors
+            import traceback
+            traceback.print_exc()
+            return Response(
+                {"detail": "حدث خطأ تقني أثناء معالجة الطلب.", "error": str(e)}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 # Admin Views

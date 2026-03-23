@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\payments\migrations\0002_wallet_escrowhold_wallettransaction.py
+# hypothesis_version: 6.151.6
+
+[0.0, 100, 255, '-created_at', '0001_initial', 'Balance', 'DZD', 'Deposit', 'Disputed', 'Escrow Lock', 'Escrow Release', 'EscrowHold', 'Held', 'ID', 'Payment', 'Penalty', 'Refund', 'Refunded', 'Released', 'Wallet', 'WalletTransaction', 'Withdrawal', 'amount', 'balance', 'balance_after', 'booking', 'bookings', 'bookings.booking', 'created_at', 'currency', 'deposit', 'description', 'disputed', 'escrow_hold', 'escrow_holds', 'escrow_lock', 'escrow_release', 'frozen_reason', 'held', 'id', 'is_frozen', 'ordering', 'payment', 'payments', 'payments.wallet', 'penalty', 'reference_id', 'refund', 'refunded', 'released', 'released_at', 'status', 'transaction_type', 'transactions', 'updated_at', 'user', 'wallet', 'withdrawal']

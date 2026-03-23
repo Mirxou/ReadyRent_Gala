@@ -6,6 +6,7 @@ from .views import (
     AdminDashboardStatsView, AdminRevenueView, AdminSalesReportView,
     ForecastListView, ForecastDetailView, GenerateForecastView,
     HighDemandProductsView, LowStockAlertsView, TrendAnalysisView,
+    ProductActivityView,
 )
 
 router = DefaultRouter()
@@ -27,5 +28,8 @@ urlpatterns = [
     path('forecasts/high-demand/', HighDemandProductsView.as_view(), name='high-demand-products'),
     path('forecasts/low-stock-alerts/', LowStockAlertsView.as_view(), name='low-stock-alerts'),
     path('forecasts/trends/', TrendAnalysisView.as_view(), name='trend-analysis'),
+    
+    # Live Trust Counters
+    path('live/activity/<int:product_id>/', ProductActivityView.as_view(), name='live-product-activity'),
 ]
 

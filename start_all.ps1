@@ -1,10 +1,10 @@
 # Script to start ngrok, Django backend, and Next.js frontend
-# For ReadyRent.Gala project
+# For STANDARD.Rent project
 
 $ErrorActionPreference = "Continue"
 
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "  ReadyRent.Gala - Development Server" -ForegroundColor Cyan
+Write-Host "  STANDARD.Rent - Development Server" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 
@@ -17,7 +17,8 @@ try {
     $null = ngrok version 2>&1
     $ngrokInstalled = $true
     Write-Host "✅ ngrok is installed" -ForegroundColor Green
-} catch {
+}
+catch {
     Write-Host "⚠️  ngrok is not installed" -ForegroundColor Yellow
     Write-Host "   Install from: https://ngrok.com/download" -ForegroundColor Gray
 }
@@ -26,7 +27,8 @@ try {
 try {
     $pythonVersion = python --version 2>&1
     Write-Host "✅ Python found: $pythonVersion" -ForegroundColor Green
-} catch {
+}
+catch {
     Write-Host "❌ Python is not installed!" -ForegroundColor Red
     exit 1
 }
@@ -35,7 +37,8 @@ try {
 try {
     $nodeVersion = node --version 2>&1
     Write-Host "✅ Node.js found: $nodeVersion" -ForegroundColor Green
-} catch {
+}
+catch {
     Write-Host "❌ Node.js is not installed!" -ForegroundColor Red
     exit 1
 }
@@ -50,7 +53,8 @@ $backendProcess = Start-Process -FilePath "python" -ArgumentList "manage.py", "r
 Start-Sleep -Seconds 3
 if ($backendProcess -and -not $backendProcess.HasExited) {
     Write-Host "   ✅ Backend started (PID: $($backendProcess.Id))" -ForegroundColor Green
-} else {
+}
+else {
     Write-Host "   ⚠️  Backend may have issues starting" -ForegroundColor Yellow
 }
 
@@ -60,7 +64,8 @@ $frontendProcess = Start-Process -FilePath "npm" -ArgumentList "run", "dev" -Wor
 Start-Sleep -Seconds 3
 if ($frontendProcess -and -not $frontendProcess.HasExited) {
     Write-Host "   ✅ Frontend started (PID: $($frontendProcess.Id))" -ForegroundColor Green
-} else {
+}
+else {
     Write-Host "   ⚠️  Frontend may have issues starting" -ForegroundColor Yellow
 }
 
@@ -94,7 +99,8 @@ if ($ngrokInstalled) {
             Write-Host "  BACKEND_URL=$publicUrl" -ForegroundColor Yellow
             Write-Host "  FRONTEND_URL=$publicUrl" -ForegroundColor Yellow
         }
-    } catch {
+    }
+    catch {
         Write-Host "   ⚠️  ngrok started but URL not available yet" -ForegroundColor Yellow
         Write-Host "   Check: http://localhost:4040" -ForegroundColor Gray
         Write-Host ""
@@ -106,7 +112,8 @@ if ($ngrokInstalled) {
         Write-Host "Frontend: http://localhost:3000" -ForegroundColor Yellow
         Write-Host "ngrok UI:  http://localhost:4040" -ForegroundColor Yellow
     }
-} else {
+}
+else {
     Write-Host "3. Skipping ngrok (not installed)" -ForegroundColor Gray
     Write-Host ""
     Write-Host "========================================" -ForegroundColor Cyan
@@ -125,7 +132,8 @@ try {
     while ($true) {
         Start-Sleep -Seconds 1
     }
-} finally {
+}
+finally {
     Write-Host ""
     Write-Host "Stopping services..." -ForegroundColor Yellow
     if ($backendProcess -and -not $backendProcess.HasExited) {

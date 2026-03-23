@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\mutants\dummy_mutation.py
+# hypothesis_version: 6.151.6
+
+['.', 'MUTANT_UNDER_TEST', 'Mutant', '__mutmut_', 'fail', 'stats', 'x_add', 'x_add__mutmut_1', 'x_subtract', 'x_subtract__mutmut_1']

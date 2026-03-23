@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\products\serializers.py
+# hypothesis_version: 6.151.6
+
+['alt_text', 'availability_status', 'category', 'category.id', 'category.name_ar', 'category_id', 'category_name', 'color', 'color_hex', 'commune', 'created_at', 'delivery_options', 'delivery_policy', 'description', 'description_ar', 'http', 'id', 'image', 'image_url', 'images', 'inventory', 'is_active', 'is_available', 'is_featured', 'is_primary', 'location_lat', 'location_lng', 'medium_url', 'name', 'name_ar', 'order', 'owner_id', 'price', 'price_per_day', 'primary_image', 'product', 'product.name_ar', 'product_id', 'product_name', 'rating', 'request', 'size', 'sku', 'slug', 'small_url', 'status', 'style', 'thumbnail_url', 'total_rentals', 'unknown', 'updated_at', 'wilaya']

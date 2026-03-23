@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\inventory\admin.py
+# hypothesis_version: 6.151.6
+
+['Product', 'Stock Information', 'Timestamps', 'Variant', 'acknowledged_by', 'alert_type', 'created_at', 'created_by', 'fields', 'inventory_item', 'is_low_stock', 'last_restocked', 'low_stock_threshold', 'message', 'movement_type', 'new_quantity', 'notes', 'previous_quantity', 'product', 'product__name', 'product__name_ar', 'quantity', 'quantity_available', 'quantity_maintenance', 'quantity_rented', 'quantity_total', 'status', 'updated_at', 'variant', 'variant__name', 'variant__sku']

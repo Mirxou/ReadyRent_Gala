@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\contracts\migrations\0003_contract_delete_smartagreement.py
+# hypothesis_version: 6.151.6
+
+['-created_at', '1.0', 'Contract', 'ID', 'SmartAgreement', 'agreement snapshot', 'booking', 'bookings', 'bookings.booking', 'contract', 'contract version', 'contract_hash', 'contracts', 'created at', 'created_at', 'digital signature', 'id', 'ordering', 'snapshot', 'verbose_name', 'verbose_name_plural', 'version', 'العقد الذكي', 'العقود الذكية']

@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\notifications\services.py
+# hypothesis_version: 6.151.6
+
+['Booking Confirmed', 'booking_confirmed', 'booking_reminder', 'created_at', 'id', 'is_read', 'message', 'notification', 'notification_message', 'phone', 'product_available', 'return_confirmed', 'return_reminder', 'title', 'type', 'المنتج متوفر الآن', 'تذكير بالإرجاع', 'تذكير بالحجز', 'تم استلام الإرجاع', 'تم تأكيد الحجز']

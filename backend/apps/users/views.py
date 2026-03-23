@@ -27,9 +27,10 @@ from .permissions import (
     IsAdminOrManager, IsAdminOrManagerOrStaff, IsAdminOnly,
     CanManageStaff, CanViewOwnActivity, CanManageShifts, CanManagePerformanceReviews
 )
+from standard_core.mixins import SovereignResponseMixin
 
 
-class RegisterView(generics.CreateAPIView):
+class RegisterView(SovereignResponseMixin, generics.CreateAPIView):
     """User registration"""
     queryset = User.objects.all()
     permission_classes = [AllowAny]
@@ -43,14 +44,38 @@ class RegisterView(generics.CreateAPIView):
         user = serializer.save()
         
         refresh = RefreshToken.for_user(user)
-        return Response({
+        response = Response({
             'user': UserSerializer(user).data,
-            'refresh': str(refresh),
-            'access': str(refresh.access_token),
+            'status': 'created',
+            'dignity_preserved': True
         }, status=status.HTTP_201_CREATED)
 
+        # Set Access Token Cookie
+        response.set_cookie(
+            settings.AUTH_COOKIE_ACCESS,
+            str(refresh.access_token),
+            max_age=settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'].total_seconds(),
+            secure=settings.AUTH_COOKIE_SECURE,
+            httponly=settings.AUTH_COOKIE_HTTP_ONLY,
+            samesite=settings.AUTH_COOKIE_SAMESITE,
+            path=settings.AUTH_COOKIE_PATH
+        )
+        
+        # Set Refresh Token Cookie
+        response.set_cookie(
+            settings.AUTH_COOKIE_REFRESH,
+            str(refresh),
+            max_age=settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME'].total_seconds(),
+            secure=settings.AUTH_COOKIE_SECURE,
+            httponly=settings.AUTH_COOKIE_HTTP_ONLY,
+            samesite=settings.AUTH_COOKIE_SAMESITE,
+            path=settings.AUTH_REFRESH_COOKIE_PATH
+        )
+        
+        return response
 
-class LoginView(generics.GenericAPIView):
+
+class LoginView(SovereignResponseMixin, generics.GenericAPIView):
     """User login"""
     permission_classes = [AllowAny]
     throttle_classes = [LoginRateThrottle]
@@ -80,15 +105,56 @@ class LoginView(generics.GenericAPIView):
                     status=status.HTTP_403_FORBIDDEN
                 )
             
+            
             refresh = RefreshToken.for_user(user)
-            return Response({
+            response = Response({
                 'user': UserSerializer(user).data,
-                'refresh': str(refresh),
-                'access': str(refresh.access_token),
+                'status': 'authenticated',
+                'dignity_preserved': True
             })
+            
+            # Set Access Token Cookie
+            response.set_cookie(
+                settings.AUTH_COOKIE_ACCESS,
+                str(refresh.access_token),
+                max_age=settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'].total_seconds(),
+                secure=settings.AUTH_COOKIE_SECURE,
+                httponly=settings.AUTH_COOKIE_HTTP_ONLY,
+                samesite=settings.AUTH_COOKIE_SAMESITE,
+                path=settings.AUTH_COOKIE_PATH
+            )
+            
+            # Set Refresh Token Cookie (Restricted Path)
+            response.set_cookie(
+                settings.AUTH_COOKIE_REFRESH,
+                str(refresh),
+                max_age=settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME'].total_seconds(),
+                secure=settings.AUTH_COOKIE_SECURE,
+                httponly=settings.AUTH_COOKIE_HTTP_ONLY,
+                samesite=settings.AUTH_COOKIE_SAMESITE,
+                path=settings.AUTH_REFRESH_COOKIE_PATH
+            )
+            
+            return response
         except Exception as e:
+            import structlog
+            auth_logger = structlog.get_logger("auth")
+            auth_logger.error(
+                "login_failure_internal",
+                error=str(e),
+                exc_info=True,
+                request_id=getattr(request, 'request_id', None),
+            )
             return Response(
-                {'error': f'حدث خطأ في تسجيل الدخول: {str(e)}', 'message': f'Login error: {str(e)}'},
+                {
+                    'status': 'sovereign_error',
+                    'category': 'system',
+                    'dignity_preserved': True,
+                    'code': 'LOGIN_INTERNAL_ERROR',
+                    'message_ar': 'تعذر إتمام تسجيل الدخول. يرجى المحاولة لاحقاً.',
+                    'message_en': 'Login could not be completed. Please try again later.',
+                    'request_id': getattr(request, 'request_id', None),
+                },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
@@ -160,7 +226,7 @@ class RequestPhoneVerificationView(generics.GenericAPIView):
         })
 
 
-class VerifyPhoneView(generics.GenericAPIView):
+class VerifyPhoneView(SovereignResponseMixin, generics.GenericAPIView):
     """Verify phone with code"""
     permission_classes = [IsAuthenticated]
     serializer_class = PhoneVerificationSerializer
@@ -202,7 +268,7 @@ class UploadIDView(generics.UpdateAPIView):
         verification.save()
 
 
-class VerifyAddressView(generics.GenericAPIView):
+class VerifyAddressView(SovereignResponseMixin, generics.GenericAPIView):
     """Verify address"""
     permission_classes = [IsAuthenticated]
     serializer_class = AddressVerificationSerializer
@@ -503,7 +569,12 @@ class PasswordResetRequestView(generics.GenericAPIView):
         email = serializer.validated_data['email']
         
         try:
-            user = User.objects.get(email=email, is_active=True)
+            # Phase 16C: always look up via email_hash — never filter on plaintext email.
+            # After 16C.4a, email becomes EncryptedCharField and cannot be filtered directly.
+            from apps.core.crypto.normalization import normalize_email
+            from apps.core.crypto.hashing import compute_pii_hash, get_pii_hash_key
+            email_hash = compute_pii_hash(normalize_email(email), get_pii_hash_key())
+            user = User.objects.get(email_hash=email_hash, is_active=True)
         except User.DoesNotExist:
             # Don't reveal if user exists or not for security
             return Response({
@@ -610,3 +681,229 @@ class PasswordResetConfirmView(generics.GenericAPIView):
             'message_en': 'Password reset successfully'
         }, status=status.HTTP_200_OK)
 
+
+class CookieTokenRefreshView(SovereignResponseMixin, generics.GenericAPIView):
+    """
+    Refresh access token using HttpOnly cookie.
+    Reads 'refresh_token' from cookie, validates it, and sets new cookies.
+    """
+    permission_classes = [AllowAny]
+    throttle_classes = [LoginRateThrottle] # Re-use login throttle
+    serializer_class = None # No body serializer needed
+
+    def post(self, request, *args, **kwargs):
+        refresh_token = request.COOKIES.get(settings.AUTH_COOKIE_REFRESH)
+        
+        if not refresh_token:
+            return Response(
+                {'error': 'Authentication credentials were not provided.'},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        try:
+            refresh = RefreshToken(refresh_token)
+            
+            # Rotate Token
+            data = {'refresh': str(refresh)}
+            
+            # Generates new access token
+            # Note: SimpleJWT RefreshToken object can generate access_token property
+            new_access_token = str(refresh.access_token)
+            
+            # If rotation is enabled, we should blacklist the old one and get a new refresh token
+            if settings.SIMPLE_JWT['ROTATE_REFRESH_TOKENS']:
+                if settings.SIMPLE_JWT['BLACKLIST_AFTER_ROTATION']:
+                    try:
+                        refresh.blacklist()
+                    except AttributeError:
+                        pass # Blacklist app might not be installed
+
+                refresh.set_jti()
+                refresh.set_exp()
+                refresh.set_iat()
+                new_refresh_token = str(refresh)
+            else:
+                new_refresh_token = refresh_token
+
+            response = Response({
+                'status': 'refreshed',
+                'dignity_preserved': True
+            })
+
+            # Set Access Token Cookie
+            response.set_cookie(
+                settings.AUTH_COOKIE_ACCESS,
+                new_access_token,
+                max_age=settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'].total_seconds(),
+                secure=settings.AUTH_COOKIE_SECURE,
+                httponly=settings.AUTH_COOKIE_HTTP_ONLY,
+                samesite=settings.AUTH_COOKIE_SAMESITE,
+                path=settings.AUTH_COOKIE_PATH
+            )
+            
+            # Set Refresh Token Cookie (if rotated)
+            if settings.SIMPLE_JWT['ROTATE_REFRESH_TOKENS']:
+                response.set_cookie(
+                    settings.AUTH_COOKIE_REFRESH,
+                    new_refresh_token,
+                    max_age=settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME'].total_seconds(),
+                    secure=settings.AUTH_COOKIE_SECURE,
+                    httponly=settings.AUTH_COOKIE_HTTP_ONLY,
+                    samesite=settings.AUTH_COOKIE_SAMESITE,
+                    path=settings.AUTH_REFRESH_COOKIE_PATH
+                )
+
+            return response
+            
+        except Exception as e:
+            # If refresh fails, clear cookies
+            response = Response(
+                {'error': 'Invalid or expired refresh token'},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+            response.delete_cookie(settings.AUTH_COOKIE_ACCESS)
+            response.delete_cookie(settings.AUTH_COOKIE_REFRESH, path=settings.AUTH_REFRESH_COOKIE_PATH)
+            return response
+
+
+class LogoutView(SovereignResponseMixin, generics.GenericAPIView):
+    """
+    Logout user by blacklisting refresh token and clearing cookies.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            refresh_token = request.COOKIES.get(settings.AUTH_COOKIE_REFRESH)
+            if refresh_token:
+                token = RefreshToken(refresh_token)
+                try:
+                    token.blacklist()
+                except AttributeError:
+                    pass
+        except Exception:
+            pass # Invalid token, just clear cookies
+
+        response = Response({
+            'status': 'logged_out',
+            'message': 'Logged out successfully',
+            'dignity_preserved': True
+        })
+
+        response.delete_cookie(settings.AUTH_COOKIE_ACCESS)
+        response.delete_cookie(settings.AUTH_COOKIE_REFRESH, path=settings.AUTH_REFRESH_COOKIE_PATH)
+        
+        return response
+
+class CookieTokenRefreshView(SovereignResponseMixin, generics.GenericAPIView):
+    """
+    Refresh access token using HttpOnly cookie.
+    Reads 'refresh_token' from cookie, validates it, and sets new cookies.
+    """
+    permission_classes = [AllowAny]
+    throttle_classes = [LoginRateThrottle] # Re-use login throttle
+    serializer_class = None # No body serializer needed
+
+    def post(self, request, *args, **kwargs):
+        refresh_token = request.COOKIES.get(settings.AUTH_COOKIE_REFRESH)
+        
+        if not refresh_token:
+            return Response(
+                {'error': 'Authentication credentials were not provided.'},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        try:
+            refresh = RefreshToken(refresh_token)
+            
+            # Rotate Token
+            data = {'refresh': str(refresh)}
+            
+            # Generates new access token
+            # Note: SimpleJWT RefreshToken object can generate access_token property
+            new_access_token = str(refresh.access_token)
+            
+            # If rotation is enabled, we should blacklist the old one and get a new refresh token
+            if settings.SIMPLE_JWT['ROTATE_REFRESH_TOKENS']:
+                if settings.SIMPLE_JWT['BLACKLIST_AFTER_ROTATION']:
+                    try:
+                        refresh.blacklist()
+                    except AttributeError:
+                        pass # Blacklist app might not be installed
+
+                refresh.set_jti()
+                refresh.set_exp()
+                refresh.set_iat()
+                new_refresh_token = str(refresh)
+            else:
+                new_refresh_token = refresh_token
+
+            response = Response({
+                'status': 'refreshed',
+                'dignity_preserved': True
+            })
+
+            # Set Access Token Cookie
+            response.set_cookie(
+                settings.AUTH_COOKIE_ACCESS,
+                new_access_token,
+                max_age=settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'].total_seconds(),
+                secure=settings.AUTH_COOKIE_SECURE,
+                httponly=settings.AUTH_COOKIE_HTTP_ONLY,
+                samesite=settings.AUTH_COOKIE_SAMESITE,
+                path=settings.AUTH_COOKIE_PATH
+            )
+            
+            # Set Refresh Token Cookie (if rotated)
+            if settings.SIMPLE_JWT['ROTATE_REFRESH_TOKENS']:
+                response.set_cookie(
+                    settings.AUTH_COOKIE_REFRESH,
+                    new_refresh_token,
+                    max_age=settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME'].total_seconds(),
+                    secure=settings.AUTH_COOKIE_SECURE,
+                    httponly=settings.AUTH_COOKIE_HTTP_ONLY,
+                    samesite=settings.AUTH_COOKIE_SAMESITE,
+                    path=settings.AUTH_REFRESH_COOKIE_PATH
+                )
+
+            return response
+            
+        except Exception as e:
+            # If refresh fails, clear cookies
+            response = Response(
+                {'error': 'Invalid or expired refresh token'},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+            response.delete_cookie(settings.AUTH_COOKIE_ACCESS)
+            response.delete_cookie(settings.AUTH_COOKIE_REFRESH, path=settings.AUTH_REFRESH_COOKIE_PATH)
+            return response
+
+
+class LogoutView(SovereignResponseMixin, generics.GenericAPIView):
+    """
+    Logout user by blacklisting refresh token and clearing cookies.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            refresh_token = request.COOKIES.get(settings.AUTH_COOKIE_REFRESH)
+            if refresh_token:
+                token = RefreshToken(refresh_token)
+                try:
+                    token.blacklist()
+                except AttributeError:
+                    pass
+        except Exception:
+            pass # Invalid token, just clear cookies
+
+        response = Response({
+            'status': 'logged_out',
+            'message': 'Logged out successfully',
+            'dignity_preserved': True
+        })
+
+        response.delete_cookie(settings.AUTH_COOKIE_ACCESS)
+        response.delete_cookie(settings.AUTH_COOKIE_REFRESH, path=settings.AUTH_REFRESH_COOKIE_PATH)
+        
+        return response

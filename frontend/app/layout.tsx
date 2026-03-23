@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
-import { Inter, Cairo } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { Inter, Cairo, IBM_Plex_Sans_Arabic } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/lib/providers";
 import { Toaster } from "@/components/ui/toaster";
@@ -11,31 +11,52 @@ import { PageTransition } from "@/components/ui/page-transition";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const cairo = Cairo({ subsets: ["arabic"], variable: "--font-cairo" });
+const ibmPlexArabic = IBM_Plex_Sans_Arabic({
+  subsets: ["arabic"],
+  weight: ['100', '200', '300', '400', '500', '600', '700'],
+  variable: "--font-ibm-plex"
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3001"),
   title: {
-    default: "ReadyRent.Gala | استئجار فساتين الحفلات",
-    template: "%s | ReadyRent.Gala",
+    default: "STANDARD.Rent | معيار الفخامة",
+    template: "%s | STANDARD.Rent",
   },
-  description: "منصة تأجير فساتين الحفلات الرائدة. تألقي في مناسباتك بأحدث التصاميم العالمية.",
+  description: "المنصة الأولى لتداول الأزياء الفاخرة في الجزائر. نظام بيئي مجتمعي آمن.",
   keywords: ["فساتين", "تأجير فساتين", "فساتين سهرة", "زفاف", "موضة", "الجزائر"],
-  authors: [{ name: "ReadyRent Team" }],
+  authors: [{ name: "STANDARD Team" }],
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "STANDARD.Rent",
+  },
   openGraph: {
     type: "website",
     locale: "ar_DZ",
     url: "/",
-    siteName: "ReadyRent.Gala",
+    siteName: "STANDARD.Rent",
     images: [
       {
         url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "ReadyRent.Gala Preview",
+        alt: "STANDARD.Rent Preview",
       },
     ],
   },
 };
+
+export const viewport: Viewport = {
+  themeColor: "#a855f7",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+};
+
+import { SovereignProvider } from "@/contexts/SovereignContext";
+import { SystemHaltBanner } from "@/components/sovereign/SystemHaltBanner";
 
 export default function RootLayout({
   children,
@@ -47,7 +68,7 @@ export default function RootLayout({
     <html lang="ar" dir="rtl" suppressHydrationWarning>
       <body
         suppressHydrationWarning
-        className={`${cairo.className} ${inter.variable} ${cairo.variable} antialiased relative overflow-x-hidden`}
+        className={`${cairo.className} ${inter.variable} ${cairo.variable} ${ibmPlexArabic.variable} antialiased relative overflow-x-hidden`}
       >
         {/* Ambient Vibrant Background */}
         <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden">
@@ -59,18 +80,21 @@ export default function RootLayout({
         <GrainOverlay />
 
         <Analytics />
-        <Providers>
-          <div className="flex min-h-screen flex-col">
-            <Navbar />
-            <main className="flex-1">
-              <PageTransition>
-                {children}
-              </PageTransition>
-            </main>
-            <Footer />
-          </div>
-          <Toaster />
-        </Providers>
+        <SovereignProvider>
+          <SystemHaltBanner />
+          <Providers>
+            <div className="flex min-h-screen flex-col">
+              <Navbar />
+              <main className="flex-1">
+                <PageTransition>
+                  {children}
+                </PageTransition>
+              </main>
+              <Footer />
+            </div>
+            <Toaster />
+          </Providers>
+        </SovereignProvider>
       </body>
     </html>
   );

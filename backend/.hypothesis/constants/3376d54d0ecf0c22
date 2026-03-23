@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\notifications\whatsapp_service.py
+# hypothesis_version: 6.151.6
+
+['+', '-', '0', '213', 'Authorization', 'Content-Type', 'WHATSAPP_API_TOKEN', 'WHATSAPP_API_URL', 'application/json', 'ar', 'assigned', 'body', 'code', 'components', 'delivered', 'error', 'id', 'in_transit', 'language', 'message_id', 'messages', 'messaging_product', 'name', 'parameters', 'picked_up', 'success', 'template', 'text', 'to', 'type', 'whatsapp', 'تم التسليم بنجاح']

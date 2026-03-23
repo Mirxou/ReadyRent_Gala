@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\standard_core\migrations\0003_realestatespec_vehiclespec_user_business_mode.py
+# hypothesis_version: 6.151.6
+
+['APARTMENT', 'GASOLINE', 'MANUAL', 'PERSONAL', 'PROFESSIONAL', 'RealEstateSpec', 'VehicleSpec', 'asset', 'business_mode', 'capacity', 'fuel_type', 'has_parking', 'location_lat', 'location_lon', 'make', 'model', 'property_type', 'standard_core', 'standard_core.asset', 'transmission', 'user', 'year']

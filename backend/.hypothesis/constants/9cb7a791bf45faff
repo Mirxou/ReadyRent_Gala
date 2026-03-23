@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\users\admin.py
+# hypothesis_version: 6.151.6
+
+['-created_at', 'action', 'added_by', 'address_verified', 'assigned_at', 'assigned_by', 'branch', 'city', 'comments', 'created_at', 'department', 'description', 'email', 'end_time', 'id_number', 'id_type', 'ip_address', 'is_active', 'is_blacklisted', 'is_completed', 'is_staff', 'is_verified', 'model_name', 'notes', 'object_id', 'overall_rating', 'phone', 'phone_verified', 'preferred_language', 'reason', 'review_period_end', 'review_period_start', 'reviewed_at', 'reviewed_by', 'risk_score', 'role', 'shift_date', 'staff', 'staff__email', 'start_time', 'status', 'strengths', 'updated_at', 'user', 'user__email', 'user__username', 'user_agent', 'username', 'verified_at']

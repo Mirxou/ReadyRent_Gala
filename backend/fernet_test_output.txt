@@ -1,0 +1,13 @@
+DEBUG: sys.argv = ['scripts\\test_fernet.py']
+{"event": "Patched drf_spectacular._map_model_field to handle gettext_lazy verbose_name"}
+{"event": "Patched drf_spectacular._resolve_path_parameters"}
+==================================================
+  FERNET KEY FORMAT SELF-TEST
+==================================================
+  Encrypt: ✅ OK
+  Format:  enc:v1:gAAAA... (marker check)
+  Decrypt: ✅ OK — round-trip matches
+  Idempotency check: ✅ correctly identified as encrypted
+
+  ✅ Fernet key format fix confirmed — ready for backfill.
+==================================================

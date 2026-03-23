@@ -1,0 +1,4 @@
+# file: C:\Users\pc\Desktop\ReadyRent_Gala\backend\apps\social\models.py
+# hypothesis_version: 6.151.6
+
+['-created_at', 'Colleague', 'Community Member', 'Completed', 'Family', 'Friend', 'I guarantee for them', 'I highly trust them', 'I know them', 'I trust them', 'Neighbor', 'Pending', 'Receiver', 'Referral Code', 'Referred (Child)', 'Referrer (Parent)', 'Social Collateral', 'Voucher', 'colleague', 'community', 'completed', 'family', 'friend', 'neighbor', 'pending', 'receiver', 'referral_received', 'referrals_sent', 'relationship', 'revoked', 'trust level', 'voucher', 'vouchers_given', 'vouches_received', 'الإحالات', 'الإحالة', 'تزكيات', 'تزكية']
