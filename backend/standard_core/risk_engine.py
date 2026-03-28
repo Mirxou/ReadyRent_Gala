@@ -18,46 +18,31 @@ class RiskEngine:
     2. Asset Value/Price (The Stake).
     """
 
-    @property
-    def TRUST_THRESHOLD_HIGH(self):
-        from .engine import SovereignEngine
-        # Fetch dynamically or fallback
-        return Decimal(SovereignEngine.get_law('trust_threshold_high', "80.00"))
 
-    @property
-    def TRUST_THRESHOLD_LOW(self):
-         from .engine import SovereignEngine
-         return Decimal(SovereignEngine.get_law('trust_threshold_low', "30.00"))
-    
-    @property
-    def HIGH_VALUE_ASSET_DAILY(self):
-        from .models import Constitution
-        return Constitution.get_solo().high_value_threshold
 
     @classmethod
     def evaluate(cls, user: User, asset: Asset, force_refresh_score: bool = False) -> RiskDecision:
         """
         Determines if a booking is allowed, what deposit is required, and if it can be auto-confirmed.
         """
+        from .engine import SovereignEngine
+        from .models import Constitution
+        
+        trust_high = Decimal(SovereignEngine.get_law('trust_threshold_high', "80.00"))
+        trust_low = Decimal(SovereignEngine.get_law('trust_threshold_low', "30.00"))
+        high_val_asset_daily = Constitution.get_solo().high_value_threshold
+
         # Optional: Refresh score if needed, but usually done async
         # from apps.users.services_risk import RiskScoreService
         # if force_refresh_score: 
         #    RiskScoreService.update_user_risk_score(user)
 
         trust = Decimal(user.trust_score) if hasattr(user, 'trust_score') else Decimal(50)
-        # Handle case where trust_score might be Non-Decimal in DB (though model says Integer, let's be safe)
-        
-        # Verify if trust score is actually inversely related to risk score in VerificationStatus?
-        # The Model `User` has `merit_score` (default 50). `VerificationStatus` has `risk_score`.
-        # Code in services_risk.py says: trust_score = 100 - risk_score.
-        # Let's standardize on using the User model's intended field if it exists and is synced, 
-        # OR fetch from VerificationStatus if that is the source of truth.
-        # For now, we assume user.trust_score is the source of truth for "Merit/Trust".
         
         price = asset.daily_price
 
         # 1. Critical Stop: Unverified users on High Val Assets
-        if price > cls().HIGH_VALUE_ASSET_DAILY and not user.is_verified:
+        if price > high_val_asset_daily and not user.is_verified:
              return RiskDecision(
                 allowed=False,
                 deposit_requirement=Decimal("0.00"),
@@ -74,7 +59,7 @@ class RiskEngine:
         )
 
         # Risk Matrix
-        if trust >= cls().TRUST_THRESHOLD_HIGH:
+        if trust >= trust_high:
             # Trusted User (Sovereign)
             decision.risk_level = "LOW"
             decision.deposit_requirement = Decimal("0.00") # Reward for trust
@@ -83,7 +68,7 @@ class RiskEngine:
             if user.is_verified:
                 decision.auto_confirm = True
         
-        elif trust <= cls().TRUST_THRESHOLD_LOW:
+        elif trust <= trust_low:
             # Risky User
             decision.risk_level = "HIGH"
             # Deposit = 3x Daily Price (Hard Rule)
@@ -98,7 +83,7 @@ class RiskEngine:
             decision.auto_confirm = False
 
         # 3. High Value Asset Multiplier
-        if price > cls().HIGH_VALUE_ASSET_DAILY:
+        if price > high_val_asset_daily:
             # If Risk is already high, maybe block? For now, just increase deposit
             if decision.risk_level == "HIGH":
                  decision.allowed = False # Too risky: Risky User + Expensive Asset

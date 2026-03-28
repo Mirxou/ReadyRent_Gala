@@ -65,12 +65,37 @@ export default function CartPage() {
 
   const removeFromCartMutation = useMutation({
     mutationFn: (itemId: number) => bookingsApi.removeFromCart(itemId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['cart'] });
-      toast.success('تم حذف المنتج من السلة');
+    onMutate: async (itemId) => {
+      // Cancel any outgoing refetchs (so they don't overwrite our optimistic update)
+      await queryClient.cancelQueries({ queryKey: ['cart'] });
+
+      // Snapshot the previous value
+      const previousCart = queryClient.getQueryData(['cart']);
+
+      // Optimistically update to the new value
+      if (previousCart) {
+        queryClient.setQueryData(['cart'], (old: any) => ({
+          ...old,
+          items: old.items.filter((item: any) => item.id !== itemId),
+        }));
+      }
+
+      // Return a context object with the snapshotted value
+      return { previousCart };
     },
-    onError: () => {
+    onError: (err, itemId, context) => {
+      // Rollback to the previous value if mutation fails
+      if (context?.previousCart) {
+        queryClient.setQueryData(['cart'], context.previousCart);
+      }
       toast.error('حدث خطأ أثناء حذف المنتج');
+    },
+    onSettled: () => {
+      // Final sync with server
+      queryClient.invalidateQueries({ queryKey: ['cart'] });
+    },
+    onSuccess: () => {
+      toast.success('تم حذف المنتج من السلة');
     },
   });
 

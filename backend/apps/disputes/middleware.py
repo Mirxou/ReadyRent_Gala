@@ -37,8 +37,8 @@ class SovereignSafetyMiddleware(MiddlewareMixin):
         # Use cache for speed (Redis)
         is_halted = cache.get('SOVEREIGN_AI_HALTED', None)
         
-        # Fallback: Check database if cache is missing/False (for LocMemCache isolation or cold start)
-        if not is_halted:
+        # Fallback: Check database if cache is missing (for LocMemCache isolation or cold start)
+        if is_halted is None:
             from .models import SystemFlag
             is_halted = SystemFlag.get_flag('SOVEREIGN_AI_HALTED', False)
         

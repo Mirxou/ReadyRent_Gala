@@ -13,12 +13,11 @@ import { useRouter } from 'next/navigation';
 
 interface DisputeFormProps {
   bookingId?: number;
-  onSuccess?: () => void;
+  isSubmitting?: boolean;
+  onSubmit: (data: any) => void;
 }
 
-export function DisputeForm({ bookingId, onSuccess }: DisputeFormProps) {
-  const router = useRouter();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+export function DisputeForm({ bookingId, isSubmitting = false, onSubmit }: DisputeFormProps) {
   const [formData, setFormData] = useState({
     dispute_type: '',
     subject: '',
@@ -26,23 +25,13 @@ export function DisputeForm({ bookingId, onSuccess }: DisputeFormProps) {
     booking_id: bookingId || undefined,
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
-
-    try {
-      await disputesApi.createDispute(formData);
-      toast.success('تم إنشاء النزاع بنجاح');
-      if (onSuccess) {
-        onSuccess();
-      } else {
-        router.push('/disputes');
-      }
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'حدث خطأ أثناء إنشاء النزاع');
-    } finally {
-      setIsSubmitting(false);
+    if (!formData.dispute_type || !formData.subject || !formData.description) {
+      toast.error('يرجى ملء جميع الحقول المطلوبة');
+      return;
     }
+    onSubmit(formData);
   };
 
   return (

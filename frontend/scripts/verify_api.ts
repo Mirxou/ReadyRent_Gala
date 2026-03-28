@@ -1,11 +1,9 @@
-import { 
-  authApi, 
-  productsApi, 
-  bookingsApi, 
-  walletApi, 
-  disputesApi,
-  sovereignClient 
-} from '@/lib/api';
+import { authApi } from '@/lib/api/auth';
+import { productsApi } from '@/lib/api/products';
+import { bookingsApi } from '@/lib/api/bookings';
+import { walletApi } from '@/lib/api/wallet';
+import { disputesApi } from '@/lib/api/disputes';
+import { sovereignClient } from '@/lib/api/sovereign-client';
 
 /**
  * ⚖️ SOVEREIGN API INTEGRITY AUDIT (Phase 3 Final)

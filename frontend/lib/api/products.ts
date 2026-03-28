@@ -16,14 +16,22 @@ export interface SearchFilters {
 export interface Product {
   id: number;
   name: string;
+  name_ar: string;
   slug: string;
   description: string;
   price_per_day: number;
   owner_id: number;
   images: { id: number; url: string; is_main: boolean }[];
+  primary_image?: string;
   category_name: string;
   location_name: string;
   is_available: boolean;
+  rating?: number;
+  is_verified?: boolean;
+  trust_score?: number;
+  category?: {
+    name_ar: string;
+  };
 }
 
 export const productsApi = {

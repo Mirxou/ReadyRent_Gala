@@ -1,9 +1,18 @@
 import { sovereignClient } from './sovereign-client';
 
+export interface ContractParty {
+  id: string | number;
+  name: string;
+  role: 'renter' | 'owner';
+  signed: boolean;
+  signedAt?: string;
+  ipAddress?: string;
+}
+
 export interface Contract {
   id: number;
   booking_id: number;
-  status: 'draft' | 'signed' | 'void';
+  status: 'draft' | 'signed' | 'finalized' | 'void';
   is_finalized: boolean;
   contract_hash: string;
   renter_signature?: string;
@@ -11,6 +20,8 @@ export interface Contract {
   created_at: string;
   signed_at?: string;
   snapshot: any;
+  parties?: ContractParty[];
+  terms?: string;
 }
 
 export const contractsApi = {

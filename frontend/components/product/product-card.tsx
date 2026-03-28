@@ -11,19 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useBookingStore } from '@/lib/hooks/use-booking-store';
 
-export interface Product {
-  id: number;
-  slug: string;
-  name_ar: string;
-  price_per_day: number;
-  primary_image?: string;
-  rating?: number;
-  is_verified?: boolean;
-  trust_score?: number;
-  category?: {
-    name_ar: string;
-  };
-}
+import { Product } from '@/lib/api/products';
 
 interface ProductCardProps {
   product: Product;

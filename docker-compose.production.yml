@@ -140,6 +140,26 @@ services:
       - rentily_network
 
   # ─────────────────────────────────────────────────────────────────────────────
+  # Frontend Application (Next.js Standalone)
+  # ─────────────────────────────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: rentily_frontend_prod
+    restart: unless-stopped
+    env_file: .env.production
+    depends_on:
+      - backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - rentily_network
+
+  # ─────────────────────────────────────────────────────────────────────────────
   # Ingress Layer (Nginx)
   # ─────────────────────────────────────────────────────────────────────────────
   nginx:
@@ -157,6 +177,7 @@ services:
       - static_volume:/var/www/rentily/static:ro
       - media_volume:/var/www/rentily/media:ro
     depends_on:
+      - frontend
       - backend
     networks:
       - rentily_network

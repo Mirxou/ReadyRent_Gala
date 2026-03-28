@@ -2,29 +2,54 @@
 
 import * as React from 'react';
 import { useDisputeStore } from '@/lib/hooks/use-dispute-store';
+import { disputesApi } from '@/lib/api/disputes';
 import { Button } from '@/components/ui/button';
 import { Upload, X, FileText, Image as ImageIcon, Video, ShieldCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
-export function EvidenceStep() {
+
+export function EvidenceStep({ disputeId }: { disputeId?: number }) {
   const { formData, setFormData } = useDisputeStore();
   const [isUploading, setIsUploading] = React.useState(false);
 
-  const handleUpload = () => {
-    // Simulated upload for Phase 3 UI work
+
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
     setIsUploading(true);
-    setTimeout(() => {
-      const mockEvidence = {
-        id: `ev-${Math.random().toString(36).substr(2, 9)}`,
-        url: '#',
-        type: 'image'
+
+    try {
+      // Attempt real upload to backend; fall back to local preview if no disputeId
+      let uploadedUrl = URL.createObjectURL(file); // local preview default
+      let uploadedId = `ev-${Math.random().toString(36).substr(2, 9)}`;
+
+      if (disputeId) {
+        const result = await disputesApi.uploadEvidence(disputeId, file);
+        uploadedUrl = result?.url ?? uploadedUrl;
+        uploadedId = String(result?.id ?? uploadedId);
+      }
+
+      const evidence = {
+        id: uploadedId,
+        url: uploadedUrl,
+        type: file.type.startsWith('video/') ? 'video' : 'image',
+        name: file.name,
       };
-      setFormData({ evidence: [...formData.evidence, mockEvidence] });
+      setFormData({ evidence: [...formData.evidence, evidence] });
+      toast.success(`تم رفع ${file.name} بنجاح.`);
+    } catch (err: any) {
+      console.error('Evidence upload failed:', err);
+      toast.error(err?.message ?? 'فشل رفع الدليل. تحقق من اتصالك.');
+    } finally {
       setIsUploading(false);
-      toast.success('تم رفع الدليل بنجاح');
-    }, 1500);
+      if (e.target) e.target.value = '';
+    }
   };
+
 
   const removeEvidence = (id: string) => {
     setFormData({ evidence: formData.evidence.filter(ev => ev.id !== id) });
@@ -39,8 +64,15 @@ export function EvidenceStep() {
 
       <div className="grid grid-cols-1 gap-6">
         {/* Dropzone Area */}
+        <input 
+          type="file" 
+          ref={fileInputRef} 
+          className="hidden" 
+          accept="image/*,video/mp4" 
+          onChange={handleFileChange} 
+        />
         <div 
-          onClick={handleUpload}
+          onClick={() => fileInputRef.current?.click()}
           className={cn(
             "h-48 rounded-[2rem] border-2 border-dashed flex flex-col items-center justify-center gap-4 cursor-pointer transition-all bg-gray-50/50 hover:bg-blue-50/50 hover:border-blue-400 border-gray-200",
             isUploading && "animate-pulse pointer-events-none"

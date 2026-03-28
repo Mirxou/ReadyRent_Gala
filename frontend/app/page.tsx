@@ -6,6 +6,7 @@ import { SovereignButton } from "@/components/sovereign/sovereign-button";
 import { GlassPanel } from "@/components/sovereign/glass-panel";
 import { IdentityShield } from "@/components/sovereign/identity-shield";
 import { ShieldCheck, LockKeyhole, FileSignature, ArrowLeft } from 'lucide-react';
+import { FeaturedProducts } from '@/components/product/featured-products';
 
 export default function HomePage() {
   const { scrollYProgress } = useScroll();
@@ -65,15 +66,33 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8, duration: 0.8 }}
-            className="flex flex-col md:flex-row gap-6 items-center"
+            className="flex flex-col md:flex-row gap-6 items-center relative"
           >
+            {/* New AI Search Badge Hint */}
+            <motion.div 
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 1.5, type: 'spring' }}
+              className="absolute -top-12 md:-right-12 md:top-auto"
+            >
+              <Link href="/ai-search" className="group">
+                <div className="bg-gala-purple/10 backdrop-blur-md border border-gala-purple/30 px-3 py-1 rounded-full text-[10px] font-bold text-gala-purple flex items-center gap-2 hover:bg-gala-purple/20 transition-all cursor-pointer">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-gala-purple opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-gala-purple"></span>
+                  </span>
+                  بحث بمعايير الثقة AI
+                </div>
+              </Link>
+            </motion.div>
+
             <Link href="/products">
               <SovereignButton size="xl" variant="primary" withShimmer>
                 تصفح المجموعة
               </SovereignButton>
             </Link>
 
-            <Link href="/auth/register">
+            <Link href="/register">
               <SovereignButton size="lg" variant="secondary">
                 انضم إلى النخبة
               </SovereignButton>
@@ -140,6 +159,9 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* SECTION 2.5: LIVE PRODUCTS CHECK */}
+      <FeaturedProducts />
 
       {/* SECTION 3: THE CALL (CTA) */}
       <section className="py-40 px-6 relative overflow-hidden">

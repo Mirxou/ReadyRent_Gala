@@ -101,10 +101,14 @@ class BookingCreateView(SovereignResponseMixin, generics.CreateAPIView):
 
         try:
             with transaction.atomic():
+                # 2. Concurrency Lock: Lock all Product rows to prevent race conditions and N+1 queries
+                product_ids = [item.product.id for item in items]
+                _locked_products = {p.id: p for p in Product.objects.select_for_update().filter(id__in=product_ids)}
+                
                 for item in items:
-                    # 2. Concurrency Lock: Lock the Product row to prevent race conditions
-                    # This ensures no one else can book this product while we are checking/creating
-                    _locked_product = Product.objects.select_for_update().get(id=item.product.id)
+                    _locked_product = _locked_products.get(item.product.id)
+                    if not _locked_product:
+                        raise ValidationError({'error': 'Product unavailable'})
                     
                     # --- SOVEREIGN LAUNCH CHECK ---
                     from apps.bookings.launch_policy import SovereignLaunchPolicy

@@ -95,8 +95,8 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({ transact
                   </div>
                 </td>
                 <td className="px-6 py-4">
-                  <p className="text-sm text-slate-600">{new Date(tx.createdAt).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
-                  <p className="text-[10px] text-slate-400">{new Date(tx.createdAt).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}</p>
+                  <p className="text-sm text-slate-600">{new Date(tx.createdAt ?? tx.created_at).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                  <p className="text-[10px] text-slate-400">{new Date(tx.createdAt ?? tx.created_at).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}</p>
                 </td>
                 <td className="px-6 py-4 text-left">
                   <p className={`font-black text-base ${

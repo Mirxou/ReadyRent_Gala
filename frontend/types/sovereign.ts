@@ -6,7 +6,10 @@ export type SovereignStatus =
   | 'sovereign_proceeding'
   | 'sovereign_wait'
   | 'sovereign_verdict'
-  | 'sovereign_protection';
+  | 'sovereign_protection'
+  // Client-side synthetic statuses (not from backend)
+  | 'success'
+  | 'error';
 
 export type SovereignCode =
   | 'DIGNITY_COOLING_OFF'
@@ -14,7 +17,10 @@ export type SovereignCode =
   | 'JUDICIAL_PROCESS_INITIATED'
   | 'PROTECTIVE_REVIEW_IN_PROGRESS'
   | 'RESOLUTION_DELIVERED'
-  | 'SYSTEM_HALT';
+  | 'SYSTEM_HALT'
+  // Client-side synthetic codes (not from backend)
+  | 'NO_CONTENT'
+  | 'CONNECTION_ERROR';
 
 export interface SovereignResponse<T> {
   status: SovereignStatus;

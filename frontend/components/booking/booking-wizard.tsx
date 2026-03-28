@@ -37,9 +37,15 @@ export function BookingWizard() {
   const [isSuccess, setIsSuccess] = React.useState(false);
   const [bookingRef, setBookingRef] = React.useState('');
 
+  const [isTransitioning, setIsTransitioning] = React.useState(false);
+  
   const handleNext = async () => {
     if (step < 5) {
-      nextStep();
+      setIsTransitioning(true);
+      setTimeout(() => {
+        nextStep();
+        setIsTransitioning(false);
+      }, 600); // Sovereign "Calculated" delay
       return;
     }
 
@@ -138,15 +144,34 @@ export function BookingWizard() {
           {/* Content Area */}
           <div className="flex-1 overflow-y-auto px-8 py-4">
             <AnimatePresence mode="wait">
-              <motion.div
-                key={step}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.3 }}
-              >
-                {currentStepData?.component}
-              </motion.div>
+              {isTransitioning ? (
+                <motion.div
+                  key="skeleton"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="h-full flex flex-col items-center justify-center space-y-4"
+                >
+                  <Loader2 className="h-10 w-10 text-blue-100 animate-spin" />
+                  <div className="space-y-2 w-full max-w-sm">
+                    <div className="h-4 bg-slate-50 rounded-full w-3/4 mx-auto animate-pulse" />
+                    <div className="h-4 bg-slate-50/50 rounded-full w-1/2 mx-auto animate-pulse" />
+                  </div>
+                  <p className="text-[10px] text-slate-300 font-mono tracking-widest uppercase">
+                    Sovereign Protocol: Authenticating Step {step}...
+                  </p>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key={step}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  {currentStepData?.component}
+                </motion.div>
+              )}
             </AnimatePresence>
           </div>
 

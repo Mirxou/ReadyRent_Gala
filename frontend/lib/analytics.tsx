@@ -105,6 +105,45 @@ export const trackABTest = (testName: string, variant: string, conversion: boole
     });
 };
 
+// Judicial & Dispute Tracking
+export const trackDisputeFiled = (disputeId: number, claimType: string) => {
+    event({
+        action: 'dispute_filed',
+        category: 'judicial',
+        label: claimType,
+        value: disputeId,
+    });
+};
+
+export const trackAppealFiled = (disputeId: number, reason: string) => {
+    event({
+        action: 'appeal_filed',
+        category: 'judicial',
+        label: reason,
+        value: disputeId,
+    });
+};
+
+// Booking & Payment Tracking
+export const trackBookingCreated = (bookingId: number, totalPrice: number) => {
+    event({
+        action: 'booking_created',
+        category: 'ecommerce',
+        label: `Booking ${bookingId}`,
+        value: totalPrice,
+    });
+};
+
+export const trackPaymentCompleted = (bookingId: number, amount: number, method: string) => {
+    event({
+        action: 'payment_completed',
+        category: 'ecommerce',
+        label: method,
+        value: amount,
+    });
+};
+
+
 
 // Default export for usage in Layout
 function AnalyticsComponent() {

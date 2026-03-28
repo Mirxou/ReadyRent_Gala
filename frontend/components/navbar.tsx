@@ -90,12 +90,10 @@ export function Navbar() {
             <div className="hidden xl:flex items-center space-x-8">
               {[
                 { label: 'المنتجات', href: '/products' },
-                { label: 'الحزم', href: '/bundles' },
+                { label: 'البحث الذكي', href: '/ai-search' },
+                { label: 'السجل القضائي', href: '/judicial' },
                 { label: 'دليل المناسبات', href: '/local-guide' },
                 { label: 'الحرفيات', href: '/artisans' },
-                { label: 'المدونة', href: '/blog' },
-                { label: 'الأسئلة الشائعة', href: '/faq' },
-                { label: 'عن غالا', href: '/about' },
                 { label: 'الحجوزات', href: isAuthenticated ? '/dashboard/bookings' : '/login' },
               ].map((link) => (
                 <Link
@@ -208,12 +206,10 @@ export function Navbar() {
                   <div className="flex flex-col gap-6 mt-12 text-right pb-8">
                     {[
                       { label: 'المنتجات', href: '/products' },
-                      { label: 'الحزم', href: '/bundles' },
+                      { label: 'البحث الذكي', href: '/ai-search' },
+                      { label: 'السجل القضائي', href: '/judicial' },
                       { label: 'دليل المناسبات', href: '/local-guide' },
                       { label: 'الحرفيات', href: '/artisans' },
-                      { label: 'المدونة', href: '/blog' },
-                      { label: 'الأسئلة الشائعة', href: '/faq' },
-                      { label: 'عن غالا', href: '/about' },
                       { label: 'الحجوزات', href: isAuthenticated ? '/dashboard/bookings' : '/login' },
                     ].map((link) => (
                       <Link

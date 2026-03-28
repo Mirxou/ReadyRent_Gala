@@ -10,10 +10,11 @@ export interface WalletBalance {
 export interface Transaction {
   id: string;
   type: 'deposit' | 'withdrawal' | 'escrow_hold' | 'escrow_release' | 'payment_split';
-  status: 'pending' | 'completed' | 'failed' | 'cancelled';
+  status: 'pending' | 'completed' | 'failed' | 'cancelled' | 'disputed';
   amount: number;
   description: string;
   created_at: string;
+  createdAt?: string; // alias used by TransactionHistory component
   reference_id?: string;
 }
 

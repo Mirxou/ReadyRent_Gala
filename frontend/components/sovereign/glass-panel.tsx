@@ -13,12 +13,14 @@ import { motion, HTMLMotionProps } from "framer-motion";
  * - Context: Adapts to Dark/Light mode automatically.
  */
 
-interface GlassPanelProps extends HTMLMotionProps<"div"> {
+interface GlassPanelProps extends Omit<HTMLMotionProps<"div">, "children"> {
     gradientBorder?: boolean;
+    children?: React.ReactNode;
 }
 
 const GlassPanel = React.forwardRef<HTMLDivElement, GlassPanelProps>(
     ({ className, children, gradientBorder = false, ...props }, ref) => {
+
         return (
             <motion.div
                 ref={ref}

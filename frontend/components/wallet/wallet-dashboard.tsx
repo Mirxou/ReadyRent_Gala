@@ -21,7 +21,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { walletApi, WalletBalance, Transaction } from '@/lib/api/wallet';
+import { TransactionHistory } from '@/components/wallet/transaction-history';
 import { toast } from 'sonner';
+
 
 export const WalletDashboard = () => {
   const [balance, setBalance] = useState<WalletBalance | null>(null);
@@ -35,12 +37,12 @@ export const WalletDashboard = () => {
   const loadWalletData = async () => {
     try {
       setLoading(true);
-      const [balanceData, transactionsData] = await Promise.all([
+      const [balanceRes, transactionsRes] = await Promise.all([
         walletApi.getBalance(),
-        walletApi.getTransactions(5)
+        walletApi.getTransactions({ limit: 5 })
       ]);
-      setBalance(balanceData);
-      setTransactions(transactionsData);
+      if (balanceRes.data) setBalance(balanceRes.data);
+      if (transactionsRes.data) setTransactions(Array.isArray(transactionsRes.data) ? transactionsRes.data : []);
     } catch (error) {
       toast.error('تعذر تحميل بيانات المحفظة');
     } finally {

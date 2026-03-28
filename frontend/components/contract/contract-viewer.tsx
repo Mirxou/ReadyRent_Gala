@@ -26,14 +26,13 @@ interface ContractViewerProps {
 }
 
 export const ContractViewer: React.FC<ContractViewerProps> = ({ contract, onSign }) => {
-  const c = contract as any;
   const [isSigning, setIsSigning] = useState(false);
   const [signature, setSignature] = useState<string | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
 
-  const currentUser = c.parties?.find((p: any) => p.role === 'renter'); // demo assumption
-  const isFinalized = c.status === 'finalized' || c.status === 'signed' || c.is_finalized === true;
+  const currentUser = contract.parties?.find((p) => p.role === 'renter'); // demo assumption
+  const isFinalized = contract.status === 'finalized' || contract.status === 'signed' || contract.is_finalized === true;
 
   const startDrawing = (e: React.MouseEvent | React.TouchEvent) => {
     setIsDrawing(true);
@@ -111,7 +110,7 @@ export const ContractViewer: React.FC<ContractViewerProps> = ({ contract, onSign
 
       {/* Parties Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-right" dir="rtl">
-        {(c.parties ?? []).map((party: any) => (
+        {(contract.parties ?? []).map((party) => (
           <Card key={party.id} className="p-6 relative overflow-hidden group hover:shadow-md transition-shadow">
             <div className="absolute top-0 right-0 w-1 h-full bg-slate-200 group-hover:bg-indigo-500 transition-colors" />
             <div className="flex items-center gap-4 mb-4">
@@ -162,8 +161,8 @@ export const ContractViewer: React.FC<ContractViewerProps> = ({ contract, onSign
           البنود القانونية والضمانات
         </h2>
         <div className="prose prose-slate max-w-none text-slate-700 leading-relaxed font-serif" dir="rtl">
-          {typeof c.terms === 'string'
-            ? c.terms.split('\n').map((para: string, i: number) => (
+          {typeof contract.terms === 'string'
+            ? contract.terms.split('\n').map((para: string, i: number) => (
                 <p key={i} className="mb-4">{para.trim()}</p>
               ))
             : null}
@@ -244,7 +243,7 @@ export const ContractViewer: React.FC<ContractViewerProps> = ({ contract, onSign
           وثيقة محمية بنظام ReadyRent السيادي
         </div>
         <div className="font-mono bg-slate-100 px-3 py-1 rounded-full uppercase tracking-widest">
-          HASH: {c.hash ?? c.contract_hash}
+          HASH: {contract.contract_hash}
         </div>
       </div>
     </div>

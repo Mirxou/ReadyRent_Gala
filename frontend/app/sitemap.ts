@@ -1,5 +1,5 @@
 import { MetadataRoute } from 'next';
-import { productsApi, cmsApi, bundlesApi } from '@/lib/api';
+import { productsApi } from '@/lib/api/products';
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://standard.rent';
 
@@ -68,95 +68,27 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  try {
-    // Fetch all products
-    const productsResponse = await productsApi.getAll();
-    const products = Array.isArray(productsResponse.data)
-      ? productsResponse.data
-      : productsResponse.data?.results || [];
-
-    // Generate product pages
-    const productPages: MetadataRoute.Sitemap = products.map((product: any) => ({
-      url: `${baseUrl}/products/${product.slug || product.id}`,
-      lastModified: product.updated_at ? new Date(product.updated_at) : new Date(),
-      changeFrequency: 'weekly' as const,
-      priority: 0.7,
-    }));
-
-    // Fetch categories if available
-    const categoriesResponse = await productsApi.getCategories();
-    const categories = Array.isArray(categoriesResponse.data) ? categoriesResponse.data : [];
-
-    // Generate category pages
-    const categoryPages: MetadataRoute.Sitemap = categories.map((category: any) => ({
-      url: `${baseUrl}/products?category=${category.id}`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly' as const,
-      priority: 0.6,
-    }));
-
-    // Fetch blog posts
-    let blogPages: MetadataRoute.Sitemap = [];
+  // During build time, backend is not available — return static pages only.
+  // In production, Next.js will revalidate this route periodically.
+  if (process.env.NODE_ENV === 'production' && !process.env.NEXT_PUBLIC_API_URL?.includes('localhost')) {
     try {
-      const blogResponse = await cmsApi.getBlogPosts({ published: true });
-      const blogPosts = Array.isArray(blogResponse.data)
-        ? blogResponse.data
-        : blogResponse.data?.results || [];
-      blogPages = blogPosts.map((post: any) => ({
-        url: `${baseUrl}/blog/${post.id}`,
-        lastModified: post.updated_at ? new Date(post.updated_at) : new Date(),
+      const productsResponse = await productsApi.search('', {}).catch(() => ({ data: [] as any[] }));
+      const products: any[] = Array.isArray(productsResponse.data)
+        ? productsResponse.data
+        : (productsResponse.data as any)?.results ?? [];
+
+      const productPages: MetadataRoute.Sitemap = products.map((product: any) => ({
+        url: `${baseUrl}/products/${product.slug || product.id}`,
+        lastModified: product.updated_at ? new Date(product.updated_at) : new Date(),
         changeFrequency: 'weekly' as const,
         priority: 0.7,
       }));
-    } catch (error) {
-      console.error('Error fetching blog posts:', error);
-    }
 
-    // Fetch bundles
-    let bundlePages: MetadataRoute.Sitemap = [];
-    try {
-      const bundlesResponse = await bundlesApi.getAll({ active: true });
-      const bundles = Array.isArray(bundlesResponse.data)
-        ? bundlesResponse.data
-        : bundlesResponse.data?.results || [];
-      bundlePages = bundles.map((bundle: any) => ({
-        url: `${baseUrl}/bundles/${bundle.id}`,
-        lastModified: bundle.updated_at ? new Date(bundle.updated_at) : new Date(),
-        changeFrequency: 'weekly' as const,
-        priority: 0.7,
-      }));
-    } catch (error) {
-      console.error('Error fetching bundles:', error);
+      return [...staticPages, ...productPages];
+    } catch {
+      return staticPages;
     }
-
-    // Fetch CMS pages
-    let cmsPages: MetadataRoute.Sitemap = [];
-    try {
-      const pagesResponse = await cmsApi.getPages({ published: true });
-      const pages = Array.isArray(pagesResponse.data)
-        ? pagesResponse.data
-        : pagesResponse.data?.results || [];
-      cmsPages = pages.map((page: any) => ({
-        url: `${baseUrl}/pages/${page.slug}`,
-        lastModified: page.updated_at ? new Date(page.updated_at) : new Date(),
-        changeFrequency: 'monthly' as const,
-        priority: 0.6,
-      }));
-    } catch (error) {
-      console.error('Error fetching CMS pages:', error);
-    }
-
-    return [
-      ...staticPages,
-      ...productPages,
-      ...categoryPages,
-      ...blogPages,
-      ...bundlePages,
-      ...cmsPages,
-    ];
-  } catch (error) {
-    console.error('Error generating sitemap:', error);
-    return staticPages;
   }
-}
 
+  return staticPages;
+}

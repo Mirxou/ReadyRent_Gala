@@ -1,21 +1,39 @@
 // Sovereign API Client - connects to Django backend
-import { SovereignResponse, DisputeStatus, MediationOffer } from '@/types/sovereign';
+import { SovereignResponse } from '@/types/sovereign';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+
+// Extended options type that supports query params (compatible with fetch RequestInit)
+interface SovereignRequestOptions extends Omit<RequestInit, 'body'> {
+  params?: Record<string, any>;
+  body?: BodyInit | null;
+}
 
 export class SovereignClient {
   public async request<T>(
     endpoint: string,
-    options?: RequestInit
+    options?: SovereignRequestOptions
   ): Promise<SovereignResponse<T>> {
-    const url = endpoint.startsWith('http') ? endpoint : `${API_BASE}/api${endpoint}`;
+    // Build URL with optional query params
+    let path = endpoint.startsWith('http') ? endpoint : `${API_BASE}/api${endpoint}`;
+    if (options?.params) {
+      const qs = new URLSearchParams();
+      Object.entries(options.params).forEach(([k, v]) => {
+        if (v !== undefined && v !== null) qs.append(k, String(v));
+      });
+      const qStr = qs.toString();
+      if (qStr) path += (path.includes('?') ? '&' : '?') + qStr;
+    }
+
+    // Strip params from RequestInit before passing to fetch
+    const { params: _params, ...fetchOptions } = options ?? {};
 
     try {
-      const response = await fetch(url, {
-        ...options,
+      const response = await fetch(path, {
+        ...fetchOptions,
         headers: {
           'Content-Type': 'application/json',
-          ...options?.headers,
+          ...fetchOptions.headers,
         },
         credentials: 'include', // for cookies/JWT
       });
@@ -32,11 +50,11 @@ export class SovereignClient {
         };
       }
 
-      // Handle raw response if JSON is not possible (e.g. 204 No Content)
+      // Handle 204 No Content (e.g. DELETE success)
       if (response.status === 204) {
         return {
-          status: 'success',
-          code: 'NO_CONTENT',
+          status: 'sovereign_proceeding',
+          code: 'RESOLUTION_DELIVERED',
           dignity_preserved: true,
           message_ar: 'تمت العملية بنجاح',
           message_en: 'Operation successful',
@@ -46,33 +64,33 @@ export class SovereignClient {
 
       const data = await response.json();
 
-      // Enforce dignity_preserved flag
+      // Warn if backend response doesn't follow sovereign spec
       if (data && typeof data === 'object' && !('dignity_preserved' in data)) {
-        // Some endpoints might not be fully sovereign-compliant yet, warn but don't crash
-        console.warn('⚠️ Response might be missing dignity_preserved flag!', url);
+        console.warn('⚠️ Response might be missing dignity_preserved flag!', path);
       }
 
       return data;
     } catch (error) {
-      console.error("Sovereign Client Error:", error);
-      // Return a safe error response
+      // Use warn instead of error to avoid Next.js treating this as a build failure
+      // during static generation when backend is unavailable
+      console.warn('Sovereign Client: Connection unavailable:', (error as Error)?.message ?? error);
       return {
-        status: 'error',
-        code: 'CONNECTION_ERROR',
+        status: 'sovereign_halt',
+        code: 'SYSTEM_HALT',
         dignity_preserved: true,
         message_ar: 'خطأ في الاتصال بالنظام',
         message_en: 'Connection error',
-        data: null as unknown as T
+        data: null as unknown as T,
       };
     }
   }
 
   // Convenience methods
-  async get<T>(endpoint: string, options?: RequestInit) {
+  async get<T>(endpoint: string, options?: SovereignRequestOptions) {
     return this.request<T>(endpoint, { ...options, method: 'GET' });
   }
 
-  async post<T>(endpoint: string, data?: any, options?: RequestInit) {
+  async post<T>(endpoint: string, data?: any, options?: SovereignRequestOptions) {
     return this.request<T>(endpoint, {
       ...options,
       method: 'POST',
@@ -80,7 +98,7 @@ export class SovereignClient {
     });
   }
 
-  async put<T>(endpoint: string, data?: any, options?: RequestInit) {
+  async put<T>(endpoint: string, data?: any, options?: SovereignRequestOptions) {
     return this.request<T>(endpoint, {
       ...options,
       method: 'PUT',
@@ -88,7 +106,7 @@ export class SovereignClient {
     });
   }
 
-  async patch<T>(endpoint: string, data?: any, options?: RequestInit) {
+  async patch<T>(endpoint: string, data?: any, options?: SovereignRequestOptions) {
     return this.request<T>(endpoint, {
       ...options,
       method: 'PATCH',
@@ -96,8 +114,15 @@ export class SovereignClient {
     });
   }
 
-  async delete<T>(endpoint: string, options?: RequestInit) {
+  async delete<T>(endpoint: string, options?: SovereignRequestOptions) {
     return this.request<T>(endpoint, { ...options, method: 'DELETE' });
+  }
+
+  /**
+   * System status check — used by SovereignContext to detect sovereign_halt
+   */
+  async getSystemStatus() {
+    return this.get<{ status: string; code?: string }>('/health/');
   }
 }
 

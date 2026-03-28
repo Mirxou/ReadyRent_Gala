@@ -140,7 +140,7 @@ class AbuseDetector:
             won = 0
             for judgment in user_judgments:
                 dispute = judgment.dispute
-                if dispute.product.owner == user and judgment.verdict == 'favor_owner':
+                if dispute.booking and dispute.booking.product.owner == user and judgment.verdict == 'favor_owner':
                     won += 1
                 elif dispute.booking.user == user and judgment.verdict == 'favor_renter':
                     won += 1
