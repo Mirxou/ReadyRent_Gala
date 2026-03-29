@@ -4,7 +4,7 @@ import { productsApi } from '@/lib/api/products';
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://standard.rent';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  // Static pages
+  // Static pages including new Sovereign features
   const staticPages: MetadataRoute.Sitemap = [
     {
       url: baseUrl,
@@ -17,6 +17,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/ai-search`,
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/judicial`,
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/trust-score`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.8,
     },
     {
       url: `${baseUrl}/bundles`,
@@ -54,32 +72,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'monthly',
       priority: 0.7,
     },
-    {
-      url: `${baseUrl}/login`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.5,
-    },
-    {
-      url: `${baseUrl}/register`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.5,
-    },
   ];
 
-  // During build time, backend is not available — return static pages only.
-  // In production, Next.js will revalidate this route periodically.
-  if (process.env.NODE_ENV === 'production' && !process.env.NEXT_PUBLIC_API_URL?.includes('localhost')) {
-    try {
-      const productsResponse = await productsApi.search('', {}).catch(() => ({ data: [] as any[] }));
-      const products: any[] = Array.isArray(productsResponse.data)
-        ? productsResponse.data
-        : (productsResponse.data as any)?.results ?? [];
+  // Try to fetch dynamic products if environment allows
+  const isProduction = process.env.NODE_ENV === 'production';
+  const hasExternalApi = process.env.NEXT_PUBLIC_API_URL && !process.env.NEXT_PUBLIC_API_URL.includes('localhost');
 
-      const productPages: MetadataRoute.Sitemap = products.map((product: any) => ({
-        url: `${baseUrl}/products/${product.slug || product.id}`,
-        lastModified: product.updated_at ? new Date(product.updated_at) : new Date(),
+  if (isProduction && hasExternalApi) {
+    try {
+      const resp = await productsApi.search('', {}).catch(() => ({ data: [] as any[] }));
+      const products: any[] = Array.isArray(resp.data) ? resp.data : (resp.data as any)?.results ?? [];
+
+      const productPages: MetadataRoute.Sitemap = products.map((p: any) => ({
+        url: `${baseUrl}/products/${p.slug || p.id}`,
+        lastModified: p.updated_at ? new Date(p.updated_at) : new Date(),
         changeFrequency: 'weekly' as const,
         priority: 0.7,
       }));
