@@ -103,6 +103,7 @@ MIDDLEWARE = [
     'django.middleware.locale.LocaleMiddleware',  # Must be after SessionMiddleware and CommonMiddleware
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'apps.users.middleware.SovereignGuardMiddleware',  # 🛡️ SOVEREIGN GUARD: 2FA ENFORCEMENT
     'middleware.judicial_lockout.JudicialLockoutMiddleware',  # GLOBAL ETHICAL SHIELD
     'middleware.sovereign_response.SovereignResponseMiddleware',  # THE CONSTITUTIONAL ENFORCER
     'apps.core.middleware.MaintenanceModeMiddleware',  # Sovereign Emergency Protocol
@@ -147,29 +148,30 @@ if 'test' in sys.argv:
     }
 else:
     # 🌍 PRODUCTION/DEV: Use PostgreSQL if configured, otherwise fallback to SQLite
-import dj_database_url
+    import dj_database_url
 
-# 🛡️ SOVEREIGN DATABASE: Use PgBouncer (6543) in Prod, Fallback to direct DB (5432)
-# We use PgBouncer for transaction-level pooling to handle high concurrency.
-DATABASE_URL = env('DATABASE_URL', default='postgresql://rentily_admin:postgres@localhost:5432/rentily_production')
+    # 🛡️ SOVEREIGN DATABASE: Use PgBouncer (6543) in Prod, Fallback to direct DB (5432)
+    # We use PgBouncer for transaction-level pooling to handle high concurrency.
+    DATABASE_URL = env('DATABASE_URL', default='postgresql://rentily_admin:postgres@localhost:5432/rentily_production')
 
-DATABASES = {
-    'default': dj_database_url.config(
-        default=DATABASE_URL,
-        conn_max_age=0,  # 🛡️ PgBouncer handles pooling; Django should not hold connections
-        conn_health_checks=True,
-    )
-}
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=DATABASE_URL,
+            conn_max_age=0,  # 🛡️ PgBouncer handles pooling; Django should not hold connections
+            conn_health_checks=True,
+        )
+    }
 
-# 🛠️ Enterprise-Grade Database Tuning
-DATABASES['default'].update({
-    'OPTIONS': {
-        'connect_timeout': 10,
-        'options': '-c statement_timeout=30000',  # 30 second Hard Kill for hanging queries
-    },
-    'ATOMIC_REQUESTS': True,  # Wrap each request in a transaction (Atomicity)
-    'AUTOCOMMIT': True,
-})
+    # 🛠️ Enterprise-Grade Database Tuning
+    DATABASES['default'].update({
+        'OPTIONS': {
+            'connect_timeout': 10,
+            'options': '-c statement_timeout=30000',  # 30 second Hard Kill for hanging queries
+        },
+        'ATOMIC_REQUESTS': True,  # Wrap each request in a transaction (Atomicity)
+        'AUTOCOMMIT': True,
+    })
+
 
 # 🛡️ SOVEREIGN GUARD: Ensure we are not using SQLite in production
 if not DEBUG and DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3':
@@ -276,6 +278,10 @@ REST_FRAMEWORK = {
         'product_search': '60/min',   # Allow browsing
         'chatbot': '20/min',          # Prevent LLM abuse
     },
+    'DEFAULT_RENDERER_CLASSES': [
+        'core.renderers.SovereignJSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'backend.authentication.CookieJWTAuthentication', # 🛡️ Cookie-First Auth
         'rest_framework.authentication.SessionAuthentication',
@@ -284,7 +290,7 @@ REST_FRAMEWORK = {
 
 from datetime import timedelta
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),  # Short lived for security
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=10),  # Reduced for higher security rotation
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),     # Standard rotation window
     'ROTATE_REFRESH_TOKENS': True,                   # Critical for security
     'BLACKLIST_AFTER_ROTATION': True,                # Prevent reuse
