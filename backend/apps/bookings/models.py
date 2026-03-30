@@ -88,10 +88,19 @@ class Booking(models.Model):
         verbose_name = _('الحجز')
         verbose_name_plural = _('الحجوزات')
         ordering = ['-created_at']
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(end_date__gt=models.F('start_date')),
+                name='booking_end_date_after_start_date'
+            )
+        ]
         indexes = [
             models.Index(fields=['user', 'status']),
-            models.Index(fields=['product', 'start_date', 'end_date']),
+            models.Index(fields=['product', 'status']), # Added for availability checks
+            models.Index(fields=['start_date', 'end_date']),
+            models.Index(fields=['idempotency_key']), # Explicit index for fast lookup
         ]
+
     
     def __str__(self):
         return f"{self.user.email} - {self.product.name} ({self.start_date} to {self.end_date})"
@@ -161,6 +170,9 @@ def generate_token_on_confirm(sender, instance, **kwargs):
     if instance.status == 'confirmed' and not instance.qr_code_token:
         instance.qr_code_token = instance.generate_qr_token()
 
+import structlog
+logger = structlog.get_logger("bookings")
+
 @receiver(post_save, sender=Booking)
 def send_booking_notifications(sender, instance, created, **kwargs):
     """Send notifications when booking status changes"""
@@ -178,7 +190,12 @@ def send_booking_notifications(sender, instance, created, **kwargs):
             send_booking_confirmation_email(instance)
         except Exception as e:
             # Log error but don't fail the save
-            print(f"Error sending booking confirmation: {e}")
+            logger.error(
+                "booking_notification_failed",
+                booking_id=instance.id,
+                error=str(e),
+                exc_info=True
+            )
 
 
 class Cart(models.Model):
