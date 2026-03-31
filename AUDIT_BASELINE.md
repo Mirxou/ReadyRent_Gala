@@ -793,6 +793,8 @@ SEC-002	🟠 عالية	Security	JWT lifetime قصير	settings.py	✅ Fixed in 
 SEC-003	🟡 متوسطة	Security	CSP with unsafe-inline	settings.py	✅ Fixed in 68de86a
 PR-001	🟠 عالية	Performance	No DB indexes on Vendor	vendors/models.py	✅ Fixed in d56e9c2
 BK-001	🔴 حرجة	Production	print() statement	bookings/models.py	✅ Fixed in 461ab63
+BK-002	🟠 عالية	Production	لا يوجد idempotency key	bookings/models.py	🟢 Debunked (موجود في models.py)
+SEC-004	🟡 متوسطة	Security	لا يوجد 2FA	users/models.py	🟢 Debunked (موجود في users/services/security.py)
 5.2 تفاصيل المخالفات الحرجة
 CR-001: SECRET_KEY في الإنتاج
 الموقع: `.env.production`
@@ -1040,3 +1042,7 @@ core/crypto/hashing.py	46	9/10
 +FROM python:3.11-slim
 +USER appuser
 ```
+
+### 7. تفنيد BK-002 و SEC-004 (False Positives)
+**الملاحظة:** أشار التدقيق الأولي إلى غياب هاتين الميزتين.
+**الواقع:** عند التحقق من الشيفرة المصدرية (Ground Truth)، اتضح أن كلاهما مُنفذ بالكامل (Idempotency Key متواجد وحي في `bookings/models.py`، ونظام 2FA TOTP متكامل في `users/services/security.py` مع واجهات زجاجية مذهلة في Frontend). تم تصنيفهما كإيجابيات كاذبة.
