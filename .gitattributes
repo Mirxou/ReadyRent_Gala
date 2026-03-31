@@ -1,0 +1,40 @@
+# .gitattributes — ReadyRent.Gala
+# GAP-00 FIX + Git LF enforcement (2026-03-31)
+# Forces Git to normalize all text files to LF on commit and checkout.
+# Prevents CRLF creeping back in even on Windows.
+# Ref: AUDIT_BASELINE.md §12.0 GAP-00
+
+# Global: normalize all text files to LF
+* text=auto eol=lf
+
+# Explicitly enforce LF for source code
+*.py    text eol=lf
+*.js    text eol=lf
+*.ts    text eol=lf
+*.tsx   text eol=lf
+*.jsx   text eol=lf
+*.json  text eol=lf
+*.yml   text eol=lf
+*.yaml  text eol=lf
+*.md    text eol=lf
+*.txt   text eol=lf
+*.sh    text eol=lf
+*.env   text eol=lf
+*.cfg   text eol=lf
+*.ini   text eol=lf
+*.toml  text eol=lf
+*.css   text eol=lf
+*.html  text eol=lf
+*.sql   text eol=lf
+
+# Binary files — no line ending normalization
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.webp  binary
+*.ico   binary
+*.pdf   binary
+*.zip   binary
+*.gz    binary
+*.whl   binary

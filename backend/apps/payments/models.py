@@ -12,6 +12,9 @@ class PaymentMethod(models.Model):
     METHOD_CHOICES = [
         ('baridimob', _('BaridiMob')),
         ('bank_card', _('Bank Card')),
+        # GAP-03 FIX (2026-03-31): E-Dahabia (Golden Card) + COD. Ref: AUDIT_BASELINE.md §12.2 GAP-03.
+        ('edahabia', _('E-Dahabia (البطاقة الذهبية)')),
+        ('cod', _('دفع عند الاستلام (COD)')),
     ]
     
     name = models.CharField(_('name'), max_length=50, choices=METHOD_CHOICES, unique=True)
@@ -58,6 +61,21 @@ class Payment(models.Model):
         _('payment method'),
         max_length=20,
         choices=PaymentMethod.METHOD_CHOICES
+    )
+    
+    # GAP-03: E-Dahabia specific fields
+    edahabia_card_number_hash = models.CharField(
+        _('E-Dahabia card hash'), max_length=88, blank=True,
+        help_text='HMAC-SHA256 of card number for idempotency — never store plaintext'
+    )
+    # GAP-03: COD specific fields
+    cod_delivery_address = models.TextField(_('COD delivery address'), blank=True)
+    cod_confirmed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='cod_confirmations',
+        verbose_name=_('COD confirmed by staff')
     )
     amount = models.DecimalField(
         _('amount'),
@@ -274,6 +292,7 @@ class WalletTransaction(models.Model):
         ('refund', _('Refund')),
         ('escrow_lock', _('Escrow Lock')),
         ('escrow_release', _('Escrow Release')),
+        ('escrow_refund', _('Escrow Refund')),  # GAP-05 FIX (2026-03-31): was in docs, missing from code
         ('penalty', _('Penalty')),
     ]
     

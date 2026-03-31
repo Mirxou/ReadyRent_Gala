@@ -5,6 +5,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
+from apps.core.crypto.fields import EncryptedCharField  # GAP-01 FIX (2026-03-31)
 
 
 class Vendor(models.Model):
@@ -23,8 +24,10 @@ class Vendor(models.Model):
         verbose_name=_('user'))
     business_name = models.CharField(_('business name'), max_length=200)
     business_name_ar = models.CharField(_('business name (Arabic)'), max_length=200)
-    tax_id = models.CharField(_('tax ID'), max_length=50, blank=True)
-    registration_number = models.CharField(_('registration number'), max_length=50, blank=True)
+    # GAP-01 FIX (2026-03-31): tax_id & registration_number are sensitive PII.
+    # Must be encrypted at rest like email/phone. Ref: AUDIT_BASELINE.md §12.2 GAP-01.
+    tax_id = EncryptedCharField(_('tax ID'), max_length=50, blank=True)
+    registration_number = EncryptedCharField(_('registration number'), max_length=50, blank=True)
     
     # Contact info
     phone = models.CharField(_('phone'), max_length=20)

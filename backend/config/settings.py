@@ -89,6 +89,7 @@ INSTALLED_APPS = [
     'apps.contracts',
     'apps.social',
     'apps.audit', # 🛡️ Immutable Audit Logging (Phase 15.4)
+    'apps.communication',  # GAP-06 FIX (2026-03-31): WebSocket Signaling (was ghost module — now registered)
     'standard_core', # The Sovereign Kernel (Phase 11)
 ]
 

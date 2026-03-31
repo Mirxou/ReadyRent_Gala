@@ -212,6 +212,124 @@ class VerificationStatus(models.Model):
         return f"{self.user.email} - {self.get_status_display()}"
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# GAP-02 FIX (2026-03-31): KYC Completion — VerificationLevel + FaceVerification
+# Ref: AUDIT_BASELINE.md §12.2 GAP-02
+# ─────────────────────────────────────────────────────────────────────────────
+
+class VerificationLevel(models.Model):
+    """
+    KYC Tier System — enforces transaction limits per verified level.
+    BASIC   → phone verified only       → max 10,000 DZD/transaction
+    STANDARD → ID + selfie verified     → max 50,000 DZD/transaction
+    PREMIUM  → full KYB / biometric     → unlimited (B2B / power users)
+    """
+    LEVEL_CHOICES = [
+        ('basic',    _('Basic — Phone Only')),
+        ('standard', _('Standard — ID + Selfie')),
+        ('premium',  _('Premium — Biometric / KYB')),
+    ]
+
+    LIMIT_MAP = {
+        'basic':    10_000,
+        'standard': 50_000,
+        'premium':  None,   # No limit
+    }
+
+    user = models.OneToOneField(
+        User, on_delete=models.CASCADE,
+        related_name='verification_level',
+        verbose_name=_('user')
+    )
+    level = models.CharField(
+        _('verification level'), max_length=20,
+        choices=LEVEL_CHOICES, default='basic'
+    )
+    upgraded_at = models.DateTimeField(_('upgraded at'), null=True, blank=True)
+    upgraded_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='kyc_level_upgrades', verbose_name=_('upgraded by')
+    )
+    notes = models.TextField(_('notes'), blank=True)
+    created_at = models.DateTimeField(_('created at'), auto_now_add=True)
+    updated_at = models.DateTimeField(_('updated at'), auto_now=True)
+
+    class Meta:
+        verbose_name = _('مستوى التحقق')
+        verbose_name_plural = _('مستويات التحقق')
+
+    @property
+    def transaction_limit(self):
+        """Returns max DZD per transaction, or None if unlimited."""
+        return self.LIMIT_MAP.get(self.level)
+
+    def can_transact(self, amount) -> bool:
+        """Check if user is allowed to initiate a transaction of this amount."""
+        limit = self.transaction_limit
+        if limit is None:
+            return True
+        return amount <= limit
+
+    def __str__(self):
+        return f"{self.user} — {self.get_level_display()}"
+
+
+class FaceVerification(models.Model):
+    """
+    AI Biometric Verification record.
+    Stores encrypted face descriptor reference (NOT the image — image stays in
+    VerificationStatus.selfie). Only the AI-generated face_id token is stored,
+    encrypted with EncryptedCharField (AES-256), so raw biometrics never touch
+    the DB in plaintext.
+    """
+    STATUS_CHOICES = [
+        ('pending',   _('Pending')),
+        ('matched',   _('Face Matched ✅')),
+        ('mismatch',  _('Face Mismatch ❌')),
+        ('low_quality', _('Low Quality Image')),
+        ('error',     _('Processing Error')),
+    ]
+
+    verification = models.OneToOneField(
+        VerificationStatus, on_delete=models.CASCADE,
+        related_name='face_verification',
+        verbose_name=_('verification record')
+    )
+    status = models.CharField(
+        _('status'), max_length=20,
+        choices=STATUS_CHOICES, default='pending'
+    )
+    # Encrypted AI face descriptor token — never stores raw biometric data
+    face_id = EncryptedCharField(
+        _('face ID token'), max_length=512,
+        blank=True,
+        help_text='Encrypted AI face descriptor token. Raw biometrics are never stored.'
+    )
+    confidence_score = models.DecimalField(
+        _('confidence score'), max_digits=5, decimal_places=4,
+        null=True, blank=True,
+        help_text='AI match confidence: 0.0000 → 1.0000. Threshold: 0.8500'
+    )
+    liveness_passed = models.BooleanField(_('liveness check passed'), default=False)
+    model_version = models.CharField(
+        _('AI model version'), max_length=50, blank=True,
+        help_text='e.g. deepface-v2.1 — for drift tracking'
+    )
+    processed_at = models.DateTimeField(_('processed at'), null=True, blank=True)
+    created_at = models.DateTimeField(_('created at'), auto_now_add=True)
+
+    class Meta:
+        verbose_name = _('التحقق البيومتري')
+        verbose_name_plural = _('التحققات البيومترية')
+
+    def is_verified(self) -> bool:
+        return self.status == 'matched' and self.liveness_passed
+
+    def __str__(self):
+        return f"FaceVerification({self.verification.user}) — {self.get_status_display()}"
+
+
+
 class Blacklist(models.Model):
     """Blacklist for suspicious users"""
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='blacklist_entries',
