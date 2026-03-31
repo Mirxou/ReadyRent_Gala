@@ -291,9 +291,9 @@ jobs:
       - name: Run Post-Deploy Health Checks
         run: |
           echo "Running health checks..."
-          # sleep 30  # Wait for services to start
-          # curl -f https://staging-backend.readyrent.gala/api/health/ || exit 1
-          # curl -f https://staging.readyrent.gala/ || exit 1
+          sleep 30  # Wait for services to start
+          curl -f https://staging-backend.readyrent.gala/api/health/ || exit 1
+          curl -f https://staging.readyrent.gala/ || exit 1
           echo "Health checks passed"
 
   deploy-production:
@@ -342,9 +342,9 @@ jobs:
       - name: Run Post-Deploy Health Checks
         run: |
           echo "Running health checks..."
-          # sleep 30  # Wait for services to start
-          # curl -f https://api.readyrent.gala/api/health/ || exit 1
-          # curl -f https://readyrent.gala/ || exit 1
+          sleep 30  # Wait for services to start
+          curl -f https://api.readyrent.gala/api/health/ || exit 1
+          curl -f https://readyrent.gala/ || exit 1
           echo "Health checks passed"
       
       - name: Create Deployment Tag
