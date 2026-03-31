@@ -6,7 +6,8 @@ from .views import (
     AdminDashboardStatsView, AdminRevenueView, AdminSalesReportView,
     ForecastListView, ForecastDetailView, GenerateForecastView,
     HighDemandProductsView, LowStockAlertsView, TrendAnalysisView,
-    ProductActivityView,
+    ProductActivityView, IntelligenceViewSet,
+    RegionalLiquidityView, IntelligenceReportView # Assuming these views also exist or will be added
 )
 
 router = DefaultRouter()
@@ -14,6 +15,7 @@ router.register(r'events', AnalyticsEventViewSet, basename='analytics-event')
 router.register(r'products', ProductAnalyticsViewSet, basename='product-analytics')
 router.register(r'daily', DailyAnalyticsViewSet, basename='daily-analytics')
 router.register(r'user-behavior', UserBehaviorViewSet, basename='user-behavior')
+router.register(r'intelligence', IntelligenceViewSet, basename='intelligence')
 
 urlpatterns = [
     path('', include(router.urls)),
@@ -31,5 +33,9 @@ urlpatterns = [
     
     # Live Trust Counters
     path('live/activity/<int:product_id>/', ProductActivityView.as_view(), name='live-product-activity'),
+    
+    # Mastery Intelligence Hub
+    path('admin/regional-liquidity/', RegionalLiquidityView.as_view(), name='admin-regional-liquidity'),
+    path('intelligence/report/', IntelligenceReportView.as_view(), name='intelligence-report'),
 ]
 

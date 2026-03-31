@@ -1,5 +1,23 @@
 from rest_framework import serializers
-from .models import AnalyticsEvent, ProductAnalytics, DailyAnalytics, UserBehavior, Forecast
+from .models import (
+    AnalyticsEvent, ProductAnalytics, DailyAnalytics, 
+    UserBehavior, Forecast, MarketIntelligence
+)
+
+
+class MarketIntelligenceSerializer(serializers.ModelSerializer):
+    """
+    Sovereign Intelligence Serializer.
+    Phase 13: Mastery Finalization.
+    """
+    class Meta:
+        model = MarketIntelligence
+        fields = [
+            'id', 'intel_type', 'region', 'title', 'description', 
+            'metrics', 'source_platform', 'external_url', 
+            'confidence_score', 'timestamp'
+        ]
+        read_only_fields = ['timestamp']
 
 
 class AnalyticsEventSerializer(serializers.ModelSerializer):

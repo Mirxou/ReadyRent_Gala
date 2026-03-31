@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReadyRent - الشريحة 3</title>
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap');
+    
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #0a0a0a;
+      font-family: 'IBM Plex Sans Arabic', sans-serif;
+    }
+    .slide-content {
+      width: 960px;
+      height: 540px;
+      position: relative;
+      transform-origin: center center;
+    }
+    </style>
+    <script>
+    function scaleSlide() {
+      const slide = document.querySelector('.slide-content');
+      if (!slide) return;
+      const slideWidth = 960;
+      const slideHeight = 540;
+      const scaleX = window.innerWidth / slideWidth;
+      const scaleY = window.innerHeight / slideHeight;
+      const scale = Math.min(scaleX, scaleY);
+      slide.style.width = slideWidth + 'px';
+      slide.style.height = slideHeight + 'px';
+      slide.style.transform = `scale(${scale})`;
+      slide.style.transformOrigin = 'center center';
+    }
+    window.addEventListener('load', scaleSlide);
+    window.addEventListener('resize', scaleSlide);
+    </script>
+</head>
+<body style="background:#0a0a0a;">
+    <div class="slide-content" style="background:#0a0a0a; color:#ffffff;">
+        
+        <!-- Header -->
+        <h2 style="position:absolute; right:60px; top:40px; font-size:36px; font-weight:700; color:#ffffff; margin:0;">
+            الحل: <span style="color:#D4AF37;">المنظومة السيادية الثلاثية</span>
+        </h2>
+        
+        <svg style="position:absolute; top:90px; right:60px;" width="120" height="4">
+            <rect width="120" height="4" rx="2" fill="#D4AF37"/>
+        </svg>
+
+        <!-- Solution Pillars -->
+        <div style="position:absolute; right:60px; top:180px; width:840px; height:280px;">
+            
+            <!-- Connector Line (SVG Straight Line) -->
+            <svg style="position:absolute; top:80px; left:0; width:100%; height:2px; z-index:0;">
+                <rect width="840" height="2" fill="rgba(212, 175, 55, 0.2)"/>
+            </svg>
+
+            <!-- Pillar 1: Economic -->
+            <div style="position:absolute; right:0; top:0; width:220px; z-index:1; text-align:center;">
+                <svg width="64" height="64" style="margin-bottom:16px;">
+                    <circle cx="32" cy="32" r="30" stroke="#D4AF37" stroke-width="2" fill="rgba(212, 175, 55, 0.1)"/>
+                    <path d="M20 32 L44 32 M32 20 L32 44" stroke="#D4AF37" stroke-width="2" fill="none"/>
+                </svg>
+                <h3 style="font-size:18px; font-weight:700; color:#D4AF37; margin:0 0 8px 0; letter-spacing:1px;">الطبقة الاقتصادية</h3>
+                <p style="font-size:13px; color:#d4d4d4; margin:0; line-height:1.8;">
+                    محرك الضمان المالي (Escrow) يدير عمليات التسوية الفورية ويضمن عدم تسرب السيولة.
+                </p>
+            </div>
+
+            <!-- Pillar 2: Judicial -->
+            <div style="position:absolute; right:310px; top:0; width:220px; z-index:1; text-align:center;">
+                <svg width="64" height="64" style="margin-bottom:16px;">
+                    <circle cx="32" cy="32" r="30" stroke="#ffffff" stroke-width="2" fill="rgba(255, 255, 255, 0.05)"/>
+                    <rect x="22" y="22" width="20" height="20" stroke="#ffffff" stroke-width="2" fill="none"/>
+                </svg>
+                <h3 style="font-size:18px; font-weight:700; color:#ffffff; margin:0 0 8px 0; letter-spacing:1px;">الطبقة القضائية</h3>
+                <p style="font-size:13px; color:#d4d4d4; margin:0; line-height:1.8;">
+                    خزنة الأدلة (Evidence Vault) توفر سجلات تدقيق غير قابلة للتغيير لتسوية النزاعات في ثوانٍ.
+                </p>
+            </div>
+
+            <!-- Pillar 3: Asset -->
+            <div style="position:absolute; right:620px; top:0; width:220px; z-index:1; text-align:center;">
+                <svg width="64" height="64" style="margin-bottom:16px;">
+                    <circle cx="32" cy="32" r="30" stroke="#D4AF37" stroke-width="2" fill="rgba(212, 175, 55, 0.1)"/>
+                    <path d="M22 25 L32 35 L42 25" stroke="#D4AF37" stroke-width="2" fill="none"/>
+                </svg>
+                <h3 style="font-size:18px; font-weight:700; color:#D4AF37; margin:0 0 8px 0; letter-spacing:1px;">الطبقة الأصولية</h3>
+                <p style="font-size:13px; color:#d4d4d4; margin:0; line-height:1.8;">
+                    إدارة المخزون السيادي تسمح للملاك بالتحقق من الأصول عالية القيمة وإدراجها بأمان.
+                </p>
+            </div>
+
+        </div>
+
+        <!-- Tagline -->
+        <p style="position:absolute; right:60px; bottom:80px; font-size:24px; font-weight:600; color:#ffffff;">
+            موثوقة من كبار الملاك. مدعومة بـ <span style="color:#D4AF37;">كود سيادي.</span>
+        </p>
+
+        <!-- Page Number -->
+        <svg style="position:absolute; left:32px; bottom:24px;" width="36" height="36" viewBox="0 0 36 36">
+            <circle cx="18" cy="18" r="18" fill="#D4AF37" fill-opacity="0.2" stroke="#D4AF37" stroke-width="1"/>
+            <text x="18" y="18" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="600" fill="#D4AF37">03</text>
+        </svg>
+
+    </div>
+</body>
+</html>

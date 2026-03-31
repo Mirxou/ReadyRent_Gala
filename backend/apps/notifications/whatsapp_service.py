@@ -1,10 +1,9 @@
-"""
-WhatsApp Business API service
-"""
+import structlog
 import requests
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 
+logger = structlog.get_logger("notifications.whatsapp")
 
 class WhatsAppService:
     """Service for sending WhatsApp messages via WhatsApp Business API"""
@@ -30,7 +29,7 @@ class WhatsAppService:
             dict with success status and message_id
         """
         if not cls.API_URL or not cls.API_TOKEN or not cls.PHONE_NUMBER_ID:
-            print("WhatsApp API not configured")
+            logger.warning("whatsapp_api_not_configured")
             return {'success': False, 'error': 'WhatsApp API not configured'}
         
         # Format phone number (remove + if present, ensure country code)
@@ -89,7 +88,12 @@ class WhatsAppService:
                 'message_id': data.get('messages', [{}])[0].get('id', ''),
             }
         except requests.exceptions.RequestException as e:
-            print(f"Error sending WhatsApp message: {e}")
+            logger.error(
+                "whatsapp_send_failed",
+                to_phone=to_phone,
+                error=str(e),
+                exc_info=True
+            )
             return {
                 'success': False,
                 'error': str(e),

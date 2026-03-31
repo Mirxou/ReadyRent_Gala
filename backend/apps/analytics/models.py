@@ -257,3 +257,44 @@ class Forecast(models.Model):
         elif self.category:
             return f"Forecast for {self.category.name_ar} - {self.forecast_start} to {self.forecast_end}"
         return f"{self.get_forecast_type_display()} - {self.forecast_start} to {self.forecast_end}"
+
+
+class MarketIntelligence(models.Model):
+    """
+    Strategic Intelligence Hub data.
+    Phase 13: Mastery Finalization.
+    Stores scraped trends, regional popularities, and liquidity signals.
+    """
+    INTELLIGENCE_TYPE = [
+        ('social_trend', _('Social Trend')),
+        ('regional_liquidity', _('Regional Liquidity')),
+        ('competitor_signal', _('Competitor Signal')),
+        ('cultural_pulse', _('Cultural Pulse')),
+    ]
+
+    intel_type = models.CharField(max_length=30, choices=INTELLIGENCE_TYPE)
+    region = models.CharField(max_length=100, default='Algeria') # e.g. "Algiers", "Oran"
+    
+    # Payload
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    metrics = models.JSONField(default=dict, help_text=_("e.g. {'growth': 15, 'engagement': 80}"))
+    
+    # Source metadata
+    source_platform = models.CharField(max_length=50, blank=True) # e.g. "Instagram", "TikTok"
+    external_url = models.URLField(blank=True)
+    
+    # Scoring
+    confidence_score = models.IntegerField(default=70, help_text=_("0-100 scale"))
+    is_active = models.BooleanField(default=True)
+    
+    timestamp = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = _('إستخبارات السوق')
+        verbose_name_plural = _('إستخبارات السوق')
+        ordering = ['-timestamp']
+
+    def __str__(self):
+        return f"[{self.get_intel_type_display()}] {self.title} ({self.region})"

@@ -281,3 +281,15 @@ class PerformanceReviewSerializer(serializers.ModelSerializer):
             return f"{obj.reviewed_by.profile.first_name_ar} {obj.reviewed_by.profile.last_name_ar}".strip()
         return obj.reviewed_by.email if obj.reviewed_by else None
 
+
+class TOTPVerifySerializer(serializers.Serializer):
+    """Serializer for verifying a TOTP token"""
+    token = serializers.CharField(max_length=6, min_length=6, required=True)
+    secret = serializers.CharField(max_length=32, required=True)
+
+
+class TOTPEnableSerializer(serializers.Serializer):
+    """Serializer for enabling 2FA with a token and secret"""
+    token = serializers.CharField(max_length=6, min_length=6, required=True)
+    secret = serializers.CharField(max_length=32, required=True)
+

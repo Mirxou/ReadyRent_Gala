@@ -1,18 +1,8 @@
-"""
-Async Tasks Module for Disputes App
-
-Provides background thread helpers to move blocking operations off the request path.
-
-Usage:
-    from apps.disputes.async_tasks import async_create_evidence_log, async_embed_judgment
-    
-    # In signals or views
-    async_create_evidence_log(action="BOOKING_CREATED", actor=user, booking=booking)
-"""
-
+import structlog
 import threading
 from django.db import transaction
 
+logger = structlog.get_logger("disputes.async_tasks")
 
 def async_create_evidence_log(action, actor, booking=None, dispute=None, metadata=None, context_snapshot=None):
     """
@@ -43,10 +33,15 @@ def async_create_evidence_log(action, actor, booking=None, dispute=None, metadat
                 metadata=metadata or {},
                 context_snapshot=context_snapshot or {}
             )
-            print(f"✅ ASYNC VAULT: Logged {action}")
+            logger.info("async_vault_logged", action=action)
         except Exception as e:
             # Log error but don't crash the main application
-            print(f"⚠️ ASYNC EVIDENCE VAULT ERROR: {e}")
+            logger.error(
+                "async_evidence_vault_error",
+                action=action,
+                error=str(e),
+                exc_info=True
+            )
             # In production, this should go to proper logging system
     
     # Run in background thread AFTER transaction commits
@@ -76,14 +71,19 @@ def async_embed_judgment(judgment_id, delay_seconds=5):
             judgment = Judgment.objects.get(id=judgment_id)
             if judgment.status == 'final':
                 PrecedentSearchService.embed_judgment(judgment)
-                print(f"✅ ASYNC EMBED: Judgment #{judgment_id} embedded successfully")
+                logger.info("async_embed_success", judgment_id=judgment_id)
         except Judgment.DoesNotExist:
-            print(f"⚠️ ASYNC EMBED ERROR: Judgment #{judgment_id} not found")
+            logger.error("async_embed_failed_not_found", judgment_id=judgment_id)
         except Exception as e:
-            print(f"⚠️ ASYNC EMBED ERROR for Judgment #{judgment_id}: {e}")
+            logger.error(
+                "async_embed_failed_error",
+                judgment_id=judgment_id,
+                error=str(e),
+                exc_info=True
+            )
             # In production, this should go to proper logging system
     
     # Delay by N seconds to batch near-simultaneous requests
     # This reduces load during bulk operations
     threading.Timer(delay_seconds, _embed).start()
-    print(f"🕐 ASYNC EMBED: Scheduled for Judgment #{judgment_id} in {delay_seconds}s")
+    logger.info("async_embed_scheduled", judgment_id=judgment_id, delay_seconds=delay_seconds)

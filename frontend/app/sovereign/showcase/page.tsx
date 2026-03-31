@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { SovereignSeal } from '@/components/sovereign/SovereignSeal';
-import { JusticeReceipt } from '@/components/sovereign/JusticeReceipt';
-import { ModeSwitcher } from '@/components/sovereign/ModeSwitcher';
-import { DignifiedLoader } from '@/components/sovereign/DignifiedLoader';
+import { SovereignSeal } from '@/shared/components/sovereign/sovereign-seal';
+import { JusticeReceipt } from '@/shared/components/sovereign/justice-receipt';
+import { ModeSwitcher } from '@/shared/components/sovereign/mode-switcher';
+import { DignifiedLoader } from '@/shared/components/sovereign/dignified-loader';
 import { useSovereign } from '@/contexts/SovereignContext';
 
 export default function SovereignShowcasePage() {

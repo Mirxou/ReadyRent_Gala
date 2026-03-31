@@ -6,7 +6,10 @@ import string
 from datetime import timedelta
 from django.utils import timezone
 from django.core.cache import cache
+import structlog
 from .models import VerificationStatus, Blacklist, User
+
+logger = structlog.get_logger("users.verification")
 
 
 class VerificationService:
@@ -28,7 +31,11 @@ class VerificationService:
             return True
         else:
             # Log error but don't fail verification process
-            print(f"Error sending SMS: {result.get('error', 'Unknown error')}")
+            logger.error(
+                "sms_verification_failed",
+                phone_number=phone_number,
+                error=result.get('error', 'Unknown error')
+            )
             # In development, still return True to allow testing
             # In production, you might want to return False or raise an exception
             from django.conf import settings

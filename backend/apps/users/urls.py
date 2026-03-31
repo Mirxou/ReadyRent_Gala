@@ -4,7 +4,8 @@ from apps.users.views import (
     RequestPhoneVerificationView, VerifyPhoneView,
     UploadIDView, VerifyAddressView,
     CookieTokenRefreshView, LogoutView,
-    PasswordResetRequestView, PasswordResetConfirmView
+    PasswordResetRequestView, PasswordResetConfirmView,
+    Generate2FASecretView, Enable2FAView
 )
 
 urlpatterns = [
@@ -23,4 +24,8 @@ urlpatterns = [
     # Password Reset
     path('password-reset/', PasswordResetRequestView.as_view(), name='password_reset_request'),
     path('password-reset/confirm/', PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
+
+    # Security (Phase 6)
+    path('security/2fa/generate/', Generate2FASecretView.as_view(), name='2fa_generate'),
+    path('security/2fa/enable/', Enable2FAView.as_view(), name='2fa_enable'),
 ]

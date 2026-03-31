@@ -7,10 +7,12 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from django_filters.rest_framework import DjangoFilterBackend
 from django.utils import timezone
-from .models import Payment, PaymentMethod
+from .models import Payment, PaymentMethod, EscrowHold, Wallet
 from .serializers import (
     PaymentSerializer, PaymentCreateSerializer, PaymentMethodSerializer
 )
+from .states import EscrowState
+from django.db.models import Sum, Count
 from .services import PaymentService, BaridiMobService, BankCardService
 from apps.bookings.models import Booking
 
@@ -234,3 +236,35 @@ class PaymentCreateView(generics.CreateAPIView):
                 'payment': payment_serializer.data,
                 'error': result.get('error', 'Payment processing failed')
             }, status=status.HTTP_400_BAD_REQUEST)
+
+
+class EscrowMetricsView(generics.GenericAPIView):
+    """
+    Sovereign Financial Intelligence: Metrics for the Digital Vault.
+    Phase 13: Mastery Finalization.
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        # 1. Total Secured Liquidity (Held + Disputed)
+        escrow_stats = EscrowHold.objects.filter(
+            state__in=[EscrowState.HELD, EscrowState.DISPUTED]
+        ).aggregate(
+            total_hz=Sum('amount'),
+            active_count=Count('id')
+        )
+        
+        # 2. User-Specific Metrics (Optional)
+        user_wallet = getattr(request.user, 'wallet', None)
+        
+        return Response({
+            "status": "sovereign_economics",
+            "dignity_preserved": True,
+            "metrics": {
+                "total_secured": float(escrow_stats['total_hz'] or 0.0),
+                "active_escrows": escrow_stats['active_count'] or 0,
+                "currency": "DZD",
+                "vault_status": "ENCRYPTED_PGBOUNCER",
+                "user_balance": float(user_wallet.balance) if user_wallet else 0.0
+            }
+        })

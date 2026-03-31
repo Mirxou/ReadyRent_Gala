@@ -17,6 +17,7 @@ import { ParticleField } from '@/components/ui/particle-field';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MagneticButton } from '@/components/ui/magnetic-button';
 import { TiltCard } from '@/components/ui/tilt-card';
+import { HighCourtMonitor } from '@/features/judicial/components/high-court-monitor';
 
 export default function AdminDashboardPage() {
   const router = useRouter();
@@ -225,6 +226,11 @@ export default function AdminDashboardPage() {
               </CardContent>
             </Card>
           )}
+        </div>
+
+        {/* High Court: Sovereign Integrity Monitor (Phase 6) */}
+        <div className="mt-12">
+          <HighCourtMonitor />
         </div>
 
         {/* Quick Actions Panel */}

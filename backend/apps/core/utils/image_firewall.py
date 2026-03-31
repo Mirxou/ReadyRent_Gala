@@ -1,11 +1,11 @@
+import structlog
 import os
 import sys
 from PIL import Image
 from io import BytesIO
 from django.core.files.uploadedfile import InMemoryUploadedFile
-import logging
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger("core.image_firewall")
 
 # Try importing DeepFace, handle if not installed (though it should be)
 try:
@@ -13,7 +13,7 @@ try:
     DEEPFACE_AVAILABLE = True
 except ImportError:
     DEEPFACE_AVAILABLE = False
-    logger.info("DeepFace not found. Identity verification will be skipped.")
+    logger.info("identity_verification_skipped_no_deepface")
 
 
 class ImageFirewall:
@@ -46,7 +46,11 @@ class ImageFirewall:
             )
         except Exception as e:
             # If scrubbing fails, return original or raise warning
-            print(f"EXIF Scrubbing failed: {e}")
+            logger.error(
+                "exif_scrubbing_failed",
+                error=str(e),
+                exc_info=True
+            )
             return image_file
 
     @staticmethod
@@ -78,7 +82,11 @@ class ImageFirewall:
                 None
             )
         except Exception as e:
-            print(f"Compression failed: {e}")
+            logger.error(
+                "image_compression_failed",
+                error=str(e),
+                exc_info=True
+            )
             return image_file
 
     @staticmethod

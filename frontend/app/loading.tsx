@@ -1,4 +1,4 @@
-import { DignifiedLoader } from '@/components/sovereign/DignifiedLoader';
+import { DignifiedLoader } from '@/shared/components/sovereign/dignified-loader';
 
 export default function Loading() {
     return (

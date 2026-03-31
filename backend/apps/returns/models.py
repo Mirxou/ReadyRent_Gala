@@ -94,7 +94,12 @@ def send_return_notifications(sender, instance, created, **kwargs):
         try:
             send_return_confirmation_email(instance)
         except Exception as e:
-            print(f"Error sending return confirmation: {e}")
+            logger.error(
+                "return_confirmation_failed",
+                return_id=instance.id,
+                error=str(e),
+                exc_info=True
+            )
 
 
 class ReturnItem(models.Model):

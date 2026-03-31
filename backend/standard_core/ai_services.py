@@ -1,5 +1,8 @@
+import structlog
 from decimal import Decimal
 from unittest.mock import MagicMock
+
+logger = structlog.get_logger("standard_core.ai_services")
 
 # Stub DeepFace for now since we are in a skeleton environment
 # In production, this would be: from deepface import DeepFace
@@ -59,5 +62,10 @@ class IdentityGuard:
 
         except Exception as e:
             # AI Service Failure (Log it)
-            print(f"AI Verification Error: {e}")
+            logger.error(
+                "ai_verification_failed",
+                user_id=getattr(user, 'id', None),
+                error=str(e),
+                exc_info=True
+            )
             return False

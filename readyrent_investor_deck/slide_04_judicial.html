@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReadyRent - الشريحة 4</title>
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap');
+    
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #0a0a0a;
+      font-family: 'IBM Plex Sans Arabic', sans-serif;
+    }
+    .slide-content {
+      width: 960px;
+      height: 540px;
+      position: relative;
+      transform-origin: center center;
+    }
+    </style>
+    <script>
+    function scaleSlide() {
+      const slide = document.querySelector('.slide-content');
+      if (!slide) return;
+      const slideWidth = 960;
+      const slideHeight = 540;
+      const scaleX = window.innerWidth / slideWidth;
+      const scaleY = window.innerHeight / slideHeight;
+      const scale = Math.min(scaleX, scaleY);
+      slide.style.width = slideWidth + 'px';
+      slide.style.height = slideHeight + 'px';
+      slide.style.transform = `scale(${scale})`;
+      slide.style.transformOrigin = 'center center';
+    }
+    window.addEventListener('load', scaleSlide);
+    window.addEventListener('resize', scaleSlide);
+    </script>
+</head>
+<body style="background:#0a0a0a;">
+    <div class="slide-content" style="background:#0a0a0a; color:#ffffff;">
+        
+        <!-- Header -->
+        <h2 style="position:absolute; right:60px; top:40px; font-size:36px; font-weight:700; color:#ffffff; margin:0;">
+            النزاهة القضائية: <span style="color:#ffffff;">خزنة الأدلة الرقمية</span>
+        </h2>
+        
+        <svg style="position:absolute; top:90px; right:60px;" width="120" height="4">
+            <rect width="120" height="4" rx="2" fill="#ffffff"/>
+        </svg>
+
+        <!-- Descriptive Text -->
+        <p style="position:absolute; right:60px; top:120px; font-size:20px; color:#a3a3a3; margin:0; line-height:1.6; width:500px;">
+            تقوم خزنة الأدلة بالقضاء على معضلة "كلمته ضد كلمتها" من خلال إنشاء مسار تتبع غير قابل للتلاعب لكل دورة حياة إيجارية.
+        </p>
+
+        <!-- Hash Chain Visual (SVG) -->
+        <div style="position:absolute; right:60px; top:220px; width:840px;">
+            <svg width="840" height="100" viewBox="0 0 840 100">
+                <!-- Block 1 -->
+                <rect x="660" y="20" width="180" height="60" rx="8" fill="rgba(255, 255, 255, 0.05)" stroke="#ffffff" stroke-width="1"/>
+                <text x="750" y="45" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="700" fill="#ffffff">إنشاء الحجز</text>
+                <text x="750" y="65" text-anchor="middle" dominant-baseline="central" font-size="10" font-family="monospace" fill="#a3a3a3">HASH: 7a!9...</text>
+
+                <!-- Connector 1 -->
+                <path d="M660 50 L620 50" stroke="#ffffff" stroke-width="2" stroke-dasharray="4,4"/>
+
+                <!-- Block 2 -->
+                <rect x="440" y="20" width="180" height="60" rx="8" fill="rgba(255, 255, 255, 0.05)" stroke="#ffffff" stroke-width="1"/>
+                <text x="530" y="45" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="700" fill="#ffffff">توقيع الفحص</text>
+                <text x="530" y="65" text-anchor="middle" dominant-baseline="central" font-size="10" font-family="monospace" fill="#a3a3a3">HASH: v8c0...</text>
+
+                <!-- Connector 2 -->
+                <path d="M440 50 L400 50" stroke="#D4AF37" stroke-width="2"/>
+
+                <!-- Block 3 (Current) -->
+                <rect x="220" y="20" width="180" height="60" rx="8" fill="rgba(212, 175, 55, 0.1)" stroke="#D4AF37" stroke-width="1"/>
+                <text x="310" y="45" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="700" fill="#D4AF37">فتح نزاع</text>
+                <text x="310" y="65" text-anchor="middle" dominant-baseline="central" font-size="10" font-family="monospace" fill="#D4AF37">HASH: n4b3...</text>
+
+                <!-- Connector 3 -->
+                <path d="M220 50 L180 50" stroke="#ffffff" stroke-width="2" stroke-dasharray="4,4" opacity="0.3"/>
+
+                <!-- Block 4 (Prospective) -->
+                <rect x="0" y="20" width="180" height="60" rx="8" fill="none" stroke="#525252" stroke-width="1" stroke-dasharray="2,2"/>
+                <text x="90" y="50" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="600" fill="#525252">التسوية القرارية</text>
+            </svg>
+        </div>
+
+        <!-- Key Points -->
+        <div style="position:absolute; right:60px; top:360px; width:840px; display:flex; gap:40px;">
+            <div style="flex:1;">
+                <h4 style="font-size:16px; font-weight:700; color:#D4AF37; margin:0 0 8px 0;">عدم التلاعب</h4>
+                <p style="font-size:13px; color:#d4d4d4; margin:0; line-height:1.8;">يضمن نظام الهاش عدم تعديل أي سجل بعد وقوعه.</p>
+            </div>
+            <div style="flex:1;">
+                <h4 style="font-size:16px; font-weight:700; color:#D4AF37; margin:0 0 8px 0;">الشفافية الكاملة</h4>
+                <p style="font-size:13px; color:#d4d4d4; margin:0; line-height:1.8;">يرى كلا الطرفين "لقطة الحقيقة" المستخدمة لإصدار الحكم.</p>
+            </div>
+            <div style="flex:1;">
+                <h4 style="font-size:16px; font-weight:700; color:#D4AF37; margin:0 0 8px 0;">قبول فوري</h4>
+                <p style="font-size:13px; color:#d4d4d4; margin:0; line-height:1.8;">يقوم قاضي المحكمة العليا الآلي بمراجعة السجلات في <span style="font-weight:700;">ثوانٍ</span>.</p>
+            </div>
+        </div>
+
+        <!-- Page Number -->
+        <svg style="position:absolute; left:32px; bottom:24px;" width="36" height="36" viewBox="0 0 36 36">
+            <circle cx="18" cy="18" r="18" fill="#ffffff" fill-opacity="0.1" stroke="#ffffff" stroke-width="1"/>
+            <text x="18" y="18" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="600" fill="#ffffff">04</text>
+        </svg>
+
+    </div>
+</body>
+</html>

@@ -1,3 +1,4 @@
+import structlog
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.conf import settings
@@ -8,6 +9,8 @@ from apps.disputes.async_tasks import async_create_evidence_log, async_embed_jud
 from apps.disputes.services import DisputeRouter
 from constance import config
 import json
+
+logger = structlog.get_logger("disputes.signals")
 
 @receiver(post_save, sender=Booking)
 def log_booking_event(sender, instance, created, **kwargs):
@@ -97,17 +100,31 @@ def evaluate_judgment_consistency(sender, instance, created, **kwargs):
             # Log the report to EvidenceLog
             ConsistencyService.log_consistency_report(instance, report)
             
-            # Optional: Print for debugging
+            # Optional: Log for consistency tracking
             if report.get('consistency_score') is not None:
                 score = report['consistency_score']
                 recommendation = report['recommendation']
-                print(f"📊 CONSISTENCY: Judgment #{instance.id} → {score:.0%} ({recommendation})")
+                logger.info(
+                    "judgment_consistency_evaluated",
+                    judgment_id=instance.id,
+                    score=score,
+                    recommendation=recommendation
+                )
             else:
                 msg = report.get('message', 'No precedents')
-                print(f"📊 CONSISTENCY: Judgment #{instance.id} → {msg}")
+                logger.info(
+                    "judgment_consistency_no_precedents",
+                    judgment_id=instance.id,
+                    message=msg
+                )
             
             # ASYNC: Trigger background embedding for precedent search
             async_embed_judgment(instance.id, delay_seconds=5)
                 
         except Exception as e:
-            print("⚠️ CONSISTENCY ERROR: Failed to evaluate judgment:", e)
+            logger.error(
+                "judgment_consistency_evaluation_failed",
+                judgment_id=instance.id,
+                error=str(e),
+                exc_info=True
+            )

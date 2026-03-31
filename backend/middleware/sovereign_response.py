@@ -1,45 +1,51 @@
-
 import json
 from django.http import JsonResponse
-from django.core.exceptions import MiddlewareNotUsed
-
-class ConstitutionalViolation(Exception):
-    pass
+from core.utils.responses import SovereignResponse
 
 class SovereignResponseMiddleware:
     """
-    Ensures that all JSON responses from the Sovereign API
-    adhere to the 'dignity_preserved' contract.
+    The Constitutional Enforcer (Elite Standard).
+    Automatically wraps all /api/ responses in the Sovereign Schema:
+    { success, data, meta, error }
     """
     def __init__(self, get_response):
         self.get_response = get_response
-        # Only activate for API routes to avoid breaking Django Admin
-        # self.api_prefix = '/api/v1/judicial/' 
 
     def __call__(self, request):
         response = self.get_response(request)
         
-        # Only check Judicial API endpoints
-        if not request.path.startswith('/api/v1/judicial/'):
+        # Only target API endpoints
+        if not request.path.startswith('/api/'):
             return response
 
-        # If it's a JSON response, inspect it
+        # If it's already a SovereignResponse or similar structured JsonResponse, skip
+        if isinstance(response, SovereignResponse):
+            return response
+
         if isinstance(response, JsonResponse):
             try:
-                # content is bytes, need to decode
                 content = response.content.decode('utf-8')
                 data = json.loads(content)
                 
-                if isinstance(data, dict):
-                    if 'dignity_preserved' not in data:
-                        # VIOLATION DETECTED
-                        # In production, we might log this. 
-                        # In development (now), we RAISE HELL to fix it.
-                        raise ConstitutionalViolation(
-                            f"Sovereign Contract Violation: Endpoint {request.path} returned a response "
-                            f"without the 'dignity_preserved' flag. The Soul cannot interpret this Body."
-                        )
-            except json.JSONDecodeError:
-                pass # Not valid JSON, skip check
+                # Check if it's already following our elite schema
+                if isinstance(data, dict) and 'success' in data and 'data' in data:
+                    return response
+                
+                # Otherwise, wrap it!
+                success = 200 <= response.status_code < 300
+                wrapped_data = {
+                    "success": success,
+                    "data": data if success else None,
+                    "meta": {"version": "1.0-auto-wrapped", "path": request.path},
+                    "error": data if not success else None
+                }
+                
+                response.content = json.dumps(wrapped_data).encode('utf-8')
+                # Content-Length must be updated if edited manually
+                response['Content-Length'] = str(len(response.content))
+                
+            except (json.JSONDecodeError, UnicodeDecodeError):
+                pass
                 
         return response
+

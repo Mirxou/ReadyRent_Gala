@@ -1,6 +1,4 @@
-"""
-Serializers for Booking app
-"""
+import structlog
 from rest_framework import serializers
 from .models import (
     Booking, Cart, CartItem, Waitlist,
@@ -12,6 +10,8 @@ from django.utils import timezone
 
 
 from apps.bookings.services_financial import FinancialService
+
+logger = structlog.get_logger("bookings.serializers")
 
 class BookingSerializer(serializers.ModelSerializer):
     """Serializer for Booking"""
@@ -67,8 +67,8 @@ class BookingSerializer(serializers.ModelSerializer):
                         data['protection_fee'] = breakdown['protection_fee']
                         data['total_price'] = breakdown['total_price']
                         
-                        # Phase 17: Log debug info if needed
-                        # print(f"Treasury Calculated: {breakdown}")
+                        # Phase 17: Log debug info
+                        logger.debug("treasury_calculated", breakdown=breakdown)
                 # ----------------------------------------------------
         
         # Validate status transitions (basic validation)

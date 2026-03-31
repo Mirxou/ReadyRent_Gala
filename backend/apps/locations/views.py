@@ -1,3 +1,4 @@
+import structlog
 from rest_framework import viewsets, filters, status
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
@@ -10,6 +11,8 @@ from .serializers import (
     DeliveryRequestSerializer, DeliveryTrackingSerializer
 )
 from .services import GoogleMapsService, LocationService
+
+logger = structlog.get_logger("locations.views")
 
 
 class AddressViewSet(viewsets.ModelViewSet):
@@ -122,7 +125,12 @@ class DeliveryRequestViewSet(viewsets.ModelViewSet):
                         tracking_url
                     )
                 except Exception as e:
-                    print(f"Error sending WhatsApp delivery update: {e}")
+                    logger.error(
+                        "whatsapp_delivery_update_failed",
+                        delivery_id=delivery.id,
+                        error=str(e),
+                        exc_info=True
+                    )
         
         # Create tracking record
         DeliveryTracking.objects.create(
@@ -171,7 +179,12 @@ class DeliveryRequestViewSet(viewsets.ModelViewSet):
                     tracking_url
                 )
             except Exception as e:
-                print(f"Error sending WhatsApp notification: {e}")
+                logger.error(
+                    "whatsapp_driver_assignment_notification_failed",
+                    delivery_id=delivery.id,
+                    error=str(e),
+                    exc_info=True
+                )
         
         serializer = self.get_serializer(delivery)
         return Response(serializer.data)

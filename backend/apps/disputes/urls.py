@@ -12,7 +12,8 @@ from .views import (
     SupportTicketListView, SupportTicketCreateView, SupportTicketDetailView,
     TicketMessageCreateView, AdminDisputeStatsView, AdminTicketStatsView,
     get_dispute_status, sovereign_override,  # Phase 42
-    AdminPendingOffersView, admin_decide_offer  # Phase 44
+    AdminPendingOffersView, admin_decide_offer,  # Phase 44
+    VaultIntegrityView, ExportIntegrityCertificateView # Phase 6 & 7
 )
 
 app_name = 'disputes'
@@ -58,8 +59,10 @@ urlpatterns = [
     # Phase 23: Public Transparency APIs
     path('', include('apps.disputes.transparency_urls')),
     
+    # Phase 6 & 7: High Court (Executive Oversight)
+    path('admin/vault/integrity/', VaultIntegrityView.as_view(), name='vault-integrity'),
+    path('admin/vault/certificate/', ExportIntegrityCertificateView.as_view(), name='vault-certificate'),
+
     # Phase 6: REST API Routes
     path('', include(router.urls)),
 ]
-
-

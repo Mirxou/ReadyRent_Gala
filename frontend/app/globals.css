@@ -7,7 +7,7 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  /* Sovereign Palette - "The Authority" */
+  /* Sovereign Palette - "The Authority" (Pinnacle Edition) */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
 
@@ -20,351 +20,210 @@
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
 
-  /* Sovereign Identity Colors */
+  /* Sovereign Identity Colors - Refined for Obsidian-Gold */
   --color-sovereign-gold: #C5A059;
-  /* Burnt Gold */
-  --color-sovereign-blue: #0A192F;
-  /* Jet Blue */
-  --color-sovereign-white: #F8F9FA;
-  /* Off-White */
-  /* Deep Navy */
+  --color-sovereign-gold-light: #DFBD84;
+  --color-sovereign-black: #050505;
+  --color-sovereign-obsidian: #0A0A0A;
+  --color-sovereign-white: #FDFDFD;
 
-  /* Typography - Sovereign Voice */
-  --font-sans: var(--font-ibm-plex), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  /* Typography - Elite Arabic Pairing */
+  --font-sans: var(--font-inter), "Outfit", ui-sans-serif, system-ui, sans-serif;
+  --font-arabic: var(--font-ibm-plex), "Cairo", serif;
 
-  /* Typography - Sovereign Voice */
-  --font-sans: var(--font-ibm-plex), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-
-  /* Retain accents for secondary actions if needed, but muted */
-  --color-gala-purple: #8B5CF6;
-  --color-gala-gold: #C5A059;
-  /* Remapped to Sovereign */
-
-  /* Spacing Scale */
-  --spacing-section: 8rem;
+  /* Spacing Scale - "Airy" */
+  --spacing-section: 12rem;
+  --spacing-pinnacle: 4rem;
 
   /* Dynamic Animations */
   @keyframes gradient-shift {
-
-    0%,
-    100% {
-      background-position: 0% 50%;
-    }
-
-    50% {
-      background-position: 100% 50%;
-    }
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
   }
 
-  @keyframes pulse-glow {
-
-    0%,
-    100% {
-      opacity: 1;
-      transform: scale(1);
-    }
-
-    50% {
-      opacity: 0.8;
-      transform: scale(1.05);
-    }
+  @keyframes pulse-glow-gold {
+    0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 20px rgba(197, 160, 89, 0.2); }
+    50% { opacity: 0.8; transform: scale(1.02); box-shadow: 0 0 40px rgba(197, 160, 89, 0.4); }
   }
 
-  @keyframes medical-glow {
-
-    0%,
-    100% {
-      box-shadow: 0 0 0px rgba(139, 92, 246, 0);
-      border-color: rgba(255, 255, 255, 0.1);
-    }
-
-    50% {
-      box-shadow: 0 0 15px rgba(139, 92, 246, 0.15);
-      border-color: rgba(139, 92, 246, 0.3);
-    }
+  @keyframes shimmer-gold {
+    0% { background-position: -1000px 0; }
+    100% { background-position: 1000px 0; }
   }
 
-  @keyframes shimmer {
-    0% {
-      background-position: -1000px 0;
-    }
-
-    100% {
-      background-position: 1000px 0;
-    }
-  }
-
-  @keyframes float {
-
-    0%,
-    100% {
-      transform: translateY(0px);
-    }
-
-    50% {
-      transform: translateY(-20px);
-    }
-  }
-
-  @keyframes rotate-border {
-    0% {
-      transform: rotate(0deg);
-    }
-
-    100% {
-      transform: rotate(360deg);
-    }
-  }
-
-  @keyframes spin-reverse {
-    0% {
-      transform: rotate(360deg);
-    }
-
-    100% {
-      transform: rotate(0deg);
-    }
+  @keyframes float-sovereign {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-15px) rotate(1deg); }
   }
 }
 
 :root {
+  /* High-End Arabic Typography */
   --font-cairo: "Cairo", sans-serif;
   --font-inter: "Inter", sans-serif;
   --font-ibm-plex: "IBM Plex Sans Arabic", sans-serif;
-  --radius: 0.75rem;
+  
+  /* PILL & AIRY TOKENS (Phase 11 - Mastery Edition) */
+  --radius: 999px; /* Absolute Pill */
+  --radius-lg: 40px; /* Airy Card Radius */
+  --radius-md: 24px;
+  --radius-sm: 12px;
 
-  /* Light: "Vibrant Gallery" */
-  --background: oklch(0.99 0.01 280);
-  --foreground: oklch(0.15 0.02 280);
+  /* Layout Spacing (The Airy Recipe) */
+  --page-margin: 40px;
+  --section-gap: 64px;
+  --component-gap: 24px;
 
-  --card: oklch(1 0 0 / 0.6);
-  --card-foreground: oklch(0.15 0.02 280);
+  /* Light: "Platinum Gallery" */
+  --background: oklch(0.99 0.002 280);
+  --foreground: oklch(0.12 0.01 280);
 
-  /* Primary: "Electric Purple" */
-  --primary: oklch(0.6 0.25 290);
-  --primary-foreground: oklch(1 0 0);
+  --card: oklch(1 0 0 / 0.8);
+  --card-foreground: oklch(0.12 0.01 280);
 
-  --muted: oklch(0.95 0.02 280);
-  --muted-foreground: oklch(0.5 0.02 280);
+  /* Primary: "Sovereign Gold" */
+  --primary: oklch(0.7 0.12 85);
+  --primary-foreground: oklch(0.1 0.01 280);
 
-  --border: oklch(0.88 0.02 280);
-  --accent: oklch(0.7 0.2 340);
+  --muted: oklch(0.97 0.002 280);
+  --muted-foreground: oklch(0.5 0.01 280);
+
+  --border: oklch(0.92 0.005 280);
+  --accent: oklch(0.7 0.12 85);
 }
 
 .dark {
-  /* Dark: "Neon Luxury" */
-  --background: oklch(0.08 0.03 280);
-  --foreground: oklch(0.98 0.01 280);
+  /* DARK: "OBSIDIAN GOLD" */
+  --background: oklch(0.05 0 0); /* Pure Black Depth */
+  --foreground: oklch(0.95 0.005 280);
 
-  --card: oklch(0.12 0.03 280 / 0.8);
-  --card-foreground: oklch(0.98 0.01 280);
+  --card: oklch(0.08 0 0 / 0.8);
+  --card-foreground: oklch(0.95 0.005 280);
 
-  --primary: oklch(0.75 0.25 290);
-  --primary-foreground: oklch(0.1 0.03 280);
+  --primary: oklch(0.75 0.15 85); /* Vibrant Sovereign Gold */
+  --primary-foreground: oklch(0.05 0 0);
 
-  --muted: oklch(0.15 0.03 280);
-  --muted-foreground: oklch(0.65 0.02 280);
+  --muted: oklch(0.1 0 0);
+  --muted-foreground: oklch(0.6 0.005 280);
 
-  --border: oklch(0.25 0.03 280);
-  --accent: oklch(0.7 0.2 340);
+  --border: oklch(0.15 0 0);
+  --accent: oklch(0.75 0.15 85);
 }
 
 @layer base {
   body {
-    @apply bg-background text-foreground antialiased selection:bg-gala-purple/30 selection:text-gala-purple;
+    @apply bg-background text-foreground antialiased selection:bg-sovereign-gold/30 selection:text-sovereign-gold;
+    font-feature-settings: "cv11", "ss01";
+    font-family: var(--font-ibm-plex), var(--font-inter), sans-serif;
   }
 
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    @apply tracking-tight font-bold;
+  h1, h2, h3, h4, h5, h6 {
+    @apply tracking-tight font-black italic;
+    font-family: var(--font-ibm-plex), var(--font-inter), sans-serif;
   }
-}
 
-/* Vibrant Utilities - OUTSIDE THEME */
-
-/* Mega Type with Gradient */
-@utility text-mega {
-  font-size: clamp(3rem, 8vw, 8rem);
-  line-height: 0.9;
-  letter-spacing: -0.04em;
-  background: linear-gradient(135deg, #8B5CF6, #EC4899, #F59E0B);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Fluid Body */
-@utility text-fluid-body {
-  font-size: clamp(1rem, 1.2vw, 1.25rem);
-  line-height: 1.6;
-  font-weight: 300;
-}
-
-/* Glassmorphism Card */
-@utility card-glass {
-  @apply bg-background/95 dark:bg-black/20 backdrop-blur-xl border border-gray-200 dark:border-white/20 rounded-2xl shadow-2xl;
-}
-
-/* Gradient Border */
-@utility border-gradient {
-  position: relative;
-  border: 2px solid transparent;
-  background: linear-gradient(var(--background), var(--background)) padding-box,
-    linear-gradient(135deg, #8B5CF6, #EC4899, #F59E0B) border-box;
-}
-
-/* Glow Effect */
-@utility glow-purple {
-  box-shadow: 0 0 40px rgba(139, 92, 246, 0.5),
-    0 0 80px rgba(139, 92, 246, 0.3);
-}
-
-/* Glow Pink */
-@utility glow-pink {
-  box-shadow: 0 0 40px rgba(236, 72, 153, 0.5),
-    0 0 80px rgba(236, 72, 153, 0.3);
-}
-
-/* Animated Gradient Background */
-@utility bg-gradient-animated {
-  background: linear-gradient(135deg, #8B5CF6, #EC4899, #F59E0B, #06B6D4);
-  background-size: 400% 400%;
-  animation: gradient-shift 15s ease infinite;
-}
-
-/* Shimmer Effect */
-@utility shimmer {
-  background: linear-gradient(90deg,
-      transparent 0%,
-      rgba(255, 255, 255, 0.3) 50%,
-      transparent 100%);
-  background-size: 200% 100%;
-  animation: shimmer 2s infinite;
-}
-
-/* Floating Animation */
-@utility animate-float {
-  animation: float 6s ease-in-out infinite;
-}
-
-@utility animate-spin-reverse {
-  animation: spin-reverse 1s linear infinite;
-}
-
-/* Pulse Glow */
-@utility animate-pulse-glow {
-  animation: pulse-glow 3s ease-in-out infinite;
-}
-
-/* Soft Pulse */
-@utility animate-soft-pulse {
-  animation: soft-pulse 2.1s ease-in-out infinite;
-}
-
-@utility magnetic-hover {
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-
-  &:hover {
-    transform: scale(1.05) translateY(-5px);
+  [dir="rtl"] {
+    font-family: var(--font-ibm-plex), sans-serif;
   }
-}
-
-@utility animate-medical-glow {
-  animation: medical-glow 3s ease-in-out infinite;
-}
-
-.bg-gala-cyan {
-  background-color: #06B6D4;
-}
-
-/* Ripple Effect */
-span.ripple {
-  position: absolute;
-  border-radius: 50%;
-  transform: scale(0);
-  animation: ripple 600ms linear;
-  background-color: rgba(255, 255, 255, 0.7);
-  pointer-events: none;
-}
-
-@keyframes ripple {
-  to {
-    transform: scale(4);
-    opacity: 0;
-  }
-}
-
-/* Input Glow on Focus */
-input:focus,
-textarea:focus {
-  outline: none;
-  box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
-  border-color: #8B5CF6;
-  transition: all 0.3s ease;
-}
-
-/* Next.js Portal Styles */
-nextjs-portal {
-  left: 1px !important;
-  top: -1px !important;
 }
 
 /* =========================================
-   SOVEREIGN ERA STYLES (Phase 46)
+   PINNACLE UTILITIES (Phase 9)
    ========================================= */
 
-/* Sovereign Mode Switching */
-
-/* Default: MARKET Mode */
-body.mode-market {
-  --primary: #3b82f6;
-  --background: #ffffff;
-  --text: #1f2937;
-  --accent: #10b981;
+/* Pill Container */
+@utility container-pill {
+  @apply rounded-[999px] px-12 py-6 border border-sovereign-gold/20 bg-background/50 backdrop-blur-2xl;
 }
 
-/* DISPUTE Mode: Serious, Judicial */
+/* Airy Section */
+@utility section-airy {
+  @apply py-32 md:py-48 px-10 md:px-20;
+}
+
+/* Obsidian Glow */
+@utility glow-gold {
+  box-shadow: 0 0 50px rgba(197, 160, 89, 0.15),
+              0 0 100px rgba(197, 160, 89, 0.05);
+}
+
+/* Shimmer Gold */
+@utility shimmer-gold {
+  background: linear-gradient(90deg,
+      transparent 0%,
+      rgba(197, 160, 89, 0.2) 50%,
+      transparent 100%);
+  background-size: 200% 100%;
+  animation: shimmer-gold 3s infinite;
+}
+
+/* Absolute Sovereignty Typography */
+@utility text-sovereign {
+  @apply font-black italic tracking-tighter leading-[0.8];
+  font-size: clamp(4rem, 12vw, 16rem);
+}
+
+/* Floating Animation */
+@utility animate-sovereign-float {
+  animation: float-sovereign 8s ease-in-out infinite;
+}
+
+@utility animate-gold-pulse {
+  animation: pulse-glow-gold 4s ease-in-out infinite;
+}
+
+/* =========================================
+   SOVEREIGN ERA STYLES (Refined)
+   ========================================= */
+
 body.mode-dispute {
-  --primary: #64748b;
-  /* Slate Grey */
-  --background: #f8fafc;
-  --text: #334155;
-  --accent: #94a3b8;
-
-  /* Typography: Serif for formality */
-  font-family: var(--font-ibm-plex), 'Georgia', 'Times New Roman', serif;
+  --primary: oklch(0.5 0.05 250); /* Judicial Slate */
+  --accent: oklch(0.6 0.05 250);
 }
 
-body.mode-dispute button {
-  /* Muted, outline buttons by default unless primary */
-  /* This is a base reset, components might override */
-}
-
-/* VERDICT Mode: Formal, Regal */
 body.mode-verdict {
-  --primary: #d97706;
-  /* Gold */
-  --background: #1f2937;
-  /* Dark */
-  --text: #f9fafb;
-  --accent: #fbbf24;
-
-  font-family: var(--font-ibm-plex), 'Georgia', serif;
-}
-
-body.mode-verdict h1,
-body.mode-verdict h2 {
-  color: var(--accent);
-  font-weight: 600;
-  letter-spacing: 0.05em;
+  --primary: oklch(0.7 0.15 85); /* Regal Gold */
+  --background: oklch(0.03 0 0);
+  --foreground: oklch(0.98 0.005 280);
 }
 
 /* System Halt Banner */
 .system-halted-banner {
-  /* Tailwind classes handle this in component, but this is for reference or specific overrides */
-  animation: pulse-glow 2s infinite;
+  @apply bg-red-950/20 text-red-500 border-red-500/50 backdrop-blur-xl rounded-full px-8 py-3 animate-pulse font-black uppercase tracking-[0.3em] text-[10px];
+}
+
+/* =========================================
+   PHASE 10: SOVEREIGN PINNACLE EXCELLENCE
+   ========================================= */
+
+.theme-obsidian {
+  --background: oklch(0.01 0 0); /* Ultra-Deep Black */
+  --foreground: oklch(0.98 0.005 280);
+  --card: oklch(0.02 0 0);
+  --border: oklch(0.05 0 0);
+  --primary: oklch(0.7 0.15 85); /* Regal Gold */
+}
+
+@utility animate-golden-spark {
+  animation: golden-spark 3s infinite ease-in-out;
+}
+
+@keyframes golden-spark {
+  0%, 100% { opacity: 0.3; transform: scale(1); filter: brightness(1); }
+  50% { opacity: 1; transform: scale(1.1); filter: brightness(1.5) drop-shadow(0 0 15px rgba(184, 159, 103, 0.4)); }
+}
+
+@utility animate-soft-pulse {
+  animation: soft-pulse 4s infinite ease-in-out;
+}
+
+@keyframes soft-pulse {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.05); }
+}
+
+/* Airy Spacing Overrides for Dashboard (Phase 10) */
+.airy-dashboard {
+  --section-spacing: 12rem;
+  --container-padding: 3rem;
 }

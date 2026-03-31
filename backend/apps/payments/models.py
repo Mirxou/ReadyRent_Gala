@@ -235,8 +235,32 @@ class EscrowHold(models.Model):
         
         super().save(*args, **kwargs)
 
+    def get_progress_percentage(self) -> int:
+        """
+        Calculate visual progress based on the Sovereign State Machine.
+        Returns 0 to 100.
+        """
+        progress_map = {
+            EscrowState.PENDING: 10,
+            EscrowState.HELD: 50,
+            EscrowState.DISPUTED: 50,
+            EscrowState.RELEASED: 100,
+            EscrowState.REFUNDED: 100,
+            EscrowState.CANCELLED: 100,
+            EscrowState.SPLIT_RELEASED: 100,
+        }
+        return progress_map.get(self.state, 0)
+
+    def is_release_ready(self) -> bool:
+        """
+        Check if the escrow can be transitioned to RELEASED.
+        Standard Rule: Booking must be 'completed' (item returned & inspected).
+        """
+        return self.state == EscrowState.HELD and self.booking.status == 'completed'
+
     def __str__(self):
         return f"Escrow #{self.id} ({self.amount}) - {self.state}"
+
 
 class WalletTransaction(models.Model):
     """

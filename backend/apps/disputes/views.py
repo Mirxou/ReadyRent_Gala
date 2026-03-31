@@ -755,3 +755,42 @@ class PublicMetricsView(generics.ListAPIView):
     serializer_class = PublicMetricsSerializer
     permission_classes = [] # Publicly accessible
     filterset_fields = ['metric_type', 'category']
+
+
+# ⚖️ HIGH COURT: Integrity Monitoring (Phase 6)
+from .services.vault_audit import VaultAuditor
+
+class VaultIntegrityView(SovereignResponseMixin, generics.GenericAPIView):
+    """
+    High Court Oversight: Verify the Evidence Vault integrity.
+    Phase 6: The High-Security Executive Suite.
+    """
+    permission_classes = [IsAdminUser]
+    
+    def get(self, request):
+        # Run the full chain audit
+        audit_result = VaultAuditor.audit_full_chain()
+        
+        return Response({
+            "status": "sovereign_governance",
+            "dignity_preserved": True,
+            "code": "VAULT_INTEGRITY_REPORT",
+            "audit": audit_result
+        })
+
+
+from .services.ledger_export import LedgerExportService
+from django.http import HttpResponse
+
+class ExportIntegrityCertificateView(SovereignResponseMixin, generics.GenericAPIView):
+    """
+    High Court: Export the Sovereign Integrity Certificate (Phase 7).
+    """
+    permission_classes = [IsAdminUser]
+    
+    def get(self, request):
+        cert_data = LedgerExportService.generate_integrity_certificate(actor=request.user)
+        
+        # In a real environment, we might use WeasyPrint or similar to convert to PDF.
+        # For now, we return the premium HTML certificate which can be printed to PDF by the browser.
+        return HttpResponse(cert_data['html'], content_type='text/html')

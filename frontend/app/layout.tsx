@@ -20,17 +20,17 @@ const ibmPlexArabic = IBM_Plex_Sans_Arabic({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3001"),
   title: {
-    default: "STANDARD.Rent | معيار الفخامة",
+    default: "STANDARD.Rent | معيار السيادة والفخامة",
     template: "%s | STANDARD.Rent",
   },
-  description: "المنصة الأولى لتداول الأزياء الفاخرة في الجزائر. نظام بيئي مجتمعي آمن.",
-  keywords: ["فساتين", "تأجير فساتين", "فساتين سهرة", "زفاف", "موضة", "الجزائر"],
-  authors: [{ name: "STANDARD Team" }],
+  description: "المنصة السيادية الأولى لتداول الأصول الفاخرة في الجزائر. نظام بيئي ذكي مدعوم ببروتوكولات الثقة والشفافية الراديكالية.",
+  keywords: ["سيادة", "فخامة", "تداول أصول", "الجزائر", "ثقة رقمية", "مبني على الحقائق"],
+  authors: [{ name: "STANDARD Sovereign Team" }],
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
-    statusBarStyle: "default",
-    title: "STANDARD.Rent",
+    statusBarStyle: "black-translucent",
+    title: "STANDARD Sovereign",
   },
   openGraph: {
     type: "website",
@@ -39,24 +39,24 @@ export const metadata: Metadata = {
     siteName: "STANDARD.Rent",
     images: [
       {
-        url: "/og-image.jpg",
+        url: "/images/manifesto/frame1.png",
         width: 1200,
         height: 630,
-        alt: "STANDARD.Rent Preview",
+        alt: "STANDARD.Rent Sovereign Manifesto",
       },
     ],
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#a855f7",
+  themeColor: "#b89f67",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
 };
 
 import { SovereignProvider } from "@/contexts/SovereignContext";
-import { SystemHaltBanner } from "@/components/sovereign/SystemHaltBanner";
+import { SystemHaltBanner } from "@/shared/components/sovereign/system-halt-banner";
 
 export default function RootLayout({
   children,

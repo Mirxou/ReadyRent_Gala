@@ -1,13 +1,15 @@
-
 "use client";
 
 import * as React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { ShieldCheck, Calendar, Wallet, PenTool, CheckCircle2, AlertTriangle, ArrowRight, Loader2 } from 'lucide-react';
+import { ShieldCheck, Calendar, Wallet, PenTool, CheckCircle2, AlertTriangle, ArrowRight, Loader2, Sparkles, Lock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { motion, AnimatePresence } from 'framer-motion';
+import { SovereignButton } from '@/components/sovereign/sovereign-button';
+import { GlassPanel } from '@/components/sovereign/glass-panel';
+import { SovereignSparkle } from '@/components/sovereign/sovereign-sparkle';
 
 interface SovereignCheckoutModalProps {
     isOpen: boolean;
@@ -16,7 +18,7 @@ interface SovereignCheckoutModalProps {
     startDate: Date | null;
     endDate: Date | null;
     totalPrice: number;
-    onConfirm: (signatureData: string) => void;
+    onConfirm: (signature: string, artisanId?: number) => void;
     isProcessing: boolean;
 }
 
@@ -30,21 +32,25 @@ export function SovereignCheckoutModal({
     onConfirm,
     isProcessing
 }: SovereignCheckoutModalProps) {
-    const [step, setStep] = React.useState<'review' | 'sign' | 'sealing'>('review');
+    const [step, setStep] = React.useState<'review' | 'sign' | 'sealing' | 'sealed'>('review');
     const [signature, setSignature] = React.useState<string | null>(null);
     const canvasRef = React.useRef<HTMLCanvasElement>(null);
     const [isDrawing, setIsDrawing] = React.useState(false);
 
-    // Canvas Logic
+    // Canvas Logic (Minimal for Masterpiece)
     const startDrawing = (e: any) => {
         const canvas = canvasRef.current;
         if (!canvas) return;
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
+        ctx.strokeStyle = '#B89F67';
+        ctx.lineWidth = 3;
+        ctx.lineJoin = 'round';
+        ctx.lineCap = 'round';
+        ctx.beginPath();
         const rect = canvas.getBoundingClientRect();
         const x = (e.clientX || e.touches[0].clientX) - rect.left;
         const y = (e.clientY || e.touches[0].clientY) - rect.top;
-        ctx.beginPath();
         ctx.moveTo(x, y);
         setIsDrawing(true);
     };
@@ -62,163 +68,168 @@ export function SovereignCheckoutModal({
         ctx.stroke();
     };
 
-    const stopDrawing = () => {
-        setIsDrawing(false);
-    };
-
-    const clearSignature = () => {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        setSignature(null);
-    };
+    const stopDrawing = () => setIsDrawing(false);
 
     const handleConfirmSignature = () => {
         const canvas = canvasRef.current;
         if (!canvas) return;
-        // Simple check if empty (not robust but sufficient for prototype)
-        const blank = document.createElement('canvas');
-        blank.width = canvas.width;
-        blank.height = canvas.height;
-        if (canvas.toDataURL() === blank.toDataURL()) {
-            toast.error("يجب التوقيع للمتابعة");
-            return;
-        }
-
-        setSignature(canvas.toDataURL());
         setStep('sealing');
-
-        // The "Weight" Pause
         setTimeout(() => {
-            onConfirm(canvas.toDataURL());
-        }, 1500);
+            setStep('sealed');
+            setTimeout(() => {
+                onConfirm(canvas.toDataURL());
+            }, 1000);
+        }, 2000);
     };
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !isProcessing && onClose()}>
-            <DialogContent className="max-w-2xl bg-background border-sovereign-gold/10 p-0 overflow-hidden" dir="rtl">
-
-                {/* Header */}
-                <div className="p-6 bg-gradient-to-r from-sovereign-blue/5 to-transparent border-b border-border">
-                    <DialogTitle className="text-2xl font-black flex items-center gap-2">
-                        <ShieldCheck className="w-6 h-6 text-sovereign-gold" />
-                        {step === 'review' ? 'مراجعة المعاملة السيادية' :
-                            step === 'sign' ? 'إبرام العقد الرقمي' : 'جاري الختم...'}
+            <DialogContent className="max-w-4xl bg-background border-none p-0 overflow-hidden rounded-[3rem] shadow-[0_0_100px_rgba(184,159,103,0.1)]" dir="rtl">
+                
+                {/* Header Context */}
+                <div className="p-10 bg-gradient-to-l from-sovereign-gold/10 to-transparent border-b border-white/5 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-sovereign-gold/5 rounded-full blur-[80px]" />
+                    <DialogTitle className="text-4xl font-black flex items-center gap-4 relative z-10 italic">
+                        <ShieldCheck className="w-10 h-10 text-sovereign-gold" />
+                        {step === 'review' ? 'مراجعة الميثاق السيادي' : 
+                         step === 'sign' ? 'توقيع الإرادة الرقمية' : 'ختم العقد...'}
                     </DialogTitle>
                 </div>
 
-                <div className="p-6">
-                    {step === 'review' && (
-                        <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-                            {/* Timeline Visualization */}
-                            <div className="relative py-4 px-2">
-                                <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-border -z-10" />
-                                <div className="flex justify-between text-xs text-muted-foreground">
-                                    <div className="flex flex-col items-center gap-2 bg-background px-2 z-10">
-                                        <span className="w-3 h-3 rounded-full bg-sovereign-gold animate-pulse" />
-                                        <span className="font-bold text-foreground">توقيع</span>
+                <div className="p-10">
+                    <AnimatePresence mode="wait">
+                        {step === 'review' && (
+                            <motion.div 
+                                key="review"
+                                initial={{ opacity: 0, x: 50 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -50 }}
+                                className="space-y-10"
+                            >
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                                    <div className="space-y-8">
+                                        <div className="space-y-2">
+                                            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground opacity-40">Asset Under Contract</p>
+                                            <h3 className="text-2xl font-black">{product?.name_ar}</h3>
+                                        </div>
+                                        <div className="p-8 bg-white/5 rounded-3xl border border-white/5 space-y-6">
+                                            <div className="flex justify-between items-center text-sm">
+                                                <span className="text-muted-foreground">فترة الحجز:</span>
+                                                <span className="font-bold font-mono tracking-tighter" dir="ltr">
+                                                   {startDate?.toLocaleDateString('ar-DZ')} → {endDate?.toLocaleDateString('ar-DZ')}
+                                                </span>
+                                            </div>
+                                            <div className="flex justify-between items-center text-sm">
+                                                <span className="text-muted-foreground">قيمة الإيجار:</span>
+                                                <span className="font-bold">{totalPrice.toLocaleString()} دج</span>
+                                            </div>
+                                            <div className="pt-6 border-t border-white/10 flex justify-between items-end">
+                                               <p className="text-sm font-black">إجمالي الضمان (Escrow):</p>
+                                               <p className="text-3xl font-black text-sovereign-gold">{totalPrice.toLocaleString()} <span className="text-xs font-normal">DA</span></p>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div className="flex flex-col items-center gap-2 bg-background px-2 z-10">
-                                        <span className="w-3 h-3 rounded-full bg-emerald-500" />
-                                        <span>نافذة تراجع (10د)</span>
-                                    </div>
-                                    <div className="flex flex-col items-center gap-2 bg-background px-2 z-10">
-                                        <span className="w-3 h-3 rounded-full bg-primary" />
-                                        <span>التزام ملزم</span>
-                                    </div>
-                                    <div className="flex flex-col items-center gap-2 bg-background px-2 z-10">
-                                        <span className="w-3 h-3 rounded-full bg-destructive" />
-                                        <span>نزاع فقط</span>
+
+                                    <div className="space-y-6">
+                                        <h4 className="text-sm font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                                            <Lock className="w-4 h-4 text-sovereign-gold" /> بروتوكول الحماية
+                                        </h4>
+                                        <p className="text-xs text-muted-foreground leading-relaxed italic">
+                                            "بإبرام هذا العقد، تلتزم ReadyRent بحماية الأصل خلال فترة الحجز، وتجميد مبلغ الضمان في حساب الضمان السيادي (Escrow) لضمان حقوق كافة الأطراف."
+                                        </p>
+                                        <GlassPanel className="p-6 bg-emerald-500/5 border-emerald-500/10">
+                                            <div className="flex items-center gap-4">
+                                               <CheckCircle2 className="w-6 h-6 text-emerald-500" />
+                                               <p className="text-xs font-bold text-emerald-500">ميثاق الثقة السيادي مفعل لهذا الحجز</p>
+                                            </div>
+                                        </GlassPanel>
                                     </div>
                                 </div>
-                            </div>
 
-                            <div className="bg-muted/5 rounded-xl p-4 border border-dashed border-border space-y-3">
-                                <div className="flex justify-between">
-                                    <span className="text-muted-foreground">الأصل:</span>
-                                    <span className="font-bold">{product?.name_ar}</span>
+                                <div className="flex justify-between items-center pt-8 border-t border-white/5">
+                                    <p className="text-[9px] text-muted-foreground font-black uppercase tracking-widest">Sovereign Registry System V2.1</p>
+                                    <SovereignButton onClick={() => setStep('sign')} variant="primary" size="xl" className="px-16" withShimmer>
+                                        الانتقال للتوقيع <ArrowRight className="w-5 h-5 ml-4" />
+                                    </SovereignButton>
                                 </div>
-                                <div className="flex justify-between">
-                                    <span className="text-muted-foreground">المدة:</span>
-                                    <span className="font-mono" dir="ltr">
-                                        {startDate?.toLocaleDateString()} - {endDate?.toLocaleDateString()}
-                                    </span>
-                                </div>
-                                <div className="flex justify-between items-center pt-2 border-t border-border">
-                                    <span className="text-lg font-bold">الإجمالي المجمد:</span>
-                                    <span className="text-2xl font-mono font-bold text-sovereign-gold">
-                                        {totalPrice.toLocaleString()} <span className="text-sm">دج</span>
-                                    </span>
-                                </div>
-                            </div>
+                            </motion.div>
+                        )}
 
-                            <div className="flex justify-end pt-4">
-                                <Button onClick={() => setStep('sign')} className="bg-sovereign-gold hover:bg-sovereign-gold/90 text-black min-w-[200px]">
-                                    متابعة للتوقيع <ArrowRight className="mr-2 w-4 h-4" />
-                                </Button>
-                            </div>
-                        </div>
-                    )}
-
-                    {step === 'sign' && (
-                        <div className="space-y-6 animate-in zoom-in-95 duration-300">
-                            <div className="bg-yellow-500/10 border border-yellow-500/20 p-4 rounded-lg flex gap-3 text-sm text-yellow-600 mb-4">
-                                <AlertTriangle className="w-5 h-5 flex-shrink-0" />
-                                <p>بعد التوقيع، يصبح هذا الاتفاق ملزمًا ولا يمكن تعديله إلا وفق شروط STANDARD. نافذة التراجع المجاني: 10 دقائق.</p>
-                            </div>
-
-                            <div className="border-2 border-dashed border-sovereign-gold/30 rounded-xl bg-background relative overflow-hidden h-[200px] cursor-crosshair group">
-                                <canvas
-                                    ref={canvasRef}
-                                    width={600}
-                                    height={200}
-                                    className="w-full h-full touch-none"
-                                    onMouseDown={startDrawing}
-                                    onMouseMove={draw}
-                                    onMouseUp={stopDrawing}
-                                    onMouseLeave={stopDrawing}
-                                    onTouchStart={startDrawing}
-                                    onTouchMove={draw}
-                                    onTouchEnd={stopDrawing}
-                                />
-                                <div className="absolute top-2 left-2 text-[10px] text-muted-foreground pointer-events-none opacity-50 uppercase tracking-widest">
-                                    Official Signature Space
+                        {step === 'sign' && (
+                            <motion.div 
+                                key="sign"
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="space-y-8 flex flex-col items-center"
+                            >
+                                <div className="text-center space-y-2">
+                                    <Badge className="bg-sovereign-gold/10 text-sovereign-gold border-0 uppercase tracking-widest text-[10px]">Digital Signature Required</Badge>
+                                    <h3 className="text-2xl font-black">خط التوقيع السيادي</h3>
                                 </div>
-                                {!isDrawing && !signature && (
-                                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20">
-                                        <PenTool className="w-12 h-12 text-sovereign-gold" />
+
+                                <div className="w-full h-64 bg-background border-2 border-dashed border-sovereign-gold/20 rounded-[2.5rem] relative cursor-crosshair group overflow-hidden">
+                                     <canvas
+                                        ref={canvasRef}
+                                        width={800}
+                                        height={300}
+                                        className="w-full h-full touch-none relative z-10"
+                                        onMouseDown={startDrawing}
+                                        onMouseMove={draw}
+                                        onMouseUp={stopDrawing}
+                                        onTouchStart={startDrawing}
+                                        onTouchMove={draw}
+                                        onTouchEnd={stopDrawing}
+                                    />
+                                    <PenTool className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 text-sovereign-gold/5 pointer-events-none" />
+                                </div>
+
+                                <div className="flex gap-4 w-full">
+                                    <SovereignButton onClick={() => setStep('review')} variant="secondary" className="flex-1">العودة للمراجعة</SovereignButton>
+                                    <SovereignButton onClick={handleConfirmSignature} variant="primary" className="flex-1" withShimmer>ختم العقد وتوثيقه</SovereignButton>
+                                </div>
+                            </motion.div>
+                        )}
+
+                        {step === 'sealing' && (
+                            <motion.div 
+                                key="sealing"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                className="flex flex-col items-center justify-center py-20 space-y-8"
+                            >
+                                <div className="relative">
+                                    <motion.div 
+                                        animate={{ rotate: 360 }} 
+                                        transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                                        className="w-24 h-24 border-b-2 border-sovereign-gold rounded-full"
+                                    />
+                                    <ShieldCheck className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 text-sovereign-gold animate-pulse" />
+                                </div>
+                                <div className="text-center space-y-2">
+                                    <h3 className="text-2xl font-black">جاري الختم السيادي...</h3>
+                                    <p className="text-muted-foreground text-sm uppercase tracking-widest font-black opacity-40">Initializing Immutable Chain</p>
+                                </div>
+                            </motion.div>
+                        )}
+
+                        {step === 'sealed' && (
+                            <motion.div 
+                                key="sealed"
+                                initial={{ opacity: 0, scale: 0.5 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="flex flex-col items-center justify-center py-20 space-y-8"
+                            >
+                                <SovereignSparkle active={true}>
+                                    <div className="w-24 h-24 bg-emerald-500 rounded-full flex items-center justify-center shadow-3xl shadow-emerald-500/20">
+                                        <CheckCircle2 className="w-12 h-12 text-black" />
                                     </div>
-                                )}
-                            </div>
-
-                            <div className="flex justify-between items-center">
-                                <Button variant="ghost" size="sm" onClick={clearSignature} className="text-muted-foreground">
-                                    مسح التوقيع
-                                </Button>
-                                <Button
-                                    onClick={handleConfirmSignature}
-                                    disabled={isProcessing}
-                                    className="bg-sovereign-gold hover:bg-sovereign-gold/90 text-black min-w-[150px]"
-                                >
-                                    {isProcessing ? <Loader2 className="animate-spin w-4 h-4" /> : 'ختم العقد'}
-                                </Button>
-                            </div>
-                        </div>
-                    )}
-
-                    {step === 'sealing' && (
-                        <div className="flex flex-col items-center justify-center py-12 space-y-6 animate-in fade-in duration-500">
-                            <div className="relative">
-                                <div className="absolute inset-0 bg-sovereign-gold/20 blur-xl rounded-full animate-pulse" />
-                                <Loader2 className="w-16 h-16 text-sovereign-gold animate-spin relative z-10" />
-                            </div>
-                            <h3 className="text-xl font-bold">جاري توثيق الختم...</h3>
-                            <p className="text-muted-foreground text-sm">لحظات قليلة لحماية الحقوق</p>
-                        </div>
-                    )}
+                                </SovereignSparkle>
+                                <h3 className="text-3xl font-black italic">تـم الـخـتـم بنجاح</h3>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
+
             </DialogContent>
         </Dialog>
     );

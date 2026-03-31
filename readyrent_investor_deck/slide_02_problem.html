@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReadyRent - الشريحة 2</title>
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap');
+    
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #0a0a0a;
+      font-family: 'IBM Plex Sans Arabic', sans-serif;
+    }
+    .slide-content {
+      width: 960px;
+      height: 540px;
+      position: relative;
+      transform-origin: center center;
+    }
+    </style>
+    <script>
+    function scaleSlide() {
+      const slide = document.querySelector('.slide-content');
+      if (!slide) return;
+      const slideWidth = 960;
+      const slideHeight = 540;
+      const scaleX = window.innerWidth / slideWidth;
+      const scaleY = window.innerHeight / slideHeight;
+      const scale = Math.min(scaleX, scaleY);
+      slide.style.width = slideWidth + 'px';
+      slide.style.height = slideHeight + 'px';
+      slide.style.transform = `scale(${scale})`;
+      slide.style.transformOrigin = 'center center';
+    }
+    window.addEventListener('load', scaleSlide);
+    window.addEventListener('resize', scaleSlide);
+    </script>
+</head>
+<body style="background:#0a0a0a;">
+    <div class="slide-content" style="background:#0a0a0a; color:#ffffff;">
+        
+        <!-- Header -->
+        <h2 style="position:absolute; right:60px; top:40px; font-size:36px; font-weight:700; color:#ffffff; margin:0;">
+            المشكلة: <span style="color:#ef233c;">الاحتكاك القضائي</span>
+        </h2>
+        
+        <svg style="position:absolute; top:90px; right:60px;" width="120" height="4">
+            <rect width="120" height="4" rx="2" fill="#ef233c"/>
+        </svg>
+
+        <!-- Main Description -->
+        <p style="position:absolute; right:60px; top:120px; font-size:20px; font-weight:400; color:#a3a3a3; margin:0; line-height:1.6; width:800px;">
+            يصاب سوق الإيجارات الفاخرة في الجزائر بالشلل بسبب آليات التسوية القديمة. التقاضي التقليدي لم يعد خياراً في اقتصاد الأصول سريع الحركة.
+        </p>
+
+        <!-- Problem Grid -->
+        <div style="position:absolute; right:60px; top:220px; display:flex; gap:32px; width:840px;">
+            
+            <!-- Box 1 -->
+            <div style="flex:1; background:rgba(239, 35, 60, 0.05); border:1px solid rgba(239, 35, 60, 0.2); padding:24px; border-radius:12px; position:relative;">
+                <svg width="32" height="32" style="margin-bottom:16px;">
+                    <circle cx="16" cy="16" r="14" stroke="#ef233c" stroke-width="2" fill="none"/>
+                    <line x1="16" y1="8" x2="16" y2="16" stroke="#ef233c" stroke-width="2"/>
+                    <line x1="16" y1="20" x2="16" y2="24" stroke="#ef233c" stroke-width="2"/>
+                </svg>
+                <h3 style="font-size:20px; font-weight:700; color:#ef233c; margin:0 0 12px 0;">غياب التخصص</h3>
+                <p style="font-size:14px; color:#d4d4d4; margin:0; line-height:1.8;">
+                    يتم التعامل مع النزاعات من قبل المحاكم المدنية العامة. تؤدي الأنظمة المثقلة بالأعباء إلى عدم كفاءة نظامية وترهل إداري.
+                </p>
+            </div>
+
+            <!-- Box 2 -->
+            <div style="flex:1; background:rgba(239, 35, 60, 0.05); border:1px solid rgba(239, 35, 60, 0.2); padding:24px; border-radius:12px; position:relative;">
+                <svg width="32" height="32" style="margin-bottom:16px;">
+                    <circle cx="16" cy="16" r="14" stroke="#ef233c" stroke-width="2" fill="none"/>
+                    <path d="M16 8 L16 16 L10 16" stroke="#ef233c" stroke-width="2" fill="none"/>
+                </svg>
+                <h3 style="font-size:20px; font-weight:700; color:#ef233c; margin:0 0 12px 0;">تأخر التسوية</h3>
+                <p style="font-size:14px; color:#d4d4d4; margin:0; line-height:1.8;">
+                    تستغرق النزاعات البسيطة <strong>6–18 شهراً</strong>. يستغل "المستأجرون السيئون" الجدول الزمني القانوني لشغل الأصول بدون إيجار.
+                </p>
+            </div>
+
+            <!-- Box 3 -->
+            <div style="flex:1; background:rgba(239, 35, 60, 0.05); border:1px solid rgba(239, 35, 60, 0.2); padding:24px; border-radius:12px; position:relative;">
+                <svg width="32" height="32" style="margin-bottom:16px;">
+                    <path d="M6 16 L26 16 M16 6 L16 26" stroke="#ef233c" stroke-width="2" transform="rotate(45 16 16)"/>
+                    <circle cx="16" cy="16" r="14" stroke="#ef233c" stroke-width="2" fill="none"/>
+                </svg>
+                <h3 style="font-size:20px; font-weight:700; color:#ef233c; margin:0 0 12px 0;">مخاطر السيولة</h3>
+                <p style="font-size:14px; color:#d4d4d4; margin:0; line-height:1.8;">
+                    يواجه الملاك خسائر كارثية في هوامش الربح. يمنع "عجز الثقة" تدفق الاستثمار الرأسمالي في سوق الإيجارات الجزائرية.
+                </p>
+            </div>
+
+        </div>
+
+        <!-- Footnote -->
+        <p style="position:absolute; right:60px; bottom:80px; font-size:12px; color:#525252; font-style:italic;">
+            المصدر: تحليل Sands of Wealth ذكاء السوق (Q1 2026) — تحليل الاحتكاك القضائي
+        </p>
+
+        <!-- Page Number (Appendix G) -->
+        <svg style="position:absolute; left:32px; bottom:24px;" width="36" height="36" viewBox="0 0 36 36">
+            <circle cx="18" cy="18" r="18" fill="#ef233c" fill-opacity="0.2" stroke="#ef233c" stroke-width="1"/>
+            <text x="18" y="18" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="600" fill="#ef233c">02</text>
+        </svg>
+
+    </div>
+</body>
+</html>

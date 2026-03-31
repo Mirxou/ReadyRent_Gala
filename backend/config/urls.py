@@ -73,6 +73,7 @@ urlpatterns = [
     path('api/local-guide/', include('apps.local_guide.urls')),
     path('api/artisans/', include('apps.artisans.urls')),
     path('api/analytics/', include('apps.analytics.urls')),
+    path('api/social/', include('apps.social.urls')),
     path('api/reviews/', include('apps.reviews.urls')),
     path('api/disputes/', include('apps.disputes.urls')),
     path('api/vendors/', include('apps.vendors.urls')),

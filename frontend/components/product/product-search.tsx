@@ -1,25 +1,18 @@
-'use client';
+"use client";
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Search, Filter, X, LayoutGrid, List as ListIcon } from 'lucide-react';
+import { Search, Filter, X, LayoutGrid, List as ListIcon, Sparkles, Activity, ShieldCheck, Heart } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDebounce } from '@/lib/hooks/use-debounce';
 import { productsApi } from '@/lib/api/products';
-import type { SearchFilters } from '@/lib/api/products';
 import { cn } from '@/lib/utils';
 import { ProductCard } from './product-card';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from '@/components/ui/select';
+import { SovereignButton } from '@/components/sovereign/sovereign-button';
+import { GlassPanel } from '@/components/sovereign/glass-panel';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import { 
   Sheet, 
   SheetContent, 
@@ -27,14 +20,15 @@ import {
   SheetTitle, 
   SheetTrigger 
 } from '@/components/ui/sheet';
+import { SovereignGlow, SovereignSparkle } from '@/components/sovereign/sovereign-sparkle';
 
 export function ProductSearch() {
   const [query, setQuery] = useState('');
   const [view, setView] = useState<'grid' | 'list'>('grid');
-  const [filters, setFilters] = useState<SearchFilters>({
+  const [filters, setFilters] = useState<any>({
     category: '',
     priceMin: 0,
-    priceMax: 100000,
+    priceMax: 200000,
     location: '',
     sortBy: 'newest',
   });
@@ -55,15 +49,15 @@ export function ProductSearch() {
     ? productsData
     : (productsData as any)?.results || [];
 
-  const handleFilterChange = (key: keyof SearchFilters, value: any) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
+  const handleFilterChange = (key: string, value: any) => {
+    setFilters((prev: any) => ({ ...prev, [key]: value }));
   };
 
   const clearFilters = () => {
     setFilters({
       category: '',
       priceMin: 0,
-      priceMax: 100000,
+      priceMax: 200000,
       location: '',
       sortBy: 'newest',
     });
@@ -71,136 +65,157 @@ export function ProductSearch() {
   };
 
   return (
-    <div className="flex flex-col gap-8">
-      {/* Top Search Bar */}
-      <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-        <div className="relative w-full max-w-2xl">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
-          <Input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="ابحث عن قاعات، كاميرات، فساتين..."
-            className="pl-12 h-14 text-lg rounded-2xl border-2 focus:ring-primary-500"
-          />
-        </div>
-        
-        <div className="flex items-center gap-2 w-full md:w-auto">
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="outline" className="flex-1 md:flex-none h-14 rounded-2xl gap-2">
-                <Filter className="h-5 w-5" />
-                تصفية
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-[400px]">
-              <SheetHeader>
-                <SheetTitle>خيارات التصفية</SheetTitle>
-              </SheetHeader>
-              <div className="py-6 space-y-8">
-                {/* Category Filter */}
-                <div className="space-y-4">
-                  <h4 className="font-bold">التصنيف</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {categories?.map((cat: any) => (
-                      <Badge
-                        key={cat.id}
-                        variant={filters.category === cat.slug ? 'default' : 'outline'}
-                        className="cursor-pointer px-4 py-2 text-sm rounded-xl"
-                        onClick={() => handleFilterChange('category', cat.slug)}
-                      >
-                        {cat.name_ar}
-                      </Badge>
-                    ))}
-                  </div>
+    <div className="space-y-12" dir="rtl">
+      
+      {/* 🧭 Sovereign Search Bar Hub */}
+      <GlassPanel className="p-8 border-white/5 bg-background/40 backdrop-blur-3xl shadow-4xl" gradientBorder>
+          <div className="flex flex-col md:flex-row gap-8 items-center">
+             
+             {/* The Intelligence Input */}
+             <div className="relative w-full max-w-3xl group">
+                <div className="absolute inset-0 bg-sovereign-gold/5 rounded-[2rem] blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity" />
+                <Search className="absolute right-6 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5 group-focus-within:text-sovereign-gold transition-colors" />
+                <Input
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="ابحث في سجل الأصول السيادية (فساتين، إكسسوارات، قاعات...)"
+                    className="pr-16 h-16 text-lg rounded-[2rem] border-white/5 bg-black/20 focus:border-sovereign-gold/40 transition-all font-black placeholder:text-muted-foreground/40 italic"
+                />
+             </div>
+
+             {/* Tactical Tools */}
+             <div className="flex items-center gap-4 w-full md:w-auto">
+                <Sheet>
+                   <SheetTrigger asChild>
+                      <SovereignButton variant="secondary" className="h-16 px-8 rounded-2xl gap-3 flex-1 md:flex-none">
+                         <Filter className="w-5 h-5" /> تصفية السجل
+                      </SovereignButton>
+                   </SheetTrigger>
+                   <SheetContent side="right" className="w-full md:w-[450px] bg-background border-white/5 p-10" dir="rtl">
+                      <SheetHeader className="mb-12">
+                         <SheetTitle className="text-3xl font-black italic">بروتوكول التصفية السيادي</SheetTitle>
+                      </SheetHeader>
+                      <div className="space-y-12">
+                         {/* Category Filter */}
+                         <div className="space-y-6">
+                            <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground opacity-40">أصناف الأصول (Categories)</h4>
+                            <div className="flex flex-wrap gap-3">
+                               {categories?.map((cat: any) => (
+                                 <Badge
+                                   key={cat.id}
+                                   variant="outline"
+                                   className={cn(
+                                     "cursor-pointer px-5 py-2.5 text-xs font-bold rounded-xl transition-all",
+                                     filters.category === cat.slug ? "bg-sovereign-gold text-black border-sovereign-gold" : "hover:bg-white/5 border-white/5"
+                                   )}
+                                   onClick={() => handleFilterChange('category', cat.slug)}
+                                 >
+                                   {cat.name_ar}
+                                 </Badge>
+                               ))}
+                            </div>
+                         </div>
+
+                         {/* Sort Options */}
+                         <div className="space-y-6">
+                            <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground opacity-40">منطق الترتيب (Sort Engine)</h4>
+                            <div className="grid grid-cols-2 gap-4">
+                               {[
+                                 { label: 'الأحدث سيادياً', value: 'newest' },
+                                 { label: 'الأكثر نيلاً للثقة', value: 'popularity' },
+                                 { label: 'القيمة (الأقل)', value: 'price_asc' },
+                                 { label: 'القيمة (الأعلى)', value: 'price_desc' }
+                               ].map(opt => (
+                                 <button
+                                   key={opt.value}
+                                   onClick={() => handleFilterChange('sortBy', opt.value)}
+                                   className={cn(
+                                     "p-4 rounded-xl border text-[11px] font-black uppercase tracking-widest transition-all",
+                                     filters.sortBy === opt.value ? "border-sovereign-gold bg-sovereign-gold/10 text-sovereign-gold" : "border-white/5 hover:bg-white/5"
+                                   )}
+                                 >
+                                   {opt.label}
+                                 </button>
+                               ))}
+                            </div>
+                         </div>
+
+                         <div className="pt-10 border-t border-white/5">
+                            <SovereignButton onClick={clearFilters} variant="secondary" className="w-full h-14 rounded-xl gap-3">
+                               <X className="w-4 h-4" /> إعادة ضبط البروتوكول
+                            </SovereignButton>
+                         </div>
+                      </div>
+                   </SheetContent>
+                </Sheet>
+
+                {/* View Switchers */}
+                <div className="hidden md:flex p-1.5 bg-black/40 rounded-2xl border border-white/5">
+                   <button 
+                     onClick={() => setView('grid')}
+                     className={cn("p-4 rounded-xl transition-all", view === 'grid' ? "bg-sovereign-gold text-black shadow-3xl" : "text-muted-foreground hover:text-foreground")}
+                   >
+                      <LayoutGrid className="w-5 h-5" />
+                   </button>
+                   <button 
+                     onClick={() => setView('list')}
+                     className={cn("p-4 rounded-xl transition-all", view === 'list' ? "bg-sovereign-gold text-black shadow-3xl" : "text-muted-foreground hover:text-foreground")}
+                   >
+                      <ListIcon className="w-5 h-5" />
+                   </button>
                 </div>
-
-                {/* Sort Filter */}
-                <div className="space-y-4">
-                  <h4 className="font-bold">الترتيب حسب</h4>
-                  <Select 
-                    value={filters.sortBy} 
-                    onValueChange={(v) => handleFilterChange('sortBy', v)}
-                  >
-                    <SelectTrigger className="w-full h-12 rounded-xl">
-                      <SelectValue placeholder="اختر الترتيب" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="newest">الأحدث أولاً</SelectItem>
-                      <SelectItem value="price_asc">الأقل سعراً</SelectItem>
-                      <SelectItem value="price_desc">الأعلى سعراً</SelectItem>
-                      <SelectItem value="popularity">الأكثر شهرة</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <Button className="w-full h-12 rounded-xl" onClick={clearFilters} variant="ghost">
-                  <X className="h-4 w-4 ml-2" />
-                  إعادة تعيين الكل
-                </Button>
-              </div>
-            </SheetContent>
-          </Sheet>
-
-          <div className="hidden md:flex bg-gray-100 p-1 rounded-2xl">
-            <Button
-              variant={view === 'grid' ? 'secondary' : 'ghost'}
-              size="icon"
-              className={cn("h-12 w-12 rounded-xl", view === 'grid' && "bg-white shadow-sm")}
-              onClick={() => setView('grid')}
-            >
-              <LayoutGrid className="h-5 w-5" />
-            </Button>
-            <Button
-              variant={view === 'list' ? 'secondary' : 'ghost'}
-              size="icon"
-              className={cn("h-12 w-12 rounded-xl", view === 'list' && "bg-white shadow-sm")}
-              onClick={() => setView('list')}
-            >
-              <ListIcon className="h-5 w-5" />
-            </Button>
+             </div>
           </div>
-        </div>
-      </div>
 
-      {/* active filters */}
-      {filters.category && (
-        <div className="flex items-center gap-2">
-           <Badge variant="secondary" className="px-3 py-1 gap-1">
-             {filters.category}
-             <X className="h-3 w-3 cursor-pointer" onClick={() => handleFilterChange('category', '')} />
-           </Badge>
-        </div>
-      )}
+          <div className="mt-8 flex flex-wrap items-center gap-6">
+             <div className="flex items-center gap-3">
+                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-40">System Status:</span>
+                <Badge className="bg-emerald-500/10 text-emerald-500 border-none text-[8px] font-black uppercase tracking-[0.2em] px-3 py-1">Ready to Lease</Badge>
+             </div>
+             {filters.category && (
+                <Badge variant="outline" className="border-sovereign-gold/20 text-sovereign-gold bg-sovereign-gold/5 px-4 py-1.5 gap-2 font-black italic">
+                   تجميع حسب: {filters.category}
+                   <X className="w-3 h-3 cursor-pointer" onClick={() => handleFilterChange('category', '')} />
+                </Badge>
+             )}
+          </div>
+      </GlassPanel>
 
-      {/* Main Grid */}
+      {/* 🚀 Main Search Results */}
       <div className={cn(
-        "grid gap-6",
+        "grid gap-10",
         view === 'grid' ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "grid-cols-1"
       )}>
         <AnimatePresence>
           {isLoading ? (
             Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="space-y-4">
-                <Skeleton className="aspect-[4/5] w-full rounded-2xl" />
-                <Skeleton className="h-6 w-3/4" />
-                <Skeleton className="h-4 w-1/2" />
-              </div>
+              <GlassPanel key={i} className="aspect-[3/4] p-0" gradientBorder>
+                 <Skeleton className="w-full h-full rounded-[2.5rem] bg-white/5" />
+              </GlassPanel>
             ))
           ) : products.length > 0 ? (
             products.map((product: any) => (
               <ProductCard key={product.id} product={product} />
             ))
           ) : (
-            <div className="col-span-full py-20 text-center">
-              <div className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-gray-100 mb-4">
-                 <Search className="h-10 w-10 text-gray-400" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900">لم يتم العثور على نتائج</h3>
-              <p className="text-gray-500">جرب استخدام كلمات بحث مختلفة أو تغيير الفلاتر</p>
-            </div>
+            <motion.div 
+               initial={{ opacity: 0 }}
+               animate={{ opacity: 1 }}
+               className="col-span-full py-40 text-center space-y-8"
+            >
+               <div className="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center mx-auto text-muted-foreground/20">
+                  <Activity className="w-12 h-12" />
+               </div>
+               <div className="space-y-2">
+                   <h3 className="text-3xl font-black italic">لم يتم رصد نتائج في الأرشيف</h3>
+                   <p className="text-muted-foreground italic text-sm">جرب استخدام ميثاق بحث مختلف (فساتين، قاعات، كاميرات...)</p>
+               </div>
+               <SovereignButton onClick={clearFilters} variant="secondary">العودة لتصفح السجل الكامل</SovereignButton>
+            </motion.div>
           )}
         </AnimatePresence>
       </div>
+
     </div>
   );
 }

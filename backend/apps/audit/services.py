@@ -1,5 +1,8 @@
+import structlog
 from django.contrib.contenttypes.models import ContentType
 from .models import AuditLog
+
+logger = structlog.get_logger("audit.services")
 
 class AuditService:
     @staticmethod
@@ -28,4 +31,9 @@ class AuditService:
             # 🚨 CRITICAL: Audit logging should typically NOT break the main flow,
             # but in a banking system, failure to log might be a stop-the-world event.
             # For now, we log the error to system error output.
-            print(f"CRITICAL AUDIT FAILURE: {e}")
+            logger.critical(
+                "audit_logging_failed",
+                action=action,
+                error=str(e),
+                exc_info=True
+            )

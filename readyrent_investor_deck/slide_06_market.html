@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReadyRent - الشريحة 6</title>
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap');
+    
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #0a0a0a;
+      font-family: 'IBM Plex Sans Arabic', sans-serif;
+    }
+    .slide-content {
+      width: 960px;
+      height: 540px;
+      position: relative;
+      transform-origin: center center;
+    }
+    </style>
+    <script>
+    function scaleSlide() {
+      const slide = document.querySelector('.slide-content');
+      if (!slide) return;
+      const slideWidth = 960;
+      const slideHeight = 540;
+      const scaleX = window.innerWidth / slideWidth;
+      const scaleY = window.innerHeight / slideHeight;
+      const scale = Math.min(scaleX, scaleY);
+      slide.style.width = slideWidth + 'px';
+      slide.style.height = slideHeight + 'px';
+      slide.style.transform = `scale(${scale})`;
+      slide.style.transformOrigin = 'center center';
+    }
+    window.addEventListener('load', scaleSlide);
+    window.addEventListener('resize', scaleSlide);
+    </script>
+</head>
+<body style="background:#0a0a0a;">
+    <div class="slide-content" style="background:#0a0a0a; color:#ffffff;">
+        
+        <!-- Header -->
+        <h2 style="position:absolute; right:60px; top:40px; font-size:36px; font-weight:700; color:#D4AF37; margin:0;">
+            فرصة السوق: <span style="color:#ffffff;">التركيز على الجزائر</span>
+        </h2>
+        
+        <svg style="position:absolute; top:90px; right:60px;" width="120" height="4">
+            <rect width="120" height="4" rx="2" fill="#D4AF37"/>
+        </svg>
+
+        <!-- Market Stats Cards -->
+        <div style="position:absolute; right:60px; top:140px; width:440px; display:flex; flex-direction:column; gap:20px;">
+            <div style="background:rgba(212, 175, 55, 0.05); border:1px solid rgba(212, 175, 55, 0.2); padding:20px; border-radius:12px;">
+                <h4 style="font-size:32px; font-weight:700; color:#D4AF37; margin:0 0 4px 0;">9.1% <span style="font-size:16px;">معدل نمو سنوي</span></h4>
+                <p style="font-size:14px; color:#d4d4d4; margin:0; line-height:1.6;">النمو المتوقع للعقارات الجزائرية حتى عام 2031.</p>
+            </div>
+            <div style="background:rgba(212, 175, 55, 0.05); border:1px solid rgba(212, 175, 55, 0.2); padding:20px; border-radius:12px;">
+                <h4 style="font-size:32px; font-weight:700; color:#D4AF37; margin:0 0 4px 0;">15–30% <span style="font-size:16px;">علاوة سعرية</span></h4>
+                <p style="font-size:14px; color:#d4d4d4; margin:0; line-height:1.6;">للشقق الفاخرة المؤثثة في "المثلث الذهبي" بالعاصمة الجزائر.</p>
+            </div>
+            <div style="background:rgba(212, 175, 55, 0.05); border:1px solid rgba(212, 175, 55, 0.2); padding:20px; border-radius:12px;">
+                <h4 style="font-size:32px; font-weight:700; color:#D4AF37; margin:0 0 4px 0;">$550+ <span style="font-size:16px;">وحدة تأجير</span></h4>
+                <p style="font-size:14px; color:#d4d4d4; margin:0; line-height:1.6;">إمكانات تأجير أزياء العرائس التقليدية لكل احتفال.</p>
+            </div>
+        </div>
+
+        <!-- Vision Chart (SVG Mini Chart) -->
+        <div style="position:absolute; right:540px; top:140px; width:360px; height:360px; background:rgba(255, 255, 255, 0.03); border-radius:12px; border:1px solid rgba(255, 255, 255, 0.1); padding:32px;">
+            <h4 style="font-size:18px; font-weight:700; margin:0 0 24px 0;">توقعات تبني السوق</h4>
+            
+            <svg width="300" height="240" viewBox="0 0 300 240">
+                <!-- Y-Axis Lines -->
+                <rect x="0" y="200" width="270" height="1" fill="#525252"/>
+                
+                <!-- Bars -->
+                <!-- 2024 -->
+                <rect x="210" y="180" width="30" height="20" fill="#D4AF37" opacity="0.4"/>
+                <text x="225" y="220" text-anchor="middle" font-size="10" fill="#a3a3a3">2024</text>
+                
+                <!-- 2025 -->
+                <rect x="150" y="140" width="30" height="60" fill="#D4AF37" opacity="0.6"/>
+                <text x="165" y="220" text-anchor="middle" font-size="10" fill="#a3a3a3">2025</text>
+                
+                <!-- 2026 -->
+                <rect x="90" y="90" width="30" height="110" fill="#D4AF37" opacity="0.8"/>
+                <text x="105" y="220" text-anchor="middle" font-size="10" fill="#a3a3a3">2026</text>
+                
+                <!-- 2027 (Forecast) -->
+                <rect x="30" y="40" width="30" height="160" fill="#D4AF37"/>
+                <text x="45" y="220" text-anchor="middle" font-size="10" fill="#ffffff" font-weight="700">2027F</text>
+            </svg>
+
+            <p style="font-size:12px; color:#a3a3a3; margin:24px 0 0 0; text-align:center;">
+                تبني ReadyRent بين كبار الملاك في حيدرة والأبيار.
+            </p>
+        </div>
+
+        <!-- Footnote -->
+        <p style="position:absolute; right:60px; bottom:20px; font-size:10px; color:#525252;">
+            المصدر: تقرير Knight Frank الجزائر وتوقعات ReadyRent الداخلية.
+        </p>
+
+        <!-- Page Number (Appendix G) -->
+        <svg style="position:absolute; left:32px; bottom:24px;" width="36" height="36" viewBox="0 0 36 36">
+            <circle cx="18" cy="18" r="18" fill="#D4AF37" fill-opacity="0.1" stroke="#D4AF37" stroke-width="1"/>
+            <text x="18" y="18" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="600" fill="#D4AF37">06</text>
+        </svg>
+
+    </div>
+</body>
+</html>

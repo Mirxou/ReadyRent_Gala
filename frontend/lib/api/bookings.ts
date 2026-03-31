@@ -26,6 +26,9 @@ export const bookingsApi = {
   list: (params?: any) => 
     sovereignClient.get<Booking[]>('/bookings/', { params }),
 
+  getAll: (params?: any) => 
+    sovereignClient.get<Booking[]>('/bookings/', { params }),
+
   getDetail: (id: number) => 
     sovereignClient.get<Booking>(`/bookings/${id}/`),
 

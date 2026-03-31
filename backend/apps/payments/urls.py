@@ -6,7 +6,8 @@ from rest_framework.routers import DefaultRouter
 from .views import (
     PaymentMethodListView,
     PaymentViewSet,
-    PaymentCreateView
+    PaymentCreateView,
+    EscrowMetricsView
 )
 from .webhooks import BaridiMobWebhookView, BankCardWebhookView
 
@@ -19,6 +20,7 @@ urlpatterns = [
     path('', include(router.urls)),
     path('methods/', PaymentMethodListView.as_view(), name='payment-methods'),
     path('create/', PaymentCreateView.as_view(), name='payment-create'),
+    path('metrics/', EscrowMetricsView.as_view(), name='escrow-metrics'),
     
     # Webhooks
     path('webhooks/baridimob/', BaridiMobWebhookView.as_view(), name='baridimob-webhook'),

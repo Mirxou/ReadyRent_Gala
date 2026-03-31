@@ -1,11 +1,13 @@
 """
 Services for Review app - Sentiment Analysis
 """
+import structlog
 import os
 from django.conf import settings
 from decimal import Decimal
 import openai
 
+logger = structlog.get_logger("reviews.sentiment")
 
 class SentimentAnalysisService:
     """Service for analyzing review sentiment using OpenAI API"""
@@ -17,7 +19,11 @@ class SentimentAnalysisService:
             try:
                 self.client = openai.OpenAI(api_key=self.api_key)
             except Exception as e:
-                print(f"Error initializing OpenAI client: {e}")
+                logger.error(
+                    "openai_init_failed",
+                    error=str(e),
+                    exc_info=True
+                )
     
     def analyze_sentiment(self, text: str) -> dict:
         """
@@ -73,7 +79,11 @@ class SentimentAnalysisService:
                 'label': result.get('label', 'neutral')
             }
         except Exception as e:
-            print(f"Error in OpenAI sentiment analysis: {e}")
+            logger.error(
+                "openai_sentiment_analysis_failed",
+                error=str(e),
+                exc_info=True
+            )
             # Fallback to simple analysis
             return self._simple_sentiment_analysis(text)
     

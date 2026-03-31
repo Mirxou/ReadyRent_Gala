@@ -1,15 +1,12 @@
-"""
-Location services
-"""
+import structlog
 import math
 import requests
 from datetime import time, datetime
 from django.conf import settings
 from django.utils import timezone
-from datetime import time, datetime
-from django.utils import timezone
 from .models import Address, DeliveryZone, DeliveryRequest
 
+logger = structlog.get_logger("locations.services")
 
 class LocationService:
     """Service for location calculations"""
@@ -182,7 +179,12 @@ class GoogleMapsService:
                     'formatted_address': result.get('formatted_address', address),
                 }
         except Exception as e:
-            print(f"Error geocoding address: {e}")
+            logger.error(
+                "google_geocode_failed",
+                address=address,
+                error=str(e),
+                exc_info=True
+            )
         
         return None
     
@@ -212,7 +214,13 @@ class GoogleMapsService:
                     'place_id': result.get('place_id', ''),
                 }
         except Exception as e:
-            print(f"Error reverse geocoding: {e}")
+            logger.error(
+                "google_reverse_geocode_failed",
+                latitude=latitude,
+                longitude=longitude,
+                error=str(e),
+                exc_info=True
+            )
         
         return None
     
@@ -239,7 +247,12 @@ class GoogleMapsService:
             if data['status'] == 'OK':
                 return data.get('result', {})
         except Exception as e:
-            print(f"Error getting place details: {e}")
+            logger.error(
+                "google_place_details_failed",
+                place_id=place_id,
+                error=str(e),
+                exc_info=True
+            )
         
         return None
 

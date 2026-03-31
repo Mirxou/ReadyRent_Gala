@@ -1,6 +1,4 @@
-"""
-Celery tasks for notifications
-"""
+import structlog
 from celery import shared_task
 from django.utils import timezone
 from datetime import timedelta
@@ -13,6 +11,7 @@ from .services import (
     send_waitlist_notification
 )
 
+logger = structlog.get_logger("notifications.tasks")
 
 @shared_task
 def send_booking_reminders():
@@ -105,7 +104,12 @@ def check_waitlist_availability(product_id=None):
             send_waitlist_notification(waitlist_item)
             notified_count += 1
         except Exception as e:
-            print(f"Error notifying waitlist item {waitlist_item.id}: {e}")
+            logger.error(
+                "waitlist_notification_failed",
+                waitlist_id=waitlist_item.id,
+                error=str(e),
+                exc_info=True
+            )
     
     return f"Notified {notified_count} users about product availability"
 

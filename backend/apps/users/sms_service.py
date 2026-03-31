@@ -3,8 +3,11 @@ SMS service for phone verification
 Supports multiple SMS providers: Twilio, AWS SNS, or custom provider
 """
 import requests
+import structlog
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
+
+logger = structlog.get_logger("users.sms")
 
 
 class SMSService:
@@ -37,7 +40,6 @@ class SMSService:
         """
         # Format phone number
         phone = cls._format_phone_number(phone_number)
-        
         # Choose provider
         if cls.PROVIDER == 'twilio':
             return cls._send_via_twilio(phone, code)
@@ -47,7 +49,11 @@ class SMSService:
             return cls._send_via_custom(phone, code)
         else:
             # Fallback: just log (for development)
-            print(f"[SMS] Verification code {code} for {phone}")
+            logger.info(
+                "sms_development_mode",
+                phone=phone,
+                code=code
+            )
             return {'success': True, 'message': 'SMS sent (development mode)'}
     
     @classmethod

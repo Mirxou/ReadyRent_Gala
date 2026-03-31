@@ -33,11 +33,22 @@ export const api = axios.create({
   },
 });
 
-// Response Interceptor: Handle 401 & Refresh Token
+// Response Interceptor: Handle unwrapping of Sovereign Envelope & 401 Refresh
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Phase 5: Sovereign Unwrapping
+    // Automatically extract .data from { success, data, meta } envelope
+    if (response.data && typeof response.data === 'object' && 'success' in response.data && 'data' in response.data) {
+       // Attached metadata for components that need it (e.g. pagination)
+       (response as any).meta = response.data.meta;
+       // Transparently set .data to the actual payload
+       response.data = response.data.data;
+    }
+    return response;
+  },
   async (error) => {
     const originalRequest = error.config;
+
 
     // Handle network errors
     if (!error.response) {
@@ -92,6 +103,9 @@ export const authApi = {
   me: () => api.get('/auth/profile/'),
   passwordResetRequest: (email: string) => api.post('/auth/password/reset/request/', { email }),
   passwordResetConfirm: (token: string, uid: string, password: string, passwordConfirm: string) => api.post('/auth/password/reset/confirm/', { token, uid, password, password_confirm: passwordConfirm }),
+  // Sovereign Guard (Phase 6)
+  generate2FASecret: () => api.post('/auth/security/2fa/generate/'),
+  enable2FA: (data: { secret: string; token: string }) => api.post('/auth/security/2fa/enable/', data),
 };
 
 export const verificationApi = {
@@ -480,6 +494,8 @@ export const disputesApi = {
   // Admin Stats
   getDisputeStats: () => api.get('/disputes/admin/disputes/stats/'),
   getTicketStats: () => api.get('/disputes/admin/tickets/stats/'),
+  // High Court Integrity (Phase 6)
+  getVaultIntegrity: () => api.get('/disputes/admin/vault/integrity/'),
 };
 
 // Vendors API
@@ -576,6 +592,7 @@ export const analyticsApi = {
   // User Behavior
   getUserBehavior: (params?: any) => api.get('/analytics/user-behavior/', { params }),
   getUserBehaviorById: (id: number) => api.get(`/analytics/user-behavior/${id}/`),
+  getProductActivity: (productId: number) => api.get(`/analytics/live/activity/${productId}/`),
 };
 
 // Payments API
@@ -591,4 +608,39 @@ export const paymentsApi = {
   // Payment Actions
   verifyOtp: (id: number, otpCode: string) => api.post(`/payments/payments/${id}/verify_otp/`, { otp_code: otpCode }),
   getStatus: (id: number) => api.get(`/payments/payments/${id}/status/`),
+  getEscrowMetrics: () => api.get('/payments/metrics/'),
+};
+// Social & Community Intelligence
+export const socialApi = {
+  vouch: (userId: number) => api.post(`/social/vouch/${userId}/`),
+  getSocialScore: (userId: number) => api.get(`/social/score/${userId}/`),
+  getFeed: (params?: any) => api.get('/social/feed/', { params }),
+  // Advanced: Scrapped Market Trends (from skills)
+  getMarketPulse: (params?: { platform?: string; keyword?: string }) => 
+    api.get('/social/pulse/', { params }),
+};
+
+// Sovereign Judicial Protocol (Disputes & Tribunal)
+export const judicialApi = {
+  initiateDispute: (data: any) => api.post('/v1/judicial/disputes/initiate/', data),
+  getDisputeStatus: (id: number) => api.get(`/v1/judicial/disputes/${id}/status/`),
+  issueVerdict: (id: number, data: any) => api.post(`/v1/judicial/disputes/${id}/verdict/`, data),
+  appealVerdict: (id: number, data: any) => api.post(`/v1/judicial/disputes/${id}/appeal/`, data),
+  closeDispute: (id: number) => api.post(`/v1/judicial/disputes/${id}/close/`),
+  // Internal Tribunal Portal
+  getCaseDetail: (id: number) => api.get(`/v1/tribunal/cases/${id}/`),
+  // Public Ledger & Transparency
+  getPublicLedger: (params?: any) => api.get('/v1/public/judgments/', { params }),
+  getPublicMetrics: () => api.get('/v1/public/metrics/'),
+};
+
+// McKinsey-Grade Intelligence Hub (Phase 12 Integration)
+export const intelligenceApi = {
+  getMarketReport: (params?: { industry?: string; region?: string }) => 
+    api.get('/analytics/intelligence/report/', { params }),
+  getRegionalLiquidity: () => api.get('/analytics/admin/regional-liquidity/'),
+  getPulse: () => api.get('/analytics/intelligence/pulse/'),
+  getPredictivePulse: () => api.get('/analytics/daily/summary/'),
+  // Forensic Visuals (VisualLab principles)
+  getInfographicData: (type: string) => api.get(`/analytics/visuals/${type}/`),
 };

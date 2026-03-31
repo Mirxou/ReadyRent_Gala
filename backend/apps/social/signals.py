@@ -1,3 +1,4 @@
+import structlog
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from .models import Vouch
@@ -5,6 +6,8 @@ from apps.users.services_risk import RiskScoreService
 
 from apps.users.models import Blacklist
 from .models import Referral
+
+logger = structlog.get_logger("social.referrals")
 
 @receiver(post_save, sender=Vouch)
 def vouch_created(sender, instance, created, **kwargs):
@@ -38,16 +41,29 @@ def apply_parent_penalty(sender, instance, created, **kwargs):
             
             current_strike = previous_offenses + 1
             
-            print(f"🚨 PARENT WATCH: {referrer.email} | Strike #{current_strike}")
+            logger.info(
+                "parent_watch_strike",
+                referrer=referrer.email,
+                strike=current_strike,
+                blacklisted_user=blacklisted_user.email
+            )
 
             if current_strike == 1:
                 # STRIKE 1: WARNING
-                print(f"⚠️ STRIKE 1: Warning sent to {referrer.email}. 'Your referral {blacklisted_user.email} was blacklisted. Future operational errors will affect your Rep.'")
+                logger.warning(
+                    "referral_strike_1_warning",
+                    referrer=referrer.email,
+                    blacklisted_user=blacklisted_user.email
+                )
                 # TODO: Trigger Notification Service
             
             elif current_strike == 2:
                 # STRIKE 2: FREEZE
-                print(f"❄️ STRIKE 2: Referrals FROZEN for {referrer.email}. 'You can no longer invite new users.'")
+                logger.warning(
+                    "referral_strike_2_freeze",
+                    referrer=referrer.email,
+                    blacklisted_user=blacklisted_user.email
+                )
                 # We need a flag for this. For now, we assume Risk Score logic handles it or we set a flag.
                 # Let's verify if we need to update VerificationStatus
                 pass 
@@ -59,7 +75,12 @@ def apply_parent_penalty(sender, instance, created, **kwargs):
                     verification = referrer.verification
                     verification.risk_score += penalty_points
                     verification.save()
-                    print(f"🔥 STRIKE 3: TRUST HIT! {referrer.email} (+{penalty_points} Risk Score).")
+                    logger.error(
+                        "referral_strike_3_trust_hit",
+                        referrer=referrer.email,
+                        penalty_points=penalty_points,
+                        new_risk_score=verification.risk_score
+                    )
 
             # Always revoke the bad referral
             referral.status = 'revoked'

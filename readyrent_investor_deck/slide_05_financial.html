@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReadyRent - الشريحة 5</title>
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap');
+    
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #0a0a0a;
+      font-family: 'IBM Plex Sans Arabic', sans-serif;
+    }
+    .slide-content {
+      width: 960px;
+      height: 540px;
+      position: relative;
+      transform-origin: center center;
+    }
+    </style>
+    <script>
+    function scaleSlide() {
+      const slide = document.querySelector('.slide-content');
+      if (!slide) return;
+      const slideWidth = 960;
+      const slideHeight = 540;
+      const scaleX = window.innerWidth / slideWidth;
+      const scaleY = window.innerHeight / slideHeight;
+      const scale = Math.min(scaleX, scaleY);
+      slide.style.width = slideWidth + 'px';
+      slide.style.height = slideHeight + 'px';
+      slide.style.transform = `scale(${scale})`;
+      slide.style.transformOrigin = 'center center';
+    }
+    window.addEventListener('load', scaleSlide);
+    window.addEventListener('resize', scaleSlide);
+    </script>
+</head>
+<body style="background:#0a0a0a;">
+    <div class="slide-content" style="background:#0a0a0a; color:#ffffff;">
+        
+        <!-- Header -->
+        <h2 style="position:absolute; right:60px; top:40px; font-size:36px; font-weight:700; color:#D4AF37; margin:0;">
+            الثقة المالية: <span style="color:#ffffff;">محرك الضمان المالي</span>
+        </h2>
+        
+        <svg style="position:absolute; top:90px; right:60px;" width="120" height="4">
+            <rect width="120" height="4" rx="2" fill="#D4AF37"/>
+        </svg>
+
+        <!-- Descriptive Text -->
+        <p style="position:absolute; right:60px; top:120px; font-size:20px; color:#a3a3a3; margin:0; line-height:1.6; width:500px;">
+            تدير "الخزينة" الدورة المالية لكل عملية إيجار، مما يضمن عدم تعرض المالك أو المستخدم لمخاطر التسوية.
+        </p>
+
+        <!-- State Machine Visual (SVG) -->
+        <div style="position:absolute; right:540px; top:140px; width:360px; height:360px;">
+            <svg width="360" height="360" viewBox="0 0 360 360">
+                <!-- Outer Path -->
+                <circle cx="180" cy="180" r="140" stroke="rgba(212, 175, 55, 0.1)" stroke-width="4" fill="none"/>
+                
+                <!-- State Nodes -->
+                
+                <!-- State: PENDING -->
+                <circle cx="180" cy="40" r="30" fill="#0a0a0a" stroke="#D4AF37" stroke-width="2"/>
+                <text x="180" y="40" text-anchor="middle" dominant-baseline="central" font-size="10" font-weight="700" fill="#D4AF37">قيد الانتظار</text>
+                
+                <!-- State: FUNDED -->
+                <circle cx="40" cy="180" r="30" fill="#0a0a0a" stroke="#D4AF37" stroke-width="2"/>
+                <text x="40" y="180" text-anchor="middle" dominant-baseline="central" font-size="10" font-weight="700" fill="#D4AF37">تم التمويل</text>
+                
+                <!-- State: IN_ESCROW -->
+                <circle cx="180" cy="320" r="30" fill="#D4AF37" stroke="#D4AF37" stroke-width="2"/>
+                <text x="180" y="320" text-anchor="middle" dominant-baseline="central" font-size="9" font-weight="700" fill="#0a0a0a">في الضمان</text>
+                
+                <!-- State: SETTLED -->
+                <circle cx="320" cy="180" r="30" fill="#0a0a0a" stroke="#22C55E" stroke-width="2"/>
+                <text x="320" y="180" text-anchor="middle" dominant-baseline="central" font-size="10" font-weight="700" fill="#22C55E">تمت التسوية</text>
+
+                <!-- Arrows -->
+                <path d="M150 50 L70 150" stroke="#D4AF37" stroke-width="2" fill="none"/>
+                <path d="M70 210 L150 310" stroke="#D4AF37" stroke-width="2" fill="none"/>
+                <path d="M210 310 L290 210" stroke="#D4AF37" stroke-width="2" fill="none"/>
+                <path d="M290 150 L210 50" stroke="#D4AF37" stroke-width="2" fill="none"/>
+            </svg>
+        </div>
+
+        <!-- Key Financial Pillars -->
+        <div style="position:absolute; right:60px; top:220px; width:440px;">
+            <div style="margin-bottom:32px; border-right:3px solid #D4AF37; padding-right:20px;">
+                <h4 style="font-size:18px; font-weight:700; color:#D4AF37; margin:0 0 4px 0;">تسوية فورية</h4>
+                <p style="font-size:14px; color:#d4d4d4; margin:0; line-height:1.8;">دفع تلقائي بمجرد التحقق من الإرجاع عبر خزنة الأدلة.</p>
+            </div>
+            <div style="margin-bottom:32px; border-right:3px solid #D4AF37; padding-right:20px;">
+                <h4 style="font-size:18px; font-weight:700; color:#D4AF37; margin:0 0 4px 0;">قفل النزاع</h4>
+                <p style="font-size:14px; color:#d4d4d4; margin:0; line-height:1.8;">يتم تجميد أموال الضمان تلقائياً أثناء المراجعة القضائية النشطة.</p>
+            </div>
+            <div style="border-right:3px solid #D4AF37; padding-right:20px;">
+                <h4 style="font-size:18px; font-weight:700; color:#D4AF37; margin:0 0 4px 0;">الخزينة المتميزة</h4>
+                <p style="font-size:14px; color:#d4d4d4; margin:0; line-height:1.8;">تضمن رسوم الحماية الديناميكية توفير سيولة للإصلاح والصيانة.</p>
+            </div>
+        </div>
+
+        <!-- Page Number (Appendix G) -->
+        <svg style="position:absolute; left:32px; bottom:24px;" width="36" height="36" viewBox="0 0 36 36">
+            <circle cx="18" cy="18" r="18" fill="#D4AF37" fill-opacity="0.1" stroke="#D4AF37" stroke-width="1"/>
+            <text x="18" y="18" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="600" fill="#D4AF37">05</text>
+        </svg>
+
+    </div>
+</body>
+</html>

@@ -10,6 +10,7 @@ interface User {
   role: string;
   is_verified?: boolean;
   trust_score?: number;
+  wallet_balance?: number;
 }
 
 interface AuthState {

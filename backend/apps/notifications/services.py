@@ -1,6 +1,4 @@
-"""
-Notification services for ReadyRent.Gala
-"""
+import structlog
 from django.core.mail import send_mail
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
@@ -9,6 +7,8 @@ from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from .models import Notification
 from .whatsapp_service import WhatsAppService
+
+logger = structlog.get_logger("notifications.services")
 
 channel_layer = get_channel_layer()
 
@@ -26,7 +26,13 @@ def send_email_notification(user, subject, message, html_message=None):
         )
         return True
     except Exception as e:
-        print(f"Error sending email: {e}")
+        logger.error(
+            "email_notification_failed",
+            user_id=getattr(user, 'id', None),
+            email=getattr(user, 'email', None),
+            error=str(e),
+            exc_info=True
+        )
         return False
 
 
@@ -92,7 +98,12 @@ def send_booking_confirmation(booking):
                 str(booking.end_date)
             )
         except Exception as e:
-            print(f"Error sending WhatsApp notification: {e}")
+            logger.error(
+                "whatsapp_booking_confirmation_failed",
+                booking_id=booking.id,
+                error=str(e),
+                exc_info=True
+            )
 
 
 def send_booking_confirmation_email(booking):
@@ -184,7 +195,12 @@ def send_booking_reminder_email(booking, days_before=1):
                 days_before
             )
         except Exception as e:
-            print(f"Error sending WhatsApp reminder: {e}")
+            logger.error(
+                "whatsapp_booking_reminder_failed",
+                booking_id=booking.id,
+                error=str(e),
+                exc_info=True
+            )
 
 
 def send_return_reminder_email(booking):
@@ -229,7 +245,12 @@ def send_return_reminder_email(booking):
                 1
             )
         except Exception as e:
-            print(f"Error sending WhatsApp return reminder: {e}")
+            logger.error(
+                "whatsapp_return_reminder_failed",
+                booking_id=booking.id,
+                error=str(e),
+                exc_info=True
+            )
 
 
 def send_return_confirmation_email(return_request):
@@ -272,7 +293,12 @@ def send_return_confirmation_email(return_request):
                 f'تم استلام إرجاع المنتج {product_name} بنجاح. شكراً لاستخدامك ReadyRent.Gala'
             )
         except Exception as e:
-            print(f"Error sending WhatsApp notification: {e}")
+            logger.error(
+                "whatsapp_return_confirmation_failed",
+                return_id=return_request.id,
+                error=str(e),
+                exc_info=True
+            )
 
 
 def send_waitlist_notification(waitlist_item):
@@ -314,7 +340,12 @@ def send_waitlist_notification(waitlist_item):
                 product_name
             )
         except Exception as e:
-            print(f"Error sending WhatsApp notification: {e}")
+            logger.error(
+                "whatsapp_waitlist_notification_failed",
+                waitlist_id=waitlist_item.id,
+                error=str(e),
+                exc_info=True
+            )
     
     # Mark waitlist item as notified
     waitlist_item.notified = True

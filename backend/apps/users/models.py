@@ -92,8 +92,13 @@ class User(AbstractUser):
     consecutive_emotional_attempts = models.IntegerField(_('consecutive emotional attempts'), default=0)
     merit_score = models.IntegerField(_('merit score'), default=50)
 
+    # 🛡️ SOVEREIGN GUARD: Two-Factor Authentication (Phase 5)
+    is_2fa_enabled = models.BooleanField(_('2FA Enabled'), default=False)
+    totp_secret = EncryptedCharField(_('TOTP Secret'), max_length=32, null=True, blank=True)
+
     created_at = models.DateTimeField(_('created at'), auto_now_add=True)
     updated_at = models.DateTimeField(_('updated at'), auto_now=True)
+
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']

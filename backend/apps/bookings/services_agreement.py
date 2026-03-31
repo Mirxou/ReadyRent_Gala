@@ -1,7 +1,10 @@
+import structlog
 import openai
 import json
 from django.conf import settings
 from .models import Booking, SmartAgreement
+
+logger = structlog.get_logger("bookings.agreement")
 
 class AgreementService:
     """
@@ -42,7 +45,12 @@ class AgreementService:
                 full_text = f"{transcript} {raw_text}".strip()
                 agreement.audio_file.close()
             except Exception as e:
-                print(f"Whisper Error: {e}")
+                logger.error(
+                    "whisper_transcription_failed",
+                    booking_id=booking.id,
+                    error=str(e),
+                    exc_info=True
+                )
                 # Fallback or continue with just raw_text
                 full_text = f"[Transcription Failed] {raw_text}".strip()
 
@@ -86,7 +94,12 @@ class AgreementService:
             agreement_data = json.loads(content_json)
         
         except Exception as e:
-            print(f"GPT-4 Analysis Error: {e}")
+            logger.error(
+                "gpt4_analysis_failed",
+                booking_id=booking.id,
+                error=str(e),
+                exc_info=True
+            )
             agreement_data = {"terms": "تعذر التحليل، يرجى المراجعة اليدوية.", "error": str(e)}
 
         # 3. Save Structured Data and Contract Text

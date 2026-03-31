@@ -217,27 +217,39 @@ class ProductVariant(models.Model):
     class Meta:
         verbose_name = _('متغير المنتج')
         verbose_name_plural = _('متغيرات المنتجات')
-        unique_together = ['product', 'size', 'color', 'style']
         ordering = ['size', 'color']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['product', 'size', 'color', 'style'],
+                name='unique_variant_per_product'
+            ),
+        ]
         indexes = [
             models.Index(fields=['product', 'is_active']),
             models.Index(fields=['sku']),
+            models.Index(fields=['price_per_day']), # For range filtering
         ]
     
     def __str__(self):
         return f"{self.product.name} - {self.name}"
     
     def get_price(self):
-        """Get price (variant price or product price)"""
-        return self.price_per_day if self.price_per_day else self.product.price_per_day
+        """Get price (variant price or product price) - Elite Fallback Pattern"""
+        return self.price_per_day if self.price_per_day is not None else self.product.price_per_day
     
     def save(self, *args, **kwargs):
-        """Generate SKU if not provided"""
+        """Generate SKU if not provided & Ensure fallback integrity"""
         if not self.sku:
-            base_sku = self.product.slug.upper()[:10]
-            variant_part = f"{self.size or 'DEF'}-{self.color[:3].upper() or 'DEF'}"
-            self.sku = f"{base_sku}-{variant_part}"
+            base_slug = self.product.slug.upper()[:10]
+            # Standardize SKU format for Algerian logistics
+            variant_slug = f"{self.size or 'U'}-{self.color[:3].upper() if self.color else 'DEF'}-{self.style[:3].upper() if self.style else 'STD'}"
+            self.sku = f"RR-{base_slug}-{variant_slug}"
+        
+        # PR-002: Fallback logic - if price is not set, we can either leave it null
+        # or explicitly pull from product. The get_price() method handles runtime.
+        
         super().save(*args, **kwargs)
+
 
 
 class Wishlist(models.Model):
