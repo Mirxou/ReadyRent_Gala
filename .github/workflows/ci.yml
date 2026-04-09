@@ -80,6 +80,7 @@ jobs:
           PII_ENCRYPTION_KEY_V1: test-encryption-key-v1
           JWT_SIGNING_KEY: test-jwt-signing-key
           QR_SIGNING_KEY: test-qr-signing-key
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/readyrent_test
         run: |
           python manage.py migrate --noinput
 
@@ -99,6 +100,7 @@ jobs:
           PII_ENCRYPTION_KEY_V1: test-encryption-key-v1
           JWT_SIGNING_KEY: test-jwt-signing-key
           QR_SIGNING_KEY: test-qr-signing-key
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/readyrent_test
         run: |
           pytest --cov=apps --cov=config --cov=core --cov-report=xml --cov-report=html --cov-report=term --cov-fail-under=70
 
