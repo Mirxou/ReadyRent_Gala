@@ -15,6 +15,7 @@ from django.views.decorators.cache import cache_page
 from django.utils.decorators import method_decorator
 from django.core.cache import cache
 from django.conf import settings
+import hashlib
 from rest_framework.throttling import ScopedRateThrottle
 from core.throttling import ProductSearchThrottle
 from .models import Category, Product, ProductVariant, Wishlist
@@ -114,7 +115,10 @@ class ProductListView(generics.ListAPIView):
             'search': self.request.query_params.get('search'),
             'page': self.request.query_params.get('page', 1),
         }
-        cache_key = f"products_list_{hash(frozenset(cache_params.items()))}"
+        cache_fingerprint = hashlib.sha256(
+            str(sorted(cache_params.items())).encode('utf-8')
+        ).hexdigest()
+        cache_key = f"products_list_{cache_fingerprint}"
         
         # Try to get from cache (only for non-search queries to avoid stale results)
         if not cache_params.get('search'):

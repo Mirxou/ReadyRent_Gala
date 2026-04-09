@@ -2,6 +2,9 @@
 Optimized availability checking service for bookings
 Uses caching and optimized queries for better performance
 """
+import logging
+
+from django.db import DatabaseError
 from django.db.models import Q, Count, Exists, OuterRef
 from django.core.cache import cache
 from django.utils import timezone
@@ -11,6 +14,8 @@ from .models import Booking
 from apps.products.models import Product
 from apps.inventory.models import InventoryItem
 from apps.maintenance.services import MaintenanceService
+
+logger = logging.getLogger(__name__)
 
 
 class AvailabilityService:
@@ -63,7 +68,7 @@ class AvailabilityService:
         
         # Check inventory (optimized query)
         try:
-            inventory = InventoryItem.objects.select_for_update(nowait=True).get(product=product)
+            inventory = InventoryItem.objects.select_for_update().get(product=product)
             if inventory.quantity_available <= 0:
                 result = {
                     'available': False,
@@ -79,9 +84,17 @@ class AvailabilityService:
         except InventoryItem.DoesNotExist:
             # No inventory record - assume available if product status is available
             pass
-        except Exception:
-            # Lock timeout or other error - continue with other checks
-            pass
+        except DatabaseError as ex:
+            logger.warning(
+                'availability_service_inventory_lock_failed',
+                product_id=product_id,
+                error=str(ex)
+            )
+        except Exception as ex:
+            logger.exception(
+                'availability_service_unexpected_error',
+                extra={'product_id': product_id, 'error': str(ex)}
+            )
         
         # Check maintenance periods (optimized)
         is_maintenance_available = MaintenanceService.is_product_available_for_dates(

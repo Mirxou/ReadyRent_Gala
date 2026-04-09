@@ -238,8 +238,13 @@ def custom_exception_handler(exc, context):
         if SENTRY_AVAILABLE:
             try:
                 sentry_sdk.capture_exception(exc)
-            except Exception:
-                pass
+            except Exception as err:
+                logger.warning(
+                    'sentry_capture_failed',
+                    error=str(err),
+                    request_id=request_id,
+                    exc_info=True,
+                )
     elif response.status_code >= 400:
         logger.warning(
             "client_error",

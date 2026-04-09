@@ -1,0 +1,47 @@
+# .coveragerc - Coverage configuration for ReadyRent
+# Run: pytest --cov=apps --cov-report=html --cov-fail-under=75
+
+[run]
+source = apps
+branch = True
+omit = 
+    */migrations/*
+    */tests/*
+    */venv/*
+    */__pycache__/*
+    */config/*
+    manage.py
+    */asgi.py
+    */wsgi.py
+    */apps/chatbot/ai_engines/*  # AI-heavy, mocked in tests
+    */apps/core/management/*     # CLI commands tested separately
+
+data_file = .coverage
+
+[report]
+# Fail if coverage is below 75%
+fail_under = 75
+show_missing = True
+skip_covered = False
+sort = Cover
+precision = 1
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    raise AssertionError
+    raise NotImplementedError
+    if __name__ == .__main__.:
+    if settings.DEBUG:
+    if typing.TYPE_CHECKING:
+    @abstractmethod
+    @abc.abstractmethod
+    if 0:
+    class .*\bProtocol\):
+    @(abc\.)?abstractmethod
+
+[html]
+directory = htmlcov
+title = ReadyRent Coverage Report
+
+[xml]
+output = coverage.xml

@@ -19,6 +19,7 @@
         "name": "next"
       }
     ],
+    "ignoreDeprecations": "7.0",
     "baseUrl": ".",
     "paths": {
       "@/features/*": ["./src/features/*"],

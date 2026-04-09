@@ -1,5 +1,5 @@
-import sqlite3
 import os
+import sqlite3
 
 db_path = os.path.join(os.getcwd(), 'backend', 'db.sqlite3')
 print(f"Connecting to database at: {db_path}")
@@ -16,10 +16,11 @@ try:
     print("--- END TABLES ---")
 
     # Check for likely user tables
-    potential_tables = ['auth_user', 'users_user', 'core_user']
-    for table in potential_tables:
+    safe_tables = ['auth_user', 'users_user', 'core_user']
+    for table in safe_tables:
         try:
-            cursor.execute(f"SELECT count(*) FROM {table}")
+            query = f"SELECT count(*) FROM {table}"
+            cursor.execute(query)
             count = cursor.fetchone()[0]
             print(f"Table '{table}' exists with {count} rows.")
             
@@ -36,15 +37,18 @@ try:
                 users = cursor.fetchall()
                 for u in users:
                     print(f"ID: {u[0]} | Email: {u[1]} | Name: {u[2]} | Staff: {u[3]}")
-            except:
+            except sqlite3.Error as inner_error:
                 # Fallback to select *
                 cursor.execute(f"SELECT * FROM {table} LIMIT 5")
                 rows = cursor.fetchall()
                 for row in rows:
                     print(row)
 
-        except Exception as e:
+        except sqlite3.Error as e:
             print(f"Table '{table}' query failed: {e}")
+
+except sqlite3.Error as e:
+    print(f"Database connection failed: {e}")
 
 except Exception as e:
     print(f"Database connection failed: {e}")

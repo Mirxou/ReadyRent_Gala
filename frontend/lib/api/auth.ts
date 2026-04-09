@@ -16,25 +16,56 @@ export interface AuthResponse {
   access?: string;
 }
 
+export interface RegisterData {
+  email: string;
+  password: string;
+  password_confirm: string;
+  first_name?: string;
+  last_name?: string;
+  phone?: string;
+  role?: string;
+}
+
+export interface LoginData {
+  email: string;
+  password: string;
+}
+
+export interface PasswordResetRequest {
+  email: string;
+}
+
+export interface PasswordResetConfirm {
+  uid: string;
+  token: string;
+  new_password: string;
+  new_password_confirm: string;
+}
+
 export const authApi = {
-  login: (email: string, password: string) =>
-    sovereignClient.post<AuthResponse>('/users/login/', { email, password }),
+  login: (data: LoginData) =>
+    sovereignClient.post<AuthResponse>('/users/login/', data),
   
-  register: (data: any) => 
+  register: (data: RegisterData) => 
     sovereignClient.post<AuthResponse>('/users/register/', data),
   
   logout: () => 
     sovereignClient.post<void>('/users/logout/'),
-  
+
   getProfile: () => 
     sovereignClient.get<User>('/users/profile/'),
   
-  passwordResetRequest: (email: string) => 
-    sovereignClient.post<void>('/users/password-reset/', { email }),
+  passwordResetRequest: (data: PasswordResetRequest) => 
+    sovereignClient.post<void>('/users/password-reset/', data),
   
-  passwordResetConfirm: (data: any) => 
+  passwordResetConfirm: (data: PasswordResetConfirm) => 
     sovereignClient.post<void>('/users/password-reset/confirm/', data),
 };
+
+export interface VerificationData {
+  phone?: string;
+  code?: string;
+}
 
 export const verificationApi = {
   requestPhoneVerification: (phone: string) => 
@@ -42,12 +73,11 @@ export const verificationApi = {
   
   verifyPhone: (code: string) => 
     sovereignClient.post<void>('/users/verify-phone/confirm/', { code }),
-  
+
   uploadID: (formData: FormData) => 
     sovereignClient.request<void>('/users/verify-id/', {
       method: 'POST',
       body: formData,
-      // Note: fetch automatically sets content-type for FormData if headers are omitted or partially set
       headers: {}, 
     }),
   

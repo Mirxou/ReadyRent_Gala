@@ -52,7 +52,12 @@ PII_ENCRYPTION_KEYS = {
 # 🛡️ SOVEREIGN GUARD: JWT Signing Key Separation
 # Using a separate key for JWT signing prevents a SECRET_KEY compromise 
 # from immediately allowing JWT forgery, and vice-versa.
-JWT_SIGNING_KEY = env('JWT_SIGNING_KEY', default=SECRET_KEY)
+JWT_SIGNING_KEY = env('JWT_SIGNING_KEY', default=None)
+if not JWT_SIGNING_KEY:
+    raise RuntimeError("JWT_SIGNING_KEY must be set via environment variable for security.")
+
+# Dedicated signing key for QR token generation and offline proofing
+QR_SIGNING_KEY = env('QR_SIGNING_KEY', default=None)
 
 # Validate critical crypto keys at startup to avoid delayed runtime failures.
 if not DEBUG:
@@ -61,6 +66,8 @@ if not DEBUG:
         ('PII_HASH_KEY', PII_HASH_KEY),
         ('IP_HASH_KEY', IP_HASH_KEY),
         ('PII_ENCRYPTION_KEY_V1', PII_ENCRYPTION_KEYS.get('1')),
+        ('JWT_SIGNING_KEY', JWT_SIGNING_KEY),
+        ('QR_SIGNING_KEY', QR_SIGNING_KEY),
     ]
     
     # CRITICAL: In production, JWT_SIGNING_KEY MUST NOT be the same as SECRET_KEY
@@ -386,6 +393,14 @@ CORS_ALLOWED_ORIGINS = env.list(
 CORS_ALLOW_CREDENTIALS = True
 # CORS_ALLOW_ALL_ORIGINS removed - use explicit CORS_ALLOWED_ORIGINS list
 
+CSRF_TRUSTED_ORIGINS = env.list(
+    'CSRF_TRUSTED_ORIGINS',
+    default=([] if DEBUG else [
+        'https://rentily.rent',
+        'https://www.rentily.rent',
+    ])
+)
+
 # Security Settings (Production)
 # 🔒 BANKING-GRADE SECURITY: Force HTTPS in production
 if not DEBUG:
@@ -413,7 +428,7 @@ X_FRAME_OPTIONS = 'DENY'
 CSP_DEFAULT_SRC = ("'self'",)
 CSP_SCRIPT_SRC = ("'self'",)
 CSP_OBJECT_SRC = ("'none'",) # 🛡️ Strict: No plugins/Flash
-CSP_STYLE_SRC = ("'self'", "'unsafe-inline'")  # Allow inline styles for admin
+CSP_STYLE_SRC = ("'self'",)
 CSP_IMG_SRC = ("'self'", "data:", "https:")
 CSP_FONT_SRC = ("'self'", "https:", "data:")
 CSP_CONNECT_SRC = ("'self'",)

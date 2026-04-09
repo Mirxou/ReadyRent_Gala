@@ -1,8 +1,12 @@
 """
 Cache utility functions for cache invalidation and management
 """
+import logging
+
 from django.core.cache import cache
 from django.conf import settings
+
+logger = logging.getLogger(__name__)
 
 
 def _delete_by_prefix(prefix):
@@ -13,8 +17,12 @@ def _delete_by_prefix(prefix):
             for key in list(backend_cache.keys()):
                 if prefix in str(key):
                     cache.delete(key)
-    except Exception:
-        pass
+    except Exception as exc:
+        logger.warning(
+            'cache_utils_delete_by_prefix_failed',
+            exc_info=exc,
+            extra={'prefix': prefix}
+        )
 
 
 def invalidate_product_cache(product_id=None, slug=None):

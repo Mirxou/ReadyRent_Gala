@@ -1,6 +1,7 @@
 """
 Custom middleware for security headers
 """
+from django.conf import settings
 from django.utils.deprecation import MiddlewareMixin
 
 
@@ -31,11 +32,17 @@ class SecurityHeadersMiddleware(MiddlewareMixin):
         )
         
         # Content-Security-Policy: Prevent XSS attacks
-        # Note: Adjust CSP based on your needs
+        script_sources = ["'self'", "https://maps.googleapis.com", "https://www.googletagmanager.com"]
+        style_sources = ["'self'", "https://fonts.googleapis.com"]
+
+        if settings.DEBUG:
+            script_sources.extend(["'unsafe-inline'", "'unsafe-eval'"])
+            style_sources.append("'unsafe-inline'")
+
         csp = (
             "default-src 'self'; "
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://maps.googleapis.com https://www.googletagmanager.com; "
-            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+            f"script-src {' '.join(script_sources)}; "
+            f"style-src {' '.join(style_sources)}; "
             "font-src 'self' https://fonts.gstatic.com; "
             "img-src 'self' data: https: blob:; "
             "connect-src 'self' https://api.openai.com https://graph.facebook.com; "

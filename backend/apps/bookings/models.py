@@ -7,6 +7,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import MinValueValidator
+from django.core.exceptions import ValidationError
 from django.conf import settings
 from django.utils import timezone
 from django.contrib.postgres.constraints import ExclusionConstraint
@@ -128,9 +129,14 @@ class Booking(models.Model):
         return f"{self.user.email} - {self.product.name} ({self.start_date} to {self.end_date})"
 
     def save(self, *args, **kwargs):
-        if self.start_date and self.end_date and (not self.total_days or self.total_days < 1):
-            duration = (self.end_date - self.start_date).days
-            self.total_days = duration if duration > 0 else 1
+        if self.start_date and self.end_date:
+            if self.start_date >= self.end_date:
+                raise ValidationError({
+                    'end_date': _('End date must be later than start date.')
+                })
+            if not self.total_days or self.total_days < 1:
+                duration = (self.end_date - self.start_date).days
+                self.total_days = duration if duration > 0 else 1
         super().save(*args, **kwargs)
 
     # --- Phase 2: Escrow State Unification ---
@@ -141,12 +147,10 @@ class Booking(models.Model):
         Falls back to the legacy cached DB column if no EscrowHold exists.
         Use this property everywhere — never read _escrow_status_db directly.
         """
-        try:
-            # escrow_hold is a reverse OneToOneField from payments.EscrowHold
-            return self.escrow_hold.state
-        except Exception:
-            # No EscrowHold exists yet (booking just created, or legacy record)
-            return self._escrow_status_db
+        escrow_hold = getattr(self, 'escrow_hold', None)
+        if escrow_hold is not None:
+            return escrow_hold.state
+        return self._escrow_status_db
     # -----------------------------------------
 
     @escrow_status.setter
@@ -183,9 +187,10 @@ class Booking(models.Model):
             "status": "confirmed"
         }
         data = json.dumps(payload, cls=DjangoJSONEncoder, sort_keys=True)
-        # Use SECRET_KEY as the signing key
+        signing_key = getattr(settings, 'QR_SIGNING_KEY', None) or settings.SECRET_KEY
+
         signature = hmac.new(
-            settings.SECRET_KEY.encode(),
+            signing_key.encode(),
             data.encode(),
             hashlib.sha256
         ).hexdigest()

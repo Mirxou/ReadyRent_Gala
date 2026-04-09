@@ -21,8 +21,15 @@ class RLSMiddleware:
             try:
                 user_id = int(request.user.id)
             except (ValueError, TypeError):
-                # Invalid user ID - skip RLS setup
-                return
+                # Invalid user ID - clear any existing RLS context and continue
+                with connection.cursor() as cursor:
+                    cursor.execute("""
+                        SELECT 
+                            set_config('app.current_user_id', '', false),
+                            set_config('app.current_user_is_admin', 'false', false)
+                    """)
+                return self.get_response(request)
+
             is_admin = 'true' if request.user.is_superuser else 'false'
             
             # OPTIMIZATION: Execute both SET commands in single roundtrip

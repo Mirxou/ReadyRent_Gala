@@ -31,10 +31,17 @@ const customJestConfig = {
   ],
   coverageThreshold: {
     global: {
-      branches: 60,
-      functions: 60,
-      lines: 60,
-      statements: 60,
+      branches: 70,
+      functions: 70,
+      lines: 70,
+      statements: 70,
+    },
+    // Critical components require higher coverage
+    './components/**/*.{ts,tsx}': {
+      branches: 75,
+      functions: 75,
+      lines: 75,
+      statements: 75,
     },
   },
 }

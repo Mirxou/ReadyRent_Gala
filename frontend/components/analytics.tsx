@@ -4,7 +4,6 @@ import Script from 'next/script';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useEffect, Suspense } from 'react';
 import { pageview } from '@/lib/analytics';
-import DOMPurify from 'dompurify';
 
 function AnalyticsContent() {
   const pathname = usePathname();

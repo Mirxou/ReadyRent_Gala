@@ -16,5 +16,5 @@ try:
 
     if not hasattr(_timezone, 'timedelta'):
         _timezone.timedelta = _timedelta  # type: ignore[attr-defined]
-except Exception:
+except (ImportError, AttributeError):
     pass

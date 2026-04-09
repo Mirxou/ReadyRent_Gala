@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ShieldCheck, 
@@ -37,7 +37,7 @@ export function HighCourtMonitor() {
   const [loading, setLoading] = useState(true);
   const [lastScan, setLastScan] = useState<Date | null>(null);
 
-  const performAudit = async () => {
+  const performAudit = useCallback(async () => {
     setLoading(true);
     try {
       // Note: Endpoint from disputesApi (Vault Integrity)
@@ -55,9 +55,9 @@ export function HighCourtMonitor() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  useEffect(() => { performAudit(); }, []);
+  useEffect(() => { performAudit(); }, [performAudit]);
 
   const healthPercentage = audit ? (audit.verified_count / audit.total_count) * 100 : 0;
   const isValid = audit?.is_valid;

@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 
+const isProduction = process.env.NODE_ENV === 'production';
+
 const nextConfig: NextConfig = {
   transpilePackages: ['hijri-date-converter'],
   images: {
@@ -59,7 +61,7 @@ const nextConfig: NextConfig = {
           },
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: http://localhost:8000 https://**.amazonaws.com https://**.cloudinary.com https://images.unsplash.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' http://localhost:8000; frame-ancestors 'none'; upgrade-insecure-requests;",
+            value: `default-src 'self'; script-src 'self' https://va.vercel-scripts.com${!isProduction ? " 'unsafe-inline'" : ''}; style-src 'self' https://fonts.googleapis.com${!isProduction ? " 'unsafe-inline'" : ''}; img-src 'self' data:${!isProduction ? ' http://localhost:8000' : ''} https://**.amazonaws.com https://**.cloudinary.com https://images.unsplash.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self'${!isProduction ? ' http://localhost:8000' : ''}; frame-ancestors 'none'; upgrade-insecure-requests;`,
           },
         ],
       },

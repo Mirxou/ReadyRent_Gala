@@ -1,6 +1,7 @@
 """
 Views for Booking app
 """
+
 from rest_framework import generics, status, filters
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
@@ -15,15 +16,29 @@ import logging
 
 logger = logging.getLogger(__name__)
 from .models import (
-    Booking, Cart, CartItem, Waitlist,
-    DamageAssessment, DamagePhoto, InspectionChecklist, DamageClaim,
-    Refund, Cancellation
+    Booking,
+    Cart,
+    CartItem,
+    Waitlist,
+    DamageAssessment,
+    DamagePhoto,
+    InspectionChecklist,
+    DamageClaim,
+    Refund,
+    Cancellation,
 )
 from .serializers import (
-    BookingSerializer, BookingUpdateSerializer, CartSerializer, CartItemSerializer,
-    WaitlistSerializer, DamageAssessmentSerializer, DamagePhotoSerializer,
-    InspectionChecklistSerializer, DamageClaimSerializer,
-    RefundSerializer, CancellationSerializer
+    BookingSerializer,
+    BookingUpdateSerializer,
+    CartSerializer,
+    CartItemSerializer,
+    WaitlistSerializer,
+    DamageAssessmentSerializer,
+    DamagePhotoSerializer,
+    InspectionChecklistSerializer,
+    DamageClaimSerializer,
+    RefundSerializer,
+    CancellationSerializer,
 )
 from .services import BookingService
 from .availability_service import AvailabilityService
@@ -36,9 +51,10 @@ from standard_core.mixins import SovereignResponseMixin
 
 class CartView(generics.RetrieveAPIView):
     """Get user's cart"""
+
     serializer_class = CartSerializer
     permission_classes = [IsAuthenticated]
-    
+
     def get_object(self):
         cart, created = Cart.objects.get_or_create(user=self.request.user)
         return cart
@@ -46,9 +62,10 @@ class CartView(generics.RetrieveAPIView):
 
 class CartItemCreateView(generics.CreateAPIView):
     """Add item to cart"""
+
     serializer_class = CartItemSerializer
     permission_classes = [IsAuthenticated]
-    
+
     def create(self, request, *args, **kwargs):
         cart, _ = Cart.objects.get_or_create(user=request.user)
         serializer = self.get_serializer(data=request.data)
@@ -59,9 +76,10 @@ class CartItemCreateView(generics.CreateAPIView):
 
 class CartItemDeleteView(generics.DestroyAPIView):
     """Remove item from cart"""
+
     serializer_class = CartItemSerializer
     permission_classes = [IsAuthenticated]
-    
+
     def get_queryset(self):
         cart, _ = Cart.objects.get_or_create(user=self.request.user)
         return CartItem.objects.filter(cart=cart)
@@ -69,77 +87,95 @@ class CartItemDeleteView(generics.DestroyAPIView):
 
 class BookingCreateView(SovereignResponseMixin, generics.CreateAPIView):
     """Create booking from cart"""
+
     serializer_class = BookingSerializer
     permission_classes = [IsAuthenticated]
-    
-    def create(self, request, *args, **kwargs):
-        # 1. Idempotency Check
-        idempotency_key = request.data.get('idempotency_key')
-        if idempotency_key:
-            existing_booking = Booking.objects.filter(idempotency_key=idempotency_key).first()
-            if existing_booking:
-                # Return existing booking without error (Success)
-                serializer = BookingSerializer([existing_booking], many=True)
-                return Response(
-                    {'bookings': serializer.data, 'message': 'Booking already processed (Idempotent)'}, 
-                    status=status.HTTP_200_OK
-                )
 
+    def create(self, request, *args, **kwargs):
         cart, _ = Cart.objects.get_or_create(user=request.user)
-        items = cart.items.select_related('product').all()
-        
+        items = cart.items.select_related("product").all()
+
         if not items.exists():
             return Response(
-                {'error': 'Cart is empty'},
-                status=status.HTTP_400_BAD_REQUEST
+                {"error": "Cart is empty"}, status=status.HTTP_400_BAD_REQUEST
             )
-        
-        same_day_delivery = request.data.get('same_day_delivery', False)
+
+        same_day_delivery = request.data.get("same_day_delivery", False)
         bookings = []
         messages = []
-        
+        idempotency_key = request.data.get("idempotency_key")
+
         from django.db import transaction
         from apps.products.models import Product
 
         try:
             with transaction.atomic():
+                # 1. Idempotency Check INSIDE transaction with row locking
+                if idempotency_key:
+                    existing_booking = (
+                        Booking.objects.select_for_update()
+                        .filter(idempotency_key=idempotency_key, user=request.user)
+                        .first()
+                    )
+                    if existing_booking:
+                        serializer = BookingSerializer([existing_booking], many=True)
+                        return Response(
+                            {
+                                "bookings": serializer.data,
+                                "message": "Booking already processed (Idempotent)",
+                            },
+                            status=status.HTTP_200_OK,
+                        )
+
                 # 2. Concurrency Lock: Lock all Product rows to prevent race conditions and N+1 queries
                 product_ids = [item.product.id for item in items]
-                _locked_products = {p.id: p for p in Product.objects.select_for_update().filter(id__in=product_ids)}
-                
+                _locked_products = {
+                    p.id: p
+                    for p in Product.objects.select_for_update().filter(
+                        id__in=product_ids
+                    )
+                }
+
                 for item in items:
                     _locked_product = _locked_products.get(item.product.id)
                     if not _locked_product:
-                        raise ValidationError({'error': 'Product unavailable'})
-                    
+                        raise ValidationError({"error": "Product unavailable"})
+
                     # --- SOVEREIGN LAUNCH CHECK ---
                     from apps.bookings.launch_policy import SovereignLaunchPolicy
+
                     SovereignLaunchPolicy.validate_booking(_locked_product)
                     # ------------------------------
 
                     # Create Booking via Service (Logic Unified)
-                    current_key = idempotency_key if (idempotency_key and len(bookings) == 0) else None
+                    current_key = (
+                        idempotency_key
+                        if (idempotency_key and len(bookings) == 0)
+                        else None
+                    )
 
                     booking, auto_confirmed = BookingService.create_booking(
                         user=request.user,
                         product=item.product,
                         start_date=item.start_date,
                         end_date=item.end_date,
-                        quantity=item.quantity
+                        quantity=item.quantity,
                     )
-                    
+
                     if current_key:
                         booking.idempotency_key = current_key
-                        booking.save(update_fields=['idempotency_key'])
-                    
+                        booking.save(update_fields=["idempotency_key"])
+
                     bookings.append(booking)
-                    messages.append(BookingService.get_trust_reward_message(auto_confirmed))
+                    messages.append(
+                        BookingService.get_trust_reward_message(auto_confirmed)
+                    )
 
                     # Cache invalidation still happens here as it's a side effect of successful creation
                     AvailabilityService.invalidate_cache(
                         product_id=item.product.id,
                         start_date=item.start_date,
-                        end_date=item.end_date
+                        end_date=item.end_date,
                     )
 
                     if same_day_delivery:
@@ -147,32 +183,37 @@ class BookingCreateView(SovereignResponseMixin, generics.CreateAPIView):
 
                 # Clear cart
                 items.delete()
-        
+
         except ValidationError as e:
             return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
         except DjangoValidationError as e:
-            return Response({'error': e.message if hasattr(e, 'message') else str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": e.message if hasattr(e, "message") else "Invalid input"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         except ValueError as e:
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "Invalid input provided"}, status=status.HTTP_400_BAD_REQUEST
+            )
         except Exception as e:
             logger.error(f"Booking creation failed: {str(e)}", exc_info=True)
-            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
+            return Response(
+                {"error": "Internal server error"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
         serializer = BookingSerializer(bookings, many=True)
         response_data = serializer.data
-        
+
         if messages:
-             response_data = {
-                 'bookings': serializer.data,
-                 'message': messages[0]
-             }
-        
+            response_data = {"bookings": serializer.data, "message": messages[0]}
+
         return Response(response_data, status=status.HTTP_201_CREATED)
 
     def _handle_delivery(self, user, booking, start_date):
         from apps.locations.models import DeliveryRequest, Address
         from apps.locations.services import LocationService
-        
+
         default_address = Address.objects.filter(user=user, is_default=True).first()
         if default_address and default_address.latitude and default_address.longitude:
             zone = LocationService.find_delivery_zone(
@@ -180,423 +221,487 @@ class BookingCreateView(SovereignResponseMixin, generics.CreateAPIView):
             )
             if zone:
                 same_day = LocationService.check_same_day_delivery_available(zone)
-                if same_day and same_day.get('available'):
+                if same_day and same_day.get("available"):
                     DeliveryRequest.objects.create(
                         booking=booking,
-                        delivery_type='delivery',
+                        delivery_type="delivery",
                         delivery_address=default_address,
                         delivery_zone=zone,
                         delivery_date=start_date,
-                        delivery_fee=same_day.get('fee', 0),
-                        status='pending'
+                        delivery_fee=same_day.get("fee", 0),
+                        status="pending",
                     )
 
 
 class BookingListView(generics.ListAPIView):
     """List user's bookings"""
+
     serializer_class = BookingSerializer
     permission_classes = [IsAuthenticated]
-    
+
     def get_queryset(self):
-        return Booking.objects.filter(user=self.request.user).select_related('product', 'user')
+        return Booking.objects.filter(user=self.request.user).select_related(
+            "product", "user"
+        )
 
 
 class BookingDetailView(SovereignResponseMixin, generics.RetrieveAPIView):
     """Get booking details"""
+
     serializer_class = BookingSerializer
     permission_classes = [IsAuthenticated]
-    
+
     def get_queryset(self):
-        return Booking.objects.filter(user=self.request.user).select_related('product', 'user')
+        return Booking.objects.filter(user=self.request.user).select_related(
+            "product", "user"
+        )
 
 
 # Admin Views
 class AdminBookingListView(generics.ListAPIView):
     """List all bookings for admin"""
+
     serializer_class = BookingSerializer
     permission_classes = [IsAdminUser]
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['status', 'product', 'user']
-    search_fields = ['user__email', 'product__name', 'product__name_ar']
-    ordering_fields = ['created_at', 'start_date', 'end_date', 'total_price']
-    ordering = ['-created_at']
-    
+    filter_backends = [
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    ]
+    filterset_fields = ["status", "product", "user"]
+    search_fields = ["user__email", "product__name", "product__name_ar"]
+    ordering_fields = ["created_at", "start_date", "end_date", "total_price"]
+    ordering = ["-created_at"]
+
     def get_queryset(self):
-        return Booking.objects.select_related('product', 'user').prefetch_related('product__images').all()
+        return (
+            Booking.objects.select_related("product", "user")
+            .prefetch_related("product__images")
+            .all()
+        )
 
 
 class AdminBookingUpdateView(generics.UpdateAPIView):
     """Update booking (admin only)"""
+
     serializer_class = BookingSerializer
     permission_classes = [IsAdminUser]
-    
+
     def get_queryset(self):
-        return Booking.objects.select_related('product', 'user').all()
+        return Booking.objects.select_related("product", "user").all()
 
 
 class BookingUpdateView(generics.UpdateAPIView):
     """Update booking (user can update their own bookings)"""
+
     serializer_class = BookingUpdateSerializer
     permission_classes = [IsAuthenticated]
-    
+
     def get_queryset(self):
-        return Booking.objects.filter(user=self.request.user).select_related('product', 'user')
-    
+        return Booking.objects.filter(user=self.request.user).select_related(
+            "product", "user"
+        )
+
     def get_serializer_class(self):
         # Use BookingSerializer for admin, BookingUpdateSerializer for users
-        if self.request.user.role in ['admin', 'staff']:
+        if self.request.user.role in ["admin", "staff"]:
             return BookingSerializer
         return BookingUpdateSerializer
 
 
 class BookingStatusUpdateView(generics.GenericAPIView):
     """Update booking status only"""
+
     permission_classes = [IsAuthenticated]
-    
+
     VALID_TRANSITIONS = {
-        'pending': ['confirmed', 'cancelled', 'manual_review', 'rejected'],
-        'confirmed': ['in_use', 'cancelled'],
-        'in_use': ['completed', 'cancelled'],
-        'completed': [],
-        'cancelled': [],
-        'manual_review': ['confirmed', 'rejected', 'cancelled'],
-        'rejected': ['pending'],
+        "pending": ["confirmed", "cancelled", "manual_review", "rejected"],
+        "confirmed": ["in_use", "cancelled"],
+        "in_use": ["completed", "cancelled"],
+        "completed": [],
+        "cancelled": [],
+        "manual_review": ["confirmed", "rejected", "cancelled"],
+        "rejected": ["pending"],
     }
-    
+
     def patch(self, request, pk):
         try:
             with transaction.atomic():
                 booking = Booking.objects.select_for_update().get(pk=pk)
-                
-                if booking.user != request.user and request.user.role not in ['admin', 'staff']:
+
+                if booking.user != request.user and request.user.role not in [
+                    "admin",
+                    "staff",
+                ]:
                     return Response(
-                        {'error': 'You do not have permission to update this booking'},
-                        status=status.HTTP_403_FORBIDDEN
+                        {"error": "You do not have permission to update this booking"},
+                        status=status.HTTP_403_FORBIDDEN,
                     )
-                
-                new_status = request.data.get('status')
+
+                new_status = request.data.get("status")
                 if not new_status:
                     return Response(
-                        {'error': 'Status is required'},
-                        status=status.HTTP_400_BAD_REQUEST
+                        {"error": "Status is required"},
+                        status=status.HTTP_400_BAD_REQUEST,
                     )
-                
-                valid_statuses = ['pending', 'confirmed', 'in_use', 'completed', 'cancelled', 'manual_review', 'rejected']
+
+                valid_statuses = [
+                    "pending",
+                    "confirmed",
+                    "in_use",
+                    "completed",
+                    "cancelled",
+                    "manual_review",
+                    "rejected",
+                ]
                 if new_status not in valid_statuses:
                     return Response(
-                        {'error': 'Invalid status'},
-                        status=status.HTTP_400_BAD_REQUEST
+                        {"error": "Invalid status"}, status=status.HTTP_400_BAD_REQUEST
                     )
-                
+
                 if new_status not in self.VALID_TRANSITIONS.get(booking.status, []):
                     return Response(
-                        {'error': f'Invalid transition from {booking.status} to {new_status}'},
-                        status=status.HTTP_400_BAD_REQUEST
+                        {
+                            "error": f"Invalid transition from {booking.status} to {new_status}"
+                        },
+                        status=status.HTTP_400_BAD_REQUEST,
                     )
-                
+
                 booking.status = new_status
                 booking.save()
-                
+
                 try:
                     channel_layer = get_channel_layer()
                     if channel_layer:
-                        room_group_name = f'bookings_{booking.user.id}'
+                        room_group_name = f"bookings_{booking.user.id}"
                         async_to_sync(channel_layer.group_send)(
                             room_group_name,
                             {
-                                'type': 'booking_update',
-                                'booking': {
-                                    'id': booking.id,
-                                    'status': booking.status,
-                                    'product_id': booking.product.id,
-                                    'product_name': booking.product.name_ar,
-                                    'start_date': booking.start_date.isoformat(),
-                                    'end_date': booking.end_date.isoformat(),
-                                    'total_price': str(booking.total_price),
-                                    'updated_at': booking.updated_at.isoformat(),
-                                }
-                            }
+                                "type": "booking_update",
+                                "booking": {
+                                    "id": booking.id,
+                                    "status": booking.status,
+                                    "product_id": booking.product.id,
+                                    "product_name": booking.product.name_ar,
+                                    "start_date": booking.start_date.isoformat(),
+                                    "end_date": booking.end_date.isoformat(),
+                                    "total_price": str(booking.total_price),
+                                    "updated_at": booking.updated_at.isoformat(),
+                                },
+                            },
                         )
                 except Exception as e:
                     import logging
+
                     logger = logging.getLogger(__name__)
-                    logger.warning(f"Failed to send booking update via WebSocket (non-critical): {e}")
-                
+                    logger.warning(
+                        f"Failed to send booking update via WebSocket (non-critical): {e}"
+                    )
+
                 serializer = BookingSerializer(booking)
                 return Response(serializer.data)
-            
+
         except Booking.DoesNotExist:
             return Response(
-                {'error': 'Booking not found'},
-                status=status.HTTP_404_NOT_FOUND
+                {"error": "Booking not found"}, status=status.HTTP_404_NOT_FOUND
             )
 
 
 class BookingCancelView(SovereignResponseMixin, generics.GenericAPIView):
     """Cancel booking with refund processing"""
+
     permission_classes = [IsAuthenticated]
-    
+
     def post(self, request, pk):
         try:
             booking = Booking.objects.get(pk=pk)
-            
+
             # Check permissions
-            if booking.user != request.user and request.user.role not in ['admin', 'staff']:
+            if booking.user != request.user and request.user.role not in [
+                "admin",
+                "staff",
+            ]:
                 return Response(
-                    {'error': 'You do not have permission to cancel this booking'},
-                    status=status.HTTP_403_FORBIDDEN
+                    {"error": "You do not have permission to cancel this booking"},
+                    status=status.HTTP_403_FORBIDDEN,
                 )
-            
-            reason = request.data.get('reason', '')
-            
+
+            reason = request.data.get("reason", "")
+
             # Cancel booking using service
             try:
-                cancellation, refund = BookingService.cancel_booking(booking, request.user, reason)
-                
+                cancellation, refund = BookingService.cancel_booking(
+                    booking, request.user, reason
+                )
+
                 # Calculate fee info for response
                 fee_info = CancellationPolicy.calculate_cancellation_fee(booking)
-                
-                return Response({
-                    'message': 'Booking cancelled successfully',
-                    'cancellation': CancellationSerializer(cancellation).data,
-                    'refund': RefundSerializer(refund).data if refund else None,
-                    'fee_info': fee_info,
-                })
+
+                return Response(
+                    {
+                        "message": "Booking cancelled successfully",
+                        "cancellation": CancellationSerializer(cancellation).data,
+                        "refund": RefundSerializer(refund).data if refund else None,
+                        "fee_info": fee_info,
+                    }
+                )
             except ValueError as e:
                 return Response(
-                    {'error': str(e)},
-                    status=status.HTTP_400_BAD_REQUEST
+                    {"error": "Invalid input provided"},
+                    status=status.HTTP_400_BAD_REQUEST,
                 )
-            
+
         except Booking.DoesNotExist:
             return Response(
-                {'error': 'Booking not found'},
-                status=status.HTTP_404_NOT_FOUND
+                {"error": "Booking not found"}, status=status.HTTP_404_NOT_FOUND
             )
 
 
 class CancellationPolicyView(generics.GenericAPIView):
     """Get cancellation policy information"""
+
     permission_classes = [IsAuthenticated]
-    
+
     def get(self, request, pk):
         try:
             booking = Booking.objects.get(pk=pk)
-            
+
             # Check permissions
-            if booking.user != request.user and request.user.role not in ['admin', 'staff']:
+            if booking.user != request.user and request.user.role not in [
+                "admin",
+                "staff",
+            ]:
                 return Response(
-                    {'error': 'Permission denied'},
-                    status=status.HTTP_403_FORBIDDEN
+                    {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
                 )
-            
+
             # Check if can cancel
             can_cancel, message = CancellationPolicy.can_cancel(booking)
-            
+
             # Calculate fee info
             fee_info = CancellationPolicy.calculate_cancellation_fee(booking)
-            
-            return Response({
-                'can_cancel': can_cancel,
-                'message': message,
-                'fee_info': fee_info,
-                'policy': {
-                    'cancellation_fees': CancellationPolicy.CANCELLATION_FEES,
-                    'no_refund_after_start': CancellationPolicy.NO_REFUND_AFTER_START,
-                    'early_return_refund_rate': CancellationPolicy.EARLY_RETURN_REFUND_RATE,
+
+            return Response(
+                {
+                    "can_cancel": can_cancel,
+                    "message": message,
+                    "fee_info": fee_info,
+                    "policy": {
+                        "cancellation_fees": CancellationPolicy.CANCELLATION_FEES,
+                        "no_refund_after_start": CancellationPolicy.NO_REFUND_AFTER_START,
+                        "early_return_refund_rate": CancellationPolicy.EARLY_RETURN_REFUND_RATE,
+                    },
                 }
-            })
+            )
         except Booking.DoesNotExist:
             return Response(
-                {'error': 'Booking not found'},
-                status=status.HTTP_404_NOT_FOUND
+                {"error": "Booking not found"}, status=status.HTTP_404_NOT_FOUND
             )
 
 
 class EarlyReturnView(generics.GenericAPIView):
     """Process early return"""
+
     permission_classes = [IsAuthenticated]
-    
+
     def post(self, request, pk):
         try:
             booking = Booking.objects.get(pk=pk)
-            
+
             # Check permissions
-            if booking.user != request.user and request.user.role not in ['admin', 'staff']:
+            if booking.user != request.user and request.user.role not in [
+                "admin",
+                "staff",
+            ]:
                 return Response(
-                    {'error': 'Permission denied'},
-                    status=status.HTTP_403_FORBIDDEN
+                    {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
                 )
-            
-            return_date_str = request.data.get('return_date')
+
+            return_date_str = request.data.get("return_date")
             if not return_date_str:
                 return Response(
-                    {'error': 'return_date is required'},
-                    status=status.HTTP_400_BAD_REQUEST
+                    {"error": "return_date is required"},
+                    status=status.HTTP_400_BAD_REQUEST,
                 )
-            
+
             from datetime import datetime
-            return_date = datetime.strptime(return_date_str, '%Y-%m-%d').date()
-            
+
+            return_date = datetime.strptime(return_date_str, "%Y-%m-%d").date()
+
             try:
-                refund, refund_info = BookingService.process_early_return(booking, return_date, request.user)
-                
-                return Response({
-                    'message': 'Early return processed',
-                    'refund': RefundSerializer(refund).data if refund else None,
-                    'refund_info': refund_info,
-                })
+                refund, refund_info = BookingService.process_early_return(
+                    booking, return_date, request.user
+                )
+
+                return Response(
+                    {
+                        "message": "Early return processed",
+                        "refund": RefundSerializer(refund).data if refund else None,
+                        "refund_info": refund_info,
+                    }
+                )
             except ValueError as e:
                 return Response(
-                    {'error': str(e)},
-                    status=status.HTTP_400_BAD_REQUEST
+                    {"error": "Invalid input provided"},
+                    status=status.HTTP_400_BAD_REQUEST,
                 )
         except Booking.DoesNotExist:
             return Response(
-                {'error': 'Booking not found'},
-                status=status.HTTP_404_NOT_FOUND
+                {"error": "Booking not found"}, status=status.HTTP_404_NOT_FOUND
             )
 
 
 class RefundListView(generics.ListAPIView):
     """List user's refunds"""
+
     serializer_class = RefundSerializer
     permission_classes = [IsAuthenticated]
-    
+
     def get_queryset(self):
-        queryset = Refund.objects.filter(booking__user=self.request.user).select_related('booking')
+        queryset = Refund.objects.filter(
+            booking__user=self.request.user
+        ).select_related("booking")
         return queryset
 
 
 class AdminBookingStatsView(generics.GenericAPIView):
     """Get booking statistics for admin dashboard"""
+
     permission_classes = [IsAdminUser]
-    
+
     def get(self, request):
         today = timezone.now().date()
         this_month_start = today.replace(day=1)
         last_month_start = (this_month_start - timedelta(days=1)).replace(day=1)
         last_month_end = this_month_start - timedelta(days=1)
-        
+
         # Total stats
         total_bookings = Booking.objects.count()
-        pending_bookings = Booking.objects.filter(status='pending').count()
-        confirmed_bookings = Booking.objects.filter(status='confirmed').count()
-        in_use_bookings = Booking.objects.filter(status='in_use').count()
-        completed_bookings = Booking.objects.filter(status='completed').count()
-        cancelled_bookings = Booking.objects.filter(status='cancelled').count()
-        
+        pending_bookings = Booking.objects.filter(status="pending").count()
+        confirmed_bookings = Booking.objects.filter(status="confirmed").count()
+        in_use_bookings = Booking.objects.filter(status="in_use").count()
+        completed_bookings = Booking.objects.filter(status="completed").count()
+        cancelled_bookings = Booking.objects.filter(status="cancelled").count()
+
         # Revenue stats
-        total_revenue = Booking.objects.filter(status__in=['confirmed', 'in_use', 'completed']).aggregate(
-            total=Sum('total_price')
-        )['total'] or 0
-        
-        this_month_revenue = Booking.objects.filter(
-            status__in=['confirmed', 'in_use', 'completed'],
-            created_at__gte=this_month_start
-        ).aggregate(total=Sum('total_price'))['total'] or 0
-        
-        last_month_revenue = Booking.objects.filter(
-            status__in=['confirmed', 'in_use', 'completed'],
-            created_at__gte=last_month_start,
-            created_at__lte=last_month_end
-        ).aggregate(total=Sum('total_price'))['total'] or 0
-        
+        total_revenue = (
+            Booking.objects.filter(
+                status__in=["confirmed", "in_use", "completed"]
+            ).aggregate(total=Sum("total_price"))["total"]
+            or 0
+        )
+
+        this_month_revenue = (
+            Booking.objects.filter(
+                status__in=["confirmed", "in_use", "completed"],
+                created_at__gte=this_month_start,
+            ).aggregate(total=Sum("total_price"))["total"]
+            or 0
+        )
+
+        last_month_revenue = (
+            Booking.objects.filter(
+                status__in=["confirmed", "in_use", "completed"],
+                created_at__gte=last_month_start,
+                created_at__lte=last_month_end,
+            ).aggregate(total=Sum("total_price"))["total"]
+            or 0
+        )
+
         # Today's stats
-        today_bookings = Booking.objects.filter(
-            created_at__date=today
-        ).count()
-        
-        today_revenue = Booking.objects.filter(
-            created_at__date=today,
-            status__in=['confirmed', 'in_use', 'completed']
-        ).aggregate(total=Sum('total_price'))['total'] or 0
-        
+        today_bookings = Booking.objects.filter(created_at__date=today).count()
+
+        today_revenue = (
+            Booking.objects.filter(
+                created_at__date=today, status__in=["confirmed", "in_use", "completed"]
+            ).aggregate(total=Sum("total_price"))["total"]
+            or 0
+        )
+
         # Upcoming bookings
         upcoming_bookings = Booking.objects.filter(
-            start_date__gte=today,
-            status__in=['pending', 'confirmed']
+            start_date__gte=today, status__in=["pending", "confirmed"]
         ).count()
-        
+
         # Status breakdown
-        status_breakdown = Booking.objects.values('status').annotate(
-            count=Count('id')
-        )
-        
+        status_breakdown = Booking.objects.values("status").annotate(count=Count("id"))
+
         stats = {
-            'totals': {
-                'bookings': total_bookings,
-                'revenue': float(total_revenue),
-                'pending': pending_bookings,
-                'confirmed': confirmed_bookings,
-                'in_use': in_use_bookings,
-                'completed': completed_bookings,
-                'cancelled': cancelled_bookings,
+            "totals": {
+                "bookings": total_bookings,
+                "revenue": float(total_revenue),
+                "pending": pending_bookings,
+                "confirmed": confirmed_bookings,
+                "in_use": in_use_bookings,
+                "completed": completed_bookings,
+                "cancelled": cancelled_bookings,
             },
-            'this_month': {
-                'revenue': float(this_month_revenue),
+            "this_month": {
+                "revenue": float(this_month_revenue),
             },
-            'last_month': {
-                'revenue': float(last_month_revenue),
+            "last_month": {
+                "revenue": float(last_month_revenue),
             },
-            'today': {
-                'bookings': today_bookings,
-                'revenue': float(today_revenue),
+            "today": {
+                "bookings": today_bookings,
+                "revenue": float(today_revenue),
             },
-            'upcoming': {
-                'bookings': upcoming_bookings,
+            "upcoming": {
+                "bookings": upcoming_bookings,
             },
-            'status_breakdown': list(status_breakdown),
+            "status_breakdown": list(status_breakdown),
         }
-        
+
         return Response(stats)
 
 
 class WaitlistListView(generics.ListAPIView):
     """Get user's waitlist"""
+
     serializer_class = WaitlistSerializer
     permission_classes = [IsAuthenticated]
-    
+
     def get_queryset(self):
-        return Waitlist.objects.filter(
-            user=self.request.user
-        ).select_related('product', 'user').order_by('-created_at')
+        return (
+            Waitlist.objects.filter(user=self.request.user)
+            .select_related("product", "user")
+            .order_by("-created_at")
+        )
 
 
 class WaitlistCreateView(generics.CreateAPIView):
     """Add product to waitlist"""
+
     serializer_class = WaitlistSerializer
     permission_classes = [IsAuthenticated]
-    
+
     def create(self, request, *args, **kwargs):
-        product_id = request.data.get('product_id')
-        preferred_start_date = request.data.get('preferred_start_date')
-        preferred_end_date = request.data.get('preferred_end_date')
-        
+        product_id = request.data.get("product_id")
+        preferred_start_date = request.data.get("preferred_start_date")
+        preferred_end_date = request.data.get("preferred_end_date")
+
         if not product_id:
             return Response(
-                {'error': 'product_id is required'},
-                status=status.HTTP_400_BAD_REQUEST
+                {"error": "product_id is required"}, status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         try:
             product = Product.objects.get(pk=product_id)
         except Product.DoesNotExist:
             return Response(
-                {'error': 'Product not found'},
-                status=status.HTTP_404_NOT_FOUND
+                {"error": "Product not found"}, status=status.HTTP_404_NOT_FOUND
             )
-        
+
         # Check if already in waitlist
         waitlist_item, created = Waitlist.objects.get_or_create(
             user=request.user,
             product=product,
             defaults={
-                'preferred_start_date': preferred_start_date,
-                'preferred_end_date': preferred_end_date,
-            }
+                "preferred_start_date": preferred_start_date,
+                "preferred_end_date": preferred_end_date,
+            },
         )
-        
+
         if not created:
             # Update preferred dates if provided
             if preferred_start_date:
@@ -605,19 +710,20 @@ class WaitlistCreateView(generics.CreateAPIView):
                 waitlist_item.preferred_end_date = preferred_end_date
             waitlist_item.save()
             return Response(
-                {'message': 'Product already in waitlist', 'id': waitlist_item.id},
-                status=status.HTTP_200_OK
+                {"message": "Product already in waitlist", "id": waitlist_item.id},
+                status=status.HTTP_200_OK,
             )
-        
+
         serializer = self.get_serializer(waitlist_item)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class WaitlistDeleteView(generics.DestroyAPIView):
     """Remove product from waitlist"""
+
     serializer_class = WaitlistSerializer
     permission_classes = [IsAuthenticated]
-    
+
     def get_queryset(self):
         return Waitlist.objects.filter(user=self.request.user)
 
@@ -625,139 +731,153 @@ class WaitlistDeleteView(generics.DestroyAPIView):
 # Damage Assessment Views
 class DamageAssessmentCreateView(generics.CreateAPIView):
     """Create damage assessment"""
+
     serializer_class = DamageAssessmentSerializer
     permission_classes = [IsAuthenticated]
-    
+
     def perform_create(self, serializer):
-        booking_id = self.request.data.get('booking_id')
+        booking_id = self.request.data.get("booking_id")
         try:
             booking = Booking.objects.get(pk=booking_id)
             # Only allow assessment for completed bookings or by admin
-            if booking.status != 'completed' and self.request.user.role not in ['admin', 'staff']:
-                raise ValidationError('Can only assess completed bookings')
+            if booking.status != "completed" and self.request.user.role not in [
+                "admin",
+                "staff",
+            ]:
+                raise ValidationError("Can only assess completed bookings")
             serializer.save(booking=booking, assessed_by=self.request.user)
         except Booking.DoesNotExist:
-            raise ValidationError('Booking not found')
+            raise ValidationError("Booking not found")
 
 
 class DamageAssessmentDetailView(generics.RetrieveUpdateAPIView):
     """Get or update damage assessment"""
+
     serializer_class = DamageAssessmentSerializer
     permission_classes = [IsAuthenticated]
-    
+
     def get_queryset(self):
-        queryset = DamageAssessment.objects.select_related('booking', 'assessed_by').prefetch_related(
-            'photos', 'checklist_items'
-        )
+        queryset = DamageAssessment.objects.select_related(
+            "booking", "assessed_by"
+        ).prefetch_related("photos", "checklist_items")
         # Users can only see their own assessments unless admin
-        if self.request.user.role not in ['admin', 'staff']:
+        if self.request.user.role not in ["admin", "staff"]:
             queryset = queryset.filter(booking__user=self.request.user)
         return queryset
 
 
 class DamagePhotoCreateView(generics.CreateAPIView):
     """Upload damage photo"""
+
     serializer_class = DamagePhotoSerializer
     permission_classes = [IsAuthenticated]
-    
+
     def perform_create(self, serializer):
-        assessment_id = self.request.data.get('assessment_id')
+        assessment_id = self.request.data.get("assessment_id")
         try:
             assessment = DamageAssessment.objects.get(pk=assessment_id)
             # Check permissions
-            if assessment.booking.user != self.request.user and self.request.user.role not in ['admin', 'staff']:
-                raise ValidationError('Permission denied')
+            if (
+                assessment.booking.user != self.request.user
+                and self.request.user.role not in ["admin", "staff"]
+            ):
+                raise ValidationError("Permission denied")
             serializer.save(assessment=assessment)
         except DamageAssessment.DoesNotExist:
-            raise ValidationError('Assessment not found')
+            raise ValidationError("Assessment not found")
 
 
 class InspectionChecklistCreateView(generics.CreateAPIView):
     """Create inspection checklist item"""
+
     serializer_class = InspectionChecklistSerializer
     permission_classes = [IsAuthenticated]
-    
+
     def perform_create(self, serializer):
-        assessment_id = self.request.data.get('assessment_id')
+        assessment_id = self.request.data.get("assessment_id")
         try:
             assessment = DamageAssessment.objects.get(pk=assessment_id)
             # Only admin/staff can create checklist items
-            if self.request.user.role not in ['admin', 'staff']:
-                raise ValidationError('Permission denied')
+            if self.request.user.role not in ["admin", "staff"]:
+                raise ValidationError("Permission denied")
             serializer.save(assessment=assessment)
         except DamageAssessment.DoesNotExist:
-            raise ValidationError('Assessment not found')
+            raise ValidationError("Assessment not found")
 
 
 class InspectionChecklistUpdateView(generics.UpdateAPIView):
     """Update inspection checklist item"""
+
     serializer_class = InspectionChecklistSerializer
     permission_classes = [IsAuthenticated]
-    
+
     def get_queryset(self):
-        queryset = InspectionChecklist.objects.select_related('assessment__booking')
+        queryset = InspectionChecklist.objects.select_related("assessment__booking")
         # Only admin/staff can update checklist items
-        if self.request.user.role not in ['admin', 'staff']:
+        if self.request.user.role not in ["admin", "staff"]:
             return queryset.none()
         return queryset
 
 
 class DamageClaimCreateView(generics.CreateAPIView):
     """Create damage claim"""
+
     serializer_class = DamageClaimSerializer
     permission_classes = [IsAuthenticated]
-    
+
     def perform_create(self, serializer):
-        assessment_id = self.request.data.get('assessment_id')
+        assessment_id = self.request.data.get("assessment_id")
         try:
             assessment = DamageAssessment.objects.get(pk=assessment_id)
             # Only booking owner can create claim
             if assessment.booking.user != self.request.user:
-                raise ValidationError('Permission denied')
+                raise ValidationError("Permission denied")
             # Check if claim already exists
-            if hasattr(assessment, 'claim'):
-                raise ValidationError('Claim already exists')
+            if hasattr(assessment, "claim"):
+                raise ValidationError("Claim already exists")
             serializer.save(assessment=assessment)
         except DamageAssessment.DoesNotExist:
-            raise ValidationError('Assessment not found')
+            raise ValidationError("Assessment not found")
 
 
 class DamageClaimDetailView(generics.RetrieveUpdateAPIView):
     """Get or update damage claim"""
+
     serializer_class = DamageClaimSerializer
     permission_classes = [IsAuthenticated]
-    
+
     def get_queryset(self):
-        queryset = DamageClaim.objects.select_related('assessment__booking')
+        queryset = DamageClaim.objects.select_related("assessment__booking")
         # Users can see their own claims, admins can see all
-        if self.request.user.role not in ['admin', 'staff']:
+        if self.request.user.role not in ["admin", "staff"]:
             queryset = queryset.filter(assessment__booking__user=self.request.user)
         return queryset
-    
+
     def perform_update(self, serializer):
         # Only admin can update claim status and approved amount
-        if self.request.user.role not in ['admin', 'staff']:
+        if self.request.user.role not in ["admin", "staff"]:
             # Users can only update their own claim description
             instance = self.get_object()
             if instance.assessment.booking.user != self.request.user:
-                raise ValidationError('Permission denied')
+                raise ValidationError("Permission denied")
             # Only allow updating claim_description
-            allowed_fields = ['claim_description']
+            allowed_fields = ["claim_description"]
             for field in serializer.validated_data:
                 if field not in allowed_fields:
-                    raise ValidationError(f'Cannot update {field}')
+                    raise ValidationError(f"Cannot update {field}")
             # Only allow updating claim_description
-            allowed_fields = ['claim_description']
+            allowed_fields = ["claim_description"]
             for field in serializer.validated_data:
                 if field not in allowed_fields:
-                    raise ValidationError(f'Cannot update {field}')
-        
+                    raise ValidationError(f"Cannot update {field}")
+
         serializer.save()
 
 
 from rest_framework.decorators import api_view, permission_classes
 
-@api_view(['POST'])
+
+@api_view(["POST"])
 @permission_classes([IsAdminUser])
 def resolve_dispute_admin(request, pk):
     """
@@ -765,38 +885,42 @@ def resolve_dispute_admin(request, pk):
     Receives damage report and AI assessment, calls The Judge, and executes judgment.
     """
     from .services_dispute import DisputeService
-    
+
     # 1. Get Data from Request
-    damage_report = request.data.get('damage_report', {})
-    ai_assessment = request.data.get('ai_assessment', {})
+    damage_report = request.data.get("damage_report", {})
+    ai_assessment = request.data.get("ai_assessment", {})
 
     # 2. Call The Judge (AI Logic)
     # We use the logic we built: resolve first, then execute.
     verdict = DisputeService.resolve_dispute(pk, damage_report, ai_assessment)
 
     if verdict == "ERROR_BOOKING_NOT_FOUND":
-            return Response({'error': 'Booking not found'}, status=status.HTTP_404_NOT_FOUND)
+        return Response(
+            {"error": "Booking not found"}, status=status.HTTP_404_NOT_FOUND
+        )
 
     # 3. Execute Judgment
     final_status = DisputeService.execute_dispute_judgment(pk, verdict)
 
     # 4. Response Messages
     decision_messages = {
-        'RELEASE_TO_OWNER': 'Judgment: Release to Owner. (Damage Confirmed)',
-        'RELEASE_TO_CUSTOMER': 'Judgment: Release to Customer. (Minor Damage/No Fault)',
-        'FULL_REFUND': 'Judgment: Full Refund. (Critical Failure)',
-        'BLOCK_USER': 'Judgment: User Blocked. (Fraud Detected)',
-        'PARTIAL_REFUND': 'Judgment: Partial Refund Initiate.'
+        "RELEASE_TO_OWNER": "Judgment: Release to Owner. (Damage Confirmed)",
+        "RELEASE_TO_CUSTOMER": "Judgment: Release to Customer. (Minor Damage/No Fault)",
+        "FULL_REFUND": "Judgment: Full Refund. (Critical Failure)",
+        "BLOCK_USER": "Judgment: User Blocked. (Fraud Detected)",
+        "PARTIAL_REFUND": "Judgment: Partial Refund Initiate.",
     }
 
-    return Response({
-        "verdict": verdict,
-        "escrow_status": final_status,
-        "message": decision_messages.get(verdict, 'Judgment Executed.')
-    })
+    return Response(
+        {
+            "verdict": verdict,
+            "escrow_status": final_status,
+            "message": decision_messages.get(verdict, "Judgment Executed."),
+        }
+    )
 
 
-@api_view(['POST'])
+@api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def generate_agreement_view(request, pk):
     """
@@ -806,22 +930,28 @@ def generate_agreement_view(request, pk):
     from .services_agreement import AgreementService
 
     # 1. Get Inputs
-    raw_text = request.data.get('raw_text', '')
+    raw_text = request.data.get("raw_text", "")
     # Handle File Upload (Voice) if present
-    audio_file = request.FILES.get('audio_file')
-    
+    audio_file = request.FILES.get("audio_file")
+
     try:
         # 2. Run Pipeline
         agreement = AgreementService.create_agreement(pk, raw_text, audio_file)
-        
-        return Response({
-            'message': 'Agreement Generated Successfully.',
-            'contract_text': agreement.contract_text,
-            'is_signed': agreement.is_signed_by_user,
-            'agreement_id': agreement.id
-        })
+
+        return Response(
+            {
+                "message": "Agreement Generated Successfully.",
+                "contract_text": agreement.contract_text,
+                "is_signed": agreement.is_signed_by_user,
+                "agreement_id": agreement.id,
+            }
+        )
     except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        logger.error(f"Agreement generation failed: {str(e)}", exc_info=True)
+        return Response(
+            {"error": "Internal server error"},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
 
 
 class BookingCalculateDepositView(generics.GenericAPIView):
@@ -829,19 +959,25 @@ class BookingCalculateDepositView(generics.GenericAPIView):
     Calculate required security deposit based on risk score.
     GET /api/bookings/calculate_deposit/?product_id=123
     """
+
     permission_classes = [IsAuthenticated]
-    
+
     def get(self, request):
-        product_id = request.query_params.get('product_id')
+        product_id = request.query_params.get("product_id")
         if not product_id:
-            return Response({'error': 'product_id is required'}, status=status.HTTP_400_BAD_REQUEST)
-            
+            return Response(
+                {"error": "product_id is required"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
         try:
             product = Product.objects.get(pk=product_id)
         except Product.DoesNotExist:
-            return Response({'error': 'Product not found'}, status=status.HTTP_404_NOT_FOUND)
-            
+            return Response(
+                {"error": "Product not found"}, status=status.HTTP_404_NOT_FOUND
+            )
+
         from .services_risk import RiskEngine
+
         result = RiskEngine.calculate_deposit(request.user, product)
-        
+
         return Response(result)

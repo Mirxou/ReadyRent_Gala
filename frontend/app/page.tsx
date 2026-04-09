@@ -30,6 +30,16 @@ export default function HomePage() {
   const opacity = useTransform(scrollYProgress, [0, 0.1], [1, 0]);
   const yMove = useTransform(scrollYProgress, [0, 0.2], [0, -100]);
 
+  const frameTransforms = MANIFESTO_FRAMES.map((frame, index) => {
+    const start = index / MANIFESTO_FRAMES.length;
+    const end = (index + 1) / MANIFESTO_FRAMES.length;
+
+    return {
+      opacity: useTransform(scrollYProgress, [start, start + 0.1, end - 0.1, end], [0, 1, 1, 0]),
+      scale: useTransform(scrollYProgress, [start, end], [1, 1.2]),
+    };
+  });
+
   return (
     <div className="flex flex-col min-h-screen relative overflow-hidden bg-sovereign-obsidian text-sovereign-white font-arabic" dir="rtl" ref={containerRef}>
 
@@ -40,21 +50,15 @@ export default function HomePage() {
         <div className="sticky top-0 h-screen w-full overflow-hidden">
            <AnimatePresence>
               {MANIFESTO_FRAMES.map((frame, index) => {
-                const start = (index / MANIFESTO_FRAMES.length);
-                const end = ((index + 1) / MANIFESTO_FRAMES.length);
-                
-                // eslint-disable-next-line react-hooks/rules-of-hooks
-                const frameOpacity = useTransform(scrollYProgress, [start, start + 0.1, end - 0.1, end], [0, 1, 1, 0]);
-                // eslint-disable-next-line react-hooks/rules-of-hooks
-                const frameScale = useTransform(scrollYProgress, [start, end], [1, 1.2]);
+                const transform = frameTransforms[index];
 
                 return (
                   <motion.div
                     key={frame.id}
-                    style={{ opacity: frameOpacity }}
+                    style={{ opacity: transform.opacity }}
                     className="absolute inset-0 z-0"
                   >
-                     <motion.div style={{ scale: frameScale }} className="w-full h-full relative">
+                     <motion.div style={{ scale: transform.scale }} className="w-full h-full relative">
                         <Image 
                           src={frame.src} 
                           alt={frame.title} 
