@@ -1,0 +1,4 @@
+# file: C:\Users\aboun\Desktop\ReadyRent_Gala\backend\apps\disputes\services\vault_audit.py
+# hypothesis_version: 6.151.10
+
+['calculated_hash', 'chain_break', 'clean', 'corrupted', 'detail', 'error', 'error_count', 'errors', 'hash_mismatch', 'id', 'is_valid', 'recorded_hash', 'status', 'total_logs', 'vault_audit', 'vault_audit_started', 'vault_chain_break', 'vault_hash_mismatch', 'verified_logs']

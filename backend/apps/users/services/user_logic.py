@@ -1,13 +1,15 @@
 """
 Verification services for KYC
 """
-import random
+import secrets
 import string
 from datetime import timedelta
 from django.utils import timezone
 from django.core.cache import cache
+from django.core.exceptions import ValidationError
+from django.contrib.auth.hashers import make_password, check_password
 import structlog
-from .models import VerificationStatus, Blacklist, User
+from ..models import VerificationStatus, Blacklist, User, VerificationLevel, IdentityDocument, UserProfile
 
 logger = structlog.get_logger("users.verification")
 
@@ -17,8 +19,8 @@ class VerificationService:
     
     @staticmethod
     def generate_verification_code(length=6):
-        """Generate random verification code"""
-        return ''.join(random.choices(string.digits, k=length))
+        """Generate cryptographically secure random verification code"""
+        return ''.join(secrets.choice(string.digits) for _ in range(length))
     
     @staticmethod
     def send_sms_verification_code(phone_number, code):
@@ -30,16 +32,14 @@ class VerificationService:
         if result.get('success'):
             return True
         else:
-            # Log error but don't fail verification process
             logger.error(
                 "sms_verification_failed",
                 phone_number=phone_number,
                 error=result.get('error', 'Unknown error')
             )
-            # In development, still return True to allow testing
-            # In production, you might want to return False or raise an exception
             from django.conf import settings
             if settings.DEBUG:
+                logger.info("dev_mode_verification_code", code=code)
                 return True
             return False
     
@@ -49,15 +49,12 @@ class VerificationService:
         try:
             verification = VerificationStatus.objects.get(user=user)
             
-            # Check if code is expired
             if verification.phone_verification_expires and timezone.now() > verification.phone_verification_expires:
                 return False, 'Code expired'
             
-            # Check if code matches
-            if verification.phone_verification_code != code:
+            if not check_password(code, verification.phone_verification_code):
                 return False, 'Invalid code'
             
-            # Mark as verified
             verification.phone_verified = True
             verification.phone_verification_code = ''
             verification.phone_verification_expires = None
@@ -72,16 +69,13 @@ class VerificationService:
         """Request phone verification code"""
         verification, created = VerificationStatus.objects.get_or_create(user=user)
         
-        # Generate code
         code = VerificationService.generate_verification_code()
         expires_at = timezone.now() + timedelta(minutes=10)
         
-        # Save code
-        verification.phone_verification_code = code
+        verification.phone_verification_code = make_password(code)
         verification.phone_verification_expires = expires_at
         verification.save()
         
-        # Send SMS
         if user.phone:
             VerificationService.send_sms_verification_code(user.phone, code)
         
@@ -116,6 +110,23 @@ class VerificationService:
             score -= 10  # Lower risk for older accounts
         elif account_age_days < 1:
             score += 20  # Higher risk for new accounts
+
+        # Check adult status when profile data exists
+        profile, _ = UserProfile.objects.get_or_create(user=user)
+        if profile and profile.date_of_birth:
+            age = profile.age if hasattr(profile, 'age') else None
+            if age is not None and age < 18:
+                score = 100
+
+        # Better risk for upgraded verification levels
+        try:
+            v_level = VerificationLevel.objects.get(user=user)
+            if v_level.level == 'standard':
+                score -= 10
+            elif v_level.level == 'premium':
+                score -= 20
+        except VerificationLevel.DoesNotExist:
+            pass
         
         # Check booking history
         from apps.bookings.models import Booking
@@ -124,6 +135,25 @@ class VerificationService:
             score -= min(booking_count * 5, 20)  # Lower risk for users with booking history
         
         return max(0, min(100, score))
+
+    @staticmethod
+    def require_booking_eligibility(user, amount):
+        """Raise ValidationError if user is not eligible to book."""
+        profile, _ = UserProfile.objects.get_or_create(user=user)
+        if not profile.date_of_birth:
+            raise ValidationError('Complete your profile with date of birth before booking.')
+        if profile.age is not None and profile.age < 18:
+            raise ValidationError('You must be at least 18 years old to book.')
+
+        try:
+            verification_level = VerificationLevel.objects.get(user=user)
+        except VerificationLevel.DoesNotExist:
+            verification_level = VerificationLevel.objects.create(user=user)
+
+        if not verification_level.can_transact(amount):
+            raise ValidationError('Upgrade your verification level to book this amount.')
+
+        return True
     
     @staticmethod
     def verify_address(user, address_data):
@@ -131,6 +161,7 @@ class VerificationService:
         verification, created = VerificationStatus.objects.get_or_create(user=user)
         
         # Update profile with address
+        from ..models import UserProfile
         profile, _ = UserProfile.objects.get_or_create(user=user)
         profile.address = address_data.get('address', '')
         profile.city = address_data.get('city', 'Constantine')
@@ -178,6 +209,15 @@ class VerificationService:
         verification.verified_at = timezone.now()
         verification.verified_by = approved_by
         verification.save()
+
+        profile, _ = UserProfile.objects.get_or_create(user=user)
+
+        identity_document, _ = IdentityDocument.objects.get_or_create(user=user)
+        identity_document.status = 'verified'
+        identity_document.age_verified = profile.is_adult
+        identity_document.verified_at = timezone.now()
+        identity_document.verified_by = approved_by
+        identity_document.save()
         
         # Update user verified status
         user.is_verified = True
@@ -194,7 +234,11 @@ class VerificationService:
         verification.rejection_reason = reason
         verification.verified_by = rejected_by
         verification.save()
+
+        identity_document, _ = IdentityDocument.objects.get_or_create(user=user)
+        identity_document.status = 'rejected'
+        identity_document.rejection_reason = reason
+        identity_document.verified_by = rejected_by
+        identity_document.save()
         
         return verification
-
-

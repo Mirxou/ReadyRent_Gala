@@ -21,7 +21,8 @@ import {
   Layers,
   Download,
   Play,
-  Globe
+  Globe,
+  Smartphone
 } from 'lucide-react';
 import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
 import { IdentityShield } from '@/shared/components/sovereign/identity-shield';

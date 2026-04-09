@@ -14,6 +14,7 @@ import {
   ArrowLeft,
   Quote
 } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
 import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
@@ -35,20 +36,32 @@ export function SovereignConcierge() {
   const { user } = useAuthStore();
   const { language } = useLanguageStore();
   const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
   const [messages, setMessages] = useState<Array<{ role: 'user' | 'assistant', content: string }>>([]);
 
   useEffect(() => {
      if (messages.length === 0) {
-        setMessages([
-           { 
-             role: 'assistant', 
-             content: language === 'ar' 
-               ? 'أهلاً بك في جناح الاستشارات السيادية. كيف يمكنني مساعدتك في إدارة أصولك وتعظيم قيمتها اليوم؟' 
-               : 'Bienvenue au pavillon du conseil souverain. Comment puis-je vous aider à maximiser la valeur de vos actifs aujourd\'hui ?'
-           }
-        ]);
+        let greeting = language === 'ar' 
+          ? 'أهلاً بك في جناح الاستشارات السيادية. كيف يمكنني مساعدتك في إدارة أصولك وتعظيم قيمتها اليوم؟' 
+          : 'Bienvenue au pavillon du conseil souverain. Comment puis-je vous aider à maximiser la valeur de vos actifs aujourd\'hui ?';
+
+        if (pathname.includes('/wallet')) {
+          greeting = language === 'ar' 
+            ? 'مرحباً في خزنتك السيادية. هل ترغب في تحليل تدفقاتك المالية أو مراجعة بروتوكولات الأمان لأدواتك الائتمانية؟'
+            : 'Bienvenue dans votre coffre-fort souverain. Souhaitez-vous analyser vos flux financiers ?';
+        } else if (pathname.includes('/bookings')) {
+          greeting = language === 'ar'
+            ? 'أنا هنا لمراجعة مواثيق حجزك. هل هناك تفصيل في العقد الذكي تود منّي توضيحه؟'
+            : 'Je suis ici pour examiner vos protocoles de réservation. Souhaitez-vous clarifier un détail du contrat ?';
+        } else if (pathname.includes('/dashboard')) {
+          greeting = language === 'ar'
+            ? 'مرصد الحقيقة نشط. هل تود أن أطلعك على تقارير النزاهة العالمية للنظام؟'
+            : 'L\'Observatoire de la Vérité est actif. Souhaitez-vous consulter les rapports d\'intégrité ?';
+        }
+
+        setMessages([{ role: 'assistant', content: greeting }]);
      }
-  }, [language, messages.length]);
+  }, [language, pathname, messages.length]);
 
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -60,16 +73,16 @@ export function SovereignConcierge() {
     }
   }, [messages]);
 
-  const handleSend = async () => {
-    if (!input.trim() || isLoading) return;
+  const handleSend = async (directMessage?: string) => {
+    const messageToSend = typeof directMessage === 'string' ? directMessage : input.trim();
+    if (!messageToSend || isLoading) return;
 
-    const userMessage = input.trim();
-    setInput('');
-    setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+    if (typeof directMessage !== 'string') setInput('');
+    setMessages(prev => [...prev, { role: 'user', content: messageToSend }]);
     setIsLoading(true);
 
     try {
-      const response = await chatbotApi.quickChat(userMessage, {
+      const response = await chatbotApi.quickChat(messageToSend, {
         language,
         trust_score: user?.trust_score
       });
@@ -169,11 +182,25 @@ export function SovereignConcierge() {
                {/* Intelligence Input Area */}
                <div className="p-10 border-t border-white/5 bg-black/40">
                   <div className="relative group">
-                     {/* Suggestion Chips */}
-                     <div className="absolute -top-14 inset-x-0 flex justify-end gap-4 opacity-0 group-focus-within:opacity-100 transition-all duration-500 transform translate-y-2 group-focus-within:translate-y-0">
-                        <button onClick={() => setInput('تقرير السوق 2026')} className="text-[9px] font-black uppercase tracking-widest text-sovereign-gold/60 hover:text-sovereign-gold px-3 py-1 bg-white/[0.02] rounded-full border border-white/5">Market Report</button>
-                        <button onClick={() => setInput('تحليل السيولة')} className="text-[9px] font-black uppercase tracking-widest text-sovereign-gold/60 hover:text-sovereign-gold px-3 py-1 bg-white/[0.02] rounded-full border border-white/5">Liquidity Analysis</button>
-                     </div>
+                      {/* Dynamic Suggestion Chips based on Context */}
+                      <div className="absolute -top-14 inset-x-0 flex justify-end gap-4 opacity-0 group-focus-within:opacity-100 transition-all duration-500 transform translate-y-2 group-focus-within:translate-y-0">
+                        {pathname.includes('/wallet') ? (
+                          <>
+                            <button onClick={() => handleSend('تحليل السيولة')} className="text-[9px] font-black uppercase tracking-widest text-sovereign-gold/60 hover:text-sovereign-gold px-3 py-1 bg-white/[0.02] rounded-full border border-white/5">Liquidity Analysis</button>
+                            <button onClick={() => handleSend('سجل الحجز الضامن')} className="text-[9px] font-black uppercase tracking-widest text-sovereign-gold/60 hover:text-sovereign-gold px-3 py-1 bg-white/[0.02] rounded-full border border-white/5">Escrow Audit</button>
+                          </>
+                        ) : pathname.includes('/bookings') ? (
+                          <>
+                            <button onClick={() => handleSend('شرح العقد الذكي')} className="text-[9px] font-black uppercase tracking-widest text-sovereign-gold/60 hover:text-sovereign-gold px-3 py-1 bg-white/[0.02] rounded-full border border-white/5">Contract Logic</button>
+                            <button onClick={() => handleSend('وضعية النزاع')} className="text-[9px] font-black uppercase tracking-widest text-sovereign-gold/60 hover:text-sovereign-gold px-3 py-1 bg-white/[0.02] rounded-full border border-white/5">Dispute Protocol</button>
+                          </>
+                        ) : (
+                          <>
+                            <button onClick={() => handleSend('تقرير السوق 2026')} className="text-[9px] font-black uppercase tracking-widest text-sovereign-gold/60 hover:text-sovereign-gold px-3 py-1 bg-white/[0.02] rounded-full border border-white/5">Market Report</button>
+                            <button onClick={() => handleSend('دليل المواطنة')} className="text-[9px] font-black uppercase tracking-widest text-sovereign-gold/60 hover:text-sovereign-gold px-3 py-1 bg-white/[0.02] rounded-full border border-white/5">Citizen Guide</button>
+                          </>
+                        )}
+                      </div>
                      
                      <div className="relative flex items-center">
                         <input 
@@ -185,7 +212,7 @@ export function SovereignConcierge() {
                             dir="rtl"
                         />
                         <button 
-                            onClick={handleSend}
+                            onClick={() => handleSend()}
                             disabled={isLoading}
                             className="absolute left-4 w-12 h-12 bg-sovereign-gold rounded-[11px] flex items-center justify-center text-sovereign-black hover:scale-105 active:scale-95 transition-all shadow-xl group/send"
                         >

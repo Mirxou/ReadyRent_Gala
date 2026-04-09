@@ -107,8 +107,9 @@ class Contract(models.Model):
             raise ValueError("Contract is already finalized and cannot be modified.")
 
         # Identify Party
+        owner = getattr(self.booking.product, 'owner', None)
         is_renter = (user.id == self.booking.user.id)
-        is_owner = (user.id == self.booking.product.owner.id)
+        is_owner = bool(owner and user.id == owner.id)
         
         if not is_renter and not is_owner:
             raise ValueError("User is not a party to this contract.")
@@ -124,9 +125,12 @@ class Contract(models.Model):
             self.owner_signature = sig
             self.owner_signed_at = now
             self.owner_ip = ip_address
+        elif owner is None:
+            # Ownerless inventory: renter signature is sufficient.
+            self.owner_signature = ''
             
         # Check if complete
-        if self.renter_signature and self.owner_signature:
+        if self.renter_signature and (self.owner_signature or owner is None):
             self.is_finalized = True
             self.status = self.ContractStatus.SIGNED
             self.signed_at = now

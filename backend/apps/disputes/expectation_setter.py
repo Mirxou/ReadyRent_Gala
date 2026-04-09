@@ -12,7 +12,8 @@ from decimal import Decimal
 from django.db.models import Count, Q, Avg
 from django.utils import timezone
 
-from apps.disputes.models import AnonymizedJudgment
+from .models import AnonymizedJudgment
+from .models import Dispute, EvidenceLog, JudicialPanel, Judgment
 from apps.products.models import Product
 
 
@@ -174,7 +175,7 @@ class ExpectationSetter:
         verdicts = {item['verdict']: item['count'] for item in verdict_counts}
         
         owner_count = verdicts.get('favor_owner', 0)
-        renter_count = verdicts.get('favor_renter', 0)
+        renter_count = verdicts.get('favor_renter', 0) + verdicts.get('favor_tenant', 0)
         partial_count = verdicts.get('partial', 0)
         
         owner_pct = (owner_count / total * 100) if total > 0 else 0

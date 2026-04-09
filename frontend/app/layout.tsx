@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Cairo, IBM_Plex_Sans_Arabic } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/lib/providers";
 import { Toaster } from "@/components/ui/toaster";
@@ -8,14 +7,6 @@ import { Footer } from "@/components/footer";
 import Analytics from "@/lib/analytics";
 import { GrainOverlay } from "@/components/ui/grain-overlay";
 import { PageTransition } from "@/components/ui/page-transition";
-
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
-const cairo = Cairo({ subsets: ["arabic"], variable: "--font-cairo" });
-const ibmPlexArabic = IBM_Plex_Sans_Arabic({
-  subsets: ["arabic"],
-  weight: ['100', '200', '300', '400', '500', '600', '700'],
-  variable: "--font-ibm-plex"
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3001"),
@@ -52,11 +43,12 @@ export const viewport: Viewport = {
   themeColor: "#b89f67",
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
+  // ♿ ACCESSIBILITY: Removed maximumScale: 1 to allow user zooming (Audit L8)
 };
 
 import { SovereignProvider } from "@/contexts/SovereignContext";
 import { SystemHaltBanner } from "@/shared/components/sovereign/system-halt-banner";
+import { SovereignConcierge } from "@/shared/components/sovereign/sovereign-concierge";
 
 export default function RootLayout({
   children,
@@ -68,12 +60,12 @@ export default function RootLayout({
     <html lang="ar" dir="rtl" suppressHydrationWarning>
       <body
         suppressHydrationWarning
-        className={`${cairo.className} ${inter.variable} ${cairo.variable} ${ibmPlexArabic.variable} antialiased relative overflow-x-hidden`}
+        className="antialiased relative overflow-x-hidden bg-sovereign-obsidian text-sovereign-white"
       >
-        {/* Ambient Vibrant Background */}
-        <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden">
-          <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-gala-purple/10 blur-[120px] animate-float opacity-70"></div>
-          <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-gala-pink/10 blur-[120px] animate-float [animation-delay:2s] opacity-70"></div>
+        {/* Ambient Masterpiece Background (No Purple/Blue) */}
+        <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden bg-sovereign-obsidian">
+          <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-sovereign-gold/5 blur-[160px] animate-pulse opacity-40"></div>
+          <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-sovereign-gold/3 blur-[140px] animate-pulse [animation-delay:2s] opacity-30"></div>
         </div>
 
         {/* Cinematic Grain Overlay */}
@@ -93,6 +85,7 @@ export default function RootLayout({
               <Footer />
             </div>
             <Toaster />
+            <SovereignConcierge />
           </Providers>
         </SovereignProvider>
       </body>

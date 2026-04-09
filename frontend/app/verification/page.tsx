@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { IDUpload } from '@/components/id-upload';
 import { api } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
-import { CheckCircle2, XCircle, Clock, AlertCircle, Phone, MapPin, CreditCard } from 'lucide-react';
+import { CheckCircle2, XCircle, Clock, AlertCircle, Phone, MapPin, CreditCard, Building2 } from 'lucide-react';
 
 interface VerificationStatus {
   id: number;
@@ -36,6 +36,16 @@ export default function VerificationPage() {
     city: 'Constantine',
     postal_code: '',
   });
+  const [businessData, setBusinessData] = useState({
+    business_name: '',
+    commercial_register_number: '',
+    tax_id: '',
+    nis_number: '',
+    legal_representative_name: '',
+    legal_representative_id: '',
+    city: '',
+    address: '',
+  });
 
   useEffect(() => {
     loadVerificationStatus();
@@ -43,7 +53,7 @@ export default function VerificationPage() {
 
   const loadVerificationStatus = async () => {
     try {
-      const response = await api.get('/users/verification/');
+      const response = await api.get('/auth/verification/');
       setVerification(response.data);
     } catch (error: any) {
       console.error('Error loading verification:', error);
@@ -55,7 +65,7 @@ export default function VerificationPage() {
   const requestPhoneVerification = async () => {
     setSendingCode(true);
     try {
-      await api.post('/users/verification/phone/request/');
+      await api.post('/auth/verification/phone/request/');
       toast({
         title: 'تم الإرسال',
         description: 'تم إرسال رمز التحقق إلى رقم هاتفك',
@@ -83,7 +93,7 @@ export default function VerificationPage() {
 
     setVerifyingCode(true);
     try {
-      await api.post('/users/verification/phone/verify/', { code: phoneCode });
+      await api.post('/auth/verification/phone/verify/', { code: phoneCode });
       toast({
         title: 'تم التحقق',
         description: 'تم التحقق من رقم الهاتف بنجاح',
@@ -112,7 +122,7 @@ export default function VerificationPage() {
     }
 
     try {
-      await api.post('/users/verification/address/', addressData);
+      await api.post('/auth/verification/address/', addressData);
       toast({
         title: 'تم التحقق',
         description: 'تم التحقق من العنوان بنجاح',
@@ -122,6 +132,31 @@ export default function VerificationPage() {
       toast({
         title: 'خطأ',
         description: error.response?.data?.error || 'فشل التحقق من العنوان',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const saveBusinessProfile = async () => {
+    if (!businessData.business_name) {
+      toast({
+        title: 'خطأ',
+        description: 'يرجى إدخال اسم الشركة',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      await api.patch('/auth/kyb/business/', businessData);
+      toast({
+        title: 'تم الحفظ',
+        description: 'تم حفظ بيانات KYB بنجاح',
+      });
+    } catch (error: any) {
+      toast({
+        title: 'خطأ',
+        description: error.response?.data?.error || 'فشل حفظ بيانات KYB',
         variant: 'destructive',
       });
     }
@@ -201,6 +236,53 @@ export default function VerificationPage() {
         </CardHeader>
         <CardContent>
           <IDUpload onComplete={loadVerificationStatus} />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Building2 className="w-5 h-5" />
+            التحقق التجاري (KYB)
+          </CardTitle>
+          <CardDescription>أضف بيانات الشركة أو المؤسسة للمراجعة التجارية</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="business_name">اسم الشركة</Label>
+              <Input id="business_name" value={businessData.business_name} onChange={(e) => setBusinessData({ ...businessData, business_name: e.target.value })} />
+            </div>
+            <div>
+              <Label htmlFor="commercial_register_number">السجل التجاري</Label>
+              <Input id="commercial_register_number" value={businessData.commercial_register_number} onChange={(e) => setBusinessData({ ...businessData, commercial_register_number: e.target.value })} />
+            </div>
+            <div>
+              <Label htmlFor="tax_id">الرقم الجبائي</Label>
+              <Input id="tax_id" value={businessData.tax_id} onChange={(e) => setBusinessData({ ...businessData, tax_id: e.target.value })} />
+            </div>
+            <div>
+              <Label htmlFor="nis_number">رقم NIS</Label>
+              <Input id="nis_number" value={businessData.nis_number} onChange={(e) => setBusinessData({ ...businessData, nis_number: e.target.value })} />
+            </div>
+            <div>
+              <Label htmlFor="legal_representative_name">الممثل القانوني</Label>
+              <Input id="legal_representative_name" value={businessData.legal_representative_name} onChange={(e) => setBusinessData({ ...businessData, legal_representative_name: e.target.value })} />
+            </div>
+            <div>
+              <Label htmlFor="legal_representative_id">هوية الممثل القانوني</Label>
+              <Input id="legal_representative_id" value={businessData.legal_representative_id} onChange={(e) => setBusinessData({ ...businessData, legal_representative_id: e.target.value })} />
+            </div>
+            <div>
+              <Label htmlFor="business_city">المدينة</Label>
+              <Input id="business_city" value={businessData.city} onChange={(e) => setBusinessData({ ...businessData, city: e.target.value })} />
+            </div>
+            <div>
+              <Label htmlFor="business_address">العنوان</Label>
+              <Input id="business_address" value={businessData.address} onChange={(e) => setBusinessData({ ...businessData, address: e.target.value })} />
+            </div>
+          </div>
+          <Button onClick={saveBusinessProfile}>حفظ بيانات KYB</Button>
         </CardContent>
       </Card>
 

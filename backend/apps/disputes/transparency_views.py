@@ -16,14 +16,13 @@ from django.shortcuts import get_object_or_404
 from django.views.decorators.cache import cache_page
 from django.utils.decorators import method_decorator
 
-from apps.disputes.models import AnonymizedJudgment, PublicMetrics
-from apps.disputes.transparency_serializers import (
-    AnonymizedJudgmentSerializer,
-    AnonymizedJudgmentListSerializer,
-    PublicMetricsSerializer
+from .models import AnonymizedJudgment, PublicMetrics
+from .transparency_serializers import (
+    AnonymizedJudgmentSerializer, AnonymizedJudgmentListSerializer,
+    PublicMetricsSerializer, MetricContextCardSerializer
 )
-from apps.disputes.judgment_anonymizer import JudgmentAnonymizer
-from apps.disputes.expectation_setter import ExpectationSetter
+from .services import AnonymizationService
+from .expectation_setter import ExpectationSetter
 from apps.products.models import Product
 from apps.bookings.models import Booking
 
@@ -42,6 +41,7 @@ class AnonymizedJudgmentFilter(df_filters.FilterSet):
     category = df_filters.CharFilter(field_name='category', lookup_expr='icontains')
     verdict = df_filters.ChoiceFilter(choices=[
         ('favor_owner', 'Favor Owner'),
+        ('favor_tenant', 'Favor Tenant'),
         ('favor_renter', 'Favor Renter'),
         ('partial', 'Partial'),
     ])
@@ -77,10 +77,6 @@ class AnonymizedJudgmentFilter(df_filters.FilterSet):
             return queryset.filter(consistency_score__lt=60)
         return queryset
     
-    def filter_has_evidence(self, queryset, name, value):
-        """Filter by evidence type."""
-        evidence_type = name.replace('has_', '')
-        
     def filter_has_evidence(self, queryset, name, value):
         """Filter by evidence type."""
         evidence_type = name.replace('has_', '')

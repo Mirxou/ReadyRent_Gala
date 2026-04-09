@@ -32,12 +32,22 @@ class RiskEngine:
         trust_low = Decimal(SovereignEngine.get_law('trust_threshold_low', "30.00"))
         high_val_asset_daily = Constitution.get_solo().high_value_threshold
 
-        # Optional: Refresh score if needed, but usually done async
-        # from apps.users.services_risk import RiskScoreService
-        # if force_refresh_score: 
-        #    RiskScoreService.update_user_risk_score(user)
-
-        trust = Decimal(user.trust_score) if hasattr(user, 'trust_score') else Decimal(50)
+        # 🛡️ SOVEREIGN UNIFICATION (Phase 32): Resolved data fragmentation.
+        # Now reading from the unified trust_score field on the User model.
+        if hasattr(user, 'trust_score'):
+            trust = Decimal(str(user.trust_score))
+        else:
+            # Fallback for systems not yet unified
+            trust = Decimal(50)
+            
+        import structlog
+        logger = structlog.get_logger(__name__)
+        logger.info(
+            "risk_engine_evaluation_start",
+            user_id=getattr(user, 'id', 'unknown'),
+            actual_trust=float(trust),
+            is_default=(not hasattr(user, 'trust_score'))
+        )
         
         price = asset.daily_price
 

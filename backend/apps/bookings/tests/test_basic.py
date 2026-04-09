@@ -1,12 +1,12 @@
 """
-Tests for Bookings app
+Tests for Bookings app (Legacy Basic Tests)
 """
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from datetime import timedelta
 from apps.products.models import Category, Product
-from .models import Booking, Cart, CartItem
+from ..models import Booking, Cart, CartItem
 
 User = get_user_model()
 
@@ -15,14 +15,15 @@ class CartModelTest(TestCase):
     """Test Cart model"""
     
     def setUp(self):
-        self.user = User.objects.create_user(
-            username='testuser',
-            email='test@example.com',
-            password='testpass123',
-            first_name='Test',
-            last_name='User'
+        self.user, _ = User.objects.get_or_create(
+            username='testuser_legacy',
+            defaults={
+                'email': 'test_legacy@example.com',
+                'first_name': 'Test',
+                'last_name': 'User'
+            }
         )
-        self.cart = Cart.objects.create(user=self.user)
+        self.cart, _ = Cart.objects.get_or_create(user=self.user)
     
     def test_cart_creation(self):
         self.assertEqual(self.cart.user, self.user)
@@ -33,23 +34,24 @@ class CartItemModelTest(TestCase):
     """Test CartItem model"""
     
     def setUp(self):
-        self.user = User.objects.create_user(
-            username='testuser',
-            email='test@example.com',
-            password='testpass123'
+        self.user, _ = User.objects.get_or_create(
+            username='testuser_item',
+            defaults={'email': 'test_item@example.com'}
         )
-        self.cart = Cart.objects.create(user=self.user)
+        self.cart, _ = Cart.objects.get_or_create(user=self.user)
         
-        self.category = Category.objects.create(
+        self.category, _ = Category.objects.get_or_create(
             name='Dresses',
-            name_ar='فساتين',
-            slug='dresses'
+            defaults={
+                'name_ar': 'فساتين',
+                'slug': 'dresses_legacy'
+            }
         )
         
         self.product = Product.objects.create(
             name='Test Dress',
             name_ar='فستان تجريبي',
-            slug='test-dress',
+            slug='test-dress-item',
             description='Test',
             category=self.category,
             price_per_day=1000.00,
@@ -79,22 +81,23 @@ class BookingModelTest(TestCase):
     """Test Booking model"""
     
     def setUp(self):
-        self.user = User.objects.create_user(
-            username='testuser',
-            email='test@example.com',
-            password='testpass123'
+        self.user, _ = User.objects.get_or_create(
+            username='testuser_booking',
+            defaults={'email': 'test_booking@example.com'}
         )
         
-        self.category = Category.objects.create(
+        self.category, _ = Category.objects.get_or_create(
             name='Dresses',
-            name_ar='فساتين',
-            slug='dresses'
+            defaults={
+                'name_ar': 'فساتين',
+                'slug': 'dresses_booking'
+            }
         )
         
         self.product = Product.objects.create(
             name='Test Dress',
             name_ar='فستان تجريبي',
-            slug='test-dress',
+            slug='test-dress-booking',
             description='Test',
             category=self.category,
             price_per_day=1000.00,
@@ -107,6 +110,7 @@ class BookingModelTest(TestCase):
         self.end_date = timezone.now().date() + timedelta(days=3)
     
     def test_booking_creation(self):
+        # NOTE: Using direct model creation to test the model fields
         booking = Booking.objects.create(
             user=self.user,
             product=self.product,
@@ -121,4 +125,3 @@ class BookingModelTest(TestCase):
         self.assertEqual(booking.product, self.product)
         self.assertEqual(booking.status, 'pending')
         self.assertEqual(booking.total_price, 3000.00)
-

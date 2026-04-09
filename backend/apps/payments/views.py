@@ -261,10 +261,10 @@ class EscrowMetricsView(generics.GenericAPIView):
             "status": "sovereign_economics",
             "dignity_preserved": True,
             "metrics": {
-                "total_secured": float(escrow_stats['total_hz'] or 0.0),
+                "total_secured": str(escrow_stats['total_hz'] or Decimal('0.00')),
                 "active_escrows": escrow_stats['active_count'] or 0,
                 "currency": "DZD",
                 "vault_status": "ENCRYPTED_PGBOUNCER",
-                "user_balance": float(user_wallet.balance) if user_wallet else 0.0
+                "user_balance": str(user_wallet.balance) if user_wallet else "0.00"
             }
         })

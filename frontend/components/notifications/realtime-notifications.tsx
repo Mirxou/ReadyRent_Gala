@@ -35,11 +35,11 @@ export function RealtimeNotifications() {
 
     // Listen for connection events
     const unsubscribeConnected = websocketClient.on('connected', () => {
-      console.log('Real-time notifications connected');
+      // Real-time notifications connected
     });
 
     const unsubscribeDisconnected = websocketClient.on('disconnected', () => {
-      console.log('Real-time notifications disconnected');
+      // Real-time notifications disconnected
     });
 
     // Cleanup on unmount

@@ -20,21 +20,15 @@ class DisputeService:
             return "ERROR_BOOKING_NOT_FOUND"
 
         # --- Rule 1: Owner Protection (Minor Damages) ---
-        # If the product belongs to an owner (P2P) and damage is minor, we favor the customer (or insurance handles it)
-        # We don't want to block the customer's funds for minor scratches if they are trustworthy.
+        # 🛡️ SOVEREIGN BALANCE: Even minor damage needs compensation.
+        # Instead of releasing everything to customer, we move to partial refund/mediation.
         if booking.product.owner and damage_report.get('severity') == 'minor':
-             return 'RELEASE_TO_CUSTOMER'
+             return 'PARTIAL_REFUND'
 
-        # --- Rule 2: Critical Damage -> Full Refund (to Owner/Escrow logic?) ---
-        # WAIT: If damage is critical, the OWNER should get the money (Deposit), NOT the customer.
-        # The prompt said "FULL_REFUND" (to customer), but logically if I break the item, I shouldn't get my money back.
-        # However, looking at the user's prompt: "الضرر الكامل يرجع المال للزبون" -> "Full damage returns money to customer".
-        # This implies it's a "Refund" context (maybe the item arrived broken?).
-        # BUT, usually "Damage Report" is post-rental.
-        # Let's follow the user's specified logic exactly for now ("The Customer is King" approach maybe?), 
-        # or interpretation: "Product Failed" -> Refund Customer.
+        # --- Rule 2: Critical Damage -> Release to Owner ---
+        # If the product is critically damaged, the owner should receive the escrow funds.
         if damage_report.get('severity') == 'critical':
-            return 'FULL_REFUND' 
+            return 'RELEASE_TO_OWNER' 
 
         # --- Rule 3: AI Fraud Detection ---
         if ai_assessment.get('verdict') == 'FRAUD_DETECTED':
@@ -50,9 +44,11 @@ class DisputeService:
         """
         booking = Booking.objects.get(id=booking_id)
         
+        from django.core.exceptions import ValidationError
+        
         if decision == 'RELEASE_TO_OWNER':
-            # EscrowService.release_funds(booking) # Assuming this releases to beneficiary
-            # Directly modifying state for now as consistent with user prompt, but best to use service
+            if not getattr(booking.product, 'owner', None):
+                return 'ERROR_OWNERLESS_PRODUCT'
             EscrowService.release_funds(booking)
             
         elif decision == 'FULL_REFUND':

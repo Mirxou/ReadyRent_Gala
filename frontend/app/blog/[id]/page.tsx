@@ -10,6 +10,7 @@ import { useParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { ParticleField } from '@/components/ui/particle-field';
 import { Button } from '@/components/ui/button';
+import DOMPurify from 'dompurify';
 
 export default function BlogPostPage() {
   const params = useParams();
@@ -125,7 +126,7 @@ export default function BlogPostPage() {
             <CardContent className="pt-8">
               <div
                 className="prose prose-lg max-w-none prose-headings:text-foreground prose-p:text-muted-foreground prose-a:text-gala-purple prose-strong:text-foreground"
-                dangerouslySetInnerHTML={{ __html: post.content || '' }}
+                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content || '') }}
               />
             </CardContent>
           </Card>

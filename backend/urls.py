@@ -1,7 +1,7 @@
 
 from django.contrib import admin
 from django.urls import path
-from backend.disputes.views import initiate_dispute
+from apps.disputes.views import initiate_dispute
 
 urlpatterns = [
     path('admin/', admin.site.urls),

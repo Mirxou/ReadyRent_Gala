@@ -151,7 +151,7 @@ class PrecedentExplosionSimulator:
             for future in as_completed(futures):
                 pass
         
-pass1_time = time.time() - start_time
+        pass1_time = time.time() - start_time
         print(f"   Completed: {self.stats['completed']} | Time: {pass1_time:.2f}s\n")
         
         # Reset stats for second pass

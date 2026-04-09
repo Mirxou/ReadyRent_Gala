@@ -1,0 +1,4 @@
+# file: C:\Users\aboun\Desktop\ReadyRent_Gala\backend\apps\communication\consumers_ai.py
+# hypothesis_version: 6.151.10
+
+[0.01, 'dispute_detected', 'kwargs', 'message', 'payload', 'room_name', 'session_update', 'type', 'url_route']

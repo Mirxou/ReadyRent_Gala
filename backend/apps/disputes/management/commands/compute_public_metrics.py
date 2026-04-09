@@ -9,7 +9,7 @@ Add to crontab for daily execution:
 """
 from django.core.management.base import BaseCommand
 
-from apps.disputes.metrics_aggregator import MetricsAggregator
+from ...metrics_aggregator import MetricsAggregator
 
 
 class Command(BaseCommand):

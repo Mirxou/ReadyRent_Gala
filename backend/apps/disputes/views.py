@@ -131,9 +131,6 @@ class DisputeMessageCreateView(SovereignResponseMixin, generics.CreateAPIView):
         except Dispute.DoesNotExist:
             raise ValidationError('Dispute not found')
 
-        except Dispute.DoesNotExist:
-            raise ValidationError('Dispute not found')
-
 
 class EvidenceLogView(generics.ListAPIView):
     """
@@ -143,10 +140,11 @@ class EvidenceLogView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
     
     def get_queryset(self):
-        dispute_id = self.kwargs.get('pk') # Assumes URL is disputes/<pk>/evidence/ but let's check usage. 
-        # Actually urls.py doesn't show the path for it yet, but the import is there.
-        # Let's assume standard pattern or just define it generic for now.
-        return EvidenceLog.objects.filter(dispute_id=dispute_id)
+        dispute_id = self.kwargs.get('pk')
+        dispute = get_object_or_404(Dispute, pk=dispute_id)
+        if dispute.user != self.request.user and self.request.user.role not in ['admin', 'staff']:
+            raise ValidationError('Permission denied')
+        return EvidenceLog.objects.filter(dispute=dispute)
 
 
 # Support Ticket Views
@@ -233,9 +231,9 @@ class AdminDisputeStatsView(generics.GenericAPIView):
     
     def get(self, request):
         total_disputes = Dispute.objects.count()
-        open_disputes = Dispute.objects.filter(status='open').count()
+        open_disputes = Dispute.objects.filter(status__in=['open', 'filed', 'admissible']).count()
         under_review = Dispute.objects.filter(status='under_review').count()
-        resolved = Dispute.objects.filter(status='resolved').count()
+        resolved = Dispute.objects.filter(status__in=['resolved', 'judgment_final', 'closed']).count()
         
         priority_breakdown = Dispute.objects.values('priority').annotate(count=Count('id'))
         
@@ -307,11 +305,8 @@ class AppealCreateView(generics.CreateAPIView):
         if judgment.dispute.user != self.request.user:
             raise ValidationError("You cannot appeal a judgment that is not yours.")
             
-        if judgment.status != 'provisional': # provisional/final check
-             # The model def implies 'provisional' status for appeals?
-             # Let's check model usage. Previous code used 'status="provisional"'.
-             # If logic requires provisional, enforce it.
-             pass
+        if judgment.status != 'provisional':
+            raise ValidationError("Only provisional judgments can be appealed.")
              
         serializer.save(judgment=judgment, appellant=self.request.user)
 
@@ -323,10 +318,8 @@ def initiate_dispute(request):
     """
     user = request.user
     
-    # SYSTEM GUARD: Fallback for local dev testing if not authenticated
     if not user.is_authenticated:
-        from django.contrib.auth import get_user_model
-        user = get_user_model().objects.first()
+        return JsonResponse({"error": "Authentication required"}, status=401)
 
     # 1. Database Check: Emotional Lock (Behavioral Memory)
     if user.emotional_lock_until and user.emotional_lock_until > timezone.now():
@@ -363,7 +356,7 @@ def initiate_dispute(request):
     return JsonResponse(response_data, status=status_code)
 
 
-from apps.disputes.adjudication_service import AdjudicationService
+from .services import AdjudicationService
 
 @api_view(['POST'])
 @permission_classes([IsAdminUser])
@@ -376,6 +369,13 @@ def issue_verdict(request, dispute_id):
         dispute = Dispute.objects.get(id=dispute_id)
     except Dispute.DoesNotExist:
         return Response({"error": "Dispute not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    ALLOWED_VERDICT_STATES = {'admissible', 'under_review', 'judgment_provisional'}
+    if dispute.status not in ALLOWED_VERDICT_STATES:
+        return Response(
+            {"error": f"Cannot issue verdict on dispute in state: {dispute.status}"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
     verdict_type = request.data.get('verdict')
     ruling_text = request.data.get('ruling_text')
@@ -448,37 +448,44 @@ def get_dispute_status(request, dispute_id):
     Sovereign status check.
     GET /api/v1/judicial/disputes/<id>/status/
     """
-    from sovereignty.visual_assets import VisualAssetsBuilder
+    # Guard: visual_assets module may not be installed in all environments
+    try:
+        from sovereignty.visual_assets import VisualAssetsBuilder
+        _has_visual_assets = True
+    except ImportError:
+        _has_visual_assets = False
+
     try:
         dispute = Dispute.objects.get(id=dispute_id)
-        if dispute.user != request.user and not request.user.is_staff:
-            return Response({"error": "Unauthorized"}, status=status.HTTP_403_FORBIDDEN)
+        booking = dispute.booking
+        is_owner = booking and getattr(booking.product, 'owner', None) == request.user
+        if dispute.user != request.user and not is_owner:
+            return Response({"error": "Unauthorized to appeal this judgment"}, status=status.HTTP_403_FORBIDDEN)
     except Dispute.DoesNotExist:
         return Response({"error": "Dispute not found"}, status=status.HTTP_404_NOT_FOUND)
 
     # Determine visual assets based on current state
     current_phase = dispute.status
-    
-    # Check for active mediation if status is 'under_review' or 'processing'
-    # Assuming 'active' mediation session overrides normal status for the frontend
+
+    # Check for active mediation
     if hasattr(dispute, 'mediation_session') and dispute.mediation_session.status == 'active':
         current_phase = 'mediation_active'
+
+    if _has_visual_assets:
         assets = VisualAssetsBuilder.for_proceeding(str(dispute.id))
-        assets['mode'] = 'MARKET' # Benevolent mode?
-    elif dispute.status == 'filed':
-        assets = VisualAssetsBuilder.for_proceeding(str(dispute.id))
-    elif dispute.status == 'judgment_provisional':
-        assets = VisualAssetsBuilder.for_proceeding(str(dispute.id)) # TODO: specialist asset for verdict
-        assets['mode'] = 'VERDICT'
+        if current_phase == 'mediation_active':
+            assets['mode'] = 'MARKET'
+        elif dispute.status == 'judgment_provisional':
+            assets['mode'] = 'VERDICT'
     else:
-        assets = VisualAssetsBuilder.for_proceeding(str(dispute.id))
+        assets = {"phase": current_phase, "mode": "DEFAULT"}
 
     response_data = {
         "status": "sovereign_proceeding",
         "dignity_preserved": True,
         "dispute_id": dispute.id,
         "current_phase": current_phase,
-        "visual_assets": assets
+        "visual_assets": assets,
     }
 
     # Include verdict details if judgment is issued
@@ -488,7 +495,8 @@ def get_dispute_status(request, dispute_id):
             response_data['verdict'] = {
                 "type": latest_judgment.verdict,
                 "body_ar": latest_judgment.ruling_text,
-                "awarded_amount": float(latest_judgment.awarded_amount)
+                "awarded_amount": float(latest_judgment.awarded_amount),
+                "judgment_hash": str(latest_judgment.id),
             }
 
     return Response(response_data)
@@ -502,7 +510,9 @@ def appeal_verdict(request, dispute_id):
     """
     try:
         dispute = Dispute.objects.get(id=dispute_id)
-        if dispute.user != request.user:
+        booking = dispute.booking
+        is_owner = booking and getattr(booking.product, 'owner', None) == request.user
+        if dispute.user != request.user and not is_owner:
             return Response({"error": "Unauthorized"}, status=status.HTTP_403_FORBIDDEN)
     except Dispute.DoesNotExist:
         return Response({"error": "Dispute not found"}, status=status.HTTP_404_NOT_FOUND)
@@ -555,7 +565,7 @@ def close_dispute(request, dispute_id):
 
     latest_judgment = dispute.judgments.order_by('-created_at').first()
     if latest_judgment:
-        AdjudicationService.finalize_judgment(latest_judgment)
+        AdjudicationService.finalize_judgment(latest_judgment, request.user)
     
     dispute.status = 'closed'
     dispute.save()
@@ -639,7 +649,7 @@ class MediationView(generics.RetrieveAPIView, generics.CreateAPIView):
         action = request.data.get('action')
         
         if action == 'start':
-            from .mediation_service import MediationService
+            from .services import MediationService
             session = MediationService.start_mediation(dispute)
             return Response(MediationSessionSerializer(session).data)
             
@@ -647,7 +657,7 @@ class MediationView(generics.RetrieveAPIView, generics.CreateAPIView):
             offer_id = request.data.get('offer_id')
             offer = get_object_or_404(SettlementOffer, id=offer_id, session__dispute=dispute)
             
-            from .mediation_service import MediationService
+            from .services import MediationService
             MediationService.accept_offer(offer)
             return Response({'status': 'offer_accepted', 'message': 'Dispute settled.'})
 
@@ -655,7 +665,7 @@ class MediationView(generics.RetrieveAPIView, generics.CreateAPIView):
             offer_id = request.data.get('offer_id')
             offer = get_object_or_404(SettlementOffer, id=offer_id, session__dispute=dispute)
             
-            from .mediation_service import MediationService
+            from .services import MediationService
             result = MediationService.reject_offer(offer)
             return Response(result)
             

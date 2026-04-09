@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { api } from '@/lib/api';
+import { socialApi } from '@/lib/api';
 import { toast } from 'sonner';
 import { ShieldCheck, Star, Sparkles, UserCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';

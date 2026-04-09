@@ -1,0 +1,4 @@
+# file: C:\Users\aboun\Desktop\ReadyRent_Gala\backend\apps\core\middleware.py
+# hypothesis_version: 6.151.10
+
+[503, 'GET', 'HEAD', 'MAINTENANCE_MODE', 'OPTIONS', 'admin', 'code', 'detail', 'error', 'maintenance_mode']

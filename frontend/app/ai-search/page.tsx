@@ -140,7 +140,7 @@ function AIExplainer({ query, onDismiss }: { query: string; onDismiss: () => voi
       try {
         const res = await chatbotApi.quickChat(
           `أريد استئجار: "${query}". ما نصيحتك في الاختيار؟ أجب في جملتين فقط باللغة العربية بأسلوب راقٍ.`,
-          'ar'
+          { language: 'ar' }
         );
         if (!cancelled) {
           setReply(

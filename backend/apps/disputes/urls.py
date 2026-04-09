@@ -19,12 +19,17 @@ from .views import (
 app_name = 'disputes'
 
 # DRF Router for API endpoints
-from .api_views import DisputeViewSet, SettlementOfferViewSet, AdminOfferViewSet
+from .api_views import (
+    DisputeViewSet, SettlementOfferViewSet, AdminOfferViewSet, 
+    SovereignEyeStatsView, EvidenceTickerView
+)
 
 router = DefaultRouter()
 router.register(r'api/disputes', DisputeViewSet, basename='api-dispute')
 router.register(r'api/settlement-offers', SettlementOfferViewSet, basename='api-offer')
 router.register(r'api/admin/offers', AdminOfferViewSet, basename='api-admin-offer')
+router.register(r'api/sovereign-eye/stats', SovereignEyeStatsView, basename='api-sovereign-eye-stats')
+router.register(r'api/sovereign-eye/ticker', EvidenceTickerView, basename='api-sovereign-eye-ticker')
 
 urlpatterns = [
     # Dispute routes

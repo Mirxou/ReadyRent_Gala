@@ -3,10 +3,9 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.conf import settings
 from apps.bookings.models import Booking
-from apps.disputes.models import Dispute, EvidenceLog, Judgment
-
-from apps.disputes.async_tasks import async_create_evidence_log, async_embed_judgment
-from apps.disputes.services import DisputeRouter
+from .models import Dispute, EvidenceLog, Judgment
+from .async_tasks import async_create_evidence_log, async_embed_judgment
+from .services import DisputeRouter
 from constance import config
 import json
 
@@ -62,7 +61,7 @@ def log_dispute_event(sender, instance, created, **kwargs):
         DisputeRouter.route(instance)
         
         # 2. Mediation (Phase 4)
-        from apps.disputes.mediation_service import MediationService
+        from .services import MediationService
         MediationService.start_mediation(instance)
 
     # ASYNC VERSION - Non-blocking write
@@ -89,7 +88,7 @@ def evaluate_judgment_consistency(sender, instance, created, **kwargs):
     - Transparency over enforcement
     - Logged, not blocking
     """
-    from apps.disputes.consistency_service import ConsistencyService
+    from .services import ConsistencyService
     
     # Only check when judgment reaches FINAL status
     if instance.status == 'final' and instance.finalized_at:

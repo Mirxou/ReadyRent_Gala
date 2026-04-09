@@ -368,7 +368,7 @@ function ShareButton({ title }: { title?: string }) {
           text: `اكتشف هذا الأصل الفاخر على منصة ReadyRent`,
           url: window.location.href,
         });
-      } catch (err) { console.log('Share failed', err); }
+      } catch (err) { /* Share failed */ }
     } else {
       navigator.clipboard.writeText(window.location.href);
       toast.success('تم نسخ الرابط الائتماني (Ready to Seal)');

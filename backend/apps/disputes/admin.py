@@ -10,7 +10,7 @@ from .models import (
     EvidenceLog, Judgment, Appeal, JudicialPanel,
     MediationSession, SettlementOffer
 )
-from .admin_service import SovereignGateService
+from .services.admin_service import SovereignGateService
 
 
 @admin.register(Dispute)

@@ -3,6 +3,8 @@ User models for ReadyRent.Gala
 """
 from django.contrib.auth.models import AbstractUser, BaseUserManager  # type: ignore
 from django.db import models  # type: ignore
+from django.utils import timezone  # type: ignore
+from django.utils.text import slugify  # type: ignore
 from django.utils.translation import gettext_lazy as _  # type: ignore
 from apps.core.crypto.hashing import compute_pii_hash, get_pii_hash_key  # type: ignore
 from apps.core.crypto.normalization import normalize_email, normalize_phone  # type: ignore
@@ -30,11 +32,24 @@ class UserManager(BaseUserManager):
         )
         return self.get(email_hash=email_hash)
 
+    def _generate_username(self, email):
+        base = slugify((email or '').split('@')[0]) or 'user'
+        candidate = base[:150]
+        suffix = 1
+
+        while self.model.objects.filter(username=candidate).exists():
+            suffix_text = f'-{suffix}'
+            candidate = f"{base[:150 - len(suffix_text)]}{suffix_text}"
+            suffix += 1
+
+        return candidate
+
     def create_user(self, email, password=None, **extra_fields):
         if not email:
             raise ValueError('Email is required.')
         extra_fields.setdefault('is_staff', False)
         extra_fields.setdefault('is_superuser', False)
+        extra_fields.setdefault('username', self._generate_username(email))
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
@@ -82,15 +97,21 @@ class User(AbstractUser):
     # ─────────────────────────────────────────────────────────────────────────
     # Phase 16C Shadow Encrypted Fields — CUTOVER COMPLETE (16C.4a)
     # ─────────────────────────────────────────────────────────────────────────
-    # email_encrypted column has been renamed to `email` via migration 0011.
-    # This block intentionally left here as a historical comment.
-    # Stage 16C.4b: Drop email_plaintext_backup column (separate deploy).
 
     # Sovereign Tracking Fields (Phase 31: Ethics as Data)
     last_dispute_attempt_at = models.DateTimeField(_('last dispute attempt'), null=True, blank=True)
     emotional_lock_until = models.DateTimeField(_('emotional lock until'), null=True, blank=True)
     consecutive_emotional_attempts = models.IntegerField(_('consecutive emotional attempts'), default=0)
     merit_score = models.IntegerField(_('merit score'), default=50)
+
+    # 🛡️ SOVEREIGN UNIFICATION (Phase 32): Unified Trust Architecture
+    # Range: 0 (Critical Risk) to 100 (Maximum Trust)
+    trust_score = models.DecimalField(
+        _('sovereign trust score'), 
+        max_digits=5, 
+        decimal_places=2, 
+        default=50.00
+    )
 
     # 🛡️ SOVEREIGN GUARD: Two-Factor Authentication (Phase 5)
     is_2fa_enabled = models.BooleanField(_('2FA Enabled'), default=False)
@@ -157,7 +178,22 @@ class UserProfile(models.Model):
         verbose_name_plural = _('الملفات الشخصية')
     
     def __str__(self):
-        return f"{self.user.email} - Profile"
+        return f"User #{self.user_id} - Profile"
+
+    @property
+    def age(self):
+        if not self.date_of_birth:
+            return None
+        today = timezone.now().date()
+        years = today.year - self.date_of_birth.year
+        if (today.month, today.day) < (self.date_of_birth.month, self.date_of_birth.day):
+            years -= 1
+        return years
+
+    @property
+    def is_adult(self):
+        age = self.age
+        return age is not None and age >= 18
 
 
 class VerificationStatus(models.Model):
@@ -185,7 +221,7 @@ class VerificationStatus(models.Model):
     id_back_image = models.ImageField(_('ID back image'), upload_to='verification/id_back/', blank=True, null=True)
     selfie = models.ImageField(_('selfie'), upload_to='verification/selfie/', blank=True, null=True)
     phone_verified = models.BooleanField(_('phone verified'), default=False)
-    phone_verification_code = models.CharField(_('phone verification code'), max_length=10, blank=True)
+    phone_verification_code = models.CharField(_('phone verification code'), max_length=128, blank=True)
     phone_verification_expires = models.DateTimeField(_('phone verification expires'), null=True, blank=True)
     address_verified = models.BooleanField(_('address verified'), default=False)
     risk_score = models.IntegerField(_('risk score'), default=0, help_text=_('Risk score from 0-100'))
@@ -209,7 +245,7 @@ class VerificationStatus(models.Model):
         ordering = ['-created_at']
     
     def __str__(self):
-        return f"{self.user.email} - {self.get_status_display()}"
+        return f"User #{self.user_id} - {self.get_status_display()}"
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -329,6 +365,118 @@ class FaceVerification(models.Model):
         return f"FaceVerification({self.verification.user}) — {self.get_status_display()}"
 
 
+class IdentityDocument(models.Model):
+    """KYC identity document record."""
+
+    STATUS_CHOICES = [
+        ('pending', _('Pending')),
+        ('submitted', _('Submitted')),
+        ('verified', _('Verified')),
+        ('rejected', _('Rejected')),
+        ('expired', _('Expired')),
+    ]
+
+    DOCUMENT_TYPE_CHOICES = [
+        ('national_id', _('National ID')),
+        ('passport', _('Passport')),
+        ('driver_license', _('Driver License')),
+        ('residence_permit', _('Residence Permit')),
+    ]
+
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='identity_document',
+        verbose_name=_('user')
+    )
+    document_type = models.CharField(_('document type'), max_length=30, choices=DOCUMENT_TYPE_CHOICES, default='national_id')
+    document_number = EncryptedCharField(_('document number'), max_length=120, blank=True)
+    issuing_country = models.CharField(_('issuing country'), max_length=2, default='DZ')
+    issue_date = models.DateField(_('issue date'), null=True, blank=True)
+    expiry_date = models.DateField(_('expiry date'), null=True, blank=True)
+    front_image = models.ImageField(_('front image'), upload_to='kyc/documents/front/', blank=True, null=True)
+    back_image = models.ImageField(_('back image'), upload_to='kyc/documents/back/', blank=True, null=True)
+    ocr_confidence = models.DecimalField(_('ocr confidence'), max_digits=5, decimal_places=4, null=True, blank=True)
+    age_verified = models.BooleanField(_('age verified'), default=False)
+    status = models.CharField(_('status'), max_length=20, choices=STATUS_CHOICES, default='pending')
+    verified_at = models.DateTimeField(_('verified at'), null=True, blank=True)
+    verified_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='identity_documents_verified',
+        verbose_name=_('verified by')
+    )
+    rejection_reason = models.TextField(_('rejection reason'), blank=True)
+    created_at = models.DateTimeField(_('created at'), auto_now_add=True)
+    updated_at = models.DateTimeField(_('updated at'), auto_now=True)
+
+    class Meta:
+        verbose_name = _('وثيقة هوية')
+        verbose_name_plural = _('وثائق الهوية')
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"IdentityDocument(User #{self.user_id}, {self.document_type})"
+
+    def is_expired(self):
+        return bool(self.expiry_date and timezone.now().date() > self.expiry_date)
+
+    def is_verified(self):
+        return self.status == 'verified' and not self.is_expired()
+
+
+class BusinessProfile(models.Model):
+    """KYB profile for business users and vendors."""
+
+    STATUS_CHOICES = [
+        ('pending', _('Pending')),
+        ('under_review', _('Under Review')),
+        ('verified', _('Verified')),
+        ('rejected', _('Rejected')),
+    ]
+
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='business_profile',
+        verbose_name=_('user')
+    )
+    business_name = models.CharField(_('business name'), max_length=255, blank=True)
+    commercial_register_number = EncryptedCharField(_('commercial register number'), max_length=120, blank=True)
+    tax_id = EncryptedCharField(_('tax id'), max_length=120, blank=True)
+    nis_number = EncryptedCharField(_('nis number'), max_length=120, blank=True)
+    legal_representative_name = models.CharField(_('legal representative name'), max_length=255, blank=True)
+    legal_representative_id = EncryptedCharField(_('legal representative id'), max_length=120, blank=True)
+    beneficial_owners = models.JSONField(_('beneficial owners'), default=list, blank=True)
+    address = models.TextField(_('address'), blank=True)
+    city = models.CharField(_('city'), max_length=100, blank=True)
+    status = models.CharField(_('status'), max_length=20, choices=STATUS_CHOICES, default='pending')
+    verified_at = models.DateTimeField(_('verified at'), null=True, blank=True)
+    verified_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='business_profiles_verified',
+        verbose_name=_('verified by')
+    )
+    notes = models.TextField(_('notes'), blank=True)
+    created_at = models.DateTimeField(_('created at'), auto_now_add=True)
+    updated_at = models.DateTimeField(_('updated at'), auto_now=True)
+
+    class Meta:
+        verbose_name = _('ملف تجاري')
+        verbose_name_plural = _('الملفات التجارية')
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"BusinessProfile(User #{self.user_id}, {self.business_name or 'Unspecified'})"
+
+    def is_verified(self):
+        return self.status == 'verified'
+
 
 class Blacklist(models.Model):
     """Blacklist for suspicious users"""
@@ -350,7 +498,7 @@ class Blacklist(models.Model):
         ordering = ['-created_at']
     
     def __str__(self):
-        return f"{self.user.email} - {self.reason[:50]}"
+        return f"Blacklist(User #{self.user_id}) - {self.reason[:50]}"
 
 
 class StaffRole(models.Model):
@@ -392,7 +540,7 @@ class StaffRole(models.Model):
     
     def __str__(self):
         branch_name = self.branch.name_ar if self.branch else 'All Branches'
-        return f"{self.user.email} - {self.get_role_display()} ({branch_name})"
+        return f"User #{self.user_id} - {self.get_role_display()} ({branch_name})"
 
 
 class ActivityLog(models.Model):
@@ -430,7 +578,8 @@ class ActivityLog(models.Model):
         ]
     
     def __str__(self):
-        return f"{self.user.email if self.user else 'System'} - {self.action} - {self.model_name}"
+        user_display = f"User #{self.user_id}" if self.user else 'System'
+        return f"{user_display} - {self.action} - {self.model_name}"
 
 
 class Shift(models.Model):
@@ -460,7 +609,7 @@ class Shift(models.Model):
         ]
     
     def __str__(self):
-        return f"{self.staff.email} - {self.shift_date} ({self.start_time} - {self.end_time})"
+        return f"Shift(User #{self.staff_id}) - {self.shift_date} ({self.start_time} - {self.end_time})"
 
 
 class PerformanceReview(models.Model):

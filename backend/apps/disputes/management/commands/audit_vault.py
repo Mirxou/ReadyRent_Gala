@@ -1,5 +1,7 @@
 from django.core.management.base import BaseCommand
-from apps.disputes.services.vault_audit import VaultAuditor
+from ...services.vault_audit import VaultAuditor
+from ...models import EvidenceLog
+from ...models import SystemFlag
 import json
 
 class Command(BaseCommand):

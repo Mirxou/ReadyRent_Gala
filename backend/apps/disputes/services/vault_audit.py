@@ -49,7 +49,7 @@ class VaultAuditor:
             previous_hash = log.hash
             verified_count += 1
 
-        status = "corrupted" if corrupted_logs else "clean"
+        status = "invalid" if corrupted_logs else "valid"
         logger.info("vault_audit_completed", status=status, verified=verified_count, errors=len(corrupted_logs))
 
         return {
@@ -57,7 +57,8 @@ class VaultAuditor:
             "total_logs": total_count,
             "verified_logs": verified_count,
             "error_count": len(corrupted_logs),
-            "errors": corrupted_logs
+            "errors": corrupted_logs,
+            "last_hash": previous_hash if previous_hash else 'N/A'
         }
 
     @classmethod

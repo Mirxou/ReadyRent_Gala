@@ -35,10 +35,20 @@ def optimize_user_avatar(sender, instance, **kwargs):
 
 from django.db.models.signals import post_save
 from .models import UserProfile, VerificationStatus, Blacklist
-from .services_risk import RiskScoreService
+from .services import RiskScoreService
+
 
 @receiver(post_save, sender=User)
 def trigger_risk_check_user(sender, instance, created, **kwargs):
+    """
+    🛡️ SOVEREIGN RECURSION SHIELD (Phase 32): 
+    Prevent infinite loop when update_user_risk_score calls user.save().
+    """
+    update_fields = kwargs.get('update_fields')
+    if update_fields and 'trust_score' in update_fields and len(update_fields) == 1:
+        # This save was triggered by RiskScoreService itself: STOP RECURSION.
+        return
+
     if not created:  # Avoid double save on create
         RiskScoreService.update_user_risk_score(instance)
 

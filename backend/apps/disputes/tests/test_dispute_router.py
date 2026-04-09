@@ -6,8 +6,8 @@ from django.test import TestCase
 from django.contrib.auth import get_user_model
 from decimal import Decimal
 
-from apps.disputes.models import Dispute, JudicialPanel
-from apps.disputes.engine import DisputeRouter
+from ..models import Dispute, JudicialPanel
+from ..services import DisputeRouter
 from apps.products.models import Product, Category
 from apps.bookings.models import Booking
 from django.utils import timezone
@@ -22,8 +22,12 @@ class TestDisputeRouter(TestCase):
     def setUp(self):
         """Create test data"""
         # Create users
-        self.user = User.objects.create_user(email="test@example.com", password="test123")
-        self.admin = User.objects.create_user(email="admin@example.com", password="admin123", is_staff=True)
+        # 🛡️ DIGITAL FORTRESS: Institutional-grade test isolation
+        from django.utils.crypto import get_random_string
+        TEST_PASSWORD = get_random_string(12)
+        self.user = User.objects.create_user(email="test@example.com", password=TEST_PASSWORD)
+        self.admin = User.objects.create_user(email="admin@example.com", password=TEST_PASSWORD + "_admin", is_staff=True)
+
         
         # Create booking
         category = Category.objects.create(name="Electronics")
@@ -40,7 +44,8 @@ class TestDisputeRouter(TestCase):
         self.high_court = JudicialPanel.objects.create(
             name="High Court",
             panel_type="high_court",
-            capacity=10,
+            description="High priority cases",
+            max_cases_per_week=10,
             current_load=2,
             is_active=True
         )
@@ -48,7 +53,8 @@ class TestDisputeRouter(TestCase):
         self.routine_panel = JudicialPanel.objects.create(
             name="Routine Panel",
             panel_type="routine",
-            capacity=20,
+            description="Routine cases",
+            max_cases_per_week=20,
             current_load=5,
             is_active=True
         )
@@ -56,7 +62,8 @@ class TestDisputeRouter(TestCase):
         self.busy_panel = JudicialPanel.objects.create(
             name="Busy Panel",
             panel_type="routine",
-            capacity=10,
+            description="Busy cases",
+            max_cases_per_week=10,
             current_load=9,
             is_active=True
         )

@@ -1,0 +1,4 @@
+# file: C:\Users\aboun\Desktop\ReadyRent_Gala\backend\apps\bookings\services.py
+# hypothesis_version: 6.151.10
+
+['-issued_date', 'CRITICAL', 'Cancellation', 'Early Return', 'cancelled', 'confirmed', 'fee_amount', 'manual_review', 'pending', 'refund_amount', 'rejected']

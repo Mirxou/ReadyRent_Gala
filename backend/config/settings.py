@@ -3,6 +3,7 @@ import sys
 from pathlib import Path
 from datetime import timedelta
 import environ  # type: ignore
+import logging.handlers
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -17,8 +18,12 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # SECURITY WARNING: keep the secret key used in production secret!
-# CRITICAL: Fail if SECRET_KEY is missing in production to prevent session hijacking
-SECRET_KEY = env('SECRET_KEY')
+SECRET_KEY = env('SECRET_KEY', default=None)
+if not SECRET_KEY:
+    raise RuntimeError(
+        'SECRET_KEY must be set via environment variable before Django starts. '
+        'This is required for session signing, CSRF, and JWT security.'
+    )
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env('DEBUG', default=False)
@@ -33,16 +38,44 @@ if DEBUG:
 BACKEND_URL = env('BACKEND_URL', default='http://localhost:8000')
 FRONTEND_URL = env('FRONTEND_URL', default='http://localhost:3001')
 
-# ─────────────────────────────────────────────────────────────────────────────
 # Phase 16: PII Encryption & HMAC Shadow Columns
-# Keys must be base64-encoded 32-byte secrets. Rotate = new version + backfill.
+# Keys must be base64-encoded 32-byte secrets.
 # ─────────────────────────────────────────────────────────────────────────────
 PII_HASH_KEY = env('PII_HASH_KEY', default=None)
 IP_HASH_KEY = env('IP_HASH_KEY', default=None)
 PII_CURRENT_KEY_VERSION = env.int('PII_CURRENT_KEY_VERSION', default=1)
 PII_ENCRYPTION_KEYS = {
     '1': env('PII_ENCRYPTION_KEY_V1', default=None),
+    '2': env('PII_ENCRYPTION_KEY_V2', default=None),
 }
+
+# 🛡️ SOVEREIGN GUARD: JWT Signing Key Separation
+# Using a separate key for JWT signing prevents a SECRET_KEY compromise 
+# from immediately allowing JWT forgery, and vice-versa.
+JWT_SIGNING_KEY = env('JWT_SIGNING_KEY', default=SECRET_KEY)
+
+# Validate critical crypto keys at startup to avoid delayed runtime failures.
+if not DEBUG:
+    required_keys = [
+        ('SECRET_KEY', SECRET_KEY),
+        ('PII_HASH_KEY', PII_HASH_KEY),
+        ('IP_HASH_KEY', IP_HASH_KEY),
+        ('PII_ENCRYPTION_KEY_V1', PII_ENCRYPTION_KEYS.get('1')),
+    ]
+    
+    # CRITICAL: In production, JWT_SIGNING_KEY MUST NOT be the same as SECRET_KEY
+    if JWT_SIGNING_KEY == SECRET_KEY:
+         raise RuntimeError(
+             "SECURITY BREACH: JWT_SIGNING_KEY is defaulting to SECRET_KEY in production. "
+             "A unique signing key is required for sovereign institutional integrity."
+         )
+
+    missing_keys = [name for name, val in required_keys if not val]
+    if missing_keys:
+        raise RuntimeError(
+            f"CRITICAL SECURITY FAILURE: Missing required cryptographic keys for production: {', '.join(missing_keys)}. "
+            "System halted for safety."
+        )
 
 # Application definition
 INSTALLED_APPS = [
@@ -52,6 +85,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.postgres',
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist', # 🛡️ Required for LogoutView
     'corsheaders',  # Already present
@@ -105,15 +139,14 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'apps.users.middleware.SovereignGuardMiddleware',  # 🛡️ SOVEREIGN GUARD: 2FA ENFORCEMENT
-    'middleware.judicial_lockout.JudicialLockoutMiddleware',  # GLOBAL ETHICAL SHIELD
     'middleware.sovereign_response.SovereignResponseMiddleware',  # THE CONSTITUTIONAL ENFORCER
     'apps.core.middleware.MaintenanceModeMiddleware',  # Sovereign Emergency Protocol
     'core.middleware.rls_middleware.RLSMiddleware',  # RLS Context Middleware
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     
-    # Phase 45: The Kill Switch (Must be late in chain to allow auth but block logic)
-    'apps.disputes.middleware.SovereignSafetyMiddleware',
+    # Phase 45: Sovereign Safety & Judicial Guard (Phase 36/42)
+    'apps.disputes.middleware.TribunalSovereigntyMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -153,7 +186,15 @@ else:
 
     # 🛡️ SOVEREIGN DATABASE: Use PgBouncer (6543) in Prod, Fallback to direct DB (5432)
     # We use PgBouncer for transaction-level pooling to handle high concurrency.
-    DATABASE_URL = env('DATABASE_URL', default='postgresql://rentily_admin:postgres@localhost:5432/rentily_production')
+    DATABASE_URL = env('DATABASE_URL', default=None)
+    if not DATABASE_URL and not DEBUG:
+        raise RuntimeError("DATABASE_URL must be set in production. System halted.")
+
+    if not DATABASE_URL:
+        raise RuntimeError(
+            "DATABASE_URL environment variable is required. Database credentials cannot be hardcoded. "
+            "Set DATABASE_URL in your environment (e.g., .env or container secrets)."
+        )
 
     DATABASES = {
         'default': dj_database_url.config(
@@ -163,13 +204,14 @@ else:
         )
     }
 
+
     # 🛠️ Enterprise-Grade Database Tuning
     DATABASES['default'].update({
         'OPTIONS': {
             'connect_timeout': 10,
             'options': '-c statement_timeout=30000',  # 30 second Hard Kill for hanging queries
         },
-        'ATOMIC_REQUESTS': True,  # Wrap each request in a transaction (Atomicity)
+        'ATOMIC_REQUESTS': False,  # Disable global per-request transactions to prevent DB connection exhaustion
         'AUTOCOMMIT': True,
     })
 
@@ -177,31 +219,6 @@ else:
 # 🛡️ SOVEREIGN GUARD: Ensure we are not using SQLite in production
 if not DEBUG and DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3':
     raise RuntimeError("SECURITY BREACH: SQLite detected in production mode. System Halt.")
-
-# Caching - Use Redis if available, fallback to LocMemCache for local dev
-import os as _os
-if _os.environ.get('REDIS_URL') or _os.environ.get('USE_REDIS', 'false').lower() == 'true':
-    CACHES = {
-        'default': {
-            'BACKEND': 'django_redis.cache.RedisCache',
-            'LOCATION': env('REDIS_URL', default='redis://127.0.0.1:6379/1'),
-            'OPTIONS': {
-                'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-                'IGNORE_EXCEPTIONS': True,  # Fallback to DB if Redis is down
-            }
-        }
-    }
-else:
-    # Fallback: In-memory cache for local development (no Redis)
-    CACHES = {
-        'default': {
-            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-            'LOCATION': 'unique-snowflake',
-            'OPTIONS': {
-                'MAX_ENTRIES': 1000,
-            }
-        }
-    }
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -254,50 +271,45 @@ AUTH_USER_MODEL = 'users.User'
 # REST Framework
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
+        'backend.authentication.CookieJWTAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.BasicAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'EXCEPTION_HANDLER': 'core.exception_handler.custom_exception_handler',
-    # CRITICAL: Pagination to prevent returning all records
     'DEFAULT_PAGINATION_CLASS': 'core.pagination.StrictPageNumberPagination',
-    'PAGE_SIZE': 20,  # Default page size
-    # 🔒 BANKING-GRADE SECURITY: Rate Limiting (DoS Protection)
+    'PAGE_SIZE': 20,
     'DEFAULT_THROTTLE_CLASSES': [
-        'core.throttling.AnonymousUserThrottle',     # 🛡️ Uses Real IP (X-Forwarded-For)
-        'core.throttling.AuthenticatedUserThrottle', # Standard User Throttling
+        'core.throttling.AnonymousUserThrottle',
+        'core.throttling.AuthenticatedUserThrottle',
     ],
     'DEFAULT_THROTTLE_RATES': {
-        'anon': '100/day',            # 🛡️ Strict: Prevent scraping
-        'user': '1000/day',           # Standard User Limit
-        'login': '5/min',             # 🛡️ Brute-Force Protection
-        'register': '5/min',          # 🛡️ Bot Protection
-        'product_search': '60/min',   # Allow browsing
-        'chatbot': '20/min',          # Prevent LLM abuse
+        'anon': '100/day',
+        'user': '1000/day',
+        'login': '5/min',
+        'register': '5/min',
+        'product_search': '60/min',
+        'chatbot': '20/min',
     },
     'DEFAULT_RENDERER_CLASSES': [
         'core.renderers.SovereignJSONRenderer',
+    ] if not DEBUG else [
+        'core.renderers.SovereignJSONRenderer',
         'rest_framework.renderers.BrowsableAPIRenderer',
-    ],
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'backend.authentication.CookieJWTAuthentication', # 🛡️ Cookie-First Auth
-        'rest_framework.authentication.SessionAuthentication',
     ],
 }
 
-from datetime import timedelta
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=10),  # Reduced for higher security rotation
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),  # Increased for better UX, with refresh
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),     # Standard rotation window
     'ROTATE_REFRESH_TOKENS': True,                   # Critical for security
     'BLACKLIST_AFTER_ROTATION': True,                # Prevent reuse
     'UPDATE_LAST_LOGIN': True,
     'ALGORITHM': 'HS256',
-    'SIGNING_KEY': SECRET_KEY,
+    'SIGNING_KEY': JWT_SIGNING_KEY,
     'AUTH_HEADER_TYPES': ('Bearer',),
     'USER_ID_FIELD': 'id',
     'USER_ID_CLAIM': 'user_id',
@@ -308,7 +320,7 @@ AUTH_COOKIE_ACCESS = 'access_token'
 AUTH_COOKIE_REFRESH = 'refresh_token'
 AUTH_COOKIE_SECURE = not DEBUG   # True in Prod
 AUTH_COOKIE_HTTP_ONLY = True     # JS cannot access needed for XSS protection
-AUTH_COOKIE_SAMESITE = 'Strict'  # Same-origin only
+AUTH_COOKIE_SAMESITE = 'Lax'    # Lax for cross-domain SPA support (CSRF protected by DRF)
 AUTH_COOKIE_PATH = '/'
 AUTH_REFRESH_COOKIE_PATH = '/api/auth/token/refresh/'
 
@@ -323,14 +335,7 @@ if not DEBUG:
     USE_X_FORWARDED_HOST = True
     USE_X_FORWARDED_PORT = True
     SECURE_SSL_REDIRECT = True
-    CORS_ALLOW_ALL_ORIGINS = False
-    CORS_ALLOWED_ORIGINS = [
-        "https://rentily.rent", 
-        "https://www.rentily.rent",
-    ]
-else:
-    CORS_ALLOW_ALL_ORIGINS = True
-    CORS_ALLOW_CREDENTIALS = True
+    # Development: CORS whitelisting consolidated below
 
 # Hard limit on page size (prevents abuse from ?page_size=10000)
 MAX_PAGE_SIZE = 50
@@ -370,11 +375,16 @@ SPECTACULAR_SETTINGS = {
     'POSTPROCESSING_HOOKS': [],
 }
 
-# CORS
-CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS', default=['http://localhost:3000', 'http://localhost:3001'])
+# CORS (Consolidated)
+CORS_ALLOWED_ORIGINS = env.list(
+    'CORS_ALLOWED_ORIGINS',
+    default=(['http://localhost:3000', 'http://localhost:3001', 'http://127.0.0.1:3000', 'http://127.0.0.1:3001'] if DEBUG else [
+        'https://rentily.rent',
+        'https://www.rentily.rent',
+    ])
+)
 CORS_ALLOW_CREDENTIALS = True
-# CRITICAL: Disable Allow All Origins to prevent data leakage
-CORS_ALLOW_ALL_ORIGINS = False
+# CORS_ALLOW_ALL_ORIGINS removed - use explicit CORS_ALLOWED_ORIGINS list
 
 # Security Settings (Production)
 # 🔒 BANKING-GRADE SECURITY: Force HTTPS in production
@@ -386,8 +396,6 @@ if not DEBUG:
     SECURE_HSTS_SECONDS = env.int('SECURE_HSTS_SECONDS', default=31536000)  # 1 year
     SECURE_HSTS_INCLUDE_SUBDOMAINS = env.bool('SECURE_HSTS_INCLUDE_SUBDOMAINS', default=True)
     SECURE_HSTS_PRELOAD = env.bool('SECURE_HSTS_PRELOAD', default=True)
-    SECURE_BROWSER_XSS_FILTER = True
-    SECURE_CONTENT_TYPE_NOSNIFF = True
 else:
     # Development: Allow HTTP for local testing
     SECURE_SSL_REDIRECT = env.bool('SECURE_SSL_REDIRECT', default=False)
@@ -397,7 +405,6 @@ else:
     SECURE_HSTS_INCLUDE_SUBDOMAINS = env.bool('SECURE_HSTS_INCLUDE_SUBDOMAINS', default=False)
     SECURE_HSTS_PRELOAD = env.bool('SECURE_HSTS_PRELOAD', default=False)
 
-SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'DENY'
 
@@ -464,9 +471,9 @@ RISK_CONFIG = {
 CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
 
 CONSTANCE_CONFIG = {
-    'SOVEREIGN_WILAYAS_GREEN': ([], 'List of Wilaya IDs fully open (Green Zone)', list),
+    'SOVEREIGN_WILAYAS_GREEN': ([16], 'List of Wilaya IDs fully open (Green Zone)', list),
     'SOVEREIGN_WILAYAS_YELLOW': ([], 'List of Wilaya IDs in incubation (Yellow Zone)', list),
-    'SOVEREIGN_ALLOWED_CATEGORIES': ([], 'List of allowed category slugs (Global Arsenal)', list),
+    'SOVEREIGN_ALLOWED_CATEGORIES': (['electronics'], 'List of allowed category slugs (Global Arsenal)', list),
     'SOVEREIGN_YELLOW_ZONE_CATEGORIES': (['electronics'], 'List of allowed category slugs in Yellow Zone', list),
     'MAINTENANCE_MODE': (False, 'Enable Maintenance Mode (Sovereign Emergency Protocol)', bool),
 }
@@ -476,7 +483,7 @@ CONSTANCE_CONFIG = {
 # SOVEREIGN AI CONFIGURATION (Phase 41/42)
 # -----------------------------------------------------------------------------
 SOVEREIGN_AI = {
-    'USE_MOCK': env.bool('SOVEREIGN_AI_USE_MOCK', default=False),  # ✅ Switched to Real Model
+    'USE_MOCK': env.bool('SOVEREIGN_AI_USE_MOCK', default=True),
     'USE_SEMANTIC_SEARCH': env.bool('USE_SEMANTIC_SEARCH', default=True), # Kill Switch
     'MODEL_NAME': 'sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2',
 }
@@ -502,8 +509,10 @@ LOGGING = {
             "formatter": "json",
         },
         "file": {
-            "class": "logging.FileHandler",
-            "filename": "server_debug.log",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": os.path.join(BASE_DIR, 'logs', 'server_debug.log'),
+            "maxBytes": 5242880,  # 5MB (Harden rotation: Audit M6)
+            "backupCount": 10,
             "formatter": "json",
         },
     },
@@ -575,8 +584,10 @@ SESSION_CACHE_ALIAS = 'default'
 # CELERY
 # ============================================
 
-CELERY_BROKER_URL = REDIS_URL
-CELERY_RESULT_BACKEND = REDIS_URL
+# CRITICAL FIX (M4): Use separate Redis databases for Celery broker and result backend
+# This prevents Celery result storage from competing with application cache
+CELERY_BROKER_URL = REDIS_URL.replace('/1', '/2') if REDIS_URL else 'redis://localhost:6379/2'
+CELERY_RESULT_BACKEND = REDIS_URL.replace('/1', '/3') if REDIS_URL else 'redis://localhost:6379/3'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
@@ -590,3 +601,30 @@ CELERY_BROKER_TRANSPORT_OPTIONS = {
     'visibility_timeout': 3600,
     'max_connections': 50,
 }
+
+# ============================================
+# 🛡️ SOVEREIGN PRODUCTION SECURITY HEADERS (Phase 7)
+# ============================================
+if not DEBUG:
+    # 1. Force SSL Redirection
+    SECURE_SSL_REDIRECT = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    
+    # 2. HSTS (HTTP Strict Transport Security)
+    SECURE_HSTS_SECONDS = 31536000  # 1 Year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    
+    # 3. Cookie Security
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    
+    # 4. SameSite Policy (Lax is generally best for usability/security balance)
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    CSRF_COOKIE_SAMESITE = 'Lax'
+    
+    # 5. Referrer Policy & Frame Options
+    SECURE_REFERRER_POLICY = 'same-origin'
+    X_FRAME_OPTIONS = 'DENY'
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+

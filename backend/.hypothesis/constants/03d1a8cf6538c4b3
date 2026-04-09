@@ -1,0 +1,4 @@
+# file: C:\Users\aboun\Desktop\ReadyRent_Gala\backend\apps\disputes\services\adjudication.py
+# hypothesis_version: 6.151.10
+
+['closed', 'favor_owner', 'favor_tenant', 'final', 'judgment_final', 'judgment_id', 'judgment_provisional', 'justification', 'owner', 'provisional', 'split', 'status', 'tenant', 'verdict']

@@ -1,0 +1,4 @@
+# file: C:\Users\aboun\Desktop\ReadyRent_Gala\backend\middleware\judicial_lockout.py
+# hypothesis_version: 6.151.10
+
+['/api/v1/judicial/', 'GLOBAL_LOCK']

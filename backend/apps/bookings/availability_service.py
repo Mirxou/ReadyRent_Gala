@@ -24,7 +24,8 @@ class AvailabilityService:
         product_id: int,
         start_date: date,
         end_date: date,
-        exclude_booking_id: Optional[int] = None
+        exclude_booking_id: Optional[int] = None,
+        bypass_cache: bool = False
     ) -> Dict[str, any]:
         """
         Check if product is available for booking dates
@@ -34,10 +35,11 @@ class AvailabilityService:
         """
         cache_key = f"{AvailabilityService.CACHE_PREFIX}:{product_id}:{start_date}:{end_date}"
         
-        # Try cache first
-        cached_result = cache.get(cache_key)
-        if cached_result is not None:
-            return cached_result
+        # Try cache first (unless explicit bypass requested)
+        if not bypass_cache:
+            cached_result = cache.get(cache_key)
+            if cached_result is not None:
+                return cached_result
         
         try:
             product = Product.objects.select_related('category').get(id=product_id)

@@ -5,6 +5,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.conf import settings
+from decimal import Decimal
 
 
 class Category(models.Model):
@@ -85,11 +86,13 @@ class Product(models.Model):
 
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
+        on_delete=models.CASCADE,  # Institutional Integrity: No ownerless products allowed
         related_name='owned_products',
-        verbose_name=_("المالك")
+        verbose_name=_("المالك"),
+        null=False,
+        blank=False,
     )
-    price_per_day = models.DecimalField(_('price per day'), max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
+    price_per_day = models.DecimalField(_('price per day'), max_digits=12, decimal_places=2, validators=[MinValueValidator(Decimal('0.01'))])
     size = models.CharField(_('size'), max_length=10, choices=SIZE_CHOICES)
     color = models.CharField(_('color'), max_length=50)
     color_hex = models.CharField(_('color hex'), max_length=7, blank=True, help_text=_('Hex color code (e.g., #FF5733)'))
@@ -209,7 +212,7 @@ class ProductVariant(models.Model):
     color_hex = models.CharField(_('color hex'), max_length=7, blank=True)
     style = models.CharField(_('style'), max_length=50, blank=True)
     sku = models.CharField(_('SKU'), max_length=100, unique=True, blank=True)
-    price_per_day = models.DecimalField(_('price per day'), max_digits=10, decimal_places=2, null=True, blank=True, help_text=_('Override product price if set'))
+    price_per_day = models.DecimalField(_('price per day'), max_digits=12, decimal_places=2, null=True, blank=True, help_text=_('Override product price if set'))
     is_active = models.BooleanField(_('active'), default=True)
     created_at = models.DateTimeField(_('created at'), auto_now_add=True)
     updated_at = models.DateTimeField(_('updated at'), auto_now=True)

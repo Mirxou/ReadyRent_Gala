@@ -1,0 +1,4 @@
+# file: C:\Users\aboun\Desktop\ReadyRent_Gala\backend\apps\payments\engine.py
+# hypothesis_version: 6.151.10
+
+[100, '0.01', 'completed', 'escrow', 'escrow_release', 'escrow_split_release', 'escrow_transition', 'hold_id', 'id', 'judgment_id', 'owner', 'owner_amount', 'refund', 'release', 'renter_amount', 'status', 'success', 'wallet', 'wallet_credit']

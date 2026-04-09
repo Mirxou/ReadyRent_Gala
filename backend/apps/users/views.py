@@ -13,7 +13,8 @@ from django.conf import settings
 from core.throttling import LoginRateThrottle, RegisterRateThrottle
 from .models import (
     User, UserProfile, VerificationStatus, Blacklist,
-    StaffRole, ActivityLog, Shift, PerformanceReview
+    StaffRole, ActivityLog, Shift, PerformanceReview,
+    IdentityDocument, BusinessProfile, VerificationLevel
 )
 from .serializers import (
     UserSerializer, RegisterSerializer, UserProfileSerializer,
@@ -21,10 +22,11 @@ from .serializers import (
     AddressVerificationSerializer, IDUploadSerializer, BlacklistSerializer,
     StaffRoleSerializer, ActivityLogSerializer, ShiftSerializer, PerformanceReviewSerializer,
     PasswordResetRequestSerializer, PasswordResetConfirmSerializer,
-    TOTPVerifySerializer, TOTPEnableSerializer
+    IdentityDocumentSerializer, BusinessProfileSerializer,
+    TOTPVerifySerializer, TOTPEnableSerializer, ChangePasswordSerializer
 )
-from .services import VerificationService
-from .services.security import SovereignGuardService
+from .services import VerificationService, SovereignGuardService
+
 
 from .permissions import (
     IsAdminOrManager, IsAdminOrManagerOrStaff, IsAdminOnly,
@@ -50,7 +52,7 @@ class RegisterView(SovereignResponseMixin, generics.CreateAPIView):
         response = Response({
             'user': UserSerializer(user).data,
             'status': 'created',
-            'dignity_preserved': True
+            'dignity_preserved': True,
         }, status=status.HTTP_201_CREATED)
 
         # Set Access Token Cookie
@@ -113,7 +115,7 @@ class LoginView(SovereignResponseMixin, generics.GenericAPIView):
             response = Response({
                 'user': UserSerializer(user).data,
                 'status': 'authenticated',
-                'dignity_preserved': True
+                'dignity_preserved': True,
             })
             
             # Set Access Token Cookie
@@ -173,9 +175,44 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
+
+
+class ChangePasswordView(SovereignResponseMixin, generics.GenericAPIView):
+    """Change password for authenticated user"""
+    serializer_class = ChangePasswordSerializer
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        if not user.check_password(serializer.validated_data['old_password']):
+            return Response(
+                {"error": "كلمة المرور القديمة غير صحيحة", "message_en": "Old password is incorrect"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        user.set_password(serializer.validated_data['new_password'])
+        user.save()
+
+        # 🔒 SECURITY: Invalidate all other sessions (Rotate refresh tokens)
+        try:
+            from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
+            outstanding_tokens = OutstandingToken.objects.filter(user=user)
+            for token in outstanding_tokens:
+                BlacklistedToken.objects.get_or_create(token=token)
+            logger.info("password_change_session_invalidation_complete", user_id=user.id)
+        except ImportError:
+            pass
+
+        return Response({
+            "status": "success",
+            "message_ar": "تم تغيير كلمة المرور بنجاح",
+            "message_en": "Password changed successfully"
+        })
 
 
 # 🛡️ SOVEREIGN GUARD: 2FA Views (Phase 6)
@@ -198,8 +235,13 @@ class Generate2FASecretView(SovereignResponseMixin, generics.GenericAPIView):
         uri = SovereignGuardService.get_provisioning_uri(user, secret)
         qr_code = SovereignGuardService.generate_qr_base64(uri)
         
+        # 🛡️ SOVEREIGN GUARD: Stash pending secret in cache to prevent injection race
+        from django.core.cache import cache
+        cache_key = f"pending_2fa_secret_{user.id}"
+        cache.set(cache_key, secret, timeout=300) # 5 minute window
+        
         return Response({
-            "secret": secret,
+            "secret": secret, # Still returned for visibility/manual entry, but verification now Uses Cache
             "qr_code": qr_code,
             "provisioning_uri": uri,
             "status": "pending_verification"
@@ -219,11 +261,22 @@ class Enable2FAView(SovereignResponseMixin, generics.GenericAPIView):
         serializer.is_valid(raise_exception=True)
         
         token = serializer.validated_data['token']
-        secret = serializer.validated_data['secret']
         
+        # 🛡️ SOVEREIGN GUARD: Retrieve secret from cache (not from request body)
+        from django.core.cache import cache
+        cache_key = f"pending_2fa_secret_{request.user.id}"
+        secret = cache.get(cache_key)
+        
+        if not secret:
+             return Response(
+                {"error": "2FA setup session expired", "message_ar": "انتهت جلسة إعداد المصادقة الثنائية"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         success = SovereignGuardService.enable_2fa(request.user, secret, token)
         
         if success:
+            cache.delete(cache_key) # Clean up
             # Log this high-security action
             ActivityLog.objects.create(
                 user=request.user,
@@ -255,6 +308,7 @@ class AdminUserManagementViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsAdminUser]
+    pagination_class = None
     
     def get_queryset(self):
         queryset = User.objects.all()
@@ -273,6 +327,26 @@ class VerificationStatusView(generics.RetrieveUpdateAPIView):
     def get_object(self):
         verification, created = VerificationStatus.objects.get_or_create(user=self.request.user)
         return verification
+
+
+class IdentityDocumentView(generics.RetrieveUpdateAPIView):
+    """Get and update identity document."""
+    serializer_class = IdentityDocumentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        document, _ = IdentityDocument.objects.get_or_create(user=self.request.user)
+        return document
+
+
+class BusinessProfileView(generics.RetrieveUpdateAPIView):
+    """Get and update KYB business profile."""
+    serializer_class = BusinessProfileSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        profile, _ = BusinessProfile.objects.get_or_create(user=self.request.user)
+        return profile
 
 
 class RequestPhoneVerificationView(generics.GenericAPIView):
@@ -341,6 +415,15 @@ class UploadIDView(generics.UpdateAPIView):
         verification.risk_score = VerificationService.calculate_risk_score(self.request.user)
         verification.save()
 
+        identity_document, _ = IdentityDocument.objects.get_or_create(user=self.request.user)
+        identity_document.document_type = verification.id_type or identity_document.document_type
+        identity_document.document_number = verification.id_number
+        identity_document.front_image = verification.id_front_image
+        identity_document.back_image = verification.id_back_image
+        identity_document.status = 'submitted'
+        identity_document.age_verified = bool(getattr(getattr(self.request.user, 'profile', None), 'is_adult', False))
+        identity_document.save()
+
 
 class VerifyAddressView(SovereignResponseMixin, generics.GenericAPIView):
     """Verify address"""
@@ -365,6 +448,7 @@ class AdminVerificationListView(generics.ListAPIView):
     """List all verifications (admin only)"""
     serializer_class = VerificationStatusSerializer
     permission_classes = [IsAdminUser]
+    pagination_class = None
     
     def get_queryset(self):
         status_filter = self.request.query_params.get('status', None)
@@ -418,6 +502,7 @@ class BlacklistListView(generics.ListAPIView):
     serializer_class = BlacklistSerializer
     permission_classes = [IsAdminUser]
     queryset = Blacklist.objects.filter(is_active=True).select_related('user', 'added_by')
+    pagination_class = None
 
 
 class AddToBlacklistView(generics.CreateAPIView):
@@ -442,6 +527,7 @@ class StaffRoleViewSet(viewsets.ModelViewSet):
     queryset = StaffRole.objects.select_related('user', 'branch', 'assigned_by').all()
     serializer_class = StaffRoleSerializer
     permission_classes = [IsAuthenticated, CanManageStaff]
+    pagination_class = None
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_fields = ['role', 'branch', 'is_active', 'department']
     ordering_fields = ['assigned_at', 'role']
@@ -624,6 +710,7 @@ class StaffListView(generics.ListAPIView):
     """List all staff members"""
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated, IsAdminOrManager]
+    pagination_class = None
     
     def get_queryset(self):
         return User.objects.filter(
@@ -665,18 +752,16 @@ class PasswordResetRequestView(generics.GenericAPIView):
         token = default_token_generator.make_token(user)
         uid = urlsafe_base64_encode(force_bytes(user.pk))
         
-        # Create reset link
-        reset_link = f"{getattr(settings, 'FRONTEND_URL', 'http://localhost:3001')}/reset-password?token={token}&uid={uid}"
-        
-        # Send email
         subject = 'إعادة تعيين كلمة المرور - ReadyRent.Gala'
         message = f'''
         مرحباً {user.email},
         
         لقد طلبت إعادة تعيين كلمة المرور لحسابك في ReadyRent.Gala.
         
-        اضغط على الرابط التالي لإعادة تعيين كلمة المرور:
-        {reset_link}
+        رمز إعادة تعيين كلمة المرور هو: {token}
+        
+        يرجى إدخال هذا الرمز في صفحة إعادة تعيين كلمة المرور.
+        صالح لمدة 24 ساعة.
         
         إذا لم تطلب إعادة تعيين كلمة المرور، يرجى تجاهل هذا البريد.
         
@@ -690,9 +775,12 @@ class PasswordResetRequestView(generics.GenericAPIView):
             <h2>إعادة تعيين كلمة المرور</h2>
             <p>مرحباً {user.email},</p>
             <p>لقد طلبت إعادة تعيين كلمة المرور لحسابك في ReadyRent.Gala.</p>
-            <p><a href="{reset_link}" style="background-color: #8B5CF6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">إعادة تعيين كلمة المرور</a></p>
-            <p>أو انسخ الرابط التالي إلى المتصفح:</p>
-            <p>{reset_link}</p>
+            <p><strong>رمز التحقق (أدخل هذا الرمز في صفحة الإعادة):</strong></p>
+            <div style="background:#f9f9f9; border:1px solid #ddd; padding:15px; text-align:center; margin:20px 0;">
+                <code style="font-size:24px; color:#333; letter-spacing:5px; font-weight:bold;">{token}</code>
+            </div>
+            <p>سيتطلب منك أيضاً إدخال الرمز التالي (UID): <code>{uid}</code></p>
+            <p>رابط صفحة الإعادة: <a href="https://readyrent.gala/password-reset/confirm?uid={uid}">اضغط هنا</a></p>
             <p>إذا لم تطلب إعادة تعيين كلمة المرور، يرجى تجاهل هذا البريد.</p>
             <p>مع تحياتنا,<br>فريق ReadyRent.Gala</p>
         </body>
@@ -702,8 +790,8 @@ class PasswordResetRequestView(generics.GenericAPIView):
         send_email_notification(user, subject, message, html_message)
         
         return Response({
-            'message': 'إذا كان البريد الإلكتروني موجوداً، سيتم إرسال رابط إعادة تعيين كلمة المرور',
-            'message_en': 'If the email exists, a password reset link will be sent'
+            'message': 'إذا كان البريد الإلكتروني موجوداً، سيتم إرسال رمز إعادة تعيين كلمة المرور',
+            'message_en': 'If the email exists, a password reset code will be sent'
         }, status=status.HTTP_200_OK)
 
 
@@ -718,7 +806,7 @@ class PasswordResetConfirmView(generics.GenericAPIView):
         
         token = serializer.validated_data['token']
         password = serializer.validated_data['password']
-        uid = request.data.get('uid')
+        uid = serializer.validated_data.get('uid') or request.data.get('uid')
         
         if not uid:
             return Response(
@@ -738,7 +826,6 @@ class PasswordResetConfirmView(generics.GenericAPIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # Verify token
         from django.contrib.auth.tokens import default_token_generator
         if not default_token_generator.check_token(user, token):
             return Response(
@@ -746,9 +833,22 @@ class PasswordResetConfirmView(generics.GenericAPIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # Set new password
         user.set_password(password)
         user.save()
+        
+        # 🔒 SECURITY: Invalidate all existing refresh tokens (Sign out all sessions)
+        try:
+            from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
+            outstanding_tokens = OutstandingToken.objects.filter(user=user)
+            for token in outstanding_tokens:
+                # Blacklist each token to ensure immediate invalidation
+                BlacklistedToken.objects.get_or_create(token=token)
+            
+            logger.info("password_reset_session_invalidation_complete", user_id=user.id)
+        except ImportError:
+            logger.warning("token_blacklist_app_missing_skipping_invalidation")
+        except Exception as e:
+            logger.error("password_reset_invalidation_error", error=str(e))
         
         return Response({
             'message': 'تم إعادة تعيين كلمة المرور بنجاح',
@@ -837,8 +937,28 @@ class CookieTokenRefreshView(SovereignResponseMixin, generics.GenericAPIView):
             )
             response.delete_cookie(settings.AUTH_COOKIE_ACCESS)
             response.delete_cookie(settings.AUTH_COOKIE_REFRESH, path=settings.AUTH_REFRESH_COOKIE_PATH)
-        except Exception:
-            pass # Invalid token, just clear cookies
+            return response
+
+
+class LogoutView(SovereignResponseMixin, generics.GenericAPIView):
+    """
+    Logout user by blacklisting refresh token and clearing cookies.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            refresh_token = request.COOKIES.get(settings.AUTH_COOKIE_REFRESH)
+            if refresh_token:
+                token = RefreshToken(refresh_token)
+                try:
+                    token.blacklist()
+                except AttributeError:
+                    pass  # Blacklist app may not be installed
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning(f"Logout token blacklisting failed: {e}")
 
         response = Response({
             'status': 'logged_out',

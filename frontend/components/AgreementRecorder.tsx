@@ -77,7 +77,7 @@ export const AgreementRecorder = ({ bookingId }: AgreementRecorderProps) => {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
 
-            console.log('Agreement Created:', res.data);
+            // Agreement Created
             setAgreement(res.data);
             setTextNote('');
 

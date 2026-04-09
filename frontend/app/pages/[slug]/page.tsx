@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { ParticleField } from '@/components/ui/particle-field';
+import DOMPurify from 'dompurify';
 
 export default function DynamicPage() {
   const params = useParams();
@@ -97,7 +98,7 @@ export default function DynamicPage() {
             <CardContent className="pt-8">
               <div
                 className="prose prose-lg max-w-none prose-headings:text-foreground prose-p:text-muted-foreground prose-a:text-gala-purple prose-strong:text-foreground"
-                dangerouslySetInnerHTML={{ __html: page.content || '' }}
+                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(page.content || '') }}
               />
             </CardContent>
           </Card>

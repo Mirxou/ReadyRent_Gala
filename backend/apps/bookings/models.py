@@ -1,12 +1,22 @@
 """
 Booking models for ReadyRent.Gala
 """
+from decimal import Decimal
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import MinValueValidator
 from django.conf import settings
+from django.utils import timezone
+from django.contrib.postgres.constraints import ExclusionConstraint
+from django.contrib.postgres.fields import RangeOperators
+from django.db.models import Func, Q
+
+
+class DateRange(Func):
+    function = 'DATERANGE'
+    output_field = models.DateField() # Dummy for Django type resolution
 
 
 class Booking(models.Model):
@@ -17,6 +27,8 @@ class Booking(models.Model):
         ('in_use', _('In Use')),
         ('completed', _('Completed')),
         ('cancelled', _('Cancelled')),
+        ('manual_review', _('Under Manual Review')),
+        ('rejected', _('Rejected (Risk Policy)')),
     ]
     
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='bookings',
@@ -90,8 +102,18 @@ class Booking(models.Model):
         ordering = ['-created_at']
         constraints = [
             models.CheckConstraint(
-                check=models.Q(end_date__gt=models.F('start_date')),
+                condition=models.Q(end_date__gte=models.F('start_date')),
                 name='booking_end_date_after_start_date'
+            ),
+            # 🛡️ SOVEREIGN GUARD: Prevent overlapping bookings at the database level.
+            # Only blocks overlaps for active bookings (confirmed, in_use).
+            ExclusionConstraint(
+                name='exclude_overlapping_bookings',
+                expressions=[
+                    ('product', RangeOperators.EQUAL),
+                    (DateRange('start_date', 'end_date', models.Value('[)')), RangeOperators.OVERLAPS),
+                ],
+                condition=models.Q(status__in=['confirmed', 'in_use'])
             )
         ]
         indexes = [
@@ -104,6 +126,12 @@ class Booking(models.Model):
     
     def __str__(self):
         return f"{self.user.email} - {self.product.name} ({self.start_date} to {self.end_date})"
+
+    def save(self, *args, **kwargs):
+        if self.start_date and self.end_date and (not self.total_days or self.total_days < 1):
+            duration = (self.end_date - self.start_date).days
+            self.total_days = duration if duration > 0 else 1
+        super().save(*args, **kwargs)
 
     # --- Phase 2: Escrow State Unification ---
     @property
@@ -119,6 +147,11 @@ class Booking(models.Model):
         except Exception:
             # No EscrowHold exists yet (booking just created, or legacy record)
             return self._escrow_status_db
+    # -----------------------------------------
+
+    @escrow_status.setter
+    def escrow_status(self, value):
+        self._escrow_status_db = value
 
     @property
     def current_escrow_state(self):
@@ -132,7 +165,6 @@ class Booking(models.Model):
         Kept to avoid breaking EscrowEngine (engine.py line 115).
         """
         pass  # No sync needed — escrow_status is now a live property
-    # -----------------------------------------
 
     def generate_qr_token(self):
         """Generate a cryptographic proof for offline verification"""
@@ -162,6 +194,24 @@ class Booking(models.Model):
         import base64
         b64_data = base64.urlsafe_b64encode(data.encode()).decode().rstrip("=")
         return f"{b64_data}.{signature}"
+
+    def days_overdue(self, reference_date=None):
+        reference_date = reference_date or timezone.now().date()
+        if self.status in ['completed', 'cancelled']:
+            return 0
+        if reference_date <= self.end_date:
+            return 0
+        return (reference_date - self.end_date).days
+
+    def late_fee_amount(self, reference_date=None, daily_rate=None):
+        days = self.days_overdue(reference_date)
+        if days <= 0:
+            return Decimal('0.00')
+        rate = Decimal(str(daily_rate if daily_rate is not None else getattr(settings, 'BOOKING_LATE_FEE_RATE', '0.05')))
+        return (Decimal(str(self.total_price)) * rate * Decimal(days)).quantize(Decimal('0.01'))
+
+    def is_overdue(self, reference_date=None):
+        return self.days_overdue(reference_date) > 0
 
 
 @receiver(models.signals.pre_save, sender=Booking)

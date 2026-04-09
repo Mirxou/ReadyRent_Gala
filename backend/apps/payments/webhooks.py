@@ -11,7 +11,7 @@ from django.utils.decorators import method_decorator
 from django.utils import timezone
 from django.db import transaction
 from django.views import View
-from .models import Payment, PaymentWebhook
+from .models import Payment, PaymentWebhook, Wallet, WalletTransaction
 from .services import BaridiMobService, BankCardService, PaymentService
 from apps.bookings.models import Booking
 
@@ -76,6 +76,14 @@ class BaridiMobWebhookView(View):
                     webhook.save()
                     return JsonResponse({'error': 'Payment not found'}, status=404)
                 
+                # 2c-CRITICAL: Validate webhook amount matches payment amount (H-3 fix)
+                from decimal import Decimal
+                webhook_amount = Decimal(str(payload.get('amount', '0')))
+                if webhook_amount != payment.amount:
+                    webhook.error_message = f'Amount mismatch: expected {payment.amount}, received {webhook_amount}'
+                    webhook.save()
+                    return JsonResponse({'error': 'Amount mismatch - webhook rejected'}, status=400)
+                
                 # 2d. Lock Booking (if exists)
                 locked_booking = None
                 if payment.booking:
@@ -89,6 +97,25 @@ class BaridiMobWebhookView(View):
                     payment.completed_at = timezone.now()
                     payment.gateway_response = payload
                     payment.save()
+
+                    renter_wallet, _ = Wallet.objects.select_for_update().get_or_create(user=payment.user)
+                    if not WalletTransaction.objects.filter(
+                        wallet=renter_wallet,
+                        reference_id=f"payment:{payment.id}",
+                        transaction_type='deposit'
+                    ).exists():
+                        renter_wallet.balance += payment.amount
+                        renter_wallet.save()
+                        WalletTransaction.objects.create(
+                            wallet=renter_wallet,
+                            amount=payment.amount,
+                            balance_after=renter_wallet.balance,
+                            transaction_type='deposit',
+                            reference_id=f"payment:{payment.id}",
+                            description=(
+                                f"Payment completed for Booking #{payment.booking.id if payment.booking else 'N/A'}"
+                            ),
+                        )
                     
                     # Update booking (safely locked)
                     if locked_booking and locked_booking.status == 'pending':
@@ -109,9 +136,14 @@ class BaridiMobWebhookView(View):
                             from apps.payments.engine import InvalidStateTransitionError, TerminalStateError
 
                             # Ensure Hold Exists (Idempotent)
+                            renter_wallet, _ = Wallet.objects.get_or_create(user=payment.user)
                             escrow_hold, created = EscrowHold.objects.get_or_create(
                                 booking=locked_booking,
-                                defaults={'amount': payment.amount, 'state': EscrowState.PENDING}
+                                defaults={
+                                    'amount': payment.amount,
+                                    'state': EscrowState.PENDING,
+                                    'wallet': renter_wallet,
+                                }
                             )
                             
                             # Execute Transition
@@ -215,19 +247,46 @@ class BankCardWebhookView(View):
                     webhook.save()
                     return JsonResponse({'error': 'Payment not found'}, status=404)
                 
-                # 2d. Lock Booking (if exists)
+                # 2d. Validate webhook amount when present
+                from decimal import Decimal
+                webhook_amount = Decimal(str(payload.get('amount', '0')))
+                if webhook_amount != payment.amount:
+                    webhook.error_message = f'Amount mismatch: expected {payment.amount}, received {webhook_amount}'
+                    webhook.save()
+                    return JsonResponse({'error': 'Amount mismatch - webhook rejected'}, status=400)
+
+                # 2e. Lock Booking (if exists)
                 locked_booking = None
                 if payment.booking:
                     locked_booking = Booking.objects.select_for_update().get(
                         id=payment.booking.id
                     )
                 
-                # 2e. Apply state changes
+                # 2f. Apply state changes
                 if event_type in ['payment.completed', 'payment.3d_secure.completed']:
                     payment.status = 'completed'
                     payment.completed_at = timezone.now()
                     payment.gateway_response = payload
                     payment.save()
+
+                    renter_wallet, _ = Wallet.objects.select_for_update().get_or_create(user=payment.user)
+                    if not WalletTransaction.objects.filter(
+                        wallet=renter_wallet,
+                        reference_id=f"payment:{payment.id}",
+                        transaction_type='deposit'
+                    ).exists():
+                        renter_wallet.balance += payment.amount
+                        renter_wallet.save()
+                        WalletTransaction.objects.create(
+                            wallet=renter_wallet,
+                            amount=payment.amount,
+                            balance_after=renter_wallet.balance,
+                            transaction_type='deposit',
+                            reference_id=f"payment:{payment.id}",
+                            description=(
+                                f"Payment completed for Booking #{payment.booking.id if payment.booking else 'N/A'}"
+                            ),
+                        )
                     
                     # Update booking
                     if locked_booking and locked_booking.status == 'pending':
@@ -243,9 +302,14 @@ class BankCardWebhookView(View):
                             from apps.payments.engine import InvalidStateTransitionError, TerminalStateError
 
                             # Ensure Hold Exists
+                            renter_wallet, _ = Wallet.objects.get_or_create(user=payment.user)
                             escrow_hold, created = EscrowHold.objects.get_or_create(
                                 booking=locked_booking,
-                                defaults={'amount': payment.amount, 'state': EscrowState.PENDING}
+                                defaults={
+                                    'amount': payment.amount,
+                                    'state': EscrowState.PENDING,
+                                    'wallet': renter_wallet,
+                                }
                             )
                             
                             # Execute Transition

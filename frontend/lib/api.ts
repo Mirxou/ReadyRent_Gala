@@ -1,6 +1,39 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from 'axios';
 
+// 🛡️ SOVEREIGN TYPE SYSTEM: Institutional-Grade Schemas
+export interface SovereignUser {
+  id: number;
+  email: string;
+  username: string;
+  role: 'admin' | 'staff' | 'manager' | 'renter' | 'owner';
+  is_verified: boolean;
+  is_2fa_enabled: boolean;
+  avatar?: string;
+  trust_score: number;
+}
+
+export interface SovereignBooking {
+  id: number;
+  product_id: number;
+  product_name_ar: string;
+  status: 'pending' | 'confirmed' | 'in_use' | 'completed' | 'cancelled' | 'manual_review' | 'rejected';
+  start_date: string;
+  end_date: string;
+  total_price: string;
+  escrow_status: 'pending' | 'held' | 'released' | 'refunded' | 'disputed';
+}
+
+export interface SovereignResponse<T> {
+  success: boolean;
+  data: T;
+  meta: {
+    version: string;
+    path: string;
+    [key: string]: any;
+  };
+}
+
 // 🛡️ INVESTOR-GRADE SECURITY: Cookie-First Architecture
 // No localStorage, No Authorization headers.
 // Browser handles cookies automatically via 'withCredentials: true'
@@ -64,19 +97,19 @@ api.interceptors.response.use(
 
     // Prevent infinite loops [Critical]
     // If 401 happens, try to refresh via cookie
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (error.response?.status === 401 && !originalRequest._retry && !String(originalRequest?.url || '').includes('/auth/token/refresh/')) {
       originalRequest._retry = true;
 
       try {
-        console.log('🔄 401 Detected: Attempting Silent Refresh via Cookie...');
+        // 401 Detected: Attempting Silent Refresh via Cookie...
         // Call refresh endpoint - Backend reads 'refresh_token' cookie automatically
         await api.post('/auth/token/refresh/');
 
-        console.log('✅ Refresh Successful: Retrying original request');
+        // Refresh Successful: Retrying original request
         // Retry original request (Browser sends new 'access_token' cookie)
         return api(originalRequest);
       } catch (refreshError) {
-        console.error('❌ Refresh Failed: Session expired or invalid');
+        // Refresh Failed: Session expired or invalid
         // Optional: Redirect to login or clear client state
         if (typeof window !== 'undefined' && !window.location.pathname.includes('/auth/login')) {
           window.location.href = '/auth/login';
@@ -401,7 +434,12 @@ export const chatbotApi = {
   getMySessions: () => api.get('/chatbot/sessions/my_sessions/'),
   getSession: (id: number) => api.get(`/chatbot/sessions/${id}/`),
   sendMessage: (sessionId: number, message: string) => api.post(`/chatbot/sessions/${sessionId}/send_message/`, { message }),
-  quickChat: (message: string, language?: string) => api.post('/chatbot/quick-chat/', { message, language: language || 'ar' }),
+  quickChat: (message: string, options?: { language?: string, [key: string]: any }) => 
+    api.post('/chatbot/quick-chat/', { 
+      message, 
+      language: options?.language || 'ar',
+      ...options 
+    }),
 };
 
 export const localGuideApi = {
@@ -643,4 +681,10 @@ export const intelligenceApi = {
   getPredictivePulse: () => api.get('/analytics/daily/summary/'),
   // Forensic Visuals (VisualLab principles)
   getInfographicData: (type: string) => api.get(`/analytics/visuals/${type}/`),
+};
+
+export const innovationApi = {
+  getArtisans: (params?: any) => api.get('/artisans/artisans/', { params }),
+  getBundles: (params?: any) => api.get('/bundles/bundles/', { params }),
+  getLocalGuideCategories: () => api.get('/local-guide/categories/'),
 };

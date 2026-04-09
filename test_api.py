@@ -1,8 +1,6 @@
-"""
-Simple script to test API endpoints
-"""
 import requests
 import json
+import os
 
 BASE_URL = "http://localhost:8000/api"
 
@@ -34,7 +32,7 @@ def test_api():
     print("\n2. Testing login...")
     login_data = {
         "email": "abounaas54@gmail.com",
-        "password": "admin123"
+        "password": os.getenv('TEST_PASSWORD', 'admin123')  # Use environment variable for security
     }
     try:
         response = requests.post(f"{BASE_URL}/auth/login/", json=login_data)

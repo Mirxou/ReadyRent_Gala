@@ -4,6 +4,7 @@ Generates high-fidelity, "Holographic-Ready" metadata for social sharing.
 Transforms raw database rows into vibrant, shareable "Digital Cards".
 """
 from django.conf import settings
+from django.utils import timezone
 from apps.users.models import User
 from apps.products.models import Product
 
@@ -45,7 +46,7 @@ class ViralService:
             
         tier = ViralService._get_tier(risk)
         # Simplify timezone logic for robustness
-        now = django.utils.timezone.now()
+        now = timezone.now()
         membership_days = (now - user.created_at).days if user.created_at else 0
 
         # 2. Construct 2030 Payload
@@ -74,7 +75,18 @@ class ViralService:
         Generates a 'Product Holo-Tag'.
         Used for: Viral listing shares, Map markers.
         """
-        owner_card = ViralService.generate_trust_card(product.owner)
+        owner = getattr(product, 'owner', None)
+        if owner:
+            owner_card = ViralService.generate_trust_card(owner)
+        else:
+            owner_card = {
+                'visuals': {'theme_color': '#6B7280'},
+                'data': {
+                    'tier_label': 'Platform',
+                    'tier_label_ar': 'المنصة',
+                    'trust_score': 100,
+                },
+            }
         owner_tier_ar = owner_card['data']['tier_label_ar']
         
         return {
@@ -89,9 +101,7 @@ class ViralService:
                 "owner_tier": owner_card['data']['tier_label'],
                 "owner_tier_ar": owner_tier_ar,
                 "owner_trust": owner_card['data']['trust_score'],
-                "is_verified_asset": product.owner.verification.status == 'verified' if hasattr(product.owner, 'verification') else False
+                "is_verified_asset": bool(owner and hasattr(owner, 'verification') and owner.verification.status == 'verified')
             },
             "share_text": f"📦 استأجر '{product.name}' من مالك موثوق ({owner_tier_ar})! #STANDARD_Rent"
         }
-
-import django.utils.timezone

@@ -1,0 +1,4 @@
+# file: C:\Users\aboun\Desktop\ReadyRent_Gala\backend\apps\disputes\services\appeal_service.py
+# hypothesis_version: 6.151.10
+
+[500.0, 100, 'CLEAN', 'HIGH', 'HIGH_COURT', 'HIGH_COURT_OVERFLOW', 'HIGH_COURT_REVIEW', 'MODERATE', 'NEGATIVE', 'NO', 'PANEL_REVIEW', 'PRELIMINARY_REVIEW', 'SPECIALIZED_PANEL', 'STANDARD', 'Standard case scope', 'YES', 'additional proof', 'appeal_id', 'appellant_history', 'broken', 'damage', 'delay', 'discovered', 'explanation', 'factors', 'high_court', 'late', 'max_cases_per_week', 'merit_engine_version', 'merit_score', 'new evidence', 'new_evidence', 'panel', 'points', 'precedent_divergence', 'procedural_error', 'procedure', 'process violation', 'reason', 'recommendation', 'rejected', 'routine', 'routing_decision', 'rushed judgment', 'stakes', 'status', 'timeliness', 'unfair hearing', 'v1.0']

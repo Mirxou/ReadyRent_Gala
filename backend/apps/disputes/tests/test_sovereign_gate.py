@@ -8,6 +8,7 @@ from decimal import Decimal
 
 from apps.disputes.models import Dispute, MediationSession, SettlementOffer, EvidenceLog
 from apps.disputes.admin_service import SovereignGateService
+from apps.disputes.mediation_service import MediationService
 from apps.products.models import Product, Category
 from apps.bookings.models import Booking
 from django.utils import timezone
@@ -42,10 +43,7 @@ class TestSovereignGateService(TestCase):
             claimed_amount=Decimal("10000.00")
         )
         
-        self.session = MediationSession.objects.create(
-            dispute=self.dispute,
-            expires_at=timezone.now() + timedelta(days=3)
-        )
+        self.session = MediationSession.objects.get(dispute=self.dispute)
         
         self.pending_offer = SettlementOffer.objects.create(
             session=self.session,

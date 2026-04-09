@@ -1,0 +1,4 @@
+# file: C:\Users\aboun\Desktop\ReadyRent_Gala\backend\core\middleware\request_id.py
+# hypothesis_version: 6.151.10
+
+['X-Request-ID']

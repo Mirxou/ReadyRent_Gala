@@ -59,7 +59,7 @@ class WebSocketClient {
       this.ws = new WebSocket(wsUrl);
 
       this.ws.onopen = () => {
-        console.log('WebSocket connected');
+        // WebSocket connected
         this.isConnecting = false;
         this.reconnectAttempts = 0;
         this.startPingInterval();
@@ -90,7 +90,7 @@ class WebSocketClient {
       };
 
       this.ws.onclose = () => {
-        console.log('WebSocket disconnected');
+        // WebSocket disconnected
         this.isConnecting = false;
         this.stopPingInterval();
         this.emit('disconnected', {});

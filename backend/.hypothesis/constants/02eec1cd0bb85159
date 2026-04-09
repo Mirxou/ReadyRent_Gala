@@ -1,0 +1,4 @@
+# file: C:\Users\aboun\Desktop\ReadyRent_Gala\backend\apps\disputes\services\similarity_engine.py
+# hypothesis_version: 6.151.10
+
+[0.0, 0.05, 'a', 'an', 'and', 'at', 'but', 'dispute', 'final', 'final_enforceable', 'for', 'in', 'is', 'judgment', 'of', 'on', 'or', 'similarity_score', 'the', 'to', 'was', 'with']

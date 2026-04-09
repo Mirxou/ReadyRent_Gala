@@ -1,6 +1,7 @@
 import pytest
 from rest_framework import status
 from django.contrib.auth import get_user_model
+from django.conf import settings
 from rest_framework_simplejwt.tokens import RefreshToken
 from unittest.mock import patch
 import uuid
@@ -26,8 +27,9 @@ class TestAuthViews:
         }
         response = api_client.post('/api/auth/register/', data)
         assert response.status_code == status.HTTP_201_CREATED
-        assert 'access' in response.data
         assert response.data['user']['email'] == 'new@example.com'
+        assert settings.AUTH_COOKIE_ACCESS in response.cookies
+        assert settings.AUTH_COOKIE_REFRESH in response.cookies
 
     def test_login_user_success(self, api_client):
         """Test successful user login"""
@@ -39,7 +41,8 @@ class TestAuthViews:
         }
         response = api_client.post('/api/auth/login/', data)
         assert response.status_code == status.HTTP_200_OK
-        assert 'access' in response.data
+        assert settings.AUTH_COOKIE_ACCESS in response.cookies
+        assert settings.AUTH_COOKIE_REFRESH in response.cookies
 
 @pytest.mark.unit
 @pytest.mark.django_db

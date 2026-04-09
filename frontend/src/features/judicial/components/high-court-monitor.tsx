@@ -18,6 +18,7 @@ import {
 import { cn } from '@/lib/utils';
 import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
 import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
+import { Badge } from '@/components/ui/badge';
 import { disputesApi } from '@/lib/api';
 import { toast } from 'sonner';
 

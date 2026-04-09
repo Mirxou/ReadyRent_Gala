@@ -28,7 +28,7 @@ export function CallInterface({ roomId, isInitiator = false, onEndCall }: CallIn
     useEffect(() => {
         // 1. Initialize WebRTC Manager
         const rtcManager = new WebRTCManager(roomId, (stream) => {
-            console.log("Setting remote stream in UI");
+            // Setting remote stream in UI
             setRemoteStream(stream);
             setStatus('Connected');
         });

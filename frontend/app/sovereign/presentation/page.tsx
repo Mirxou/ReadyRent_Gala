@@ -97,7 +97,7 @@ export default function HighCourtPresentation() {
       {/* Presentation Background Ambience */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-sovereign-gold/5 rounded-full blur-[120px] opacity-20" />
-          <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-blue-900/5 rounded-full blur-[120px] opacity-20" />
+          <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-sovereign-gold/5 rounded-full blur-[120px] opacity-10" />
       </div>
 
       <div className="w-full max-w-6xl aspect-[16/9] relative z-10">

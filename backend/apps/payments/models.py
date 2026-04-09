@@ -2,9 +2,13 @@
 Payment models for ReadyRent.Gala
 """
 from django.db import models
+from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import MinValueValidator
 from django.conf import settings
+from decimal import Decimal
+from apps.core.crypto.fields import EncryptedCharField # 🔐 PII Encryption Capability
+
 
 
 class PaymentMethod(models.Model):
@@ -79,9 +83,9 @@ class Payment(models.Model):
     )
     amount = models.DecimalField(
         _('amount'),
-        max_digits=10,
+        max_digits=12,
         decimal_places=2,
-        validators=[MinValueValidator(0)]
+        validators=[MinValueValidator(Decimal('0.01'))]
     )
     currency = models.CharField(_('currency'), max_length=3, default='DZD')
     status = models.CharField(
@@ -93,8 +97,8 @@ class Payment(models.Model):
     
     # Payment method specific data
     # For BaridiMob
-    phone_number = models.CharField(_('phone number'), max_length=20, blank=True)
-    otp_code = models.CharField(_('OTP code'), max_length=10, blank=True)
+    phone_number = EncryptedCharField(_('phone number'), max_length=20, blank=True)
+    otp_code = EncryptedCharField(_('OTP code'), max_length=10, blank=True)
     
     # For Bank Card
     card_last_four = models.CharField(_('card last four'), max_length=4, blank=True)
@@ -139,11 +143,11 @@ class PaymentWebhook(models.Model):
     
     # 🔐 IDEMPOTENCY PROTECTION (Phase 16.1)
     # CRITICAL: event_id MUST be provided by gateway
-    # null=False ensures uniqueness constraint works correctly in PostgreSQL
+    # Note: Uniqueness is enforced at the composite level (payment_method, event_id)
+    # to allow different payment methods to have the same event_id
     event_id = models.CharField(
         _('event ID'),
         max_length=150,
-        unique=True,
         db_index=True,
         null=False,  # ← ENFORCED: No null values allowed
         blank=False,  # ← ENFORCED: Required in forms/serializers
@@ -199,20 +203,26 @@ class EscrowHold(models.Model):
     Holds funds for a specific Booking or Dispute.
     """
     STATUS_CHOICES = [
+        ('pending', _('Pending')),
         ('held', _('Held')),
         ('released', _('Released')),
         ('refunded', _('Refunded')),
         ('disputed', _('Disputed')),
     ]
     
-    wallet = models.ForeignKey(Wallet, on_delete=models.PROTECT, related_name='escrow_holds')
+    wallet = models.ForeignKey(Wallet, on_delete=models.PROTECT, related_name='escrow_holds', db_index=True)
     booking = models.OneToOneField('bookings.Booking', on_delete=models.PROTECT, related_name='escrow_hold')
     
-    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    amount = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal('0.01'))]
+    )
     currency = models.CharField(max_length=3, default='DZD')
     
     # ⚠️ DEPRECATED: Use 'state' instead. Will be removed in Phase 3.
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='held')
+    # Match the default with state field (PENDING maps to 'pending')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', db_column='_legacy_status')
     
     # ✅ CANONICAL STATE (Phase 2 Source of Truth)
     # WARNING: Do not write directly to this field in business logic.
@@ -236,11 +246,16 @@ class EscrowHold(models.Model):
         ]
     
     def save(self, *args, **kwargs):
+        from django.db import transaction
         from .context import EscrowEngineContext
-        
-        # Guard: Prevent Direct State Writse (Phase 3)
+
+        # Guard: Prevent Direct State Writes (Phase 3)
         if self.pk:
-            current = EscrowHold.objects.get(pk=self.pk)
+            if transaction.get_connection().in_atomic_block:
+                current = EscrowHold.objects.select_for_update().get(pk=self.pk)
+            else:
+                current = EscrowHold.objects.get(pk=self.pk)
+
             if current.state != self.state:
                 # State is changing
                 if not EscrowEngineContext.is_active():
@@ -250,7 +265,7 @@ class EscrowHold(models.Model):
                         f"CRITICAL: Direct write to EscrowHold.state ({current.state} -> {self.state}) is FORBIDDEN. "
                         "Must use EscrowEngine.transition()."
                     )
-        
+
         super().save(*args, **kwargs)
 
     def get_progress_percentage(self) -> int:
@@ -308,6 +323,78 @@ class WalletTransaction(models.Model):
     
     class Meta:
         ordering = ['-created_at']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['wallet', 'reference_id', 'transaction_type'],
+                name='unique_wallet_transaction_reference',
+                condition=Q(reference_id__isnull=False) & ~Q(reference_id=''),
+            ),
+        ]
         
     def __str__(self):
         return f"{self.transaction_type}: {self.amount} ({self.created_at})"
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# GAP-04 FIX (2026-04-01): BaridiMob Lifecycle Tracking
+# Ref: AUDIT_BASELINE.md §12.2 GAP-04
+# ─────────────────────────────────────────────────────────────────────────────
+
+class BaridiMobTransaction(models.Model):
+    """
+    Dedicated granular ledger for BaridiMob transactions.
+    Stores carrier-specific metadata (OTP, phone, reference) separately
+    from the generic Payment model to ensure financial auditability.
+    """
+    class Status(models.TextChoices):
+        INITIATED = 'initiated', _('Initiated (OTP Pending)')
+        PENDING   = 'pending',   _('Pending Gateway Confirmation')
+        SUCCESS   = 'success',   _('Success ✅')
+        FAILED    = 'failed',    _('Failed ❌')
+        EXPIRED   = 'expired',   _('Expired 🕒')
+
+    payment = models.OneToOneField(
+        Payment, 
+        on_delete=models.CASCADE, 
+        related_name='baridimob_details',
+        verbose_name=_('payment')
+    )
+    
+    # 🔐 Encrypted PII: Phone number used for the transaction
+    phone_number = EncryptedCharField(
+        _('phone number'), 
+        max_length=20,
+        help_text=_('Encrypted phone number used for BaridiMob payment (AES-256)')
+    )
+    
+    # Gateway specific reference
+    external_reference = models.CharField(
+        _('external reference'), 
+        max_length=150, 
+        blank=True, 
+        db_index=True
+    )
+    
+    status = models.CharField(
+        _('status'), 
+        max_length=20, 
+        choices=Status.choices, 
+        default=Status.INITIATED
+    )
+    
+    # Integrity: Snapshot of final gateway response for forensics
+    gateway_metadata = models.JSONField(_('gateway metadata'), default=dict, blank=True)
+    
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    finalized_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = _('BaridiMob تفاصيل')
+        verbose_name_plural = _('BaridiMob تفاصيل')
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"BaridiMob-{self.payment.id}: {self.status}"
+

@@ -1,7 +1,7 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from .models import Booking
-from apps.users.services_risk import RiskScoreService
+from apps.users.services import RiskScoreService
 
 @receiver(post_save, sender=Booking)
 def trigger_risk_check_booking(sender, instance, **kwargs):

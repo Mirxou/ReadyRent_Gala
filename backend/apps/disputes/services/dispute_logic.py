@@ -1,7 +1,7 @@
 from django.db import transaction
 from django.utils import timezone
 from datetime import timedelta
-from apps.disputes.models import Dispute, EvidenceLog
+from ..models import Dispute, EvidenceLog
 
 class DisputeService:
     """
@@ -139,7 +139,7 @@ class DisputeService:
         - Graph Node logic (new Judgment for OVERTURN)
         - Closure after rejection (prevents rage appeals)
         """
-        from apps.disputes.models import Judgment, Appeal, EvidenceLog
+        from ..models import Judgment, Appeal, EvidenceLog
         
         if appeal.status != 'pending':
             return {"error": "Appeal is not pending review."}
@@ -215,9 +215,12 @@ class DisputeRouter:
         """
         Assigns the dispute to a Judicial Panel.
         """
-        from apps.disputes.models import JudicialPanel, EvidenceLog
+        from ..models import JudicialPanel, EvidenceLog
         from standard_core.engine import SovereignEngine
         # from django.db.models import F # Not used yet
+
+        if dispute.judicial_panel_id:
+            return True
         
         # 1. Determine Policy
         category_name = None
@@ -245,6 +248,19 @@ class DisputeRouter:
                 ).order_by('current_load').first()
         
         if panel:
+            if not panel.has_capacity():
+                panel = JudicialPanel.objects.filter(
+                    panel_type='routine',
+                    is_active=True
+                ).order_by('current_load').first()
+                if not panel or not panel.has_capacity():
+                    EvidenceLog.objects.create(
+                        action="ROUTING_FAILED",
+                        dispute=dispute,
+                        metadata={"reason": "No panels with capacity"},
+                        context_snapshot={"target_type": target_type}
+                    )
+                    return False
             # 3. Assign
             dispute.judicial_panel = panel
             dispute.save()
@@ -276,3 +292,10 @@ class DisputeRouter:
                 context_snapshot={"target_type": target_type}
             )
             return False
+
+    @staticmethod
+    def route_dispute(dispute: Dispute):
+        routed = DisputeRouter.route(dispute)
+        if not routed:
+            raise ValueError("No active judicial panels available.")
+        return routed

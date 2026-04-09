@@ -89,6 +89,21 @@ class PaymentCreateSerializer(serializers.ModelSerializer):
                         field: f'{field} is required for bank card payment'
                     })
         
+        # Validate amount against booking total
+        booking_id = data.get('booking_id')
+        if booking_id:
+            from apps.bookings.models import Booking
+            try:
+                booking = Booking.objects.get(id=booking_id)
+                if data.get('amount') != booking.total_price:
+                    raise serializers.ValidationError({
+                        'amount': f'Amount must match booking total: {booking.total_price}'
+                    })
+            except Booking.DoesNotExist:
+                raise serializers.ValidationError({
+                    'booking_id': 'Invalid booking ID'
+                })
+        
         return data
 
 

@@ -1,0 +1,4 @@
+# file: C:\Users\aboun\Desktop\ReadyRent_Gala\backend\apps\social\signals.py
+# hypothesis_version: 6.151.10
+
+['parent_watch_strike', 'revoked', 'social.referrals', 'verification']

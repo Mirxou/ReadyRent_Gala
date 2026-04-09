@@ -1,0 +1,4 @@
+# file: C:\Users\aboun\Desktop\ReadyRent_Gala\backend\core\utils\responses.py
+# hypothesis_version: 6.151.10
+
+['1.0-sovereign', 'ERROR', 'code', 'data', 'details', 'error', 'message', 'meta', 'success', 'version']

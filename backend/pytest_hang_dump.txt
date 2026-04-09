@@ -1,0 +1,105 @@
+DUMPING TRACEBACKS:\n\n--- Thread 7864 ---\n  File "C:\Users\aboun\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032, in _bootstrap
+    self._bootstrap_inner()
+  File "C:\Users\aboun\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075, in _bootstrap_inner
+    self.run()
+  File "C:\Users\aboun\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012, in run
+    self._target(*self._args, **self._kwargs)
+  File "C:\Users\aboun\Desktop\ReadyRent_Gala\backend\debug_pytest_hang.py", line 14, in dump_tracebacks
+    traceback.print_stack(frame, file=f)
+\n--- Thread 9024 ---\n  File "C:\Users\aboun\Desktop\ReadyRent_Gala\backend\debug_pytest_hang.py", line 22, in <module>
+    pytest.main()
+  File "C:\Users\aboun\AppData\Local\Programs\Python\Python312\Lib\site-packages\_pytest\config\__init__.py", line 199, in main
+    ret: ExitCode | int = config.hook.pytest_cmdline_main(config=config)
+  File "C:\Users\aboun\AppData\Local\Programs\Python\Python312\Lib\site-packages\pluggy\_hooks.py", line 512, in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+  File "C:\Users\aboun\AppData\Local\Programs\Python\Python312\Lib\site-packages\pluggy\_manager.py", line 120, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+  File "C:\Users\aboun\AppData\Local\Programs\Python\Python312\Lib\site-packages\pluggy\_callers.py", line 121, in _multicall
+    res = hook_impl.function(*args)
+  File "C:\Users\aboun\AppData\Local\Programs\Python\Python312\Lib\site-packages\_pytest\main.py", line 365, in pytest_cmdline_main
+    return wrap_session(config, _main)
+  File "C:\Users\aboun\AppData\Local\Programs\Python\Python312\Lib\site-packages\_pytest\main.py", line 318, in wrap_session
+    session.exitstatus = doit(config, session) or 0
+  File "C:\Users\aboun\AppData\Local\Programs\Python\Python312\Lib\site-packages\_pytest\main.py", line 372, in _main
+    config.hook.pytest_runtestloop(session=session)
+  File "C:\Users\aboun\AppData\Local\Programs\Python\Python312\Lib\site-packages\pluggy\_hooks.py", line 512, in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+  File "C:\Users\aboun\AppData\Local\Programs\Python\Python312\Lib\site-packages\pluggy\_manager.py", line 120, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+  File "C:\Users\aboun\AppData\Local\Programs\Python\Python312\Lib\site-packages\pluggy\_callers.py", line 121, in _multicall
+    res = hook_impl.function(*args)
+  File "C:\Users\aboun\AppData\Local\Programs\Python\Python312\Lib\site-packages\_pytest\main.py", line 396, in pytest_runtestloop
+    item.config.hook.pytest_runtest_protocol(item=item, nextitem=nextitem)
+  File "C:\Users\aboun\AppData\Local\Programs\Python\Python312\Lib\site-packages\pluggy\_hooks.py", line 512, in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+  File "C:\Users\aboun\AppData\Local\Programs\Python\Python312\Lib\site-packages\pluggy\_manager.py", line 120, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+  File "C:\Users\aboun\AppData\Local\Programs\Python\Python312\Lib\site-packages\pluggy\_callers.py", line 121, in _multicall
+    res = hook_impl.function(*args)
+  File "C:\Users\aboun\AppData\Local\Programs\Python\Python312\Lib\site-packages\_pytest\runner.py", line 118, in pytest_runtest_protocol
+    runtestprotocol(item, nextitem=nextitem)
+  File "C:\Users\aboun\AppData\Local\Programs\Python\Python312\Lib\site-packages\_pytest\runner.py", line 131, in runtestprotocol
+    rep = call_and_report(item, "setup", log)
+  File "C:\Users\aboun\AppData\Local\Programs\Python\Python312\Lib\site-packages\_pytest\runner.py", line 244, in call_and_report
+    call = CallInfo.from_call(
+  File "C:\Users\aboun\AppData\Local\Programs\Python\Python312\Lib\site-packages\_pytest\runner.py", line 353, in from_call
+    result: TResult | None = func()
+  File "C:\Users\aboun\AppData\Local\Programs\Python\Python312\Lib\site-packages\_pytest\runner.py", line 245, in <lambda>
+    lambda: runtest_hook(item=item, **kwds),
+  File "C:\Users\aboun\AppData\Local\Programs\Python\Python312\Lib\site-packages\pluggy\_hooks.py", line 512, in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+  File "C:\Users\aboun\AppData\Local\Programs\Python\Python312\Lib\site-packages\pluggy\_manager.py", line 120, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+  File "C:\Users\aboun\AppData\Local\Programs\Python\Python312\Lib\site-packages\pluggy\_callers.py", line 121, in _multicall
+    res = hook_impl.function(*args)
+  File "C:\Users\aboun\AppData\Local\Programs\Python\Python312\Lib\site-packages\_pytest\runner.py", line 165, in pytest_runtest_setup
+    item.session._setupstate.setup(item)
+  File "C:\Users\aboun\AppData\Local\Programs\Python\Python312\Lib\site-packages\_pytest\runner.py", line 523, in setup
+    col.setup()
+  File "C:\Users\aboun\AppData\Local\Programs\Python\Python312\Lib\site-packages\_pytest\unittest.py", line 227, in setup
+    super().setup()
+  File "C:\Users\aboun\AppData\Local\Programs\Python\Python312\Lib\site-packages\_pytest\python.py", line 1723, in setup
+    self._request._fillfixtures()
+  File "C:\Users\aboun\AppData\Local\Programs\Python\Python312\Lib\site-packages\_pytest\fixtures.py", line 707, in _fillfixtures
+    item.funcargs[argname] = self.getfixturevalue(argname)
+  File "C:\Users\aboun\AppData\Local\Programs\Python\Python312\Lib\site-packages\_pytest\fixtures.py", line 539, in getfixturevalue
+    fixturedef = self._get_active_fixturedef(argname)
+  File "C:\Users\aboun\AppData\Local\Programs\Python\Python312\Lib\site-packages\_pytest\fixtures.py", line 627, in _get_active_fixturedef
+    fixturedef.execute(request=subrequest)
+  File "C:\Users\aboun\AppData\Local\Programs\Python\Python312\Lib\site-packages\_pytest\fixtures.py", line 1110, in execute
+    result: FixtureValue = ihook.pytest_fixture_setup(
+  File "C:\Users\aboun\AppData\Local\Programs\Python\Python312\Lib\site-packages\pluggy\_hooks.py", line 512, in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+  File "C:\Users\aboun\AppData\Local\Programs\Python\Python312\Lib\site-packages\pluggy\_manager.py", line 120, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+  File "C:\Users\aboun\AppData\Local\Programs\Python\Python312\Lib\site-packages\pluggy\_callers.py", line 121, in _multicall
+    res = hook_impl.function(*args)
+  File "C:\Users\aboun\AppData\Local\Programs\Python\Python312\Lib\site-packages\_pytest\fixtures.py", line 1202, in pytest_fixture_setup
+    result = call_fixture_func(fixturefunc, request, kwargs)
+  File "C:\Users\aboun\AppData\Local\Programs\Python\Python312\Lib\site-packages\_pytest\fixtures.py", line 908, in call_fixture_func
+    fixture_result = next(generator)
+  File "C:\Users\aboun\AppData\Local\Programs\Python\Python312\Lib\site-packages\pytest_django\fixtures.py", line 144, in django_db_setup
+    db_cfg = setup_databases(
+  File "C:\Users\aboun\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\test\utils.py", line 206, in setup_databases
+    connection.creation.create_test_db(
+  File "C:\Users\aboun\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\backends\base\creation.py", line 78, in create_test_db
+    call_command(
+  File "C:\Users\aboun\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\core\management\__init__.py", line 194, in call_command
+    return command.execute(*args, **defaults)
+  File "C:\Users\aboun\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\core\management\base.py", line 459, in execute
+    output = self.handle(*args, **options)
+  File "C:\Users\aboun\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\core\management\base.py", line 107, in wrapper
+    res = handle_func(*args, **kwargs)
+  File "C:\Users\aboun\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\core\management\commands\migrate.py", line 378, in handle
+    post_migrate_apps.render_multiple(
+  File "C:\Users\aboun\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\migrations\state.py", line 898, in from_model
+    return cls(
+  File "C:\Users\aboun\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\fields\__init__.py", line 667, in clone
+    return self.__class__(*args, **kwargs)
+  File "C:\Users\aboun\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\fields\related.py", line 991, in __init__
+    self.db_constraint = db_constraint
+  File "C:\Users\aboun\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\fields\related.py", line 568, in __init__
+    self.swappable = swappable
+  File "C:\Users\aboun\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\fields\related.py", line 110, in __init__
+    super().__init__(**kwargs)
+DUMP COMPLETE\n

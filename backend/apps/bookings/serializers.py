@@ -18,6 +18,9 @@ class BookingSerializer(serializers.ModelSerializer):
     product = ProductListSerializer(read_only=True)
     product_id = serializers.IntegerField(write_only=True, required=False)
     user_email = serializers.EmailField(source='user.email', read_only=True)
+    is_overdue = serializers.SerializerMethodField(read_only=True)
+    days_overdue = serializers.SerializerMethodField(read_only=True)
+    late_fee_amount = serializers.SerializerMethodField(read_only=True)
     
     class Meta:
         model = Booking
@@ -30,18 +33,19 @@ class BookingSerializer(serializers.ModelSerializer):
             # --- Financial Trust Fields ---
             'escrow_status', 'vault_address', 'beneficiary',
             # ------------------------------
-            'status', 'notes', 'qr_code_token', 'created_at', 'updated_at'
+            'status', 'notes', 'qr_code_token', 'created_at', 'updated_at',
+            'is_overdue', 'days_overdue', 'late_fee_amount'
         ]
         read_only_fields = ['user', 'total_days', 'base_price', 'protection_fee', 'total_price', 'created_at', 'updated_at', 
                             'escrow_status', 'vault_address', 'beneficiary', 'qr_code_token']
     
-    def validate(self, data):
+    def validate(self, attrs):
         """Validate booking dates and status"""
         # If updating dates, recalculate total_days and total_price
-        if 'start_date' in data or 'end_date' in data:
+        if 'start_date' in attrs or 'end_date' in attrs:
             instance = self.instance
-            start_date = data.get('start_date', instance.start_date if instance else None)
-            end_date = data.get('end_date', instance.end_date if instance else None)
+            start_date = attrs.get('start_date', instance.start_date if instance else None)
+            end_date = attrs.get('end_date', instance.end_date if instance else None)
             
             if start_date and end_date:
                 if end_date < start_date:
@@ -51,10 +55,10 @@ class BookingSerializer(serializers.ModelSerializer):
                 
                 # Retrieve Product
                 product = instance.product if instance else None
-                if 'product_id' in data:
+                if 'product_id' in attrs:
                     from apps.products.models import Product
                     try:
-                        product = Product.objects.get(pk=data['product_id'])
+                        product = Product.objects.get(pk=attrs['product_id'])
                     except Product.DoesNotExist:
                         pass
                 
@@ -62,19 +66,19 @@ class BookingSerializer(serializers.ModelSerializer):
                 if product:
                     breakdown = FinancialService.calculate_booking_breakdown(product, start_date, end_date)
                     if breakdown:
-                        data['total_days'] = breakdown['total_days']
-                        data['base_price'] = breakdown['base_price']
-                        data['protection_fee'] = breakdown['protection_fee']
-                        data['total_price'] = breakdown['total_price']
+                        attrs['total_days'] = breakdown['total_days']
+                        attrs['base_price'] = breakdown['base_price']
+                        attrs['protection_fee'] = breakdown['protection_fee']
+                        attrs['total_price'] = breakdown['total_price']
                         
                         # Phase 17: Log debug info
                         logger.debug("treasury_calculated", breakdown=breakdown)
                 # ----------------------------------------------------
         
         # Validate status transitions (basic validation)
-        if 'status' in data and self.instance:
+        if 'status' in attrs and self.instance:
             current_status = self.instance.status
-            new_status = data['status']
+            new_status = attrs['status']
             
             # Users can only cancel their own bookings
             if current_status in ['pending', 'confirmed'] and new_status == 'cancelled':
@@ -83,7 +87,16 @@ class BookingSerializer(serializers.ModelSerializer):
                 pass  # Admin can confirm
             # Other transitions would need admin permissions
         
-        return data
+        return attrs
+
+    def get_is_overdue(self, obj):
+        return obj.is_overdue()
+
+    def get_days_overdue(self, obj):
+        return obj.days_overdue()
+
+    def get_late_fee_amount(self, obj):
+        return str(obj.late_fee_amount())
 
 
 class BookingUpdateSerializer(serializers.ModelSerializer):
@@ -94,15 +107,19 @@ class BookingUpdateSerializer(serializers.ModelSerializer):
         model = Booking
         fields = [
             'id', 'product', 'start_date', 'end_date',
-            'total_days', 'total_price', 'status', 'notes'
+            'total_days', 'total_price', 'status', 'notes', 'is_overdue', 'days_overdue', 'late_fee_amount'
         ]
         read_only_fields = ['id', 'total_days', 'total_price']
+
+    is_overdue = serializers.SerializerMethodField(read_only=True)
+    days_overdue = serializers.SerializerMethodField(read_only=True)
+    late_fee_amount = serializers.SerializerMethodField(read_only=True)
     
-    def validate(self, data):
+    def validate(self, attrs):
         """Validate booking update"""
         instance = self.instance
-        start_date = data.get('start_date', instance.start_date)
-        end_date = data.get('end_date', instance.end_date)
+        start_date = attrs.get('start_date', instance.start_date)
+        end_date = attrs.get('end_date', instance.end_date)
         
         if end_date < start_date:
             raise serializers.ValidationError({
@@ -110,12 +127,21 @@ class BookingUpdateSerializer(serializers.ModelSerializer):
             })
         
         # Recalculate if dates changed
-        if 'start_date' in data or 'end_date' in data:
+        if 'start_date' in attrs or 'end_date' in attrs:
             total_days = (end_date - start_date).days + 1
-            data['total_days'] = total_days
-            data['total_price'] = instance.product.price_per_day * total_days
+            attrs['total_days'] = total_days
+            attrs['total_price'] = instance.product.price_per_day * total_days
         
-        return data
+        return attrs
+
+    def get_is_overdue(self, obj):
+        return obj.is_overdue()
+
+    def get_days_overdue(self, obj):
+        return obj.days_overdue()
+
+    def get_late_fee_amount(self, obj):
+        return str(obj.late_fee_amount())
 
 
 class CartItemSerializer(serializers.ModelSerializer):
@@ -241,4 +267,3 @@ class CancellationSerializer(serializers.ModelSerializer):
             'cancelled_at'
         ]
         read_only_fields = ['cancelled_at']
-

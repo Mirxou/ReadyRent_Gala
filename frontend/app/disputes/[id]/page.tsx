@@ -85,7 +85,7 @@ export default function DisputeDetailPage() {
               setMode('VERDICT');
             }
           } catch (e) {
-            console.log('Verdict fetch skipped or failed', e);
+            // Verdict fetch skipped or failed
           }
         }
 

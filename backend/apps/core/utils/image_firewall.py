@@ -4,6 +4,7 @@ import sys
 from PIL import Image
 from io import BytesIO
 from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.conf import settings  # ✅ FIX: كان مفقوداً — يسبب NameError
 
 logger = structlog.get_logger("core.image_firewall")
 
@@ -97,7 +98,12 @@ class ImageFirewall:
         Returns (True, message) or (False, error_message).
         """
         if not DEEPFACE_AVAILABLE:
+            # CRITICAL: Do NOT skip in production!
+            if not settings.DEBUG:
+                logger.error("identity_verification_failed_missing_dependency_production")
+                return False, "Infrastructure Error: Identity Service Unavailable."
             return True, "DeepFace not installed, skipping verification (Dev Mode)"
+
 
         try:
             import numpy as np

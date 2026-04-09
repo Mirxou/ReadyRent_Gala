@@ -32,7 +32,7 @@ class ContractService:
                     'email': str(booking.user.email),
                     'is_verified': bool(booking.user.is_verified)
                 },
-                'owner': {
+                'owner': None if not getattr(booking.product, 'owner', None) else {
                     'id': booking.product.owner.id,
                     'username': str(booking.product.owner.username),
                     'email': str(booking.product.owner.email),

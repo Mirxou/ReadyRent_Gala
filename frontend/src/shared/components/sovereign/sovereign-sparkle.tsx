@@ -73,10 +73,11 @@ export function SovereignSparkle({ children, active = true }: { children: React.
 }
 
 // 🛡️ High-Fidelity Glow Variant
-export function SovereignGlow({ children, color = "gold", intensity = "medium" }: { 
-  children: React.ReactNode, 
+export function SovereignGlow({ children, color = "gold", intensity = "medium", className = "" }: { 
+  children: React.ReactNode,
   color?: "gold" | "blue" | "obsidian",
-  intensity?: "low" | "medium" | "high"
+  intensity?: "low" | "medium" | "high",
+  className?: string
 }) {
   const glowColors = {
     gold: "rgba(197, 160, 89, 0.15)",
@@ -91,7 +92,7 @@ export function SovereignGlow({ children, color = "gold", intensity = "medium" }
   };
 
   return (
-    <div className="relative group">
+    <div className={`relative group ${className}`}>
        <div 
          className={`absolute -inset-1 rounded-[inherit] ${blurLevels[intensity]} opacity-0 group-hover:opacity-100 transition-opacity duration-1000 pointer-events-none`}
          style={{ backgroundColor: glowColors[color] }}

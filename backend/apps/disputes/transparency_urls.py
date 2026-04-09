@@ -1,11 +1,11 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
-from apps.disputes.transparency_views import (
+from .transparency_views import (
     PublicJudgmentLedgerViewSet,
     PublicMetricsViewSet
 )
-from apps.disputes import expectation_views, abuse_views
+from . import expectation_views, abuse_views
 
 router = DefaultRouter()
 router.register(r'public/judgments', PublicJudgmentLedgerViewSet, basename='public-judgments')

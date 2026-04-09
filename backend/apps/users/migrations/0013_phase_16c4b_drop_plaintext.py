@@ -27,6 +27,11 @@ After this migration: key loss = permanent data loss for all users.
 from django.db import migrations
 
 
+def drop_plaintext_backup(apps, schema_editor):
+    if schema_editor.connection.vendor == 'postgresql':
+        schema_editor.execute('ALTER TABLE users_user DROP COLUMN IF EXISTS email_plaintext_backup;')
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -34,10 +39,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        # Final drop — no field definition needed since it was never in the model class
-        # (it was just a renamed DB column from migration 0011).
-        migrations.RunSQL(
-            sql="ALTER TABLE users_user DROP COLUMN IF EXISTS email_plaintext_backup;",
-            reverse_sql="ALTER TABLE users_user ADD COLUMN email_plaintext_backup TEXT;",
-        ),
+        migrations.RunPython(drop_plaintext_backup, reverse_code=migrations.RunPython.noop),
     ]

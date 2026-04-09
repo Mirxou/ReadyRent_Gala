@@ -1,0 +1,4 @@
+# file: C:\Users\aboun\Desktop\ReadyRent_Gala\backend\apps\users\middleware.py
+# hypothesis_version: 6.151.10
+
+['/admin/', '/api/', '2FA_REQUIRED', '2fa_enable', '2fa_generate', 'admin', 'code', 'dignity_preserved', 'login', 'logout', 'manager', 'message_ar', 'message_en', 'sovereign_halt', 'staff', 'status', 'success', 'token_refresh']

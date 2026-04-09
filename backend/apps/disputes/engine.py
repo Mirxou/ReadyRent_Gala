@@ -1,9 +1,9 @@
 
 from django.db import transaction
 from django.utils import timezone
-from apps.disputes.models import Dispute, EvidenceLog, JudicialPanel, Judgment
-from apps.disputes.services import DisputeService
-from apps.disputes.precedent_search_service import PrecedentSearchService
+from .models import Dispute, EvidenceLog, JudicialPanel, Judgment
+from apps.bookings.models import Booking
+from .services import DisputeService, PrecedentSearchService
 from sovereignty.visual_assets import VisualAssetsBuilder
 
 class TribunalEngine:
@@ -18,7 +18,7 @@ class TribunalEngine:
         Coordinates the initiation of a sovereign dispute.
         Returns a dict compliant with SOVEREIGN_API_SPEC.
         """
-        from apps.bookings.models import Booking
+        from .expectation_setter import ExpectationSetter
         
         # 1. Behavioral Check (Ethics as Data Persistence)
         now = timezone.now()

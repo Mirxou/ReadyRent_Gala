@@ -4,7 +4,21 @@ from rest_framework.test import APIClient
 from decimal import Decimal
 from datetime import date, timedelta
 
-User = get_user_model()
+def pytest_configure(config):
+    """
+    Ensure all Django migrations are applied before tests run.
+    Prevents 'no such table: disputes_judgment' (and similar) errors
+    on fresh in-memory SQLite test DBs.
+    """
+    try:
+        import django
+        django.setup()
+    except RuntimeError:
+        pass  # Already configured
+# Removing manual migrate logic to let pytest-django handle test db natively
+
+
+# User = get_user_model()  # Removed to prevent AppRegistryNotReady error
 
 
 @pytest.fixture
@@ -23,7 +37,8 @@ def authenticated_client(api_client, admin_user):
 @pytest.fixture
 def admin_user():
     """Create admin user"""
-    return User.objects.create_user(
+    User = get_user_model()
+    user = User.objects.create_user(
         email='admin@test.com',
         password='testpass123',
         username='admin',
@@ -34,12 +49,18 @@ def admin_user():
         is_superuser=True,
         is_active=True
     )
+    from apps.users.models import UserProfile
+    profile, _ = UserProfile.objects.get_or_create(user=user)
+    profile.date_of_birth = date(1990, 1, 1)
+    profile.save(update_fields=['date_of_birth'])
+    return user
 
 
 @pytest.fixture
 def regular_user():
     """Create regular user"""
-    return User.objects.create_user(
+    User = get_user_model()
+    user = User.objects.create_user(
         email='user@test.com',
         password='testpass123',
         username='user',
@@ -48,12 +69,18 @@ def regular_user():
         role='customer',
         is_active=True
     )
+    from apps.users.models import UserProfile
+    profile, _ = UserProfile.objects.get_or_create(user=user)
+    profile.date_of_birth = date(1990, 1, 1)
+    profile.save(update_fields=['date_of_birth'])
+    return user
 
 
 @pytest.fixture
 def staff_user():
     """Create staff user"""
-    return User.objects.create_user(
+    User = get_user_model()
+    user = User.objects.create_user(
         email='staff@test.com',
         password='testpass123',
         username='staff',
@@ -63,6 +90,11 @@ def staff_user():
         is_staff=True,
         is_active=True
     )
+    from apps.users.models import UserProfile
+    profile, _ = UserProfile.objects.get_or_create(user=user)
+    profile.date_of_birth = date(1990, 1, 1)
+    profile.save(update_fields=['date_of_birth'])
+    return user
 
 
 @pytest.fixture
@@ -103,6 +135,7 @@ def product(category, regular_user):
 def branch():
     """Create test branch"""
     from apps.branches.models import Branch
+    User = get_user_model()
     admin = User.objects.create_user(
         email='manager@test.com',
         password='testpass123',
@@ -159,8 +192,9 @@ def booking(regular_user, product):
     )
 
 
-@pytest.fixture(autouse=True)
-def enable_db_access_for_all_tests(db):
-    """Enable database access for all tests"""
-    pass
+# @pytest.fixture(autouse=True)
+# def enable_db_access_for_all_tests(db):
+#     """Enable database access for all tests"""
+#     pass
+
 

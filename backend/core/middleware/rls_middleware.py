@@ -17,8 +17,12 @@ class RLSMiddleware:
             return self.get_response(request)
 
         # Set the user context before the view runs
-        if request.user.is_authenticated:
-            user_id = request.user.id
+        if hasattr(request, 'user') and request.user.is_authenticated:
+            try:
+                user_id = int(request.user.id)
+            except (ValueError, TypeError):
+                # Invalid user ID - skip RLS setup
+                return
             is_admin = 'true' if request.user.is_superuser else 'false'
             
             # OPTIMIZATION: Execute both SET commands in single roundtrip

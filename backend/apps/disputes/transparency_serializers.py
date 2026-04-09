@@ -4,7 +4,9 @@ Serializers for Phase 23: Public Transparency & Social Legitimacy
 Public-facing serializers for anonymized judgments and metrics.
 """
 from rest_framework import serializers
-from apps.disputes.models import AnonymizedJudgment, PublicMetrics, MetricContextCard
+from .models import AnonymizedJudgment, PublicMetrics, MetricContextCard
+from .judgment_anonymizer import JudgmentAnonymizer
+from .throttles import PublicJudgmentLedgerThrottle, PublicMetricsThrottle
 
 
 class AnonymizedJudgmentSerializer(serializers.ModelSerializer):
@@ -69,8 +71,6 @@ class AnonymizedJudgmentSerializer(serializers.ModelSerializer):
         """
         Indicate if judgment is published or delayed.
         """
-        from apps.disputes.judgment_anonymizer import JudgmentAnonymizer
-        
         is_published = JudgmentAnonymizer.should_publish(obj)
         
         if is_published:

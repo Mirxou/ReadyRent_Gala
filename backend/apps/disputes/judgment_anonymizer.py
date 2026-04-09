@@ -18,9 +18,10 @@ from django.conf import settings
 from django.utils import timezone
 from django.db.models import Count, Q
 
-from apps.disputes.models import (
-    Judgment,
-    AnonymizedJudgment,
+from .models import (
+    Dispute, 
+    Judgment, 
+    AnonymizedJudgment, 
     EvidenceLog
 )
 
@@ -82,8 +83,9 @@ class JudgmentAnonymizer:
         
         # Step 6: Geographic region (city level)
         geographic_region = None
-        if judgment.dispute.booking and judgment.dispute.booking.product.owner.profile:
-            geographic_region = judgment.dispute.booking.product.owner.profile.city
+        owner = getattr(judgment.dispute.booking.product, 'owner', None) if judgment.dispute.booking else None
+        if owner and hasattr(owner, 'profile') and owner.profile:
+            geographic_region = owner.profile.city
         
         # Step 7: Calculate uniqueness score
         uniqueness_score = JudgmentAnonymizer._calculate_uniqueness_score(

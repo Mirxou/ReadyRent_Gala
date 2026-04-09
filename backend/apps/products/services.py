@@ -18,33 +18,25 @@ class ProductService:
     @staticmethod
     def can_user_list_product(user) -> Tuple[bool, str]:
         """
-        Intelligent Logic: Can this user list a product?
-        Relies entirely on 'risk_score' from the User's VerificationStatus.
+        Sovereign Gateway: Can this user list a product?
+        Relies on the unified 'trust_score' (The Identity Shield).
         """
-        try:
-            # Access the hidden gem: risk_score from the verification profile
-            # Safety: If logic is run before profile creation, assume pending/safe-defaults
-            verification = getattr(user, 'verification', None)
-            
-            # Default risk: 50 (Caution) if no verification profile found
-            risk_score = verification.risk_score if verification else 50
-        except ObjectDoesNotExist:
-             risk_score = 50
-
+        # 🛡️ SOVEREIGN UNIFICATION: Using unified trust score field
+        trust_score = getattr(user, 'trust_score', 50)
+        
         # --- Automation Rules ---
         from django.conf import settings
         
-        # 1. High Risk (Danger Zone)
-        if risk_score > settings.RISK_CONFIG['CRITICAL_THRESHOLD']:
-            return False, "درجة المخاطرة عالية جداً. يرجى التواصل مع الدعم لرفع مستوى الثقة."
+        # 1. Critical Stop (High Risk)
+        if trust_score < settings.RISK_CONFIG.get('MIN_TRUST_TO_LIST', 30):
+            return False, "درجة الموثوقية منخفضة. يرجى إكمال التحقق من الهوية لرفع مستوى الثقة."
         
         # 2. Safe Zone (Direct Community Vault)
-        if risk_score < settings.RISK_CONFIG['TRUSTED_THRESHOLD']:
-            return True, "موثوق: يمكن إدراج المنتجات فوراً في خزنة المجتمع."
+        if trust_score >= settings.RISK_CONFIG.get('TRUSTED_THRESHOLD', 80):
+            return True, "موثوق: سيتم إدراج منتجك فوراً في الخزنة."
         
-        # 3. Grey Zone (Under Review)
-        # Caution: Allowed to upload, but requires manual approval
-        return True, "تحت المراجعة: المنتج سينتظر موافقة الإدارة قبل النشر."
+        # 3. Middle Zone (Requires Manual Review)
+        return True, "قيد المراجعة: سيتم عرض منتجك بعد مراجعة الفريق لضمان الجودة."
 
     @staticmethod
     def create_community_product(user, product_data):
@@ -57,23 +49,21 @@ class ProductService:
         if not allowed:
             raise PermissionDenied(message)
         
-        # Determine approval status based on risk score again (to be precise)
-        # We re-fetch or pass the logic. For now, re-calc is cheap.
-        try:
-            verification = getattr(user, 'verification', None)
-            risk_score = verification.risk_score if verification else 50
-        except ObjectDoesNotExist:
-            risk_score = 50
-
+        # 🛡️ SOVEREIGN UNIFICATION: Determine approval status based on unified trust_score
+        trust_score = getattr(user, 'trust_score', 50)
+        
         from django.conf import settings
-        is_trusted = risk_score < settings.RISK_CONFIG['TRUSTED_THRESHOLD']
+        is_trusted = trust_score >= settings.RISK_CONFIG.get('TRUSTED_THRESHOLD', 80)
 
         # Second: Create the Product
-        # Explicitly handling the 'owner' and approval status
+        allowed_fields = {'name', 'name_ar', 'description', 'description_ar', 'category_id',
+                          'price_per_day', 'size', 'color', 'color_hex', 'wilaya', 'commune',
+                          'location_lat', 'location_lng', 'delivery_policy', 'delivery_options'}
+        filtered_data = {k: v for k, v in product_data.items() if k in allowed_fields}
         product = Product.objects.create(
-            **product_data,
+            **filtered_data,
             owner=user,
-            is_community_approved=is_trusted 
+            is_community_approved=is_trusted
         )
         
         return product

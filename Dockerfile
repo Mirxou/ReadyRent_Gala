@@ -18,7 +18,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Install python dependencies as Wheels
 COPY backend/requirements.txt .
-RUN pip wheel --no-cache-dir --no-deps --wheel-dir /usr/src/app/wheels -r requirements.txt
+RUN pip wheel --no-cache-dir --wheel-dir /usr/src/app/wheels -r requirements.txt
 
 # ==============================================================================
 # 🚀 STAGE 2: Runner (Lightweight Production Environment)
@@ -43,15 +43,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Copy pre-built wheels from builder stage and install
 COPY --from=builder /usr/src/app/wheels /wheels
 COPY --from=builder /usr/src/app/requirements.txt .
-RUN pip install --no-cache /wheels/* \
+RUN pip install --no-cache-dir /wheels/* \
     && rm -rf /wheels
+RUN python -c "import dj_database_url; print('dj_database_url OK')"
 
 # Copy the backend project
 COPY backend/ /app/
 
+ARG SECRET_KEY
 # Collect static files
-# Note: we need to temporarily set the secret key to allow collectstatic to run without erroring
-RUN SECRET_KEY="dummy-key-for-build" python manage.py collectstatic --noinput
+# Use build arg SECRET_KEY if provided; otherwise fallback to a build-only dummy key.
+RUN SECRET_KEY="${SECRET_KEY:-dummy-key-for-build}" python manage.py collectstatic --noinput
 
 # Secure permissions for the non-root user
 RUN chown -R appuser:appgroup /app

@@ -1,8 +1,8 @@
 from rest_framework import viewsets, status
-from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.decorators import action, api_view, permission_classes, throttle_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
-from rest_framework.throttling import ScopedRateThrottle
+from rest_framework.throttling import ScopedRateThrottle, AnonRateThrottle
 from django.utils import timezone
 from core.throttling import ChatbotThrottle
 from .models import ChatSession, ChatMessage, ChatIntent, ChatbotConfiguration
@@ -107,6 +107,7 @@ class ChatSessionViewSet(viewsets.ModelViewSet):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@throttle_classes([ChatbotThrottle])
 def quick_chat(request):
     """
     Quick chat endpoint for anonymous users

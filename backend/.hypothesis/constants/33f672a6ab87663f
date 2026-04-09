@@ -1,0 +1,4 @@
+# file: C:\Users\aboun\Desktop\ReadyRent_Gala\backend\middleware\sovereign_response.py
+# hypothesis_version: 6.151.10
+
+[200, 300, '/api/', '1.0-auto-wrapped', 'Content-Length', 'data', 'error', 'meta', 'path', 'success', 'utf-8', 'version']

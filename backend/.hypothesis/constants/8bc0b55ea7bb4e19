@@ -1,0 +1,4 @@
+# file: C:\Users\aboun\Desktop\ReadyRent_Gala\backend\apps\disputes\api_views.py
+# hypothesis_version: 6.151.10
+
+[95.0, 98.5, 1250.0, '-created_at', '-timestamp', 'No reason provided', 'Offer rejected.', 'active_disputes', 'admissible', 'closed', 'error', 'filed', 'get', 'integrity_score', 'mediation_session', 'message', 'post', 'readiness_gate', 'reason', 'total_value_locked', 'under_review']

@@ -34,10 +34,10 @@ class LedgerExportService:
         context = {
             "manifest": manifest,
             "cert_hash": cert_hash,
-            "is_valid": audit_result['is_valid'],
-            "verified_count": audit_result['verified_count'],
-            "total_count": audit_result['total_count'],
-            "last_hash": audit_result['last_hash'],
+            "is_valid": audit_result.get('status') == 'valid',
+            "verified_count": audit_result.get('verified_logs', 0),
+            "total_count": audit_result.get('total_logs', 0),
+            "last_hash": audit_result.get('last_hash', 'N/A'),
             "current_time": timezone.now()
         }
         

@@ -38,7 +38,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterField(
             model_name='wallettransaction',
-            name='type',
-            field=models.CharField(choices=[('deposit', 'Deposit'), ('withdrawal', 'Withdrawal'), ('payment', 'Payment'), ('refund', 'Refund'), ('escrow_lock', 'Escrow Lock'), ('escrow_release', 'Escrow Release'), ('escrow_refund', 'Escrow Refund'), ('penalty', 'Penalty')], max_length=20, verbose_name='type'),
+            name='transaction_type',
+            field=models.CharField(choices=[('deposit', 'Deposit'), ('withdrawal', 'Withdrawal'), ('payment', 'Payment'), ('refund', 'Refund'), ('escrow_lock', 'Escrow Lock'), ('escrow_release', 'Escrow Release'), ('escrow_refund', 'Escrow Refund'), ('penalty', 'Penalty')], max_length=20),
         ),
     ]

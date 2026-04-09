@@ -5,6 +5,18 @@ from django.core.cache import cache
 from django.conf import settings
 
 
+def _delete_by_prefix(prefix):
+    """Best-effort cache key purge without clearing unrelated entries."""
+    try:
+        backend_cache = getattr(cache, '_cache', None)
+        if backend_cache and hasattr(backend_cache, 'keys'):
+            for key in list(backend_cache.keys()):
+                if prefix in str(key):
+                    cache.delete(key)
+    except Exception:
+        pass
+
+
 def invalidate_product_cache(product_id=None, slug=None):
     """Invalidate product-related cache"""
     # Invalidate product detail cache
@@ -16,19 +28,9 @@ def invalidate_product_cache(product_id=None, slug=None):
         cache.delete(f"product_detail_{product_id}")
     
     # Invalidate product list cache
-    cache_patterns = [
-        'products_list_*',
-        'categories_list',
-    ]
-    
-    # Note: Django cache doesn't support pattern deletion by default
-    # In production, use Redis with pattern matching or maintain a list of cache keys
-    # For now, we'll clear all product list caches (aggressive but safe)
-    try:
-        # This is a simple approach - in production, maintain a registry of cache keys
-        cache.clear()  # Clear all cache - use with caution in production
-    except:
-        pass
+    _delete_by_prefix('products_list_')
+    _delete_by_prefix('product_detail_')
+    cache.delete('categories_list')
 
 
 def invalidate_category_cache():
@@ -39,8 +41,8 @@ def invalidate_category_cache():
 def invalidate_all_product_cache():
     """Invalidate all product-related caches"""
     cache.delete('categories_list')
-    # Clear all product list caches
-    cache.clear()  # In production, use a more targeted approach
+    _delete_by_prefix('products_list_')
+    _delete_by_prefix('product_detail_')
 
 
 def get_cache_key(prefix, **kwargs):

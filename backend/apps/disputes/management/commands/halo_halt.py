@@ -1,7 +1,6 @@
-
 from django.core.management.base import BaseCommand
 from django.core.cache import cache
-from apps.disputes.models import EvidenceLog
+from ..models import SystemFlag
 
 class Command(BaseCommand):
     help = 'The Sovereign Cancel Switch: Instantly halt or restore AI operations.'
@@ -19,7 +18,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        from apps.disputes.models import SystemFlag
+        from ..models import SystemFlag
         
         if options['on']:
             cache.set('SOVEREIGN_AI_HALTED', True, timeout=None)

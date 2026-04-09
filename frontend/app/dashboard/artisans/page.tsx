@@ -89,7 +89,7 @@ export default function ArtisansPage() {
         
         {/* Left: Artisan Spotlight (Registry - Span 8) */}
         <div className="lg:col-span-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-           {(artisans.length > 0 ? artisans : [1, 2, 3, 4, 5, 6]).map((item: any, i) => (
+            {(artisans.length > 0 ? artisans : [1, 2, 3, 4, 5, 6]).map((item: any, i: number) => (
              <SovereignGlow key={i} color={i % 2 === 0 ? "gold" : "blue"}>
                 <GlassPanel className="p-8 group relative overflow-hidden h-full flex flex-col justify-between" gradientBorder>
                    

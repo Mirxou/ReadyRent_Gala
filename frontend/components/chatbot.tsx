@@ -95,7 +95,7 @@ export function Chatbot({ className = '' }: ChatbotProps) {
         ]);
       } else {
         // Use quick chat if no session
-        const response = await chatbotApi.quickChat(inputMessage, 'ar');
+        const response = await chatbotApi.quickChat(inputMessage, { language: 'ar' });
         setMessages((prev) => [
           ...prev,
           {

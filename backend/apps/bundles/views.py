@@ -137,7 +137,7 @@ class BundleBookingViewSet(viewsets.ModelViewSet):
         for bundle_item in bundle.items.filter(is_required=True):
             if bundle_item.product:
                 # Calculate price for this item (proportional to bundle discount)
-                item_base_price = bundle_item.get_price() * total_days
+                item_base_price = bundle_item.get_price() * days
                 # Apply same discount percentage as bundle
                 discount_percentage = bundle.get_discount_percentage()
                 item_discount = (item_base_price * discount_percentage) / 100
@@ -145,11 +145,11 @@ class BundleBookingViewSet(viewsets.ModelViewSet):
                 
                 # Create individual booking
                 individual_booking = Booking.objects.create(
-                    user=request.user,
+                    user=self.request.user,
                     product=bundle_item.product,
                     start_date=start_date,
                     end_date=end_date,
-                    total_days=total_days,
+                    total_days=days,
                     total_price=item_total_price,
                     status='pending',
                     notes=f'جزء من حزمة: {bundle.name_ar}'
@@ -158,7 +158,7 @@ class BundleBookingViewSet(viewsets.ModelViewSet):
         
         # Link individual bookings to bundle booking
         if individual_bookings_list:
-            bundle_booking.individual_bookings.set(individual_bookings_list)
+            serializer.instance.individual_bookings.set(individual_bookings_list)
     
     @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
     def my_bookings(self, request):

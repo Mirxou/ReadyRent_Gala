@@ -23,15 +23,17 @@ class SovereignGuardMiddleware:
         ]
 
     def __call__(self, request):
-        if request.user.is_authenticated:
-            # Check if the user is staff or admin
+        if hasattr(request, 'user') and request.user.is_authenticated:
             is_high_risk_role = request.user.role in ['admin', 'staff', 'manager'] or request.user.is_staff
             
             if is_high_risk_role and not request.user.is_2fa_enabled:
-                # Resolve current path to check if it's excluded
-                match = resolve(request.path_info)
-                if match.url_name not in self.EXCLUDED_PATHS and not request.path.startswith('/admin/'):
-                    # If it's an API request, return 403 with specialized Sovereign code
+                try:
+                    match = resolve(request.path_info)
+                    url_name = match.url_name or ''
+                except Exception:
+                    url_name = ''
+
+                if url_name not in self.EXCLUDED_PATHS:
                     if request.path.startswith('/api/'):
                         return JsonResponse({
                             "success": False,
@@ -41,8 +43,6 @@ class SovereignGuardMiddleware:
                             "message_ar": "المصادقة الثنائية مطلوبة للوصول الإداري",
                             "message_en": "Two-factor authentication is required for administrative access."
                         }, status=status.HTTP_403_FORBIDDEN)
-                    
-                    # For non-API (if any), we could redirect, but our app is SPA/API driven
         
         response = self.get_response(request)
         return response

@@ -21,7 +21,7 @@ export class WebRTCManager {
         this.socket = new WebSocket(`${url}/ws/call/${this.roomId}/`);
 
         this.socket.onopen = () => {
-            console.log('Connected to Signaling Server');
+            // Connected to Signaling Server
         };
 
         this.socket.onmessage = async (event) => {
@@ -70,7 +70,7 @@ export class WebRTCManager {
         };
 
         this.peerConnection.ontrack = (event) => {
-            console.log('Remote track received');
+            // Remote track received
             this.onTrack(event.streams[0]);
         };
     }
@@ -131,7 +131,7 @@ export class WebRTCManager {
         this.aiSocket = new WebSocket(`${url}/ws/ai-judge/${this.roomId}/`);
 
         this.aiSocket.onopen = () => {
-            console.log("AI Judge Connected");
+            // AI Judge Connected
         };
 
         this.aiSocket.onmessage = (event) => {

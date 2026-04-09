@@ -1,0 +1,4 @@
+# file: C:\Users\aboun\Desktop\ReadyRent_Gala\backend\apps\disputes\services\consistency_service.py
+# hypothesis_version: 6.151.10
+
+[0.0, 0.33, 0.34, 0.6, 0.7, 0.9, 1.0, 'DIVERGENT', 'HIGHLY_CONSISTENT', 'NO_PRECEDENTS', 'aligned', 'average_similarity', 'baseline_judgments', 'booking', 'consistency_score', 'current_verdict', 'divergence_flags', 'divergence_reason', 'explanation', 'final', 'judgment', 'judgment_id', 'message', 'precedent_id', 'precedent_verdict', 'precedents', 'precedents_found', 'product', 'reason', 'recommendation', 'shared_factors', 'similar_cases', 'similarity', 'similarity_score', 'v1.0', 'was_followed']

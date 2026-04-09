@@ -1,0 +1,4 @@
+# file: C:\Users\aboun\Desktop\ReadyRent_Gala\backend\apps\contracts\models.py
+# hypothesis_version: 6.151.10
+
+[128, '-created_at', '1.0', 'Draft', 'Is Finalized?', 'Legacy (Pre-Phase15)', 'Owner IP', 'Owner Signature', 'Owner Signed At', 'Renter IP', 'Renter Signature', 'Renter Signed At', 'Signed', 'Void', 'agreement snapshot', 'booking', 'completed at', 'contract', 'contract version', 'created at', 'created_at', 'digital signature', 'draft', 'legacy', 'owner', 'signed', 'status', 'updated at', 'utf-8', 'void', 'العقد الذكي', 'العقود الذكية']

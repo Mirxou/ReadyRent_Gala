@@ -1,8 +1,9 @@
 from rest_framework import viewsets, status, views, serializers, permissions
 from rest_framework.response import Response
+from django.utils import timezone
 from .models import Vouch
 from apps.users.models import User
-from apps.users.services_risk import RiskScoreService
+from apps.users.services import RiskScoreService
 
 class VouchSerializer(serializers.ModelSerializer):
     class Meta:

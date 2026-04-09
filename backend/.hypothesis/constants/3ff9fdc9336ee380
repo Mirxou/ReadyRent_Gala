@@ -1,0 +1,4 @@
+# file: C:\Users\aboun\Desktop\ReadyRent_Gala\backend\apps\payments\states.py
+# hypothesis_version: 6.151.10
+
+['Cancelled', 'Disputed', 'Held', 'Pending', 'Refunded', 'Released', 'Split Released', 'cancelled', 'disputed', 'held', 'pending', 'refunded', 'released', 'split_released']

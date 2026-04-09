@@ -7,6 +7,9 @@ Deterministic. Bilingual. Dignified.
 from rest_framework.views import exception_handler
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.exceptions import PermissionDenied as DRFPermissionDenied, NotFound as DRFNotFound
+from django.http import Http404
+from django.core.exceptions import PermissionDenied as DjangoPermissionDenied
 import structlog
 
 logger = structlog.get_logger("sovereign.errors")
@@ -136,10 +139,38 @@ def custom_exception_handler(exc, context):
     # UNHANDLED EXCEPTION (500) — The system failed unexpectedly
     # -----------------------------------------------------------------------
     if response is None:
+        if isinstance(exc, (Http404, DRFNotFound)):
+            return Response(
+                {
+                    'status': 'sovereign_absence',
+                    'category': 'validation',
+                    'dignity_preserved': True,
+                    'code': 'RESOURCE_NOT_FOUND',
+                    'message_ar': AR_MESSAGE_MAP['RESOURCE_NOT_FOUND'],
+                    'message_en': 'The requested resource was not found.',
+                    'request_id': request_id,
+                },
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        if isinstance(exc, (DjangoPermissionDenied, DRFPermissionDenied)):
+            return Response(
+                {
+                    'status': 'sovereign_denial',
+                    'category': 'permission',
+                    'dignity_preserved': True,
+                    'code': 'PERMISSION_DENIED',
+                    'message_ar': AR_MESSAGE_MAP['PERMISSION_DENIED'],
+                    'message_en': 'You do not have permission to perform this action.',
+                    'request_id': request_id,
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
         logger.error(
             "unhandled_exception",
             error=str(exc),
-            exc_info=True,
+            exc_info=False,  # Avoid leaking sensitive stack traces in logs
             request_id=request_id,
         )
 
@@ -147,8 +178,12 @@ def custom_exception_handler(exc, context):
         if SENTRY_AVAILABLE:
             try:
                 sentry_sdk.capture_exception(exc)
-            except Exception:
-                pass
+            except Exception as sentry_error:
+                logger.warning(
+                    "sentry_capture_failed",
+                    sentry_error=str(sentry_error),
+                    original_error=str(exc),
+                )
 
         return Response(
             {

@@ -2,6 +2,7 @@
 Dispute models for ReadyRent.Gala
 """
 from django.db import models
+from django.db.models import F
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -12,12 +13,14 @@ import json
 class Dispute(models.Model):
     """Dispute model"""
     STATUS_CHOICES = [
+        ('open', _('Open (Legacy Alias)')),
         ('filed', _('Filed (Pending Admissibility)')),
         ('admissible', _('Admissible (Discovery Open)')),
         ('inadmissible', _('Inadmissible (Rejected)')),
         ('under_review', _('Under Review (Deliberation)')),
         ('judgment_provisional', _('Judgment Provisional')),
         ('judgment_final', _('Judgment Final')),
+        ('resolved', _('Resolved (Legacy Alias)')),
         ('closed', _('Closed')),
     ]
     
@@ -38,7 +41,7 @@ class Dispute(models.Model):
     priority = models.CharField(_('priority'), max_length=20, choices=PRIORITY_CHOICES, default='medium')
     
     # Financials
-    claimed_amount = models.DecimalField(_('Claimed Amount'), max_digits=10, decimal_places=2, null=True, blank=True)
+    claimed_amount = models.DecimalField(_('Claimed Amount'), max_digits=12, decimal_places=2, null=True, blank=True)
     
     # Admissibility Gate (Founder's Refinement)
     # Why is this dispute valid? (e.g. "Within 24h cooling window", "Smart Agreement #123 Valid")
@@ -85,6 +88,21 @@ class Dispute(models.Model):
     
     def __str__(self):
         return f"{self.title} - {self.user.email}"
+
+    @staticmethod
+    def canonical_status(status):
+        return {
+            'open': 'filed',
+            'resolved': 'closed',
+        }.get(status, status)
+
+    @property
+    def assigned_panel(self):
+        return self.judicial_panel
+
+    @assigned_panel.setter
+    def assigned_panel(self, value):
+        self.judicial_panel = value
 
 
 class DisputeMessage(models.Model):
@@ -189,7 +207,7 @@ class EvidenceLog(models.Model):
     
     # Linked Entities (Generic Foreign Key could be used, but direct links are simpler for Phase 18)
     booking = models.ForeignKey('bookings.Booking', on_delete=models.SET_NULL, null=True, blank=True, related_name='evidence_trail')
-    dispute = models.ForeignKey(Dispute, on_delete=models.SET_NULL, null=True, blank=True, related_name='evidence_trail')
+    dispute = models.ForeignKey('Dispute', on_delete=models.SET_NULL, null=True, blank=True, related_name='evidence_trail')
     
     # Content & Integrity
     metadata = models.JSONField(_("Event Metadata"), default=dict) # The raw data (e.g. message content, payment ID)
@@ -211,7 +229,11 @@ class EvidenceLog(models.Model):
             models.Index(fields=['booking', '-timestamp']),  # Hot: admissibility gate (evidence count)
             models.Index(fields=['dispute', '-timestamp']),  # Hot: dispute timeline view
             models.Index(fields=['action', '-timestamp']),   # Analytics/audit queries
+            models.Index(fields=['dispute', 'dispute_sequence']), # Integrity chain lookup
         ]
+    
+    # 🛡️ SOVEREIGN VAULT: Sequence within a dispute for gap detection.
+    dispute_sequence = models.PositiveIntegerField(default=0, db_index=True)
 
     def __str__(self):
         return f"[{self.timestamp}] {self.action} by {self.actor}"
@@ -219,36 +241,86 @@ class EvidenceLog(models.Model):
     def generate_integrity_hash(self):
         """
         Generates a BLAKE2b hash of the current log state and its parent.
-        Captures: action, actor_id, booking_id, dispute_id, metadata, previous_hash.
+        🛡️ SOVEREIGN INTEGRITY: Uses stable identifiers (UUIDs/Hashes) instead of Primary Keys.
         """
         payload = {
+            "dispute_id": str(self.dispute.id) if self.dispute else None,
+            "dispute_sequence": self.dispute_sequence,
             "action": self.action,
-            "actor": self.actor.id if self.actor else None,
-            "booking": self.booking.id if self.booking else None,
-            "dispute": self.dispute.id if self.dispute else None,
-            "metadata": self.metadata,
-            "previous_hash": self.previous_hash
+            "actor_uuid": str(getattr(self.actor, 'supabase_user_id', None)) if self.actor else None,
+            "booking_uuid": str(getattr(self.booking, 'idempotency_key', None)) if self.booking else None,
+            "previous_hash": self.previous_hash,
+            "metadata_hash": hashlib.blake2b(json.dumps(self.metadata, sort_keys=True).encode()).hexdigest()
         }
         data = json.dumps(payload, sort_keys=True).encode()
         return hashlib.blake2b(data).hexdigest()
 
     def save(self, *args, **kwargs):
+        """
+        🛡️ SOVEREIGN IMMUTABILITY: Prevent modification of existing evidence.
+        Once a log is committed to the Evidence Vault, it cannot be altered.
+        """
+        from django.db import transaction
+        
         if self.pk:
-            # Immutable!
-            raise ValueError("The Evidence Vault is Immutable. You cannot update a log.")
-        
-        # 1. Chain to the anchor (Latest Log)
-        latest_log = EvidenceLog.objects.order_by('-id').first()
-        if latest_log:
-            self.previous_hash = latest_log.hash
-        
-        # 2. Seal the current log
-        # We generate a temporary signature before super().save() 
-        # but timestamp is auto_now_add, so it's not set yet.
-        # We exclude timestamp from hash to ensure predictability before save.
-        self.hash = self.generate_integrity_hash()
-        
-        super().save(*args, **kwargs)
+            # Detect tampering attempts by comparing with DB state
+            existing = EvidenceLog.objects.get(pk=self.pk)
+            if (existing.hash != self.hash or 
+                existing.previous_hash != self.previous_hash or 
+                existing.action != self.action or
+                existing.dispute_id != self.dispute_id):
+                raise ValueError("SECURITY VIOLATION: Evidence Vault records are immutable and cannot be modified.")
+            
+            # If nothing changed, we still block standard updates just to be safe (WORM)
+            super().save(*args, **kwargs)
+            return
+
+        # 1. Chain to the anchor (Per-Dispute Latest Log)
+        # 🔒 WORM SECURITY: Locking the latest row for THIS dispute to safely determine the anchor and sequence.
+        with transaction.atomic():
+            latest_log = EvidenceLog.objects.filter(
+                dispute=self.dispute
+            ).select_for_update().order_by('-dispute_sequence').first()
+
+            if latest_log:
+                self.previous_hash = latest_log.hash
+                self.dispute_sequence = latest_log.dispute_sequence + 1
+            else:
+                self.previous_hash = None
+                self.dispute_sequence = 0
+
+            # 2. Generate Integrity Hash
+            self.hash = self.generate_integrity_hash()
+            
+            # 3. Final Commit
+            super().save(*args, **kwargs)
+            latest_log = EvidenceLog.objects.filter(dispute=self.dispute).select_for_update().order_by('-dispute_sequence').first()
+            
+            if not self.previous_hash:
+                if latest_log:
+                    self.previous_hash = latest_log.hash
+                    self.dispute_sequence = latest_log.dispute_sequence + 1
+                else:
+                    self.previous_hash = "GENESIS_ANCHOR"
+                    self.dispute_sequence = 1
+            else:
+                # If previous_hash was provided (e.g. from a client-side verification), verify it matches
+                if latest_log and self.previous_hash != latest_log.hash:
+                    logger.critical(f"Evidence Vault Fork Attempted: dispute {self.dispute.id} expected {latest_log.hash} but got {self.previous_hash}")
+                    raise ValueError("Integrity Violation: previous_hash mismatch.")
+                self.dispute_sequence = (latest_log.dispute_sequence + 1) if latest_log else 1
+
+            # 2. Seal the current log
+            self.hash = self.generate_integrity_hash()
+            super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        """🛡️ SOVEREIGN VAULT: Permanent record integrity enforcement."""
+        raise ValueError("CRITICAL: EvidenceLog entries are immutable and cannot be deleted.")
+
+    def update(self, *args, **kwargs):
+        """🛡️ SOVEREIGN VAULT: Permanent record integrity enforcement."""
+        raise ValueError("CRITICAL: EvidenceLog entries are immutable and cannot be updated.")
 
 
 class Judgment(models.Model):
@@ -258,8 +330,10 @@ class Judgment(models.Model):
     """
     VERDICT_TYPES = [
         ('favor_tenant', _('Favor Tenant')),
+        ('favor_renter', _('Favor Renter (Legacy Alias)')),
         ('favor_owner', _('Favor Owner')),
         ('split', _('Split Decision')),
+        ('partial', _('Partial Decision (Legacy Alias)')),
         ('dismissed', _('Dismissed')),
     ]
 
@@ -276,6 +350,7 @@ class Judgment(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
+        blank=True,
         related_name='judgments_authored',
         verbose_name=_('judge')
     )
@@ -310,6 +385,13 @@ class Judgment(models.Model):
     def __str__(self):
         return f"Judgment #{self.id} for Dispute #{self.dispute.id} ({self.status})"
 
+    @staticmethod
+    def canonical_verdict(verdict):
+        return {
+            'favor_renter': 'favor_tenant',
+            'partial': 'split',
+        }.get(verdict, verdict)
+
     def save(self, *args, **kwargs):
         is_new = self.pk is None
         old_status = None
@@ -321,27 +403,13 @@ class Judgment(models.Model):
 
         super().save(*args, **kwargs)
 
-        # Execute Split Verdict if becoming final
-        if self.status == 'final' and old_status != 'final' and self.verdict == 'split':
-            if not self.split_renter_percentage:
-                raise ValueError("split_renter_percentage is required for a split verdict.")
-            
-            # Find the linked EscrowHold
-            from apps.payments.models import EscrowHold
-            try:
-                hold = EscrowHold.objects.get(booking=self.dispute.booking)
-                from apps.payments.engine import EscrowEngine
-                EscrowEngine.execute_split_release(
-                    hold_id=hold.id,
-                    renter_percentage=self.split_renter_percentage,
-                    judgment_id=self.id,
-                    reason=f"Judicial Split Verdict (Judgment #{self.id})",
-                    actor=self.judge
-                )
-            except EscrowHold.DoesNotExist:
-                import logging
-                logging.getLogger("disputes").error(f"Cannot execute split verdict {self.id}: no EscrowHold found.")
-
+        # ─────────────────────────────────────────────────────────────────────────────
+        # REFACTORED: Financial Execution via Service Layer (Phase 24)
+        # FIXED: Now covers ALL verdict types, not just 'split'.
+        # ─────────────────────────────────────────────────────────────────────────────
+        if self.status == 'final' and old_status != 'final':
+            from apps.disputes.services.adjudication import AdjudicationService
+            AdjudicationService.finalize_judgment(self, self.judge)
 
 
 class Appeal(models.Model):
@@ -406,10 +474,6 @@ class JudgmentPrecedent(models.Model):
     """
     The Institutional Memory.
     Links a current judgment to historical precedents that influenced it.
-    
-    User Feedback Integration:
-    - Silent Precedents: Track whether precedent was challenged
-    - Graph Architecture: Judgment → Precedents (many-to-many through this model)
     """
     # Current judgment being evaluated
     judgment = models.ForeignKey(
@@ -446,16 +510,12 @@ class JudgmentPrecedent(models.Model):
         help_text=_('Why did we diverge from this precedent?')
     )
     
-    # Future Field (Phase 21): Silent Precedents
-    # is_challenged = models.BooleanField(default=False)
-    
     created_at = models.DateTimeField(_('linked at'), auto_now_add=True)
 
     class Meta:
         verbose_name = _('سابقة قضائية')
         verbose_name_plural = _('السوابق القضائية')
         ordering = ['-created_at']
-        # Prevent duplicate links
         unique_together = ['judgment', 'precedent']
 
     def __str__(self):
@@ -466,13 +526,7 @@ class JudicialPanel(models.Model):
     """
     The Delegation System.
     Specialized panels for routine appeals to prevent High Court bottlenecks.
-    
-    User Feedback Integration:
-    - Panel rotation (prevent cultural bias)
-    - Capacity tracking (prevent burnout)
-    - High Court oversight (maintain quality)
     """
-    
     PANEL_TYPE_CHOICES = [
         ('routine', _('Routine Cases')),
         ('specialized', _('Specialized Domain')),
@@ -544,24 +598,18 @@ class JudicialPanel(models.Model):
     
     def assign_case(self):
         """Increment current load when case is assigned"""
-        self.current_load += 1
-        self.save()
-    
+        self.__class__.objects.filter(pk=self.pk).update(current_load=F('current_load') + 1)
+        self.refresh_from_db(fields=['current_load'])
+
     def release_case(self):
         """Decrement current load when case is resolved"""
-        if self.current_load > 0:
-            self.current_load -= 1
-            self.save()
+        self.__class__.objects.filter(pk=self.pk, current_load__gt=0).update(current_load=F('current_load') - 1)
+        self.refresh_from_db(fields=['current_load'])
 
 
 class JudgmentEmbedding(models.Model):
     """
     Phase 22: AI-Assisted Precedent Search
-    Vector representation of judgment for semantic case matching.
-    
-    Sovereign Safeguard: Embedding Drift Protection
-    - Track model_version to prevent mixing incompatible embeddings
-    - Re-embed when model changes
     """
     judgment = models.OneToOneField(
         Judgment,
@@ -570,13 +618,11 @@ class JudgmentEmbedding(models.Model):
         verbose_name=_('judgment')
     )
     
-    # Store embedding as JSON array of floats
     embedding_vector = models.JSONField(
         verbose_name=_('embedding vector'),
         help_text=_('Normalized text embedding for semantic search')
     )
     
-    # Track model version for drift protection
     model_version = models.CharField(
         max_length=100,
         default='paraphrase-multilingual-MiniLM-L12-v2',
@@ -584,7 +630,6 @@ class JudgmentEmbedding(models.Model):
         help_text=_('Embedding model used to generate this vector')
     )
     
-    # Store original and normalized text for reference
     original_text = models.TextField(
         verbose_name=_('original text'),
         help_text=_('Original judgment text (for display)')
@@ -611,14 +656,9 @@ class JudgmentEmbedding(models.Model):
         return f"Embedding for Judgment #{self.judgment.id} ({self.model_version})"
 
 
-# ==============================================================================
-# Phase 40: Sovereign Mediation (Benevolent Interventions)
-# ==============================================================================
-
 class MediationSession(models.Model):
     """
     Automated negotiation process before full adjudication.
-    Tracks the 'Sovereign Settlement' offers.
     """
     STATUS_CHOICES = [
         ('active', _('Active')),
@@ -679,7 +719,6 @@ class SettlementOffer(models.Model):
     
     source = models.CharField(max_length=20, choices=OFFER_SOURCE_CHOICES)
     
-    # Phase 44: Sovereign Gate (Human-in-the-loop)
     status = models.CharField(
         max_length=20, 
         choices=Status.choices, 
@@ -687,7 +726,7 @@ class SettlementOffer(models.Model):
         verbose_name=_('Visibility Status')
     )
     approved_by = models.ForeignKey(
-        'users.User', 
+        settings.AUTH_USER_MODEL, 
         null=True, 
         blank=True,
         on_delete=models.SET_NULL,
@@ -697,10 +736,8 @@ class SettlementOffer(models.Model):
     approved_at = models.DateTimeField(null=True, blank=True, verbose_name=_('Approved At'))
     amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name=_('Offer Amount'))
     
-    # Reasoning (why is this fair?)
     reasoning = models.TextField(verbose_name=_('Reasoning'), blank=True)
     
-    # Precedents used to justify this offer
     cited_precedents = models.ManyToManyField(
         Judgment, 
         blank=True, 
@@ -708,14 +745,12 @@ class SettlementOffer(models.Model):
         verbose_name=_('Cited Precedents')
     )
     
-    # Phase 43: Explainability Enhancement
     confidence_min = models.DecimalField(
         max_digits=10,
         decimal_places=2,
         null=True,
         blank=True,
         verbose_name=_('Confidence Minimum'),
-        help_text=_('Minimum fair value (confidence interval)')
     )
     confidence_max = models.DecimalField(
         max_digits=10,
@@ -723,13 +758,11 @@ class SettlementOffer(models.Model):
         null=True,
         blank=True,
         verbose_name=_('Confidence Maximum'),
-        help_text=_('Maximum fair value (confidence interval)')
     )
     explainability_version = models.CharField(
         max_length=20,
         default='v1-plain-language',
         verbose_name=_('Explainability Version'),
-        help_text=_('Tracks explanation format version (Phase 43)')
     )
     
     is_accepted = models.BooleanField(default=False)
@@ -744,29 +777,16 @@ class SettlementOffer(models.Model):
         return f"Offer {self.amount} ({self.source}) - {self.session}"
 
 
-# ==============================================================================
-# Phase 23: Public Transparency & Social Legitimacy Models
-# ==============================================================================
-
 class AnonymizedJudgment(models.Model):
     """
     Public-facing, de-identified judgment record.
-    Generated automatically on judgment finalization.
-    
-    Sovereign Safeguard: Reverse inference protection via:
-    - Publication delays (60-90 days for high-risk)
-    - Dynamic redaction (region/amounts)
-    - Uniqueness scoring
     """
-    # Identifiers (Hashed)
     judgment_hash = models.CharField(
         max_length=64,
         unique=True,
         verbose_name=_('judgment hash'),
-        help_text=_('SHA256(judgment.id + salt)')
     )
     
-    # Public Context
     category = models.CharField(
         max_length=100,
         verbose_name=_('category'),
@@ -777,10 +797,8 @@ class AnonymizedJudgment(models.Model):
         verbose_name=_('dispute type')
     )
     
-    # Anonymized Details
     ruling_summary = models.TextField(
         verbose_name=_('ruling summary'),
-        help_text=_('AI-generated, stripped of names/locations')
     )
     verdict = models.CharField(
         max_length=20,
@@ -793,31 +811,24 @@ class AnonymizedJudgment(models.Model):
         null=True,
         blank=True,
         verbose_name=_('awarded ratio %'),
-        help_text=_('May be redacted for privacy')
     )
     
-    # Evidence (Types Only)
     evidence_types = models.JSONField(
         default=list,
         verbose_name=_('evidence types'),
-        help_text=_('["photo", "contract", "witness"]')
     )
     
-    # Consistency
     consistency_score = models.IntegerField(
         default=0,
         verbose_name=_('consistency score'),
-        help_text=_('0-100, from precedent search')
     )
     similar_cases_count = models.IntegerField(
         default=0,
         verbose_name=_('similar cases count')
     )
     
-    # Metadata (Rounded for privacy)
     judgment_date = models.DateField(
         verbose_name=_('judgment date'),
-        help_text=_('Month precision only (day=1)'),
         db_index=True
     )
     geographic_region = models.CharField(
@@ -825,20 +836,16 @@ class AnonymizedJudgment(models.Model):
         null=True,
         blank=True,
         verbose_name=_('geographic region'),
-        help_text=_('Province level, may be redacted')
     )
     
-    # Publishing Control
     uniqueness_score = models.IntegerField(
         default=0,
         verbose_name=_('uniqueness score'),
-        help_text=_('0-100, higher = more unique/identifiable')
     )
     publication_delayed_until = models.DateField(
         null=True,
         blank=True,
         verbose_name=_('publication delayed until'),
-        help_text=_('For high-risk categories')
     )
     
     published_at = models.DateTimeField(
@@ -854,24 +861,15 @@ class AnonymizedJudgment(models.Model):
         verbose_name = _('anonymized judgment')
         verbose_name_plural = _('anonymized judgments')
         ordering = ['-judgment_date']
-        indexes = [
-            models.Index(fields=['category', 'verdict']),
-            models.Index(fields=['consistency_score']),
-            models.Index(fields=['judgment_date']),
-            models.Index(fields=['uniqueness_score']),
-        ]
         db_table = 'disputes_anonymized_judgment'
-    
+
     def __str__(self):
-        return f"Anonymized Judgment: {self.category} ({self.verdict}) - {self.judgment_date.strftime('%Y-%m')}"
+        return f"Anonymized Judgment: {self.category} ({self.verdict})"
 
 
 class PublicMetrics(models.Model):
     """
     Pre-computed aggregate statistics for transparency dashboard.
-    Updated daily via cron job.
-    
-    Sovereign Safeguard: MUST have context card (no raw numbers).
     """
     METRIC_TYPES = [
         ('verdict_balance', _('Verdict Balance (Owner vs Renter)')),
@@ -895,14 +893,11 @@ class PublicMetrics(models.Model):
         null=True,
         blank=True,
         verbose_name=_('category'),
-        help_text=_('Null = overall metric')
     )
     
-    # Time window
     period_start = models.DateField(verbose_name=_('period start'))
     period_end = models.DateField(verbose_name=_('period end'))
     
-    # Values
     value_numeric = models.DecimalField(
         max_digits=10,
         decimal_places=2,
@@ -914,7 +909,6 @@ class PublicMetrics(models.Model):
         null=True,
         blank=True,
         verbose_name=_('complex value'),
-        help_text=_('For multi-dimensional metrics')
     )
     
     computed_at = models.DateTimeField(
@@ -928,17 +922,11 @@ class PublicMetrics(models.Model):
         unique_together = [['metric_type', 'category', 'period_start']]
         ordering = ['-period_start']
         db_table = 'disputes_public_metrics'
-    
-    def __str__(self):
-        cat = self.category or "Overall"
-        return f"{self.get_metric_type_display()} ({cat}): {self.period_start} to {self.period_end}"
 
 
 class MetricContextCard(models.Model):
     """
     Mandatory context for every public metric.
-    
-    Sovereign Safeguard #2: Never show numbers without WHY.
     """
     metric = models.OneToOneField(
         PublicMetrics,
@@ -947,22 +935,18 @@ class MetricContextCard(models.Model):
         verbose_name=_('metric')
     )
     
-    # Contextual breakdown
     context_explanation = models.TextField(
         verbose_name=_('context explanation'),
-        help_text=_('Why this number? What factors contributed?')
     )
     
     counter_narrative = models.TextField(
         blank=True,
         verbose_name=_('counter narrative'),
-        help_text=_('What would change if conditions were different?')
     )
     
     sample_scenarios = models.JSONField(
         default=list,
         verbose_name=_('sample scenarios'),
-        help_text=_('[{"condition": "With photo", "outcome": "78% owner"}]')
     )
     
     created_at = models.DateTimeField(auto_now_add=True)
@@ -972,19 +956,11 @@ class MetricContextCard(models.Model):
         verbose_name = _('metric context card')
         verbose_name_plural = _('metric context cards')
         db_table = 'disputes_metric_context_card'
-    
-    def __str__(self):
-        return f"Context for: {self.metric}"
 
 
 class UserReputationLog(models.Model):
     """
     Private log of abuse attempts.
-    NOT publicly visible, used for system adjustments only.
-    
-    Sovereign Safeguard #4: Reputation ≠ Outcome Influence
-    - CAN affect: Priority, scrutiny level
-    - CANNOT affect: Evidence weight, verdict, award amount
     """
     EVENT_TYPES = [
         ('frivolous_appeal', _('Frivolous Appeal (Rejected by Panel)')),
@@ -1019,11 +995,10 @@ class UserReputationLog(models.Model):
         blank=True,
         default='automatic',
         verbose_name=_('detection method'),
-        help_text=_('panel_rejection, AI_flag, timestamp_anomaly, etc.')
     )
     
     related_dispute = models.ForeignKey(
-        Dispute,
+        'Dispute',
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -1031,17 +1006,14 @@ class UserReputationLog(models.Model):
         verbose_name=_('related dispute')
     )
     
-    # Additional fields for pattern detection
     event_data = models.JSONField(
         null=True,
         blank=True,
         verbose_name=_('event data'),
-        help_text=_('Additional pattern-specific data')
     )
     context = models.TextField(
         blank=True,
         verbose_name=_('context'),
-        help_text=_('Human-readable context')
     )
     timestamp = models.DateTimeField(
         auto_now_add=True,
@@ -1052,7 +1024,6 @@ class UserReputationLog(models.Model):
     severity = models.IntegerField(
         default=1,
         verbose_name=_('severity'),
-        help_text=_('1-5, higher = more serious')
     )
     
     logged_at = models.DateTimeField(
@@ -1061,7 +1032,6 @@ class UserReputationLog(models.Model):
         db_index=True
     )
     
-    # Action Taken
     action = models.CharField(
         max_length=50,
         choices=ACTIONS,
@@ -1078,22 +1048,12 @@ class UserReputationLog(models.Model):
         verbose_name = _('user reputation log')
         verbose_name_plural = _('user reputation logs')
         ordering = ['-logged_at']
-        indexes = [
-            models.Index(fields=['user', 'event_type']),
-            models.Index(fields=['logged_at']),
-        ]
         db_table = 'disputes_user_reputation_log'
-    
-    def __str__(self):
-        return f"{self.user.username}: {self.get_event_type_display()} (Severity {self.severity})"
 
 
 class PostJudgmentSurvey(models.Model):
     """
     Post-judgment acceptance survey.
-    Sent 7 days after judgment, anonymous and voluntary.
-    
-    Sovereign Safeguard #6: True legitimacy = losing users accepting outcome.
     """
     judgment = models.OneToOneField(
         Judgment,
@@ -1102,36 +1062,29 @@ class PostJudgmentSurvey(models.Model):
         verbose_name=_('judgment')
     )
     
-    # Core Questions (True/False)
     understands_decision = models.BooleanField(
         null=True,
         blank=True,
         verbose_name=_('understands decision'),
-        help_text=_('Do you understand why the decision was made?')
     )
     
     accepts_fairness = models.BooleanField(
         null=True,
         blank=True,
         verbose_name=_('accepts fairness'),
-        help_text=_('Even if you disagree, do you believe the process was fair?')
     )
     
     would_use_again = models.BooleanField(
         null=True,
         blank=True,
         verbose_name=_('would use again'),
-        help_text=_('Would you use this platform again?')
     )
     
-    # Free Text (Optional)
     feedback = models.TextField(
         blank=True,
         verbose_name=_('feedback'),
-        help_text=_('Optional comments')
     )
     
-    # Metadata
     sent_at = models.DateTimeField(
         auto_now_add=True,
         verbose_name=_('sent at')
@@ -1147,28 +1100,11 @@ class PostJudgmentSurvey(models.Model):
         verbose_name_plural = _('post-judgment surveys')
         ordering = ['-sent_at']
         db_table = 'disputes_post_judgment_survey'
-    
-    def __str__(self):
-        status = "Responded" if self.responded_at else "Pending"
-        return f"Survey for Judgment #{self.judgment.id} ({status})"
-    
-    @property
-    def is_completed(self):
-        """Check if user responded to survey"""
-        return self.responded_at is not None
-
-
-# ==============================================================================
-# Orphaned Methods (TODO: Move to appropriate class or service)
-# ==============================================================================
-
 
 
 class SystemFlag(models.Model):
     """
     Persistent system-wide flags for critical operations.
-    Used as fallback when cache is unreliable (e.g., LocMemCache in testing).
-    Phase 45: Ensures Kill Switch works across all environments.
     """
     key = models.CharField(max_length=100, unique=True, db_index=True)
     value = models.BooleanField(default=False)
@@ -1182,7 +1118,6 @@ class SystemFlag(models.Model):
     
     @classmethod
     def get_flag(cls, key, default=False):
-        """Get a flag value, returning default if not found."""
         try:
             return cls.objects.get(key=key).value
         except cls.DoesNotExist:
@@ -1190,7 +1125,5 @@ class SystemFlag(models.Model):
     
     @classmethod
     def set_flag(cls, key, value):
-        """Set a flag value, creating if necessary."""
         obj, _ = cls.objects.update_or_create(key=key, defaults={'value': value})
         return obj
-

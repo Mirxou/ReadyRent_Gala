@@ -188,7 +188,7 @@ export function AIDisputeAssistant({
         const res = await chatbotApi.sendMessage(sid, fullText);
         reply = res.data?.response || res.data?.message || res.data?.content || '';
       } else {
-        const res = await chatbotApi.quickChat(fullText, 'ar');
+        const res = await chatbotApi.quickChat(fullText, { language: 'ar' });
         reply = res.data?.response || res.data?.message || res.data?.content || '';
       }
 

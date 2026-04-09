@@ -1,0 +1,4 @@
+# file: C:\Users\aboun\Desktop\ReadyRent_Gala\backend\apps\disputes\services\abuse_detector.py
+# hypothesis_version: 6.151.10
+
+[0.9, 0.95, 100, '-dispute_count', '-timestamp', 'HIGH', 'MEDIUM', 'PATTERN_DETECTED', 'WARNING_ISSUED', 'booking__user', 'context', 'data', 'dispute__user', 'dispute_count', 'event_type', 'favor_owner', 'favor_tenant', 'high_win_rate', 'id', 'judged_disputes', 'judgment', 'pattern', 'patterns_detected', 'period_days', 'recent_logs', 'risk_level', 'serial_filer', 'timestamp', 'total_disputes', 'user', 'user_email', 'user_id', 'warnings_issued', 'win_rate', 'won_disputes']

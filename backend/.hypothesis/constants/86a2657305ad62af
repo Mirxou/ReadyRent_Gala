@@ -1,0 +1,4 @@
+# file: C:\Users\aboun\Desktop\ReadyRent_Gala\backend\apps\disputes\admin.py
+# hypothesis_version: 6.151.10
+
+['#4caf50', '#999', '#f44336', '#ff9800', '-created_at', '-status', '<a href="{}">{}</a>', 'Amount', 'Dispute', 'Status', 'action', 'actor', 'actor__email', 'amount', 'amount_display', 'approve_offers', 'approved_at', 'approved_by', 'awarded_amount', 'context_snapshot', 'created_at', 'current_load', 'current_round', 'dispute', 'dispute_link', 'expires_at', 'finalized_at', 'hash', 'id', 'is_active', 'metadata', 'name', 'panel_type', 'pending_review', 'previous_hash', 'priority', 'reasoning', 'reject_offers', 'rejected', 'source', 'started_at', 'status', 'status_badge', 'timestamp', 'title', 'updated_at', 'user', 'user__email', 'verdict', 'visible']

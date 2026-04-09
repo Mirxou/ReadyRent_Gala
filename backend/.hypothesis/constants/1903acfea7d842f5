@@ -1,0 +1,4 @@
+# file: C:\Users\aboun\Desktop\ReadyRent_Gala\backend\apps\disputes\async_tasks.py
+# hypothesis_version: 6.151.10
+
+['async_embed_success', 'async_vault_logged', 'disputes.async_tasks', 'final']

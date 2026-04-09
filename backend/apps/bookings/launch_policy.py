@@ -42,7 +42,9 @@ class SovereignLaunchPolicy:
         """
         # 0. Data Integrity
         if not product.wilaya:
-             raise ValidationError(_("Product location (Wilaya) is required for Sovereign Validation."))
+            raise ValidationError(_("Product location (Wilaya) is required for Sovereign Validation."))
+        if not product.category:
+            raise ValidationError(_("Product must have a category for Sovereign Validation."))
 
         wilaya_id = product.wilaya
         category_slug = product.category.slug

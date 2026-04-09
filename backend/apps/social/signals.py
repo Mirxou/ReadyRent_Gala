@@ -2,7 +2,7 @@ import structlog
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from .models import Vouch
-from apps.users.services_risk import RiskScoreService
+from apps.users.services import RiskScoreService
 
 from apps.users.models import Blacklist
 from .models import Referral
@@ -55,7 +55,14 @@ def apply_parent_penalty(sender, instance, created, **kwargs):
                     referrer=referrer.email,
                     blacklisted_user=blacklisted_user.email
                 )
-                # TODO: Trigger Notification Service
+                # Trigger Notification Service
+                from apps.notifications.services import NotificationService
+                NotificationService.send_notification(
+                    user=referrer,
+                    title="Referral Strike Warning",
+                    message=f"User {blacklisted_user.email} has been blacklisted. Strike 1 issued.",
+                    notification_type="warning"
+                )
             
             elif current_strike == 2:
                 # STRIKE 2: FREEZE

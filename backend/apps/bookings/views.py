@@ -5,9 +5,11 @@ from rest_framework import generics, status, filters
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.utils import timezone
 from datetime import timedelta
 from django.db.models import Count, Sum, Q
+from django.db import transaction
 from django_filters.rest_framework import DjangoFilterBackend
 import logging
 
@@ -114,33 +116,8 @@ class BookingCreateView(SovereignResponseMixin, generics.CreateAPIView):
                     from apps.bookings.launch_policy import SovereignLaunchPolicy
                     SovereignLaunchPolicy.validate_booking(_locked_product)
                     # ------------------------------
-                    
-                    # Check availability (now strictly serialized)
-                    availability = AvailabilityService.check_availability(
-                        product_id=item.product.id,
-                        start_date=item.start_date,
-                        end_date=item.end_date
-                    )
-                    
-                    if not availability['available']:
-                        # Rollback everything if one item fails
-                         raise ValidationError({
-                            'error': availability['message'],
-                            'reason': availability['reason'],
-                            'product_id': item.product.id
-                        })
 
-                    # Calculate details
-                    total_days = (item.end_date - item.start_date).days + 1
-                    total_price = item.product.price_per_day * total_days * item.quantity
-
-                    # Create Booking via Service
-                    # Use idempotency key only for the first item if multiple? 
-                    # Usually cart -> single checkout. We can assign key to the first booking or unique keys per item.
-                    # Simplified: We assign the key to the first booking if multiple (or fail). 
-                    # Better: If multiple items, we rely on the specific logic. 
-                    # NOTE: Idempotency is tricky with carts. 
-                    # We will apply it to the first booking for now or assuming Single Item Checkout is common.
+                    # Create Booking via Service (Logic Unified)
                     current_key = idempotency_key if (idempotency_key and len(bookings) == 0) else None
 
                     booking, auto_confirmed = BookingService.create_booking(
@@ -148,8 +125,7 @@ class BookingCreateView(SovereignResponseMixin, generics.CreateAPIView):
                         product=item.product,
                         start_date=item.start_date,
                         end_date=item.end_date,
-                        total_days=total_days,
-                        total_price=total_price
+                        quantity=item.quantity
                     )
                     
                     if current_key:
@@ -159,6 +135,7 @@ class BookingCreateView(SovereignResponseMixin, generics.CreateAPIView):
                     bookings.append(booking)
                     messages.append(BookingService.get_trust_reward_message(auto_confirmed))
 
+                    # Cache invalidation still happens here as it's a side effect of successful creation
                     AvailabilityService.invalidate_cache(
                         product_id=item.product.id,
                         start_date=item.start_date,
@@ -173,6 +150,10 @@ class BookingCreateView(SovereignResponseMixin, generics.CreateAPIView):
         
         except ValidationError as e:
             return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
+        except DjangoValidationError as e:
+            return Response({'error': e.message if hasattr(e, 'message') else str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except ValueError as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             logger.error(f"Booking creation failed: {str(e)}", exc_info=True)
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -272,64 +253,77 @@ class BookingStatusUpdateView(generics.GenericAPIView):
     """Update booking status only"""
     permission_classes = [IsAuthenticated]
     
+    VALID_TRANSITIONS = {
+        'pending': ['confirmed', 'cancelled', 'manual_review', 'rejected'],
+        'confirmed': ['in_use', 'cancelled'],
+        'in_use': ['completed', 'cancelled'],
+        'completed': [],
+        'cancelled': [],
+        'manual_review': ['confirmed', 'rejected', 'cancelled'],
+        'rejected': ['pending'],
+    }
+    
     def patch(self, request, pk):
         try:
-            booking = Booking.objects.get(pk=pk)
-            
-            # Check permissions: user can only update their own bookings unless admin
-            if booking.user != request.user and request.user.role not in ['admin', 'staff']:
-                return Response(
-                    {'error': 'You do not have permission to update this booking'},
-                    status=status.HTTP_403_FORBIDDEN
-                )
-            
-            new_status = request.data.get('status')
-            if not new_status:
-                return Response(
-                    {'error': 'Status is required'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            
-            # Validate status transition
-            valid_statuses = ['pending', 'confirmed', 'in_use', 'completed', 'cancelled']
-            if new_status not in valid_statuses:
-                return Response(
-                    {'error': 'Invalid status'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            
-            booking.status = new_status
-            booking.save()
-            
-            # Send real-time update via WebSocket (non-blocking)
-            try:
-                channel_layer = get_channel_layer()
-                if channel_layer:
-                    room_group_name = f'bookings_{booking.user.id}'
-                    async_to_sync(channel_layer.group_send)(
-                        room_group_name,
-                        {
-                            'type': 'booking_update',
-                            'booking': {
-                                'id': booking.id,
-                                'status': booking.status,
-                                'product_id': booking.product.id,
-                                'product_name': booking.product.name_ar,
-                                'start_date': booking.start_date.isoformat(),
-                                'end_date': booking.end_date.isoformat(),
-                                'total_price': str(booking.total_price),
-                                'updated_at': booking.updated_at.isoformat(),
-                            }
-                        }
+            with transaction.atomic():
+                booking = Booking.objects.select_for_update().get(pk=pk)
+                
+                if booking.user != request.user and request.user.role not in ['admin', 'staff']:
+                    return Response(
+                        {'error': 'You do not have permission to update this booking'},
+                        status=status.HTTP_403_FORBIDDEN
                     )
-            except Exception as e:
-                # Log error but don't fail the update
-                import logging
-                logger = logging.getLogger(__name__)
-                logger.warning(f"Failed to send booking update via WebSocket (non-critical): {e}")
-            
-            serializer = BookingSerializer(booking)
-            return Response(serializer.data)
+                
+                new_status = request.data.get('status')
+                if not new_status:
+                    return Response(
+                        {'error': 'Status is required'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+                
+                valid_statuses = ['pending', 'confirmed', 'in_use', 'completed', 'cancelled', 'manual_review', 'rejected']
+                if new_status not in valid_statuses:
+                    return Response(
+                        {'error': 'Invalid status'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+                
+                if new_status not in self.VALID_TRANSITIONS.get(booking.status, []):
+                    return Response(
+                        {'error': f'Invalid transition from {booking.status} to {new_status}'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+                
+                booking.status = new_status
+                booking.save()
+                
+                try:
+                    channel_layer = get_channel_layer()
+                    if channel_layer:
+                        room_group_name = f'bookings_{booking.user.id}'
+                        async_to_sync(channel_layer.group_send)(
+                            room_group_name,
+                            {
+                                'type': 'booking_update',
+                                'booking': {
+                                    'id': booking.id,
+                                    'status': booking.status,
+                                    'product_id': booking.product.id,
+                                    'product_name': booking.product.name_ar,
+                                    'start_date': booking.start_date.isoformat(),
+                                    'end_date': booking.end_date.isoformat(),
+                                    'total_price': str(booking.total_price),
+                                    'updated_at': booking.updated_at.isoformat(),
+                                }
+                            }
+                        )
+                except Exception as e:
+                    import logging
+                    logger = logging.getLogger(__name__)
+                    logger.warning(f"Failed to send booking update via WebSocket (non-critical): {e}")
+                
+                serializer = BookingSerializer(booking)
+                return Response(serializer.data)
             
         except Booking.DoesNotExist:
             return Response(
@@ -851,4 +845,3 @@ class BookingCalculateDepositView(generics.GenericAPIView):
         result = RiskEngine.calculate_deposit(request.user, product)
         
         return Response(result)
-

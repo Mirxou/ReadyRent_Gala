@@ -49,6 +49,9 @@ class EscrowService:
         """
         Release funds to the Beneficiary (Owner).
         """
+        if not getattr(booking.product, 'owner', None):
+            raise ValidationError('Cannot release funds for an ownerless product.')
+
         # Phase 3: Engine Transition
         from apps.payments.models import EscrowHold
         from apps.payments.engine import EscrowEngine

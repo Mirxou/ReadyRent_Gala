@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 
-from apps.disputes.expectation_setter import ExpectationSetter
+from .expectation_setter import ExpectationSetter
 from apps.products.models import Product
 from apps.bookings.models import Booking
 

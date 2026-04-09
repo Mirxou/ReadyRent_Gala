@@ -11,9 +11,10 @@ from django.conf import settings
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.db import transaction
-from .models import Payment, PaymentWebhook, Wallet, EscrowHold, WalletTransaction
+from .models import Payment, PaymentWebhook, Wallet, EscrowHold, WalletTransaction, BaridiMobTransaction
 from .states import EscrowState
 from apps.bookings.models import Booking
+from apps.disputes.models import EvidenceLog
 
 
 class BaridiMobService:
@@ -85,6 +86,19 @@ class BaridiMobService:
                 payment.gateway_response = data
                 payment.status = 'processing'
                 payment.save()
+                
+                # ─────────────────────────────────────────────────────────────────────────────
+                # GAP-04 FIX (2026-04-01): Initialize granular lifecycle tracking
+                # ─────────────────────────────────────────────────────────────────────────────
+                BaridiMobTransaction.objects.update_or_create(
+                    payment=payment,
+                    defaults={
+                        'phone_number': phone,
+                        'external_reference': data.get('transaction_id', ''),
+                        'status': BaridiMobTransaction.Status.INITIATED,
+                        'gateway_metadata': data
+                    }
+                )
                 
                 return {
                     'success': True,
@@ -162,6 +176,15 @@ class BaridiMobService:
                     payment.gateway_response = data
                     payment.save()
                     
+                    # ─────────────────────────────────────────────────────────────────────────────
+                    # GAP-04 FIX (2026-04-01): Finalize lifecycle tracking
+                    # ─────────────────────────────────────────────────────────────────────────────
+                    BaridiMobTransaction.objects.filter(payment=payment).update(
+                        status=BaridiMobTransaction.Status.SUCCESS,
+                        finalized_at=timezone.now(),
+                        gateway_metadata=data
+                    )
+                    
                     # Update booking status
                     PaymentService.update_booking_status(payment)
                     
@@ -193,9 +216,8 @@ class BaridiMobService:
         sorted_payload = sorted(payload.items())
         # Create signature string
         signature_string = '&'.join([f'{k}={v}' for k, v in sorted_payload if k != 'signature'])
-        signature_string += f'&secret={cls.SECRET_KEY}'
-        # Generate hash
-        return hashlib.sha256(signature_string.encode()).hexdigest()
+        # Generate HMAC-SHA256
+        return hmac.new(cls.SECRET_KEY.encode(), signature_string.encode(), hashlib.sha256).hexdigest()
     
     @classmethod
     def verify_webhook(cls, payload: dict, signature: str) -> bool:
@@ -364,6 +386,70 @@ class BankCardService:
         return hmac.compare_digest(expected_signature, signature)
 
 
+class EDahabiaService:
+    """Service for E-Dahabia (Golden Card) payment integration"""
+    
+    GATEWAY_URL = getattr(settings, 'EDAHABIA_GATEWAY_URL', 'https://gateway.poste.dz')
+    API_KEY = getattr(settings, 'EDAHABIA_API_KEY', '')
+    
+    @classmethod
+    def initiate_payment(cls, payment: Payment, card_number_last_four: str):
+        """
+        Initiate E-Dahabia Payment Simulation.
+        Harden: Stores a hash of the card (idempotency).
+        """
+        import hashlib
+        # In a real flow, we'd hash the FULL card number.
+        # Here we simulate with the last 4 for the concept.
+        card_hash = hashlib.sha256(card_number_last_four.encode()).hexdigest()
+        
+        payment.edahabia_card_number_hash = card_hash
+        payment.status = 'processing'
+        payment.save()
+        
+        # 🔐 Log to Evidence Vault
+        EvidenceLog.objects.create(
+            action='PAYMENT_INITIATED_EDAHABIA',
+            actor=payment.user,
+            booking=payment.booking,
+            metadata={'payment_id': payment.id, 'card_hash': card_hash}
+        )
+        
+        return {'success': True, 'otp_required': True, 'message': 'E-Dahabia OTP sent to your phone.'}
+
+    @classmethod
+    def complete_payment(cls, payment: Payment, otp: str):
+        """Finalize E-Dahabia transaction"""
+        # TODO (Phase 17): Integrate with actual E-Dahabia gateway for OTP verification
+        # 🛡️ SOVEREIGN GUARD: E-Dahabia integration is pending. 
+        # For security, we MUST NOT allow phantom payments.
+        raise NotImplementedError(
+            "E-Dahabia OTP verification not yet implemented. "
+            "Gateway integration required before production deployment."
+        )
+
+
+class CODService:
+    """Service for Cash On Delivery (الدفع عند الاستلام)"""
+    
+    @classmethod
+    def request_cod(cls, payment: Payment, delivery_address: str):
+        """Submit a COD request for manual confirmation"""
+        payment.status = 'processing'
+        payment.cod_delivery_address = delivery_address
+        payment.save()
+        
+        # 🔐 Log to Evidence Vault
+        EvidenceLog.objects.create(
+            action='PAYMENT_REQUEST_COD',
+            actor=payment.user,
+            booking=payment.booking,
+            metadata={'payment_id': payment.id, 'address': delivery_address}
+        )
+        
+        return {'success': True, 'message': 'COD request received. Wait for confirmation.'}
+
+
 class PaymentService:
     """Main payment service"""
     
@@ -414,10 +500,17 @@ class PaymentService:
                 )
         elif payment.payment_method == 'bank_card':
             return BankCardService.process_payment(payment, payment_data)
-            return {
-                'success': False,
-                'error': f'Unknown payment method: {payment.payment_method}'
-            }
+        elif payment.payment_method == 'edahabia':
+            if 'otp' in payment_data:
+                return EDahabiaService.complete_payment(payment, payment_data['otp'])
+            return EDahabiaService.initiate_payment(payment, payment_data.get('card_number_last_four', ''))
+        elif payment.payment_method == 'cod':
+            return CODService.request_cod(payment, payment_data.get('delivery_address', ''))
+        
+        return {
+            'success': False,
+            'error': f'Unknown payment method: {payment.payment_method}'
+        }
 
     @staticmethod
     def release_escrow(booking: Booking):
@@ -437,7 +530,9 @@ class PaymentService:
                 # We reload booking to lock it
                 locked_booking = Booking.objects.select_for_update().get(id=booking.id)
                 
-                if locked_booking.escrow_status != 'HELD':
+                # 🛡️ SOVEREIGN INTEGRITY: Case-insensitive state check to prevent 'held' vs 'HELD' mismatch
+                current_status = (locked_booking.escrow_status or '').lower()
+                if current_status != EscrowState.HELD:
                     return {'success': False, 'error': f'Escrow not in HELD state ({locked_booking.escrow_status})'}
 
                 # 2. Get/Lock the Escrow Hold
@@ -478,72 +573,47 @@ class PaymentService:
             return {'success': False, 'error': str(e)}
 
     @staticmethod
-    def process_refund(booking: Booking, amount: float, reason: str = "Dispute Resolution"):
+    def process_refund(booking: Booking, amount: Decimal, reason: str = "Dispute Resolution"):
         """
         Process a refund to the tenant.
         Triggered by: Cancellation or Dispute Verdict (Favor Tenant).
         """
-        if booking.escrow_status not in ['HELD', 'RELEASED']: 
-             # Technically can refund after release if we claw back, but keeping simple for now.
-             pass
+        amount = amount.quantize(Decimal('0.01'))
+
+        # 🛡️ SOVEREIGN INTEGRITY: Only HELD or DISPUTED funds are refundable from escrow vault.
+        # If funds have been RELEASED to the owner, they are no longer in the vault.
+        if (booking.escrow_status or '').lower() not in [EscrowState.HELD, EscrowState.DISPUTED]:
+            return {'success': False, 'error': f'Escrow not in refundable state: {booking.escrow_status}'}
 
         from apps.bookings.models import Refund
-        
-        # 1. Create Refund Record
-        refund = Refund.objects.create(
-            booking=booking,
-            amount=amount,
-            reason=reason,
-            status='processing'
-        )
-        
-        # 2. Simulate Gateway Refund call
-        # success = Gateway.refund(booking.payment.transaction_id, amount)
-        success = True # Simulation
-        
-        if success:
-            refund.status = 'completed'
-            refund.processed_at = timezone.now()
-            refund.save()
-            
-            # Update Booking Escrow Status if full refund
-            if amount >= booking.total_price:
-                # Phase 3: Engine Transition
-                try:
-                    from apps.payments.models import EscrowHold
-                    from apps.payments.engine import EscrowEngine
-                    from apps.payments.states import EscrowState
-                    from apps.payments.context import EscrowEngineContext
-                    
-                    escrow_hold = EscrowHold.objects.get(booking=booking)
-                    
-                    # Activate Context for Transition
-                    with EscrowEngineContext.activate():
-                        EscrowEngine.transition(
-                            hold_id=escrow_hold.id,
-                            target_state=EscrowState.REFUNDED,
-                            reason=f"Full Refund ({reason})",
-                            actor=None # System
-                        )
-                except EscrowHold.DoesNotExist:
-                    # Critical: No EscrowHold means we cannot audit this refund via the Engine.
-                    # We log this irregularity. We do NOT update values directly to avoid split-brain state.
-                    # In a real fix, we might create a retrospective Hold, but for now we error safely.
-                    import logging
-                    logger = logging.getLogger(__name__)
-                    logger.error(f"CRITICAL: Refund processed for Booking #{booking.id} but NO EscrowHold found. State not updated via Engine.")
-                    # We accept the refund happened (Gateway success) but system state is inconsistent.
-                    # This requires manual reconciliation.
-                except Exception as e:
-                    # Log engine failure but don't fail the refund record itself?
-                    # Or fail hard?
-                    # Spec says: "DirectStateMutationError... Do NOT weaken invariants".
-                    # We should probably let it bubble up or log critical.
-                    # For now, we log and re-raise to ensure integrity.
-                    raise e
-                
+
+        existing_refund = Refund.objects.filter(booking=booking, status='completed').first()
+        if existing_refund:
+            return {'success': False, 'error': 'Refund already processed for this booking.'}
+
+        with transaction.atomic():
+            try:
+                escrow_hold = EscrowHold.objects.select_for_update().get(booking=booking)
+                from apps.payments.engine import EscrowEngine
+                from apps.payments.states import EscrowState
+                from apps.payments.context import EscrowEngineContext
+
+                with EscrowEngineContext.activate():
+                    EscrowEngine.transition(
+                        hold_id=escrow_hold.id,
+                        target_state=EscrowState.REFUNDED,
+                        reason=f"Full Refund ({reason})",
+                        actor=None,
+                    )
+            except EscrowHold.DoesNotExist:
+                return {'success': False, 'error': 'CRITICAL: No EscrowHold found for this booking.'}
+
+            refund = Refund.objects.create(
+                booking=booking,
+                amount=amount,
+                reason=reason,
+                status='completed',
+                processed_at=timezone.now(),
+            )
+
             return {'success': True, 'refund_id': refund.id}
-        else:
-            refund.status = 'failed'
-            refund.save()
-            return {'success': False, 'error': 'Gateway refund failed'}

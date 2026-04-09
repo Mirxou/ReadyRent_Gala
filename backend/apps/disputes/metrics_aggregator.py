@@ -11,11 +11,7 @@ from typing import Dict, List, Optional
 from django.db.models import Count, Avg, Q, F
 from django.utils import timezone
 
-from apps.disputes.models import (
-    AnonymizedJudgment,
-    PublicMetrics,
-    MetricContextCard
-)
+from .models import AnonymizedJudgment, PublicMetrics, MetricContextCard
 
 
 class MetricsAggregator:

@@ -25,15 +25,10 @@ admin.site.site_title = _('إدارة STANDARD.Rent')
 admin.site.index_title = _('لوحة التحكم')
 
 def root_view(request):
-    """Root view that provides API information"""
+    """Root view that provides minimal API information"""
     return JsonResponse({
         'message': 'ReadyRent.Gala API',
         'version': '1.0.0',
-        'documentation': {
-            'swagger': '/api/docs/',
-            'redoc': '/api/redoc/',
-            'schema': '/api/schema/',
-        },
         'endpoints': {
             'health': '/api/health/',
             'auth': '/api/auth/',
@@ -50,13 +45,18 @@ urlpatterns = [
     
     # Health check
     path('api/health/', health_check, name='health-check'),
-    
-    # API Documentation
-    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
-    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
-    path('api/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
-    
-    # API Routes
+]
+
+# CRITICAL: Conditionally include API documentation only in DEBUG mode (C1 fix)
+if settings.DEBUG:
+    urlpatterns += [
+        # API Documentation (Protected in production)
+        path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+        path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+        path('api/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+    ]
+
+urlpatterns += [
     path('api/auth/', include('apps.users.urls')),
     path('api/products/', include('apps.products.urls')),
     path('api/bookings/', include('apps.bookings.urls')),

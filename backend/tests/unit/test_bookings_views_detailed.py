@@ -14,10 +14,15 @@ User = get_user_model()
 @pytest.fixture
 def booking_setup(db):
     user = User.objects.create_user(username='buser', email='b@example.com', password='pass')
-    category = Category.objects.create(name='Electronics', slug='elec')
+    from apps.users.models import UserProfile
+    profile, _ = UserProfile.objects.get_or_create(user=user)
+    profile.date_of_birth = timezone.now().date() - timedelta(days=365 * 30)
+    profile.save(update_fields=['date_of_birth'])
+
+    category = Category.objects.create(name='Electronics', name_ar='إلكترونيات', slug='electronics')
     product = Product.objects.create(
         name='Camera', name_ar='كاميرا', price_per_day=Decimal('500.00'), 
-        category=category, status='available', slug='camera'
+        category=category, status='available', slug='camera', wilaya=16
     )
     return user, product
 

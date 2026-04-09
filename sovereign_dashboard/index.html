@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sovereign Tribunal | ReadyRent.Gala</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --stone-950: #0C0A09;
+            --amber-500: #F59E0B;
+            --gold-600: #CA8A04;
+        }
+        body {
+            background-color: var(--stone-950);
+            color: #FAF9F6;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        h1, h2, h3 {
+            font-family: 'Fraunces', serif;
+        }
+        .aurora-bg {
+            background: radial-gradient(circle at 50% -20%, rgba(245, 158, 11, 0.15), transparent 70%);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+        .glass-card:hover {
+            border-color: rgba(245, 158, 11, 0.3);
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .gold-glow {
+            box-shadow: 0 0 40px rgba(202, 138, 4, 0.1);
+        }
+        .fade-in {
+            animation: fadeIn 1s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="aurora-bg min-h-screen">
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 px-8 py-6 flex justify-between items-center glass-card border-none bg-transparent">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-amber-500 rounded-full flex items-center justify-center font-bold text-stone-950">R</div>
+            <span class="text-xl tracking-tighter font-semibold">ReadyRent<span class="text-amber-500">.Gala</span></span>
+        </div>
+        <div class="flex items-center gap-8 text-sm font-medium tracking-wide">
+            <a href="#" class="hover:text-amber-500 transition-colors">سجل الأدلة</a>
+            <a href="#" class="hover:text-amber-500 transition-colors">المحكمة السيادية</a>
+            <a href="#" class="hover:text-amber-500 transition-colors">حالة التدقيق</a>
+            <button class="px-6 py-2 bg-amber-600 hover:bg-amber-500 text-stone-950 rounded-full transition-all font-bold">بوابة المستثمر</button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="pt-32 pb-20 px-8 max-w-7xl mx-auto relative">
+        <div class="grid lg:grid-cols-2 gap-16 items-center">
+            <div class="fade-in">
+                <span class="inline-block px-4 py-1 bg-amber-500/10 text-amber-500 rounded-full text-xs font-bold mb-6 border border-amber-500/20">Phase 24: Sovereign Finality</span>
+                <h1 class="text-7xl lg:text-8xl leading-tight mb-8">المحكمة <br><span class="text-amber-500">السيادية</span></h1>
+                <p class="text-lg text-stone-400 mb-10 max-w-lg leading-relaxed">
+                    نظام العدالة المستقل لمنصة ReadyRent.Gala. سجل أدلة غير قابل للتعديل (WORM) وقوة الحوكمة التقنية لتحقيق "التسوية الفائقة".
+                </p>
+                <div class="flex gap-6">
+                    <div class="px-8 py-4 bg-white text-stone-950 rounded-xl font-bold glass-card border-none hover:translate-y-[-2px] transition-all cursor-pointer">استكشاف الخزنة</div>
+                    <div class="px-8 py-4 border border-stone-800 rounded-xl font-bold hover:bg-stone-900 transition-all cursor-pointer">تقرير التدقيق الفني</div>
+                </div>
+            </div>
+            
+            <div class="relative group fade-in" style="animation-delay: 0.2s;">
+                <div class="absolute inset-0 bg-amber-500/10 blur-[100px] rounded-full group-hover:bg-amber-500/20 transition-all duration-700"></div>
+                <img src="./imgs/hero_cinematic.png" alt="Sovereign Courtroom" class="rounded-3xl gold-glow border border-white/5 relative z-10 w-full object-cover aspect-square lg:aspect-video grayscale-[0.2] contrast-125" onerror="this.src='https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&q=80&w=2000'">
+                
+                <!-- Live Stats Overlay -->
+                <div class="absolute -bottom-6 -left-6 z-20 glass-card p-6 rounded-2xl w-64">
+                    <div class="flex justify-between items-end mb-2">
+                        <span class="text-stone-400 text-xs font-bold uppercase tracking-widest">جاهزية الإطلاق</span>
+                        <span class="text-2xl font-bold text-amber-500">92%</span>
+                    </div>
+                    <div class="w-full bg-stone-800 h-1.5 rounded-full overflow-hidden">
+                        <div class="bg-amber-500 h-full w-[92%]"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Bento Grid Info -->
+    <section class="py-20 px-8 max-w-7xl mx-auto">
+        <h2 class="text-4xl mb-16 text-center">محاور السيادة التقنية</h2>
+        
+        <div class="grid md:grid-cols-3 gap-6">
+            <!-- Long Card: Evidence Vault -->
+            <div class="md:col-span-2 glass-card rounded-3xl p-10 flex flex-col justify-between group overflow-hidden relative min-h-[400px]">
+                <div>
+                    <h3 class="text-3xl mb-4">خزنة الأدلة (The Vault)</h3>
+                    <p class="text-stone-400 max-w-md">سجل جنائي غير قابل للمحو (Write-Once, Read-Many) يوثق كل تفاعل مالي وجنائي بدقة متناهية.</p>
+                </div>
+                <div class="relative z-10">
+                    <div class="flex gap-4 items-center">
+                        <div class="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold">الحالة: مؤمنة تماماً</p>
+                            <p class="text-xs text-stone-500">آخر كتلة: #008-BM-2026</p>
+                        </div>
+                    </div>
+                </div>
+                <img src="./imgs/vault_shield.png" alt="Vault Security" class="absolute -right-20 -bottom-20 w-80 opacity-20 group-hover:opacity-40 transition-all duration-700 pointer-events-none">
+            </div>
+
+            <!-- Small Card: BaridiMob -->
+            <div class="glass-card rounded-3xl p-10 flex flex-col justify-between">
+                <div class="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-10">
+                    <span class="text-amber-500 font-bold">BM</span>
+                </div>
+                <div>
+                    <h3 class="text-2xl mb-2">تتبع BaridiMob</h3>
+                    <p class="text-sm text-stone-400">تطبيق GAP-04 لمراقبة المدفوعات من البداية حتى الإغلاق المالي.</p>
+                </div>
+            </div>
+
+            <!-- Small Card: Disputes -->
+            <div class="glass-card rounded-3xl p-10 flex flex-col justify-between border-forest-green/20">
+                <div class="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center mb-10 text-green-500">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                </div>
+                <div>
+                    <h3 class="text-2xl mb-2">الطبقة القضائية</h3>
+                    <p class="text-sm text-stone-400">هجرة كاملة لخوارزميةAdjudication Service لضمان فصل المهام.</p>
+                </div>
+            </div>
+
+            <!-- Medium Card: Real-time Ledger -->
+            <div class="glass-card rounded-3xl p-10 md:col-span-2">
+                <div class="flex justify-between items-center mb-8">
+                    <h3 class="text-2xl">سجل العمليات الأخير (Live)</h3>
+                    <div class="flex gap-2">
+                        <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                        <span class="text-[10px] uppercase font-bold tracking-widest text-stone-500">Syncing...</span>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center py-3 border-b border-white/5">
+                        <span class="text-xs font-mono text-stone-500">[08:45:12]</span>
+                        <span class="text-sm font-medium">GAP-04: BaridiMob Model Implementation</span>
+                        <span class="text-[10px] bg-green-500/10 text-green-500 px-2 py-0.5 rounded">SUCCESS</span>
+                    </div>
+                    <div class="flex justify-between items-center py-3 border-b border-white/5">
+                        <span class="text-xs font-mono text-stone-500">[08:30:45]</span>
+                        <span class="text-sm font-medium">Adjudication Service Refactoring</span>
+                        <span class="text-[10px] bg-green-500/10 text-green-500 px-2 py-0.5 rounded">SUCCESS</span>
+                    </div>
+                    <div class="flex justify-between items-center py-3 border-b border-white/5">
+                        <span class="text-xs font-mono text-stone-500">[08:15:20]</span>
+                        <span class="text-sm font-medium">WORM Audit Section 13 Appended</span>
+                        <span class="text-[10px] bg-amber-500/10 text-amber-500 px-2 py-0.5 rounded">COMMITTED</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-20 px-8 border-t border-white/5">
+        <div class="max-w-7xl mx-auto flex flex-col md:row justify-between items-center gap-10">
+            <div class="text-stone-500 text-sm">© 2026 ReadyRent.Gala — Sovereign Audit Ecosystem</div>
+            <div class="flex gap-8 text-xs font-bold uppercase tracking-widest text-stone-400">
+                <a href="#" class="hover:text-amber-500 transition-colors">Privacy</a>
+                <a href="#" class="hover:text-amber-500 transition-colors">Forensics</a>
+                <a href="#" class="hover:text-amber-500 transition-colors">GitHub</a>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>

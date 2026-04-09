@@ -3,7 +3,8 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.translation import gettext_lazy as _
 from .models import (
     User, UserProfile, VerificationStatus, Blacklist,
-    StaffRole, ActivityLog, Shift, PerformanceReview
+    StaffRole, ActivityLog, Shift, PerformanceReview,
+    IdentityDocument, BusinessProfile, VerificationLevel, FaceVerification
 )
 
 
@@ -36,6 +37,38 @@ class VerificationStatusAdmin(admin.ModelAdmin):
     search_fields = ['user__email_hash', 'id_number']
     readonly_fields = ['created_at', 'updated_at', 'verified_at']
     date_hierarchy = 'created_at'
+
+
+@admin.register(VerificationLevel)
+class VerificationLevelAdmin(admin.ModelAdmin):
+    list_display = ['user', 'level', 'upgraded_at', 'upgraded_by', 'created_at']
+    list_filter = ['level', 'created_at']
+    search_fields = ['user__email_hash', 'user__username']
+    readonly_fields = ['created_at', 'updated_at', 'upgraded_at']
+
+
+@admin.register(FaceVerification)
+class FaceVerificationAdmin(admin.ModelAdmin):
+    list_display = ['verification', 'status', 'liveness_passed', 'confidence_score', 'processed_at']
+    list_filter = ['status', 'liveness_passed']
+    search_fields = ['verification__user__email_hash']
+    readonly_fields = ['created_at', 'processed_at']
+
+
+@admin.register(IdentityDocument)
+class IdentityDocumentAdmin(admin.ModelAdmin):
+    list_display = ['user', 'document_type', 'status', 'age_verified', 'verified_at', 'created_at']
+    list_filter = ['document_type', 'status', 'age_verified', 'issuing_country']
+    search_fields = ['user__email_hash', 'document_number']
+    readonly_fields = ['created_at', 'updated_at', 'verified_at']
+
+
+@admin.register(BusinessProfile)
+class BusinessProfileAdmin(admin.ModelAdmin):
+    list_display = ['user', 'business_name', 'status', 'verified_at', 'created_at']
+    list_filter = ['status', 'city']
+    search_fields = ['user__email_hash', 'business_name', 'commercial_register_number', 'tax_id']
+    readonly_fields = ['created_at', 'updated_at', 'verified_at']
 
 
 @admin.register(Blacklist)
