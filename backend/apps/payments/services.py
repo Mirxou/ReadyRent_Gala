@@ -33,7 +33,7 @@ class BaridiMobService:
     API_KEY = getattr(settings, "BARIDIMOB_API_KEY", "")
     MERCHANT_ID = getattr(settings, "BARIDIMOB_MERCHANT_ID", "")
     SECRET_KEY = getattr(settings, "BARIDIMOB_SECRET_KEY", None)
-    if not BaridiMobService.SECRET_KEY:
+    if not SECRET_KEY:
         raise RuntimeError(
             "BARIDIMOB_SECRET_KEY must be set in settings for payment security."
         )
