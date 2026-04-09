@@ -97,7 +97,7 @@ jobs:
           name: backend-coverage
 
       - name: Upload coverage HTML
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: backend-coverage-html
           path: backend/htmlcov/
@@ -150,7 +150,7 @@ jobs:
           name: frontend-coverage
 
       - name: Upload frontend coverage HTML
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: frontend-coverage-html
           path: frontend/coverage/
@@ -166,7 +166,7 @@ jobs:
         run: npm run test:e2e || true
 
       - name: Upload Playwright report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: playwright-report
@@ -209,7 +209,7 @@ jobs:
           python -m bandit -r apps/ -f txt || true
 
       - name: Upload Bandit report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: bandit-security-report
