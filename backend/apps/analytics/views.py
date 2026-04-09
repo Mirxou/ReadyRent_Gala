@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Sum, Count, Avg, Q
-from django.db.models.functions import Cast, Date as DateFunc
+from django.db.models.functions import Cast
 from django.db import models
 from django.utils import timezone
 from datetime import timedelta
