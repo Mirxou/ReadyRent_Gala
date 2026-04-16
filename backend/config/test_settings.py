@@ -16,7 +16,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # 1. Mock heavy libraries BEFORE any other import
 # ─────────────────────────────────────────────────────────────────────────────
 class MockLib:
-    def __getattr__(self, name): return MockLib()
+    def __getattr__(self, name):
+        if name in ('__file__', '__name__', '__path__'):
+            return '/mock/path' if name in ('__file__', '__path__') else 'mock_module'
+        return MockLib()
     def __call__(self, *args, **kwargs): return MockLib()
     def __bool__(self): return False
     def __iter__(self): return iter([])

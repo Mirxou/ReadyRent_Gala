@@ -19,6 +19,9 @@ htmlcov/
 dist/
 build/
 
+# Hypothesis testing
+.hypothesis/
+
 # Django
 *.log
 local_settings.py
@@ -36,6 +39,9 @@ build/
 .eslintcache
 .yarn-integrity
 *.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
 # Environment
 .env
@@ -45,9 +51,11 @@ build/
 .env.test.local
 .env.production.local
 
-# IDE
-.vscode/
-.idea/
+# Custom scripts
+*.bat
+validate.bat
+run_act.bat
+npm-log.txt
 *.swp
 *.swo
 *~
