@@ -3,26 +3,31 @@ name: Pre-commit Checks
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+  push:
+    branches: [main, develop]
 
 jobs:
   pre-commit:
     name: Pre-commit Checks
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      
-      - name: Install pre-commit
-        run: |
-          pip install pre-commit
-      
-      - name: Run pre-commit
-        run: |
-          pre-commit run --all-files || true
 
+      - name: Cache pre-commit environments
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}
+
+      - name: Install pre-commit
+        run: pip install pre-commit
+
+      - name: Run pre-commit (non-fatal — review output)
+        run: pre-commit run --all-files || true
