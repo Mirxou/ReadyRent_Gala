@@ -109,7 +109,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: ./frontend
-        run: npm ci
+        run: npm install
 
       - name: Run linter (non-fatal)
         working-directory: ./frontend

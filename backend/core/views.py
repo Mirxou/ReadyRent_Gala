@@ -7,6 +7,12 @@ from django.core.cache import cache
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 
+try:
+    from celery import Celery
+    CELERY_AVAILABLE = True
+except ImportError:
+    CELERY_AVAILABLE = False
+
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
@@ -18,6 +24,7 @@ def health_check(request):
         'status': 'healthy',
         'database': 'ok',
         'cache': 'ok',
+        'celery': 'ok',
         'version': '1.0.0',
     }
     
@@ -40,6 +47,27 @@ def health_check(request):
         health_status['cache'] = 'error'
         health_status['status'] = 'unhealthy'
         health_status['cache_error'] = str(e)
+    
+    # Check Celery connection
+    if CELERY_AVAILABLE:
+        try:
+            from django.conf import settings
+            app = Celery('readyrent')
+            app.config_from_object(settings, namespace='CELERY')
+            i = app.control.inspect()
+            stats = i.stats()
+            if stats:
+                health_status['celery'] = 'ok'
+            else:
+                health_status['celery'] = 'error'
+                health_status['status'] = 'unhealthy'
+                health_status['celery_error'] = 'No Celery workers found'
+        except Exception as e:
+            health_status['celery'] = 'error'
+            health_status['status'] = 'unhealthy'
+            health_status['celery_error'] = str(e)
+    else:
+        health_status['celery'] = 'not available'
     
     status_code = 200 if health_status['status'] == 'healthy' else 503
     return JsonResponse(health_status, status=status_code)

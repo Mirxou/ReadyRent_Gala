@@ -17,8 +17,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Install python dependencies as Wheels
-COPY backend/requirements.txt .
-RUN pip wheel --no-cache-dir --wheel-dir /usr/src/app/wheels -r requirements.txt
+COPY backend/requirements-prod.txt .
+RUN pip wheel --no-cache-dir --wheel-dir /usr/src/app/wheels -r requirements-prod.txt
 
 # ==============================================================================
 # 🚀 STAGE 2: Runner (Lightweight Production Environment)
@@ -42,7 +42,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Copy pre-built wheels from builder stage and install
 COPY --from=builder /usr/src/app/wheels /wheels
-COPY --from=builder /usr/src/app/requirements.txt .
+COPY --from=builder /usr/src/app/requirements-prod.txt .
 RUN pip install --no-cache-dir /wheels/* \
     && rm -rf /wheels
 RUN python -c "import dj_database_url; print('dj_database_url OK')"

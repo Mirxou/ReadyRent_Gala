@@ -5,7 +5,13 @@ import structlog
 import os
 from django.conf import settings
 from decimal import Decimal
-import openai
+
+try:
+    import openai
+    OPENAI_AVAILABLE = True
+except ImportError:
+    OPENAI_AVAILABLE = False
+    openai = None
 
 logger = structlog.get_logger("reviews.sentiment")
 
@@ -15,7 +21,7 @@ class SentimentAnalysisService:
     def __init__(self):
         self.api_key = os.getenv('OPENAI_API_KEY', '')
         self.client = None
-        if self.api_key:
+        if self.api_key and OPENAI_AVAILABLE:
             try:
                 self.client = openai.OpenAI(api_key=self.api_key)
             except Exception as e:

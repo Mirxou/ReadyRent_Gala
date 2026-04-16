@@ -6,6 +6,47 @@
 
 ## المتطلبات الأساسية
 
+### فحوصات ما قبل النشر
+
+قبل البدء في النشر، تأكد من:
+
+1. **فحص متغيرات البيئة**:
+
+   ```bash
+   # في مجلد backend
+   python -c "import os; from pathlib import Path; from dotenv import load_dotenv; load_dotenv(); from config.settings import *; print('Environment variables OK')"
+   ```
+
+2. **فحص اتصال قاعدة البيانات**:
+
+   ```bash
+   python manage.py dbshell --command="SELECT 1;"
+   ```
+
+3. **فحص اتصال Redis**:
+
+   ```bash
+   redis-cli ping
+   ```
+
+4. **فحص Celery**:
+
+   ```bash
+   celery -A config inspect active
+   ```
+
+5. **تشغيل الاختبارات**:
+
+   ```bash
+   python manage.py test --settings=config.test_settings
+   ```
+
+6. **فحص صحة التطبيق**:
+
+   ```bash
+   python manage.py check --deploy
+   ```
+
 ### المتطلبات على الخادم
 
 - **Python**: 3.11 أو أحدث
@@ -40,6 +81,11 @@ sudo apt install postgresql postgresql-contrib -y
 
 # Redis
 sudo apt install redis-server -y
+sudo systemctl start redis
+sudo systemctl enable redis
+
+# فحص اتصال Redis
+redis-cli ping
 
 # Nginx
 sudo apt install nginx -y
@@ -163,9 +209,24 @@ SENTRY_DSN=your-sentry-dsn
 ### تشغيل Migrations
 
 ```bash
+# فحص ما قبل الترحيل
+python manage.py check
+python manage.py makemigrations --dry-run
+python manage.py showmigrations
+
+# تطبيق الترحيلات
 python manage.py migrate
-python manage.py collectstatic --noinput
-python manage.py createsuperuser
+
+# فحص ما بعد الترحيل
+python manage.py check
+python manage.py test --settings=config.test_minimal_settings --keepdb
+```
+
+### إعداد Celery Beat
+
+```bash
+# فحص إعداد Celery
+celery -A config beat --dry-run
 ```
 
 ## 4. إعداد Frontend (Next.js)
@@ -547,6 +608,27 @@ pm2 restart STANDARD-frontend
 - راجع أذونات الملفات
 - راجع سجلات الأمان بانتظام
 
+## 14. ملاحظات التطوير
+
+### توحيد ملفات الإعدادات
+
+يستخدم المشروع متغيرات البيئة للتحكم في سلوك التطبيق عبر البيئات المختلفة:
+
+- `DEBUG`: التحكم في وضع التطوير
+- `DATABASE_URL`: إعداد قاعدة البيانات
+- `REDIS_URL`: إعداد Redis
+- `SECRET_KEY`: مفتاح Django السري
+
+تجنب تعديل ملفات الإعدادات مباشرة؛ استخدم متغيرات البيئة بدلاً من ذلك.
+
+### فحص التوافق
+
+قبل كل تحديث، قم بفحص:
+
+- توافق المتطلبات مع إصدارات Python و Node.js
+- تغييرات في قاعدة البيانات (Migrations)
+- تحديثات الأمان في التبعيات
+
 ```bash
 # جدار الحماية
 sudo ufw allow 22/tcp
@@ -569,7 +651,6 @@ sudo ufw enable
 ## الدعم
 
 للمزيد من المساعدة، راجع:
+
 - [Django Deployment Checklist](https://docs.djangoproject.com/en/stable/howto/deployment/checklist/)
 - [Next.js Deployment](https://nextjs.org/docs/deployment)
-
-
