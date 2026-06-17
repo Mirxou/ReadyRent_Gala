@@ -106,17 +106,23 @@ class Booking(models.Model):
                 condition=models.Q(end_date__gte=models.F('start_date')),
                 name='booking_end_date_after_start_date'
             ),
-            # 🛡️ SOVEREIGN GUARD: Prevent overlapping bookings at the database level.
-            # Only blocks overlaps for active bookings (confirmed, in_use).
-            ExclusionConstraint(
-                name='exclude_overlapping_bookings',
-                expressions=[
-                    ('product', RangeOperators.EQUAL),
-                    (DateRange('start_date', 'end_date', models.Value('[)')), RangeOperators.OVERLAPS),
-                ],
-                condition=models.Q(status__in=['confirmed', 'in_use'])
-            )
         ]
+
+        # 🛡️ SOVEREIGN GUARD: Prevent overlapping bookings at the database level.
+        # Only blocks overlaps for active bookings (confirmed, in_use).
+        # PostgreSQL-only constraint; skipped on SQLite (e.g. test/CI environments).
+        _db_engine = settings.DATABASES['default']['ENGINE']
+        if _db_engine.endswith('postgresql'):
+            constraints.append(
+                ExclusionConstraint(
+                    name='exclude_overlapping_bookings',
+                    expressions=[
+                        ('product', RangeOperators.EQUAL),
+                        (DateRange('start_date', 'end_date', models.Value('[)')), RangeOperators.OVERLAPS),
+                    ],
+                    condition=models.Q(status__in=['confirmed', 'in_use'])
+                )
+            )
         indexes = [
             models.Index(fields=['user', 'status']),
             models.Index(fields=['product', 'status']), # Added for availability checks

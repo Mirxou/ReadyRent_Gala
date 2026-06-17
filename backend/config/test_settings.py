@@ -73,6 +73,7 @@ INSTALLED_APPS = [app for app in INSTALLED_APPS if app not in [
     'constance.backends.database',
     'picklefield',
 ]]
+INSTALLED_APPS += ['channels']
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 6. Strip middleware that requires external services or custom setups
@@ -167,3 +168,12 @@ SECURE_SSL_REDIRECT = False
 SESSION_COOKIE_SECURE = False
 CSRF_COOKIE_SECURE = False
 AUTH_COOKIE_SECURE = False
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 16. In-memory Channel Layer (for WebSocket/Channels tests)
+# ─────────────────────────────────────────────────────────────────────────────
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    },
+}
