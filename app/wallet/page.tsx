@@ -1,5 +1,5 @@
 "use client"
-import { formatNumber } from '@/lib/utils';;
+import { formatNumber } from '@/lib/utils';
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -88,10 +88,10 @@ export default function SovereignWallet() {
             <div className="space-y-4">
                 <div className="flex items-center gap-3">
                     <Badge className="bg-sovereign-gold/10 text-sovereign-gold border-sovereign-gold/30 rounded-full py-1 px-4 text-[10px] uppercase font-black tracking-widest">
-                        Sovereign Assets Hub
+                        مركز الأصول السيادي
                     </Badge>
                     <div className="flex gap-2 items-center text-green-500 font-bold text-xs uppercase tracking-tighter">
-                        <ShieldCheck className="w-4 h-4" /> Vault Secured
+                        <ShieldCheck className="w-4 h-4" /> الخزنة مؤمّنة
                     </div>
                 </div>
                 <h1 className="text-6xl font-black italic tracking-tighter">خزنة <span className="text-sovereign-gold">السيادة.</span></h1>
@@ -115,7 +115,7 @@ export default function SovereignWallet() {
                   </h2>
                   <div className="flex items-center gap-2 mb-1 animate-pulse">
                     <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                    <span className="text-[8px] font-black uppercase text-emerald-500 tracking-widest">Live Integrity Heartbeat</span>
+                    <span className="text-[8px] font-black uppercase text-emerald-500 tracking-widest">نبض سلامة مباشر</span>
                   </div>
                 </div>
 
@@ -131,7 +131,7 @@ export default function SovereignWallet() {
                             <div className="text-right">
                               <Fingerprint className="w-12 h-12 text-white/10 group-hover:text-sovereign-gold/40 transition-colors inline-block" />
                               <div className="text-[6px] font-mono text-white/10 group-hover:text-sovereign-gold/20 leading-none mt-1">
-                                AUTH_SHA256: 8f2d...23e1
+                                هاش_مصادقة: 8f2d...23e1
                               </div>
                             </div>
                         </div>
@@ -142,12 +142,12 @@ export default function SovereignWallet() {
                             </div>
                             <div className="flex justify-between items-end">
                                 <div>
-                                    <span className="text-[8px] font-black uppercase text-white/40 block mb-1">Elite Citizen</span>
-                                    <span className="text-sm font-bold uppercase tracking-widest text-sovereign-gold">SOVEREIGN_USER_01</span>
+                                    <span className="text-[8px] font-black uppercase text-white/40 block mb-1">مواطن مميز</span>
+                                    <span className="text-sm font-bold uppercase tracking-widest text-sovereign-gold">مستخدم_سيادي_01</span>
                                 </div>
                                 <div className="text-right">
                                     <span className="text-[8px] font-black uppercase text-white/40 block mb-1">Status</span>
-                                    <span className="text-xs font-black text-emerald-500 uppercase tracking-widest">Active Integrity</span>
+                                    <span className="text-xs font-black text-emerald-500 uppercase tracking-widest">سلامة نشطة</span>
                                 </div>
                             </div>
                         </div>
@@ -164,15 +164,15 @@ export default function SovereignWallet() {
                           <GlassPanel className="p-8 flex justify-between items-center rounded-3xl" variant="obsidian" gradientBorder>
                               <div>
                                   <span className="text-[10px] font-black uppercase text-white/30 tracking-widest block mb-1">الرصيد المتاح</span>
-                                  <h4 className="text-3xl font-black italic">{formatNumber(balance)} DA</h4>
+                                  <h4 className="text-3xl font-black italic">{formatNumber(balance)} دج</h4>
                               </div>
                               <ArrowUpRight className="w-8 h-8 text-emerald-500/50" />
                           </GlassPanel>
                         </SovereignGlow>
                         <GlassPanel className="p-8 flex justify-between items-center rounded-3xl" variant="obsidian" gradientBorder>
                             <div>
-                                <span className="text-[10px] font-black uppercase text-white/30 tracking-widest block mb-1">المحجوز في الخزنة (Escrow)</span>
-                                <h4 className="text-3xl font-black italic text-sovereign-gold">{formatNumber(escrowTotal)} DA</h4>
+                                <span className="text-[10px] font-black uppercase text-white/30 tracking-widest block mb-1">المحجوز في الخزنة</span>
+                                <h4 className="text-3xl font-black italic text-sovereign-gold">{formatNumber(escrowTotal)} دج</h4>
                             </div>
                             <Lock className="w-8 h-8 text-sovereign-gold/50" />
                         </GlassPanel>
@@ -186,7 +186,7 @@ export default function SovereignWallet() {
                     <h2 className="text-3xl font-black italic tracking-tighter flex items-center gap-4">
                         سجل الخزنة <span className="text-sovereign-gold">المشفر.</span>
                     </h2>
-                    <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">WORM Integrity Check: Verified</span>
+                    <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">فحص سلامة السجل: مُوثّق</span>
                 </div>
 
                 <div className="space-y-4">
@@ -216,7 +216,7 @@ export default function SovereignWallet() {
                                             tx.type === 'INCOME' ? 'text-emerald-500' : 
                                             tx.type === 'EXPENDITURE' ? 'text-red-500' : 'text-sovereign-gold'
                                         }`}>
-                                            {tx.type === 'INCOME' ? '+' : '-'}{formatNumber(tx.amount)} DA
+                                            {tx.type === 'INCOME' ? '+' : '-'}{formatNumber(tx.amount)} دج
                                         </span>
                                         <code className="text-[8px] font-mono opacity-20 block group-hover:opacity-60 transition-opacity mt-1">{tx.hash}</code>
                                     </div>
@@ -252,10 +252,10 @@ export default function SovereignWallet() {
             </div>
             <div className="space-y-2">
                 <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20 italic">
-                    READYRENT.GALA | VAULT SYSTEM 2.0
+                    STANDARD.Rent | نظام الخزنة 2.0
                 </p>
                 <p className="text-[9px] text-white/10 uppercase tracking-widest">
-                    immutable records • sovereign liquidity • elite banking standards
+                    سجلات ثابتة • سيولة سيادية • معايير مصرفية متميزة
                 </p>
             </div>
         </footer>

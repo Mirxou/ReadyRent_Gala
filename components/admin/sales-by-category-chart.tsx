@@ -1,4 +1,5 @@
-'use client';
+'use client'
+import { formatNumber } from '@/lib/utils';;
 
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -40,7 +41,7 @@ export function SalesByCategoryChart({ data }: SalesByCategoryChartProps) {
               style={{ fontSize: '12px' }}
             />
             <Tooltip
-              formatter={(value: number | undefined, name: string | undefined) => {
+              formatter={(value: any, name: any) => {
                 const numValue = value || 0;
                 const nameStr = name || '';
                 if (nameStr === 'revenue') return [`${formatNumber(numValue)} دج`, 'الإيرادات'];

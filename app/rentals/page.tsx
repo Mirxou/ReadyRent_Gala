@@ -1,7 +1,7 @@
 "use client";
 
 import Link from 'next/link';
-import { motion, useInView } from 'framer-motion';
+import { motion, useInView, type Variants } from 'framer-motion';
 import { useRef } from 'react';
 import { SovereignButton } from "@/shared/components/sovereign/sovereign-button";
 import { GlassPanel } from "@/shared/components/sovereign/glass-panel";
@@ -20,12 +20,12 @@ import {
 /* ────────────────────────────────────────────
    Animation Variants
    ──────────────────────────────────────────── */
-const fadeUp = {
+const fadeUp: Variants = {
   hidden: { opacity: 0, y: 40 },
   visible: (i: number = 0) => ({
     opacity: 1,
     y: 0,
-    transition: { duration: 0.7, delay: i * 0.12, ease: [0.32, 0.72, 0, 1] },
+    transition: { duration: 0.7, delay: i * 0.12, ease: [0.32, 0.72, 0, 1] as [number, number, number, number] },
   }),
 };
 
@@ -115,7 +115,7 @@ function CategoriesGrid() {
               key={cat.id}
               initial={{ opacity: 0, y: 30 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: i * 0.08, ease: [0.32, 0.72, 0, 1] }}
+              transition={{ duration: 0.6, delay: i * 0.08, ease: [0.32, 0.72, 0, 1] as [number, number, number, number] }}
             >
               <Link href={`/products?category=${cat.slug}`} className="block group h-full">
                 <div className="relative p-5 md:p-6 rounded-[2rem] border border-white/5 bg-white/[0.02] backdrop-blur-sm hover:border-sovereign-gold/20 hover:bg-sovereign-gold/5 transition-all duration-500 text-center h-full">
@@ -185,7 +185,7 @@ function FeaturedProducts() {
               key={product.id}
               initial={{ opacity: 0, y: 30 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: i * 0.08, ease: [0.32, 0.72, 0, 1] }}
+              transition={{ duration: 0.6, delay: i * 0.08, ease: [0.32, 0.72, 0, 1] as [number, number, number, number] }}
             >
               <ProductCard product={product} />
             </motion.div>
@@ -245,7 +245,7 @@ function HowItWorks() {
               key={step.title}
               initial={{ opacity: 0, y: 40 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.7, delay: i * 0.15, ease: [0.32, 0.72, 0, 1] }}
+              transition={{ duration: 0.7, delay: i * 0.15, ease: [0.32, 0.72, 0, 1] as [number, number, number, number] }}
             >
               <GlassPanel
                 variant="obsidian"

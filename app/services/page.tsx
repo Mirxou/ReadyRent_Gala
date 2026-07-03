@@ -1,7 +1,7 @@
 "use client";
 
 import Link from 'next/link';
-import { motion, useInView } from 'framer-motion';
+import { motion, useInView, type Variants } from 'framer-motion';
 import { useRef } from 'react';
 import { SovereignButton } from "@/shared/components/sovereign/sovereign-button";
 import { GlassPanel } from "@/shared/components/sovereign/glass-panel";
@@ -22,12 +22,12 @@ import {
 /* ────────────────────────────────────────────
    Animation Variants
    ──────────────────────────────────────────── */
-const fadeUp = {
+const fadeUp: Variants = {
   hidden: { opacity: 0, y: 40 },
   visible: (i: number = 0) => ({
     opacity: 1,
     y: 0,
-    transition: { duration: 0.7, delay: i * 0.12, ease: [0.32, 0.72, 0, 1] },
+    transition: { duration: 0.7, delay: i * 0.12, ease: [0.32, 0.72, 0, 1] as [number, number, number, number] },
   }),
 };
 
@@ -113,9 +113,9 @@ function ServiceCategoriesGrid() {
               key={cat.slug}
               initial={{ opacity: 0, y: 30 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: i * 0.08, ease: [0.32, 0.72, 0, 1] }}
+              transition={{ duration: 0.6, delay: i * 0.08, ease: [0.32, 0.72, 0, 1] as [number, number, number, number] }}
             >
-              <Link href="/local-guide" className="block group h-full">
+              <Link href="/services" className="block group h-full">
                 <div className={`relative p-5 md:p-6 rounded-[2rem] border border-white/5 bg-gradient-to-br ${cat.gradient} backdrop-blur-sm hover:border-purple-400/20 transition-all duration-500 text-center h-full`}>
                   <div className="space-y-3">
                     <div className="w-12 h-12 mx-auto rounded-xl bg-purple-400/10 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform duration-500">
@@ -164,7 +164,7 @@ function FeaturedServices() {
           </motion.div>
           <motion.div variants={fadeUp}>
             <Link
-              href="/local-guide"
+              href="/services"
               className="flex items-center gap-2 text-purple-400 text-sm font-bold hover:gap-3 transition-all"
             >
               <span>عرض الكل</span>
@@ -179,9 +179,9 @@ function FeaturedServices() {
               key={service.id}
               initial={{ opacity: 0, y: 30 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: i * 0.1, ease: [0.32, 0.72, 0, 1] }}
+              transition={{ duration: 0.6, delay: i * 0.1, ease: [0.32, 0.72, 0, 1] as [number, number, number, number] }}
             >
-              <Link href={`/local-guide/${service.id}`} className="block group h-full">
+              <Link href={`/services/${service.id}`} className="block group h-full">
                 <GlassPanel
                   variant="obsidian"
                   className="overflow-hidden rounded-[2rem] hover:border-purple-400/20 transition-all duration-500 h-full"
@@ -269,7 +269,7 @@ function CTASection() {
         </motion.p>
 
         <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-          <Link href="/local-guide">
+          <Link href="/services">
             <SovereignButton size="lg" variant="primary" className="h-16 px-12 text-sm rounded-full shadow-2xl shadow-purple-500/20 bg-purple-600 hover:bg-purple-700" withShimmer>
               اكتشفي جميع الخدمات
               <ArrowLeft className="w-5 h-5" />

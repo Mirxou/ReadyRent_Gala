@@ -23,7 +23,7 @@ export function ReviewForm({ productId, bookingId, onSuccess }: ReviewFormProps)
   const queryClient = useQueryClient();
 
   const createReviewMutation = useMutation({
-    mutationFn: () => reviewsApi.createReview({ booking_id: bookingId || 0, rating, comment: title + '\n' + comment }),
+    mutationFn: () => reviewsApi.create({ booking_id: bookingId || 0, rating, comment: title + '\n' + comment }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['reviews', productId] });
       queryClient.invalidateQueries({ queryKey: ['product', productId] });

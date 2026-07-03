@@ -1,4 +1,5 @@
-'use client';
+'use client'
+import { formatNumber } from '@/lib/utils';;
 
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -65,7 +66,7 @@ export function SalesByStatusChart({ data }: SalesByStatusChartProps) {
               })}
             </Pie>
             <Tooltip
-              formatter={(value: number | undefined, name: string | undefined, props: any) => {
+              formatter={(value: any, name: any, props: any) => {
                 const numValue = value || 0;
                 const revenue = props.payload?.revenue || 0;
                 return [

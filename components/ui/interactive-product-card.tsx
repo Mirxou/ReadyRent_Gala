@@ -21,10 +21,13 @@ interface InteractiveProductCardProps {
             name_ar: string;
         };
         images?: Array<{
-            image: string;
-            is_primary: boolean;
+            image?: string;
+            url?: string;
+            is_primary?: boolean;
+            is_main?: boolean;
         }>;
         primary_image?: string;
+        image?: string;
         is_featured?: boolean;
     };
     className?: string;

@@ -26,6 +26,14 @@
   --color-sovereign-black: #050505;
   --color-sovereign-obsidian: #0A0A0A;
   --color-sovereign-white: #FDFDFD;
+  --color-sovereign-blue: #1E3A5F;
+
+  /* Gala Palette - Accent Colors */
+  --color-gala-purple: #8B5CF6;
+  --color-gala-pink: #EC4899;
+  --color-gala-gold: #C5A059;
+  --color-gala-cyan: #06B6D4;
+  --color-gala-orange: #F59E0B;
 
   /* Typography - Elite Arabic Pairing */
   --font-sans: var(--font-inter), "Outfit", ui-sans-serif, system-ui, sans-serif;
@@ -202,6 +210,27 @@ body.mode-verdict {
   --card: oklch(0.02 0 0);
   --border: oklch(0.05 0 0);
   --primary: oklch(0.7 0.15 85); /* Regal Gold */
+}
+
+/* Scrollbar Hide */
+@utility scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Card Glass */
+@utility card-glass {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Glow Purple */
+@utility glow-purple {
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
 }
 
 @utility animate-golden-spark {

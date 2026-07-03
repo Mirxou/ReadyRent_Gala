@@ -111,7 +111,7 @@ export default function LoginPage() {
           </form>
 
           <div className="mt-8 text-center text-sm">
-            <Link href="/auth/register" className="text-muted-foreground hover:text-sovereign-gold transition-colors">
+            <Link href="/register" className="text-muted-foreground hover:text-sovereign-gold transition-colors">
               طلب عضوية جديدة
             </Link>
           </div>

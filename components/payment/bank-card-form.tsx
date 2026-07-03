@@ -1,4 +1,5 @@
-'use client';
+'use client'
+import { formatNumber } from '@/lib/utils';;
 
 import { useState } from 'react';
 import { Input } from '@/components/ui/input';

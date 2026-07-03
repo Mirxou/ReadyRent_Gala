@@ -79,7 +79,7 @@ export function SovereignSparkle({ children, active = true }: { children: React.
 // 🛡️ High-Fidelity Glow Variant
 export function SovereignGlow({ children, color = "gold", intensity = "medium", className = "" }: { 
   children: React.ReactNode,
-  color?: "gold" | "blue" | "obsidian",
+  color?: "gold" | "blue" | "obsidian" | "emerald" | "purple",
   intensity?: "low" | "medium" | "high",
   className?: string
 }) {
@@ -87,6 +87,8 @@ export function SovereignGlow({ children, color = "gold", intensity = "medium", 
     gold: "rgba(197, 160, 89, 0.15)",
     blue: "rgba(30, 58, 138, 0.15)",
     obsidian: "rgba(0, 0, 0, 0.4)",
+    emerald: "rgba(16, 185, 129, 0.15)",
+    purple: "rgba(168, 85, 247, 0.15)",
   };
 
   const blurLevels = {

@@ -65,7 +65,7 @@ export default function ProductDetailsPage() {
 
   const { data: productReviews } = useQuery({
     queryKey: ['reviews', product?.id],
-    queryFn: () => reviewsApi.listForProduct(product!.id).then(r => r.data),
+    queryFn: () => reviewsApi.getAll({ product_id: product!.id }).then(r => r.data),
     enabled: !!product?.id,
   });
 
@@ -191,7 +191,7 @@ export default function ProductDetailsPage() {
                     className="flex-shrink-0 w-32 aspect-square rounded-[1.5rem] overflow-hidden cursor-pointer border-2 border-white/5 active:border-sovereign-gold transition-all" 
                     onClick={() => { setLightboxIndex(idx); setLightboxOpen(true); }}
                   >
-                    <Image src={img.image} alt="" fill className="object-cover" />
+                    <Image src={img.image || img.url} alt="" fill className="object-cover" />
                   </motion.div>
                 ))}
               </div>

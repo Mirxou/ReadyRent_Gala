@@ -25,9 +25,13 @@ export function Footer() {
               منصة الكراء الفاخر والخدمات في الجزائر. 3 في 1: كراء، خدمات، وسوق مفتوح.
             </p>
             <div className="flex gap-6">
-              {['Instagram', 'TikTok', 'WhatsApp'].map((social) => (
-                <a key={social} href="#" className="text-sm font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground dark:hover:text-white transition-colors border-b border-gray-200 dark:border-white/10 pb-1">
-                  {social}
+              {[
+                { name: 'انستغرام', url: 'https://instagram.com/standardrent' },
+                { name: 'تيك توك', url: 'https://tiktok.com/@standardrent' },
+                { name: 'واتساب', url: 'https://wa.me/213000000000' },
+              ].map((social) => (
+                <a key={social.name} href={social.url} className="text-sm font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground dark:hover:text-white transition-colors border-b border-gray-200 dark:border-white/10 pb-1">
+                  {social.name}
                 </a>
               ))}
             </div>

@@ -45,13 +45,13 @@ const SovereignButton = React.forwardRef<HTMLButtonElement, SovereignButtonProps
             xl: "h-24 px-16 text-lg font-black uppercase tracking-[0.4em] rounded-full",
         };
 
-        const MotionLink = motion(Link);
-        const Component = href ? MotionLink : motion.button;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const Component: any = href ? motion(Link) : motion.button;
 
         return (
             <Component
                 ref={ref}
-                href={href as any}
+                href={href}
                 disabled={isLoading || (props as any).disabled}
                 className={cn(
                     "relative inline-flex items-center justify-center border-2 transition-all duration-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-sovereign-gold disabled:pointer-events-none disabled:opacity-50 overflow-hidden",

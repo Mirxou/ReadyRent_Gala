@@ -70,7 +70,7 @@ export function RevenueChart({ data, period }: RevenueChartProps) {
                 backdropFilter: 'blur(10px)',
                 boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)'
               }}
-              formatter={(value: number | undefined) => [`${formatNumber(value || 0)} دج`, 'الإيرادات']}
+              formatter={(value: any) => [`${formatNumber(Number(value) || 0)} دج`, 'الإيرادات']}
             />
             <Line
               type="monotone"

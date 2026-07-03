@@ -1,4 +1,5 @@
-'use client';
+'use client'
+import { formatNumber } from '@/lib/utils';
 
 import { motion } from 'framer-motion';
 import { Shield, Check, ArrowLeft, Info, Phone, FileText } from 'lucide-react';

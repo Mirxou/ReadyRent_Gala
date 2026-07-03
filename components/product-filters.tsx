@@ -1,4 +1,5 @@
-'use client';
+'use client'
+import { formatNumber } from '@/lib/utils';;
 
 import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';

@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, type Variants } from 'framer-motion';
 import {
   Shield,
   Star,
@@ -17,6 +17,7 @@ import {
 import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
 import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
 // Hardcoded trust score data
@@ -50,7 +51,7 @@ const benefits = [
   { title: 'ثقة البائعين', description: 'يتم قبول حجوزاتك تلقائياً بدون مراجعة يدوية', icon: '🤝' },
 ];
 
-const fadeUp = {
+const fadeUp: Variants = {
   hidden: { opacity: 0, y: 30 },
   visible: (i: number) => ({
     opacity: 1,

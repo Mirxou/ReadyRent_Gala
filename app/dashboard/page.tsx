@@ -39,7 +39,7 @@ import { ar } from 'date-fns/locale';
 
 import { SocialFeed } from '@/features/social/components/social-feed';
 import { SovereignLedger } from '@/shared/components/sovereign/sovereign-ledger';
-import { SovereignConcierge } from '@/shared/components/sovereign/sovereign-concierge';
+
 import { SovereignPredictivePulse } from '@/features/analytics/components/predictive-pulse';
 
 import { Sovereign2FAEnrollment } from '@/shared/components/sovereign/2fa-enrollment';
@@ -421,8 +421,6 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* 🤖 THE ORACLE CONCIERGE (Global Support) */}
-      <SovereignConcierge />
-    </motion.div>
+      </motion.div>
   );
 }

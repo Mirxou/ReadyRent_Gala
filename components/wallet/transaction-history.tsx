@@ -1,4 +1,5 @@
-'use client';
+'use client'
+import { formatNumber } from '@/lib/utils';;
 
 import React from 'react';
 import { motion } from 'framer-motion';

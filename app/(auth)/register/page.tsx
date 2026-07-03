@@ -30,7 +30,7 @@ export default function RegisterPage() {
         router.push('/');
       } else {
         // Handle direct login if register returns tokens directly
-        router.push('/auth/login');
+        router.push('/login');
       }
     } catch (error: any) {
       toast.error('فشل إنشاء الهوية. تحقق من المدخلات.');
@@ -127,7 +127,7 @@ export default function RegisterPage() {
           </form>
 
           <div className="mt-8 text-center text-sm">
-            <Link href="/auth/login" className="text-muted-foreground hover:text-sovereign-gold transition-colors">
+            <Link href="/login" className="text-muted-foreground hover:text-sovereign-gold transition-colors">
               لدي هوية بالفعل؟ تسجيل الدخول
             </Link>
           </div>

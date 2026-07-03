@@ -26,7 +26,7 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { SovereignPredictivePulse } from '@/features/analytics/components/predictive-pulse';
-import { SovereignConcierge } from '@/shared/components/sovereign/sovereign-concierge';
+
 import { useQuery } from '@tanstack/react-query';
 import { intelligenceApi } from '@/lib/api';
 import { 
@@ -321,8 +321,6 @@ export default function ReportsPage() {
 
             </div>
 
-            {/* 🤖 GLOBAL CONCIERGE */}
-            <SovereignConcierge />
-        </motion.div>
+            </motion.div>
     );
 }
