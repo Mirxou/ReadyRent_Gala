@@ -53,7 +53,7 @@ export default function JudicialLedgerPage() {
             السجل القضائي العام
           </h1>
           <p className="text-slate-500 max-w-2xl mx-auto leading-relaxed">
-            سجل شفاف وغير قابل للتعديل لجميع الأحكام القضائية الصادرة عن منصة ReadyRent.
+            سجل شفاف وغير قابل للتعديل لجميع الأحكام القضائية الصادرة عن منصة STANDARD.Rent.
             جميع البيانات مجهولة الهوية للحفاظ على خصوصية الأطراف.
           </p>
         </motion.div>
@@ -179,7 +179,7 @@ export default function JudicialLedgerPage() {
         <div className="mt-12 flex flex-col items-center gap-2 text-slate-400 text-xs">
           <Shield className="w-5 h-5" />
           <p>جميع الأحكام مجهولة الهوية ومحمية بتقنية BLAKE2b Hash Chaining</p>
-          <p>ReadyRent Sovereign Judicial System — نظام قضائي مستقل وشفاف</p>
+          <p>STANDARD.Rent النظام القضائي — نظام قضائي مستقل وشفاف</p>
         </div>
       </div>
     </div>

@@ -51,8 +51,8 @@ export default function DashboardLayout({
                         <ShieldCheck className="absolute inset-0 m-auto w-6 h-6 text-sovereign-gold animate-pulse" />
                     </div>
                     <div className="space-y-1 text-center">
-                        <p className="text-white/40 font-black uppercase tracking-[0.4em] text-[10px] italic">Consulting Sovereign Registry</p>
-                        <p className="text-[8px] font-black text-white/10 uppercase tracking-widest leading-none">Authentication Protocol V.11</p>
+                        <p className="text-white/40 font-black uppercase tracking-[0.4em] text-[10px] italic">جاري التحقق من الهوية</p>
+                        <p className="text-[8px] font-black text-white/10 uppercase tracking-widest leading-none">بروتوكول المصادقة</p>
                     </div>
                 </div>
             </div>

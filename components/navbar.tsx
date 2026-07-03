@@ -186,7 +186,7 @@ export function Navbar() {
                   variant="ghost"
                   size="icon"
                   onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                  aria-label="Toggle theme"
+                  aria-label="تبديل المظهر"
                   className="rounded-full hover:bg-gala-purple/10 text-foreground dark:text-white/90 transition-colors"
                 >
                   {theme === 'dark' ? (

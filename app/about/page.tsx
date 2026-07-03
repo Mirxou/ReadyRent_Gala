@@ -8,22 +8,22 @@ import Link from 'next/link';
 
 const features = [
     {
-        icon: <Sparkles className="w-8 h-8 text-gala-gold" />,
+        icon: <Sparkles className="w-8 h-8 text-sovereign-gold" />,
         title: "مجموعة استثنائية",
         description: "نختار كل قطعة بعناية فائقة لتناسب أرقـى المناسبات والاحتفالات ."
     },
     {
-        icon: <Heart className="w-8 h-8 text-gala-pink" />,
+        icon: <Heart className="w-8 h-8 text-sovereign-gold" />,
         title: "صُنع الشغف",
         description: "قصتنا بدأت من الرغبة في جعل كل امرأة تشعر وكأنها ملكة في ليلتها."
     },
     {
-        icon: <Zap className="w-8 h-8 text-gala-purple" />,
+        icon: <Zap className="w-8 h-8 text-purple-500" />,
         title: "خدمة سريعة",
         description: "التوصيل والتجهيز في وقت قياسي لضمان راحتكم التامة."
     },
     {
-        icon: <ShieldCheck className="w-8 h-8 text-gala-cyan" />,
+        icon: <ShieldCheck className="w-8 h-8 text-cyan-500" />,
         title: "جودة مضمونة",
         description: "نضمن نظافة وسلامة كل فستان بأعلى معايير العناية المهنية."
     }
@@ -46,7 +46,7 @@ export default function AboutPage() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8 }}
                     >
-                        <h1 className="text-mega mb-6 inline-block">قصة غالا.</h1>
+                        <h1 className="text-mega mb-6 inline-block">قصة ستاندرد.</h1>
                         <p className="text-2xl md:text-3xl font-light text-muted-foreground max-w-3xl mx-auto leading-relaxed">
                             نحن لا نؤجر الفساتين فحسب، بل نصنع لحظات لا تُنسى من التألق والفخامة.
                         </p>
@@ -76,15 +76,15 @@ export default function AboutPage() {
                         initial={{ opacity: 0, scale: 0.9 }}
                         whileInView={{ opacity: 1, scale: 1 }}
                         viewport={{ once: true }}
-                        className="relative h-[500px] rounded-3xl overflow-hidden shadow-2xl glow-purple"
+                        className="relative h-[500px] rounded-3xl overflow-hidden shadow-2xl glow-gold"
                     >
-                        <div className="absolute inset-0 bg-gradient-to-br from-gala-purple/20 to-gala-pink/20 mix-blend-overlay" />
+                        <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-pink-500/20 mix-blend-overlay" />
                         <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="text-9xl font-black text-white/10 italic select-none">GALA</div>
+                            <div className="text-9xl font-black text-white/10 italic select-none">STANDARD</div>
                         </div>
                         {/* Overlay for glass effect */}
                         <div className="absolute inset-0 card-glass flex flex-col items-center justify-center p-12 text-center">
-                            <Sparkles className="w-16 h-16 text-gala-gold mb-6 animate-pulse-glow" />
+                            <Sparkles className="w-16 h-16 text-sovereign-gold mb-6 animate-pulse-glow" />
                             <h3 className="text-3xl font-bold mb-4">أناقة بلا حدود</h3>
                             <p className="text-lg text-muted-foreground">تجربة استثنائية تبدأ من اختيارك وتنتهي بلحظة دخولك للحفل.</p>
                         </div>
@@ -105,7 +105,7 @@ export default function AboutPage() {
                             <div className="mb-6 p-4 rounded-2xl bg-white/5 w-fit group-hover:bg-white/10 transition-colors">
                                 {feature.icon}
                             </div>
-                            <h3 className="text-2xl font-bold mb-4 group-hover:text-gala-purple transition-colors">
+                            <h3 className="text-2xl font-bold mb-4 group-hover:text-purple-500 transition-colors">
                                 {feature.title}
                             </h3>
                             <p className="text-muted-foreground leading-relaxed">
@@ -119,14 +119,14 @@ export default function AboutPage() {
                 <motion.div
                     initial={{ opacity: 0 }}
                     whileInView={{ opacity: 1 }}
-                    className="mt-32 p-12 rounded-[3rem] bg-gradient-to-r from-gala-purple/20 via-gala-pink/20 to-gala-gold/20 border border-white/10 text-center"
+                    className="mt-32 p-12 rounded-[3rem] bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-sovereign-gold/20 border border-white/10 text-center"
                 >
                     <h2 className="text-4xl md:text-5xl font-black mb-8">هل أنتِ مستعدة للتألق؟</h2>
                     <Link href="/products">
                         <motion.div
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
-                            className="inline-block px-12 py-6 bg-gradient-to-r from-gala-purple to-gala-pink rounded-full text-2xl font-bold shadow-2xl glow-pink cursor-pointer"
+                            className="inline-block px-12 py-6 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full text-2xl font-bold shadow-2xl glow-gold cursor-pointer"
                         >
                             تصفحي المجموعة الآن
                         </motion.div>

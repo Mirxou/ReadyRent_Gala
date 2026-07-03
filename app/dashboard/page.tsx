@@ -76,6 +76,21 @@ export default function DashboardPage() {
   const isSovereign = trustScore >= 1; 
   const is2FAEnabled = (user as any)?.is_2fa_enabled;
 
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center text-center gap-6" dir="rtl">
+        <ShieldCheck className="w-16 h-16 text-sovereign-gold/30" />
+        <h2 className="text-2xl font-black text-foreground">سجّل الدخول للوصول إلى لوحة التحكم</h2>
+        <p className="text-muted-foreground max-w-md">تحتاج إلى حساب سيادي للوصول إلى غرفة القيادة وميزات لوحة التحكم.</p>
+        <Link href="/login">
+          <SovereignButton variant="primary" size="lg" withShimmer>
+            الدخول إلى الحساب
+          </SovereignButton>
+        </Link>
+      </div>
+    );
+  }
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -108,7 +123,7 @@ export default function DashboardPage() {
                             : "bg-red-500/10 border-red-500/20 text-red-500 animate-pulse"
                     )}>
                         <div className="flex flex-col items-end">
-                            <span className="text-[10px] font-black uppercase tracking-tight">Sovereign Guard</span>
+                            <span className="text-[10px] font-black uppercase tracking-tight">الحارس السيادي</span>
                             <span className="text-[9px] font-bold opacity-60">
                                 {is2FAEnabled ? "حماية نشطة" : "تأمين الهوية مطلوب"}
                             </span>
@@ -154,7 +169,7 @@ export default function DashboardPage() {
                                     "px-4 py-2 text-[10px] font-black uppercase tracking-widest border-0",
                                     isSovereign ? "bg-sovereign-gold/10 text-sovereign-gold" : "bg-white/5 text-muted-foreground"
                                 )}>
-                                    {isSovereign ? "مستوى النخبة (High Trust)" : "مستوى قيد البناء"}
+                                    {isSovereign ? "مستوى النخبة (ثقة عالية)" : "مستوى قيد البناء"}
                                 </Badge>
                             </div>
                         </div>
@@ -232,7 +247,7 @@ export default function DashboardPage() {
                         <div className="space-y-2">
                             <p className="font-black text-md tracking-tight text-foreground">قائد التواصل</p>
                             <p className="text-[9px] text-cyan-400 font-black uppercase tracking-widest opacity-60">
-                                Social Hub (DZ)
+                                مركز التواصل الاجتماعي
                             </p>
                         </div>
                         <Smartphone className="w-6 h-6 text-cyan-400 group-hover:scale-110 transition-transform opacity-40 group-hover:opacity-100" />
@@ -243,7 +258,7 @@ export default function DashboardPage() {
                         <div className="space-y-2">
                             <p className="font-black text-md tracking-tight text-foreground">نبض النظام</p>
                             <p className="text-[9px] text-sovereign-gold font-black uppercase tracking-widest opacity-60">
-                                Predict Engine
+                                محرك التنبؤ
                             </p>
                         </div>
                         <BrainCircuit className="w-6 h-6 text-sovereign-gold group-hover:scale-110 transition-transform opacity-40 group-hover:opacity-100" />
@@ -253,7 +268,7 @@ export default function DashboardPage() {
                     <GlassPanel className="p-6 flex items-center justify-between hover:bg-white/5 transition-all cursor-pointer group border-white/5">
                         <div className="space-y-2">
                             <p className="font-black text-md tracking-tight text-foreground">أرشيف العقود</p>
-                            <p className="text-[9px] text-muted-foreground opacity-60 uppercase">History</p>
+                            <p className="text-[9px] text-muted-foreground opacity-60 uppercase">السجل</p>
                         </div>
                         <HistoryIcon className="w-6 h-6 text-white group-hover:scale-110 transition-transform opacity-40 group-hover:opacity-100" />
                     </GlassPanel>
@@ -270,7 +285,7 @@ export default function DashboardPage() {
                                 <h3 className="text-3xl font-black italic tracking-tighter">مركز الاستخبارات السيادي</h3>
                             </div>
                             <p className="text-muted-foreground italic leading-relaxed max-w-xl">
-                                استعرض آخر تقارير توجهات السوق لعام 2026. بيانات حصرية مدعومة بذكاء ReadyRent لتحليل الأصول والسيولة الإقليمية في الجزائر.
+                                استعرض آخر تقارير توجهات السوق لعام 2026. بيانات حصرية مدعومة بذكاء STANDARD.Rent لتحليل الأصول والسيولة الإقليمية في الجزائر.
                             </p>
                             <div className="flex flex-wrap gap-4 pt-4">
                                 <Link href="/reports/sovereign_intel_2026_ar.md">
@@ -331,18 +346,18 @@ export default function DashboardPage() {
                 <div className="space-y-1">
                     <h2 className="text-3xl font-black tracking-tight flex items-center gap-4 text-foreground">
                         <FileSignature className="w-8 h-8 text-sovereign-gold" />
-                        سجل العقود السيادية (Active Registry)
+                        سجل العقود السيادية (السجل النشط)
                     </h2>
                     <p className="text-xs text-muted-foreground font-light px-12">العقود الجارية، الضمانات المجمدة، ومواعيد الإفراج.</p>
                 </div>
-                <Badge variant="outline" className="border-white/5 text-muted-foreground px-4 py-1">{activeBookings.length} Active</Badge>
+                <Badge variant="outline" className="border-white/5 text-muted-foreground px-4 py-1">{activeBookings.length} نشط</Badge>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {isBookingsLoading ? (
                     <div className="col-span-full py-20 text-center">
                         <Loader2 className="w-10 h-10 animate-spin text-sovereign-gold mx-auto mb-4" />
-                        <span className="text-xs font-black uppercase tracking-[0.2em] opacity-40">Consulting Digital Ledger...</span>
+                        <span className="text-xs font-black uppercase tracking-[0.2em] opacity-40">جاري تحميل السجل الرقمي...</span>
                     </div>
                 ) : activeBookings.length > 0 ? (
                     activeBookings.map((booking: any) => (
@@ -364,8 +379,8 @@ export default function DashboardPage() {
                                 booking.status === 'in_use' ? "bg-blue-500/10 text-blue-500" :
                                 "bg-yellow-500/10 text-yellow-500 shadow-sm"
                             )}>
-                                {booking.status === 'confirmed' ? 'Confirmed' :
-                                booking.status === 'in_use' ? 'Active Use' : booking.status}
+                                {booking.status === 'confirmed' ? 'مؤكد' :
+                                booking.status === 'in_use' ? 'قيد الاستخدام' : booking.status}
                             </Badge>
                         </div>
 
@@ -373,14 +388,14 @@ export default function DashboardPage() {
                             <div className="flex justify-between items-center">
                                 <div className="flex items-center gap-2">
                                     <Clock className="w-4 h-4 text-sovereign-gold" />
-                                    <span className="font-bold opacity-60">تاريخ الإفراج (Release):</span>
+                                    <span className="font-bold opacity-60">تاريخ الإفراج:</span>
                                 </div>
                                 <span className="font-mono text-foreground font-bold">{format(new Date(booking.end_date), 'dd MMM yyyy', { locale: ar })}</span>
                             </div>
                         </div>
 
                         <div className="flex items-center justify-between mb-8">
-                            <span className="text-[10px] font-black text-muted-foreground uppercase opacity-40 tracking-widest">Sovereign Value (Escrow)</span>
+                            <span className="text-[10px] font-black text-muted-foreground uppercase opacity-40 tracking-widest">القيمة السيادية (الضمان)</span>
                             <span className="text-2xl font-black text-sovereign-gold">{formatNumber(booking.total_price)} <span className="text-xs font-normal">DA</span></span>
                         </div>
 
@@ -396,13 +411,13 @@ export default function DashboardPage() {
                         <div className="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center mb-8 border border-white/5 shadow-inner">
                             <FileSignature className="w-10 h-10 text-muted-foreground/20" />
                         </div>
-                        <h3 className="text-3xl font-black text-foreground mb-4 opacity-80">سجل باهت (No Active Contracts)</h3>
+                        <h3 className="text-3xl font-black text-foreground mb-4 opacity-80">سجل باهت (لا توجد عقود نشطة)</h3>
                         <p className="text-muted-foreground/60 mb-10 max-w-sm mx-auto text-lg leading-relaxed font-light">
                             بصمتك السيادية بانتظار العقد الأول. تصفح الأصول الملكية لبدء بناء تاريخك الائتماني.
                         </p>
                         <Link href="/products">
                             <SovereignButton variant="primary" size="xl" withShimmer className="px-12 h-16 text-lg font-black">
-                                تصفح سجل الأصول (Explore)
+                                تصفح سجل الأصول (استكشاف)
                             </SovereignButton>
                         </Link>
                     </GlassPanel>
@@ -414,7 +429,7 @@ export default function DashboardPage() {
         <div className="lg:col-span-12 pt-20">
             <div className="flex flex-col items-center mb-10 text-center space-y-4">
                 <Scale className="w-10 h-10 text-muted-foreground opacity-20" />
-                <h3 className="text-sm font-black uppercase tracking-[0.5em] text-muted-foreground opacity-30">الحوكمة السيادية (System Transparency)</h3>
+                <h3 className="text-sm font-black uppercase tracking-[0.5em] text-muted-foreground opacity-30">الحوكمة السيادية (شفافية النظام)</h3>
                 <div className="h-px w-20 bg-muted-foreground/10" />
             </div>
             <SovereignLedger />

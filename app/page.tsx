@@ -50,11 +50,24 @@ const staggerContainer = {
    ──────────────────────────────────────────── */
 function useAnimatedCounter(target: number, duration: number = 2000) {
   const [count, setCount] = useState(0);
+  const [started, setStarted] = useState(false);
+
+  // Use IntersectionObserver directly for reliable detection
   const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true });
 
   useEffect(() => {
-    if (!inView) return;
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setStarted(true); observer.disconnect(); } },
+      { threshold: 0.1 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!started) return;
     let start = 0;
     const step = target / (duration / 16);
     const timer = setInterval(() => {
@@ -67,7 +80,7 @@ function useAnimatedCounter(target: number, duration: number = 2000) {
       }
     }, 16);
     return () => clearInterval(timer);
-  }, [inView, target, duration]);
+  }, [started, target, duration]);
 
   return { count, ref };
 }
@@ -512,21 +525,19 @@ const stats = [
 ];
 
 function StatisticsBar() {
-  const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-50px" });
-
   return (
-    <section ref={ref} className="py-16 md:py-20 px-4">
+    <section className="py-16 md:py-20 px-4">
       <div className="max-w-7xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
           transition={{ duration: 0.7, ease: [0.32, 0.72, 0, 1] }}
         >
           <GlassPanel variant="gold" className="rounded-[2.5rem] p-8 md:p-10">
             <div className="relative z-10 grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-4">
               {stats.map((stat, i) => (
-                <StatItem key={stat.label} stat={stat} inView={inView} index={i} />
+                <StatItem key={stat.label} stat={stat} index={i} />
               ))}
             </div>
           </GlassPanel>
@@ -536,14 +547,15 @@ function StatisticsBar() {
   );
 }
 
-function StatItem({ stat, inView, index }: { stat: typeof stats[0]; inView: boolean; index: number }) {
-  const { count, ref: countRef } = useAnimatedCounter(stat.value);
+function StatItem({ stat, index }: { stat: typeof stats[0]; index: number }) {
+  const { count, ref } = useAnimatedCounter(stat.value);
 
   return (
     <motion.div
-      ref={countRef}
+      ref={ref}
       initial={{ opacity: 0, y: 20 }}
-      animate={inView ? { opacity: 1, y: 0 } : {}}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.3 }}
       transition={{ duration: 0.6, delay: index * 0.12, ease: [0.32, 0.72, 0, 1] }}
       className="text-center space-y-2"
     >

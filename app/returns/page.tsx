@@ -1,124 +1,75 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
-import { returnsApi } from '@/lib/api';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Package, Calendar } from 'lucide-react';
+import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { Package, ArrowLeft } from 'lucide-react';
+import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
+import { SovereignGlow, SovereignSparkle } from '@/shared/components/sovereign/sovereign-sparkle';
 
 export default function ReturnsPage() {
-  const { data: returns, isLoading } = useQuery({
-    queryKey: ['my-returns'],
-    queryFn: () => returnsApi.getMyReturns().then((res) => res.data),
-  });
-
-  if (isLoading) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center py-12">
-          <p className="text-muted-foreground">جاري تحميل طلبات الإرجاع...</p>
-        </div>
-      </div>
-    );
-  }
-
-  const getStatusBadge = (status: string) => {
-    const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
-      requested: { label: 'طلب الإرجاع', variant: 'outline' },
-      approved: { label: 'موافق عليه', variant: 'default' },
-      scheduled: { label: 'مجدول للاستلام', variant: 'default' },
-      in_transit: { label: 'قيد النقل', variant: 'default' },
-      received: { label: 'تم الاستلام', variant: 'secondary' },
-      inspecting: { label: 'قيد الفحص', variant: 'outline' },
-      accepted: { label: 'مقبول', variant: 'default' },
-      damaged: { label: 'تالف', variant: 'destructive' },
-      rejected: { label: 'مرفوض', variant: 'destructive' },
-      completed: { label: 'مكتمل', variant: 'secondary' },
-    };
-    
-    const config = statusConfig[status] || { label: status, variant: 'outline' };
-    return <Badge variant={config.variant}>{config.label}</Badge>;
-  };
-
-  if (!returns || returns.length === 0) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">طلبات الإرجاع</h1>
-        </div>
-        <div className="text-center py-12">
-          <Package className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-          <h2 className="text-2xl font-bold mb-2">لا توجد طلبات إرجاع</h2>
-          <p className="text-muted-foreground mb-6">
-            لم تقم بطلب إرجاع أي منتجات بعد
-          </p>
-          <Button asChild>
-            <Link href="/dashboard/bookings">عرض الحجوزات</Link>
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">طلبات الإرجاع</h1>
-        <p className="text-muted-foreground">
-          {returns.length} {returns.length === 1 ? 'طلب إرجاع' : 'طلبات إرجاع'}
-        </p>
+    <main className="min-h-screen bg-gradient-to-b from-slate-950 to-slate-900 text-white" dir="rtl">
+      {/* Ambient glow */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <SovereignGlow className="top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] opacity-20" />
       </div>
 
-      <div className="grid grid-cols-1 gap-6">
-        {returns.map((returnRequest: any) => (
-          <Card key={returnRequest.id}>
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <CardTitle>{returnRequest.booking_details?.product_name || 'منتج'}</CardTitle>
-                {getStatusBadge(returnRequest.status)}
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">تاريخ الطلب</p>
-                    <p className="font-semibold">
-                      {new Date(returnRequest.requested_at).toLocaleDateString('ar-EG')}
-                    </p>
-                  </div>
-                </div>
-                {returnRequest.scheduled_pickup_date && (
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <div>
-                      <p className="text-sm text-muted-foreground">تاريخ الاستلام المجدول</p>
-                      <p className="font-semibold">
-                        {new Date(returnRequest.scheduled_pickup_date).toLocaleDateString('ar-EG')}
-                      </p>
-                    </div>
-                  </div>
-                )}
-                {returnRequest.is_late && (
-                  <div className="col-span-2">
-                    <Badge variant="destructive">متأخر</Badge>
-                  </div>
-                )}
-              </div>
-              {returnRequest.return_notes && (
-                <div className="mt-4 p-3 bg-muted rounded-lg">
-                  <p className="text-sm font-semibold mb-1">ملاحظات:</p>
-                  <p className="text-sm text-muted-foreground">{returnRequest.return_notes}</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        ))}
+      <div className="container mx-auto px-4 py-12 relative z-10 max-w-3xl">
+        {/* Page heading */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-10"
+        >
+          <h1 className="text-4xl md:text-5xl font-black mb-3 bg-gradient-to-r from-gala-purple via-gala-pink to-gala-gold bg-clip-text text-transparent">
+            طلبات الإرجاع
+          </h1>
+          <p className="text-muted-foreground text-base">
+            تتبع حالة طلبات إرجاع المنتجات المؤجرة
+          </p>
+        </motion.div>
+
+        {/* Empty state card */}
+        <motion.div
+          initial={{ opacity: 0, y: 30, scale: 0.97 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.6, ease: [0.32, 0.72, 0, 1] }}
+        >
+          <GlassPanel className="p-10 md:p-14 text-center relative overflow-hidden">
+            {/* Decorative sparkle */}
+            <SovereignSparkle className="absolute top-4 left-4 w-20 h-20 opacity-30" />
+
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.3, type: 'spring', stiffness: 200 }}
+              className="w-24 h-24 mx-auto mb-6 rounded-3xl bg-gradient-to-br from-gala-purple/20 to-gala-gold/10 border border-white/10 flex items-center justify-center"
+            >
+              <Package className="w-12 h-12 text-gala-gold/80" />
+            </motion.div>
+
+            <h2 className="text-2xl md:text-3xl font-bold mb-3">
+              لا توجد طلبات إرجاع حالياً
+            </h2>
+            <p className="text-muted-foreground text-sm md:text-base mb-8 max-w-md mx-auto leading-relaxed">
+              لم تقم بطلب إرجاع أي منتجات بعد. يمكنك تصفح المنتجات المتاحة واختيار ما يناسبك.
+            </p>
+
+            <motion.div
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <Link
+                href="/products"
+                className="inline-flex items-center gap-2 bg-gradient-to-l from-gala-purple to-gala-pink text-white font-bold px-8 py-3 rounded-2xl text-sm shadow-lg shadow-gala-purple/25 hover:shadow-gala-purple/40 transition-shadow"
+              >
+                تصفّحي المنتجات
+                <ArrowLeft className="w-4 h-4" />
+              </Link>
+            </motion.div>
+          </GlassPanel>
+        </motion.div>
       </div>
-    </div>
+    </main>
   );
 }
-

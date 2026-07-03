@@ -324,8 +324,8 @@ export default function AISearchPage() {
           <div className="flex items-center justify-center py-24">
             <div className="flex flex-col items-center gap-4">
               <Loader2 className="w-10 h-10 animate-spin text-indigo-500" />
-              <p className="text-sm font-mono tracking-widest text-indigo-400 uppercase animate-pulse">
-                Sovereign Core: Indexing Results...
+              <p className="text-sm font-bold tracking-widest text-indigo-400 animate-pulse">
+                جارٍ البحث عن أفضل النتائج...
               </p>
             </div>
           </div>

@@ -257,14 +257,14 @@ export function AIDisputeAssistant({
       {/* Floating trigger */}
       <motion.button
         onClick={() => setIsOpen((v) => !v)}
-        aria-label={isOpen ? "إغلاق المساعد القضائي" : "فتح المساعد القضائي"}
+        aria-label={isOpen ? "إغلاق المساعد الذكي" : "المساعد الذكي"}
         aria-expanded={isOpen}
         className={cn(
           'fixed bottom-6 left-6 z-50 w-14 h-14 rounded-full shadow-2xl flex items-center justify-center transition-all',
           'bg-gradient-to-br from-blue-600 to-indigo-700 text-white hover:scale-110'
         )}
         whileTap={{ scale: 0.95 }}
-        title="المساعد القضائي"
+        title="المساعد الذكي"
       >
         <AnimatePresence mode="wait">
           {isOpen ? (
@@ -287,7 +287,7 @@ export function AIDisputeAssistant({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             role="dialog"
-            aria-label="نافذة المساعد القضائي"
+            aria-label="نافذة المساعد الذكي"
             className="fixed bottom-24 left-6 z-50 w-80 sm:w-96 h-[520px] bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-700 flex flex-col overflow-hidden"
           >
             {/* Header */}
@@ -296,7 +296,7 @@ export function AIDisputeAssistant({
                 <Scale className="w-4 h-4" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-bold">المساعد القضائي</p>
+                <p className="text-sm font-bold">المساعد الذكي</p>
                 <p className="text-[10px] text-blue-200 flex items-center gap-1">
                   <Sparkles className="w-2.5 h-2.5" aria-hidden="true" />
                   مدعوم بالذكاء الاصطناعي

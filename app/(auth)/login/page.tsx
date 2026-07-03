@@ -27,10 +27,10 @@ export default function LoginPage() {
       // 🛡️ Security: Tokens are HttpOnly cookies now.
       // We only store user details in client state.
       setAuth(response.data.user);
-      toast.success('Access Granted (الدخول مسموح)');
+      toast.success('تم الدخول بنجاح');
       router.push('/');
     } catch (error: any) {
-      toast.error('Access Denied (بيانات غير صالحة)');
+      toast.error('بيانات الدخول غير صحيحة');
     } finally {
       setIsLoading(false);
     }
@@ -56,7 +56,7 @@ export default function LoginPage() {
               STANDARD<span className="text-sovereign-gold">.</span>
             </h1>
             <p className="text-sovereign-gold/80 text-sm font-medium tracking-widest uppercase">
-              Sovereign Access Terminal
+              بوابة الدخول الآمن
             </p>
           </div>
 

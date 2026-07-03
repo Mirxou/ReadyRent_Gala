@@ -15,7 +15,8 @@ export class SovereignClient {
     options?: SovereignRequestOptions
   ): Promise<SovereignResponse<T>> {
     // Build URL with optional query params
-    let path = endpoint.startsWith('http') ? endpoint : `${API_BASE}/api${endpoint}`;
+    // Always use relative path: /api/...  (avoids double-slash when API_BASE is "/")
+    let path = endpoint.startsWith('http') ? endpoint : `/api${endpoint}`;
     if (options?.params) {
       const qs = new URLSearchParams();
       Object.entries(options.params).forEach(([k, v]) => {

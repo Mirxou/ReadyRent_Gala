@@ -1,0 +1,2942 @@
+=============================================
+STANDARD.Rent UI/UX Review Report
+Date: Fri Jul  3 21:14:58 UTC 2026
+=============================================
+
+=============================================
+PAGE: Homepage (/)
+=============================================
+Navigation: ✓ STANDARD.Rent | معيار السيادة والفخامة
+  http://localhost:3000/
+Title: STANDARD.Rent | معيار السيادة والفخامة
+---Console Errors---
+---Page Structure---
+- generic
+  - generic
+  - navigation
+    - link "STANDARD" [ref=e4]
+      - generic
+        - StaticText "STANDARD"
+    - generic [ref=e5] clickable [onclick]
+      - button "الكراء" [ref=e14]
+    - generic [ref=e6] clickable [onclick]
+      - button "الخدمات" [ref=e15]
+    - generic [ref=e7] clickable [onclick]
+      - button "السوق" [ref=e16]
+    - link "البحث الذكي" [ref=e8]
+    - link "السجل القضائي" [ref=e9]
+    - link "نقاط الثقة" [ref=e10]
+    - button "تغيير اللغة" [expanded=false, ref=e17]
+      - StaticText "العربية"
+    - button "Toggle theme" [ref=e11]
+    - link "دخول" [ref=e12]
+      - button "دخول" [ref=e18]
+    - link "التسجيل" [ref=e13]
+      - button "التسجيل" [ref=e19]
+  - main
+    - generic
+      - generic
+        - generic
+          - StaticText "المنصة الأولى في الجزائر"
+          - heading "STANDARD." [level=1, ref=e44]
+            - generic
+              - StaticText "STANDARD."
+          - paragraph
+            - StaticText "منصة الكراء الفاخر والخدمات في الجزائر"
+          - link "الكراء فساتين، بدلات، قفطان استأجري أرقى الملابس الفاخرة لمناسباتك بأسعار تنافسية اكتشفي الآن" [ref=e45]
+            - generic
+              - generic
+                - heading "الكراء" [level=3, ref=e98]
+          - link "الخدمات تصوير، مكياج، دج، قاعات اكتشفي أفضل مزودي الخدمات لمناسباتك المميزة اكتشفي الآن" [ref=e46]
+            - generic
+              - generic
+                - heading "الخدمات" [level=3, ref=e99]
+          - link "السوق بائعون وحرفيات سوق مفتوح لبيع وشراء منتجات الحرفيين والبائعين المحليين اكتشفي الآن" [ref=e47]
+            - generic
+              - generic
+                - heading "السوق" [level=3, ref=e100]
+      - paragraph
+        - StaticText "التحديد السيادي"
+      - heading "المنتجات المميزة" [level=2, ref=e24]
+        - StaticText "المنتجات المميزة"
+      - link "عرض الكل" [ref=e25]
+        - StaticText "عرض الكل"
+      - generic
+        - generic
+          - generic
+            - link "فستان زفاف أميرة الزهراء متميز 96 عرض التفاصيل" [ref=e76]
+              - button "عرض التفاصيل" [ref=e101]
+            - paragraph
+            - heading "فستان زفاف أميرة الزهراء" [level=3, ref=e77]
+            - StaticText "4.9"
+            - StaticText "قسنطينة"
+            - paragraph
+            - paragraph
+            - button [ref=e78]
+        - generic
+          - generic
+            - link "بدلة سوداء كلاسيكية متميز 92 عرض التفاصيل" [ref=e79]
+              - button "عرض التفاصيل" [ref=e102]
+            - paragraph
+            - heading "بدلة سوداء كلاسيكية" [level=3, ref=e80]
+            - StaticText "4.7"
+            - StaticText "الجزائر العاصمة"
+            - paragraph
+            - paragraph
+            - button [ref=e81]
+        - generic
+          - generic
+            - link "قفطان جزائري ملكي ذهبي متميز 98 عرض التفاصيل" [ref=e82]
+              - button "عرض التفاصيل" [ref=e103]
+            - paragraph
+            - heading "قفطان جزائري ملكي ذهبي" [level=3, ref=e83]
+            - StaticText "5.0"
+            - StaticText "تلمسان"
+            - paragraph
+            - paragraph
+            - button [ref=e84]
+        - generic
+          - generic
+            - link "قرطاسية أنيقة متميز 90 عرض التفاصيل" [ref=e85]
+              - button "عرض التفاصيل" [ref=e104]
+            - heading "قرطاسية أنيقة" [level=3, ref=e86]
+            - button [ref=e87]
+      - paragraph
+        - StaticText "المنظومة المتكاملة"
+      - heading "النظام البيئي الثلاثي" [level=2, ref=e26]
+        - StaticText "النظام البيئي الثلاثي"
+      - link "الكراء الفاخر اكتشفي مجموعة واسعة من الفساتين والبدلات والقفطانات الفاخرة. استأجري بأفضل الأسعار مع ضمان الجودة والنظافة لكل مناسبة. استكشفي" [ref=e27]
+        - generic
+          - generic
+            - heading "الكراء الفاخر" [level=3, ref=e88]
+            - button "استكشفي" [ref=e91]
+      - link "خدمات المناسبات اعثري على أفضل المصورين ومجمّلي الأزياء ومقدمي الدي جي وقاعات الأفراح. كل ما تحتاجينه لمناسبتك المثالية في مكان واحد. استكشفي" [ref=e28]
+        - generic
+          - generic
+            - heading "خدمات المناسبات" [level=3, ref=e89]
+            - button "استكشفي" [ref=e92]
+      - link "السوق المفتوح تسوقي من بائعين وحرفيات محليين. اكتشفي منتجات فريدة مصنوعة يدوياً وادعمي الأعمال المحلية في الجزائر. استكشفي" [ref=e29]
+        - generic
+          - generic
+            - heading "السوق المفتوح" [level=3, ref=e90]
+            - button "استكشفي" [ref=e93]
+      - paragraph
+        - StaticText "إبداع محلي"
+      - heading "حرفيات مميزات" [level=2, ref=e30]
+        - StaticText "حرفيات مميزات"
+      - link "عرض الكل" [ref=e31]
+        - StaticText "عرض الكل"
+      - link "أميرة بن موسى أميرة بن موسى LUXURY SEWING 4.9 قسنطينة" [ref=e32]
+        - generic
+          - generic
+            - heading "أميرة بن موسى" [level=3, ref=e94]
+      - link "فاطمة الزهراء حاج فاطمة الزهراء حاج TRADITIONAL EMBROIDERY 5.0 تلمسان" [ref=e33]
+        - generic
+          - generic
+            - heading "فاطمة الزهراء حاج" [level=3, ref=e95]
+      - link "نادية بوزياف نادية بوزياف FASHION DESIGN 4.8 الجزائر العاصمة" [ref=e34]
+        - generic
+          - generic
+            - heading "نادية بوزياف" [level=3, ref=e96]
+      - link "سامية خليفي سامية خليفي EVENT PHOTOGRAPHY 4.7 وهران" [ref=e35]
+        - generic
+          - generic
+            - heading "سامية خليفي" [level=3, ref=e97]
+      - paragraph
+        - StaticText "دليل الخدمات"
+      - heading "خدمات المناسبات" [level=2, ref=e36]
+        - StaticText "خدمات المناسبات"
+      - link "عرض الكل" [ref=e37]
+        - StaticText "عرض الكل"
+      - link "فساتين زفاف" [ref=e38]
+        - heading "فساتين زفاف" [level=3, ref=e68]
+      - link "بدلات رجالية" [ref=e39]
+        - heading "بدلات رجالية" [level=3, ref=e69]
+      - link "قفطان جزائري" [ref=e40]
+        - heading "قفطان جزائري" [level=3, ref=e70]
+      - link "قرطاسيات" [ref=e41]
+        - heading "قرطاسيات" [level=3, ref=e71]
+      - link "جلابيات فاخرة" [ref=e42]
+        - heading "جلابيات فاخرة" [level=3, ref=e72]
+      - link "أزياء مناسبات" [ref=e43]
+        - heading "أزياء مناسبات" [level=3, ref=e73]
+      - generic
+        - paragraph
+          - StaticText "0+"
+        - paragraph
+          - StaticText "منتج"
+        - paragraph
+          - StaticText "0+"
+        - paragraph
+          - StaticText "حرفية"
+        - paragraph
+          - StaticText "0+"
+        - paragraph
+          - StaticText "خدمة"
+        - paragraph
+          - StaticText "0+"
+        - paragraph
+          - StaticText "عميل سعيد"
+      - generic
+        - generic
+          - paragraph
+          - heading "انضمي إلى عالمSTANDARDاليوم" [level=2, ref=e48]
+          - paragraph
+          - link "سجّلي الآن مجاناً" [ref=e49]
+            - button "سجّلي الآن مجاناً" [ref=e74]
+          - link "تصفّحي المنتجات" [ref=e50]
+            - button "تصفّحي المنتجات" [ref=e75]
+  - contentinfo
+    - generic
+      - link "STANDARD." [ref=e20]
+        - generic
+      - paragraph
+        - StaticText "منصة الكراء الفاخر والخدمات في الجزائر. 3 في 1: كراء، خدمات، وسوق مفتوح."
+      - link "انستغرام" [ref=e21]
+      - link "تيك توك" [ref=e22]
+      - link "واتساب" [ref=e23]
+      - StaticText "الكراء"
+      - list
+        - listitem [level=1]
+          - link "الكراء الفاخر" [ref=e51]
+        - listitem [level=1]
+          - link "المنتجات" [ref=e52]
+        - listitem [level=1]
+          - link "الحزم والعروض" [ref=e53]
+        - listitem [level=1]
+          - link "السلة" [ref=e54]
+      - StaticText "الخدمات"
+      - list
+        - listitem [level=1]
+          - link "خدمات المناسبات" [ref=e55]
+        - listitem [level=1]
+          - link "دليل المناسبات" [ref=e56]
+        - listitem [level=1]
+          - link "الحرفيات" [ref=e57]
+        - listitem [level=1]
+          - link "التأمين" [ref=e58]
+      - StaticText "السوق والدعم"
+      - list
+        - listitem [level=1]
+          - link "السوق المفتوح" [ref=e59]
+        - listitem [level=1]
+          - link "البائعون" [ref=e60]
+        - listitem [level=1]
+          - link "نقاط الثقة" [ref=e61]
+        - listitem [level=1]
+          - link "السجل القضائي" [ref=e62]
+      - StaticText "أخرى"
+      - list
+        - listitem [level=1]
+          - link "المدونة" [ref=e63]
+        - listitem [level=1]
+          - link "عن ستاندرد" [ref=e64]
+        - listitem [level=1]
+          - link "الأسئلة الشائعة" [ref=e65]
+        - listitem [level=1]
+          - link "المرتجعات" [ref=e66]
+  - region "Notifications alt+T" [ref=e1]
+  - button [ref=e2]
+  - region "Notifications alt+T" [ref=e3]
+  - button "Open Next.js Dev Tools" [expanded=false, ref=e67]
+=============================================
+
+=============================================
+PAGE: Products Listing (/products)
+=============================================
+Navigation: ✓ STANDARD.Rent | معيار السيادة والفخامة
+  http://localhost:3000/products
+Title: STANDARD.Rent | معيار السيادة والفخامة
+---Console Errors---
+---Page Structure---
+- generic
+  - generic
+  - navigation
+    - link "STANDARD" [ref=e4]
+      - generic
+        - StaticText "STANDARD"
+    - generic [ref=e5] clickable [onclick]
+      - button "الكراء" [ref=e14]
+    - generic [ref=e6] clickable [onclick]
+      - button "الخدمات" [ref=e15]
+    - generic [ref=e7] clickable [onclick]
+      - button "السوق" [ref=e16]
+    - link "البحث الذكي" [ref=e8]
+    - link "السجل القضائي" [ref=e9]
+    - link "نقاط الثقة" [ref=e10]
+    - button "تغيير اللغة" [expanded=false, ref=e17]
+      - StaticText "العربية"
+    - button "Toggle theme" [ref=e11]
+    - link "دخول" [ref=e12]
+      - button "دخول" [ref=e18]
+    - link "التسجيل" [ref=e13]
+      - button "التسجيل" [ref=e19]
+  - main
+    - generic
+      - generic
+      - generic
+        - generic
+          - StaticText "أرشيف ستاندرد"
+        - generic
+          - heading "كتالوج 2026." [level=1, ref=e43]
+            - StaticText "كتالوج 2026."
+        - paragraph
+          - StaticText "\"اكتشف نخبة الأصول المختارة بعناية لتناسب أرقى المناسبات في الجزائر. كل قطعة هنا هي ميثاق ثقة بحد ذاتها.\""
+        - StaticText "رقابة جودة عالية"
+        - StaticText "حماية سيادية"
+        - generic
+          - generic
+            - generic
+              - textbox "ابحث في سجل الأصول السيادية (فساتين، إكسسوارات، قاعات...)" [ref=e47]
+            - button "تصفية السجل" [expanded=false, ref=e44]
+            - button [ref=e45]
+            - button [ref=e46]
+        - heading "لم يتم رصد نتائج في الأرشيف" [level=3, ref=e24]
+        - paragraph
+        - button "العودة لتصفح السجل الكامل" [ref=e25]
+  - contentinfo
+    - generic
+      - link "STANDARD." [ref=e20]
+        - generic
+      - paragraph
+        - StaticText "منصة الكراء الفاخر والخدمات في الجزائر. 3 في 1: كراء، خدمات، وسوق مفتوح."
+      - link "انستغرام" [ref=e21]
+      - link "تيك توك" [ref=e22]
+      - link "واتساب" [ref=e23]
+      - StaticText "الكراء"
+      - list
+        - listitem [level=1]
+          - link "الكراء الفاخر" [ref=e26]
+        - listitem [level=1]
+          - link "المنتجات" [ref=e27]
+        - listitem [level=1]
+          - link "الحزم والعروض" [ref=e28]
+        - listitem [level=1]
+          - link "السلة" [ref=e29]
+      - StaticText "الخدمات"
+      - list
+        - listitem [level=1]
+          - link "خدمات المناسبات" [ref=e30]
+        - listitem [level=1]
+          - link "دليل المناسبات" [ref=e31]
+        - listitem [level=1]
+          - link "الحرفيات" [ref=e32]
+        - listitem [level=1]
+          - link "التأمين" [ref=e33]
+      - StaticText "السوق والدعم"
+      - list
+        - listitem [level=1]
+          - link "السوق المفتوح" [ref=e34]
+        - listitem [level=1]
+          - link "البائعون" [ref=e35]
+        - listitem [level=1]
+          - link "نقاط الثقة" [ref=e36]
+        - listitem [level=1]
+          - link "السجل القضائي" [ref=e37]
+      - StaticText "أخرى"
+      - list
+        - listitem [level=1]
+          - link "المدونة" [ref=e38]
+        - listitem [level=1]
+          - link "عن ستاندرد" [ref=e39]
+        - listitem [level=1]
+          - link "الأسئلة الشائعة" [ref=e40]
+        - listitem [level=1]
+          - link "المرتجعات" [ref=e41]
+  - region "Notifications alt+T" [ref=e1]
+  - button [ref=e2]
+  - region "Notifications alt+T" [ref=e3]
+  - button "Open Next.js Dev Tools" [expanded=false, ref=e42]
+=============================================
+
+=============================================
+PAGE: Login (/login)
+=============================================
+Navigation: ✓ STANDARD.Rent | معيار السيادة والفخامة
+  http://localhost:3000/login
+Title: STANDARD.Rent | معيار السيادة والفخامة
+---Console Errors---
+---Page Structure---
+- generic
+  - generic
+  - navigation
+    - link "STANDARD" [ref=e4]
+      - generic
+        - StaticText "STANDARD"
+    - generic [ref=e5] clickable [onclick]
+      - button "الكراء" [ref=e14]
+    - generic [ref=e6] clickable [onclick]
+      - button "الخدمات" [ref=e15]
+    - generic [ref=e7] clickable [onclick]
+      - button "السوق" [ref=e16]
+    - link "البحث الذكي" [ref=e8]
+    - link "السجل القضائي" [ref=e9]
+    - link "نقاط الثقة" [ref=e10]
+    - button "تغيير اللغة" [expanded=false, ref=e17]
+      - StaticText "العربية"
+    - button "Toggle theme" [ref=e11]
+    - link "دخول" [ref=e12]
+      - button "دخول" [ref=e18]
+    - link "التسجيل" [ref=e13]
+      - button "التسجيل" [ref=e19]
+  - main
+    - generic
+      - Canvas
+      - generic
+        - generic
+          - generic
+            - heading "STANDARD." [level=1, ref=e41]
+              - StaticText "STANDARD."
+            - paragraph
+              - StaticText "SOVEREIGN ACCESS TERMINAL"
+            - form
+              - textbox "البريد الإلكتروني الرسمي" [required, ref=e44]
+              - generic
+                - textbox "رمز الدخول" [required, ref=e45]
+                - button [ref=e46]
+              - button "فتح البوابة" [ref=e42]
+            - link "طلب عضوية جديدة" [ref=e43]
+  - contentinfo
+    - generic
+      - link "STANDARD." [ref=e20]
+        - generic
+      - paragraph
+        - StaticText "منصة الكراء الفاخر والخدمات في الجزائر. 3 في 1: كراء، خدمات، وسوق مفتوح."
+      - link "انستغرام" [ref=e21]
+      - link "تيك توك" [ref=e22]
+      - link "واتساب" [ref=e23]
+      - StaticText "الكراء"
+      - list
+        - listitem [level=1]
+          - link "الكراء الفاخر" [ref=e24]
+        - listitem [level=1]
+          - link "المنتجات" [ref=e25]
+        - listitem [level=1]
+          - link "الحزم والعروض" [ref=e26]
+        - listitem [level=1]
+          - link "السلة" [ref=e27]
+      - StaticText "الخدمات"
+      - list
+        - listitem [level=1]
+          - link "خدمات المناسبات" [ref=e28]
+        - listitem [level=1]
+          - link "دليل المناسبات" [ref=e29]
+        - listitem [level=1]
+          - link "الحرفيات" [ref=e30]
+        - listitem [level=1]
+          - link "التأمين" [ref=e31]
+      - StaticText "السوق والدعم"
+      - list
+        - listitem [level=1]
+          - link "السوق المفتوح" [ref=e32]
+        - listitem [level=1]
+          - link "البائعون" [ref=e33]
+        - listitem [level=1]
+          - link "نقاط الثقة" [ref=e34]
+        - listitem [level=1]
+          - link "السجل القضائي" [ref=e35]
+      - StaticText "أخرى"
+      - list
+        - listitem [level=1]
+          - link "المدونة" [ref=e36]
+        - listitem [level=1]
+          - link "عن ستاندرد" [ref=e37]
+        - listitem [level=1]
+          - link "الأسئلة الشائعة" [ref=e38]
+        - listitem [level=1]
+          - link "المرتجعات" [ref=e39]
+  - region "Notifications alt+T" [ref=e1]
+  - button [ref=e2]
+  - region "Notifications alt+T" [ref=e3]
+  - button "Open Next.js Dev Tools" [expanded=false, ref=e40]
+=============================================
+
+=============================================
+PAGE: Rentals (/rentals)
+=============================================
+Navigation: ✓ STANDARD.Rent | معيار السيادة والفخامة
+  http://localhost:3000/rentals
+Title: STANDARD.Rent | معيار السيادة والفخامة
+---Console Errors---
+---Page Structure---
+- generic
+  - generic
+  - navigation
+    - link "STANDARD" [ref=e4]
+      - generic
+        - StaticText "STANDARD"
+    - generic [ref=e5] clickable [onclick]
+      - button "الكراء" [ref=e14]
+    - generic [ref=e6] clickable [onclick]
+      - button "الخدمات" [ref=e15]
+    - generic [ref=e7] clickable [onclick]
+      - button "السوق" [ref=e16]
+    - link "البحث الذكي" [ref=e8]
+    - link "السجل القضائي" [ref=e9]
+    - link "نقاط الثقة" [ref=e10]
+    - button "تغيير اللغة" [expanded=false, ref=e17]
+      - StaticText "العربية"
+    - button "Toggle theme" [ref=e11]
+    - link "دخول" [ref=e12]
+      - button "دخول" [ref=e18]
+    - link "التسجيل" [ref=e13]
+      - button "التسجيل" [ref=e19]
+  - main
+    - generic
+      - generic
+        - StaticText "كراء فاخر"
+        - heading "الكراء الفاخر" [level=1, ref=e34]
+          - generic
+        - paragraph
+          - StaticText "اكتشفي أرقى الملابس الفاخرة لمناسباتك في الجزائر"
+        - link "ابحثي عن فستان، قفطان، بدلة..." [ref=e54]
+          - generic
+      - paragraph
+        - StaticText "التصنيفات"
+      - heading "تصفّحي التصنيفات" [level=2, ref=e24]
+        - StaticText "تصفّحي التصنيفات"
+      - link "فساتين زفاف فساتين زفاف 5 منتج" [ref=e25]
+        - image "فساتين زفاف"
+        - heading "فساتين زفاف" [level=3, ref=e55]
+        - paragraph
+          - StaticText "5 منتج"
+      - link "بدلات رجالية بدلات رجالية 3 منتج" [ref=e26]
+        - image "بدلات رجالية"
+        - heading "بدلات رجالية" [level=3, ref=e56]
+        - paragraph
+          - StaticText "3 منتج"
+      - link "قفطان جزائري قفطان جزائري 4 منتج" [ref=e27]
+        - image "قفطان جزائري"
+        - heading "قفطان جزائري" [level=3, ref=e57]
+        - paragraph
+          - StaticText "4 منتج"
+      - link "قرطاسيات قرطاسيات 3 منتج" [ref=e28]
+        - image "قرطاسيات"
+        - heading "قرطاسيات" [level=3, ref=e58]
+        - paragraph
+          - StaticText "3 منتج"
+      - link "جلابيات فاخرة جلابيات فاخرة 3 منتج" [ref=e29]
+        - image "جلابيات فاخرة"
+        - heading "جلابيات فاخرة" [level=3, ref=e59]
+        - paragraph
+          - StaticText "3 منتج"
+      - link "أزياء مناسبات أزياء مناسبات 2 منتج" [ref=e30]
+        - image "أزياء مناسبات"
+        - heading "أزياء مناسبات" [level=3, ref=e60]
+        - paragraph
+          - StaticText "2 منتج"
+      - paragraph
+        - StaticText "التحديد السيادي"
+      - heading "منتجات مميزة" [level=2, ref=e31]
+        - StaticText "منتجات مميزة"
+      - link "عرض الكل" [ref=e32]
+        - StaticText "عرض الكل"
+      - generic
+        - generic
+          - link "فستان زفاف أميرة الزهراء متميز 96 عرض التفاصيل" [ref=e61]
+            - button "عرض التفاصيل" [ref=e89]
+          - paragraph
+          - heading "فستان زفاف أميرة الزهراء" [level=3, ref=e62]
+          - StaticText "4.9"
+          - StaticText "قسنطينة"
+          - paragraph
+          - paragraph
+          - button [ref=e63]
+      - generic
+        - generic
+          - link "بدلة سوداء كلاسيكية متميز 92 عرض التفاصيل" [ref=e64]
+            - button "عرض التفاصيل" [ref=e90]
+          - paragraph
+          - heading "بدلة سوداء كلاسيكية" [level=3, ref=e65]
+          - StaticText "4.7"
+          - StaticText "الجزائر العاصمة"
+          - paragraph
+          - paragraph
+          - button [ref=e66]
+      - generic
+        - generic
+          - link "قفطان جزائري ملكي ذهبي متميز 98 عرض التفاصيل" [ref=e67]
+            - button "عرض التفاصيل" [ref=e91]
+          - paragraph
+          - heading "قفطان جزائري ملكي ذهبي" [level=3, ref=e68]
+          - StaticText "5.0"
+          - StaticText "تلمسان"
+          - paragraph
+          - paragraph
+          - button [ref=e69]
+      - generic
+        - generic
+          - link "قرطاسية أنيقة متميز 90 عرض التفاصيل" [ref=e70]
+            - button "عرض التفاصيل" [ref=e92]
+          - paragraph
+          - heading "قرطاسية أنيقة" [level=3, ref=e71]
+          - StaticText "4.8"
+          - StaticText "وهران"
+          - paragraph
+          - paragraph
+          - button [ref=e72]
+      - generic
+        - generic
+          - link "جلابية فاخرة مطرّزة معتمد 85 عرض التفاصيل" [ref=e73]
+            - button "عرض التفاصيل" [ref=e93]
+          - paragraph
+          - heading "جلابية فاخرة مطرّزة" [level=3, ref=e74]
+          - StaticText "4.6"
+          - StaticText "عنابة"
+          - paragraph
+          - paragraph
+          - button [ref=e75]
+      - generic
+        - generic
+          - link "قفطان عروس أزرق ياقوتي متميز 95 عرض التفاصيل" [ref=e76]
+            - button "عرض التفاصيل" [ref=e94]
+          - paragraph
+          - heading "قفطان عروس أزرق ياقوتي" [level=3, ref=e77]
+          - StaticText "4.9"
+          - StaticText "قسنطينة"
+          - paragraph
+          - paragraph
+          - button [ref=e78]
+      - generic
+        - generic
+          - link "فستان سهرة وردي معتمد 82 عرض التفاصيل" [ref=e79]
+            - button "عرض التفاصيل" [ref=e95]
+          - paragraph
+          - heading "فستان سهرة وردي" [level=3, ref=e80]
+          - StaticText "4.5"
+          - StaticText "البليدة"
+          - paragraph
+          - paragraph
+          - button [ref=e81]
+      - generic
+        - generic
+          - link "بدلة زفاف رجالية عاجية متميز 91 عرض التفاصيل" [ref=e82]
+            - button "عرض التفاصيل" [ref=e96]
+          - paragraph
+          - heading "بدلة زفاف رجالية عاجية" [level=3, ref=e83]
+          - StaticText "4.8"
+          - StaticText "الجزائر العاصمة"
+          - paragraph
+          - paragraph
+          - button [ref=e84]
+      - paragraph
+        - StaticText "بكل سهولة"
+      - heading "كيف يعمل؟" [level=2, ref=e33]
+        - StaticText "كيف يعمل؟"
+      - generic
+        - generic
+          - StaticText "١"
+          - heading "تصفّحي" [level=3, ref=e86]
+          - paragraph
+      - generic
+        - generic
+          - StaticText "٢"
+          - heading "احجزي" [level=3, ref=e87]
+          - paragraph
+      - generic
+        - generic
+          - StaticText "٣"
+          - heading "استلمي" [level=3, ref=e88]
+          - paragraph
+      - generic
+        - generic
+          - paragraph
+          - heading "ابدئي الكراء الآن" [level=2, ref=e35]
+          - paragraph
+          - link "تصفّحي المنتجات" [ref=e36]
+            - button "تصفّحي المنتجات" [ref=e85]
+  - contentinfo
+    - generic
+      - link "STANDARD." [ref=e20]
+        - generic
+      - paragraph
+        - StaticText "منصة الكراء الفاخر والخدمات في الجزائر. 3 في 1: كراء، خدمات، وسوق مفتوح."
+      - link "انستغرام" [ref=e21]
+      - link "تيك توك" [ref=e22]
+      - link "واتساب" [ref=e23]
+      - StaticText "الكراء"
+      - list
+        - listitem [level=1]
+          - link "الكراء الفاخر" [ref=e37]
+        - listitem [level=1]
+          - link "المنتجات" [ref=e38]
+        - listitem [level=1]
+          - link "الحزم والعروض" [ref=e39]
+        - listitem [level=1]
+          - link "السلة" [ref=e40]
+      - StaticText "الخدمات"
+      - list
+        - listitem [level=1]
+          - link "خدمات المناسبات" [ref=e41]
+        - listitem [level=1]
+          - link "دليل المناسبات" [ref=e42]
+        - listitem [level=1]
+          - link "الحرفيات" [ref=e43]
+        - listitem [level=1]
+          - link "التأمين" [ref=e44]
+      - StaticText "السوق والدعم"
+      - list
+        - listitem [level=1]
+          - link "السوق المفتوح" [ref=e45]
+        - listitem [level=1]
+          - link "البائعون" [ref=e46]
+        - listitem [level=1]
+          - link "نقاط الثقة" [ref=e47]
+        - listitem [level=1]
+          - link "السجل القضائي" [ref=e48]
+      - StaticText "أخرى"
+      - list
+        - listitem [level=1]
+          - link "المدونة" [ref=e49]
+        - listitem [level=1]
+          - link "عن ستاندرد" [ref=e50]
+        - listitem [level=1]
+          - link "الأسئلة الشائعة" [ref=e51]
+        - listitem [level=1]
+          - link "المرتجعات" [ref=e52]
+  - region "Notifications alt+T" [ref=e1]
+  - button [ref=e2]
+  - region "Notifications alt+T" [ref=e3]
+  - button "Open Next.js Dev Tools" [expanded=false, ref=e53]
+=============================================
+
+=============================================
+PAGE: Services (/services)
+=============================================
+Navigation: ✓ STANDARD.Rent | معيار السيادة والفخامة
+  http://localhost:3000/services
+Title: STANDARD.Rent | معيار السيادة والفخامة
+---Console Errors---
+---Page Structure---
+- generic
+  - generic
+  - navigation
+    - link "STANDARD" [ref=e4]
+      - generic
+        - StaticText "STANDARD"
+    - generic [ref=e5] clickable [onclick]
+      - button "الكراء" [ref=e14]
+    - generic [ref=e6] clickable [onclick]
+      - button "الخدمات" [ref=e15]
+    - generic [ref=e7] clickable [onclick]
+      - button "السوق" [ref=e16]
+    - link "البحث الذكي" [ref=e8]
+    - link "السجل القضائي" [ref=e9]
+    - link "نقاط الثقة" [ref=e10]
+    - button "تغيير اللغة" [expanded=false, ref=e17]
+      - StaticText "العربية"
+    - button "Toggle theme" [ref=e11]
+    - link "دخول" [ref=e12]
+      - button "دخول" [ref=e18]
+    - link "التسجيل" [ref=e13]
+      - button "التسجيل" [ref=e19]
+  - main
+    - generic
+      - generic
+        - generic
+          - StaticText "خدمات المناسبات"
+        - heading "خدمات المناسبات" [level=1, ref=e39]
+          - generic
+            - StaticText "خدمات المناسبات"
+        - paragraph
+          - StaticText "كل ما تحتاجينه لمناسبتك المثالية"
+      - paragraph
+        - StaticText "دليل الخدمات"
+      - heading "أصناف الخدمات" [level=2, ref=e24]
+        - StaticText "أصناف الخدمات"
+      - link "أعراس قاعات وتنظيم أفراح" [ref=e25]
+        - heading "أعراس" [level=3, ref=e59]
+        - paragraph
+          - StaticText "قاعات وتنظيم أفراح"
+      - link "تصوير مصورون محترفون" [ref=e26]
+        - heading "تصوير" [level=3, ref=e60]
+        - paragraph
+          - StaticText "مصورون محترفون"
+      - link "مكياج مجمّلات أزياء محترفات" [ref=e27]
+        - heading "مكياج" [level=3, ref=e61]
+        - paragraph
+          - StaticText "مجمّلات أزياء محترفات"
+      - link "دج دي جي لموسيقى لا تُنسى" [ref=e28]
+        - heading "دج" [level=3, ref=e62]
+        - paragraph
+          - StaticText "دي جي لموسيقى لا تُنسى"
+      - link "زهور تنسيق زهور فاخر" [ref=e29]
+        - heading "زهور" [level=3, ref=e63]
+        - paragraph
+          - StaticText "تنسيق زهور فاخر"
+      - link "حفلات تنظيم حفلات شاملة" [ref=e30]
+        - heading "حفلات" [level=3, ref=e64]
+        - paragraph
+          - StaticText "تنظيم حفلات شاملة"
+      - paragraph
+        - StaticText "الأفضل تقييماً"
+      - heading "خدمات مميزة" [level=2, ref=e31]
+        - StaticText "خدمات مميزة"
+      - link "عرض الكل" [ref=e32]
+        - StaticText "عرض الكل"
+      - link "دار العروس - قسنطينة موثّق دار العروس - قسنطينة 4.8 قاعة أعراس فاخرة في قلب قسنطينة تتسع لـ 500 ضيف مع ديكور راقي وخدمات شاملة قسنطينة أماكن أعراس" [ref=e33]
+        - generic
+          - generic
+            - generic
+            - generic
+              - heading "دار العروس - قسنطينة" [level=3, ref=e66]
+      - link "ستوديو النور - الجزائر موثّق ستوديو النور - الجزائر 4.9 استوديو تصوير احترافي متخصص في تصوير الأعراس والمناسبات. فريق مكون من 4 مصورين محترفين الجزائر العاصمة مصورين" [ref=e34]
+        - generic
+          - generic
+            - generic
+            - generic
+              - heading "ستوديو النور - الجزائر" [level=3, ref=e67]
+      - link "مكياج أمينة موثّق مكياج أمينة 4.7 خدمات مكياج احترافي في المنزل أو صالون العروس. استخدام منتجات عالمية عالية الجودة وهران مكياج" [ref=e35]
+        - generic
+          - generic
+            - generic
+            - generic
+              - heading "مكياج أمينة" [level=3, ref=e68]
+      - link "دي جي كريم - حفلات موثّق دي جي كريم - حفلات 4.6 دي جي محترف مع أحدث المعدات الصوتية والإضاءة. يقدم مزيج من الموسيقى الجزائرية والعالمية البليدة دج" [ref=e36]
+        - generic
+          - generic
+            - generic
+            - generic
+              - heading "دي جي كريم - حفلات" [level=3, ref=e69]
+      - link "ورود ذهبية - عنابة موثّق ورود ذهبية - عنابة 4.5 محل زهور فاخر يقدم خدمات تنسيق الزهور للأعراس والمناسبات. توصيل مجاني في عنابة عنابة زهور" [ref=e37]
+        - generic
+          - generic
+            - generic
+            - generic
+              - heading "ورود ذهبية - عنابة" [level=3, ref=e70]
+      - link "إيفانتس برو - سطيف موثّق إيفانتس برو - سطيف 4.8 شركة تنسيق حفلات متكاملة. من التخطيط إلى التنفيذ، نقدم كل ما تحتاجه لمناسبتك المثالية سطيف تنسيق حفلات" [ref=e38]
+        - generic
+          - generic
+            - generic
+            - generic
+              - heading "إيفانتس برو - سطيف" [level=3, ref=e71]
+      - generic
+        - generic
+          - generic
+          - heading "اكتشفي جميع الخدمات" [level=2, ref=e40]
+          - paragraph
+          - link "اكتشفي جميع الخدمات" [ref=e41]
+            - button "اكتشفي جميع الخدمات" [ref=e65]
+  - contentinfo
+    - generic
+      - link "STANDARD." [ref=e20]
+        - generic
+      - paragraph
+        - StaticText "منصة الكراء الفاخر والخدمات في الجزائر. 3 في 1: كراء، خدمات، وسوق مفتوح."
+      - link "انستغرام" [ref=e21]
+      - link "تيك توك" [ref=e22]
+      - link "واتساب" [ref=e23]
+      - StaticText "الكراء"
+      - list
+        - listitem [level=1]
+          - link "الكراء الفاخر" [ref=e42]
+        - listitem [level=1]
+          - link "المنتجات" [ref=e43]
+        - listitem [level=1]
+          - link "الحزم والعروض" [ref=e44]
+        - listitem [level=1]
+          - link "السلة" [ref=e45]
+      - StaticText "الخدمات"
+      - list
+        - listitem [level=1]
+          - link "خدمات المناسبات" [ref=e46]
+        - listitem [level=1]
+          - link "دليل المناسبات" [ref=e47]
+        - listitem [level=1]
+          - link "الحرفيات" [ref=e48]
+        - listitem [level=1]
+          - link "التأمين" [ref=e49]
+      - StaticText "السوق والدعم"
+      - list
+        - listitem [level=1]
+          - link "السوق المفتوح" [ref=e50]
+        - listitem [level=1]
+          - link "البائعون" [ref=e51]
+        - listitem [level=1]
+          - link "نقاط الثقة" [ref=e52]
+        - listitem [level=1]
+          - link "السجل القضائي" [ref=e53]
+      - StaticText "أخرى"
+      - list
+        - listitem [level=1]
+          - link "المدونة" [ref=e54]
+        - listitem [level=1]
+          - link "عن ستاندرد" [ref=e55]
+        - listitem [level=1]
+          - link "الأسئلة الشائعة" [ref=e56]
+        - listitem [level=1]
+          - link "المرتجعات" [ref=e57]
+  - region "Notifications alt+T" [ref=e1]
+  - button [ref=e2]
+  - region "Notifications alt+T" [ref=e3]
+  - button "Open Next.js Dev Tools" [expanded=false, ref=e58]
+=============================================
+
+=============================================
+PAGE: Marketplace (/marketplace)
+=============================================
+Navigation: ✓ STANDARD.Rent | معيار السيادة والفخامة
+  http://localhost:3000/marketplace
+Title: STANDARD.Rent | معيار السيادة والفخامة
+---Console Errors---
+---Page Structure---
+- generic
+  - generic
+  - navigation
+    - link "STANDARD" [ref=e4]
+      - generic
+        - StaticText "STANDARD"
+    - generic [ref=e5] clickable [onclick]
+      - button "الكراء" [ref=e14]
+    - generic [ref=e6] clickable [onclick]
+      - button "الخدمات" [ref=e15]
+    - generic [ref=e7] clickable [onclick]
+      - button "السوق" [ref=e16]
+    - link "البحث الذكي" [ref=e8]
+    - link "السجل القضائي" [ref=e9]
+    - link "نقاط الثقة" [ref=e10]
+    - button "تغيير اللغة" [expanded=false, ref=e17]
+      - StaticText "العربية"
+    - button "Toggle theme" [ref=e11]
+    - link "دخول" [ref=e12]
+      - button "دخول" [ref=e18]
+    - link "التسجيل" [ref=e13]
+      - button "التسجيل" [ref=e19]
+  - main
+    - generic
+      - generic
+        - StaticText "السوق الرقمي"
+        - heading "السوق المفتوح" [level=1, ref=e38]
+          - generic
+        - paragraph
+          - StaticText "سوق رقمي للحرفيين والبائعين المحليين"
+      - paragraph
+        - StaticText "البائعون المميزون"
+      - heading "بائعون موثوقون" [level=2, ref=e24]
+        - StaticText "بائعون موثوقون"
+      - link "عرض الكل" [ref=e25]
+        - StaticText "عرض الكل"
+      - link "دار القصر للأزياء دار القصر للأزياء 4.9 قسنطينة دار أزياء فاخرة في قسنطينة متخصصة في فساتين الزفاف والأزياء التقليدية الجزائرية. تأسست عام 2010. 45 منتج نقاط ثقة 96%" [ref=e26]
+        - generic
+          - generic
+            - heading "دار القصر للأزياء" [level=3, ref=e59]
+      - link "كوتور القصبة كوتور القصبة 4.7 الجزائر العاصمة متجرب للأزياء الفاخرة في قلب العاصمة. يقدم أحدث صيحات الموضة مع لمسة جزائرية أصيلة. 62 منتج نقاط ثقة 92%" [ref=e27]
+        - generic
+          - generic
+            - heading "كوتور القصبة" [level=3, ref=e60]
+      - link "تراث تلمساني تراث تلمساني 4.8 تلمسان متجر متخصص في الأزياء التقليدية التلمسانية. يقدم أجود أنواع القفطان والقرطاسيات المصنوعة يدوياً. 38 منتج نقاط ثقة 95%" [ref=e28]
+        - generic
+          - generic
+            - heading "تراث تلمساني" [level=3, ref=e61]
+      - link "أناقة وهران أناقة وهران 4.5 وهران معرض أزياء راقي في وهران يقدم تشكيلة واسعة من الأزياء الراقية للرجال والنساء. 29 منتج نقاط ثقة 87%" [ref=e29]
+        - generic
+          - generic
+            - heading "أناقة وهران" [level=3, ref=e62]
+      - link "ستوديو عروس عنابة ستوديو عروس عنابة 4.6 عنابة ستوديو متخصص في أزياء العروسات في عنابة. يقدم فساتين زفاف استثنائية وخدمات تفصيل حسب الطلب. 24 منتج نقاط ثقة 89%" [ref=e30]
+        - generic
+          - generic
+            - heading "ستوديو عروس عنابة" [level=3, ref=e63]
+      - link "غاليري أزياء سطيف غاليري أزياء سطيف 4.4 سطيف غاليري أزياء في سطيف يقدم تشكيلة متنوعة من الأزياء التقليدية والعصرية بأسعار تنافسية. 31 منتج نقاط ثقة 83%" [ref=e31]
+        - generic
+          - generic
+            - heading "غاليري أزياء سطيف" [level=3, ref=e64]
+      - paragraph
+        - StaticText "إبداع محلي"
+      - heading "حرفيات مميزات" [level=2, ref=e32]
+        - StaticText "حرفيات مميزات"
+      - link "عرض الكل" [ref=e33]
+        - StaticText "عرض الكل"
+      - link "أميرة بن موسى أميرة بن موسى خياطة فاخرة 4.9 قسنطينة" [ref=e34]
+        - generic
+          - generic
+            - heading "أميرة بن موسى" [level=3, ref=e65]
+      - link "فاطمة الزهراء حاج فاطمة الزهراء حاج تطريز تقليدي 5.0 تلمسان" [ref=e35]
+        - generic
+          - generic
+            - heading "فاطمة الزهراء حاج" [level=3, ref=e66]
+      - link "نادية بوزياف نادية بوزياف تصميم أزياء 4.8 الجزائر العاصمة" [ref=e36]
+        - generic
+          - generic
+            - heading "نادية بوزياف" [level=3, ref=e67]
+      - link "سامية خليفي سامية خليفي تصوير مناسبات 4.7 وهران" [ref=e37]
+        - generic
+          - generic
+            - heading "سامية خليفي" [level=3, ref=e68]
+      - generic
+        - generic
+          - paragraph
+          - heading "سجّلي كبائعة اليوم" [level=2, ref=e39]
+          - paragraph
+          - link "سجّلي كبائعة" [ref=e40]
+            - button "سجّلي كبائعة" [ref=e58]
+  - contentinfo
+    - generic
+      - link "STANDARD." [ref=e20]
+        - generic
+      - paragraph
+        - StaticText "منصة الكراء الفاخر والخدمات في الجزائر. 3 في 1: كراء، خدمات، وسوق مفتوح."
+      - link "انستغرام" [ref=e21]
+      - link "تيك توك" [ref=e22]
+      - link "واتساب" [ref=e23]
+      - StaticText "الكراء"
+      - list
+        - listitem [level=1]
+          - link "الكراء الفاخر" [ref=e41]
+        - listitem [level=1]
+          - link "المنتجات" [ref=e42]
+        - listitem [level=1]
+          - link "الحزم والعروض" [ref=e43]
+        - listitem [level=1]
+          - link "السلة" [ref=e44]
+      - StaticText "الخدمات"
+      - list
+        - listitem [level=1]
+          - link "خدمات المناسبات" [ref=e45]
+        - listitem [level=1]
+          - link "دليل المناسبات" [ref=e46]
+        - listitem [level=1]
+          - link "الحرفيات" [ref=e47]
+        - listitem [level=1]
+          - link "التأمين" [ref=e48]
+      - StaticText "السوق والدعم"
+      - list
+        - listitem [level=1]
+          - link "السوق المفتوح" [ref=e49]
+        - listitem [level=1]
+          - link "البائعون" [ref=e50]
+        - listitem [level=1]
+          - link "نقاط الثقة" [ref=e51]
+        - listitem [level=1]
+          - link "السجل القضائي" [ref=e52]
+      - StaticText "أخرى"
+      - list
+        - listitem [level=1]
+          - link "المدونة" [ref=e53]
+        - listitem [level=1]
+          - link "عن ستاندرد" [ref=e54]
+        - listitem [level=1]
+          - link "الأسئلة الشائعة" [ref=e55]
+        - listitem [level=1]
+          - link "المرتجعات" [ref=e56]
+  - region "Notifications alt+T" [ref=e1]
+  - button [ref=e2]
+  - region "Notifications alt+T" [ref=e3]
+  - button "Open Next.js Dev Tools" [expanded=false, ref=e57]
+=============================================
+
+=============================================
+PAGE: Cart (/cart)
+=============================================
+Navigation: ✓ STANDARD.Rent | معيار السيادة والفخامة
+  http://localhost:3000/cart
+Title: STANDARD.Rent | معيار السيادة والفخامة
+---Console Errors---
+---Page Structure---
+- generic
+  - generic
+  - navigation
+    - link "STANDARD" [ref=e4]
+      - generic
+        - StaticText "STANDARD"
+    - generic [ref=e5] clickable [onclick]
+      - button "الكراء" [ref=e14]
+    - generic [ref=e6] clickable [onclick]
+      - button "الخدمات" [ref=e15]
+    - generic [ref=e7] clickable [onclick]
+      - button "السوق" [ref=e16]
+    - link "البحث الذكي" [ref=e8]
+    - link "السجل القضائي" [ref=e9]
+    - link "نقاط الثقة" [ref=e10]
+    - button "تغيير اللغة" [expanded=false, ref=e17]
+      - StaticText "العربية"
+    - button "Toggle theme" [ref=e11]
+    - link "دخول" [ref=e12]
+      - button "دخول" [ref=e18]
+    - link "التسجيل" [ref=e13]
+      - button "التسجيل" [ref=e19]
+  - main
+    - paragraph
+      - StaticText "جاري استرجاع سلتكم الأنيقة..."
+  - contentinfo
+    - generic
+      - link "STANDARD." [ref=e20]
+        - generic
+      - paragraph
+        - StaticText "منصة الكراء الفاخر والخدمات في الجزائر. 3 في 1: كراء، خدمات، وسوق مفتوح."
+      - link "انستغرام" [ref=e21]
+      - link "تيك توك" [ref=e22]
+      - link "واتساب" [ref=e23]
+      - StaticText "الكراء"
+      - list
+        - listitem [level=1]
+          - link "الكراء الفاخر" [ref=e24]
+        - listitem [level=1]
+          - link "المنتجات" [ref=e25]
+        - listitem [level=1]
+          - link "الحزم والعروض" [ref=e26]
+        - listitem [level=1]
+          - link "السلة" [ref=e27]
+      - StaticText "الخدمات"
+      - list
+        - listitem [level=1]
+          - link "خدمات المناسبات" [ref=e28]
+        - listitem [level=1]
+          - link "دليل المناسبات" [ref=e29]
+        - listitem [level=1]
+          - link "الحرفيات" [ref=e30]
+        - listitem [level=1]
+          - link "التأمين" [ref=e31]
+      - StaticText "السوق والدعم"
+      - list
+        - listitem [level=1]
+          - link "السوق المفتوح" [ref=e32]
+        - listitem [level=1]
+          - link "البائعون" [ref=e33]
+        - listitem [level=1]
+          - link "نقاط الثقة" [ref=e34]
+        - listitem [level=1]
+          - link "السجل القضائي" [ref=e35]
+      - StaticText "أخرى"
+      - list
+        - listitem [level=1]
+          - link "المدونة" [ref=e36]
+        - listitem [level=1]
+          - link "عن ستاندرد" [ref=e37]
+        - listitem [level=1]
+          - link "الأسئلة الشائعة" [ref=e38]
+        - listitem [level=1]
+          - link "المرتجعات" [ref=e39]
+  - region "Notifications alt+T" [ref=e1]
+  - button [ref=e2]
+  - region "Notifications alt+T" [ref=e3]
+  - button "Open Next.js Dev Tools" [expanded=false, ref=e40]
+=============================================
+
+=============================================
+PAGE: Artisans (/artisans)
+=============================================
+Navigation: ✓ STANDARD.Rent | معيار السيادة والفخامة
+  http://localhost:3000/artisans
+Title: STANDARD.Rent | معيار السيادة والفخامة
+---Console Errors---
+---Page Structure---
+- generic
+  - generic
+  - navigation
+    - link "STANDARD" [ref=e4]
+      - generic
+        - StaticText "STANDARD"
+    - generic [ref=e5] clickable [onclick]
+      - button "الكراء" [ref=e14]
+    - generic [ref=e6] clickable [onclick]
+      - button "الخدمات" [ref=e15]
+    - generic [ref=e7] clickable [onclick]
+      - button "السوق" [ref=e16]
+    - link "البحث الذكي" [ref=e8]
+    - link "السجل القضائي" [ref=e9]
+    - link "نقاط الثقة" [ref=e10]
+    - button "تغيير اللغة" [expanded=false, ref=e17]
+      - StaticText "العربية"
+    - button "Toggle theme" [ref=e11]
+    - link "دخول" [ref=e12]
+      - button "دخول" [ref=e18]
+    - link "التسجيل" [ref=e13]
+      - button "التسجيل" [ref=e19]
+  - main
+    - generic
+      - Canvas
+      - generic
+        - heading "أنامل ذهبية" [level=1, ref=e24]
+        - paragraph
+          - StaticText "نخبة من المصممات والحرفيات اللواتي ينسجن الإبداع في كل قطعة"
+        - textbox "ابحثي عن موهبة..." [ref=e43]
+        - combobox [expanded=false, ref=e25]: الكل
+          - MenuListPopup
+            - option "الكل" [selected, ref=e44]
+            - option "مصممة فساتين" [ref=e45]
+            - option "مصممة إكسسوارات" [ref=e46]
+            - option "تطريز" [ref=e47]
+            - option "خرز" [ref=e48]
+            - option "خياطة" [ref=e49]
+            - option "أخرى" [ref=e50]
+  - contentinfo
+    - generic
+      - link "STANDARD." [ref=e20]
+        - generic
+      - paragraph
+        - StaticText "منصة الكراء الفاخر والخدمات في الجزائر. 3 في 1: كراء، خدمات، وسوق مفتوح."
+      - link "انستغرام" [ref=e21]
+      - link "تيك توك" [ref=e22]
+      - link "واتساب" [ref=e23]
+      - StaticText "الكراء"
+      - list
+        - listitem [level=1]
+          - link "الكراء الفاخر" [ref=e26]
+        - listitem [level=1]
+          - link "المنتجات" [ref=e27]
+        - listitem [level=1]
+          - link "الحزم والعروض" [ref=e28]
+        - listitem [level=1]
+          - link "السلة" [ref=e29]
+      - StaticText "الخدمات"
+      - list
+        - listitem [level=1]
+          - link "خدمات المناسبات" [ref=e30]
+        - listitem [level=1]
+          - link "دليل المناسبات" [ref=e31]
+        - listitem [level=1]
+          - link "الحرفيات" [ref=e32]
+        - listitem [level=1]
+          - link "التأمين" [ref=e33]
+      - StaticText "السوق والدعم"
+      - list
+        - listitem [level=1]
+          - link "السوق المفتوح" [ref=e34]
+        - listitem [level=1]
+          - link "البائعون" [ref=e35]
+        - listitem [level=1]
+          - link "نقاط الثقة" [ref=e36]
+        - listitem [level=1]
+          - link "السجل القضائي" [ref=e37]
+      - StaticText "أخرى"
+      - list
+        - listitem [level=1]
+          - link "المدونة" [ref=e38]
+        - listitem [level=1]
+          - link "عن ستاندرد" [ref=e39]
+        - listitem [level=1]
+          - link "الأسئلة الشائعة" [ref=e40]
+        - listitem [level=1]
+          - link "المرتجعات" [ref=e41]
+  - region "Notifications alt+T" [ref=e1]
+  - button [ref=e2]
+  - region "Notifications alt+T" [ref=e3]
+  - button "Open Next.js Dev Tools" [ref=e42]
+=============================================
+
+=============================================
+PAGE: Vendors (/vendors)
+=============================================
+Navigation: ✓ STANDARD.Rent | معيار السيادة والفخامة
+  http://localhost:3000/vendors
+Title: STANDARD.Rent | معيار السيادة والفخامة
+---Console Errors---
+---Page Structure---
+- generic
+  - generic
+  - navigation
+    - link "STANDARD" [ref=e4]
+      - generic
+        - StaticText "STANDARD"
+    - generic [ref=e5] clickable [onclick]
+      - button "الكراء" [ref=e14]
+    - generic [ref=e6] clickable [onclick]
+      - button "الخدمات" [ref=e15]
+    - generic [ref=e7] clickable [onclick]
+      - button "السوق" [ref=e16]
+    - link "البحث الذكي" [ref=e8]
+    - link "السجل القضائي" [ref=e9]
+    - link "نقاط الثقة" [ref=e10]
+    - button "تغيير اللغة" [expanded=false, ref=e17]
+      - StaticText "العربية"
+    - button "Toggle theme" [ref=e11]
+    - link "دخول" [ref=e12]
+      - button "دخول" [ref=e18]
+    - link "التسجيل" [ref=e13]
+      - button "التسجيل" [ref=e19]
+  - main
+    - generic
+      - Canvas
+      - generic
+        - heading "الموردون والمصممون" [level=1, ref=e24]
+        - paragraph
+        - textbox "ابحث في الموردين..." [ref=e25]
+        - paragraph
+  - contentinfo
+    - generic
+      - link "STANDARD." [ref=e20]
+        - generic
+      - paragraph
+        - StaticText "منصة الكراء الفاخر والخدمات في الجزائر. 3 في 1: كراء، خدمات، وسوق مفتوح."
+      - link "انستغرام" [ref=e21]
+      - link "تيك توك" [ref=e22]
+      - link "واتساب" [ref=e23]
+      - StaticText "الكراء"
+      - list
+        - listitem [level=1]
+          - link "الكراء الفاخر" [ref=e26]
+        - listitem [level=1]
+          - link "المنتجات" [ref=e27]
+        - listitem [level=1]
+          - link "الحزم والعروض" [ref=e28]
+        - listitem [level=1]
+          - link "السلة" [ref=e29]
+      - StaticText "الخدمات"
+      - list
+        - listitem [level=1]
+          - link "خدمات المناسبات" [ref=e30]
+        - listitem [level=1]
+          - link "دليل المناسبات" [ref=e31]
+        - listitem [level=1]
+          - link "الحرفيات" [ref=e32]
+        - listitem [level=1]
+          - link "التأمين" [ref=e33]
+      - StaticText "السوق والدعم"
+      - list
+        - listitem [level=1]
+          - link "السوق المفتوح" [ref=e34]
+        - listitem [level=1]
+          - link "البائعون" [ref=e35]
+        - listitem [level=1]
+          - link "نقاط الثقة" [ref=e36]
+        - listitem [level=1]
+          - link "السجل القضائي" [ref=e37]
+      - StaticText "أخرى"
+      - list
+        - listitem [level=1]
+          - link "المدونة" [ref=e38]
+        - listitem [level=1]
+          - link "عن ستاندرد" [ref=e39]
+        - listitem [level=1]
+          - link "الأسئلة الشائعة" [ref=e40]
+        - listitem [level=1]
+          - link "المرتجعات" [ref=e41]
+  - region "Notifications alt+T" [ref=e1]
+  - button [ref=e2]
+  - region "Notifications alt+T" [ref=e3]
+  - button "Open Next.js Dev Tools" [expanded=false, ref=e42]
+=============================================
+
+=============================================
+PAGE: Wallet (/wallet)
+=============================================
+Navigation: ✓ STANDARD.Rent | معيار السيادة والفخامة
+  http://localhost:3000/wallet
+Title: STANDARD.Rent | معيار السيادة والفخامة
+---Console Errors---
+---Page Structure---
+- generic
+  - generic
+  - navigation
+    - link "STANDARD" [ref=e4]
+      - generic
+        - StaticText "STANDARD"
+    - generic [ref=e5] clickable [onclick]
+      - button "الكراء" [ref=e14]
+    - generic [ref=e6] clickable [onclick]
+      - button "الخدمات" [ref=e15]
+    - generic [ref=e7] clickable [onclick]
+      - button "السوق" [ref=e16]
+    - link "البحث الذكي" [ref=e8]
+    - link "السجل القضائي" [ref=e9]
+    - link "نقاط الثقة" [ref=e10]
+    - button "تغيير اللغة" [expanded=false, ref=e17]
+      - StaticText "العربية"
+    - button "Toggle theme" [ref=e11]
+    - link "دخول" [ref=e12]
+      - button "دخول" [ref=e18]
+    - link "التسجيل" [ref=e13]
+      - button "التسجيل" [ref=e19]
+  - main
+  - contentinfo
+    - generic
+      - link "STANDARD." [ref=e20]
+        - generic
+      - paragraph
+        - StaticText "منصة الكراء الفاخر والخدمات في الجزائر. 3 في 1: كراء، خدمات، وسوق مفتوح."
+      - link "انستغرام" [ref=e21]
+      - link "تيك توك" [ref=e22]
+      - link "واتساب" [ref=e23]
+      - StaticText "الكراء"
+      - list
+        - listitem [level=1]
+          - link "الكراء الفاخر" [ref=e24]
+        - listitem [level=1]
+          - link "المنتجات" [ref=e25]
+        - listitem [level=1]
+          - link "الحزم والعروض" [ref=e26]
+        - listitem [level=1]
+          - link "السلة" [ref=e27]
+      - StaticText "الخدمات"
+      - list
+        - listitem [level=1]
+          - link "خدمات المناسبات" [ref=e28]
+        - listitem [level=1]
+          - link "دليل المناسبات" [ref=e29]
+        - listitem [level=1]
+          - link "الحرفيات" [ref=e30]
+        - listitem [level=1]
+          - link "التأمين" [ref=e31]
+      - StaticText "السوق والدعم"
+      - list
+        - listitem [level=1]
+          - link "السوق المفتوح" [ref=e32]
+        - listitem [level=1]
+          - link "البائعون" [ref=e33]
+        - listitem [level=1]
+          - link "نقاط الثقة" [ref=e34]
+        - listitem [level=1]
+          - link "السجل القضائي" [ref=e35]
+      - StaticText "أخرى"
+      - list
+        - listitem [level=1]
+          - link "المدونة" [ref=e36]
+        - listitem [level=1]
+          - link "عن ستاندرد" [ref=e37]
+        - listitem [level=1]
+          - link "الأسئلة الشائعة" [ref=e38]
+        - listitem [level=1]
+          - link "المرتجعات" [ref=e39]
+  - region "Notifications alt+T" [ref=e1]
+  - button [ref=e2]
+  - region "Notifications alt+T" [ref=e3]
+  - button "Open Next.js Dev Tools" [expanded=false, ref=e40]
+=============================================
+
+=============================================
+PAGE: Insurance (/insurance)
+=============================================
+Navigation: ✓ STANDARD.Rent | معيار السيادة والفخامة
+  http://localhost:3000/insurance
+Title: STANDARD.Rent | معيار السيادة والفخامة
+---Console Errors---
+---Page Structure---
+- generic
+  - generic
+  - navigation
+    - link "STANDARD" [ref=e4]
+      - generic
+        - StaticText "STANDARD"
+    - generic [ref=e5] clickable [onclick]
+      - button "الكراء" [ref=e14]
+    - generic [ref=e6] clickable [onclick]
+      - button "الخدمات" [ref=e15]
+    - generic [ref=e7] clickable [onclick]
+      - button "السوق" [ref=e16]
+    - link "البحث الذكي" [ref=e8]
+    - link "السجل القضائي" [ref=e9]
+    - link "نقاط الثقة" [ref=e10]
+    - button "تغيير اللغة" [expanded=false, ref=e17]
+      - StaticText "العربية"
+    - button "Toggle theme" [ref=e11]
+    - link "دخول" [ref=e12]
+      - button "دخول" [ref=e18]
+    - link "التسجيل" [ref=e13]
+      - button "التسجيل" [ref=e19]
+  - main
+    - generic
+      - StaticText "حماية موثوقة لمنتجاتك المستأجرة"
+      - heading "التأمين على المنتجات" [level=1, ref=e20]
+        - StaticText "التأمين على المنتجات"
+      - paragraph
+        - StaticText "استأجر بثقة. تقدم STANDARD.Rent خطط تأمين شاملة تحميك من أي تلف أو فقدان للمنتجات المستأجرة. اختر الخطة المناسبة لك."
+      - generic
+        - StaticText "🛡️"
+        - StaticText "الخطة الأساسية"
+        - StaticText "500"
+        - StaticText "دج / لكل حجز"
+        - paragraph
+          - StaticText "تغطية الأساسيات: تلفيات بسيطة مثل البقع والخدوش الطفيفة"
+        - StaticText "تغطية التلفيات البسيطة"
+        - StaticText "تعويض حتى 5,000 دج"
+        - StaticText "مدة الكراء حتى 3 أيام"
+        - StaticText "دعم عبر البريد الإلكتروني"
+        - button "اختيار هذه الخطة" [ref=e27]
+      - generic
+        - StaticText "الأكثر طلباً"
+        - StaticText "⚔️"
+        - StaticText "الخطة المتقدمة"
+        - StaticText "1 200"
+        - StaticText "دج / لكل حجز"
+        - paragraph
+          - StaticText "تغطية شاملة: تشمل التمزق، الحروق، البقع المستعصية، وفقدان الملحقات"
+        - StaticText "تغطية التلفيات المتوسطة والكبيرة"
+        - StaticText "تعويض حتى 20,000 دج"
+        - StaticText "مدة الكراء حتى 7 أيام"
+        - StaticText "دعم هاتفي على مدار الساعة"
+        - StaticText "استبدال المنتج في حالة التلف الكلي"
+        - button "اختيار هذه الخطة" [ref=e28]
+      - generic
+        - StaticText "👑"
+        - StaticText "خطة VIP"
+        - StaticText "2 500"
+        - StaticText "دج / لكل حجز"
+        - paragraph
+          - StaticText "تغطية كاملة: كل أنواع التلف بما فيها السرقة والفقدان الكلي للمنتج"
+        - StaticText "تغطية شاملة بلا حدود"
+        - StaticText "تعويض حتى 50,000 دج"
+        - StaticText "مدة الكراء حتى 14 يوم"
+        - StaticText "مستشار تأمين مخصص"
+        - StaticText "استبدال فوري بدون أسئلة"
+        - StaticText "تأمين الشحن والنقل"
+        - StaticText "أولوية في المعالجة"
+        - button "اختيار هذه الخطة" [ref=e29]
+      - heading "كيف يعمل التأمين؟" [level=2, ref=e21]
+        - StaticText "كيف يعمل التأمين؟"
+      - generic
+        - generic
+          - heading "اختر المنتج" [level=3, ref=e30]
+      - generic
+        - generic
+          - heading "أضف التأمين" [level=3, ref=e31]
+      - generic
+        - generic
+          - heading "استلم وتأمّن" [level=3, ref=e32]
+      - generic
+        - generic
+          - heading "التعويض عند الحاجة" [level=3, ref=e33]
+      - heading "لماذا التأمين؟" [level=2, ref=e22]
+        - StaticText "لماذا التأمين؟"
+      - generic
+        - generic
+          - heading "راحة بالك" [level=3, ref=e34]
+      - generic
+        - generic
+          - heading "تعويض سريع" [level=3, ref=e35]
+      - generic
+        - generic
+          - heading "دعم متواصل" [level=3, ref=e36]
+      - generic
+        - generic
+          - heading "لديك أسئلة حول التأمين؟" [level=2, ref=e37]
+          - button "تواصل مع الدعم" [ref=e38]
+          - link "العودة للرئيسية" [ref=e39]
+  - contentinfo
+    - generic
+      - link "STANDARD." [ref=e23]
+        - generic
+      - paragraph
+        - StaticText "منصة الكراء الفاخر والخدمات في الجزائر. 3 في 1: كراء، خدمات، وسوق مفتوح."
+      - link "انستغرام" [ref=e24]
+      - link "تيك توك" [ref=e25]
+      - link "واتساب" [ref=e26]
+      - StaticText "الكراء"
+      - list
+        - listitem [level=1]
+          - link "الكراء الفاخر" [ref=e40]
+        - listitem [level=1]
+          - link "المنتجات" [ref=e41]
+        - listitem [level=1]
+          - link "الحزم والعروض" [ref=e42]
+        - listitem [level=1]
+          - link "السلة" [ref=e43]
+      - StaticText "الخدمات"
+      - list
+        - listitem [level=1]
+          - link "خدمات المناسبات" [ref=e44]
+        - listitem [level=1]
+          - link "دليل المناسبات" [ref=e45]
+        - listitem [level=1]
+          - link "الحرفيات" [ref=e46]
+        - listitem [level=1]
+          - link "التأمين" [ref=e47]
+      - StaticText "السوق والدعم"
+      - list
+        - listitem [level=1]
+          - link "السوق المفتوح" [ref=e48]
+        - listitem [level=1]
+          - link "البائعون" [ref=e49]
+        - listitem [level=1]
+          - link "نقاط الثقة" [ref=e50]
+        - listitem [level=1]
+          - link "السجل القضائي" [ref=e51]
+      - StaticText "أخرى"
+      - list
+        - listitem [level=1]
+          - link "المدونة" [ref=e52]
+        - listitem [level=1]
+          - link "عن ستاندرد" [ref=e53]
+        - listitem [level=1]
+          - link "الأسئلة الشائعة" [ref=e54]
+        - listitem [level=1]
+          - link "المرتجعات" [ref=e55]
+  - region "Notifications alt+T" [ref=e1]
+  - button [ref=e2]
+  - region "Notifications alt+T" [ref=e3]
+  - button "Open Next.js Dev Tools" [expanded=false, ref=e56]
+=============================================
+
+=============================================
+PAGE: Trust Score (/trust-score)
+=============================================
+Navigation: ✓ STANDARD.Rent | معيار السيادة والفخامة
+  http://localhost:3000/trust-score
+Title: STANDARD.Rent | معيار السيادة والفخامة
+---Console Errors---
+---Page Structure---
+- generic
+  - generic
+  - navigation
+    - link "STANDARD" [ref=e4]
+      - generic
+        - StaticText "STANDARD"
+    - generic [ref=e5] clickable [onclick]
+      - button "الكراء" [ref=e14]
+    - generic [ref=e6] clickable [onclick]
+      - button "الخدمات" [ref=e15]
+    - generic [ref=e7] clickable [onclick]
+      - button "السوق" [ref=e16]
+    - link "البحث الذكي" [ref=e8]
+    - link "السجل القضائي" [ref=e9]
+    - link "نقاط الثقة" [ref=e10]
+    - button "تغيير اللغة" [expanded=false, ref=e17]
+      - StaticText "العربية"
+    - button "Toggle theme" [ref=e11]
+    - link "دخول" [ref=e12]
+      - button "دخول" [ref=e18]
+    - link "التسجيل" [ref=e13]
+      - button "التسجيل" [ref=e19]
+  - main
+    - generic
+      - StaticText "نظام سمعة موثوق"
+      - heading "نقاط الثقة" [level=1, ref=e20]
+        - StaticText "نقاط الثقة"
+      - paragraph
+        - StaticText "نقاط الثقة تعكس سمعتك وموثوقيتك على المنصة. كلما ارتفعت نقاطك، حصلت على مزايا حصرية وفرص أفضل."
+      - generic
+        - generic
+          - StaticText "🥇"
+          - StaticText "المستوى "
+          - StaticText "ذهبي"
+          - generic
+          - heading "نقاط الثقة الخاصة بك" [level=2, ref=e27]
+          - paragraph
+            - StaticText "آخر تحديث: اليوم"
+      - generic
+        - generic
+          - heading "المستويات" [level=3, ref=e28]
+      - generic
+        - generic
+          - heading "تفاصيل المكونات" [level=3, ref=e29]
+      - heading "مزايا نقاط الثقة العالية" [level=2, ref=e21]
+        - StaticText "مزايا نقاط الثقة العالية"
+      - generic
+        - generic
+          - heading "أسعار أفضل" [level=3, ref=e30]
+      - generic
+        - generic
+          - heading "أولوية الحجز" [level=3, ref=e31]
+      - generic
+        - generic
+          - heading "حدود كراء أعلى" [level=3, ref=e32]
+      - generic
+        - generic
+          - heading "ثقة البائعين" [level=3, ref=e33]
+      - generic
+        - generic
+          - heading "نصائح لرفع نقاط ثقتك" [level=3, ref=e34]
+      - link "العودة للرئيسية" [ref=e26]
+  - contentinfo
+    - generic
+      - link "STANDARD." [ref=e22]
+        - generic
+      - paragraph
+        - StaticText "منصة الكراء الفاخر والخدمات في الجزائر. 3 في 1: كراء، خدمات، وسوق مفتوح."
+      - link "انستغرام" [ref=e23]
+      - link "تيك توك" [ref=e24]
+      - link "واتساب" [ref=e25]
+      - StaticText "الكراء"
+      - list
+        - listitem [level=1]
+          - link "الكراء الفاخر" [ref=e35]
+        - listitem [level=1]
+          - link "المنتجات" [ref=e36]
+        - listitem [level=1]
+          - link "الحزم والعروض" [ref=e37]
+        - listitem [level=1]
+          - link "السلة" [ref=e38]
+      - StaticText "الخدمات"
+      - list
+        - listitem [level=1]
+          - link "خدمات المناسبات" [ref=e39]
+        - listitem [level=1]
+          - link "دليل المناسبات" [ref=e40]
+        - listitem [level=1]
+          - link "الحرفيات" [ref=e41]
+        - listitem [level=1]
+          - link "التأمين" [ref=e42]
+      - StaticText "السوق والدعم"
+      - list
+        - listitem [level=1]
+          - link "السوق المفتوح" [ref=e43]
+        - listitem [level=1]
+          - link "البائعون" [ref=e44]
+        - listitem [level=1]
+          - link "نقاط الثقة" [ref=e45]
+        - listitem [level=1]
+          - link "السجل القضائي" [ref=e46]
+      - StaticText "أخرى"
+      - list
+        - listitem [level=1]
+          - link "المدونة" [ref=e47]
+        - listitem [level=1]
+          - link "عن ستاندرد" [ref=e48]
+        - listitem [level=1]
+          - link "الأسئلة الشائعة" [ref=e49]
+        - listitem [level=1]
+          - link "المرتجعات" [ref=e50]
+  - region "Notifications alt+T" [ref=e1]
+  - button [ref=e2]
+  - region "Notifications alt+T" [ref=e3]
+  - button "Open Next.js Dev Tools" [expanded=false, ref=e51]
+=============================================
+
+=============================================
+PAGE: Verification (/verification)
+=============================================
+Navigation: ✓ STANDARD.Rent | معيار السيادة والفخامة
+  http://localhost:3000/verification
+Title: STANDARD.Rent | معيار السيادة والفخامة
+---Console Errors---
+---Page Structure---
+- generic
+  - generic
+  - navigation
+    - link "STANDARD" [ref=e4]
+      - generic
+        - StaticText "STANDARD"
+    - generic [ref=e5] clickable [onclick]
+      - button "الكراء" [ref=e14]
+    - generic [ref=e6] clickable [onclick]
+      - button "الخدمات" [ref=e15]
+    - generic [ref=e7] clickable [onclick]
+      - button "السوق" [ref=e16]
+    - link "البحث الذكي" [ref=e8]
+    - link "السجل القضائي" [ref=e9]
+    - link "نقاط الثقة" [ref=e10]
+    - button "تغيير اللغة" [expanded=false, ref=e17]
+      - StaticText "العربية"
+    - button "Toggle theme" [ref=e11]
+    - link "دخول" [ref=e12]
+      - button "دخول" [ref=e18]
+    - link "التسجيل" [ref=e13]
+      - button "التسجيل" [ref=e19]
+  - main
+    - generic
+      - StaticText "هويتك محمية وموثقة"
+      - heading "التحقق من الهوية" [level=1, ref=e20]
+        - StaticText "التحقق من الهوية"
+      - paragraph
+        - StaticText "أكمل عملية التحقق لتتمتع بمزايا حصرية وزيادة نقاط ثقتك على المنصة"
+      - generic
+        - generic
+          - heading "حالة التحقق" [level=3, ref=e29]
+          - paragraph
+          - StaticText "قيد التقدم"
+      - heading "خطوات التحقق" [level=2, ref=e21]
+        - StaticText "خطوات التحقق"
+      - generic
+        - StaticText "الخطوة "
+        - StaticText "1"
+        - StaticText "مكتملة"
+        - heading "إدخال البيانات" [level=3, ref=e30]
+        - paragraph
+          - StaticText "أدخل بياناتك الشخصية الأساسية: الاسم الكامل، رقم الهاتف، العنوان"
+      - generic
+        - StaticText "الخطوة "
+        - StaticText "2"
+        - StaticText "الحالية"
+        - heading "رفع الوثائق" [level=3, ref=e31]
+        - paragraph
+          - StaticText "ارفع صورة واضحة من بطاقة الهوية الوطنية أو جواز السفر"
+      - generic
+        - StaticText "الخطوة "
+        - StaticText "3"
+        - heading "المراجعة" [level=3, ref=e32]
+        - paragraph
+          - StaticText "يقوم فريقنا بمراجعة وثائقك والتحقق من صحتها خلال 24-48 ساعة"
+      - generic
+        - StaticText "الخطوة "
+        - StaticText "4"
+        - heading "الموافقة" [level=3, ref=e33]
+        - paragraph
+          - StaticText "بعد التحقق الناجح، ستحصل على شارة \"متحقق\" في ملفك الشخصي"
+      - heading "رفع وثائق الهوية" [level=2, ref=e22]
+        - StaticText "رفع وثائق الهوية"
+      - generic
+        - generic
+          - heading "اسحب الملف هنا أو انقر للاختيار" [level=3, ref=e34]
+          - paragraph
+            - StaticText "يدعم: JPG, PNG, PDF — الحد الأقصى: 10 ميغابايت"
+          - button "اختر ملف" [ref=e35]
+      - heading "فوائد التحقق" [level=2, ref=e23]
+        - StaticText "فوائد التحقق"
+      - generic
+        - generic
+          - heading "رفع نقاط الثقة" [level=3, ref=e36]
+      - generic
+        - generic
+          - heading "وصول للمنتجات الحصرية" [level=3, ref=e37]
+      - generic
+        - generic
+          - heading "معاملات أسرع" [level=3, ref=e38]
+      - link "العودة للرئيسية" [ref=e28]
+  - contentinfo
+    - generic
+      - link "STANDARD." [ref=e24]
+        - generic
+      - paragraph
+        - StaticText "منصة الكراء الفاخر والخدمات في الجزائر. 3 في 1: كراء، خدمات، وسوق مفتوح."
+      - link "انستغرام" [ref=e25]
+      - link "تيك توك" [ref=e26]
+      - link "واتساب" [ref=e27]
+      - StaticText "الكراء"
+      - list
+        - listitem [level=1]
+          - link "الكراء الفاخر" [ref=e39]
+        - listitem [level=1]
+          - link "المنتجات" [ref=e40]
+        - listitem [level=1]
+          - link "الحزم والعروض" [ref=e41]
+        - listitem [level=1]
+          - link "السلة" [ref=e42]
+      - StaticText "الخدمات"
+      - list
+        - listitem [level=1]
+          - link "خدمات المناسبات" [ref=e43]
+        - listitem [level=1]
+          - link "دليل المناسبات" [ref=e44]
+        - listitem [level=1]
+          - link "الحرفيات" [ref=e45]
+        - listitem [level=1]
+          - link "التأمين" [ref=e46]
+      - StaticText "السوق والدعم"
+      - list
+        - listitem [level=1]
+          - link "السوق المفتوح" [ref=e47]
+        - listitem [level=1]
+          - link "البائعون" [ref=e48]
+        - listitem [level=1]
+          - link "نقاط الثقة" [ref=e49]
+        - listitem [level=1]
+          - link "السجل القضائي" [ref=e50]
+      - StaticText "أخرى"
+      - list
+        - listitem [level=1]
+          - link "المدونة" [ref=e51]
+        - listitem [level=1]
+          - link "عن ستاندرد" [ref=e52]
+        - listitem [level=1]
+          - link "الأسئلة الشائعة" [ref=e53]
+        - listitem [level=1]
+          - link "المرتجعات" [ref=e54]
+  - region "Notifications alt+T" [ref=e1]
+  - button [ref=e2]
+  - region "Notifications alt+T" [ref=e3]
+  - button "Open Next.js Dev Tools" [expanded=false, ref=e55]
+=============================================
+
+=============================================
+PAGE: Returns (/returns)
+=============================================
+Navigation: ✓ STANDARD.Rent | معيار السيادة والفخامة
+  http://localhost:3000/returns
+Title: STANDARD.Rent | معيار السيادة والفخامة
+---Console Errors---
+---Page Structure---
+- generic
+  - generic
+  - navigation
+    - link "STANDARD" [ref=e4]
+      - generic
+        - StaticText "STANDARD"
+    - generic [ref=e5] clickable [onclick]
+      - button "الكراء" [ref=e14]
+    - generic [ref=e6] clickable [onclick]
+      - button "الخدمات" [ref=e15]
+    - generic [ref=e7] clickable [onclick]
+      - button "السوق" [ref=e16]
+    - link "البحث الذكي" [ref=e8]
+    - link "السجل القضائي" [ref=e9]
+    - link "نقاط الثقة" [ref=e10]
+    - button "تغيير اللغة" [expanded=false, ref=e17]
+      - StaticText "العربية"
+    - button "Toggle theme" [ref=e11]
+    - link "دخول" [ref=e12]
+      - button "دخول" [ref=e18]
+    - link "التسجيل" [ref=e13]
+      - button "التسجيل" [ref=e19]
+  - main
+    - paragraph
+      - StaticText "جاري تحميل طلبات الإرجاع..."
+  - contentinfo
+    - generic
+      - link "STANDARD." [ref=e20]
+        - generic
+      - paragraph
+        - StaticText "منصة الكراء الفاخر والخدمات في الجزائر. 3 في 1: كراء، خدمات، وسوق مفتوح."
+      - link "انستغرام" [ref=e21]
+      - link "تيك توك" [ref=e22]
+      - link "واتساب" [ref=e23]
+      - StaticText "الكراء"
+      - list
+        - listitem [level=1]
+          - link "الكراء الفاخر" [ref=e24]
+        - listitem [level=1]
+          - link "المنتجات" [ref=e25]
+        - listitem [level=1]
+          - link "الحزم والعروض" [ref=e26]
+        - listitem [level=1]
+          - link "السلة" [ref=e27]
+      - StaticText "الخدمات"
+      - list
+        - listitem [level=1]
+          - link "خدمات المناسبات" [ref=e28]
+        - listitem [level=1]
+          - link "دليل المناسبات" [ref=e29]
+        - listitem [level=1]
+          - link "الحرفيات" [ref=e30]
+        - listitem [level=1]
+          - link "التأمين" [ref=e31]
+      - StaticText "السوق والدعم"
+      - list
+        - listitem [level=1]
+          - link "السوق المفتوح" [ref=e32]
+        - listitem [level=1]
+          - link "البائعون" [ref=e33]
+        - listitem [level=1]
+          - link "نقاط الثقة" [ref=e34]
+        - listitem [level=1]
+          - link "السجل القضائي" [ref=e35]
+      - StaticText "أخرى"
+      - list
+        - listitem [level=1]
+          - link "المدونة" [ref=e36]
+        - listitem [level=1]
+          - link "عن ستاندرد" [ref=e37]
+        - listitem [level=1]
+          - link "الأسئلة الشائعة" [ref=e38]
+        - listitem [level=1]
+          - link "المرتجعات" [ref=e39]
+  - region "Notifications alt+T" [ref=e1]
+  - button [ref=e2]
+  - region "Notifications alt+T" [ref=e3]
+  - button "Open Next.js Dev Tools" [expanded=false, ref=e40]
+=============================================
+
+=============================================
+PAGE: Disputes (/disputes)
+=============================================
+Navigation: ✓ STANDARD.Rent | معيار السيادة والفخامة
+  http://localhost:3000/disputes
+Title: STANDARD.Rent | معيار السيادة والفخامة
+---Console Errors---
+---Page Structure---
+- generic
+  - generic
+  - navigation
+    - link "STANDARD" [ref=e4]
+      - generic
+        - StaticText "STANDARD"
+    - generic [ref=e5] clickable [onclick]
+      - button "الكراء" [ref=e14]
+    - generic [ref=e6] clickable [onclick]
+      - button "الخدمات" [ref=e15]
+    - generic [ref=e7] clickable [onclick]
+      - button "السوق" [ref=e16]
+    - link "البحث الذكي" [ref=e8]
+    - link "السجل القضائي" [ref=e9]
+    - link "نقاط الثقة" [ref=e10]
+    - button "تغيير اللغة" [expanded=false, ref=e17]
+      - StaticText "العربية"
+    - button "Toggle theme" [ref=e11]
+    - link "دخول" [ref=e12]
+      - button "دخول" [ref=e18]
+    - link "التسجيل" [ref=e13]
+      - button "التسجيل" [ref=e19]
+  - main
+    - generic
+      - Canvas
+      - heading "النزاعات والدعم" [level=1, ref=e25]
+      - paragraph
+        - StaticText "إدارة النزاعات وطلبات الدعم"
+      - button "إنشاء نزاع جديد" [ref=e26]
+      - paragraph
+        - StaticText "جاري تحميل النزاعات..."
+      - button "فتح المساعد القضائي" [expanded=false, ref=e20]
+  - contentinfo
+    - generic
+      - link "STANDARD." [ref=e21]
+        - generic
+      - paragraph
+        - StaticText "منصة الكراء الفاخر والخدمات في الجزائر. 3 في 1: كراء، خدمات، وسوق مفتوح."
+      - link "انستغرام" [ref=e22]
+      - link "تيك توك" [ref=e23]
+      - link "واتساب" [ref=e24]
+      - StaticText "الكراء"
+      - list
+        - listitem [level=1]
+          - link "الكراء الفاخر" [ref=e27]
+        - listitem [level=1]
+          - link "المنتجات" [ref=e28]
+        - listitem [level=1]
+          - link "الحزم والعروض" [ref=e29]
+        - listitem [level=1]
+          - link "السلة" [ref=e30]
+      - StaticText "الخدمات"
+      - list
+        - listitem [level=1]
+          - link "خدمات المناسبات" [ref=e31]
+        - listitem [level=1]
+          - link "دليل المناسبات" [ref=e32]
+        - listitem [level=1]
+          - link "الحرفيات" [ref=e33]
+        - listitem [level=1]
+          - link "التأمين" [ref=e34]
+      - StaticText "السوق والدعم"
+      - list
+        - listitem [level=1]
+          - link "السوق المفتوح" [ref=e35]
+        - listitem [level=1]
+          - link "البائعون" [ref=e36]
+        - listitem [level=1]
+          - link "نقاط الثقة" [ref=e37]
+        - listitem [level=1]
+          - link "السجل القضائي" [ref=e38]
+      - StaticText "أخرى"
+      - list
+        - listitem [level=1]
+          - link "المدونة" [ref=e39]
+        - listitem [level=1]
+          - link "عن ستاندرد" [ref=e40]
+        - listitem [level=1]
+          - link "الأسئلة الشائعة" [ref=e41]
+        - listitem [level=1]
+          - link "المرتجعات" [ref=e42]
+  - region "Notifications alt+T" [ref=e1]
+  - button [ref=e2]
+  - region "Notifications alt+T" [ref=e3]
+  - button "Open Next.js Dev Tools" [ref=e43]
+=============================================
+
+=============================================
+PAGE: FAQ (/faq)
+=============================================
+Navigation: ✓ STANDARD.Rent | معيار السيادة والفخامة
+  http://localhost:3000/faq
+Title: STANDARD.Rent | معيار السيادة والفخامة
+---Console Errors---
+---Page Structure---
+- generic
+  - generic
+  - navigation
+    - link "STANDARD" [ref=e4]
+      - generic
+        - StaticText "STANDARD"
+    - generic [ref=e5] clickable [onclick]
+      - button "الكراء" [ref=e14]
+    - generic [ref=e6] clickable [onclick]
+      - button "الخدمات" [ref=e15]
+    - generic [ref=e7] clickable [onclick]
+      - button "السوق" [ref=e16]
+    - link "البحث الذكي" [ref=e8]
+    - link "السجل القضائي" [ref=e9]
+    - link "نقاط الثقة" [ref=e10]
+    - button "تغيير اللغة" [expanded=false, ref=e17]
+      - StaticText "العربية"
+    - button "Toggle theme" [ref=e11]
+    - link "دخول" [ref=e12]
+      - button "دخول" [ref=e18]
+    - link "التسجيل" [ref=e13]
+      - button "التسجيل" [ref=e19]
+  - main
+    - generic
+      - Canvas
+      - generic
+        - heading "الأسئلة الشائعة" [level=1, ref=e24]
+        - paragraph
+        - textbox "ابحث في الأسئلة الشائعة..." [ref=e25]
+        - paragraph
+  - contentinfo
+    - generic
+      - link "STANDARD." [ref=e20]
+        - generic
+      - paragraph
+        - StaticText "منصة الكراء الفاخر والخدمات في الجزائر. 3 في 1: كراء، خدمات، وسوق مفتوح."
+      - link "انستغرام" [ref=e21]
+      - link "تيك توك" [ref=e22]
+      - link "واتساب" [ref=e23]
+      - StaticText "الكراء"
+      - list
+        - listitem [level=1]
+          - link "الكراء الفاخر" [ref=e26]
+        - listitem [level=1]
+          - link "المنتجات" [ref=e27]
+        - listitem [level=1]
+          - link "الحزم والعروض" [ref=e28]
+        - listitem [level=1]
+          - link "السلة" [ref=e29]
+      - StaticText "الخدمات"
+      - list
+        - listitem [level=1]
+          - link "خدمات المناسبات" [ref=e30]
+        - listitem [level=1]
+          - link "دليل المناسبات" [ref=e31]
+        - listitem [level=1]
+          - link "الحرفيات" [ref=e32]
+        - listitem [level=1]
+          - link "التأمين" [ref=e33]
+      - StaticText "السوق والدعم"
+      - list
+        - listitem [level=1]
+          - link "السوق المفتوح" [ref=e34]
+        - listitem [level=1]
+          - link "البائعون" [ref=e35]
+        - listitem [level=1]
+          - link "نقاط الثقة" [ref=e36]
+        - listitem [level=1]
+          - link "السجل القضائي" [ref=e37]
+      - StaticText "أخرى"
+      - list
+        - listitem [level=1]
+          - link "المدونة" [ref=e38]
+        - listitem [level=1]
+          - link "عن ستاندرد" [ref=e39]
+        - listitem [level=1]
+          - link "الأسئلة الشائعة" [ref=e40]
+        - listitem [level=1]
+          - link "المرتجعات" [ref=e41]
+  - region "Notifications alt+T" [ref=e1]
+  - button [ref=e2]
+  - region "Notifications alt+T" [ref=e3]
+  - button "Open Next.js Dev Tools" [expanded=false, ref=e42]
+=============================================
+
+=============================================
+PAGE: Blog (/blog)
+=============================================
+Navigation: ✓ STANDARD.Rent | معيار السيادة والفخامة
+  http://localhost:3000/blog
+Title: STANDARD.Rent | معيار السيادة والفخامة
+---Console Errors---
+---Page Structure---
+- generic
+  - generic
+  - navigation
+    - link "STANDARD" [ref=e4]
+      - generic
+        - StaticText "STANDARD"
+    - generic [ref=e5] clickable [onclick]
+      - button "الكراء" [ref=e14]
+    - generic [ref=e6] clickable [onclick]
+      - button "الخدمات" [ref=e15]
+    - generic [ref=e7] clickable [onclick]
+      - button "السوق" [ref=e16]
+    - link "البحث الذكي" [ref=e8]
+    - link "السجل القضائي" [ref=e9]
+    - link "نقاط الثقة" [ref=e10]
+    - button "تغيير اللغة" [expanded=false, ref=e17]
+      - StaticText "العربية"
+    - button "Toggle theme" [ref=e11]
+    - link "دخول" [ref=e12]
+      - button "دخول" [ref=e18]
+    - link "التسجيل" [ref=e13]
+      - button "التسجيل" [ref=e19]
+  - main
+    - generic
+      - Canvas
+      - generic
+        - heading "المدونة" [level=1, ref=e24]
+        - paragraph
+        - textbox "ابحث في المدونة..." [ref=e25]
+        - paragraph
+  - contentinfo
+    - generic
+      - link "STANDARD." [ref=e20]
+        - generic
+      - paragraph
+        - StaticText "منصة الكراء الفاخر والخدمات في الجزائر. 3 في 1: كراء، خدمات، وسوق مفتوح."
+      - link "انستغرام" [ref=e21]
+      - link "تيك توك" [ref=e22]
+      - link "واتساب" [ref=e23]
+      - StaticText "الكراء"
+      - list
+        - listitem [level=1]
+          - link "الكراء الفاخر" [ref=e26]
+        - listitem [level=1]
+          - link "المنتجات" [ref=e27]
+        - listitem [level=1]
+          - link "الحزم والعروض" [ref=e28]
+        - listitem [level=1]
+          - link "السلة" [ref=e29]
+      - StaticText "الخدمات"
+      - list
+        - listitem [level=1]
+          - link "خدمات المناسبات" [ref=e30]
+        - listitem [level=1]
+          - link "دليل المناسبات" [ref=e31]
+        - listitem [level=1]
+          - link "الحرفيات" [ref=e32]
+        - listitem [level=1]
+          - link "التأمين" [ref=e33]
+      - StaticText "السوق والدعم"
+      - list
+        - listitem [level=1]
+          - link "السوق المفتوح" [ref=e34]
+        - listitem [level=1]
+          - link "البائعون" [ref=e35]
+        - listitem [level=1]
+          - link "نقاط الثقة" [ref=e36]
+        - listitem [level=1]
+          - link "السجل القضائي" [ref=e37]
+      - StaticText "أخرى"
+      - list
+        - listitem [level=1]
+          - link "المدونة" [ref=e38]
+        - listitem [level=1]
+          - link "عن ستاندرد" [ref=e39]
+        - listitem [level=1]
+          - link "الأسئلة الشائعة" [ref=e40]
+        - listitem [level=1]
+          - link "المرتجعات" [ref=e41]
+  - region "Notifications alt+T" [ref=e1]
+  - button [ref=e2]
+  - region "Notifications alt+T" [ref=e3]
+  - button "Open Next.js Dev Tools" [expanded=false, ref=e42]
+=============================================
+
+=============================================
+PAGE: About (/about)
+=============================================
+Navigation: ✓ STANDARD.Rent | معيار السيادة والفخامة
+  http://localhost:3000/about
+Title: STANDARD.Rent | معيار السيادة والفخامة
+---Console Errors---
+---Page Structure---
+- generic
+  - generic
+  - navigation
+    - link "STANDARD" [ref=e4]
+      - generic
+        - StaticText "STANDARD"
+    - generic [ref=e5] clickable [onclick]
+      - button "الكراء" [ref=e14]
+    - generic [ref=e6] clickable [onclick]
+      - button "الخدمات" [ref=e15]
+    - generic [ref=e7] clickable [onclick]
+      - button "السوق" [ref=e16]
+    - link "البحث الذكي" [ref=e8]
+    - link "السجل القضائي" [ref=e9]
+    - link "نقاط الثقة" [ref=e10]
+    - button "تغيير اللغة" [expanded=false, ref=e17]
+      - StaticText "العربية"
+    - button "Toggle theme" [ref=e11]
+    - link "دخول" [ref=e12]
+      - button "دخول" [ref=e18]
+    - link "التسجيل" [ref=e13]
+      - button "التسجيل" [ref=e19]
+  - main
+    - generic
+      - generic
+        - Canvas
+      - generic
+        - heading "قصة غالا." [level=1, ref=e24]
+        - paragraph
+          - StaticText "نحن لا نؤجر الفساتين فحسب، بل نصنع لحظات لا تُنسى من التألق والفخامة."
+        - heading "رؤيتنا لعام 2026 وما بعده" [level=2, ref=e25]
+        - paragraph
+          - StaticText "تأسست STANDARD.Rent لتكون الوجهة الأولى لكل امرأة تبحث عن التفرد. نحن نؤمن أن الجمال يجب أن يكون متاحاً للجميع، مع الحفاظ على روح الفخامة والاستدامة التي تقتضيها الموضة الحديثة."
+        - paragraph
+          - StaticText "في قلب قسنطينة والجزائر، نجحنا في بناء مجتمع من المتألقات اللواتي يثقن في ذوقنا واختياراتنا. كل فستان في مجموعتنا يحمل قصة، ونحن ننتظر أن تكوني أنتِ بطلة القصة القادمة."
+        - generic
+          - StaticText "GALA"
+          - generic
+            - heading "أناقة بلا حدود" [level=3, ref=e50]
+        - heading "مجموعة استثنائية" [level=3, ref=e26]
+        - paragraph
+        - heading "صُنع الشغف" [level=3, ref=e27]
+        - paragraph
+        - heading "خدمة سريعة" [level=3, ref=e28]
+        - paragraph
+        - heading "جودة مضمونة" [level=3, ref=e29]
+        - paragraph
+        - heading "هل أنتِ مستعدة للتألق؟" [level=2, ref=e30]
+        - link "تصفحي المجموعة الآن" [ref=e31]
+          - generic [ref=e32] clickable [cursor:pointer, tabindex]
+  - contentinfo
+    - generic
+      - link "STANDARD." [ref=e20]
+        - generic
+      - paragraph
+        - StaticText "منصة الكراء الفاخر والخدمات في الجزائر. 3 في 1: كراء، خدمات، وسوق مفتوح."
+      - link "انستغرام" [ref=e21]
+      - link "تيك توك" [ref=e22]
+      - link "واتساب" [ref=e23]
+      - StaticText "الكراء"
+      - list
+        - listitem [level=1]
+          - link "الكراء الفاخر" [ref=e33]
+        - listitem [level=1]
+          - link "المنتجات" [ref=e34]
+        - listitem [level=1]
+          - link "الحزم والعروض" [ref=e35]
+        - listitem [level=1]
+          - link "السلة" [ref=e36]
+      - StaticText "الخدمات"
+      - list
+        - listitem [level=1]
+          - link "خدمات المناسبات" [ref=e37]
+        - listitem [level=1]
+          - link "دليل المناسبات" [ref=e38]
+        - listitem [level=1]
+          - link "الحرفيات" [ref=e39]
+        - listitem [level=1]
+          - link "التأمين" [ref=e40]
+      - StaticText "السوق والدعم"
+      - list
+        - listitem [level=1]
+          - link "السوق المفتوح" [ref=e41]
+        - listitem [level=1]
+          - link "البائعون" [ref=e42]
+        - listitem [level=1]
+          - link "نقاط الثقة" [ref=e43]
+        - listitem [level=1]
+          - link "السجل القضائي" [ref=e44]
+      - StaticText "أخرى"
+      - list
+        - listitem [level=1]
+          - link "المدونة" [ref=e45]
+        - listitem [level=1]
+          - link "عن ستاندرد" [ref=e46]
+        - listitem [level=1]
+          - link "الأسئلة الشائعة" [ref=e47]
+        - listitem [level=1]
+          - link "المرتجعات" [ref=e48]
+  - region "Notifications alt+T" [ref=e1]
+  - button [ref=e2]
+  - region "Notifications alt+T" [ref=e3]
+  - button "Open Next.js Dev Tools" [expanded=false, ref=e49]
+=============================================
+
+=============================================
+PAGE: Bundles (/bundles)
+=============================================
+Navigation: ✓ STANDARD.Rent | معيار السيادة والفخامة
+  http://localhost:3000/bundles
+Title: STANDARD.Rent | معيار السيادة والفخامة
+---Console Errors---
+---Page Structure---
+- generic
+  - generic
+  - navigation
+    - link "STANDARD" [ref=e4]
+      - generic
+        - StaticText "STANDARD"
+    - generic [ref=e5] clickable [onclick]
+      - button "الكراء" [ref=e14]
+    - generic [ref=e6] clickable [onclick]
+      - button "الخدمات" [ref=e15]
+    - generic [ref=e7] clickable [onclick]
+      - button "السوق" [ref=e16]
+    - link "البحث الذكي" [ref=e8]
+    - link "السجل القضائي" [ref=e9]
+    - link "نقاط الثقة" [ref=e10]
+    - button "تغيير اللغة" [expanded=false, ref=e17]
+      - StaticText "العربية"
+    - button "Toggle theme" [ref=e11]
+    - link "دخول" [ref=e12]
+      - button "دخول" [ref=e18]
+    - link "التسجيل" [ref=e13]
+      - button "التسجيل" [ref=e19]
+  - main
+    - generic
+      - Canvas
+      - generic
+        - heading "الحزم المجمعة" [level=1, ref=e24]
+        - paragraph
+        - textbox "ابحث في الحزم..." [ref=e25]
+        - paragraph
+  - contentinfo
+    - generic
+      - link "STANDARD." [ref=e20]
+        - generic
+      - paragraph
+        - StaticText "منصة الكراء الفاخر والخدمات في الجزائر. 3 في 1: كراء، خدمات، وسوق مفتوح."
+      - link "انستغرام" [ref=e21]
+      - link "تيك توك" [ref=e22]
+      - link "واتساب" [ref=e23]
+      - StaticText "الكراء"
+      - list
+        - listitem [level=1]
+          - link "الكراء الفاخر" [ref=e26]
+        - listitem [level=1]
+          - link "المنتجات" [ref=e27]
+        - listitem [level=1]
+          - link "الحزم والعروض" [ref=e28]
+        - listitem [level=1]
+          - link "السلة" [ref=e29]
+      - StaticText "الخدمات"
+      - list
+        - listitem [level=1]
+          - link "خدمات المناسبات" [ref=e30]
+        - listitem [level=1]
+          - link "دليل المناسبات" [ref=e31]
+        - listitem [level=1]
+          - link "الحرفيات" [ref=e32]
+        - listitem [level=1]
+          - link "التأمين" [ref=e33]
+      - StaticText "السوق والدعم"
+      - list
+        - listitem [level=1]
+          - link "السوق المفتوح" [ref=e34]
+        - listitem [level=1]
+          - link "البائعون" [ref=e35]
+        - listitem [level=1]
+          - link "نقاط الثقة" [ref=e36]
+        - listitem [level=1]
+          - link "السجل القضائي" [ref=e37]
+      - StaticText "أخرى"
+      - list
+        - listitem [level=1]
+          - link "المدونة" [ref=e38]
+        - listitem [level=1]
+          - link "عن ستاندرد" [ref=e39]
+        - listitem [level=1]
+          - link "الأسئلة الشائعة" [ref=e40]
+        - listitem [level=1]
+          - link "المرتجعات" [ref=e41]
+  - region "Notifications alt+T" [ref=e1]
+  - button [ref=e2]
+  - region "Notifications alt+T" [ref=e3]
+  - button "Open Next.js Dev Tools" [expanded=false, ref=e42]
+=============================================
+
+=============================================
+PAGE: Judicial (/judicial)
+=============================================
+Navigation: ✓ STANDARD.Rent | معيار السيادة والفخامة
+  http://localhost:3000/judicial
+Title: STANDARD.Rent | معيار السيادة والفخامة
+---Console Errors---
+---Page Structure---
+- generic
+  - generic
+  - navigation
+    - link "STANDARD" [ref=e4]
+      - generic
+        - StaticText "STANDARD"
+    - generic [ref=e5] clickable [onclick]
+      - button "الكراء" [ref=e15]
+    - generic [ref=e6] clickable [onclick]
+      - button "الخدمات" [ref=e16]
+    - generic [ref=e7] clickable [onclick]
+      - button "السوق" [ref=e17]
+    - link "البحث الذكي" [ref=e8]
+    - link "السجل القضائي" [ref=e9]
+    - link "نقاط الثقة" [ref=e10]
+    - button "تغيير اللغة" [expanded=false, ref=e18]
+      - StaticText "العربية"
+    - button "Toggle theme" [ref=e11]
+    - link "دخول" [ref=e12]
+      - button "دخول" [ref=e19]
+    - link "التسجيل" [ref=e13]
+      - button "التسجيل" [ref=e20]
+  - main
+    - heading "السجل القضائي العام" [level=1, ref=e14]
+    - paragraph
+      - StaticText "سجل شفاف وغير قابل للتعديل لجميع الأحكام القضائية الصادرة عن منصة ReadyRent. جميع البيانات مجهولة الهوية للحفاظ على خصوصية الأطراف."
+    - paragraph
+      - StaticText "لا توجد أحكام منشورة بعد في السجل العام."
+    - paragraph
+      - StaticText "جميع الأحكام مجهولة الهوية ومحمية بتقنية BLAKE2b Hash Chaining"
+    - paragraph
+      - StaticText "ReadyRent Sovereign Judicial System — نظام قضائي مستقل وشفاف"
+  - contentinfo
+    - generic
+      - link "STANDARD." [ref=e21]
+        - generic
+      - paragraph
+        - StaticText "منصة الكراء الفاخر والخدمات في الجزائر. 3 في 1: كراء، خدمات، وسوق مفتوح."
+      - link "انستغرام" [ref=e22]
+      - link "تيك توك" [ref=e23]
+      - link "واتساب" [ref=e24]
+      - StaticText "الكراء"
+      - list
+        - listitem [level=1]
+          - link "الكراء الفاخر" [ref=e25]
+        - listitem [level=1]
+          - link "المنتجات" [ref=e26]
+        - listitem [level=1]
+          - link "الحزم والعروض" [ref=e27]
+        - listitem [level=1]
+          - link "السلة" [ref=e28]
+      - StaticText "الخدمات"
+      - list
+        - listitem [level=1]
+          - link "خدمات المناسبات" [ref=e29]
+        - listitem [level=1]
+          - link "دليل المناسبات" [ref=e30]
+        - listitem [level=1]
+          - link "الحرفيات" [ref=e31]
+        - listitem [level=1]
+          - link "التأمين" [ref=e32]
+      - StaticText "السوق والدعم"
+      - list
+        - listitem [level=1]
+          - link "السوق المفتوح" [ref=e33]
+        - listitem [level=1]
+          - link "البائعون" [ref=e34]
+        - listitem [level=1]
+          - link "نقاط الثقة" [ref=e35]
+        - listitem [level=1]
+          - link "السجل القضائي" [ref=e36]
+      - StaticText "أخرى"
+      - list
+        - listitem [level=1]
+          - link "المدونة" [ref=e37]
+        - listitem [level=1]
+          - link "عن ستاندرد" [ref=e38]
+        - listitem [level=1]
+          - link "الأسئلة الشائعة" [ref=e39]
+        - listitem [level=1]
+          - link "المرتجعات" [ref=e40]
+  - region "Notifications alt+T" [ref=e1]
+  - button [ref=e2]
+  - region "Notifications alt+T" [ref=e3]
+  - button "Open Next.js Dev Tools" [expanded=false, ref=e41]
+=============================================
+
+=============================================
+PAGE: AI Search (/ai-search)
+=============================================
+Navigation: ✓ STANDARD.Rent | معيار السيادة والفخامة
+  http://localhost:3000/ai-search
+Title: STANDARD.Rent | معيار السيادة والفخامة
+---Console Errors---
+---Page Structure---
+- generic
+  - generic
+  - navigation
+    - link "STANDARD" [ref=e4]
+      - generic
+        - StaticText "STANDARD"
+    - generic [ref=e5] clickable [onclick]
+      - button "الكراء" [ref=e14]
+    - generic [ref=e6] clickable [onclick]
+      - button "الخدمات" [ref=e15]
+    - generic [ref=e7] clickable [onclick]
+      - button "السوق" [ref=e16]
+    - link "البحث الذكي" [ref=e8]
+    - link "السجل القضائي" [ref=e9]
+    - link "نقاط الثقة" [ref=e10]
+    - button "تغيير اللغة" [expanded=false, ref=e17]
+      - StaticText "العربية"
+    - button "Toggle theme" [ref=e11]
+    - link "دخول" [ref=e12]
+      - button "دخول" [ref=e18]
+    - link "التسجيل" [ref=e13]
+      - button "التسجيل" [ref=e19]
+  - main
+    - main
+      - generic
+        - generic
+        - generic
+          - StaticText "مدعوم بالذكاء الاصطناعي"
+          - heading "ابحث بلغتك الطبيعية" [level=1, ref=e24]
+          - paragraph
+          - generic
+            - textbox "ابحث بلغتك الطبيعية" [ref=e47]
+            - button "تنفيذ البحث" [disabled, ref=e48]
+          - button "فستان سهرة للتأجير في الجزائر العاصمة" [ref=e25]
+          - button "فستان زفاف أبيض فاخر" [ref=e26]
+          - button "تلبيسة أنيقة لحفلة خطوبة" [ref=e27]
+          - button "فستان عيد ميلاد للأطفال" [ref=e28]
+          - button "جلابية تقليدية بسعر معقول" [ref=e29]
+  - contentinfo
+    - generic
+      - link "STANDARD." [ref=e20]
+        - generic
+      - paragraph
+        - StaticText "منصة الكراء الفاخر والخدمات في الجزائر. 3 في 1: كراء، خدمات، وسوق مفتوح."
+      - link "انستغرام" [ref=e21]
+      - link "تيك توك" [ref=e22]
+      - link "واتساب" [ref=e23]
+      - StaticText "الكراء"
+      - list
+        - listitem [level=1]
+          - link "الكراء الفاخر" [ref=e30]
+        - listitem [level=1]
+          - link "المنتجات" [ref=e31]
+        - listitem [level=1]
+          - link "الحزم والعروض" [ref=e32]
+        - listitem [level=1]
+          - link "السلة" [ref=e33]
+      - StaticText "الخدمات"
+      - list
+        - listitem [level=1]
+          - link "خدمات المناسبات" [ref=e34]
+        - listitem [level=1]
+          - link "دليل المناسبات" [ref=e35]
+        - listitem [level=1]
+          - link "الحرفيات" [ref=e36]
+        - listitem [level=1]
+          - link "التأمين" [ref=e37]
+      - StaticText "السوق والدعم"
+      - list
+        - listitem [level=1]
+          - link "السوق المفتوح" [ref=e38]
+        - listitem [level=1]
+          - link "البائعون" [ref=e39]
+        - listitem [level=1]
+          - link "نقاط الثقة" [ref=e40]
+        - listitem [level=1]
+          - link "السجل القضائي" [ref=e41]
+      - StaticText "أخرى"
+      - list
+        - listitem [level=1]
+          - link "المدونة" [ref=e42]
+        - listitem [level=1]
+          - link "عن ستاندرد" [ref=e43]
+        - listitem [level=1]
+          - link "الأسئلة الشائعة" [ref=e44]
+        - listitem [level=1]
+          - link "المرتجعات" [ref=e45]
+  - region "Notifications alt+T" [ref=e1]
+  - button [ref=e2]
+  - region "Notifications alt+T" [ref=e3]
+  - button "Open Next.js Dev Tools" [expanded=false, ref=e46]
+=============================================
+
+=============================================
+PAGE: Checkout (/checkout)
+=============================================
+Navigation: ✓ STANDARD.Rent | معيار السيادة والفخامة
+  http://localhost:3000/checkout
+Title: STANDARD.Rent | معيار السيادة والفخامة
+---Console Errors---
+---Page Structure---
+- generic
+  - generic
+  - navigation
+    - link "STANDARD" [ref=e4]
+      - generic
+        - StaticText "STANDARD"
+    - generic [ref=e5] clickable [onclick]
+      - button "الكراء" [ref=e14]
+    - generic [ref=e6] clickable [onclick]
+      - button "الخدمات" [ref=e15]
+    - generic [ref=e7] clickable [onclick]
+      - button "السوق" [ref=e16]
+    - link "البحث الذكي" [ref=e8]
+    - link "السجل القضائي" [ref=e9]
+    - link "نقاط الثقة" [ref=e10]
+    - button "تغيير اللغة" [expanded=false, ref=e17]
+      - StaticText "العربية"
+    - button "Toggle theme" [ref=e11]
+    - link "دخول" [ref=e12]
+      - button "دخول" [ref=e18]
+    - link "التسجيل" [ref=e13]
+      - button "التسجيل" [ref=e19]
+  - main
+    - generic
+      - Canvas
+      - generic
+        - generic
+          - generic
+            - heading "STANDARD." [level=1, ref=e41]
+              - StaticText "STANDARD."
+            - paragraph
+              - StaticText "SOVEREIGN ACCESS TERMINAL"
+            - form
+              - textbox "البريد الإلكتروني الرسمي" [required, ref=e44]
+              - generic
+                - textbox "رمز الدخول" [required, ref=e45]
+                - button [ref=e46]
+              - button "فتح البوابة" [ref=e42]
+            - link "طلب عضوية جديدة" [ref=e43]
+  - contentinfo
+    - generic
+      - link "STANDARD." [ref=e20]
+        - generic
+      - paragraph
+        - StaticText "منصة الكراء الفاخر والخدمات في الجزائر. 3 في 1: كراء، خدمات، وسوق مفتوح."
+      - link "انستغرام" [ref=e21]
+      - link "تيك توك" [ref=e22]
+      - link "واتساب" [ref=e23]
+      - StaticText "الكراء"
+      - list
+        - listitem [level=1]
+          - link "الكراء الفاخر" [ref=e24]
+        - listitem [level=1]
+          - link "المنتجات" [ref=e25]
+        - listitem [level=1]
+          - link "الحزم والعروض" [ref=e26]
+        - listitem [level=1]
+          - link "السلة" [ref=e27]
+      - StaticText "الخدمات"
+      - list
+        - listitem [level=1]
+          - link "خدمات المناسبات" [ref=e28]
+        - listitem [level=1]
+          - link "دليل المناسبات" [ref=e29]
+        - listitem [level=1]
+          - link "الحرفيات" [ref=e30]
+        - listitem [level=1]
+          - link "التأمين" [ref=e31]
+      - StaticText "السوق والدعم"
+      - list
+        - listitem [level=1]
+          - link "السوق المفتوح" [ref=e32]
+        - listitem [level=1]
+          - link "البائعون" [ref=e33]
+        - listitem [level=1]
+          - link "نقاط الثقة" [ref=e34]
+        - listitem [level=1]
+          - link "السجل القضائي" [ref=e35]
+      - StaticText "أخرى"
+      - list
+        - listitem [level=1]
+          - link "المدونة" [ref=e36]
+        - listitem [level=1]
+          - link "عن ستاندرد" [ref=e37]
+        - listitem [level=1]
+          - link "الأسئلة الشائعة" [ref=e38]
+        - listitem [level=1]
+          - link "المرتجعات" [ref=e39]
+  - region "Notifications alt+T" [ref=e1]
+  - button [ref=e2]
+  - region "Notifications alt+T" [ref=e3]
+  - button "Open Next.js Dev Tools" [expanded=false, ref=e40]
+=============================================
+
+=============================================
+PAGE: Dashboard (/dashboard)
+=============================================
+Navigation: ✓ STANDARD.Rent | معيار السيادة والفخامة
+  http://localhost:3000/dashboard
+Title: STANDARD.Rent | معيار السيادة والفخامة
+---Console Errors---
+---Page Structure---
+- generic
+  - generic
+  - navigation
+    - link "STANDARD" [ref=e4]
+      - generic
+        - StaticText "STANDARD"
+    - generic [ref=e5] clickable [onclick]
+      - button "الكراء" [ref=e14]
+    - generic [ref=e6] clickable [onclick]
+      - button "الخدمات" [ref=e15]
+    - generic [ref=e7] clickable [onclick]
+      - button "السوق" [ref=e16]
+    - link "البحث الذكي" [ref=e8]
+    - link "السجل القضائي" [ref=e9]
+    - link "نقاط الثقة" [ref=e10]
+    - button "تغيير اللغة" [expanded=false, ref=e17]
+      - StaticText "العربية"
+    - button "Toggle theme" [ref=e11]
+    - link "دخول" [ref=e12]
+      - button "دخول" [ref=e18]
+    - link "التسجيل" [ref=e13]
+      - button "التسجيل" [ref=e19]
+  - main
+    - paragraph
+      - StaticText "CONSULTING SOVEREIGN REGISTRY"
+    - paragraph
+      - StaticText "AUTHENTICATION PROTOCOL V.11"
+  - contentinfo
+    - generic
+      - link "STANDARD." [ref=e20]
+        - generic
+      - paragraph
+        - StaticText "منصة الكراء الفاخر والخدمات في الجزائر. 3 في 1: كراء، خدمات، وسوق مفتوح."
+      - link "انستغرام" [ref=e21]
+      - link "تيك توك" [ref=e22]
+      - link "واتساب" [ref=e23]
+      - StaticText "الكراء"
+      - list
+        - listitem [level=1]
+          - link "الكراء الفاخر" [ref=e24]
+        - listitem [level=1]
+          - link "المنتجات" [ref=e25]
+        - listitem [level=1]
+          - link "الحزم والعروض" [ref=e26]
+        - listitem [level=1]
+          - link "السلة" [ref=e27]
+      - StaticText "الخدمات"
+      - list
+        - listitem [level=1]
+          - link "خدمات المناسبات" [ref=e28]
+        - listitem [level=1]
+          - link "دليل المناسبات" [ref=e29]
+        - listitem [level=1]
+          - link "الحرفيات" [ref=e30]
+        - listitem [level=1]
+          - link "التأمين" [ref=e31]
+      - StaticText "السوق والدعم"
+      - list
+        - listitem [level=1]
+          - link "السوق المفتوح" [ref=e32]
+        - listitem [level=1]
+          - link "البائعون" [ref=e33]
+        - listitem [level=1]
+          - link "نقاط الثقة" [ref=e34]
+        - listitem [level=1]
+          - link "السجل القضائي" [ref=e35]
+      - StaticText "أخرى"
+      - list
+        - listitem [level=1]
+          - link "المدونة" [ref=e36]
+        - listitem [level=1]
+          - link "عن ستاندرد" [ref=e37]
+        - listitem [level=1]
+          - link "الأسئلة الشائعة" [ref=e38]
+        - listitem [level=1]
+          - link "المرتجعات" [ref=e39]
+  - region "Notifications alt+T" [ref=e1]
+  - button [ref=e2]
+  - region "Notifications alt+T" [ref=e3]
+  - button "Open Next.js Dev Tools" [ref=e40]
+=============================================
+
+=============================================
+PAGE: Register (/register)
+=============================================
+Navigation: ✓ STANDARD.Rent | معيار السيادة والفخامة
+  http://localhost:3000/register
+Title: STANDARD.Rent | معيار السيادة والفخامة
+---Console Errors---
+---Page Structure---
+- generic
+  - generic
+  - navigation
+    - link "STANDARD" [ref=e4]
+      - generic
+        - StaticText "STANDARD"
+    - generic [ref=e5] clickable [onclick]
+      - button "الكراء" [ref=e14]
+    - generic [ref=e6] clickable [onclick]
+      - button "الخدمات" [ref=e15]
+    - generic [ref=e7] clickable [onclick]
+      - button "السوق" [ref=e16]
+    - link "البحث الذكي" [ref=e8]
+    - link "السجل القضائي" [ref=e9]
+    - link "نقاط الثقة" [ref=e10]
+    - button "تغيير اللغة" [expanded=false, ref=e17]
+      - StaticText "العربية"
+    - button "Toggle theme" [ref=e11]
+    - link "دخول" [ref=e12]
+      - button "دخول" [ref=e18]
+    - link "التسجيل" [ref=e13]
+      - button "التسجيل" [ref=e19]
+  - main
+    - generic
+      - Canvas
+      - generic
+        - generic
+          - generic
+            - heading "انضم إلى النخبة" [level=1, ref=e41]
+            - paragraph
+            - form
+              - textbox "الاسم الكامل" [required, ref=e44]
+              - textbox "البريد الإلكتروني" [required, ref=e45]
+              - textbox "رقم الهاتف (+213)" [required, ref=e46]
+              - textbox "رمز المرور الآمن" [required, ref=e47]
+              - button "تأكيد الهوية" [ref=e42]
+            - link "لدي هوية بالفعل؟ تسجيل الدخول" [ref=e43]
+  - contentinfo
+    - generic
+      - link "STANDARD." [ref=e20]
+        - generic
+      - paragraph
+        - StaticText "منصة الكراء الفاخر والخدمات في الجزائر. 3 في 1: كراء، خدمات، وسوق مفتوح."
+      - link "انستغرام" [ref=e21]
+      - link "تيك توك" [ref=e22]
+      - link "واتساب" [ref=e23]
+      - StaticText "الكراء"
+      - list
+        - listitem [level=1]
+          - link "الكراء الفاخر" [ref=e24]
+        - listitem [level=1]
+          - link "المنتجات" [ref=e25]
+        - listitem [level=1]
+          - link "الحزم والعروض" [ref=e26]
+        - listitem [level=1]
+          - link "السلة" [ref=e27]
+      - StaticText "الخدمات"
+      - list
+        - listitem [level=1]
+          - link "خدمات المناسبات" [ref=e28]
+        - listitem [level=1]
+          - link "دليل المناسبات" [ref=e29]
+        - listitem [level=1]
+          - link "الحرفيات" [ref=e30]
+        - listitem [level=1]
+          - link "التأمين" [ref=e31]
+      - StaticText "السوق والدعم"
+      - list
+        - listitem [level=1]
+          - link "السوق المفتوح" [ref=e32]
+        - listitem [level=1]
+          - link "البائعون" [ref=e33]
+        - listitem [level=1]
+          - link "نقاط الثقة" [ref=e34]
+        - listitem [level=1]
+          - link "السجل القضائي" [ref=e35]
+      - StaticText "أخرى"
+      - list
+        - listitem [level=1]
+          - link "المدونة" [ref=e36]
+        - listitem [level=1]
+          - link "عن ستاندرد" [ref=e37]
+        - listitem [level=1]
+          - link "الأسئلة الشائعة" [ref=e38]
+        - listitem [level=1]
+          - link "المرتجعات" [ref=e39]
+  - region "Notifications alt+T" [ref=e1]
+  - button [ref=e2]
+  - region "Notifications alt+T" [ref=e3]
+  - button "Open Next.js Dev Tools" [expanded=false, ref=e40]
+=============================================
+
+=== DEV SERVER LOG ===
+ GET /manifest.json 404 in 282ms (compile: 11ms, render: 271ms)
+ GET /verification 200 in 1896ms (compile: 1342ms, render: 554ms)
+ GET /manifest.json 404 in 248ms (compile: 25ms, render: 223ms)
+ GET /manifest.json 404 in 286ms (compile: 13ms, render: 273ms)
+ GET /returns 200 in 1620ms (compile: 1269ms, render: 351ms)
+ GET /manifest.json 404 in 176ms (compile: 16ms, render: 160ms)
+ GET /manifest.json 404 in 610ms (compile: 48ms, render: 562ms)
+ GET /returns/returns/my_returns 404 in 289ms (compile: 17ms, render: 273ms)
+ GET /returns/returns/my_returns 404 in 134ms (compile: 5ms, render: 129ms)
+ GET /disputes 200 in 2.9s (compile: 2.3s, render: 666ms)
+ GET /manifest.json 404 in 430ms (compile: 29ms, render: 402ms)
+ GET /manifest.json 404 in 202ms (compile: 40ms, render: 162ms)
+ GET /disputes/disputes 200 in 3.2s (compile: 2.8s, render: 399ms)
+ GET /faq 200 in 2.8s (compile: 2.6s, render: 201ms)
+ GET /manifest.json 404 in 383ms (compile: 67ms, render: 316ms)
+ GET /manifest.json 404 in 211ms (compile: 6ms, render: 205ms)
+ GET /cms/faqs 404 in 155ms (compile: 9ms, render: 146ms)
+ GET /cms/faqs 404 in 292ms (compile: 203ms, render: 88ms)
+ GET /blog 200 in 1706ms (compile: 1267ms, render: 439ms)
+ GET /manifest.json 404 in 179ms (compile: 21ms, render: 158ms)
+ GET /manifest.json 404 in 263ms (compile: 12ms, render: 251ms)
+ GET /cms/blog?status=published 404 in 105ms (compile: 7ms, render: 98ms)
+ GET /cms/blog?status=published 404 in 590ms (compile: 223ms, render: 367ms)
+ GET /about 200 in 1516ms (compile: 1216ms, render: 300ms)
+ GET /manifest.json 404 in 414ms (compile: 28ms, render: 386ms)
+ GET /manifest.json 404 in 233ms (compile: 7ms, render: 226ms)
+ GET /bundles 200 in 546ms (compile: 121ms, render: 425ms)
+ GET /manifest.json 404 in 353ms (compile: 43ms, render: 309ms)
+ GET /manifest.json 404 in 360ms (compile: 15ms, render: 345ms)
+ GET /bundles/bundles 200 in 1390ms (compile: 1194ms, render: 196ms)
+ GET /judicial 200 in 2.2s (compile: 1902ms, render: 322ms)
+ GET /manifest.json 404 in 481ms (compile: 72ms, render: 409ms)
+ GET /manifest.json 404 in 281ms (compile: 46ms, render: 235ms)
+ GET /ai-search 200 in 1476ms (compile: 1280ms, render: 196ms)
+ GET /manifest.json 404 in 334ms (compile: 52ms, render: 282ms)
+ GET /manifest.json 404 in 224ms (compile: 15ms, render: 209ms)
+ GET /checkout 200 in 2.0s (compile: 1546ms, render: 475ms)
+ GET /manifest.json 404 in 327ms (compile: 37ms, render: 290ms)
+ GET /manifest.json 404 in 218ms (compile: 4ms, render: 213ms)
+ GET /login?redirect=%2Fcheckout 200 in 96ms (compile: 29ms, render: 67ms)
+ GET /manifest.json 404 in 249ms (compile: 6ms, render: 242ms)
+○ Compiling /dashboard ...
+ GET /dashboard 200 in 11.6s (compile: 10.7s, render: 938ms)
+ GET /manifest.json 404 in 388ms (compile: 37ms, render: 351ms)
+ GET /login 200 in 428ms (compile: 27ms, render: 401ms)
+ GET /manifest.json 404 in 665ms (compile: 327ms, render: 338ms)
+ GET /manifest.json 404 in 275ms (compile: 19ms, render: 256ms)
+ GET /register 200 in 2.2s (compile: 1699ms, render: 539ms)
+ GET /manifest.json 404 in 303ms (compile: 10ms, render: 293ms)
+ GET /manifest.json 404 in 303ms (compile: 7ms, render: 296ms)
