@@ -13,7 +13,7 @@ import {
 } from 'recharts';
 import { BrainCircuit, TrendingUp, AlertTriangle, Droplets, Sparkles, Quote } from 'lucide-react';
 import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
-import { cn } from '@/lib/utils';
+import { cn, formatNumber, formatNumber } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 
 /**
@@ -45,7 +45,7 @@ export function SovereignPredictivePulse() {
           <div className="space-y-4">
              <div className="flex items-center justify-between gap-12">
                 <span className="text-[11px] font-bold text-white/60">توقع القيمة:</span>
-                <span className="font-mono text-sovereign-gold font-black">{Number(payload[0].value).toLocaleString()} <span className="text-[9px] opacity-40">DZD</span></span>
+                <span className="font-mono text-sovereign-gold font-black">{formatNumber(payload[0].value)} <span className="text-[9px] opacity-40">DZD</span></span>
              </div>
              <div className="flex items-center justify-between gap-12">
                 <span className="text-[11px] font-bold text-white/60">سيولة الثقة:</span>

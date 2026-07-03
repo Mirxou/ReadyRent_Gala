@@ -4,7 +4,7 @@ import * as React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { ShieldCheck, Calendar, Wallet, PenTool, CheckCircle2, AlertTriangle, ArrowRight, Loader2, Sparkles, Lock } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, formatNumber, formatNumber } from '@/lib/utils';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SovereignButton } from '@/components/sovereign/sovereign-button';
@@ -122,11 +122,11 @@ export function SovereignCheckoutModal({
                                             </div>
                                             <div className="flex justify-between items-center text-sm">
                                                 <span className="text-muted-foreground">قيمة الإيجار:</span>
-                                                <span className="font-bold">{totalPrice.toLocaleString()} دج</span>
+                                                <span className="font-bold">{formatNumber(totalPrice)} دج</span>
                                             </div>
                                             <div className="pt-6 border-t border-white/10 flex justify-between items-end">
                                                <p className="text-sm font-black">إجمالي الضمان (Escrow):</p>
-                                               <p className="text-3xl font-black text-sovereign-gold">{totalPrice.toLocaleString()} <span className="text-xs font-normal">DA</span></p>
+                                               <p className="text-3xl font-black text-sovereign-gold">{formatNumber(totalPrice)} <span className="text-xs font-normal">DA</span></p>
                                             </div>
                                         </div>
                                     </div>

@@ -86,7 +86,7 @@ export function VendorCard({ vendor }: VendorCardProps) {
             <div className="mt-4 pt-4 border-t flex items-center gap-2">
               <TrendingUp className="h-4 w-4 text-green-500" />
               <span className="text-sm font-medium">
-                {vendor.total_sales.toLocaleString()} مبيع
+                {formatNumber(vendor.total_sales)} مبيع
               </span>
             </div>
           )}

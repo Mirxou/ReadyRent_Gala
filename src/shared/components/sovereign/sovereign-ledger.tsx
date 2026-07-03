@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
 import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
+import { cn, formatNumber } from '@/lib/utils';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 
@@ -132,7 +132,7 @@ export function SovereignLedger() {
                              </div>
                              <div className="flex flex-col">
                                 <span className="text-[10px] font-black text-white/20 uppercase tracking-widest mb-1">إجراء مالي</span>
-                                <span className="text-xl font-black font-mono text-red-500 tracking-tighter">-{item.penalty_amount?.toLocaleString()} <span className="text-xs font-normal">DA</span></span>
+                                <span className="text-xl font-black font-mono text-red-500 tracking-tighter">-{formatNumber(item.penalty_amount || 0)} <span className="text-xs font-normal">DA</span></span>
                              </div>
                            </div>
                            

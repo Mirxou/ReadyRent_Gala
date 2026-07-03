@@ -16,7 +16,7 @@ import {
   ArrowUpRight
 } from 'lucide-react';
 import { api } from '@/lib/api';
-import { cn } from '@/lib/utils';
+import { cn, formatNumber, formatNumber } from '@/lib/utils';
 import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
 import { SovereignSeal } from '@/shared/components/sovereign/sovereign-seal';
 import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
@@ -114,7 +114,7 @@ export default function BookingDetailPage() {
                         <div className="text-left">
                             <span className="text-[10px] font-black uppercase text-white/30 block mb-1">المبلغ الإجمالي</span>
                             <span className="text-4xl font-black text-white italic">
-                                {booking.total_price.toLocaleString()} <small className="text-xs text-sovereign-gold uppercase not-italic">DA</small>
+                                {formatNumber(booking.total_price)} <small className="text-xs text-sovereign-gold uppercase not-italic">DA</small>
                             </span>
                         </div>
                         <div className="w-px h-12 bg-white/10" />

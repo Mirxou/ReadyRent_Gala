@@ -33,7 +33,7 @@ import { Separator } from '@/components/ui/separator';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
-import { cn } from '@/lib/utils';
+import { cn, formatNumber, formatNumber } from '@/lib/utils';
 import { toast } from 'sonner';
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -205,7 +205,7 @@ export default function BookingDetailsPage() {
                             <div className="space-y-1">
                                 <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">القيمة الإجمالية</p>
                                 <p className="text-4xl font-black text-foreground tracking-tighter">
-                                    {Number(booking.total_price).toLocaleString()} <span className="text-sm font-normal">DA</span>
+                                    {formatNumber(booking.total_price)} <span className="text-sm font-normal">DA</span>
                                 </p>
                             </div>
                             <div className="p-4 bg-white/5 rounded-2xl border border-white/5 text-center">
@@ -272,7 +272,7 @@ export default function BookingDetailsPage() {
                     <div className="flex flex-col md:flex-row justify-between items-center p-6 bg-emerald-500/5 rounded-3xl border border-emerald-500/10">
                         <div className="space-y-1">
                             <p className="text-sm font-black">إشعار الاسترجاع المالي (Automatic Refund)</p>
-                            <p className="text-xs text-muted-foreground">تمت إعادة مبلغ {Number(booking.total_price * 0.2).toLocaleString()} DA إلى محفظتكم السيادية.</p>
+                            <p className="text-xs text-muted-foreground">تمت إعادة مبلغ {formatNumber(booking.total_price * 0.2)} DA إلى محفظتكم السيادية.</p>
                         </div>
                         <SovereignButton variant="secondary" size="sm" className="mt-4 md:mt-0 gap-2 border-emerald-500/20 text-emerald-500">
                              تحميل الفاتورة النهائية

@@ -172,7 +172,7 @@ export default function CheckoutPage() {
                 )}
                 <div>
                   <p className="text-sm text-muted-foreground">المبلغ الإجمالي</p>
-                  <p className="text-2xl font-bold">{totalAmount.toLocaleString()} DZD</p>
+                  <p className="text-2xl font-bold">{formatNumber(totalAmount)} DZD</p>
                 </div>
                 {selectedMethod && (
                   <Button

@@ -130,7 +130,7 @@ export default function ReportsPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {salesReport.summary.total_revenue.toLocaleString()} دج
+                {formatNumber(salesReport.summary.total_revenue)} دج
               </div>
             </CardContent>
           </Card>
@@ -140,7 +140,7 @@ export default function ReportsPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {salesReport.summary.avg_booking_value.toLocaleString()} دج
+                {formatNumber(salesReport.summary.avg_booking_value)} دج
               </div>
             </CardContent>
           </Card>
@@ -222,8 +222,8 @@ export default function ReportsPage() {
                       </td>
                       <td className="p-2">{customer.user__email}</td>
                       <td className="p-2">{customer.booking_count}</td>
-                      <td className="p-2">{customer.total_spent.toLocaleString()} دج</td>
-                      <td className="p-2">{customer.avg_booking_value.toLocaleString()} دج</td>
+                      <td className="p-2">{formatNumber(customer.total_spent)} دج</td>
+                      <td className="p-2">{formatNumber(customer.avg_booking_value)} دج</td>
                     </tr>
                   ))}
                 </tbody>

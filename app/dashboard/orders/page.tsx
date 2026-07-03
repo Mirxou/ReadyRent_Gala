@@ -23,7 +23,7 @@ import { Separator } from '@/components/ui/separator';
 import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
 import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
 import Link from 'next/link';
-import { cn } from '@/lib/utils';
+import { cn, formatNumber, formatNumber } from '@/lib/utils';
 
 // Mock Data
 const orders = [
@@ -149,7 +149,7 @@ export default function OrdersPage() {
                                         </div>
                                     </div>
                                     <div className="text-3xl font-black text-foreground tracking-tighter">
-                                        {order.total.toLocaleString()} <span className="text-xs font-normal text-muted-foreground">DA</span>
+                                        {formatNumber(order.total)} <span className="text-xs font-normal text-muted-foreground">DA</span>
                                     </div>
                                 </div>
 

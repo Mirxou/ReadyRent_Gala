@@ -1,3 +1,4 @@
+import { formatNumber } from '@/lib/utils';
 'use client';
 
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
@@ -57,7 +58,7 @@ export function RevenueChart({ data, period }: RevenueChartProps) {
             />
             <YAxis
               style={{ fontSize: '12px', fill: 'rgba(255,255,255,0.4)', fontWeight: 'bold' }}
-              tickFormatter={(value) => `${value.toLocaleString()} دج`}
+              tickFormatter={(value) => `${formatNumber(value)} دج`}
               axisLine={false}
               tickLine={false}
             />
@@ -69,7 +70,7 @@ export function RevenueChart({ data, period }: RevenueChartProps) {
                 backdropFilter: 'blur(10px)',
                 boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)'
               }}
-              formatter={(value: number | undefined) => [`${(value || 0).toLocaleString()} دج`, 'الإيرادات']}
+              formatter={(value: number | undefined) => [`${formatNumber(value || 0)} دج`, 'الإيرادات']}
             />
             <Line
               type="monotone"

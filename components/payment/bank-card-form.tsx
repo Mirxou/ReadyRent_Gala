@@ -110,7 +110,7 @@ export function BankCardForm({
           الدفع بالبطاقة البنكية
         </CardTitle>
         <CardDescription>
-          المبلغ: {amount.toLocaleString()} {currency}
+          المبلغ: {formatNumber(amount)} {currency}
         </CardDescription>
       </CardHeader>
       <CardContent>

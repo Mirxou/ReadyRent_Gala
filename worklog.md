@@ -293,3 +293,21 @@ Stage Summary:
 - App running on port 3000, accessible via Preview Panel
 - All Arabic content renders correctly
 - Cross-origin static assets need allowedDevOrigins config (added preview domain + IP)
+
+---
+Task ID: 8
+Agent: Main
+Task: Fix hydration mismatch from toLocaleString() locale difference
+
+Work Log:
+- Root cause: Number.toLocaleString() produces "25,000" on server (Node.js EN locale) but "25 000" on client (browser AR locale)
+- Created formatNumber() utility in lib/utils.ts with deterministic space-separated thousands
+- Replaced ALL 30+ number toLocaleString() calls across 30 files with formatNumber()
+- Files fixed: product-card, vendor-card, revenue-chart, sales charts, payment forms, wallet, checkout, cart, admin reports, dashboard pages, AI search, sovereign ledger/calendar, escrow components, etc.
+- Preserved Date.toLocaleString('ar-*') calls (explicit locale = deterministic)
+- Synced fixes back to /home/z/STANDARD_Rent/frontend/
+
+Stage Summary:
+- Zero number toLocaleString() calls remain (verified with grep)
+- formatNumber() produces "25 000" consistently on server and client
+- Hydration mismatch resolved

@@ -21,7 +21,7 @@ import { SovereignButton } from '@/shared/components/sovereign/sovereign-button'
 import { SovereignSparkle, SovereignGlow } from '@/shared/components/sovereign/sovereign-sparkle';
 import { IdentityShield } from '@/shared/components/sovereign/identity-shield';
 import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
+import { cn, formatNumber, formatNumber } from '@/lib/utils';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 
@@ -105,7 +105,7 @@ export default function WalletPage() {
                           <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em] mb-4 opacity-40">Available Sovereign Liquidity</p>
                           <h2 className="text-7xl font-black text-foreground tracking-tighter flex items-baseline gap-4 italic">
                             <SovereignSparkle active={true}>
-                               {Number(userProfile?.wallet_balance || 0).toLocaleString()}
+                               {formatNumber(userProfile?.wallet_balance || 0)}
                             </SovereignSparkle>
                             <span className="text-2xl font-normal text-muted-foreground opacity-20 not-italic">DA</span>
                           </h2>
@@ -129,7 +129,7 @@ export default function WalletPage() {
                                <Lock className="w-3 h-3 text-sovereign-gold" /> Escrow Pipeline
                             </p>
                             <h3 className="text-4xl font-black text-sovereign-gold tracking-tight">
-                               {escrowAmount.toLocaleString()} <span className="text-sm font-normal text-muted-foreground/40">DA</span>
+                               {formatNumber(escrowAmount)} <span className="text-sm font-normal text-muted-foreground/40">DA</span>
                             </h3>
                          </div>
                          <p className="text-[10px] text-muted-foreground/60 leading-relaxed max-w-[200px] italic">
@@ -166,7 +166,7 @@ export default function WalletPage() {
                        <div className="flex justify-between items-end">
                           <div className="space-y-1">
                              <p className="text-[8px] text-muted-foreground uppercase">Escrow Value</p>
-                             <p className="text-lg font-black">{Number(b.deposit_amount || 0).toLocaleString()} DA</p>
+                             <p className="text-lg font-black">{formatNumber(b.deposit_amount || 0)} DA</p>
                           </div>
                           <p className="text-[10px] text-muted-foreground">Release: {format(new Date(b.end_date), 'dd MMM')}</p>
                        </div>
@@ -219,7 +219,7 @@ export default function WalletPage() {
                                 "text-xl font-black tracking-tighter",
                                 tx.type === 'deposit' || tx.type === 'escrow_release' ? "text-emerald-500" : "text-foreground"
                               )}>
-                                 {tx.type === 'deposit' || tx.type === 'escrow_release' ? '+' : '-'}{Number(tx.amount).toLocaleString()} <span className="text-xs font-normal opacity-40">DA</span>
+                                 {tx.type === 'deposit' || tx.type === 'escrow_release' ? '+' : '-'}{formatNumber(tx.amount)} <span className="text-xs font-normal opacity-40">DA</span>
                               </p>
                               <p className="text-[10px] text-muted-foreground opacity-60">
                                 {format(new Date(tx.created_at), 'dd MMMM yyyy', { locale: ar })}

@@ -14,7 +14,7 @@ import {
   Coins,
   History
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, formatNumber, formatNumber } from '@/lib/utils';
 import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
 
 /**
@@ -78,7 +78,7 @@ export function EscrowTracker({ state, amount, currency = 'DZD', updatedAt }: Es
                         </div>
                         <div className="flex items-baseline gap-4">
                             <h3 className="text-5xl font-black italic tracking-tighter text-white/90 font-mono">
-                                {amount.toLocaleString()}
+                                {formatNumber(amount)}
                             </h3>
                             <span className="text-sm font-black text-sovereign-gold uppercase tracking-widest">{currency}</span>
                         </div>

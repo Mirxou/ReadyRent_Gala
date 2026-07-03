@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { analyticsApi } from '@/lib/api';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Eye, Activity, Zap, Users } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, formatNumber } from '@/lib/utils';
 
 /**
  * ProductHeartbeat - Live Asset Activity Monitor.
@@ -73,7 +73,7 @@ export function ProductHeartbeat({ productId, className }: ProductHeartbeatProps
             <div className="flex items-center gap-2 mt-1">
                 <Users className="w-3 h-3 text-white/20" />
                 <span className="text-[8px] font-bold text-white/10 uppercase tracking-[0.2em] italic">
-                   {totalViews.toLocaleString()} Total Engagements
+                   {formatNumber(totalViews)} Total Engagements
                 </span>
             </div>
         </div>

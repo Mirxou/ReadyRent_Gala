@@ -1,4 +1,5 @@
-"use client";
+"use client"
+import { formatNumber } from '@/lib/utils';;
 
 import React, { useState } from "react";
 import Image from "next/image";
@@ -162,7 +163,7 @@ export const InteractiveProductCard = ({
                     <div className="flex items-center justify-between">
                         <div className="space-y-1">
                             <p className="text-2xl font-bold bg-gradient-to-r from-gala-purple to-gala-pink bg-clip-text text-transparent">
-                                {price.toLocaleString('ar-DZ')} دج
+                                {formatNumber(price)} دج
                             </p>
                             <p className="text-sm text-muted-foreground">لليوم الواحد</p>
                         </div>

@@ -110,7 +110,7 @@ export const WalletDashboard = () => {
               <Wallet size={16} /> إجمالي الرصيد (ريال سعودي)
             </p>
             <h2 className="text-5xl md:text-6xl font-black tracking-tight flex items-baseline gap-2">
-              {balance.total.toLocaleString()}
+              {formatNumber(balance.total)}
               <span className="text-2xl font-normal text-slate-400">SAR</span>
             </h2>
           </div>
@@ -138,7 +138,7 @@ export const WalletDashboard = () => {
               </div>
               <span className="text-sm font-medium">متاح للسحب</span>
             </div>
-            <span className="text-lg font-bold">{balance.available.toLocaleString()} SAR</span>
+            <span className="text-lg font-bold">{formatNumber(balance.available)} SAR</span>
           </div>
           
           <div className="bg-slate-800/50 p-4 rounded-2xl border border-slate-700 flex justify-between items-center">
@@ -148,7 +148,7 @@ export const WalletDashboard = () => {
               </div>
               <span className="text-sm font-medium">محجوز في الضمان (Escrow)</span>
             </div>
-            <span className="text-lg font-bold text-amber-400">{balance.escrow.toLocaleString()} SAR</span>
+            <span className="text-lg font-bold text-amber-400">{formatNumber(balance.escrow)} SAR</span>
           </div>
         </div>
       </Card>

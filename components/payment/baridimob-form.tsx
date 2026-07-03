@@ -101,7 +101,7 @@ export function BaridiMobForm({
           الدفع عبر بريدي موب
         </CardTitle>
         <CardDescription>
-          المبلغ: {amount.toLocaleString()} {currency}
+          المبلغ: {formatNumber(amount)} {currency}
         </CardDescription>
       </CardHeader>
       <CardContent>

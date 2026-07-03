@@ -167,7 +167,7 @@ export default function InsurancePage() {
                   </CardTitle>
                   <div className="flex items-baseline justify-center gap-1 mt-3">
                     <span className="text-3xl md:text-4xl font-black text-sovereign-gold">
-                      {plan.price.toLocaleString()}
+                      {formatNumber(plan.price)}
                     </span>
                     <span className="text-muted-foreground text-sm">دج / لكل حجز</span>
                   </div>

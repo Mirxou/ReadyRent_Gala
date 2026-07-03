@@ -1,4 +1,5 @@
-"use client";
+"use client"
+import { formatNumber } from '@/lib/utils';;
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -141,7 +142,7 @@ export default function SovereignDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             {[
                 { label: 'الخلافات النشطة', value: stats?.active_disputes, icon: ShieldAlert, color: 'gold' },
-                { label: 'القيمة المؤمنة المطلقة', value: `${stats?.total_value_locked.toLocaleString()} د.ج`, icon: Lock, color: 'gold' },
+                { label: 'القيمة المؤمنة المطلقة', value: `${stats?.formatNumber(total_value_locked)} د.ج`, icon: Lock, color: 'gold' },
                 { label: 'جاهزية الإطلاق السيادي', value: `${stats?.readiness_gate}%`, icon: TrendingUp, color: 'gold' },
                 { label: 'سجلات الأدلة (Vault)', value: '1.4k+', icon: Database, color: 'gold' },
             ].map((m, i) => (

@@ -30,7 +30,7 @@ import { SovereignButton } from '@/shared/components/sovereign/sovereign-button'
 import { SovereignSparkle, SovereignGlow } from '@/shared/components/sovereign/sovereign-sparkle';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
-import { cn } from '@/lib/utils';
+import { cn, formatNumber, formatNumber } from '@/lib/utils';
 
 import { useQuery } from '@tanstack/react-query';
 import { bookingsApi, authApi } from '@/lib/api';
@@ -221,7 +221,7 @@ export default function DashboardPage() {
                         <div className="space-y-2">
                             <p className="font-black text-md tracking-tight text-foreground">الخزانة المالية</p>
                             <p className="text-[10px] text-muted-foreground font-mono opacity-60">
-                                {Number(user?.wallet_balance || 0).toLocaleString()} DZD
+                                {formatNumber(user?.wallet_balance || 0)} DZD
                             </p>
                         </div>
                         <CreditCard className="w-6 h-6 text-sovereign-gold group-hover:scale-110 transition-transform opacity-40 group-hover:opacity-100" />
@@ -381,7 +381,7 @@ export default function DashboardPage() {
 
                         <div className="flex items-center justify-between mb-8">
                             <span className="text-[10px] font-black text-muted-foreground uppercase opacity-40 tracking-widest">Sovereign Value (Escrow)</span>
-                            <span className="text-2xl font-black text-sovereign-gold">{Number(booking.total_price).toLocaleString()} <span className="text-xs font-normal">DA</span></span>
+                            <span className="text-2xl font-black text-sovereign-gold">{formatNumber(booking.total_price)} <span className="text-xs font-normal">DA</span></span>
                         </div>
 
                         <Link href={`/dashboard/orders/${booking.id}`} className="w-full">

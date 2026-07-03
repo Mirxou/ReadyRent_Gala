@@ -8,6 +8,7 @@ import { GlassPanel } from "@/shared/components/sovereign/glass-panel";
 import { SovereignGlow, SovereignSparkle } from '@/shared/components/sovereign/sovereign-sparkle';
 import { ProductCard } from '@/components/product/product-card';
 import { products as mockProducts, artisans as mockArtisans, localGuideServices as mockGuideServices, categories as mockCategories } from '@/lib/mock-data';
+import { formatNumber } from '@/lib/utils';
 import {
   Shirt,
   Sparkles,
@@ -544,7 +545,7 @@ function StatItem({ stat, inView, index }: { stat: typeof stats[0]; inView: bool
         <stat.icon className="w-5 h-5" />
       </div>
       <p className="text-3xl md:text-4xl font-black tracking-tighter text-sovereign-gold">
-        {count.toLocaleString()}<span className="text-xl">{stat.suffix}</span>
+        {formatNumber(count)}<span className="text-xl">{stat.suffix}</span>
       </p>
       <p className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">{stat.label}</p>
     </motion.div>

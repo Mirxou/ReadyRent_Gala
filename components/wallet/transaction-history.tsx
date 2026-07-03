@@ -102,7 +102,7 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({ transact
                   <p className={`font-black text-base ${
                     tx.type === 'deposit' || tx.type === 'escrow_release' ? 'text-green-600' : 'text-slate-900'
                   }`}>
-                    {tx.type === 'deposit' || tx.type === 'escrow_release' ? '+' : '-'}{tx.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    {tx.type === 'deposit' || tx.type === 'escrow_release' ? '+' : '-'}{formatNumber(tx.amount)}
                   </p>
                   <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">SAR</p>
                 </td>

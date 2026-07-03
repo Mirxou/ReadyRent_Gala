@@ -421,7 +421,7 @@ export function ProductFilters({
             if (isTyping || hasCustomValues) {
               return (
                 <div className="text-xs text-muted-foreground pt-1 text-center">
-                  النطاق المحدد: {currentMin.toLocaleString()} - {currentMax.toLocaleString()} دج
+                  النطاق المحدد: {formatNumber(currentMin)} - {formatNumber(currentMax)} دج
                 </div>
               );
             }

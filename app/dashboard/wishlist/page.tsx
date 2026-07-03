@@ -20,7 +20,7 @@ import {
 import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
 import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
 import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
+import { cn, formatNumber, formatNumber } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SovereignGlow, SovereignSparkle } from '@/shared/components/sovereign/sovereign-sparkle';
 import { useRouter } from 'next/navigation';
@@ -97,7 +97,7 @@ export default function WishlistPage() {
                              <div className="pt-6 border-t border-white/5 flex items-center justify-between">
                                 <div className="space-y-1">
                                    <p className="text-[10px] uppercase font-black tracking-widest text-muted-foreground opacity-40 italic">القيمة اليومية</p>
-                                   <p className="text-2xl font-black text-sovereign-gold">{Number(item.price_per_day).toLocaleString()} <span className="text-xs font-normal">DA</span></p>
+                                   <p className="text-2xl font-black text-sovereign-gold">{formatNumber(item.price_per_day)} <span className="text-xs font-normal">DA</span></p>
                                 </div>
                                 <SovereignButton variant="primary" className="h-12 px-8 rounded-xl shadow-xl shadow-sovereign-gold/10">
                                    احجز الآن

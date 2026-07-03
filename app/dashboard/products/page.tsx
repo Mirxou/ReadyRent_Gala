@@ -134,7 +134,7 @@ export default function ProductsPage() {
                                             {product.status === 'active' ? 'نشط' : 'مسودة'}
                                         </Badge>
                                     </TableCell>
-                                    <TableCell>{product.price.toLocaleString()} دج</TableCell>
+                                    <TableCell>{formatNumber(product.price)} دج</TableCell>
                                     <TableCell className="text-center text-muted-foreground">{product.views}</TableCell>
                                     <TableCell className="text-center">
                                         <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gala-purple/10 text-gala-purple">

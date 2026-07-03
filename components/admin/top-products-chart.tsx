@@ -47,9 +47,9 @@ export function TopProductsChart({ data, limit = 10 }: TopProductsChartProps) {
               formatter={(value: number | undefined, name: string | undefined) => {
                 const numValue = value || 0;
                 const nameStr = name || '';
-                if (nameStr === 'revenue') return [`${numValue.toLocaleString()} دج`, 'الإيرادات'];
+                if (nameStr === 'revenue') return [`${formatNumber(numValue)} دج`, 'الإيرادات'];
                 if (nameStr === 'bookings') return [numValue, 'عدد الحجوزات'];
-                if (nameStr === 'avgPrice') return [`${numValue.toLocaleString()} دج`, 'متوسط السعر'];
+                if (nameStr === 'avgPrice') return [`${formatNumber(numValue)} دج`, 'متوسط السعر'];
                 return [numValue, nameStr];
               }}
               labelStyle={{ color: '#000' }}

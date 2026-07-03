@@ -13,7 +13,7 @@ import {
   Zap
 } from 'lucide-react';
 import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
-import { cn } from '@/lib/utils';
+import { cn, formatNumber, formatNumber } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 
 /**
@@ -79,7 +79,7 @@ export function EscrowPulse() {
                             animate={{ filter: 'blur(0px)', opacity: 1, y: 0 }}
                             className="text-7xl font-black italic tracking-tighter text-white group-hover:text-sovereign-gold transition-colors duration-1000 font-mono"
                         >
-                            {securedAmount.toLocaleString()}
+                            {formatNumber(securedAmount)}
                         </motion.span>
                         <span className="text-2xl font-black text-sovereign-gold italic uppercase tracking-widest">DZD</span>
                     </div>

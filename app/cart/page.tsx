@@ -285,7 +285,7 @@ export default function CartPage() {
                                 {item.quantity} {item.quantity === 1 ? 'قطعة فريدة' : 'قطع'}
                               </div>
                               <div className="text-2xl font-black bg-gradient-to-r from-gala-purple to-gala-pink bg-clip-text text-transparent">
-                                {itemTotal.toLocaleString('ar-DZ')} دج
+                                {itemTotal.toLocaleString} دج
                               </div>
                             </div>
                           </div>
@@ -314,7 +314,7 @@ export default function CartPage() {
                     return (
                       <div key={item.id} className="flex justify-between items-center text-sm font-medium">
                         <span className="text-muted-foreground">{item.product.name_ar}</span>
-                        <span className="text-white">{itemTotal.toLocaleString('ar-DZ')} دج</span>
+                        <span className="text-white">{itemTotal.toLocaleString} دج</span>
                       </div>
                     );
                   })}
@@ -352,7 +352,7 @@ export default function CartPage() {
                       </div>
                       {sameDayInfo.fee > 0 && (
                         <span className="text-sm font-black text-gala-cyan">
-                          +{sameDayInfo.fee.toLocaleString('ar-DZ')} دج
+                          +{sameDayInfo.fee.toLocaleString} دج
                         </span>
                       )}
                     </div>
@@ -368,13 +368,13 @@ export default function CartPage() {
                   {sameDayDelivery && sameDayInfo && sameDayInfo.fee > 0 && (
                     <div className="flex justify-between text-sm font-medium">
                       <span className="text-muted-foreground font-bold">رسوم السرعة القصوى</span>
-                      <span className="text-gala-cyan">{sameDayInfo.fee.toLocaleString('ar-DZ')} دج</span>
+                      <span className="text-gala-cyan">{sameDayInfo.fee.toLocaleString} دج</span>
                     </div>
                   )}
                   <div className="flex justify-between items-end">
                     <span className="text-xl font-bold opacity-60">المبلغ الإجمالي</span>
                     <span className="text-4xl font-black bg-gradient-to-r from-gala-gold to-gala-gold/60 bg-clip-text text-transparent">
-                      {(totalPrice + (sameDayDelivery && sameDayInfo ? sameDayInfo.fee : 0)).toLocaleString('ar-DZ')} دج
+                      {(totalPrice + (sameDayDelivery && sameDayInfo ? sameDayInfo.fee : 0)).toLocaleString} دج
                     </span>
                   </div>
                 </div>

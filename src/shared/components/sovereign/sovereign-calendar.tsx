@@ -8,7 +8,7 @@ import { useQuery } from '@tanstack/react-query';
 import { bookingsApi } from '@/lib/api';
 import { CalendarIcon, Clock, Zap, ShieldCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { cn } from '@/lib/utils';
+import { cn, formatNumber } from '@/lib/utils';
 
 /**
  * SovereignCalendar - The Temporal Lease Agreement.
@@ -147,7 +147,7 @@ export function SovereignCalendar({
                         <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20 italic">Valeur de l'Engagement</p>
                    </div>
                    <p className="text-4xl font-black italic tracking-tighter text-sovereign-gold font-mono">
-                      {(daysCount * pricePerDay).toLocaleString()} <span className="text-xs opacity-40">DZD</span>
+                      {formatNumber(daysCount * pricePerDay)} <span className="text-xs opacity-40">DZD</span>
                    </p>
                 </div>
               </motion.div>

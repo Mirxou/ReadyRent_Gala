@@ -69,7 +69,7 @@ export function SalesByStatusChart({ data }: SalesByStatusChartProps) {
                 const numValue = value || 0;
                 const revenue = props.payload?.revenue || 0;
                 return [
-                  `${numValue} حجز (${revenue.toLocaleString()} دج)`,
+                  `${numValue} حجز (${formatNumber(revenue)} دج)`,
                   'عدد الحجوزات',
                 ];
               }}

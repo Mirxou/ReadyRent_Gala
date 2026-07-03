@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Star, Shield, Zap, Heart, MapPin, Sparkles } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, formatNumber } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { SovereignButton } from '@/components/sovereign/sovereign-button';
 import { SovereignGlow, SovereignSparkle } from '@/components/sovereign/sovereign-sparkle';
@@ -90,7 +90,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
                     <div className="space-y-0.5">
                         <p className="text-[9px] font-black text-muted-foreground uppercase opacity-40">السعر لليوم</p>
                         <p className="text-2xl font-black tracking-tighter">
-                            {Number(product.price_per_day).toLocaleString()} <span className="text-xs font-normal opacity-40">دج</span>
+                            {formatNumber(product.price_per_day)} <span className="text-xs font-normal opacity-40">دج</span>
                         </p>
                     </div>
                     <button className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-all">

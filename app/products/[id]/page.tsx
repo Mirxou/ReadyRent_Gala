@@ -26,7 +26,7 @@ import { SovereignButton } from '@/shared/components/sovereign/sovereign-button'
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
 import Link from 'next/link';
-import { cn } from '@/lib/utils';
+import { cn, formatNumber, formatNumber } from '@/lib/utils';
 import Lightbox from "yet-another-react-lightbox";
 import Zoom from "yet-another-react-lightbox/plugins/zoom";
 import "yet-another-react-lightbox/styles.css";
@@ -226,7 +226,7 @@ export default function ProductDetailsPage() {
                       <div className="space-y-1">
                         <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-40">السعر لليوم</p>
                         <p className="text-6xl font-black tracking-tighter">
-                          {Number(product.price_per_day).toLocaleString()} <span className="text-xl font-normal text-muted-foreground">دج</span>
+                          {formatNumber(product.price_per_day)} <span className="text-xl font-normal text-muted-foreground">دج</span>
                         </p>
                       </div>
                       <SovereignButton variant="primary" size="xl" className="px-16 h-20 shadow-2xl rounded-2xl text-xl" onClick={handleReserve} withShimmer>

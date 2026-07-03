@@ -1,4 +1,5 @@
-"use client";
+"use client"
+import { formatNumber } from '@/lib/utils';;
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -163,7 +164,7 @@ export default function SovereignWallet() {
                           <GlassPanel className="p-8 flex justify-between items-center rounded-3xl" variant="obsidian" gradientBorder>
                               <div>
                                   <span className="text-[10px] font-black uppercase text-white/30 tracking-widest block mb-1">الرصيد المتاح</span>
-                                  <h4 className="text-3xl font-black italic">{balance.toLocaleString()} DA</h4>
+                                  <h4 className="text-3xl font-black italic">{formatNumber(balance)} DA</h4>
                               </div>
                               <ArrowUpRight className="w-8 h-8 text-emerald-500/50" />
                           </GlassPanel>
@@ -171,7 +172,7 @@ export default function SovereignWallet() {
                         <GlassPanel className="p-8 flex justify-between items-center rounded-3xl" variant="obsidian" gradientBorder>
                             <div>
                                 <span className="text-[10px] font-black uppercase text-white/30 tracking-widest block mb-1">المحجوز في الخزنة (Escrow)</span>
-                                <h4 className="text-3xl font-black italic text-sovereign-gold">{escrowTotal.toLocaleString()} DA</h4>
+                                <h4 className="text-3xl font-black italic text-sovereign-gold">{formatNumber(escrowTotal)} DA</h4>
                             </div>
                             <Lock className="w-8 h-8 text-sovereign-gold/50" />
                         </GlassPanel>
@@ -215,7 +216,7 @@ export default function SovereignWallet() {
                                             tx.type === 'INCOME' ? 'text-emerald-500' : 
                                             tx.type === 'EXPENDITURE' ? 'text-red-500' : 'text-sovereign-gold'
                                         }`}>
-                                            {tx.type === 'INCOME' ? '+' : '-'}{tx.amount.toLocaleString()} DA
+                                            {tx.type === 'INCOME' ? '+' : '-'}{formatNumber(tx.amount)} DA
                                         </span>
                                         <code className="text-[8px] font-mono opacity-20 block group-hover:opacity-60 transition-opacity mt-1">{tx.hash}</code>
                                     </div>

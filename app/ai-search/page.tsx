@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { cn } from '@/lib/utils';
+import { cn, formatNumber } from '@/lib/utils';
 import { trackSearch } from '@/lib/analytics';
 import { Badge } from '@/components/ui/badge';
 
@@ -78,7 +78,7 @@ function ProductCard({ product }: { product: Product }) {
             </div>
           )}
           <p className="text-base font-black text-blue-600">
-            {product.price_per_day.toLocaleString('ar-DZ')} دج<span className="text-xs font-normal text-slate-400">/يوم</span>
+            {formatNumber(product.price_per_day)} دج<span className="text-xs font-normal text-slate-400">/يوم</span>
           </p>
         </div>
       </Link>
