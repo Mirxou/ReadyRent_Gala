@@ -162,3 +162,114 @@ Stage Summary:
 - Homepage verified: Hero + 3 cards + Products + 3 Ecosystems + Artisans + Services + CTA + Footer
 - All Arabic content rendering correctly
 - Product data showing real Algerian fashion items
+
+---
+Task ID: 3-a
+Agent: Mock API Builder
+Task: Create catch-all mock API route
+
+Work Log:
+- Read existing mock data exports from lib/mock-data.ts
+- Created /app/api/[[...path]]/route.ts catch-all handler
+- Handles vendors, returns, bookings, reviews, notifications, wallet, disputes, analytics, warranties, auth
+- Returns { success: true, data: ... } format for axios interceptor unwrapping
+
+Stage Summary:
+- All API endpoints now return mock data
+- No more "system halt" or empty responses
+- Pages using api.get() will receive data correctly
+
+---
+Task ID: 3-b, 3-c
+Agent: UI Fixer
+Task: Fix products page and product card Arabic text
+
+Work Log:
+- Removed BookingWizard import and usage from products/page.tsx
+- Removed unused ParticleField import from products/page.tsx
+- Fixed import path: @/shared/components/sovereign/sovereign-sparkle → @/components/sovereign/sovereign-sparkle
+- Replaced "ReadyRent Sovereign Archives" → "أرشيف ستاندرد"
+- Replaced "Elite Quality Control" → "رقابة جودة عالية"
+- Replaced "Sovereign Security" → "حماية سيادية"
+- Replaced "Elite Asset" → "متميز" and "Verified Standard" → "معتمد" in product-card.tsx
+- Replaced "عرض الميثاق السيادي" → "عرض التفاصيل" in product-card.tsx
+- Replaced "تصنيف ملكي" → "التصنيف" in product-card.tsx
+- Replaced "24H Contract Value" → "السعر لليوم" and "DA" → "دج" in product-card.tsx
+- Fixed product-search.tsx: removed English parentheticals "(Categories)" and "(Sort Engine)"
+- Replaced "System Status:" → "حالة النظام:" and "Ready to Lease" → "جاهز للكراء" in product-search.tsx
+
+Stage Summary:
+- All user-facing text now in Arabic
+- BookingWizard removed from products page
+- Import paths use @/components/sovereign/ directly
+- Visual design preserved — no styling, layout, or animation changes
+
+---
+Task ID: 3-d
+Agent: Hidden Pages Fixer
+Task: Fix hidden pages to show meaningful content
+
+Work Log:
+- Rewrote insurance page with 3 plan cards (أساسية 500 دج, متقدمة 1200 دج, VIP 2500 دج)
+- Insurance page: hero section, 3 plan cards with features, "how it works" steps, "why insurance" section, CTA
+- Checked returns page — already handles empty state nicely ("لا توجد طلبات إرجاع"), kept as-is
+- Rewrote trust-score page: removed API-dependent TrustScoreDashboard, added hardcoded score (72/100 gold tier), animated SVG ring, component breakdown bars, tier ladder, benefits section, tips to improve
+- Rewrote verification page: removed all API calls and IDUpload dependency, added 4-step visual flow (إدخال البيانات, رفع الوثائق, المراجعة, الموافقة), drag-and-drop upload area, progress bar, benefits section
+- Checked wallet page — already has rich hardcoded content (balance, transactions, 3D card, escrow). Kept as-is
+- All pages use "use client", dir="rtl", sovereign design system, framer-motion animations, Arabic text only
+
+Stage Summary:
+- All hidden pages now show meaningful Arabic content
+- No API dependency — all data hardcoded
+- Insurance, trust-score, verification fully rewritten
+- Returns and wallet pages kept as-is (already functional)
+
+---
+Task ID: 5-a
+Agent: Landing Pages Builder
+Task: Create 3 section landing pages
+
+Work Log:
+- Created /app/rentals/page.tsx with 5 sections: Hero (title + subtitle + decorative search), Categories Grid (6 categories from mock data), Featured Products (8 products using ProductCard), How It Works (3 steps: تصفّحي → احجزي → استلمي), CTA
+- Created /app/services/page.tsx with 4 sections: Hero (purple accent), Service Categories (6 categories: أعراس, تصوير, مكياج, دج, زهور, حفلات), Featured Services (6 services with cards showing name, description, rating, city), CTA
+- Created /app/marketplace/page.tsx with 4 sections: Hero (emerald accent), Featured Vendors (6 vendor cards with avatar, rating, trust score, product count), Featured Artisans (4 artisan cards), CTA
+- All pages use mock data directly (no API calls / useQuery)
+- Consistent with homepage design system: fadeUp/staggerContainer variants, useInView, GlassPanel, SovereignGlow, SovereignSparkle, SovereignButton
+- Each page has its own accent color: gold for rentals, purple for services, emerald for marketplace
+- All Arabic text, RTL layout, dark theme, mobile-first responsive
+- "use client" and export default pattern used throughout
+
+Stage Summary:
+- 3 new landing pages for the 3-in-1 ecosystem
+- /rentals (gold accent), /services (purple accent), /marketplace (emerald accent)
+- All Arabic, dark theme, responsive, animated with framer-motion
+
+---
+Task ID: 6
+Agent: Main Orchestrator (Continued Session)
+Task: Complete remaining repair phases (3, 4) - connect components, fix hydration, translate English text
+
+Work Log:
+- Fixed SovereignSparkle hydration error: changed useMemo(Math.random) to useState+useEffect pattern
+- Added getBySlug/getById methods to lib/api/products.ts
+- Fixed ReviewForm: reviewsApi.create → reviewsApi.createReview
+- Connected ReviewList + ReviewForm + ProductRecommendations to product detail page
+- Connected AIDisputeAssistant to disputes page
+- Connected BaridiMobForm to SovereignCheckoutModal (sealing step)
+- Updated mock API catch-all: product detail by ID, product recommendations, reviews list
+- Translated all English text in product detail page to Arabic (18 strings)
+- Translated English text in checkout modal to Arabic (4 strings)
+- Changed "DA" to "دج" (دينار جزائري) in product detail
+- TypeScript check: 0 errors
+- All 14 main routes compile and return HTTP 200:
+  /, /products, /rentals, /services, /marketplace, /artisans, /disputes,
+  /insurance, /trust-score, /verification, /vendors, /wallet, /faq, /blog
+
+Stage Summary:
+- Phase 0: Mock API + Seed Data ✅ (10 dedicated routes + catch-all, 1224 lines of mock data)
+- Phase 1: Homepage Rebuild ✅ (7 sections, 3-in-1 showcase)
+- Phase 2: Navbar + Footer ✅ (3 dropdown sections, 5-column footer)
+- Phase 3: Component Connection ✅ (Reviews, Recommendations, AI Dispute, BaridiMob)
+- Phase 4: Bug Fixes ✅ (Hydration fix, English→Arabic translation, API method fixes)
+- Phase 5: Landing Pages ✅ (/rentals, /services, /marketplace)
+- All changes tested: TypeScript clean, 14/14 routes compile successfully
