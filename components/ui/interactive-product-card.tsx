@@ -39,10 +39,14 @@ export const InteractiveProductCard = ({
     const [isHovered, setIsHovered] = useState(false);
     const router = useRouter();
 
+    const PLACEHOLDER = 'https://picsum.photos/seed/standard-placeholder/600/800';
     const primaryImage = product.primary_image ||
-        product.images?.find((img) => img.is_primary)?.image ||
+        product.images?.find((img: any) => img.is_primary || img.is_main)?.image ||
+        product.images?.find((img: any) => img.is_primary || img.is_main)?.url ||
         product.images?.[0]?.image ||
-        'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=800&q=80&auto=format&fit=crop';
+        product.images?.[0]?.url ||
+        product.image ||
+        PLACEHOLDER;
 
     const id = product.id;
     const name = product.name_ar;

@@ -17,8 +17,9 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, priority = false }: ProductCardProps) {
+  const PLACEHOLDER = 'https://picsum.photos/seed/standard-placeholder/600/800';
   const isElite = product.is_premium || (product.trust_score && product.trust_score > 90);
-  const primaryImage = product.primary_image || (product.images && product.images[0]?.image) || product.image || '';
+  const primaryImage = product.primary_image || product.images?.[0]?.image || product.images?.[0]?.url || product.image || PLACEHOLDER;
 
   return (
     <SovereignGlow color={isElite ? 'gold' : 'blue'}>
@@ -34,7 +35,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
             <Link href={`/products/${product.id || product.slug}`} className="block relative aspect-[3/4] overflow-hidden">
                 <Image
                     src={primaryImage}
-                    alt={product.name_ar || ''}
+                    alt={product.name_ar || 'صورة المنتج'}
                     fill
                     className="object-cover transition-transform duration-1000 group-hover:scale-110"
                     priority={priority}

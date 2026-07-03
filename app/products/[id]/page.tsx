@@ -126,8 +126,16 @@ export default function ProductDetailsPage() {
   const trustScore = depositData?.trust_score ?? user?.trust_score ?? 0;
   const isSovereign = depositData ? !depositData.deposit_required : (trustScore >= 80);
   const isVerified = depositData?.is_verified ?? user?.is_verified ?? false;
-  const primaryImage = product.images?.find((img: any) => img.is_primary)?.image || product.images?.[0]?.image || product.image || '';
-  const lightboxImages = product.images?.map((img: any) => ({ src: img.image })) || [{ src: primaryImage }];
+  const PLACEHOLDER = 'https://picsum.photos/seed/standard-placeholder/600/800';
+  const primaryImage = product.images?.find((img: any) => img.is_primary || img.is_main)?.image
+    || product.images?.find((img: any) => img.is_primary || img.is_main)?.url
+    || product.images?.[0]?.image
+    || product.images?.[0]?.url
+    || product.image
+    || product.primary_image
+    || PLACEHOLDER;
+  const safeImage = primaryImage || PLACEHOLDER;
+  const lightboxImages = product.images?.map((img: any) => ({ src: img.image || img.url || PLACEHOLDER })) || [{ src: safeImage }];
 
   return (
     <div className="relative min-h-screen pb-20 bg-background overflow-hidden text-right" dir="rtl">
@@ -155,7 +163,7 @@ export default function ProductDetailsPage() {
                 className="aspect-[3/4] rounded-[4rem] overflow-hidden bg-white/5 border border-white/10 shadow-3xl shadow-sovereign-gold/10 relative group cursor-zoom-in"
                 onClick={() => setLightboxOpen(true)}
               >
-                <Image src={primaryImage} alt={product.name_ar} fill className="object-cover transition-transform duration-1000 group-hover:scale-110" priority />
+                <Image src={safeImage} alt={product.name_ar || 'صورة المنتج'} fill className="object-cover transition-transform duration-1000 group-hover:scale-110" priority />
                 
                 {/* Elite Overlay */}
                 <div className="absolute top-10 right-10">
