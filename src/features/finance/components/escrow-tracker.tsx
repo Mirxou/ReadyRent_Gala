@@ -14,7 +14,7 @@ import {
   Coins,
   History
 } from 'lucide-react';
-import { cn, formatNumber, formatNumber } from '@/lib/utils';
+import { cn, formatNumber } from '@/lib/utils';
 import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
 
 /**

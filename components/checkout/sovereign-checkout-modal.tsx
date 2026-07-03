@@ -4,7 +4,7 @@ import * as React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { ShieldCheck, Calendar, Wallet, PenTool, CheckCircle2, AlertTriangle, ArrowRight, Loader2, Sparkles, Lock } from 'lucide-react';
-import { cn, formatNumber, formatNumber } from '@/lib/utils';
+import { cn, formatNumber } from '@/lib/utils';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SovereignButton } from '@/components/sovereign/sovereign-button';

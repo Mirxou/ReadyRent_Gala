@@ -13,7 +13,7 @@ import {
 } from 'recharts';
 import { BrainCircuit, TrendingUp, AlertTriangle, Droplets, Sparkles, Quote } from 'lucide-react';
 import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
-import { cn, formatNumber, formatNumber } from '@/lib/utils';
+import { cn, formatNumber } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 
 /**

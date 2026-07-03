@@ -16,7 +16,7 @@ import {
   ArrowUpRight
 } from 'lucide-react';
 import { api } from '@/lib/api';
-import { cn, formatNumber, formatNumber } from '@/lib/utils';
+import { cn, formatNumber } from '@/lib/utils';
 import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
 import { SovereignSeal } from '@/shared/components/sovereign/sovereign-seal';
 import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';

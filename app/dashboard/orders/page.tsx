@@ -23,7 +23,7 @@ import { Separator } from '@/components/ui/separator';
 import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
 import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
 import Link from 'next/link';
-import { cn, formatNumber, formatNumber } from '@/lib/utils';
+import { cn, formatNumber } from '@/lib/utils';
 
 // Mock Data
 const orders = [

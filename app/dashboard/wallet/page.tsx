@@ -21,7 +21,7 @@ import { SovereignButton } from '@/shared/components/sovereign/sovereign-button'
 import { SovereignSparkle, SovereignGlow } from '@/shared/components/sovereign/sovereign-sparkle';
 import { IdentityShield } from '@/shared/components/sovereign/identity-shield';
 import { Badge } from '@/components/ui/badge';
-import { cn, formatNumber, formatNumber } from '@/lib/utils';
+import { cn, formatNumber } from '@/lib/utils';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 

@@ -30,7 +30,7 @@ import { SovereignButton } from '@/shared/components/sovereign/sovereign-button'
 import { SovereignSparkle, SovereignGlow } from '@/shared/components/sovereign/sovereign-sparkle';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
-import { cn, formatNumber, formatNumber } from '@/lib/utils';
+import { cn, formatNumber } from '@/lib/utils';
 
 import { useQuery } from '@tanstack/react-query';
 import { bookingsApi, authApi } from '@/lib/api';
