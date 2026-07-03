@@ -95,7 +95,7 @@ export default function ReportsPage() {
                         </div>
                         <div className="space-y-1">
                             <h1 className="text-6xl font-black italic tracking-tighter leading-none">فضاء <span className="text-sovereign-gold">الاستخبارات</span></h1>
-                            <p className="text-[10px] font-black uppercase tracking-[0.5em] text-white/20">Sovereign Intelligence Unit / V.11</p>
+                            <p className="text-[10px] font-black uppercase tracking-[0.5em] text-white/20">وحدة الاستخبارات السيادية / الإصدار ١١</p>
                         </div>
                     </div>
                 </div>
@@ -105,7 +105,7 @@ export default function ReportsPage() {
                         الأرشيف السيادي <Search className="mr-3 w-4 h-4 opacity-40" />
                     </SovereignButton>
                     <SovereignButton variant="primary" size="lg" className="px-10 h-14 shadow-2xl rounded-full" withShimmer>
-                        توليد تقرير (Protocol) <Sparkles className="mr-3 w-4 h-4" />
+                        توليد تقرير (البروتوكول) <Sparkles className="mr-3 w-4 h-4" />
                     </SovereignButton>
                 </div>
             </div>
@@ -146,7 +146,7 @@ export default function ReportsPage() {
                         <div className="flex items-center gap-3 p-4 bg-white/[0.02] rounded-2xl border border-white/5">
                             <BrainCircuit className="w-5 h-5 text-sovereign-gold" />
                             <p className="text-[9px] text-white/30 leading-relaxed font-black uppercase tracking-widest italic">
-                                Verified by Oracle Core V.10
+                                تم التحقق بواسطة المحرك الأساسي الإصدار ١٠
                             </p>
                         </div>
                     </GlassPanel>
@@ -162,7 +162,7 @@ export default function ReportsPage() {
                             <div className="flex flex-col md:flex-row justify-between items-start gap-16 relative z-10">
                                 <div className="space-y-8 max-w-3xl">
                                     <Badge className="bg-sovereign-obsidian text-sovereign-gold border-sovereign-gold/30 px-6 py-2.5 text-[10px] font-black tracking-[0.4em] uppercase rounded-full">
-                                        Executive Briefing 26-Q1 / DZ
+                                        ملخص تنفيذي ٢٦-الربع الأول / الجزائر
                                     </Badge>
                                     <h2 className="text-6xl lg:text-7xl font-black italic tracking-tighter leading-[0.85] text-white/95">
                                         {report?.title || "آفاق الاقتصاد السيادي: النمو غير العضوي"}: <span className="text-sovereign-gold">النمو غير العضوي</span> في سوق الأصول الجزائري.
@@ -170,11 +170,11 @@ export default function ReportsPage() {
                                     <div className="flex items-center gap-8 pt-4">
                                         <div className="flex items-center gap-3">
                                             <ShieldCheck className="w-5 h-5 text-emerald-500" />
-                                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/30">Protocol: STANDARD CORE</span>
+                                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/30">البروتوكول: ستاندرد الأساسي</span>
                                         </div>
                                         <div className="flex items-center gap-3">
                                             <Globe2 className="w-5 h-5 text-sovereign-gold" />
-                                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/30">Region: ALGERIA_CENTRAL</span>
+                                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/30">المنطقة: وسط الجزائر</span>
                                         </div>
                                     </div>
                                 </div>
@@ -232,7 +232,7 @@ export default function ReportsPage() {
                                         <h3 className="text-xs font-black uppercase tracking-[0.5em] text-sovereign-gold italic leading-none">2.0 تحليل السيولة الجهوي</h3>
                                         <h4 className="text-3xl font-black italic tracking-tighter">تركز الثقة في الولايات الرئيسية</h4>
                                     </div>
-                                    <Badge className="bg-white/5 text-white/30 border-white/10 px-6 py-2 rounded-full text-[9px] font-black tracking-widest italic">GEOSPATIAL PULSE</Badge>
+                                    <Badge className="bg-white/5 text-white/30 border-white/10 px-6 py-2 rounded-full text-[9px] font-black tracking-widest italic">نبض جغرافي مكاني</Badge>
                                 </div>
 
                                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
@@ -277,8 +277,8 @@ export default function ReportsPage() {
                                                 <motion.div initial={{ width: 0 }} animate={{ width: '85%' }} className="h-full bg-sovereign-gold" />
                                             </div>
                                             <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-white/20">
-                                                <span>Alger Hub Accuracy</span>
-                                                <span className="text-sovereign-gold">High Density</span>
+                                                <span>دقة مركز الجزائر</span>
+                                                <span className="text-sovereign-gold">كثافة عالية</span>
                                             </div>
                                         </div>
                                     </div>
@@ -309,11 +309,11 @@ export default function ReportsPage() {
 
                          {/* McKinsey Style Footer (Watermarked) */}
                          <div className="p-12 border-t border-white/5 bg-white/[0.02] flex flex-col md:flex-row justify-between items-center gap-10">
-                             <div className="text-[10px] font-black text-white/10 uppercase tracking-[0.5em] italic">Confidential | Standard Sovereign Intelligence Hub</div>
+                             <div className="text-[10px] font-black text-white/10 uppercase tracking-[0.5em] italic">سري | مركز استخبارات ستاندرد</div>
                              <div className="flex gap-12 text-[9px] font-black text-white/30 uppercase tracking-[0.3em] italic">
                                  <span className="flex items-center gap-2"><BarChart3 className="w-3 h-3" /> Report ID: RR-DZ-Q1-2026</span>
-                                 <span>Security: Forensic Level 4</span>
-                                 <span className="text-white/60">Page: 01 / 24</span>
+                                 <span>الأمان: مستوى الطب الشرعي ٤</span>
+                                 <span className="text-white/60">الصفحة: ٠١ / ٢٤</span>
                              </div>
                          </div>
                     </GlassPanel>

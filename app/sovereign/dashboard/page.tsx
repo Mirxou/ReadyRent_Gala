@@ -116,15 +116,15 @@ export default function SovereignDashboard() {
                 <div className="flex items-center gap-3">
                     <SovereignSparkle active={true}>
                         <Badge className="bg-sovereign-gold/10 text-sovereign-gold border-sovereign-gold/30 rounded-full py-1 px-4 text-[10px] uppercase font-black tracking-widest">
-                            Active Operational Eye
+                            العين التشغيلية النشطة
                         </Badge>
                     </SovereignSparkle>
                     <div className="flex gap-2 items-center text-green-500 font-bold text-xs uppercase tracking-tighter">
-                        <Activity className="w-4 h-4 animate-pulse" /> Live Integrity Syncing
+                        <Activity className="w-4 h-4 animate-pulse" /> مزامنة النزاهة المباشرة
                     </div>
                 </div>
                 <h1 className="text-6xl font-black italic tracking-tighter">توازن <span className="text-sovereign-gold">السيادة.</span></h1>
-                <p className="text-muted-foreground text-xl font-light italic">"مرصد الحقيقة الفوري لنظام ReadyRent.Gala — حيث تلتقي الشفافية بالسيادة."</p>
+                <p className="text-muted-foreground text-xl font-light italic">"مرصد الحقيقة الفوري لنظام STANDARD.Rent — حيث تلتقي الشفافية بالسيادة."</p>
             </div>
 
             <GlassPanel className="p-8 flex items-center gap-6 rounded-3xl" gradientBorder>
@@ -144,7 +144,7 @@ export default function SovereignDashboard() {
                 { label: 'الخلافات النشطة', value: stats?.active_disputes, icon: ShieldAlert, color: 'gold' },
                 { label: 'القيمة المؤمنة المطلقة', value: `${formatNumber(stats?.total_value_locked ?? 0)} د.ج`, icon: Lock, color: 'gold' },
                 { label: 'جاهزية الإطلاق السيادي', value: `${stats?.readiness_gate}%`, icon: TrendingUp, color: 'gold' },
-                { label: 'سجلات الأدلة (Vault)', value: '1.4k+', icon: Database, color: 'gold' },
+                { label: 'سجلات الأدلة (الخزنة)', value: '1.4k+', icon: Database, color: 'gold' },
             ].map((m, i) => (
                 <GlassPanel key={i} className="p-10 space-y-6 group hover:translate-y-[-5px] transition-all rounded-[2.5rem]">
                     <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-white group-hover:text-sovereign-gold transition-colors">
@@ -184,7 +184,7 @@ export default function SovereignDashboard() {
                     <div className="space-y-6">
                         <div className="p-6 bg-red-900/10 border border-red-900/20 rounded-2xl space-y-3" role="alert" aria-live="assertive">
                             <div className="flex justify-between items-center">
-                                <span className="text-red-500 text-[10px] font-black uppercase tracking-widest">High Risk</span>
+                                <span className="text-red-500 text-[10px] font-black uppercase tracking-widest">مرتفع المخاطر</span>
                                 <ShieldAlert className="w-4 h-4 text-red-500" aria-hidden="true" />
                             </div>
                             <p className="text-sm font-light italic leading-relaxed text-red-100">"تم قفل معاملة مشبوهة بمحفظة #WALT-029: خرق السلوكية المالية."</p>

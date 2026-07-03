@@ -62,7 +62,7 @@ export default function StandardizeAssetPage() {
       <header className="flex flex-col md:flex-row justify-between items-end gap-8 mb-12">
         <div className="space-y-3">
           <Badge variant="outline" className="border-sovereign-gold/30 text-sovereign-gold px-6 py-2 text-[10px] font-black uppercase tracking-[0.3em] bg-sovereign-gold/5">
-             Asset Standardization Protocol V.2
+             بروتوكول توحيد الأصول الإصدار ٢
           </Badge>
           <h1 className="text-5xl font-black italic tracking-tighter text-foreground">معيرة <span className="text-sovereign-gold">الأصل</span> السيادي<span className="text-sovereign-gold">.</span></h1>
           <p className="text-muted-foreground font-light text-xl italic opacity-80">نحول مقتنياتك إلى أصول "نخبوية" معتمدة في النظام البيئي.</p>
@@ -132,11 +132,11 @@ export default function StandardizeAssetPage() {
                          {step === 0 && (
                             <div className="space-y-8">
                                <div className="space-y-4">
-                                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">اسم الأصل السيادي (Name)</label>
+                                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">اسم الأصل السيادي (الاسم)</label>
                                   <Input placeholder="مثال: فستان قسنطيني ملكي - مجموعة 2026" className="h-16 rounded-2xl bg-white/5 border-white/5 text-xl font-black italic pr-6" />
                                </div>
                                <div className="space-y-4">
-                                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">التصنيف (Hierarchy)</label>
+                                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">التصنيف (الهرمية)</label>
                                   <div className="flex flex-wrap gap-3">
                                      {['فساتين نادرة', 'سيارات فارهة', 'معدات إنتاج', 'أصول عقارية'].map(c => (
                                        <button key={c} className="px-6 py-3 rounded-xl border border-white/5 bg-white/5 hover:border-sovereign-gold/40 transition-all font-black text-xs uppercase italic">{c}</button>
@@ -150,11 +150,11 @@ export default function StandardizeAssetPage() {
                             <div className="grid grid-cols-2 gap-6 h-64">
                                <div className="border-2 border-dashed border-white/10 rounded-3xl flex flex-col items-center justify-center gap-4 hover:border-sovereign-gold/40 transition-all group cursor-pointer">
                                   <Camera className="w-12 h-12 text-muted-foreground group-hover:text-sovereign-gold" />
-                                  <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">صورة الصدر (Portrait)</p>
+                                  <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">صورة الصدر (صورة شخصية)</p>
                                </div>
                                <div className="border-2 border-dashed border-white/10 rounded-3xl flex flex-col items-center justify-center gap-4 group cursor-pointer">
                                   <Layers className="w-12 h-12 text-muted-foreground group-hover:text-sovereign-gold" />
-                                  <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">التفاصيل (Macro View)</p>
+                                  <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">التفاصيل (عرض شامل)</p>
                                </div>
                             </div>
                          )}
@@ -163,7 +163,7 @@ export default function StandardizeAssetPage() {
                             <div className="space-y-12">
                                <div className="p-8 bg-sovereign-gold/5 rounded-3xl border border-sovereign-gold/10">
                                    <p className="text-sm font-black italic text-sovereign-gold mb-2">القيمة المقترحة من الـ Oracle</p>
-                                   <p className="text-4xl font-black">15,000 - 18,000 <span className="text-sm">DA / Day</span></p>
+                                   <p className="text-4xl font-black">15,000 - 18,000 <span className="text-sm">دج / يوم</span></p>
                                </div>
                                <div className="grid grid-cols-2 gap-8">
                                   <div className="space-y-4">
@@ -171,7 +171,7 @@ export default function StandardizeAssetPage() {
                                      <Input placeholder="0,00" className="h-16 rounded-2xl bg-white/5 border-white/5 text-2xl font-black" />
                                   </div>
                                   <div className="space-y-4">
-                                     <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">مبلغ الضمان الإجباري (Escrow)</label>
+                                     <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">مبلغ الضمان الإجباري (الضمان)</label>
                                      <Input placeholder="0,00" value="45,000" disabled className="h-16 rounded-2xl bg-white/5 border-white/5 text-2xl font-black opacity-40" />
                                   </div>
                                </div>
@@ -202,7 +202,7 @@ export default function StandardizeAssetPage() {
                       </div>
                    </SovereignSparkle>
                    <div className="space-y-3">
-                      <h3 className="text-3xl font-black italic uppercase tracking-tighter">جاري التدقيق السيادي (Auditing...)</h3>
+                      <h3 className="text-3xl font-black italic uppercase tracking-tighter">جاري التدقيق السيادي (جارٍ التدقيق...)</h3>
                       <p className="text-muted-foreground italic text-lg opacity-60">يتم الآن فحص البصمة البصرية، تقييم القيمة السوقية، واختبار "سلامة الثقة".</p>
                    </div>
                 </motion.div>
@@ -226,7 +226,7 @@ export default function StandardizeAssetPage() {
                       <div className="space-y-4">
                          <h3 className="text-5xl font-black italic tracking-tighter text-foreground">تمت المعيرة بنجاح!</h3>
                          <p className="text-xl text-muted-foreground max-w-lg mx-auto leading-relaxed italic">
-                            أصلك الآن يحمل شارة **Sovereign Grade A**. تم إدراجه في سجل الأرشيف وهو جاهز لتوليد القيمة.
+                            أصلك الآن يحمل شارة **درجة ستاندرد أ**. تم إدراجه في سجل الأرشيف وهو جاهز لتوليد القيمة.
                          </p>
                       </div>
 

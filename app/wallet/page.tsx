@@ -146,7 +146,7 @@ export default function SovereignWallet() {
                                     <span className="text-sm font-bold uppercase tracking-widest text-sovereign-gold">مستخدم_سيادي_01</span>
                                 </div>
                                 <div className="text-right">
-                                    <span className="text-[8px] font-black uppercase text-white/40 block mb-1">Status</span>
+                                    <span className="text-[8px] font-black uppercase text-white/40 block mb-1">الحالة</span>
                                     <span className="text-xs font-black text-emerald-500 uppercase tracking-widest">سلامة نشطة</span>
                                 </div>
                             </div>

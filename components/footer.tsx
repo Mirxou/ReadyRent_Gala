@@ -103,6 +103,8 @@ export function Footer() {
                 { label: 'عن ستاندرد', href: '/about' },
                 { label: 'الأسئلة الشائعة', href: '/faq' },
                 { label: 'المرتجعات', href: '/returns' },
+                { label: 'التحقق', href: '/verification' },
+                { label: 'المحفظة', href: '/wallet' },
               ].map((item) => (
                 <li key={item.href}>
                   <Link href={item.href} className="text-lg font-medium text-muted-foreground/60 hover:text-foreground dark:hover:text-white transition-colors">

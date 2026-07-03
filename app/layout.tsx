@@ -49,6 +49,8 @@ export const viewport: Viewport = {
 import { SovereignProvider } from "@/contexts/SovereignContext";
 import { SystemHaltBanner } from "@/shared/components/sovereign/system-halt-banner";
 import { SovereignConcierge } from "@/shared/components/sovereign/sovereign-concierge";
+import { RealtimeNotifications } from "@/components/notifications/realtime-notifications";
+import { WhatsAppButton } from "@/components/whatsapp-button";
 
 export default function RootLayout({
   children,
@@ -86,7 +88,9 @@ export default function RootLayout({
             </div>
             <Toaster />
             <SovereignConcierge />
+            <RealtimeNotifications />
           </Providers>
+          <WhatsAppButton variant="floating" />
         </SovereignProvider>
       </body>
     </html>

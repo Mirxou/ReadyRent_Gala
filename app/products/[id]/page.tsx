@@ -8,7 +8,6 @@ import { useAuthStore } from '@/lib/store';
 import { 
   ShieldCheck, 
   Star, 
-  Share2, 
   MapPin, 
   Sparkles, 
   LockKeyhole, 
@@ -41,6 +40,9 @@ import { ProductHeartbeat } from '@/features/analytics/components/product-heartb
 import { ReviewList } from '@/components/reviews/review-list';
 import { ReviewForm } from '@/components/reviews/review-form';
 import { ProductRecommendations } from '@/components/product-recommendations';
+import { LiveViewerCount } from '@/components/product/LiveViewerCount';
+import { WaitlistButton } from '@/components/waitlist-button';
+import { ShareButton } from '@/components/share-button';
 
 export default function ProductDetailsPage() {
   const { id: slug } = useParams();
@@ -206,20 +208,21 @@ export default function ProductDetailsPage() {
                 <Badge variant="outline" className="border-sovereign-gold/30 text-sovereign-gold px-6 py-2 text-[10px] font-black uppercase tracking-[0.3em] bg-sovereign-gold/5">
                   التصنيف: {product.category?.name_ar || 'فاخر'}
                 </Badge>
-                <ShareButton title={product.name_ar} />
+                <ShareButton title={product.name_ar} description='اكتشفي هذا الأصل الفاخر على منصة ستاندرد' variant="ghost" size="icon" />
               </div>
 
               <h1 className="text-7xl font-black text-foreground tracking-tighter leading-tight italic">
                 {product.name_ar}<span className="text-sovereign-gold">.</span>
               </h1>
 
-              <div className="flex items-center gap-8">
+              <div className="flex items-center gap-8 flex-wrap">
                 <div className="flex items-center gap-2 text-sovereign-gold">
                   <Star className="w-6 h-6 fill-current animate-pulse" />
                   <span className="text-2xl font-black font-mono">{Number(product.rating || 5).toFixed(1)}</span>
                 </div>
                 <div className="h-2 w-2 rounded-full bg-white/20" />
                 <span className="text-xs text-muted-foreground font-black uppercase tracking-[0.3em]">{product.total_bookings || 0} حجز ناجح</span>
+                <LiveViewerCount productId={product.id} />
               </div>
             </div>
 
@@ -237,9 +240,12 @@ export default function ProductDetailsPage() {
                           {formatNumber(product.price_per_day)} <span className="text-xl font-normal text-muted-foreground">دج</span>
                         </p>
                       </div>
-                      <SovereignButton variant="primary" size="xl" className="px-16 h-20 shadow-2xl rounded-2xl text-xl" onClick={handleReserve} withShimmer>
-                        إبرام الميثاق
-                      </SovereignButton>
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                        <SovereignButton variant="primary" size="xl" className="px-16 h-20 shadow-2xl rounded-2xl text-xl" onClick={handleReserve} withShimmer>
+                          إبرام الميثاق
+                        </SovereignButton>
+                        <WaitlistButton productId={product.id} />
+                      </div>
                     </div>
                 </div>
 
@@ -402,24 +408,4 @@ export default function ProductDetailsPage() {
   );
 }
 
-function ShareButton({ title }: { title?: string }) {
-  const handleShare = async () => {
-    if (typeof navigator !== 'undefined' && navigator.share) {
-      try {
-        await navigator.share({
-          title: `ستاندرد: ${title}`,
-          text: `اكتشف هذا الأصل الفاخر على منصة ستاندرد`,
-          url: window.location.href,
-        });
-      } catch (err) { /* Share failed */ }
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      toast.success('تم نسخ الرابط');
-    }
-  };
-  return (
-    <button onClick={handleShare} className="p-4 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-muted-foreground hover:text-sovereign-gold shadow-xl">
-      <Share2 className="w-6 h-6" />
-    </button>
-  );
-}
+

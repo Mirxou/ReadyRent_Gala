@@ -52,7 +52,7 @@ export function SovereignLedger() {
        verdict: 'settled',
        penalty_amount: 5000,
        description_ar: 'نزاع حول تلف طفيف في منطقة التطريز. حكمت المحكمة السيادية بتغطية جزئية من التأمين الخاص بالمنصة.',
-       resolved_at: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString()
+       resolved_at: '2025-06-15T14:30:00Z'
     },
     {
        id: 985,
@@ -60,7 +60,7 @@ export function SovereignLedger() {
        verdict: 'resolved',
        penalty_amount: 1200,
        description_ar: 'تأخير في تسليم القطعة لمدة 12 ساعة. تم فرض رسوم تأخير رمزية وفق الشروط التعاقدية.',
-       resolved_at: new Date(Date.now() - 1000 * 60 * 60 * 72).toISOString()
+       resolved_at: '2025-06-12T08:00:00Z'
     }
   ];
 

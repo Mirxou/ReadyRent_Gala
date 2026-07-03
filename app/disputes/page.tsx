@@ -15,7 +15,9 @@ export default function DisputesPage() {
     <div className="relative min-h-screen bg-gradient-to-b from-slate-950 to-slate-900 text-white" dir="rtl">
       {/* Ambient glow */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <SovereignGlow className="top-0 left-1/2 -translate-x-1/2 w-[700px] h-[700px] opacity-20" />
+        <SovereignGlow color="purple" intensity="high" className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[700px] opacity-20">
+          <div />
+        </SovereignGlow>
       </div>
 
       <div className="container mx-auto px-4 py-12 relative z-10 max-w-5xl">
@@ -80,7 +82,11 @@ export default function DisputesPage() {
         >
           <GlassPanel className="p-10 md:p-14 text-center relative overflow-hidden">
             {/* Decorative sparkle */}
-            <SovereignSparkle className="absolute top-4 right-4 w-20 h-20 opacity-30" />
+            <div className="absolute top-4 right-4 w-20 h-20 opacity-30">
+              <SovereignSparkle>
+                <Sparkles className="w-8 h-8 text-gala-gold/40" />
+              </SovereignSparkle>
+            </div>
 
             <motion.div
               initial={{ scale: 0 }}

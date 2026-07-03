@@ -178,7 +178,7 @@ export default function JudicialLedgerPage() {
         {/* Trust footer */}
         <div className="mt-12 flex flex-col items-center gap-2 text-slate-400 text-xs">
           <Shield className="w-5 h-5" />
-          <p>جميع الأحكام مجهولة الهوية ومحمية بتقنية BLAKE2b Hash Chaining</p>
+          <p>جميع الأحكام مجهولة الهوية ومحمية بتقنية تسلسل تجزئة BLAKE2b</p>
           <p>STANDARD.Rent النظام القضائي — نظام قضائي مستقل وشفاف</p>
         </div>
       </div>

@@ -28,17 +28,28 @@ export function SovereignSparkle({ children, active = true }: { children: React.
   const [particles, setParticles] = useState<Particle[]>([]);
 
   useEffect(() => {
-    if (!active) return;
+    if (!active) {
+      setParticles([]);
+      return;
+    }
+    // Generate deterministic particles based on index to avoid hydration mismatch
+    // while satisfying React 19 purity rules
+    const seed = active ? 42 : 0;
+    const pseudoRandom = (index: number) => {
+      const x = Math.sin(seed + index * 9301 + 49297) * 49297;
+      return x - Math.floor(x);
+    };
     const newParticles: Particle[] = Array.from({ length: 12 }).map((_, i) => ({
       id: i,
-      x: Math.random() * 120 - 60,
-      y: Math.random() * 120 - 60,
-      size: Math.random() * 3 + 1,
-      duration: Math.random() * 4 + 2,
-      delay: Math.random() * 3,
-      color: Math.random() > 0.4 ? '#C5A059' : '#FFFFFF'
+      x: pseudoRandom(i) * 120 - 60,
+      y: pseudoRandom(i + 12) * 120 - 60,
+      size: pseudoRandom(i + 24) * 3 + 1,
+      duration: pseudoRandom(i + 36) * 4 + 2,
+      delay: pseudoRandom(i + 48) * 3,
+      color: pseudoRandom(i + 60) > 0.4 ? '#C5A059' : '#FFFFFF'
     }));
     setParticles(newParticles);
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   }, [active]);
 
   return (

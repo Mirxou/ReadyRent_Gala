@@ -243,7 +243,7 @@ export default function ArtisanDetailPage() {
                 <div className="flex items-center gap-3">
                   <Phone className="h-5 w-5 text-muted-foreground" />
                   <div>
-                    <p className="text-sm text-muted-foreground">WhatsApp</p>
+                    <p className="text-sm text-muted-foreground">واتساب</p>
                     <a
                       href={`https://wa.me/${artisan.whatsapp.replace(/[^0-9]/g, '')}`}
                       target="_blank"
@@ -307,7 +307,7 @@ export default function ArtisanDetailPage() {
                       rel="noopener noreferrer"
                     >
                       <Phone className="h-4 w-4 ml-2" />
-                      WhatsApp
+                      واتساب
                     </a>
                   </Button>
                 )}
@@ -351,7 +351,7 @@ export default function ArtisanDetailPage() {
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">التقييم</span>
                   <span className="font-semibold">
-                    {artisan.rating ? Number(artisan.rating).toFixed(1) : 'N/A'}
+                    {artisan.rating ? Number(artisan.rating).toFixed(1) : '—'}
                   </span>
                 </div>
                 <div className="flex justify-between">

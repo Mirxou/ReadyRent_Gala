@@ -144,7 +144,7 @@ export default function DashboardPage() {
 
         <p className="text-muted-foreground flex items-center gap-2 text-sm mt-2">
           <Badge className="bg-sovereign-gold/10 text-sovereign-gold border-0">VIP</Badge>
-          الهوية السيادية: {isSovereign ? "مفعلة (Elite)" : "قيد البناء"}
+          الهوية السيادية: {isSovereign ? "مفعلة (متميز)" : "قيد البناء"}
         </p>
       </div>
 

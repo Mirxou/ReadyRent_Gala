@@ -95,9 +95,9 @@ export default function DashboardLayout({
                     <footer className="mt-[120px] pb-10 flex border-t border-white/5 pt-10 px-4 justify-between items-center opacity-20 hover:opacity-40 transition-opacity duration-1000">
                         <div className="flex items-center gap-4">
                             <Sparkles className="w-4 h-4" />
-                            <span className="text-[10px] font-black uppercase tracking-[0.4em] italic">Standard Sovereign Ecosystem</span>
+                            <span className="text-[10px] font-black uppercase tracking-[0.4em] italic">نظام ستاندرد البيئي</span>
                         </div>
-                        <span className="text-[8px] font-black uppercase tracking-widest italic">All Operations Logged & Verified</span>
+                        <span className="text-[8px] font-black uppercase tracking-widest italic">جميع العمليات مسجّلة ومتحقّق منها</span>
                     </footer>
                 </main>
             </div>
