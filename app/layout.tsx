@@ -6,6 +6,7 @@ import { Footer } from "@/components/footer";
 import Analytics from "@/lib/analytics";
 import { GrainOverlay } from "@/components/ui/grain-overlay";
 import { PageTransition } from "@/components/ui/page-transition";
+import { ClientErrorBoundary } from "@/components/client-error-boundary";
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3001"),
@@ -79,9 +80,11 @@ export default function RootLayout({
             <div className="flex min-h-screen flex-col">
               <Navbar />
               <main className="flex-1">
-                <PageTransition>
-                  {children}
-                </PageTransition>
+                <ClientErrorBoundary>
+                  <PageTransition>
+                    {children}
+                  </PageTransition>
+                </ClientErrorBoundary>
               </main>
               <Footer />
             </div>

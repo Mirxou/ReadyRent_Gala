@@ -12,10 +12,12 @@ import { BankCardForm } from '@/components/payment/bank-card-form';
 import { paymentsApi, bookingsApi } from '@/lib/api';
 import { useAuthStore } from '@/lib/store';
 import { toast } from 'sonner';
-import { ArrowLeft, CreditCard, Smartphone, Loader2 } from 'lucide-react';
+import { ArrowLeft, CreditCard, Smartphone, Loader2, MapPin } from 'lucide-react';
 import { ParticleField } from '@/components/ui/particle-field';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { WILAYAS } from '@/lib/dz-data';
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -25,6 +27,7 @@ export default function CheckoutPage() {
 
   const bookingId = searchParams.get('booking_id') ? parseInt(searchParams.get('booking_id')!) : null;
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
+  const [selectedWilaya, setSelectedWilaya] = useState<string>('');
   const [paymentCompleted, setPaymentCompleted] = useState(false);
 
   // Redirect if not authenticated
@@ -122,7 +125,33 @@ export default function CheckoutPage() {
           </h1>
 
           <div className="grid md:grid-cols-2 gap-6">
-            {/* Payment Methods Selection */}
+            {/* Wilaya Selection */}
+            <div className="md:col-span-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <MapPin className="h-5 w-5" />
+                    عنوان التوصيل
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Select value={selectedWilaya} onValueChange={setSelectedWilaya}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="اختر الولاية" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-64 overflow-y-auto">
+                      {WILAYAS.map((wilaya) => (
+                        <SelectItem key={wilaya.id} value={String(wilaya.id)}>
+                          {wilaya.id} - {wilaya.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </CardContent>
+              </Card>
+            </div>
+
+          {/* Payment Methods Selection */}
             {!selectedMethod && (
               <div className="md:col-span-2">
                 <Card>

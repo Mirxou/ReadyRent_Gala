@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { MapPin, Star, Phone, Mail, Instagram, Facebook, Palette } from 'lucide-react';
 import { MapLocation } from '@/components/map-location';
 import { RatingStars } from '@/components/reviews/rating-stars';
+import { VouchButton } from '@/shared/components/sovereign/vouch-button';
 import Lightbox from 'yet-another-react-lightbox';
 import 'yet-another-react-lightbox/styles.css';
 import Zoom from 'yet-another-react-lightbox/plugins/zoom';
@@ -126,6 +127,14 @@ export default function ArtisanDetailPage() {
               </CardContent>
             </Card>
           )}
+
+          {/* Vouch Button */}
+          <div className="flex justify-start">
+            <VouchButton
+              targetUserId={Number(artisanId)}
+              viewerRiskScore={10}
+            />
+          </div>
 
           {/* Portfolio */}
           {portfolioItems.length > 0 && (

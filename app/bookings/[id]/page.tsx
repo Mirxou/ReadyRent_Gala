@@ -2,27 +2,23 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { motion } from 'framer-motion';
+
 import { 
   ShieldCheck, 
   Calendar, 
-  Clock, 
-  CreditCard, 
-  Package, 
   ChevronLeft,
-  FileText,
-  Fingerprint,
   Lock,
   ArrowUpRight
 } from 'lucide-react';
 import { api } from '@/lib/api';
-import { cn, formatNumber } from '@/lib/utils';
+import { formatNumber } from '@/lib/utils';
 import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
 import { SovereignSeal } from '@/shared/components/sovereign/sovereign-seal';
 import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
-import { SovereignGlow } from '@/shared/components/sovereign/sovereign-sparkle';
 import { Badge } from '@/components/ui/badge';
 import { AgreementRecorder } from '@/components/AgreementRecorder';
+import { EscrowTracker } from '@/features/finance/components/escrow-tracker';
+import type { EscrowState } from '@/features/finance/components/escrow-tracker';
 
 interface BookingDetail {
     id: number;
@@ -73,13 +69,11 @@ export default function BookingDetailPage() {
         </div>
     );
 
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'HELD': return 'text-sovereign-gold';
-            case 'RELEASED': return 'text-emerald-400';
-            case 'REFUNDED': return 'text-red-400';
-            default: return 'text-white/60';
-        }
+    const escrowStateMap: Record<string, EscrowState> = {
+        INITIATED: 'pending',
+        HELD: 'held',
+        RELEASED: 'released',
+        REFUNDED: 'refunded',
     };
 
     return (
@@ -193,51 +187,12 @@ export default function BookingDetailPage() {
                             خزنة <span className="text-sovereign-gold">السيادة.</span>
                         </h2>
 
-                        <GlassPanel className="p-10 space-y-10 rounded-[3rem]" gradientBorder>
-                            <div className="space-y-6">
-                                <div className="flex items-center justify-between">
-                                    <span className="text-xs font-black uppercase text-white/40 tracking-widest">حالة الضمان (Escrow)</span>
-                                    <Lock className="w-4 h-4 text-sovereign-gold/40" />
-                                </div>
-
-                                <div className="text-center py-6 space-y-4">
-                                    <SovereignGlow color="gold" intensity="medium" className="inline-block p-1 rounded-full">
-                                        <div className="w-24 h-24 rounded-full bg-white/[0.02] border border-white/5 flex items-center justify-center">
-                                            <CreditCard className={cn("w-10 h-10 transition-colors duration-1000", getStatusColor(booking.escrow_status))} />
-                                        </div>
-                                    </SovereignGlow>
-                                    <div className="space-y-1">
-                                        <h4 className={cn("text-2xl font-black italic tracking-tighter uppercase", getStatusColor(booking.escrow_status))}>
-                                            {booking.escrow_status}
-                                        </h4>
-                                        <p className="text-[10px] text-white/30 uppercase tracking-[0.3em] font-black">ركن التحقق من الحساب المؤتمن</p>
-                                    </div>
-                                </div>
-
-                                <div className="space-y-4 pt-6 border-t border-white/5">
-                                    <div className="flex justify-between text-sm">
-                                        <span className="text-white/40 italic">تاريخ الحركة:</span>
-                                        <span className="font-bold">{new Date(booking.updated_at).toLocaleDateString('ar-DZ')}</span>
-                                    </div>
-                                    <div className="flex justify-between text-sm">
-                                        <span className="text-white/40 italic">الرقم المرجعي للخزنة:</span>
-                                        <span className="font-mono text-xs text-sovereign-gold opacity-60">
-                                            {booking.vault_address ? `${booking.vault_address.slice(0, 8)}...` : 'PENDING_ADDR'}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="p-6 bg-white/[0.02] rounded-2xl space-y-3 border border-white/5">
-                                <div className="flex items-center gap-2 mb-1">
-                                    <Fingerprint className="w-4 h-4 text-sovereign-gold" />
-                                    <span className="text-[10px] font-black uppercase text-white tracking-[0.2em]">إثبات قضائي</span>
-                                </div>
-                                <p className="text-xs text-white/40 font-light italic leading-relaxed">
-                                    يتم تأمين هذه المعاملة عبر بروتوكول الحصن الرقمي. لا يمكن تعديل بيانات الضمان المالي دون مصادقة ثنائية من المحكمة السيادية.
-                                </p>
-                            </div>
-                        </GlassPanel>
+                        <EscrowTracker
+                            state={escrowStateMap[booking.escrow_status] || 'pending'}
+                            amount={booking.total_price}
+                            currency="DA"
+                            updatedAt={new Date(booking.updated_at).toLocaleDateString('ar-DZ')}
+                        />
 
                         {/* Additional Sovereign Insight */}
                         <div className="p-8 bg-sovereign-gold/5 border border-sovereign-gold/10 rounded-[2.5rem] flex items-start gap-4">

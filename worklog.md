@@ -827,3 +827,54 @@ Stage Summary:
 - All dead code removed
 - All hardcoded Django backend references eliminated
 - Server tested: /, /products, /login, /dashboard, /cart, /judicial, /disputes, /returns, /wallet, /verification, /offline, /trust-score, /bookings/:id all return 200
+
+---
+Task ID: 2
+Agent: Wiring Agent
+Task: Wire orphaned components (EscrowTracker, JudicialLedger, VouchButton, ErrorBoundary, dz-data)
+
+Work Log:
+- Read all orphaned components and target pages to understand props and current structure
+- TASK 1: Replaced simple escrow status display in app/bookings/[id]/page.tsx with full EscrowTracker component. Added escrowStateMap (INITIATED→pending, HELD→held, RELEASED→released, REFUNDED→refunded). Cleaned up unused imports (CreditCard, Fingerprint, SovereignGlow, cn, motion, Clock, FileText, Package).
+- TASK 2: Replaced entire app/judicial/page.tsx with JudicialLedger component wrapped in sovereign-obsidian container. Removed old white-themed basic cards implementation.
+- TASK 3: Added VouchButton component after bio section in app/artisans/[id]/page.tsx with targetUserId=Number(artisanId) and viewerRiskScore=10.
+- TASK 4: Created components/client-error-boundary.tsx as 'use client' wrapper. Wrapped PageTransition in layout.tsx with ClientErrorBoundary.
+- TASK 5: Added wilaya selector (using WILAYAS from lib/dz-data.ts) to app/checkout/page.tsx as full-width card before payment methods section. Uses shadcn Select component with max-h-64 scrollable dropdown.
+- Ran `bun run lint` — all pre-existing errors remain; zero new lint issues introduced by changes.
+
+Stage Summary:
+- 5 orphaned components/features wired into the application
+- EscrowTracker now provides rich visual escrow state tracking on booking detail pages
+- JudicialLedger replaces basic judicial page with full sovereign-style transparency dashboard
+- VouchButton enables elite user vouching on artisan profiles
+- ErrorBoundary provides global error catching for the entire app via layout.tsx
+- Wilaya selector adds Algerian geographic address support to checkout flow
+- No existing functionality broken; all text remains in Arabic
+
+---
+Task ID: 8
+Agent: Dead Code & Asset Path Cleanup
+Task: Fix broken public/public/ nested directory, delete all dead code files, remove unused stores and npm packages
+
+Work Log:
+- TASK 1 — Fixed public/public/ nested directory:
+  - Copied all assets from public/public/ (icons, images/manifesto, videos, reports, SVGs) up to public/
+  - Fixed manifest.json icon paths from `/public/icons/...` to `/icons/...` (3 occurrences in icons array + 2 in shortcuts)
+  - Deleted entire public/public/ directory
+  - Verified app/layout.tsx OG image reference `/images/manifesto/frame1.png` resolves correctly after move
+- TASK 2 — Deleted 15 dead/unused files (verified zero consumers before each deletion):
+  - Components: dispute-form.tsx, dispute-card.tsx, booking-calendar.tsx, trust-chips.tsx, ui/progress.tsx
+  - SKIPPED components/product-card.tsx — verified it has 1 active consumer (components/product-recommendations.tsx)
+  - Hooks: useCreateCommunityProduct.ts
+  - Lib: push-notifications.ts, webrtc.ts, ab-testing.ts, conversion-funnel.ts, image-optimizer.ts, design-tokens.ts, lib/api/index.ts
+  - Misc: components/types.ts (only referenced in skills/ directory, not project source)
+  - Service worker: app/sw.ts (never registered, withSerwist() not in next.config.ts)
+- TASK 3 — Removed useCartStore from lib/store.ts (confirmed zero imports via codebase search)
+- TASK 4 — Removed 8 unused npm packages: axios, simple-peer, @types/simple-peer, @react-spring/web, dompurify, http-proxy-middleware, mini-svg-data-uri, @radix-ui/react-slider
+
+Stage Summary:
+- Fixed all broken asset paths caused by nested public/public/ directory
+- Removed 15 dead source files and 8 unused npm packages
+- Removed unused CartStore from Zustand store (kept AuthStore, NotificationStore, LanguageStore)
+- `bun run lint` shows 786 pre-existing issues, zero new errors from changes
+- NOTE: components/product-card.tsx was NOT deleted because components/product-recommendations.tsx imports it via `@/components/product-card`

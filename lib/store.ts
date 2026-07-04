@@ -62,32 +62,6 @@ export const useAuthStore = create<AuthState>()(
   )
 );
 
-// ... rest of the file (CartStore, NotificationStore, LanguageStore) ...
-
-interface CartItem {
-  id: number;
-  product: { id: number; name: string; price: number };
-  start_date: string;
-  end_date: string;
-  quantity: number;
-}
-
-interface CartState {
-  items: CartItem[];
-  addItem: (item: CartItem) => void;
-  removeItem: (id: number) => void;
-  clearCart: () => void;
-  getTotalItems: () => number;
-}
-
-export const useCartStore = create<CartState>((set, get) => ({
-  items: [],
-  addItem: (item) => set((state) => ({ items: [...state.items, item] })),
-  removeItem: (id) => set((state) => ({ items: state.items.filter((item) => item.id !== id) })),
-  clearCart: () => set({ items: [] }),
-  getTotalItems: () => get().items.length,
-}));
-
 interface Notification {
   id: number;
   type: string;
