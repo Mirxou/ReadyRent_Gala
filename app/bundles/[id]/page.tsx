@@ -1,7 +1,6 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { bundlesApi } from '@/lib/api';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -21,7 +20,7 @@ export default function BundleDetailPage() {
 
   const { data: bundle, isLoading } = useQuery({
     queryKey: ['bundle', bundleId],
-    queryFn: () => bundlesApi.getById(Number(bundleId)).then((res) => res.data),
+    queryFn: () => fetch(`/api/bundles/bundles?id=${bundleId}`).then(r => r.json()).then(d => { const arr = Array.isArray(d) ? d : (d.results || []); return arr.find((b: any) => String(b.id) === bundleId) || null; }),
     enabled: !!bundleId,
   });
 
@@ -39,15 +38,19 @@ export default function BundleDetailPage() {
 
     try {
       // Create bundle booking directly (bundles are booked as a whole)
-      await bundlesApi.createBooking({
-        bundle_id: bundle.id,
-        start_date: new Date().toISOString().split('T')[0], // Default to today
-        end_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Default to 7 days
-      });
+      await fetch('/api/bookings/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          bundle_id: bundle.id,
+          start_date: new Date().toISOString().split('T')[0], // Default to today
+          end_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Default to 7 days
+        }),
+      }).then(r => r.json());
       toast.success('تم إضافة الحزمة للسلة بنجاح');
       router.push('/cart');
     } catch (error: any) {
-      toast.error(error.response?.data?.error || 'حدث خطأ أثناء إضافة الحزمة');
+      toast.error(error?.message || 'حدث خطأ أثناء إضافة الحزمة');
     }
   };
 
@@ -224,4 +227,3 @@ export default function BundleDetailPage() {
     </div>
   );
 }
-

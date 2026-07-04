@@ -6,7 +6,6 @@ import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { artisansApi } from '@/lib/api';
 import { MapPin, Star, Phone, Mail, Instagram, Facebook, Palette } from 'lucide-react';
 import { MapLocation } from '@/components/map-location';
 import { RatingStars } from '@/components/reviews/rating-stars';
@@ -23,12 +22,12 @@ export default function ArtisanDetailPage() {
 
   const { data: artisan, isLoading } = useQuery({
     queryKey: ['artisan', artisanId],
-    queryFn: () => artisansApi.getById(Number(artisanId)).then((res) => res.data),
+    queryFn: () => fetch('/api/artisans/artisans?id=' + artisanId).then(r => r.json()).then(d => { const arr = Array.isArray(d) ? d : (d.results || d.data || []); return arr.find((a: any) => String(a.id) === artisanId) || null; }),
   });
 
   const { data: reviews } = useQuery({
     queryKey: ['artisan-reviews', artisanId],
-    queryFn: () => artisansApi.getAll({ id: artisanId }).then((res) => res.data),
+    queryFn: () => fetch('/api/artisans/artisans?id=' + artisanId).then(r => r.json()).then(d => { const arr = Array.isArray(d) ? d : (d.results || d.data || []); return arr.find((a: any) => String(a.id) === artisanId) || null; }).then(a => a?.reviews || []),
     enabled: !!artisanId,
   });
 
@@ -370,4 +369,3 @@ export default function ArtisanDetailPage() {
     </div>
   );
 }
-

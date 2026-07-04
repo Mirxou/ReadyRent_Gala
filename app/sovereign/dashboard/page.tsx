@@ -1,5 +1,5 @@
 "use client"
-import { formatNumber } from '@/lib/utils';;
+import { formatNumber } from '@/lib/utils';
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -92,7 +92,7 @@ export default function SovereignDashboard() {
         setTicker(mockTicker);
         setIsLoading(false);
       } catch (error) {
-        console.error("Dashboard error:", error);
+        if (process.env.NODE_ENV === 'development') console.error("Dashboard error:", error);
       }
     };
 

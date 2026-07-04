@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Providers } from "@/lib/providers";
-import { Toaster } from "@/components/ui/toaster";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import Analytics from "@/lib/analytics";
@@ -86,7 +85,6 @@ export default function RootLayout({
               </main>
               <Footer />
             </div>
-            <Toaster />
             <SovereignConcierge />
             <RealtimeNotifications />
           </Providers>

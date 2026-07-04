@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { artisansApi } from '@/lib/api';
 import { Search, Star, Palette, Instagram, Facebook } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -22,10 +21,7 @@ export default function ArtisansPage() {
   const { data: artisans, isLoading, isError } = useQuery({
     queryKey: ['artisans', search, selectedSpecialty],
     queryFn: () =>
-      artisansApi.getAll({
-        search,
-        specialty: selectedSpecialty || undefined,
-      }).then((res) => res.data),
+      fetch(`/api/artisans/artisans?search=${search}&specialty=${selectedSpecialty || ''}`).then(r => r.json()).then(d => d.data || d),
   });
 
   const artisansList = useMemo(() => {
@@ -288,4 +284,3 @@ export default function ArtisansPage() {
     </div>
   );
 }
-

@@ -1,5 +1,5 @@
 'use client'
-import { formatNumber } from '@/lib/utils';;
+import { formatNumber } from '@/lib/utils';
 
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';

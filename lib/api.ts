@@ -111,8 +111,8 @@ api.interceptors.response.use(
       } catch (refreshError) {
         // Refresh Failed: Session expired or invalid
         // Optional: Redirect to login or clear client state
-        if (typeof window !== 'undefined' && !window.location.pathname.includes('/auth/login')) {
-          window.location.href = '/auth/login';
+        if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
+          window.location.href = '/login';
         }
         return Promise.reject(refreshError);
       }

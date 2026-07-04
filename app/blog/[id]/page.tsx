@@ -1,7 +1,6 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { cmsApi } from '@/lib/api';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, User, ArrowRight } from 'lucide-react';
@@ -18,7 +17,7 @@ export default function BlogPostPage() {
 
   const { data: post, isLoading } = useQuery({
     queryKey: ['blog-post', postId],
-    queryFn: () => cmsApi.getBlogPost(Number(postId)).then((res) => res.data),
+    queryFn: () => fetch('/api/cms/blog/' + postId).then(r => r.json()).then(d => d.data || d),
     enabled: !!postId,
   });
 
@@ -135,4 +134,3 @@ export default function BlogPostPage() {
     </div>
   );
 }
-

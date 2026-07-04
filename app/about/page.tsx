@@ -3,7 +3,6 @@
 import { motion } from 'framer-motion';
 import { ParticleField } from '@/components/ui/particle-field';
 import { Sparkles, Heart, Zap, ShieldCheck } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
 
 const features = [

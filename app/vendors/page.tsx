@@ -3,7 +3,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { vendorsApi } from '@/lib/api';
 import { VendorCard } from '@/components/vendors/vendor-card';
 import { Store, Search, LayoutDashboard } from 'lucide-react';
 import { useState } from 'react';
@@ -28,7 +27,7 @@ export default function VendorsPage() {
 
   const { data: vendors, isLoading } = useQuery({
     queryKey: ['vendors'],
-    queryFn: () => vendorsApi.getAll().then((res) => res.data),
+    queryFn: () => fetch('/api/vendors/vendors').then(r => r.json()).then(d => d.data || d),
   });
 
   const filteredVendors = vendors?.results?.filter((vendor: any) => {
@@ -127,5 +126,3 @@ export default function VendorsPage() {
     </div>
   );
 }
-
-

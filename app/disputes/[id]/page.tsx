@@ -102,7 +102,7 @@ export default function DisputeDetailPage() {
         }
 
       } catch (err) {
-        console.error(err);
+        if (process.env.NODE_ENV === 'development') console.error(err);
         setError('تعذر تحميل بيانات النزاع.');
       } finally {
         setLoading(false);

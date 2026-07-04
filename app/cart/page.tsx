@@ -19,7 +19,6 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { bookingsApi, packagingApi, locationsApi } from '@/lib/api';
 import { formatNumber } from '@/lib/utils';
 import { trackBooking } from '@/lib/analytics';
 import { ParticleField } from '@/components/ui/particle-field';
@@ -49,13 +48,13 @@ export default function CartPage() {
 
   const { data: cart, isLoading } = useQuery({
     queryKey: ['cart'],
-    queryFn: () => bookingsApi.getCart().then((res) => res.data),
+    queryFn: () => fetch('/api/bookings/cart').then(r => r.json()).then(d => d.data || d),
   });
 
   // Get user's default address to determine delivery zone
   const { data: addresses } = useQuery({
     queryKey: ['addresses'],
-    queryFn: () => locationsApi.getMyAddresses().then((res) => res.data),
+    queryFn: () => fetch('/api/locations/addresses/').then(r => r.json()).then(d => d.data || d || []),
   });
 
   // Determine delivery zone from default address using useMemo (Professor 0 approved)
@@ -70,7 +69,7 @@ export default function CartPage() {
   // Check same-day delivery availability
   const { data: sameDayInfo } = useQuery({
     queryKey: ['same-day-delivery', deliveryZoneId],
-    queryFn: () => locationsApi.checkSameDayDelivery(deliveryZoneId!).then((res) => res.data),
+    queryFn: () => fetch('/api/locations/delivery-zones/' + deliveryZoneId + '/same-day/').then(r => r.json()).then(d => d.data || d),
     enabled: !!deliveryZoneId,
   });
 
@@ -81,7 +80,7 @@ export default function CartPage() {
   }, [sameDayInfo]);
 
   const removeFromCartMutation = useMutation({
-    mutationFn: (itemId: number) => bookingsApi.removeFromCart(itemId),
+    mutationFn: (itemId: number) => fetch('/api/bookings/cart/items/' + itemId, { method: 'DELETE' }).then(r => r.json()),
     onMutate: async (itemId) => {
       // Cancel any outgoing refetchs (so they don't overwrite our optimistic update)
       await queryClient.cancelQueries({ queryKey: ['cart'] });
@@ -117,9 +116,11 @@ export default function CartPage() {
   });
 
   const createBookingMutation = useMutation({
-    mutationFn: () => bookingsApi.createBookingFromCart({
-      same_day_delivery: sameDayDelivery,
-    }),
+    mutationFn: () => fetch('/api/bookings/create/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ same_day_delivery: sameDayDelivery }),
+    }).then(r => r.json()),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['cart'] });
       
@@ -134,7 +135,7 @@ export default function CartPage() {
       }
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.error || 'حدث خطأ أثناء إنشاء الحجز');
+      toast.error(error?.message || 'حدث خطأ أثناء إنشاء الحجز');
     },
   });
 
@@ -167,10 +168,7 @@ export default function CartPage() {
 
   const { data: packagingInfo } = useQuery({
     queryKey: ['packaging-suggestion', firstItem?.product?.id, rentalDays],
-    queryFn: () => packagingApi.getSuggestedForBooking({
-      product_id: firstItem?.product?.id,
-      rental_days: rentalDays
-    }).then((res) => res.data),
+    queryFn: () => fetch('/api/packaging/types/').then(r => r.json()).then(d => d.data || d || []),
     enabled: !!firstItem?.product?.id,
   });
 
@@ -431,4 +429,3 @@ export default function CartPage() {
     </div>
   );
 }
-

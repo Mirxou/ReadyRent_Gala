@@ -54,7 +54,7 @@ export default function BookingDetailPage() {
             setBooking(response.data);
             setLoading(false);
         }).catch(err => {
-            console.error(err);
+            if (process.env.NODE_ENV === 'development') console.error(err);
             setLoading(false);
         });
     }, [id]);
@@ -178,7 +178,7 @@ export default function BookingDetailPage() {
                                     ميثاق <span className="text-sovereign-gold">الاتفاق.</span>
                                 </h2>
                                 <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 text-[9px] uppercase font-black uppercase tracking-widest">
-                                    Immutable Recording Active
+                                    التسجيل الثابت نشط
                                 </Badge>
                             </div>
                             <GlassPanel className="p-10 rounded-[3rem]" variant="obsidian" gradientBorder>
@@ -210,7 +210,7 @@ export default function BookingDetailPage() {
                                         <h4 className={cn("text-2xl font-black italic tracking-tighter uppercase", getStatusColor(booking.escrow_status))}>
                                             {booking.escrow_status}
                                         </h4>
-                                        <p className="text-[10px] text-white/30 uppercase tracking-[0.3em] font-black">Escrow Verification Pillar</p>
+                                        <p className="text-[10px] text-white/30 uppercase tracking-[0.3em] font-black">ركن التحقق من الحساب المؤتمن</p>
                                     </div>
                                 </div>
 
@@ -231,7 +231,7 @@ export default function BookingDetailPage() {
                             <div className="p-6 bg-white/[0.02] rounded-2xl space-y-3 border border-white/5">
                                 <div className="flex items-center gap-2 mb-1">
                                     <Fingerprint className="w-4 h-4 text-sovereign-gold" />
-                                    <span className="text-[10px] font-black uppercase text-white tracking-[0.2em]">Forensic Proof</span>
+                                    <span className="text-[10px] font-black uppercase text-white tracking-[0.2em]">إثبات قضائي</span>
                                 </div>
                                 <p className="text-xs text-white/40 font-light italic leading-relaxed">
                                     يتم تأمين هذه المعاملة عبر بروتوكول الحصن الرقمي. لا يمكن تعديل بيانات الضمان المالي دون مصادقة ثنائية من المحكمة السيادية.
@@ -261,10 +261,10 @@ export default function BookingDetailPage() {
                     </div>
                     <div className="space-y-2">
                         <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20 italic">
-                            READYRENT.GALA | THE SOVEREIGN SYSTEM 2026
+                            STANDARD.Rent | نظام STANDARD.Rent 2026
                         </p>
                         <p className="text-[9px] text-white/10 uppercase tracking-widest">
-                            radical truth • absolute security • masterpiece code
+                            الحقيقة الراديكالية • الأمان المطلق • كود تحفة فنية
                         </p>
                     </div>
                 </footer>

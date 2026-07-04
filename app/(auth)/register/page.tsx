@@ -59,7 +59,7 @@ export default function RegisterPage() {
               انضم إلى النخبة
             </h1>
             <p className="text-sovereign-gold/80 text-xs font-medium tracking-widest uppercase">
-              Identity Creation Protocol
+              بروتوكول إنشاء الهوية
             </p>
           </div>
 

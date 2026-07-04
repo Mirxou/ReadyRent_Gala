@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronRight, ChevronLeft, ShieldCheck, Scale, Globe, Target, Fingerprint, Download } from "lucide-react";
+import Link from "next/link";
 import { GlassPanel } from "@/shared/components/sovereign/glass-panel";
 import { SovereignButton } from "@/shared/components/sovereign/sovereign-button";
 import { SovereignGlow } from "@/shared/components/sovereign/sovereign-sparkle";
@@ -172,9 +173,11 @@ export default function HighCourtPresentation() {
                     transition={{ delay: 1 }}
                     className="pt-10"
                  >
-                    <SovereignButton variant="primary" size="xl" href="/dashboard" withShimmer>
+                    <Link href="/dashboard">
+                      <SovereignButton variant="primary" size="xl" withShimmer>
                         العودة للوحة التحكيم
-                    </SovereignButton>
+                      </SovereignButton>
+                    </Link>
                  </motion.div>
               )}
             </motion.div>
@@ -183,7 +186,7 @@ export default function HighCourtPresentation() {
           {/* Footer & Controls */}
           <div className="flex justify-between items-center mt-12 pt-8 border-t border-white/5">
              <div className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground opacity-40">
-                {activeSlide.footer || `Sovereign Deck / Slide ${currentSlide + 1}`}
+                {activeSlide.footer || `عرض سيادي / شريحة ${currentSlide + 1}`}
              </div>
 
              <div className="flex items-center gap-6">

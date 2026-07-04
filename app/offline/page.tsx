@@ -37,7 +37,7 @@ export default function OfflinePage() {
                 </div>
 
                 <div className="mt-8 pt-6 border-t border-neutral-100 text-xs text-neutral-400">
-                    STANDARD Offline Mode v1.0
+                    وضع عدم الاتصال STANDARD الإصدار 1.0
                 </div>
             </div>
         </div>

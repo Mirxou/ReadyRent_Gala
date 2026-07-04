@@ -181,8 +181,7 @@ function FeaturedServices() {
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.6, delay: i * 0.1, ease: [0.32, 0.72, 0, 1] as [number, number, number, number] }}
             >
-              <Link href={`/services/${service.id}`} className="block group h-full">
-                <GlassPanel
+              <GlassPanel
                   variant="obsidian"
                   className="overflow-hidden rounded-[2rem] hover:border-purple-400/20 transition-all duration-500 h-full"
                 >
@@ -227,7 +226,6 @@ function FeaturedServices() {
                     </div>
                   </div>
                 </GlassPanel>
-              </Link>
             </motion.div>
           ))}
         </div>

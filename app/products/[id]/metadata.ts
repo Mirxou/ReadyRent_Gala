@@ -28,10 +28,10 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
         'قسنطينة'
       ],
       openGraph: {
-        title: `${product.name_ar || product.name} - ReadyRent.Gala`,
-        description: product.description_ar || product.description || 'اكتشف هذا المنتج من ReadyRent.Gala',
+        title: `${product.name_ar || product.name} - STANDARD.Rent`,
+        description: product.description_ar || product.description || 'اكتشف هذا المنتج من STANDARD.Rent',
         url: `${baseUrl}/products/${product.slug || product.id}`,
-        siteName: 'ReadyRent.Gala',
+        siteName: 'STANDARD.Rent',
         images: [
           {
             url: imageUrl,

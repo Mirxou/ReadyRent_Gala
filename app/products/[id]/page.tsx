@@ -282,7 +282,7 @@ export default function ProductDetailsPage() {
                     <IdentityShield status={isVerified ? "verified" : "pending"} showLabel={false} trustScore={trustScore} className="w-14 h-14" />
                     <div>
                       <p className="text-sm font-black uppercase tracking-wider text-foreground">
-                        {isSovereign ? "الوصول السيادي مفعل (Elite Access)" : "مستوى ميثاق قياسي"}
+                        {isSovereign ? "الوصول السيادي مفعل (وصول متميز)" : "مستوى ميثاق قياسي"}
                       </p>
                       <p className="text-xs text-muted-foreground mt-1 opacity-60 italic">تم إعفاء الضمان بناءً على سجل ثقتكم السيادي.</p>
                     </div>

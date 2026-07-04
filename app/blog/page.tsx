@@ -3,6 +3,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Search, Calendar, Clock, ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { ParticleField } from '@/components/ui/particle-field';
 import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
@@ -89,6 +90,7 @@ export default function BlogPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
               >
+                <Link href={`/blog/${post.id}`} className="block h-full">
                 <SovereignGlow color="purple" intensity="low">
                   <GlassPanel
                     variant="obsidian"
@@ -130,6 +132,7 @@ export default function BlogPage() {
                     </div>
                   </GlassPanel>
                 </SovereignGlow>
+                </Link>
               </motion.div>
             ))}
           </div>
