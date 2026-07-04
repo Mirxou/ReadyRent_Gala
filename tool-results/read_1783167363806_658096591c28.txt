@@ -1,0 +1,686 @@
+     1→     1→"use client";
+     2→     2→
+     3→     3→import Link from 'next/link';
+     4→     4→import { motion, useInView, type Variants } from 'framer-motion';
+     5→     5→import { useRef, useEffect, useState } from 'react';
+     6→     6→import { SovereignButton } from "@/shared/components/sovereign/sovereign-button";
+     7→     7→import { GlassPanel } from "@/shared/components/sovereign/glass-panel";
+     8→     8→import { SovereignGlow, SovereignSparkle } from '@/shared/components/sovereign/sovereign-sparkle';
+     9→     9→import { FeaturedProducts } from '@/components/product/featured-products';
+    10→    10→import { ReviewList } from '@/components/reviews/review-list';
+    11→    11→import { artisans as mockArtisans, localGuideServices as mockGuideServices, categories as mockCategories } from '@/lib/mock-data';
+    12→    12→import { formatNumber } from '@/lib/utils';
+    13→    13→import {
+    14→    14→  Shirt,
+    15→    15→  Sparkles,
+    16→    16→  Store,
+    17→    17→  ArrowLeft,
+    18→    18→  Star,
+    19→    19→  MapPin,
+    20→    20→  Camera,
+    21→    21→  Palette,
+    22→    22→  Music,
+    23→    23→  Flower2,
+    24→    24→  PartyPopper,
+    25→    25→  Users,
+    26→    26→  Package,
+    27→    27→  Briefcase,
+    28→    28→  Smile,
+    29→    29→  TrendingUp,
+    30→    30→  MessageCircle,
+    31→    31→} from 'lucide-react';
+    32→    32→
+    33→    33→/* ────────────────────────────────────────────
+    34→    34→   Animation Variants
+    35→    35→   ──────────────────────────────────────────── */
+    36→    36→const fadeUp: Variants = {
+    37→    37→  hidden: { opacity: 0, y: 40 },
+    38→    38→  visible: (i: number = 0) => ({
+    39→    39→    opacity: 1,
+    40→    40→    y: 0,
+    41→    41→    transition: { duration: 0.7, delay: i * 0.12, ease: [0.32, 0.72, 0, 1] },
+    42→    42→  }),
+    43→    43→};
+    44→    44→
+    45→    45→const staggerContainer = {
+    46→    46→  hidden: {},
+    47→    47→  visible: { transition: { staggerChildren: 0.1 } },
+    48→    48→};
+    49→    49→
+    50→    50→/* ────────────────────────────────────────────
+    51→    51→   Animated Counter Hook
+    52→    52→   ──────────────────────────────────────────── */
+    53→    53→function useAnimatedCounter(target: number, duration: number = 2000) {
+    54→    54→  const [count, setCount] = useState(0);
+    55→    55→  const [started, setStarted] = useState(false);
+    56→    56→
+    57→    57→  // Use IntersectionObserver directly for reliable detection
+    58→    58→  const ref = useRef<HTMLDivElement>(null);
+    59→    59→
+    60→    60→  useEffect(() => {
+    61→    61→    const el = ref.current;
+    62→    62→    if (!el) return;
+    63→    63→    const observer = new IntersectionObserver(
+    64→    64→      ([entry]) => { if (entry.isIntersecting) { setStarted(true); observer.disconnect(); } },
+    65→    65→      { threshold: 0.1 }
+    66→    66→    );
+    67→    67→    observer.observe(el);
+    68→    68→    return () => observer.disconnect();
+    69→    69→  }, []);
+    70→    70→
+    71→    71→  useEffect(() => {
+    72→    72→    if (!started) return;
+    73→    73→    let start = 0;
+    74→    74→    const step = target / (duration / 16);
+    75→    75→    const timer = setInterval(() => {
+    76→    76→      start += step;
+    77→    77→      if (start >= target) {
+    78→    78→        setCount(target);
+    79→    79→        clearInterval(timer);
+    80→    80→      } else {
+    81→    81→        setCount(Math.floor(start));
+    82→    82→      }
+    83→    83→    }, 16);
+    84→    84→    return () => clearInterval(timer);
+    85→    85→  }, [started, target, duration]);
+    86→    86→
+    87→    87→  return { count, ref };
+    88→    88→}
+    89→    89→
+    90→    90→/* ════════════════════════════════════════════
+    91→    91→   SECTION 1 — HERO
+    92→    92→   ════════════════════════════════════════════ */
+    93→    93→const heroCards = [
+    94→    94→  {
+    95→    95→    icon: Shirt,
+    96→    96→    title: 'الكراء',
+    97→    97→    subtitle: 'فساتين، بدلات، قفطان',
+    98→    98→    desc: 'استأجري أرقى الملابس الفاخرة لمناسباتك بأسعار تنافسية',
+    99→    99→    href: '/rentals',
+   100→   100→    gradient: 'from-sovereign-gold/20 via-sovereign-obsidian to-sovereign-gold/5',
+   101→   101→  },
+   102→   102→  {
+   103→   103→    icon: Sparkles,
+   104→   104→    title: 'الخدمات',
+   105→   105→    subtitle: 'تصوير، مكياج، دج، قاعات',
+   106→   106→    desc: 'اكتشفي أفضل مزودي الخدمات لمناسباتك المميزة',
+   107→   107→    href: '/services',
+   108→   108→    gradient: 'from-purple-500/15 via-sovereign-obsidian to-purple-500/5',
+   109→   109→  },
+   110→   110→  {
+   111→   111→    icon: Store,
+   112→   112→    title: 'السوق',
+   113→   113→    subtitle: 'بائعون وحرفيات',
+   114→   114→    desc: 'سوق مفتوح لبيع وشراء منتجات الحرفيين والبائعين المحليين',
+   115→   115→    href: '/marketplace',
+   116→   116→    gradient: 'from-emerald-500/15 via-sovereign-obsidian to-emerald-500/5',
+   117→   117→  },
+   118→   118→];
+   119→   119→
+   120→   120→function HeroSection() {
+   121→   121→  return (
+   122→   122→    <section className="relative pt-24 pb-20 md:pt-40 md:pb-32 px-4 overflow-hidden">
+   123→   123→      {/* Background glow */}
+   124→   124→      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-sovereign-gold/8 rounded-full blur-[200px] opacity-30 pointer-events-none" />
+   125→   125→
+   126→   126→      <div className="max-w-7xl mx-auto relative z-10">
+   127→   127→        {/* Brand Heading */}
+   128→   128→        <motion.div
+   129→   129→          initial="hidden"
+   130→   130→          animate="visible"
+   131→   131→          className="text-center mb-16 md:mb-24"
+   132→   132→        >
+   133→   133→          <motion.div custom={0} variants={fadeUp} className="mb-6">
+   134→   134→            <SovereignSparkle active={true}>
+   135→   135→              <span className="inline-block px-6 py-2 rounded-full border border-sovereign-gold/20 bg-sovereign-gold/5 text-sovereign-gold text-[10px] font-black tracking-[0.4em] uppercase backdrop-blur-md">
+   136→   136→                المنصة الأولى في الجزائر
+   137→   137→              </span>
+   138→   138→            </SovereignSparkle>
+   139→   139→          </motion.div>
+   140→   140→
+   141→   141→          <motion.h1 custom={1} variants={fadeUp} className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-tighter leading-none">
+   142→   142→            <SovereignGlow color="gold" intensity="high">
+   143→   143→              STAND<span className="text-sovereign-gold">ARD.</span>
+   144→   144→            </SovereignGlow>
+   145→   145→          </motion.h1>
+   146→   146→
+   147→   147→          <motion.p custom={2} variants={fadeUp} className="mt-6 md:mt-8 text-lg sm:text-xl md:text-2xl text-muted-foreground font-light leading-relaxed max-w-2xl mx-auto">
+   148→   148→            منصة الكراء الفاخر والخدمات في الجزائر
+   149→   149→          </motion.p>
+   150→   150→        </motion.div>
+   151→   151→
+   152→   152→        {/* 3 Ecosystem Cards */}
+   153→   153→        <motion.div
+   154→   154→          initial="hidden"
+   155→   155→          animate="visible"
+   156→   156→          variants={staggerContainer}
+   157→   157→          className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6"
+   158→   158→        >
+   159→   159→          {heroCards.map((card, i) => (
+   160→   160→            <motion.div key={card.title} custom={i + 3} variants={fadeUp}>
+   161→   161→              <Link href={card.href} className="block group">
+   162→   162→                <GlassPanel
+   163→   163→                  variant="obsidian"
+   164→   164→                  className={`relative p-6 md:p-8 h-full bg-gradient-to-br ${card.gradient} hover:border-sovereign-gold/40 transition-all duration-500 rounded-[2rem]`}
+   165→   165→                >
+   166→   166→                  <div className="relative z-10 space-y-5">
+   167→   167→                    <div className="w-14 h-14 rounded-2xl bg-sovereign-gold/10 flex items-center justify-center text-sovereign-gold group-hover:bg-sovereign-gold/20 transition-colors">
+   168→   168→                      <card.icon className="w-7 h-7" />
+   169→   169→                    </div>
+   170→   170→                    <div>
+   171→   171→                      <h3 className="text-2xl md:text-3xl font-black tracking-tight">{card.title}</h3>
+   172→   172→                      <p className="text-xs text-sovereign-gold/70 font-bold uppercase tracking-widest mt-1">{card.subtitle}</p>
+   173→   173→                    </div>
+   174→   174→                    <p className="text-sm text-muted-foreground leading-relaxed">{card.desc}</p>
+   175→   175→                    <div className="flex items-center gap-2 text-sovereign-gold text-xs font-bold uppercase tracking-widest pt-2 group-hover:gap-3 transition-all">
+   176→   176→                      <span>اكتشفي الآن</span>
+   177→   177→                      <ArrowLeft className="w-4 h-4" />
+   178→   178→                    </div>
+   179→   179→                  </div>
+   180→   180→                </GlassPanel>
+   181→   181→              </Link>
+   182→   182→            </motion.div>
+   183→   183→          ))}
+   184→   184→        </motion.div>
+   185→   185→      </div>
+   186→   186→    </section>
+   187→   187→  );
+   188→   188→}
+   189→   189→
+   190→   190→/* ════════════════════════════════════════════
+   191→   191→   SECTION 2 — FEATURED PRODUCTS (imported)
+   192→   192→   Uses the standalone FeaturedProducts component
+   193→   193→   which fetches from API and handles its own state.
+   194→   194→   Falls back to nothing if API is unavailable.
+   195→   195→   ════════════════════════════════════════════ */
+   196→   196→
+   197→   197→/* ════════════════════════════════════════════
+   198→   198→   SECTION 3 — THE 3 ECOSYSTEMS
+   199→   199→   ════════════════════════════════════════════ */
+   200→   200→const ecosystems = [
+   201→   201→  {
+   202→   202→    icon: Shirt,
+   203→   203→    title: 'الكراء الفاخر',
+   204→   204→    desc: 'اكتشفي مجموعة واسعة من الفساتين والبدلات والقفطانات الفاخرة. استأجري بأفضل الأسعار مع ضمان الجودة والنظافة لكل مناسبة.',
+   205→   205→    href: '/rentals',
+   206→   206→    gradient: 'from-sovereign-gold/15 via-sovereign-obsidian/90 to-sovereign-gold/5',
+   207→   207→    accent: 'sovereign-gold',
+   208→   208→  },
+   209→   209→  {
+   210→   210→    icon: Sparkles,
+   211→   211→    title: 'خدمات المناسبات',
+   212→   212→    desc: 'اعثري على أفضل المصورين ومجمّلي الأزياء ومقدمي الدي جي وقاعات الأفراح. كل ما تحتاجينه لمناسبتك المثالية في مكان واحد.',
+   213→   213→    href: '/services',
+   214→   214→    gradient: 'from-purple-500/12 via-sovereign-obsidian/90 to-purple-500/5',
+   215→   215→    accent: 'purple-400',
+   216→   216→  },
+   217→   217→  {
+   218→   218→    icon: Store,
+   219→   219→    title: 'السوق المفتوح',
+   220→   220→    desc: 'تسوقي من بائعين وحرفيات محليين. اكتشفي منتجات فريدة مصنوعة يدوياً وادعمي الأعمال المحلية في الجزائر.',
+   221→   221→    href: '/marketplace',
+   222→   222→    gradient: 'from-emerald-500/12 via-sovereign-obsidian/90 to-emerald-500/5',
+   223→   223→    accent: 'emerald-400',
+   224→   224→  },
+   225→   225→];
+   226→   226→
+   227→   227→const accentStyles: Record<string, string> = {
+   228→   228→  'sovereign-gold': 'bg-sovereign-gold/10 text-sovereign-gold',
+   229→   229→  'purple-400': 'bg-purple-400/10 text-purple-400',
+   230→   230→  'emerald-400': 'bg-emerald-400/10 text-emerald-400',
+   231→   231→};
+   232→   232→
+   233→   233→function EcosystemsSection() {
+   234→   234→  const ref = useRef<HTMLDivElement>(null);
+   235→   235→  const inView = useInView(ref, { once: true, margin: "-100px" });
+   236→   236→
+   237→   237→  return (
+   238→   238→    <section ref={ref} className="py-20 md:py-28 px-4">
+   239→   239→      <div className="max-w-7xl mx-auto">
+   240→   240→        <motion.div
+   241→   241→          initial="hidden"
+   242→   242→          animate={inView ? "visible" : "hidden"}
+   243→   243→          variants={staggerContainer}
+   244→   244→          className="text-center mb-14 md:mb-20"
+   245→   245→        >
+   246→   246→          <motion.p variants={fadeUp} className="text-[10px] font-black uppercase tracking-[0.4em] text-sovereign-gold/60 mb-3">المنظومة المتكاملة</motion.p>
+   247→   247→          <motion.h2 variants={fadeUp} className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tighter">
+   248→   248→            النظام البيئي <span className="text-sovereign-gold">الثلاثي</span>
+   249→   249→          </motion.h2>
+   250→   250→        </motion.div>
+   251→   251→
+   252→   252→        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+   253→   253→          {ecosystems.map((eco, i) => (
+   254→   254→            <motion.div
+   255→   255→              key={eco.title}
+   256→   256→              initial={{ opacity: 0, y: 40 }}
+   257→   257→              animate={inView ? { opacity: 1, y: 0 } : {}}
+   258→   258→              transition={{ duration: 0.7, delay: i * 0.15, ease: [0.32, 0.72, 0, 1] }}
+   259→   259→            >
+   260→   260→              <Link href={eco.href} className="block group h-full">
+   261→   261→                <div className={`relative h-full rounded-[2.5rem] p-8 md:p-10 border border-white/5 bg-gradient-to-br ${eco.gradient} backdrop-blur-xl overflow-hidden transition-all duration-500 hover:border-white/10 hover:scale-[1.02]`}>
+   262→   262→                  {/* Internal Glow */}
+   263→   263→                  <div className="absolute top-0 right-0 w-48 h-48 bg-sovereign-gold/5 rounded-full blur-[80px] -mr-20 -mt-20 pointer-events-none" />
+   264→   264→
+   265→   265→                  <div className="relative z-10 flex flex-col h-full gap-6">
+   266→   266→                    <div className={`w-16 h-16 rounded-2xl ${accentStyles[eco.accent] || ''} flex items-center justify-center group-hover:scale-110 transition-transform duration-500`}>
+   267→   267→                      <eco.icon className="w-8 h-8" />
+   268→   268→                    </div>
+   269→   269→
+   270→   270→                    <h3 className="text-2xl md:text-3xl font-black tracking-tight">{eco.title}</h3>
+   271→   271→
+   272→   272→                    <p className="text-sm text-muted-foreground leading-relaxed flex-1">{eco.desc}</p>
+   273→   273→
+   274→   274→                    <div className="pt-4">
+   275→   275→                      <SovereignButton variant="secondary" size="sm" className="w-full">
+   276→   276→                        <span>استكشفي</span>
+   277→   277→                        <ArrowLeft className="w-4 h-4" />
+   278→   278→                      </SovereignButton>
+   279→   279→                    </div>
+   280→   280→                  </div>
+   281→   281→                </div>
+   282→   282→              </Link>
+   283→   283→            </motion.div>
+   284→   284→          ))}
+   285→   285→        </div>
+   286→   286→      </div>
+   287→   287→    </section>
+   288→   288→  );
+   289→   289→}
+   290→   290→
+   291→   291→/* ════════════════════════════════════════════
+   292→   292→   SECTION 4 — ARTISANS SPOTLIGHT
+   293→   293→   ════════════════════════════════════════════ */
+   294→   294→function ArtisansSpotlight() {
+   295→   295→  const ref = useRef<HTMLDivElement>(null);
+   296→   296→  const inView = useInView(ref, { once: true, margin: "-100px" });
+   297→   297→
+   298→   298→  const artisans = mockArtisans?.slice(0, 4) || [];
+   299→   299→
+   300→   300→  return (
+   301→   301→    <section ref={ref} className="py-20 md:py-28 px-4">
+   302→   302→      <div className="max-w-7xl mx-auto">
+   303→   303→        <motion.div
+   304→   304→          initial="hidden"
+   305→   305→          animate={inView ? "visible" : "hidden"}
+   306→   306→          variants={staggerContainer}
+   307→   307→          className="flex items-end justify-between mb-10 md:mb-14"
+   308→   308→        >
+   309→   309→          <motion.div variants={fadeUp}>
+   310→   310→            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-sovereign-gold/60 mb-3">إبداع محلي</p>
+   311→   311→            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tighter">
+   312→   312→              حرفيات <span className="text-sovereign-gold">مميزات</span>
+   313→   313→            </h2>
+   314→   314→          </motion.div>
+   315→   315→          <motion.div variants={fadeUp}>
+   316→   316→            <Link
+   317→   317→              href="/artisans"
+   318→   318→              className="flex items-center gap-2 text-sovereign-gold text-sm font-bold hover:gap-3 transition-all"
+   319→   319→            >
+   320→   320→              <span>عرض الكل</span>
+   321→   321→              <ArrowLeft className="w-4 h-4" />
+   322→   322→            </Link>
+   323→   323→          </motion.div>
+   324→   324→        </motion.div>
+   325→   325→
+   326→   326→        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+   327→   327→          {artisans.map((artisan: any, i: number) => (
+   328→   328→            <motion.div
+   329→   329→              key={artisan.id || i}
+   330→   330→              initial={{ opacity: 0, y: 30 }}
+   331→   331→              animate={inView ? { opacity: 1, y: 0 } : {}}
+   332→   332→              transition={{ duration: 0.6, delay: i * 0.1, ease: [0.32, 0.72, 0, 1] }}
+   333→   333→            >
+   334→   334→              <Link href="/artisans" className="block group">
+   335→   335→                <GlassPanel
+   336→   336→                  variant="obsidian"
+   337→   337→                  className="p-6 hover:border-sovereign-gold/30 transition-all duration-500 rounded-[2rem] text-center"
+   338→   338→                >
+   339→   339→                  <div className="relative z-10 space-y-4">
+   340→   340→                    {/* Avatar */}
+   341→   341→                    <div className="w-20 h-20 mx-auto rounded-full overflow-hidden border-2 border-sovereign-gold/20 group-hover:border-sovereign-gold/50 transition-colors">
+   342→   342→                      <img
+   343→   343→                        src={artisan.avatar || `https://picsum.photos/seed/artisan${i}/200/200`}
+   344→   344→                        alt={artisan.name_ar || 'حرفية'}
+   345→   345→                        className="w-full h-full object-cover"
+   346→   346→                      />
+   347→   347→                    </div>
+   348→   348→
+   349→   349→                    <div>
+   350→   350→                      <h3 className="text-lg font-black tracking-tight group-hover:text-sovereign-gold transition-colors">
+   351→   351→                        {artisan.name_ar || 'حرفية'}
+   352→   352→                      </h3>
+   353→   353→                      <p className="text-xs text-sovereign-gold/60 font-bold uppercase tracking-widest mt-1">
+   354→   354→                        {artisan.specialty || 'حرفية محلية'}
+   355→   355→                      </p>
+   356→   356→                    </div>
+   357→   357→
+   358→   358→                    {/* Rating */}
+   359→   359→                    <div className="flex items-center justify-center gap-1">
+   360→   360→                      <Star className="w-3.5 h-3.5 fill-sovereign-gold text-sovereign-gold" />
+   361→   361→                      <span className="text-sm font-bold">
+   362→   362→                        {Number(artisan.rating || 4.8).toFixed(1)}
+   363→   363→                      </span>
+   364→   364→                    </div>
+   365→   365→
+   366→   366→                    {/* Location */}
+   367→   367→                    {artisan.location && (
+   368→   368→                      <div className="flex items-center justify-center gap-1.5 text-muted-foreground text-xs">
+   369→   369→                        <MapPin className="w-3 h-3" />
+   370→   370→                        <span>{artisan.location}</span>
+   371→   371→                      </div>
+   372→   372→                    )}
+   373→   373→                  </div>
+   374→   374→                </GlassPanel>
+   375→   375→              </Link>
+   376→   376→            </motion.div>
+   377→   377→          ))}
+   378→   378→        </div>
+   379→   379→      </div>
+   380→   380→    </section>
+   381→   381→  );
+   382→   382→}
+   383→   383→
+   384→   384→/* ════════════════════════════════════════════
+   385→   385→   SECTION 5 — SERVICES CATEGORIES
+   386→   386→   ════════════════════════════════════════════ */
+   387→   387→const defaultServiceCategories = [
+   388→   388→  { icon: PartyPopper, name: 'أعراس', desc: 'تنظيم وتجهيز حفلات الزفاف والمناسبات الكبرى', slug: 'weddings' },
+   389→   389→  { icon: Camera, name: 'تصوير', desc: 'مصورون محترفون لكل لحظة مميزة', slug: 'photography' },
+   390→   390→  { icon: Palette, name: 'مكياج', desc: 'مجمّلات أزياء محترفات لكل ذوق', slug: 'makeup' },
+   391→   391→  { icon: Music, name: 'دج', desc: 'دي جي محترفون لموسيقى لا تُنسى', slug: 'dj' },
+   392→   392→  { icon: Flower2, name: 'زهور', desc: 'تنسيق زهور فاخر لجميع المناسبات', slug: 'flowers' },
+   393→   393→  { icon: PartyPopper, name: 'حفلات', desc: 'تنظيم حفلات خاصة وشاملة', slug: 'parties' },
+   394→   394→];
+   395→   395→
+   396→   396→function ServicesCategories() {
+   397→   397→  const ref = useRef<HTMLDivElement>(null);
+   398→   398→  const inView = useInView(ref, { once: true, margin: "-100px" });
+   399→   399→
+   400→   400→  const categories = mockCategories?.length ? mockCategories.slice(0, 6) : defaultServiceCategories;
+   401→   401→
+   402→   402→  return (
+   403→   403→    <section ref={ref} className="py-20 md:py-28 px-4">
+   404→   404→      <div className="max-w-7xl mx-auto">
+   405→   405→        <motion.div
+   406→   406→          initial="hidden"
+   407→   407→          animate={inView ? "visible" : "hidden"}
+   408→   408→          variants={staggerContainer}
+   409→   409→          className="flex items-end justify-between mb-10 md:mb-14"
+   410→   410→        >
+   411→   411→          <motion.div variants={fadeUp}>
+   412→   412→            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-sovereign-gold/60 mb-3">دليل الخدمات</p>
+   413→   413→            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tighter">
+   414→   414→              خدمات <span className="text-sovereign-gold">المناسبات</span>
+   415→   415→            </h2>
+   416→   416→          </motion.div>
+   417→   417→          <motion.div variants={fadeUp}>
+   418→   418→            <Link
+   419→   419→              href="/services"
+   420→   420→              className="flex items-center gap-2 text-sovereign-gold text-sm font-bold hover:gap-3 transition-all"
+   421→   421→            >
+   422→   422→              <span>عرض الكل</span>
+   423→   423→              <ArrowLeft className="w-4 h-4" />
+   424→   424→            </Link>
+   425→   425→          </motion.div>
+   426→   426→        </motion.div>
+   427→   427→
+   428→   428→        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-5">
+   429→   429→          {categories.map((cat: any, i: number) => {
+   430→   430→            const IconComp = cat.icon || (defaultServiceCategories[i]?.icon) || Sparkles;
+   431→   431→            return (
+   432→   432→              <motion.div
+   433→   433→                key={cat.id || cat.slug || i}
+   434→   434→                initial={{ opacity: 0, y: 30 }}
+   435→   435→                animate={inView ? { opacity: 1, y: 0 } : {}}
+   436→   436→                transition={{ duration: 0.6, delay: i * 0.08, ease: [0.32, 0.72, 0, 1] }}
+   437→   437→              >
+   438→   438→                <Link href="/services" className="block group">
+   439→   439→                  <div className="relative p-5 md:p-6 rounded-[2rem] border border-white/5 bg-white/[0.02] backdrop-blur-sm hover:border-sovereign-gold/20 hover:bg-sovereign-gold/5 transition-all duration-500 text-center h-full">
+   440→   440→                    <div className="space-y-3">
+   441→   441→                      <div className="w-12 h-12 mx-auto rounded-xl bg-sovereign-gold/10 flex items-center justify-center text-sovereign-gold group-hover:scale-110 transition-transform duration-500">
+   442→   442→                        {typeof IconComp === 'string' ? (
+   443→   443→                          <Sparkles className="w-6 h-6" />
+   444→   444→                        ) : (
+   445→   445→                          <IconComp className="w-6 h-6" />
+   446→   446→                        )}
+   447→   447→                      </div>
+   448→   448→                      <h3 className="text-sm md:text-base font-black tracking-tight group-hover:text-sovereign-gold transition-colors">
+   449→   449→                        {cat.name_ar || cat.name || 'خدمة'}
+   450→   450→                      </h3>
+   451→   451→                      <p className="text-[11px] text-muted-foreground leading-relaxed line-clamp-2 hidden sm:block">
+   452→   452→                        {cat.description || cat.desc || ''}
+   453→   453→                      </p>
+   454→   454→                    </div>
+   455→   455→                  </div>
+   456→   456→                </Link>
+   457→   457→              </motion.div>
+   458→   458→            );
+   459→   459→          })}
+   460→   460→        </div>
+   461→   461→      </div>
+   462→   462→    </section>
+   463→   463→  );
+   464→   464→}
+   465→   465→
+   466→   466→/* ════════════════════════════════════════════
+   467→   467→   SECTION 5.5 — CUSTOMER REVIEWS
+   468→   468→   ════════════════════════════════════════════ */
+   469→   469→const homepageReviews = [
+   470→   470→  {
+   471→   471→    id: 1,
+   472→   472→    user_email: '',
+   473→   473→    user_username: 'سارة بن عبد الله',
+   474→   474→    rating: 5,
+   475→   475→    title: 'تجربة زفاف رائعة',
+   476→   476→    comment: 'فستان الزفاف كان رائعاً! الجودة ممتازة والتطريز يدوي بامتياز. أنصح بشدة كل عروس بتجربته. الخدمة كانت سريعة والتوصيل في الموعد.',
+   477→   477→    is_verified_purchase: true,
+   478→   478→    helpful_count: 12,
+   479→   479→    created_at: '2024-12-15T14:30:00Z',
+   480→   480→  },
+   481→   481→  {
+   482→   482→    id: 2,
+   483→   483→    user_email: '',
+   484→   484→    user_username: 'كريم بوجلال',
+   485→   485→    rating: 4,
+   486→   486→    title: 'جودة عالية',
+   487→   487→    comment: 'البدلة كانت نظيفة ومكوية بشكل جيد. القماش ذو جودة عالية. فقط أتمنى لو كان هناك خيار لتعديل المقاس.',
+   488→   488→    is_verified_purchase: true,
+   489→   489→    helpful_count: 8,
+   490→   490→    created_at: '2024-12-10T09:15:00Z',
+   491→   491→  },
+   492→   492→  {
+   493→   493→    id: 3,
+   494→   494→    user_email: '',
+   495→   495→    user_username: 'نورة بلقاسم',
+   496→   496→    rating: 5,
+   497→   497→    title: 'تحفة فنية',
+   498→   498→    comment: 'القفطان الذهبي كان تحفة فنية! التطريز بالذهب الخالص جعلني أشعر بالملكية. شكراً على التجربة الرائعة.',
+   499→   499→    is_verified_purchase: true,
+   500→   500→    helpful_count: 15,
+   501→   501→    created_at: '2024-11-28T16:45:00Z',
+   502→   502→  },
+   503→   503→];
+   504→   504→
+   505→   505→function CustomerReviewsSection() {
+   506→   506→  const ref = useRef<HTMLDivElement>(null);
+   507→   507→  const inView = useInView(ref, { once: true, margin: "-100px" });
+   508→   508→
+   509→   509→  return (
+   510→   510→    <section ref={ref} className="py-20 md:py-28 px-4">
+   511→   511→      <div className="max-w-7xl mx-auto">
+   512→   512→        {/* Section Header */}
+   513→   513→        <motion.div
+   514→   514→          initial="hidden"
+   515→   515→          animate={inView ? "visible" : "hidden"}
+   516→   516→          variants={staggerContainer}
+   517→   517→          className="text-center mb-14 md:mb-16"
+   518→   518→        >
+   519→   519→          <motion.div variants={fadeUp} className="mb-4">
+   520→   520→            <div className="w-14 h-14 mx-auto rounded-2xl bg-sovereign-gold/10 flex items-center justify-center text-sovereign-gold mb-4">
+   521→   521→              <MessageCircle className="w-7 h-7" />
+   522→   522→            </div>
+   523→   523→          </motion.div>
+   524→   524→          <motion.p variants={fadeUp} className="text-[10px] font-black uppercase tracking-[0.4em] text-sovereign-gold/60 mb-3">
+   525→   525→            تقييمات العملاء
+   526→   526→          </motion.p>
+   527→   527→          <motion.h2 variants={fadeUp} className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tighter">
+   528→   528→            ماذا يقول <span className="text-sovereign-gold">عملاؤنا</span>
+   529→   529→          </motion.h2>
+   530→   530→          <motion.div variants={fadeUp} className="mt-4">
+   531→   531→            <SovereignGlow color="gold" intensity="low">
+   532→   532→              <div className="h-1 w-24 bg-sovereign-gold/60 mx-auto rounded-full" />
+   533→   533→            </SovereignGlow>
+   534→   534→          </motion.div>
+   535→   535→        </motion.div>
+   536→   536→
+   537→   537→        {/* Reviews Grid */}
+   538→   538→        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+   539→   539→          {homepageReviews.map((review, i) => (
+   540→   540→            <motion.div
+   541→   541→              key={review.id}
+   542→   542→              initial={{ opacity: 0, y: 30 }}
+   543→   543→              animate={inView ? { opacity: 1, y: 0 } : {}}
+   544→   544→              transition={{ duration: 0.6, delay: i * 0.12, ease: [0.32, 0.72, 0, 1] }}
+   545→   545→            >
+   546→   546→              <GlassPanel
+   547→   547→                variant="obsidian"
+   548→   548→                className="p-6 hover:border-sovereign-gold/30 transition-all duration-500 rounded-[2rem] h-full"
+   549→   549→              >
+   550→   550→                <div className="relative z-10">
+   551→   551→                  <ReviewList reviews={[review]} />
+   552→   552→                </div>
+   553→   553→              </GlassPanel>
+   554→   554→            </motion.div>
+   555→   555→          ))}
+   556→   556→        </div>
+   557→   557→      </div>
+   558→   558→    </section>
+   559→   559→  );
+   560→   560→}
+   561→   561→
+   562→   562→/* ════════════════════════════════════════════
+   563→   563→   SECTION 6 — STATISTICS BAR
+   564→   564→   ════════════════════════════════════════════ */
+   565→   565→const stats = [
+   566→   566→  { value: 500, suffix: '+', label: 'منتج', icon: Package },
+   567→   567→  { value: 50, suffix: '+', label: 'حرفية', icon: Users },
+   568→   568→  { value: 120, suffix: '+', label: 'خدمة', icon: Briefcase },
+   569→   569→  { value: 2000, suffix: '+', label: 'عميل سعيد', icon: Smile },
+   570→   570→];
+   571→   571→
+   572→   572→function StatisticsBar() {
+   573→   573→  return (
+   574→   574→    <section className="py-16 md:py-20 px-4">
+   575→   575→      <div className="max-w-7xl mx-auto">
+   576→   576→        <motion.div
+   577→   577→          initial={{ opacity: 0, y: 30 }}
+   578→   578→          whileInView={{ opacity: 1, y: 0 }}
+   579→   579→          viewport={{ once: true, amount: 0.2 }}
+   580→   580→          transition={{ duration: 0.7, ease: [0.32, 0.72, 0, 1] }}
+   581→   581→        >
+   582→   582→          <GlassPanel variant="gold" className="rounded-[2.5rem] p-8 md:p-10">
+   583→   583→            <div className="relative z-10 grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-4">
+   584→   584→              {stats.map((stat, i) => (
+   585→   585→                <StatItem key={stat.label} stat={stat} index={i} />
+   586→   586→              ))}
+   587→   587→            </div>
+   588→   588→          </GlassPanel>
+   589→   589→        </motion.div>
+   590→   590→      </div>
+   591→   591→    </section>
+   592→   592→  );
+   593→   593→}
+   594→   594→
+   595→   595→function StatItem({ stat, index }: { stat: typeof stats[0]; index: number }) {
+   596→   596→  const { count, ref } = useAnimatedCounter(stat.value);
+   597→   597→
+   598→   598→  return (
+   599→   599→    <motion.div
+   600→   600→      ref={ref}
+   601→   601→      initial={{ opacity: 0, y: 20 }}
+   602→   602→      whileInView={{ opacity: 1, y: 0 }}
+   603→   603→      viewport={{ once: true, amount: 0.3 }}
+   604→   604→      transition={{ duration: 0.6, delay: index * 0.12, ease: [0.32, 0.72, 0, 1] }}
+   605→   605→      className="text-center space-y-2"
+   606→   606→    >
+   607→   607→      <div className="w-10 h-10 mx-auto rounded-xl bg-sovereign-gold/10 flex items-center justify-center text-sovereign-gold mb-2">
+   608→   608→        <stat.icon className="w-5 h-5" />
+   609→   609→      </div>
+   610→   610→      <p className="text-3xl md:text-4xl font-black tracking-tighter text-sovereign-gold">
+   611→   611→        {formatNumber(count)}<span className="text-xl">{stat.suffix}</span>
+   612→   612→      </p>
+   613→   613→      <p className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">{stat.label}</p>
+   614→   614→    </motion.div>
+   615→   615→  );
+   616→   616→}
+   617→   617→
+   618→   618→/* ════════════════════════════════════════════
+   619→   619→   SECTION 7 — CTA SECTION
+   620→   620→   ════════════════════════════════════════════ */
+   621→   621→function CTASection() {
+   622→   622→  const ref = useRef<HTMLDivElement>(null);
+   623→   623→  const inView = useInView(ref, { once: true, margin: "-100px" });
+   624→   624→
+   625→   625→  return (
+   626→   626→    <section ref={ref} className="py-24 md:py-40 px-4 relative overflow-hidden">
+   627→   627→      {/* Background Glow */}
+   628→   628→      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] md:w-[900px] h-[600px] md:h-[900px] bg-sovereign-gold/10 rounded-full blur-[160px] opacity-20 animate-pulse pointer-events-none" />
+   629→   629→
+   630→   630→      <motion.div
+   631→   631→        initial="hidden"
+   632→   632→        animate={inView ? "visible" : "hidden"}
+   633→   633→        variants={staggerContainer}
+   634→   634→        className="max-w-4xl mx-auto text-center relative z-10 space-y-8 md:space-y-12"
+   635→   635→      >
+   636→   636→        <motion.div variants={fadeUp}>
+   637→   637→          <SovereignSparkle active={true}>
+   638→   638→            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-sovereign-gold/60 mb-6">الانضمام مجاني</p>
+   639→   639→          </SovereignSparkle>
+   640→   640→        </motion.div>
+   641→   641→
+   642→   642→        <motion.h2 variants={fadeUp} className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tighter leading-tight">
+   643→   643→          انضمي إلى عالم{' '}
+   644→   644→          <span className="text-sovereign-gold">STANDARD</span>{' '}
+   645→   645→          اليوم
+   646→   646→        </motion.h2>
+   647→   647→
+   648→   648→        <motion.p variants={fadeUp} className="text-base md:text-xl text-muted-foreground font-light max-w-2xl mx-auto leading-relaxed">
+   649→   649→          سجّلي الآن واكتشفي عالماً من الفخامة والخدمات المتميزة. منصة متكاملة تجمع بين الكراء الفاخر وخدمات المناسبات والسوق المحلي.
+   650→   650→        </motion.p>
+   651→   651→
+   652→   652→        <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+   653→   653→          <Link href="/register">
+   654→   654→            <SovereignButton size="lg" variant="primary" className="h-16 px-12 text-sm rounded-full shadow-2xl shadow-sovereign-gold/20" withShimmer>
+   655→   655→              سجّلي الآن مجاناً
+   656→   656→              <ArrowLeft className="w-5 h-5" />
+   657→   657→            </SovereignButton>
+   658→   658→          </Link>
+   659→   659→          <Link href="/products">
+   660→   660→            <SovereignButton size="lg" variant="secondary" className="h-16 px-12 text-sm rounded-full">
+   661→   661→              تصفّحي المنتجات
+   662→   662→            </SovereignButton>
+   663→   663→          </Link>
+   664→   664→        </motion.div>
+   665→   665→      </motion.div>
+   666→   666→    </section>
+   667→   667→  );
+   668→   668→}
+   669→   669→
+   670→   670→/* ════════════════════════════════════════════
+   671→   671→   PAGE — HOME
+   672→   672→   ════════════════════════════════════════════ */
+   673→   673→export default function HomePage() {
+   674→   674→  return (
+   675→   675→    <div className="flex flex-col min-h-screen relative overflow-hidden bg-sovereign-obsidian text-sovereign-white font-arabic" dir="rtl">
+   676→   676→      <HeroSection />
+   677→   677→      <FeaturedProducts />
+   678→   678→      <EcosystemsSection />
+   679→   679→      <ArtisansSpotlight />
+   680→   680→      <ServicesCategories />
+   681→   681→      <CustomerReviewsSection />
+   682→   682→      <StatisticsBar />
+   683→   683→      <CTASection />
+   684→   684→    </div>
+   685→   685→  );
+   686→   686→}
