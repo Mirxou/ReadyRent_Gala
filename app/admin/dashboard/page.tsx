@@ -88,7 +88,7 @@ export default function AdminDashboardPage() {
 
           <div className="flex gap-4">
             <Button variant="outline" className="rounded-2xl h-14 px-8 border-white/10 hover:bg-white/5" asChild>
-              <Link href="/admin/settings">
+              <Link href="/admin/users">
                 <Settings className="ml-2 h-5 w-5" />
                 الإعدادات
               </Link>

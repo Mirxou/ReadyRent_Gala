@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { ProductSearch } from '@/components/product/product-search';
-import { SovereignGlow, SovereignSparkle } from '@/components/sovereign/sovereign-sparkle';
+import { SovereignGlow, SovereignSparkle } from '@/shared/components/sovereign/sovereign-sparkle';
 import { Badge } from '@/components/ui/badge';
 
 export default function ProductsPage() {

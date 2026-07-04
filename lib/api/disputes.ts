@@ -61,12 +61,11 @@ export const disputesApi = {
    * Uses multipart/form-data (not JSON).
    */
   uploadEvidence: async (disputeId: number, file: File): Promise<any> => {
-    const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
     const formData = new FormData();
     formData.append('file', file);
     formData.append('dispute', String(disputeId));
 
-    const response = await fetch(`${API_BASE}/api/disputes/disputes/${disputeId}/evidence/upload/`, {
+    const response = await fetch(`/api/disputes/disputes/${disputeId}/evidence/upload/`, {
       method: 'POST',
       body: formData,
       credentials: 'include',

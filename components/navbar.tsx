@@ -44,7 +44,7 @@ const navSections = [
     label: 'الخدمات',
     href: '/services',
     children: [
-      { label: 'دليل المناسبات', href: '/local-guide' },
+      { label: 'دليل الخدمات', href: '/services' },
       { label: 'صفحة الخدمات', href: '/services' },
       { label: 'الحرفيات', href: '/artisans' },
       { label: 'التأمين', href: '/insurance' },

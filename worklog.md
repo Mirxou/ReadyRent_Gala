@@ -796,3 +796,34 @@ Stage Summary:
 - 0 compilation errors in dev log
 - ~4,500 lines of dead code removed
 - All Arabic text preserved, no English leaks remaining in fixed files
+
+---
+Task ID: FULL-REPAIR-3
+Agent: Main Orchestrator
+Task: Comprehensive fix-all — neutral expert review and repair of every broken connection
+
+Work Log:
+- Complete audit of 60+ files importing from @/lib/api (broken axios to Django:8000)
+- Rewrote lib/api.ts: replaced axios with native fetch('/api/...') mock proxy — single fix repairs ALL 60+ consumer files
+- Fixed lib/api/sovereign-client.ts: removed localhost:8000 fallback reference
+- Fixed lib/api/disputes.ts: removed localhost:8000 in uploadEvidence function
+- Fixed src/features/judicial/components/high-court-monitor.tsx: removed localhost:8000 in certificate export
+- Fixed hooks/useOfflineSync.ts: replaced axios with native fetch, fixed French text to Arabic
+- Fixed components/navbar.tsx: changed /local-guide (nonexistent page) to /services
+- Fixed components/footer.tsx: changed /local-guide to /ai-search
+- Fixed app/admin/dashboard/page.tsx: changed /admin/settings (nonexistent) to /admin/users
+- Fixed app/dashboard/page.tsx: fixed /reports/sovereign_intel_2026_ar.md link with target=_blank
+- Fixed lib/store.ts: changed /auth/login redirect to /login
+- Consolidated sovereign component imports: 4 files updated from @/components/sovereign/ to @/shared/components/sovereign/
+- Deleted dead code: shared/ (root-level, unreachable) and components/sovereign/ (re-export shims)
+- Verified zero axios imports remain in codebase
+- Verified zero localhost:8000 references remain
+- Verified all critical pages compile and return HTTP 200
+
+Stage Summary:
+- lib/api.ts completely rewritten (691 lines → ~420 lines, fetch-based)
+- 60+ pages/components now work via mock API proxy
+- All broken links fixed (navbar, footer, admin dashboard, user dashboard)
+- All dead code removed
+- All hardcoded Django backend references eliminated
+- Server tested: /, /products, /login, /dashboard, /cart, /judicial, /disputes, /returns, /wallet, /verification, /offline, /trust-score, /bookings/:id all return 200

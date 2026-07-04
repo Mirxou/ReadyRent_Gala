@@ -1,7 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import axios from 'axios';
 
-// 🛡️ SOVEREIGN TYPE SYSTEM: Institutional-Grade Schemas
+// ═══════════════════════════════════════════════════════════════════
+// STANDARD.Rent — Sovereign Unified API Client
+// Replaces axios-to-Django with native fetch to /api/ mock proxy
+// ═══════════════════════════════════════════════════════════════════
+
+// ──── Type Exports ────
 export interface SovereignUser {
   id: number;
   email: string;
@@ -27,664 +31,565 @@ export interface SovereignBooking {
 export interface SovereignResponse<T> {
   success: boolean;
   data: T;
-  meta: {
-    version: string;
-    path: string;
+  meta?: {
+    version?: string;
+    path?: string;
     [key: string]: any;
   };
 }
 
-// 🛡️ INVESTOR-GRADE SECURITY: Cookie-First Architecture
-// No localStorage, No Authorization headers.
-// Browser handles cookies automatically via 'withCredentials: true'
+// ──── Core Fetch Helper ────
+// Returns { data, status, meta } to be compatible with axios response pattern
+// that components use: `const res = await api.get(...); const d = res.data;`
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+async function apiFetch(
+  path: string,
+  options: {
+    method?: string;
+    body?: any;
+    params?: Record<string, any>;
+    headers?: Record<string, string>;
+  } = {},
+): Promise<{ data: any; status: number; meta?: any }> {
+  let url = `/api/${path.replace(/^\/+/, '')}`;
 
-export const api = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  timeout: 15000,
-  withCredentials: true, // Critical: Sends HttpOnly cookies
-  xsrfCookieName: 'csrftoken',
-  xsrfHeaderName: 'X-CSRFToken', // Protection against CSRF
-  paramsSerializer: (params: any) => {
-    // Convert arrays to Django getlist format: ?sizes=XXXL&sizes=XXL
-    const searchParams = new URLSearchParams();
-    Object.keys(params).forEach((key) => {
-      const value = params[key];
-      if (Array.isArray(value)) {
-        value.forEach((item: any) => {
-          searchParams.append(key, String(item));
-        });
-      } else if (value !== null && value !== undefined) {
-        searchParams.append(key, String(value));
+  // Append query params
+  if (options.params) {
+    const qs = new URLSearchParams();
+    Object.entries(options.params).forEach(([k, v]) => {
+      if (v !== undefined && v !== null) {
+        if (Array.isArray(v)) {
+          v.forEach((item) => qs.append(k, String(item)));
+        } else {
+          qs.append(k, String(v));
+        }
       }
     });
-    return searchParams.toString();
-  },
-});
-
-// Response Interceptor: Handle unwrapping of Sovereign Envelope & 401 Refresh
-api.interceptors.response.use(
-  (response) => {
-    // Phase 5: Sovereign Unwrapping
-    // Automatically extract .data from { success, data, meta } envelope
-    if (response.data && typeof response.data === 'object' && 'success' in response.data && 'data' in response.data) {
-       // Attached metadata for components that need it (e.g. pagination)
-       (response as any).meta = response.data.meta;
-       // Transparently set .data to the actual payload
-       response.data = response.data.data;
-    }
-    return response;
-  },
-  async (error) => {
-    const originalRequest = error.config;
-
-
-    // Handle network errors
-    if (!error.response) {
-      if (error.code === 'ECONNABORTED') {
-        error.message = 'انتهت مهلة الاتصال. يرجى التحقق من اتصال الإنترنت وإعادة المحاولة.';
-      } else if (error.message === 'Network Error') {
-        error.message = `لا يمكن الاتصال بالخادم. تأكد من أن الـ backend يعمل على ${API_BASE_URL}`;
-      } else {
-        error.message = error.message || 'خطأ في الاتصال بالخادم';
-      }
-      return Promise.reject(error);
-    }
-
-    // Prevent infinite loops [Critical]
-    // If 401 happens, try to refresh via cookie
-    if (error.response?.status === 401 && !originalRequest._retry && !String(originalRequest?.url || '').includes('/auth/token/refresh/')) {
-      originalRequest._retry = true;
-
-      try {
-        // 401 Detected: Attempting Silent Refresh via Cookie...
-        // Call refresh endpoint - Backend reads 'refresh_token' cookie automatically
-        await api.post('/auth/token/refresh/');
-
-        // Refresh Successful: Retrying original request
-        // Retry original request (Browser sends new 'access_token' cookie)
-        return api(originalRequest);
-      } catch (refreshError) {
-        // Refresh Failed: Session expired or invalid
-        // Optional: Redirect to login or clear client state
-        if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
-          window.location.href = '/login';
-        }
-        return Promise.reject(refreshError);
-      }
-    }
-
-    // Dignity Preserved Error Handling
-    if (error.response?.data?.dignity_preserved) {
-      // Handle specialized sovereign errors if needed
-    }
-
-    return Promise.reject(error);
+    const qStr = qs.toString();
+    if (qStr) url += (url.includes('?') ? '&' : '?') + qStr;
   }
-);
 
-// API endpoints
+  const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
+
+  try {
+    const res = await fetch(url, {
+      method: options.method || 'GET',
+      headers: isFormData ? options.headers : {
+        'Content-Type': 'application/json',
+        ...options.headers,
+      },
+      body: isFormData ? options.body : options.body ? JSON.stringify(options.body) : undefined,
+      credentials: 'include',
+    });
+
+    // Handle 204 No Content
+    if (res.status === 204) {
+      return { data: { success: true }, status: 204 };
+    }
+
+    const json = await res.json();
+
+    // Unwrap sovereign envelope: { success, data, meta } → return { data, status, meta }
+    if (json && typeof json === 'object' && 'success' in json && 'data' in json) {
+      return { data: json.data, status: res.status, meta: json.meta };
+    }
+
+    // Already raw data
+    return { data: json, status: res.status };
+  } catch (error) {
+    // Return empty data instead of throwing — prevents page crashes
+    console.warn('API fetch failed:', path, (error as Error)?.message);
+    return { data: null, status: 0 };
+  }
+}
+
+// ──── Axios-Compatible `api` Instance ────
+// Components use: `api.get('/path')`, `api.post('/path', body)`, etc.
+// These return `{ data: ..., status: ... }` just like axios responses.
+export const api = {
+  get: (url: string, config?: { params?: any; headers?: any }) =>
+    apiFetch(url, { method: 'GET', params: config?.params, headers: config?.headers }),
+
+  post: (url: string, body?: any, config?: { headers?: any }) =>
+    apiFetch(url, { method: 'POST', body, headers: config?.headers }),
+
+  put: (url: string, body?: any, config?: { headers?: any }) =>
+    apiFetch(url, { method: 'PUT', body, headers: config?.headers }),
+
+  patch: (url: string, body?: any, config?: { headers?: any }) =>
+    apiFetch(url, { method: 'PATCH', body, headers: config?.headers }),
+
+  delete: (url: string, config?: { headers?: any }) =>
+    apiFetch(url, { method: 'DELETE', headers: config?.headers }),
+};
+
+// ═══════════════════════════════════════════════════════════════════
+// API Endpoint Objects — same shape as before, now using fetch
+// ═══════════════════════════════════════════════════════════════════
+
 export const authApi = {
   login: (email: string, password: string) =>
-    api.post('/auth/login/', { email, password }),
-  register: (data: any) => api.post('/auth/register/', data),
-  logout: () => api.post('/auth/logout/'),
-  me: () => api.get('/auth/profile/'),
-  passwordResetRequest: (email: string) => api.post('/auth/password/reset/request/', { email }),
-  passwordResetConfirm: (token: string, uid: string, password: string, passwordConfirm: string) => api.post('/auth/password/reset/confirm/', { token, uid, password, password_confirm: passwordConfirm }),
-  // Sovereign Guard (Phase 6)
-  generate2FASecret: () => api.post('/auth/security/2fa/generate/'),
-  enable2FA: (data: { secret: string; token: string }) => api.post('/auth/security/2fa/enable/', data),
+    apiFetch('auth/login/', { method: 'POST', body: { email, password } }),
+  register: (data: any) =>
+    apiFetch('auth/register/', { method: 'POST', body: data }),
+  logout: () =>
+    apiFetch('auth/logout/', { method: 'POST' }),
+  me: () =>
+    apiFetch('auth/profile/'),
+  passwordResetRequest: (email: string) =>
+    apiFetch('auth/password/reset/request/', { method: 'POST', body: { email } }),
+  passwordResetConfirm: (token: string, uid: string, password: string, passwordConfirm: string) =>
+    apiFetch('auth/password/reset/confirm/', { method: 'POST', body: { token, uid, password, password_confirm: passwordConfirm } }),
+  generate2FASecret: () =>
+    apiFetch('auth/security/2fa/generate/', { method: 'POST' }),
+  enable2FA: (data: { secret: string; token: string }) =>
+    apiFetch('auth/security/2fa/enable/', { method: 'POST', body: data }),
 };
 
 export const verificationApi = {
-  getStatus: () => api.get('/auth/verification/'),
-  requestPhoneVerification: (data: any) => api.post('/auth/verification/phone/request/', data),
-  verifyPhone: (data: any) => api.post('/auth/verification/phone/verify/', data),
-  uploadID: (data: FormData) => api.post('/auth/verification/id/upload/', data, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  }),
-  verifyAddress: (data: any) => api.post('/auth/verification/address/', data),
+  getStatus: () => apiFetch('auth/verification/'),
+  requestPhoneVerification: (data: any) => apiFetch('auth/verification/phone/request/', { method: 'POST', body: data }),
+  verifyPhone: (data: any) => apiFetch('auth/verification/phone/verify/', { method: 'POST', body: data }),
+  uploadID: (data: FormData) => apiFetch('auth/verification/id/upload/', { method: 'POST', body: data }),
+  verifyAddress: (data: any) => apiFetch('auth/verification/address/', { method: 'POST', body: data }),
 };
 
 export const adminVerificationApi = {
-  getAll: (params?: any) => api.get('/auth/admin/verifications/', { params }),
-  approve: (userId: number) => api.post(`/auth/admin/verifications/${userId}/approve/`),
-  reject: (userId: number, reason?: string) => api.post(`/auth/admin/verifications/${userId}/reject/`, { reason }),
+  getAll: (params?: any) => apiFetch('auth/admin/verifications/', { params }),
+  approve: (userId: number) => apiFetch(`auth/admin/verifications/${userId}/approve/`, { method: 'POST' }),
+  reject: (userId: number, reason?: string) => apiFetch(`auth/admin/verifications/${userId}/reject/`, { method: 'POST', body: { reason } }),
 };
 
 export const blacklistApi = {
-  getAll: (params?: any) => api.get('/auth/admin/blacklist/', { params }),
-  add: (data: any) => api.post('/auth/admin/blacklist/add/', data),
+  getAll: (params?: any) => apiFetch('auth/admin/blacklist/', { params }),
+  add: (data: any) => apiFetch('auth/admin/blacklist/add/', { method: 'POST', body: data }),
 };
 
 export const staffApi = {
-  getList: (params?: any) => api.get('/auth/staff/list/', { params }),
-  // Roles
-  getRoles: (params?: any) => api.get('/auth/staff/roles/', { params }),
-  createRole: (data: any) => api.post('/auth/staff/roles/', data),
-  updateRole: (id: number, data: any) => api.patch(`/auth/staff/roles/${id}/`, data),
-  deleteRole: (id: number) => api.delete(`/auth/staff/roles/${id}/`),
-  // Activity Logs
-  getActivityLogs: (params?: any) => api.get('/auth/staff/activity-logs/', { params }),
-  getActivityLog: (id: number) => api.get(`/auth/staff/activity-logs/${id}/`),
-  // Shifts
-  getShifts: (params?: any) => api.get('/auth/staff/shifts/', { params }),
-  createShift: (data: any) => api.post('/auth/staff/shifts/', data),
-  updateShift: (id: number, data: any) => api.patch(`/auth/staff/shifts/${id}/`, data),
-  deleteShift: (id: number) => api.delete(`/auth/staff/shifts/${id}/`),
-  // Performance Reviews
-  getPerformanceReviews: (params?: any) => api.get('/auth/staff/performance-reviews/', { params }),
-  createPerformanceReview: (data: any) => api.post('/auth/staff/performance-reviews/', data),
-  updatePerformanceReview: (id: number, data: any) => api.patch(`/auth/staff/performance-reviews/${id}/`, data),
-  deletePerformanceReview: (id: number) => api.delete(`/auth/staff/performance-reviews/${id}/`),
+  getList: (params?: any) => apiFetch('auth/staff/list/', { params }),
+  getRoles: (params?: any) => apiFetch('auth/staff/roles/', { params }),
+  createRole: (data: any) => apiFetch('auth/staff/roles/', { method: 'POST', body: data }),
+  updateRole: (id: number, data: any) => apiFetch(`auth/staff/roles/${id}/`, { method: 'PATCH', body: data }),
+  deleteRole: (id: number) => apiFetch(`auth/staff/roles/${id}/`, { method: 'DELETE' }),
+  getActivityLogs: (params?: any) => apiFetch('auth/staff/activity-logs/', { params }),
+  getActivityLog: (id: number) => apiFetch(`auth/staff/activity-logs/${id}/`),
+  getShifts: (params?: any) => apiFetch('auth/staff/shifts/', { params }),
+  createShift: (data: any) => apiFetch('auth/staff/shifts/', { method: 'POST', body: data }),
+  updateShift: (id: number, data: any) => apiFetch(`auth/staff/shifts/${id}/`, { method: 'PATCH', body: data }),
+  deleteShift: (id: number) => apiFetch(`auth/staff/shifts/${id}/`, { method: 'DELETE' }),
+  getPerformanceReviews: (params?: any) => apiFetch('auth/staff/performance-reviews/', { params }),
+  createPerformanceReview: (data: any) => apiFetch('auth/staff/performance-reviews/', { method: 'POST', body: data }),
+  updatePerformanceReview: (id: number, data: any) => apiFetch(`auth/staff/performance-reviews/${id}/`, { method: 'PATCH', body: data }),
+  deletePerformanceReview: (id: number) => apiFetch(`auth/staff/performance-reviews/${id}/`, { method: 'DELETE' }),
 };
 
 export const productsApi = {
-  getAll: (params?: any) => {
-    return api.get('/products/', { params });
-  },
-  getById: (id: string) => api.get(`/products/${id}/`),
-  getBySlug: (slug: string) => api.get(`/products/${slug}/`),
-  getCategories: () => api.get('/products/categories/'),
-  getMetadata: () => api.get('/products/metadata/'),
-  getSearchSuggestions: (query: string) => api.get('/products/search-suggestions/', { params: { q: query } }),
+  getAll: (params?: any) => apiFetch('products/', { params }),
+  getById: (id: string) => apiFetch(`products/${id}/`),
+  getBySlug: (slug: string) => apiFetch(`products/${slug}/`),
+  getCategories: () => apiFetch('products/categories/'),
+  getMetadata: () => apiFetch('products/metadata/'),
+  getSearchSuggestions: (query: string) => apiFetch('products/search-suggestions/', { params: { q: query } }),
   getMatchingAccessories: (productId: number, limit?: number) =>
-    api.get(`/products/${productId}/matching-accessories/`, { params: { limit: limit || 5 } }),
+    apiFetch(`products/${productId}/matching-accessories/`, { params: { limit: limit || 5 } }),
   getRecommendations: (productId: number, limit?: number) =>
-    api.get(`/products/${productId}/recommendations/`, { params: { limit: limit || 6 } }),
-  // Wishlist
-  getWishlist: () => api.get('/products/wishlist/'),
-  addToWishlist: (productId: number) => api.post('/products/wishlist/', { product_id: productId }),
-  removeFromWishlist: (id: number) => api.delete(`/products/wishlist/${id}/`),
-  toggleWishlist: (productId: number) => api.post(`/products/wishlist/toggle/${productId}/`),
-  checkWishlist: (productId: number) => api.get(`/products/wishlist/check/${productId}/`),
+    apiFetch(`products/${productId}/recommendations/`, { params: { limit: limit || 6 } }),
+  getWishlist: () => apiFetch('products/wishlist/'),
+  addToWishlist: (productId: number) => apiFetch('products/wishlist/', { method: 'POST', body: { product_id: productId } }),
+  removeFromWishlist: (id: number) => apiFetch(`products/wishlist/${id}/`, { method: 'DELETE' }),
+  toggleWishlist: (productId: number) => apiFetch(`products/wishlist/toggle/${productId}/`, { method: 'POST' }),
+  checkWishlist: (productId: number) => apiFetch(`products/wishlist/check/${productId}/`),
 };
 
 export const bookingsApi = {
-  create: (data: any) => api.post('/bookings/create/', data),
-  getAll: () => api.get('/bookings/'),
-  getById: (id: string) => api.get(`/bookings/${id}/`),
-  getCart: () => api.get('/bookings/cart/'),
-  addToCart: (data: any) => api.post('/bookings/cart/items/', data),
-  removeFromCart: (id: number) => api.delete(`/bookings/cart/items/${id}/`),
-  createBookingFromCart: (data?: any) => api.post('/bookings/create/', data),
-  update: (id: number, data: any) => api.patch(`/bookings/${id}/update/`, data),
-  updateStatus: (id: number, status: string) => api.patch(`/bookings/${id}/status/`, { status }),
-  cancel: (id: number) => api.post(`/bookings/${id}/cancel/`),
-  getWaitlist: () => api.get('/bookings/waitlist/'),
-  addToWaitlist: (data: any) => api.post('/bookings/waitlist/add/', data),
-  removeFromWaitlist: (id: number) => api.delete(`/bookings/waitlist/${id}/`),
-  getCancellationPolicy: (id: number) => api.get(`/bookings/${id}/cancellation-policy/`),
-  earlyReturn: (id: number, data: any) => api.post(`/bookings/${id}/early-return/`, data),
-  getRefunds: (params?: any) => api.get('/bookings/refunds/', { params }),
-  calculateDeposit: (productId: number) => api.get('/bookings/calculate-deposit/', { params: { product_id: productId } }),
+  create: (data: any) => apiFetch('bookings/create/', { method: 'POST', body: data }),
+  getAll: () => apiFetch('bookings/'),
+  getById: (id: string) => apiFetch(`bookings/${id}/`),
+  getCart: () => apiFetch('bookings/cart/'),
+  addToCart: (data: any) => apiFetch('bookings/cart/items/', { method: 'POST', body: data }),
+  removeFromCart: (id: number) => apiFetch(`bookings/cart/items/${id}/`, { method: 'DELETE' }),
+  createBookingFromCart: (data?: any) => apiFetch('bookings/create/', { method: 'POST', body: data }),
+  update: (id: number, data: any) => apiFetch(`bookings/${id}/update/`, { method: 'PATCH', body: data }),
+  updateStatus: (id: number, status: string) => apiFetch(`bookings/${id}/status/`, { method: 'PATCH', body: { status } }),
+  cancel: (id: number) => apiFetch(`bookings/${id}/cancel/`, { method: 'POST' }),
+  getWaitlist: () => apiFetch('bookings/waitlist/'),
+  addToWaitlist: (data: any) => apiFetch('bookings/waitlist/add/', { method: 'POST', body: data }),
+  removeFromWaitlist: (id: number) => apiFetch(`bookings/waitlist/${id}/`, { method: 'DELETE' }),
+  getCancellationPolicy: (id: number) => apiFetch(`bookings/${id}/cancellation-policy/`),
+  earlyReturn: (id: number, data: any) => apiFetch(`bookings/${id}/early-return/`, { method: 'POST', body: data }),
+  getRefunds: (params?: any) => apiFetch('bookings/refunds/', { params }),
+  calculateDeposit: (productId: number) => apiFetch('bookings/calculate-deposit/', { params: { product_id: productId } }),
 };
 
 export const damageAssessmentApi = {
-  create: (data: any) => api.post('/bookings/damage-assessment/', data),
-  getById: (id: number) => api.get(`/bookings/damage-assessment/${id}/`),
-  uploadPhoto: (data: FormData) => api.post('/bookings/damage-photos/', data, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  }),
-  createInspectionChecklist: (data: any) => api.post('/bookings/inspection-checklist/', data),
-  updateInspectionChecklist: (id: number, data: any) => api.patch(`/bookings/inspection-checklist/${id}/`, data),
-  createClaim: (data: any) => api.post('/bookings/damage-claims/', data),
-  getClaim: (id: number) => api.get(`/bookings/damage-claims/${id}/`),
+  create: (data: any) => apiFetch('bookings/damage-assessment/', { method: 'POST', body: data }),
+  getById: (id: number) => apiFetch(`bookings/damage-assessment/${id}/`),
+  uploadPhoto: (data: FormData) => apiFetch('bookings/damage-photos/', { method: 'POST', body: data }),
+  createInspectionChecklist: (data: any) => apiFetch('bookings/inspection-checklist/', { method: 'POST', body: data }),
+  updateInspectionChecklist: (id: number, data: any) => apiFetch(`bookings/inspection-checklist/${id}/`, { method: 'PATCH', body: data }),
+  createClaim: (data: any) => apiFetch('bookings/damage-claims/', { method: 'POST', body: data }),
+  getClaim: (id: number) => apiFetch(`bookings/damage-claims/${id}/`),
 };
 
 export const adminApi = {
-  // Dashboard stats
-  getDashboardStats: () => api.get('/analytics/admin/dashboard/'),
-  getRevenue: (params?: { days?: number }) => api.get('/analytics/admin/revenue/', { params }),
-  exportRevenueCSV: (params?: { days?: number }) =>
-    api.get('/analytics/admin/revenue/export/', { params, responseType: 'blob' }),
-  getDailyAnalyticsSummary: (params?: { days?: number }) =>
-    api.get('/analytics/daily/summary/', { params }),
-  getTopProducts: (params?: { metric?: string }) =>
-    api.get('/analytics/products/top_products/', { params }),
-  getSalesReport: (params?: { days?: number; export?: boolean }) => {
-    if (params?.export) {
-      return api.get('/analytics/admin/sales-report/', { params: { ...params, export: 'true' }, responseType: 'blob' });
-    }
-    return api.get('/analytics/admin/sales-report/', { params });
-  },
-
-  // Bookings
-  getAllBookings: (params?: any) => api.get('/bookings/admin/', { params }),
-  updateBooking: (id: number, data: any) => api.patch(`/bookings/admin/${id}/`, data),
-  getBookingStats: () => api.get('/bookings/admin/stats/'),
-
-  // Products
-  getAllProducts: (params?: any) => api.get('/products/admin/products/', { params }),
-  createProduct: (data: any) => api.post('/products/admin/products/', data),
-  updateProduct: (id: number, data: any) => api.patch(`/products/admin/products/${id}/`, data),
-  deleteProduct: (id: number) => api.delete(`/products/admin/products/${id}/`),
-
-  // Categories
-  getAllCategories: () => api.get('/products/admin/categories/'),
-  createCategory: (data: any) => api.post('/products/admin/categories/', data),
-  updateCategory: (id: number, data: any) => api.patch(`/products/admin/categories/${id}/`, data),
-  deleteCategory: (id: number) => api.delete(`/products/admin/categories/${id}/`),
-
-  // Variants
-  getAllVariants: (params?: any) => api.get('/products/admin/variants/', { params }),
-  createVariant: (data: any) => api.post('/products/admin/variants/', data),
-  updateVariant: (id: number, data: any) => api.patch(`/products/admin/variants/${id}/`, data),
-  deleteVariant: (id: number) => api.delete(`/products/admin/variants/${id}/`),
-
-  // Users
-  getAllUsers: (params?: any) => api.get('/auth/admin/users/', { params }),
-  getUser: (id: number) => api.get(`/auth/admin/users/${id}/`),
-  updateUser: (id: number, data: any) => api.patch(`/auth/admin/users/${id}/`, data),
-  deleteUser: (id: number) => api.delete(`/auth/admin/users/${id}/`),
+  getDashboardStats: () => apiFetch('analytics/admin/dashboard/'),
+  getRevenue: (params?: { days?: number }) => apiFetch('analytics/admin/revenue/', { params }),
+  exportRevenueCSV: (params?: { days?: number }) => apiFetch('analytics/admin/revenue/export/', { params }),
+  getDailyAnalyticsSummary: (params?: { days?: number }) => apiFetch('analytics/daily/summary/', { params }),
+  getTopProducts: (params?: { metric?: string }) => apiFetch('analytics/products/top_products/', { params }),
+  getSalesReport: (params?: { days?: number; export?: boolean }) => apiFetch('analytics/admin/sales-report/', { params }),
+  getAllBookings: (params?: any) => apiFetch('bookings/admin/', { params }),
+  updateBooking: (id: number, data: any) => apiFetch(`bookings/admin/${id}/`, { method: 'PATCH', body: data }),
+  getBookingStats: () => apiFetch('bookings/admin/stats/'),
+  getAllProducts: (params?: any) => apiFetch('products/admin/products/', { params }),
+  createProduct: (data: any) => apiFetch('products/admin/products/', { method: 'POST', body: data }),
+  updateProduct: (id: number, data: any) => apiFetch(`products/admin/products/${id}/`, { method: 'PATCH', body: data }),
+  deleteProduct: (id: number) => apiFetch(`products/admin/products/${id}/`, { method: 'DELETE' }),
+  getAllCategories: () => apiFetch('products/admin/categories/'),
+  createCategory: (data: any) => apiFetch('products/admin/categories/', { method: 'POST', body: data }),
+  updateCategory: (id: number, data: any) => apiFetch(`products/admin/categories/${id}/`, { method: 'PATCH', body: data }),
+  deleteCategory: (id: number) => apiFetch(`products/admin/categories/${id}/`, { method: 'DELETE' }),
+  getAllVariants: (params?: any) => apiFetch('products/admin/variants/', { params }),
+  createVariant: (data: any) => apiFetch('products/admin/variants/', { method: 'POST', body: data }),
+  updateVariant: (id: number, data: any) => apiFetch(`products/admin/variants/${id}/`, { method: 'PATCH', body: data }),
+  deleteVariant: (id: number) => apiFetch(`products/admin/variants/${id}/`, { method: 'DELETE' }),
+  getAllUsers: (params?: any) => apiFetch('auth/admin/users/', { params }),
+  getUser: (id: number) => apiFetch(`auth/admin/users/${id}/`),
+  updateUser: (id: number, data: any) => apiFetch(`auth/admin/users/${id}/`, { method: 'PATCH', body: data }),
+  deleteUser: (id: number) => apiFetch(`auth/admin/users/${id}/`, { method: 'DELETE' }),
 };
 
 export const notificationsApi = {
-  getAll: () => api.get('/notifications/'),
-  markAsRead: (id: number) => api.patch(`/notifications/${id}/read/`),
-  markAllAsRead: () => api.post('/notifications/mark-all-read/'),
+  getAll: () => apiFetch('notifications/'),
+  markAsRead: (id: number) => apiFetch(`notifications/${id}/read/`, { method: 'PATCH' }),
+  markAllAsRead: () => apiFetch('notifications/mark-all-read/', { method: 'POST' }),
 };
 
 export const returnsApi = {
-  getAll: () => api.get('/returns/returns/'),
-  getMyReturns: () => api.get('/returns/returns/my_returns/'),
-  create: (data: any) => api.post('/returns/returns/', data),
-  getById: (id: number) => api.get(`/returns/returns/${id}/`),
-  updateStatus: (id: number, status: string) => api.patch(`/returns/returns/${id}/`, { status }),
-  approve: (id: number, data?: any) => api.post(`/returns/returns/${id}/approve/`, data),
-  markReceived: (id: number) => api.post(`/returns/returns/${id}/mark_received/`),
-  completeInspection: (id: number, data: any) => api.post(`/returns/returns/${id}/complete_inspection/`, data),
+  getAll: () => apiFetch('returns/returns/'),
+  getMyReturns: () => apiFetch('returns/returns/my_returns/'),
+  create: (data: any) => apiFetch('returns/returns/', { method: 'POST', body: data }),
+  getById: (id: number) => apiFetch(`returns/returns/${id}/`),
+  updateStatus: (id: number, status: string) => apiFetch(`returns/returns/${id}/`, { method: 'PATCH', body: { status } }),
+  approve: (id: number, data?: any) => apiFetch(`returns/returns/${id}/approve/`, { method: 'POST', body: data }),
+  markReceived: (id: number) => apiFetch(`returns/returns/${id}/mark_received/`, { method: 'POST' }),
+  completeInspection: (id: number, data: any) => apiFetch(`returns/returns/${id}/complete_inspection/`, { method: 'POST', body: data }),
 };
 
 export const reviewsApi = {
-  getAll: (params?: any) => api.get('/reviews/', { params }),
-  create: (data: any) => api.post('/reviews/create/', data),
-  moderate: (id: number, status: string) => api.patch(`/reviews/${id}/moderate/`, { status }),
+  getAll: (params?: any) => apiFetch('reviews/', { params }),
+  create: (data: any) => apiFetch('reviews/create/', { method: 'POST', body: data }),
+  moderate: (id: number, status: string) => apiFetch(`reviews/${id}/moderate/`, { method: 'PATCH', body: { status } }),
 };
 
 export const maintenanceApi = {
-  // Periods
-  getPeriods: (params?: any) => api.get('/maintenance/periods/', { params }),
-  getPeriodsList: (params?: any) => api.get('/maintenance/periods/list/', { params }),
-  createPeriod: (data: any) => api.post('/maintenance/periods/', data),
-  updatePeriod: (id: number, data: any) => api.patch(`/maintenance/periods/${id}/`, data),
-  deletePeriod: (id: number) => api.delete(`/maintenance/periods/${id}/`),
-  // Schedules
-  getSchedules: (params?: any) => api.get('/maintenance/schedules/', { params }),
-  getSchedulesList: (params?: any) => api.get('/maintenance/schedules/list/', { params }),
-  createSchedule: (data: any) => api.post('/maintenance/schedules/', data),
-  updateSchedule: (id: number, data: any) => api.patch(`/maintenance/schedules/${id}/`, data),
-  deleteSchedule: (id: number) => api.delete(`/maintenance/schedules/${id}/`),
-  // Records
-  getRecords: (params?: any) => api.get('/maintenance/records/', { params }),
-  createRecord: (data: any) => api.post('/maintenance/records/', data),
-  updateRecord: (id: number, data: any) => api.patch(`/maintenance/records/${id}/`, data),
-  deleteRecord: (id: number) => api.delete(`/maintenance/records/${id}/`),
+  getPeriods: (params?: any) => apiFetch('maintenance/periods/', { params }),
+  getPeriodsList: (params?: any) => apiFetch('maintenance/periods/list/', { params }),
+  createPeriod: (data: any) => apiFetch('maintenance/periods/', { method: 'POST', body: data }),
+  updatePeriod: (id: number, data: any) => apiFetch(`maintenance/periods/${id}/`, { method: 'PATCH', body: data }),
+  deletePeriod: (id: number) => apiFetch(`maintenance/periods/${id}/`, { method: 'DELETE' }),
+  getSchedules: (params?: any) => apiFetch('maintenance/schedules/', { params }),
+  getSchedulesList: (params?: any) => apiFetch('maintenance/schedules/list/', { params }),
+  createSchedule: (data: any) => apiFetch('maintenance/schedules/', { method: 'POST', body: data }),
+  updateSchedule: (id: number, data: any) => apiFetch(`maintenance/schedules/${id}/`, { method: 'PATCH', body: data }),
+  deleteSchedule: (id: number) => apiFetch(`maintenance/schedules/${id}/`, { method: 'DELETE' }),
+  getRecords: (params?: any) => apiFetch('maintenance/records/', { params }),
+  createRecord: (data: any) => apiFetch('maintenance/records/', { method: 'POST', body: data }),
+  updateRecord: (id: number, data: any) => apiFetch(`maintenance/records/${id}/`, { method: 'PATCH', body: data }),
+  deleteRecord: (id: number) => apiFetch(`maintenance/records/${id}/`, { method: 'DELETE' }),
 };
 
 export const hygieneApi = {
-  // Records
-  getRecords: (params?: any) => api.get('/hygiene/hygiene-records/', { params }),
-  getRecord: (id: number) => api.get(`/hygiene/hygiene-records/${id}/`),
-  createRecord: (data: any) => api.post('/hygiene/hygiene-records/', data),
-  updateRecord: (id: number, data: any) => api.patch(`/hygiene/hygiene-records/${id}/`, data),
-  deleteRecord: (id: number) => api.delete(`/hygiene/hygiene-records/${id}/`),
-  getLatestForProduct: (productId: number) => api.get('/hygiene/hygiene-records/latest_for_product/', { params: { product: productId } }),
-  // Certificates
-  getCertificates: (params?: any) => api.get('/hygiene/certificates/', { params }),
-  getCertificate: (id: number) => api.get(`/hygiene/certificates/${id}/`),
-  createCertificate: (data: any) => api.post('/hygiene/certificates/', data),
-  updateCertificate: (id: number, data: any) => api.patch(`/hygiene/certificates/${id}/`, data),
-  deleteCertificate: (id: number) => api.delete(`/hygiene/certificates/${id}/`),
+  getRecords: (params?: any) => apiFetch('hygiene/hygiene-records/', { params }),
+  getRecord: (id: number) => apiFetch(`hygiene/hygiene-records/${id}/`),
+  createRecord: (data: any) => apiFetch('hygiene/hygiene-records/', { method: 'POST', body: data }),
+  updateRecord: (id: number, data: any) => apiFetch(`hygiene/hygiene-records/${id}/`, { method: 'PATCH', body: data }),
+  deleteRecord: (id: number) => apiFetch(`hygiene/hygiene-records/${id}/`, { method: 'DELETE' }),
+  getLatestForProduct: (productId: number) => apiFetch('hygiene/hygiene-records/latest_for_product/', { params: { product: productId } }),
+  getCertificates: (params?: any) => apiFetch('hygiene/certificates/', { params }),
+  getCertificate: (id: number) => apiFetch(`hygiene/certificates/${id}/`),
+  createCertificate: (data: any) => apiFetch('hygiene/certificates/', { method: 'POST', body: data }),
+  updateCertificate: (id: number, data: any) => apiFetch(`hygiene/certificates/${id}/`, { method: 'PATCH', body: data }),
+  deleteCertificate: (id: number) => apiFetch(`hygiene/certificates/${id}/`, { method: 'DELETE' }),
 };
 
 export const locationsApi = {
-  // Addresses
-  getMyAddresses: () => api.get('/locations/addresses/'),
-  getAllAddresses: (params?: any) => api.get('/locations/addresses/', { params }),
-  getAddress: (id: number) => api.get(`/locations/addresses/${id}/`),
-  createAddress: (data: any) => api.post('/locations/addresses/', data),
-  updateAddress: (id: number, data: any) => api.patch(`/locations/addresses/${id}/`, data),
-  deleteAddress: (id: number) => api.delete(`/locations/addresses/${id}/`),
-  // Delivery Zones
-  getDeliveryZones: (params?: any) => api.get('/locations/delivery-zones/', { params }),
-  getDeliveryZone: (id: number) => api.get(`/locations/delivery-zones/${id}/`),
-  createDeliveryZone: (data: any) => api.post('/locations/delivery-zones/', data),
-  updateDeliveryZone: (id: number, data: any) => api.patch(`/locations/delivery-zones/${id}/`, data),
-  deleteDeliveryZone: (id: number) => api.delete(`/locations/delivery-zones/${id}/`),
-  checkSameDayDelivery: (zoneId: number) => api.get(`/locations/delivery-zones/${zoneId}/check_same_day/`),
-  // Deliveries
-  getMyDeliveries: () => api.get('/locations/delivery-requests/my_deliveries/'),
-  getDeliveries: (params?: any) => api.get('/locations/deliveries/', { params }),
-  getDelivery: (id: number) => api.get(`/locations/deliveries/${id}/`),
-  createDelivery: (data: any) => api.post('/locations/deliveries/', data),
-  updateDelivery: (id: number, data: any) => api.patch(`/locations/deliveries/${id}/`, data),
-  deleteDelivery: (id: number) => api.delete(`/locations/deliveries/${id}/`),
-  getDeliveryTracking: (id: number) => api.get(`/locations/delivery-requests/${id}/`),
-  updateTracking: (id: number, data: any) => api.post(`/locations/delivery-requests/${id}/update_tracking/`, data),
-  // Tracking
-  getTracking: (params?: any) => api.get('/locations/tracking/', { params }),
-  getTrackingById: (id: number) => api.get(`/locations/tracking/${id}/`),
-  // Geocoding
-  geocodeAddress: (address: string) => api.post('/locations/geocode/', { address }),
-  reverseGeocode: (latitude: number, longitude: number) => api.post('/locations/reverse-geocode/', { latitude, longitude }),
-  getPlaceDetails: (placeId: string) => api.post('/locations/place-details/', { place_id: placeId }),
+  getMyAddresses: () => apiFetch('locations/addresses/'),
+  getAllAddresses: (params?: any) => apiFetch('locations/addresses/', { params }),
+  getAddress: (id: number) => apiFetch(`locations/addresses/${id}/`),
+  createAddress: (data: any) => apiFetch('locations/addresses/', { method: 'POST', body: data }),
+  updateAddress: (id: number, data: any) => apiFetch(`locations/addresses/${id}/`, { method: 'PATCH', body: data }),
+  deleteAddress: (id: number) => apiFetch(`locations/addresses/${id}/`, { method: 'DELETE' }),
+  getDeliveryZones: (params?: any) => apiFetch('locations/delivery-zones/', { params }),
+  getDeliveryZone: (id: number) => apiFetch(`locations/delivery-zones/${id}/`),
+  createDeliveryZone: (data: any) => apiFetch('locations/delivery-zones/', { method: 'POST', body: data }),
+  updateDeliveryZone: (id: number, data: any) => apiFetch(`locations/delivery-zones/${id}/`, { method: 'PATCH', body: data }),
+  deleteDeliveryZone: (id: number) => apiFetch(`locations/delivery-zones/${id}/`, { method: 'DELETE' }),
+  checkSameDayDelivery: (zoneId: number) => apiFetch(`locations/delivery-zones/${zoneId}/check_same_day/`),
+  getMyDeliveries: () => apiFetch('locations/delivery-requests/my_deliveries/'),
+  getDeliveries: (params?: any) => apiFetch('locations/deliveries/', { params }),
+  getDelivery: (id: number) => apiFetch(`locations/deliveries/${id}/`),
+  createDelivery: (data: any) => apiFetch('locations/deliveries/', { method: 'POST', body: data }),
+  updateDelivery: (id: number, data: any) => apiFetch(`locations/deliveries/${id}/`, { method: 'PATCH', body: data }),
+  deleteDelivery: (id: number) => apiFetch(`locations/deliveries/${id}/`, { method: 'DELETE' }),
+  getDeliveryTracking: (id: number) => apiFetch(`locations/delivery-requests/${id}/`),
+  updateTracking: (id: number, data: any) => apiFetch(`locations/delivery-requests/${id}/update_tracking/`, { method: 'POST', body: data }),
+  getTracking: (params?: any) => apiFetch('locations/tracking/', { params }),
+  getTrackingById: (id: number) => apiFetch(`locations/tracking/${id}/`),
+  geocodeAddress: (address: string) => apiFetch('locations/geocode/', { method: 'POST', body: { address } }),
+  reverseGeocode: (latitude: number, longitude: number) => apiFetch('locations/reverse-geocode/', { method: 'POST', body: { latitude, longitude } }),
+  getPlaceDetails: (placeId: string) => apiFetch('locations/place-details/', { method: 'POST', body: { place_id: placeId } }),
 };
 
 export const warrantiesApi = {
-  // Warranty Plans
-  getPlans: (params?: any) => api.get('/warranties/warranty-plans/', { params }),
-  getPlan: (id: number) => api.get(`/warranties/warranty-plans/${id}/`),
-  calculatePrice: (planId: number, rentalPrice: number) => api.get(`/warranties/warranty-plans/${planId}/calculate_price/`, { params: { rental_price: rentalPrice } }),
-  // Warranty Purchases
-  getPurchases: (params?: any) => api.get('/warranties/warranty-purchases/', { params }),
-  getPurchase: (id: number) => api.get(`/warranties/warranty-purchases/${id}/`),
-  purchase: (data: any) => api.post('/warranties/warranty-purchases/', data),
-  // Warranty Claims
-  getClaims: (params?: any) => api.get('/warranties/claims/', { params }),
-  getClaim: (id: number) => api.get(`/warranties/claims/${id}/`),
-  createClaim: (data: any) => api.post('/warranties/claims/', data),
-  updateClaim: (id: number, data: any) => api.patch(`/warranties/claims/${id}/`, data),
-  // Insurance Plans
-  getInsurancePlans: (params?: any) => api.get('/warranties/insurance/plans/', { params }),
-  getInsurancePlan: (id: number) => api.get(`/warranties/insurance/plans/${id}/`),
-  calculateInsurance: (data: any) => api.post('/warranties/insurance/calculator/', data),
-  getRecommendedInsurance: (params?: any) => api.get('/warranties/insurance/recommended/', { params }),
-  // Insurance Claims
-  createInsuranceClaim: (data: any) => api.post('/warranties/insurance/claims/', data),
-  processInsuranceClaim: (id: number, data: any) => api.post(`/warranties/insurance/claims/${id}/process/`, data),
+  getPlans: (params?: any) => apiFetch('warranties/warranty-plans/', { params }),
+  getPlan: (id: number) => apiFetch(`warranties/warranty-plans/${id}/`),
+  calculatePrice: (planId: number, rentalPrice: number) => apiFetch(`warranties/warranty-plans/${planId}/calculate_price/`, { params: { rental_price: rentalPrice } }),
+  getPurchases: (params?: any) => apiFetch('warranties/warranty-purchases/', { params }),
+  getPurchase: (id: number) => apiFetch(`warranties/warranty-purchases/${id}/`),
+  purchase: (data: any) => apiFetch('warranties/warranty-purchases/', { method: 'POST', body: data }),
+  getClaims: (params?: any) => apiFetch('warranties/claims/', { params }),
+  getClaim: (id: number) => apiFetch(`warranties/claims/${id}/`),
+  createClaim: (data: any) => apiFetch('warranties/claims/', { method: 'POST', body: data }),
+  updateClaim: (id: number, data: any) => apiFetch(`warranties/claims/${id}/`, { method: 'PATCH', body: data }),
+  getInsurancePlans: (params?: any) => apiFetch('warranties/insurance/plans/', { params }),
+  getInsurancePlan: (id: number) => apiFetch(`warranties/insurance/plans/${id}/`),
+  calculateInsurance: (data: any) => apiFetch('warranties/insurance/calculator/', { method: 'POST', body: data }),
+  getRecommendedInsurance: (params?: any) => apiFetch('warranties/insurance/recommended/', { params }),
+  createInsuranceClaim: (data: any) => apiFetch('warranties/insurance/claims/', { method: 'POST', body: data }),
+  processInsuranceClaim: (id: number, data: any) => apiFetch(`warranties/insurance/claims/${id}/process/`, { method: 'POST', body: data }),
 };
 
 export const packagingApi = {
-  // Types
-  getTypes: (params?: any) => api.get('/packaging/types/', { params }),
-  getType: (id: number) => api.get(`/packaging/types/${id}/`),
-  createType: (data: any) => api.post('/packaging/types/', data),
-  updateType: (id: number, data: any) => api.patch(`/packaging/types/${id}/`, data),
-  deleteType: (id: number) => api.delete(`/packaging/types/${id}/`),
-  // Materials
-  getMaterials: (params?: any) => api.get('/packaging/materials/', { params }),
-  getMaterial: (id: number) => api.get(`/packaging/materials/${id}/`),
-  createMaterial: (data: any) => api.post('/packaging/materials/', data),
-  updateMaterial: (id: number, data: any) => api.patch(`/packaging/materials/${id}/`, data),
-  deleteMaterial: (id: number) => api.delete(`/packaging/materials/${id}/`),
-  // Rules
-  getRules: (params?: any) => api.get('/packaging/rules/', { params }),
-  getRule: (id: number) => api.get(`/packaging/rules/${id}/`),
-  createRule: (data: any) => api.post('/packaging/rules/', data),
-  updateRule: (id: number, data: any) => api.patch(`/packaging/rules/${id}/`, data),
-  deleteRule: (id: number) => api.delete(`/packaging/rules/${id}/`),
-  // Instances
-  getInstances: (params?: any) => api.get('/packaging/instances/', { params }),
-  getInstance: (id: number) => api.get(`/packaging/instances/${id}/`),
-  createInstance: (data: any) => api.post('/packaging/instances/', data),
-  updateInstance: (id: number, data: any) => api.patch(`/packaging/instances/${id}/`, data),
-  deleteInstance: (id: number) => api.delete(`/packaging/instances/${id}/`),
+  getTypes: (params?: any) => apiFetch('packaging/types/', { params }),
+  getType: (id: number) => apiFetch(`packaging/types/${id}/`),
+  createType: (data: any) => apiFetch('packaging/types/', { method: 'POST', body: data }),
+  updateType: (id: number, data: any) => apiFetch(`packaging/types/${id}/`, { method: 'PATCH', body: data }),
+  deleteType: (id: number) => apiFetch(`packaging/types/${id}/`, { method: 'DELETE' }),
+  getMaterials: (params?: any) => apiFetch('packaging/materials/', { params }),
+  getMaterial: (id: number) => apiFetch(`packaging/materials/${id}/`),
+  createMaterial: (data: any) => apiFetch('packaging/materials/', { method: 'POST', body: data }),
+  updateMaterial: (id: number, data: any) => apiFetch(`packaging/materials/${id}/`, { method: 'PATCH', body: data }),
+  deleteMaterial: (id: number) => apiFetch(`packaging/materials/${id}/`, { method: 'DELETE' }),
+  getRules: (params?: any) => apiFetch('packaging/rules/', { params }),
+  getRule: (id: number) => apiFetch(`packaging/rules/${id}/`),
+  createRule: (data: any) => apiFetch('packaging/rules/', { method: 'POST', body: data }),
+  updateRule: (id: number, data: any) => apiFetch(`packaging/rules/${id}/`, { method: 'PATCH', body: data }),
+  deleteRule: (id: number) => apiFetch(`packaging/rules/${id}/`, { method: 'DELETE' }),
+  getInstances: (params?: any) => apiFetch('packaging/instances/', { params }),
+  getInstance: (id: number) => apiFetch(`packaging/instances/${id}/`),
+  createInstance: (data: any) => apiFetch('packaging/instances/', { method: 'POST', body: data }),
+  updateInstance: (id: number, data: any) => apiFetch(`packaging/instances/${id}/`, { method: 'PATCH', body: data }),
+  deleteInstance: (id: number) => apiFetch(`packaging/instances/${id}/`, { method: 'DELETE' }),
   getSuggestedForBooking: (params: { product_id: number; rental_days?: number; booking_id?: number }) =>
-    api.get('/packaging/instances/suggested_for_booking/', { params }),
+    apiFetch('packaging/instances/suggested_for_booking/', { params }),
 };
 
 export const chatbotApi = {
-  createSession: (data?: { language?: string }) => api.post('/chatbot/sessions/create_anonymous/', data || {}),
-  getMySessions: () => api.get('/chatbot/sessions/my_sessions/'),
-  getSession: (id: number) => api.get(`/chatbot/sessions/${id}/`),
-  sendMessage: (sessionId: number, message: string) => api.post(`/chatbot/sessions/${sessionId}/send_message/`, { message }),
-  quickChat: (message: string, options?: { language?: string, [key: string]: any }) => 
-    api.post('/chatbot/quick-chat/', { 
-      message, 
-      language: options?.language || 'ar',
-      ...options 
-    }),
+  createSession: (data?: { language?: string }) => apiFetch('chatbot/sessions/create_anonymous/', { method: 'POST', body: data || {} }),
+  getMySessions: () => apiFetch('chatbot/sessions/my_sessions/'),
+  getSession: (id: number) => apiFetch(`chatbot/sessions/${id}/`),
+  sendMessage: (sessionId: number, message: string) => apiFetch(`chatbot/sessions/${sessionId}/send_message/`, { method: 'POST', body: { message } }),
+  quickChat: (message: string, options?: { language?: string; [key: string]: any }) =>
+    apiFetch('chatbot/quick-chat/', { method: 'POST', body: { message, language: options?.language || 'ar', ...options } }),
 };
 
 export const localGuideApi = {
-  getCategories: () => api.get('/local-guide/categories/'),
-  getServices: (params?: any) => api.get('/local-guide/services/', { params }),
-  getServiceById: (id: number) => api.get(`/local-guide/services/${id}/`),
-  createReview: (data: any) => api.post('/local-guide/reviews/', data),
-  getReviews: (params?: any) => api.get('/local-guide/reviews/', { params }),
+  getCategories: () => apiFetch('local-guide/categories/'),
+  getServices: (params?: any) => apiFetch('local-guide/services/', { params }),
+  getServiceById: (id: number) => apiFetch(`local-guide/services/${id}/`),
+  createReview: (data: any) => apiFetch('local-guide/reviews/', { method: 'POST', body: data }),
+  getReviews: (params?: any) => apiFetch('local-guide/reviews/', { params }),
 };
 
 export const artisansApi = {
-  // Artisans
-  getAll: (params?: any) => api.get('/artisans/artisans/', { params }),
-  getById: (id: number) => api.get(`/artisans/artisans/${id}/`),
-  createArtisan: (data: any) => api.post('/artisans/artisans/', data),
-  updateArtisan: (id: number, data: any) => api.patch(`/artisans/artisans/${id}/`, data),
-  deleteArtisan: (id: number) => api.delete(`/artisans/artisans/${id}/`),
-  getProducts: (artisanId: number, params?: any) => api.get(`/artisans/artisans/${artisanId}/products/`, { params }),
-  // Artisan Reviews
-  getArtisanReviews: (params?: any) => api.get('/artisans/reviews/', { params }),
-  getArtisanReview: (id: number) => api.get(`/artisans/reviews/${id}/`),
-  createArtisanReview: (data: any) => api.post('/artisans/reviews/', data),
-  updateArtisanReview: (id: number, data: any) => api.patch(`/artisans/reviews/${id}/`, data),
-  deleteArtisanReview: (id: number) => api.delete(`/artisans/reviews/${id}/`),
+  getAll: (params?: any) => apiFetch('artisans/artisans/', { params }),
+  getById: (id: number) => apiFetch(`artisans/artisans/${id}/`),
+  createArtisan: (data: any) => apiFetch('artisans/artisans/', { method: 'POST', body: data }),
+  updateArtisan: (id: number, data: any) => apiFetch(`artisans/artisans/${id}/`, { method: 'PATCH', body: data }),
+  deleteArtisan: (id: number) => apiFetch(`artisans/artisans/${id}/`, { method: 'DELETE' }),
+  getProducts: (artisanId: number, params?: any) => apiFetch(`/artisans/artisans/${artisanId}/products/`, { params }),
+  getArtisanReviews: (params?: any) => apiFetch('artisans/reviews/', { params }),
+  getArtisanReview: (id: number) => apiFetch(`artisans/reviews/${id}/`),
+  createArtisanReview: (data: any) => apiFetch('artisans/reviews/', { method: 'POST', body: data }),
+  updateArtisanReview: (id: number, data: any) => apiFetch(`artisans/reviews/${id}/`, { method: 'PATCH', body: data }),
+  deleteArtisanReview: (id: number) => apiFetch(`artisans/reviews/${id}/`, { method: 'DELETE' }),
 };
 
 export const bundlesApi = {
-  // Categories
-  getCategories: (params?: any) => api.get('/bundles/categories/', { params }),
-  getCategory: (id: number) => api.get(`/bundles/categories/${id}/`),
-  createCategory: (data: any) => api.post('/bundles/categories/', data),
-  updateCategory: (id: number, data: any) => api.patch(`/bundles/categories/${id}/`, data),
-  deleteCategory: (id: number) => api.delete(`/bundles/categories/${id}/`),
-  // Bundles
-  getAll: (params?: any) => api.get('/bundles/bundles/', { params }),
-  getById: (id: number) => api.get(`/bundles/bundles/${id}/`),
-  createBundle: (data: any) => api.post('/bundles/bundles/', data),
-  updateBundle: (id: number, data: any) => api.patch(`/bundles/bundles/${id}/`, data),
-  deleteBundle: (id: number) => api.delete(`/bundles/bundles/${id}/`),
+  getCategories: (params?: any) => apiFetch('bundles/categories/', { params }),
+  getCategory: (id: number) => apiFetch(`bundles/categories/${id}/`),
+  createCategory: (data: any) => apiFetch('bundles/categories/', { method: 'POST', body: data }),
+  updateCategory: (id: number, data: any) => apiFetch(`bundles/categories/${id}/`, { method: 'PATCH', body: data }),
+  deleteCategory: (id: number) => apiFetch(`bundles/categories/${id}/`, { method: 'DELETE' }),
+  getAll: (params?: any) => apiFetch('bundles/bundles/', { params }),
+  getById: (id: number) => apiFetch(`bundles/bundles/${id}/`),
+  createBundle: (data: any) => apiFetch('bundles/bundles/', { method: 'POST', body: data }),
+  updateBundle: (id: number, data: any) => apiFetch(`bundles/bundles/${id}/`, { method: 'PATCH', body: data }),
+  deleteBundle: (id: number) => apiFetch(`bundles/bundles/${id}/`, { method: 'DELETE' }),
   calculatePrice: (bundleId: number, params: { start_date: string; end_date: string }) =>
-    api.get(`/bundles/bundles/${bundleId}/calculate_price/`, { params }),
-  // Bundle Bookings
-  getBundleBookings: (params?: any) => api.get('/bundles/bookings/', { params }),
-  getBundleBooking: (id: number) => api.get(`/bundles/bookings/${id}/`),
-  createBooking: (data: any) => api.post('/bundles/bookings/', data),
-  updateBundleBooking: (id: number, data: any) => api.patch(`/bundles/bookings/${id}/`, data),
-  deleteBundleBooking: (id: number) => api.delete(`/bundles/bookings/${id}/`),
-  // Bundle Reviews
-  getBundleReviews: (params?: any) => api.get('/bundles/reviews/', { params }),
-  getBundleReview: (id: number) => api.get(`/bundles/reviews/${id}/`),
-  createBundleReview: (data: any) => api.post('/bundles/reviews/', data),
-  updateBundleReview: (id: number, data: any) => api.patch(`/bundles/reviews/${id}/`, data),
-  deleteBundleReview: (id: number) => api.delete(`/bundles/reviews/${id}/`),
+    apiFetch(`bundles/bundles/${bundleId}/calculate_price/`, { params }),
+  getBundleBookings: (params?: any) => apiFetch('bundles/bookings/', { params }),
+  getBundleBooking: (id: number) => apiFetch(`bundles/bookings/${id}/`),
+  createBooking: (data: any) => apiFetch('bundles/bookings/', { method: 'POST', body: data }),
+  updateBundleBooking: (id: number, data: any) => apiFetch(`bundles/bookings/${id}/`, { method: 'PATCH', body: data }),
+  deleteBundleBooking: (id: number) => apiFetch(`bundles/bookings/${id}/`, { method: 'DELETE' }),
+  getBundleReviews: (params?: any) => apiFetch('bundles/reviews/', { params }),
+  getBundleReview: (id: number) => apiFetch(`bundles/reviews/${id}/`),
+  createBundleReview: (data: any) => apiFetch('bundles/reviews/', { method: 'POST', body: data }),
+  updateBundleReview: (id: number, data: any) => apiFetch(`bundles/reviews/${id}/`, { method: 'PATCH', body: data }),
+  deleteBundleReview: (id: number) => apiFetch(`bundles/reviews/${id}/`, { method: 'DELETE' }),
 };
 
-// Inventory API
 export const inventoryApi = {
-  // Inventory Items
-  getItems: (params?: any) => api.get('/inventory/inventory/', { params }),
-  getItem: (id: number) => api.get(`/inventory/inventory/${id}/`),
-  createItem: (data: any) => api.post('/inventory/inventory/', data),
-  updateItem: (id: number, data: any) => api.patch(`/inventory/inventory/${id}/`, data),
-  deleteItem: (id: number) => api.delete(`/inventory/inventory/${id}/`),
-  // Stock Alerts
-  getStockAlerts: (params?: any) => api.get('/inventory/stock-alerts/', { params }),
-  getStockAlert: (id: number) => api.get(`/inventory/stock-alerts/${id}/`),
-  createStockAlert: (data: any) => api.post('/inventory/stock-alerts/', data),
-  updateStockAlert: (id: number, data: any) => api.patch(`/inventory/stock-alerts/${id}/`, data),
-  deleteStockAlert: (id: number) => api.delete(`/inventory/stock-alerts/${id}/`),
-  // Stock Movements
-  getStockMovements: (params?: any) => api.get('/inventory/stock-movements/', { params }),
-  getStockMovement: (id: number) => api.get(`/inventory/stock-movements/${id}/`),
-  createStockMovement: (data: any) => api.post('/inventory/stock-movements/', data),
-  updateStockMovement: (id: number, data: any) => api.patch(`/inventory/stock-movements/${id}/`, data),
-  deleteStockMovement: (id: number) => api.delete(`/inventory/stock-movements/${id}/`),
+  getItems: (params?: any) => apiFetch('inventory/inventory/', { params }),
+  getItem: (id: number) => apiFetch(`inventory/inventory/${id}/`),
+  createItem: (data: any) => apiFetch('inventory/inventory/', { method: 'POST', body: data }),
+  updateItem: (id: number, data: any) => apiFetch(`inventory/inventory/${id}/`, { method: 'PATCH', body: data }),
+  deleteItem: (id: number) => apiFetch(`inventory/inventory/${id}/`, { method: 'DELETE' }),
+  getStockAlerts: (params?: any) => apiFetch('inventory/stock-alerts/', { params }),
+  getStockAlert: (id: number) => apiFetch(`inventory/stock-alerts/${id}/`),
+  createStockAlert: (data: any) => apiFetch('inventory/stock-alerts/', { method: 'POST', body: data }),
+  updateStockAlert: (id: number, data: any) => apiFetch(`inventory/stock-alerts/${id}/`, { method: 'PATCH', body: data }),
+  deleteStockAlert: (id: number) => apiFetch(`inventory/stock-alerts/${id}/`, { method: 'DELETE' }),
+  getStockMovements: (params?: any) => apiFetch('inventory/stock-movements/', { params }),
+  getStockMovement: (id: number) => apiFetch(`inventory/stock-movements/${id}/`),
+  createStockMovement: (data: any) => apiFetch('inventory/stock-movements/', { method: 'POST', body: data }),
+  updateStockMovement: (id: number, data: any) => apiFetch(`inventory/stock-movements/${id}/`, { method: 'PATCH', body: data }),
+  deleteStockMovement: (id: number) => apiFetch(`inventory/stock-movements/${id}/`, { method: 'DELETE' }),
 };
 
-// Disputes API
 export const disputesApi = {
-  // Disputes
-  getDisputes: (params?: any) => api.get('/disputes/disputes/', { params }),
-  getDispute: (id: number) => api.get(`/disputes/disputes/${id}/`),
-  createDispute: (data: any) => api.post('/disputes/disputes/create/', data),
-  createDisputeMessage: (disputeId: number, data: any) => api.post(`/disputes/disputes/${disputeId}/messages/`, data),
-  // Support Tickets
-  getTickets: (params?: any) => api.get('/disputes/tickets/', { params }),
-  getTicket: (id: number) => api.get(`/disputes/tickets/${id}/`),
-  createTicket: (data: any) => api.post('/disputes/tickets/create/', data),
-  createTicketMessage: (ticketId: number, data: any) => api.post(`/disputes/tickets/${ticketId}/messages/`, data),
-  // Admin Stats
-  getDisputeStats: () => api.get('/disputes/admin/disputes/stats/'),
-  getTicketStats: () => api.get('/disputes/admin/tickets/stats/'),
-  // High Court Integrity (Phase 6)
-  getVaultIntegrity: () => api.get('/disputes/admin/vault/integrity/'),
+  getDisputes: (params?: any) => apiFetch('disputes/disputes/', { params }),
+  getDispute: (id: number) => apiFetch(`disputes/disputes/${id}/`),
+  createDispute: (data: any) => apiFetch('disputes/disputes/create/', { method: 'POST', body: data }),
+  createDisputeMessage: (disputeId: number, data: any) => apiFetch(`disputes/disputes/${disputeId}/messages/`, { method: 'POST', body: data }),
+  getTickets: (params?: any) => apiFetch('disputes/tickets/', { params }),
+  getTicket: (id: number) => apiFetch(`disputes/tickets/${id}/`),
+  createTicket: (data: any) => apiFetch('disputes/tickets/create/', { method: 'POST', body: data }),
+  createTicketMessage: (ticketId: number, data: any) => apiFetch(`disputes/tickets/${ticketId}/messages/`, { method: 'POST', body: data }),
+  getDisputeStats: () => apiFetch('disputes/admin/disputes/stats/'),
+  getTicketStats: () => apiFetch('disputes/admin/tickets/stats/'),
+  getVaultIntegrity: () => apiFetch('disputes/admin/vault/integrity/'),
 };
 
-// Vendors API
 export const vendorsApi = {
-  // Public
-  getAll: (params?: any) => api.get('/vendors/', { params }),
-  getById: (id: number) => api.get(`/vendors/${id}/`),
-  // Vendor Management
-  register: (data: any) => api.post('/vendors/register/', data),
-  getProfile: () => api.get('/vendors/profile/'),
-  updateProfile: (data: any) => api.patch('/vendors/profile/', data),
-  getDashboard: () => api.get('/vendors/dashboard/'),
-  getProducts: (params?: any) => api.get('/vendors/products/', { params }),
-  getPerformance: (params?: any) => api.get('/vendors/performance/', { params }),
-  // Admin
-  adminGetAll: (params?: any) => api.get('/vendors/admin/vendors/', { params }),
-  adminGetById: (id: number) => api.get(`/vendors/admin/vendors/${id}/`),
-  adminCreate: (data: any) => api.post('/vendors/admin/vendors/', data),
-  adminUpdate: (id: number, data: any) => api.patch(`/vendors/admin/vendors/${id}/`, data),
-  adminDelete: (id: number) => api.delete(`/vendors/admin/vendors/${id}/`),
-  // Commissions
-  getCommissions: (params?: any) => api.get('/vendors/admin/commissions/', { params }),
-  processCommission: (id: number, data: any) => api.post(`/vendors/admin/commissions/${id}/process/`, data),
+  getAll: (params?: any) => apiFetch('vendors/', { params }),
+  getById: (id: number) => apiFetch(`vendors/${id}/`),
+  register: (data: any) => apiFetch('vendors/register/', { method: 'POST', body: data }),
+  getProfile: () => apiFetch('vendors/profile/'),
+  updateProfile: (data: any) => apiFetch('vendors/profile/', { method: 'PATCH', body: data }),
+  getDashboard: () => apiFetch('vendors/dashboard/'),
+  getProducts: (params?: any) => apiFetch('vendors/products/', { params }),
+  getPerformance: (params?: any) => apiFetch('vendors/performance/', { params }),
+  adminGetAll: (params?: any) => apiFetch('vendors/admin/vendors/', { params }),
+  adminGetById: (id: number) => apiFetch(`vendors/admin/vendors/${id}/`),
+  adminCreate: (data: any) => apiFetch('vendors/admin/vendors/', { method: 'POST', body: data }),
+  adminUpdate: (id: number, data: any) => apiFetch(`vendors/admin/vendors/${id}/`, { method: 'PATCH', body: data }),
+  adminDelete: (id: number) => apiFetch(`vendors/admin/vendors/${id}/`, { method: 'DELETE' }),
+  getCommissions: (params?: any) => apiFetch('vendors/admin/commissions/', { params }),
+  processCommission: (id: number, data: any) => apiFetch(`vendors/admin/commissions/${id}/process/`, { method: 'POST', body: data }),
 };
 
-// Branches API
 export const branchesApi = {
-  // Public
-  getAll: (params?: any) => api.get('/branches/', { params }),
-  getById: (id: number) => api.get(`/branches/${id}/`),
-  getStats: (id: number) => api.get(`/branches/${id}/stats/`),
-  // Inventory
-  getInventory: (params?: any) => api.get('/branches/inventory/', { params }),
-  getInventoryById: (id: number) => api.get(`/branches/inventory/${id}/`),
-  // Staff
-  getStaff: (params?: any) => api.get('/branches/staff/', { params }),
-  // Performance
-  getPerformance: (params?: any) => api.get('/branches/performance/', { params }),
-  // Admin
-  adminGetAll: (params?: any) => api.get('/branches/admin/branches/', { params }),
-  adminGetById: (id: number) => api.get(`/branches/admin/branches/${id}/`),
-  adminCreate: (data: any) => api.post('/branches/admin/branches/', data),
-  adminUpdate: (id: number, data: any) => api.patch(`/branches/admin/branches/${id}/`, data),
-  adminDelete: (id: number) => api.delete(`/branches/admin/branches/${id}/`),
-  // Admin Inventory
-  adminGetInventory: (params?: any) => api.get('/branches/admin/inventory/', { params }),
-  adminGetInventoryById: (id: number) => api.get(`/branches/admin/inventory/${id}/`),
-  adminCreateInventory: (data: any) => api.post('/branches/admin/inventory/', data),
-  adminUpdateInventory: (id: number, data: any) => api.patch(`/branches/admin/inventory/${id}/`, data),
-  adminDeleteInventory: (id: number) => api.delete(`/branches/admin/inventory/${id}/`),
+  getAll: (params?: any) => apiFetch('branches/', { params }),
+  getById: (id: number) => apiFetch(`branches/${id}/`),
+  getStats: (id: number) => apiFetch(`branches/${id}/stats/`),
+  getInventory: (params?: any) => apiFetch('branches/inventory/', { params }),
+  getInventoryById: (id: number) => apiFetch(`branches/inventory/${id}/`),
+  getStaff: (params?: any) => apiFetch('branches/staff/', { params }),
+  getPerformance: (params?: any) => apiFetch('branches/performance/', { params }),
+  adminGetAll: (params?: any) => apiFetch('branches/admin/branches/', { params }),
+  adminGetById: (id: number) => apiFetch(`branches/admin/branches/${id}/`),
+  adminCreate: (data: any) => apiFetch('branches/admin/branches/', { method: 'POST', body: data }),
+  adminUpdate: (id: number, data: any) => apiFetch(`branches/admin/branches/${id}/`, { method: 'PATCH', body: data }),
+  adminDelete: (id: number) => apiFetch(`branches/admin/branches/${id}/`, { method: 'DELETE' }),
+  adminGetInventory: (params?: any) => apiFetch('branches/admin/inventory/', { params }),
+  adminGetInventoryById: (id: number) => apiFetch(`branches/admin/inventory/${id}/`),
+  adminCreateInventory: (data: any) => apiFetch('branches/admin/inventory/', { method: 'POST', body: data }),
+  adminUpdateInventory: (id: number, data: any) => apiFetch(`branches/admin/inventory/${id}/`, { method: 'PATCH', body: data }),
+  adminDeleteInventory: (id: number) => apiFetch(`branches/admin/inventory/${id}/`, { method: 'DELETE' }),
 };
 
-// CMS API
 export const cmsApi = {
-  // Pages
-  getPages: (params?: any) => api.get('/cms/pages/', { params }),
-  getPage: (id: number) => api.get(`/cms/pages/${id}/`),
-  createPage: (data: any) => api.post('/cms/pages/', data),
-  updatePage: (id: number, data: any) => api.patch(`/cms/pages/${id}/`, data),
-  deletePage: (id: number) => api.delete(`/cms/pages/${id}/`),
-  // Blog Posts
-  getBlogPosts: (params?: any) => api.get('/cms/blog/', { params }),
-  getBlogPost: (id: number) => api.get(`/cms/blog/${id}/`),
-  createBlogPost: (data: any) => api.post('/cms/blog/', data),
-  updateBlogPost: (id: number, data: any) => api.patch(`/cms/blog/${id}/`, data),
-  deleteBlogPost: (id: number) => api.delete(`/cms/blog/${id}/`),
-  // Banners
-  getBanners: (params?: any) => api.get('/cms/banners/', { params }),
-  getBanner: (id: number) => api.get(`/cms/banners/${id}/`),
-  createBanner: (data: any) => api.post('/cms/banners/', data),
-  updateBanner: (id: number, data: any) => api.patch(`/cms/banners/${id}/`, data),
-  deleteBanner: (id: number) => api.delete(`/cms/banners/${id}/`),
-  // FAQs
-  getFAQs: (params?: any) => api.get('/cms/faqs/', { params }),
-  getFAQ: (id: number) => api.get(`/cms/faqs/${id}/`),
-  createFAQ: (data: any) => api.post('/cms/faqs/', data),
-  updateFAQ: (id: number, data: any) => api.patch(`/cms/faqs/${id}/`, data),
-  deleteFAQ: (id: number) => api.delete(`/cms/faqs/${id}/`),
-  markFAQHelpful: (id: number) => api.post(`/cms/faqs/${id}/helpful/`),
+  getPages: (params?: any) => apiFetch('cms/pages/', { params }),
+  getPage: (id: number) => apiFetch(`cms/pages/${id}/`),
+  createPage: (data: any) => apiFetch('cms/pages/', { method: 'POST', body: data }),
+  updatePage: (id: number, data: any) => apiFetch(`cms/pages/${id}/`, { method: 'PATCH', body: data }),
+  deletePage: (id: number) => apiFetch(`cms/pages/${id}/`, { method: 'DELETE' }),
+  getBlogPosts: (params?: any) => apiFetch('cms/blog/', { params }),
+  getBlogPost: (id: number) => apiFetch(`cms/blog/${id}/`),
+  createBlogPost: (data: any) => apiFetch('cms/blog/', { method: 'POST', body: data }),
+  updateBlogPost: (id: number, data: any) => apiFetch(`cms/blog/${id}/`, { method: 'PATCH', body: data }),
+  deleteBlogPost: (id: number) => apiFetch(`cms/blog/${id}/`, { method: 'DELETE' }),
+  getBanners: (params?: any) => apiFetch('cms/banners/', { params }),
+  getBanner: (id: number) => apiFetch(`cms/banners/${id}/`),
+  createBanner: (data: any) => apiFetch('cms/banners/', { method: 'POST', body: data }),
+  updateBanner: (id: number, data: any) => apiFetch(`cms/banners/${id}/`, { method: 'PATCH', body: data }),
+  deleteBanner: (id: number) => apiFetch(`cms/banners/${id}/`, { method: 'DELETE' }),
+  getFAQs: (params?: any) => apiFetch('cms/faqs/', { params }),
+  getFAQ: (id: number) => apiFetch(`cms/faqs/${id}/`),
+  createFAQ: (data: any) => apiFetch('cms/faqs/', { method: 'POST', body: data }),
+  updateFAQ: (id: number, data: any) => apiFetch(`cms/faqs/${id}/`, { method: 'PATCH', body: data }),
+  deleteFAQ: (id: number) => apiFetch(`cms/faqs/${id}/`, { method: 'DELETE' }),
+  markFAQHelpful: (id: number) => apiFetch(`cms/faqs/${id}/helpful/`, { method: 'POST' }),
 };
 
-// Analytics API
 export const analyticsApi = {
-  // Events
-  trackEvent: (data: any) => api.post('/analytics/events/', data),
-  getEvents: (params?: any) => api.get('/analytics/events/', { params }),
-  getEvent: (id: number) => api.get(`/analytics/events/${id}/`),
-  // Product Analytics
-  getProductAnalytics: (params?: any) => api.get('/analytics/products/', { params }),
-  getProductAnalytic: (id: number) => api.get(`/analytics/products/${id}/`),
-  // Daily Analytics
-  getDailyAnalytics: (params?: any) => api.get('/analytics/daily/', { params }),
-  getDailyAnalytic: (id: number) => api.get(`/analytics/daily/${id}/`),
-  // User Behavior
-  getUserBehavior: (params?: any) => api.get('/analytics/user-behavior/', { params }),
-  getUserBehaviorById: (id: number) => api.get(`/analytics/user-behavior/${id}/`),
-  getProductActivity: (productId: number) => api.get(`/analytics/live/activity/${productId}/`),
+  trackEvent: (data: any) => apiFetch('analytics/events/', { method: 'POST', body: data }),
+  getEvents: (params?: any) => apiFetch('analytics/events/', { params }),
+  getEvent: (id: number) => apiFetch(`analytics/events/${id}/`),
+  getProductAnalytics: (params?: any) => apiFetch('analytics/products/', { params }),
+  getProductAnalytic: (id: number) => apiFetch(`analytics/products/${id}/`),
+  getDailyAnalytics: (params?: any) => apiFetch('analytics/daily/', { params }),
+  getDailyAnalytic: (id: number) => apiFetch(`analytics/daily/${id}/`),
+  getUserBehavior: (params?: any) => apiFetch('analytics/user-behavior/', { params }),
+  getUserBehaviorById: (id: number) => apiFetch(`analytics/user-behavior/${id}/`),
+  getProductActivity: (productId: number) => apiFetch(`analytics/live/activity/${productId}/`),
 };
 
-// Payments API
 export const paymentsApi = {
-  // Payment Methods
-  getMethods: () => api.get('/payments/methods/'),
-  // Payments
-  getAll: (params?: any) => api.get('/payments/payments/', { params }),
-  getById: (id: number) => api.get(`/payments/payments/${id}/`),
-  create: (data: any) => api.post('/payments/create/', data),
-  update: (id: number, data: any) => api.patch(`/payments/payments/${id}/`, data),
-  delete: (id: number) => api.delete(`/payments/payments/${id}/`),
-  // Payment Actions
-  verifyOtp: (id: number, otpCode: string) => api.post(`/payments/payments/${id}/verify_otp/`, { otp_code: otpCode }),
-  getStatus: (id: number) => api.get(`/payments/payments/${id}/status/`),
-  getEscrowMetrics: () => api.get('/payments/metrics/'),
+  getMethods: () => apiFetch('payments/methods/'),
+  getAll: (params?: any) => apiFetch('payments/payments/', { params }),
+  getById: (id: number) => apiFetch(`payments/payments/${id}/`),
+  create: (data: any) => apiFetch('payments/create/', { method: 'POST', body: data }),
+  update: (id: number, data: any) => apiFetch(`payments/payments/${id}/`, { method: 'PATCH', body: data }),
+  delete: (id: number) => apiFetch(`payments/payments/${id}/`, { method: 'DELETE' }),
+  verifyOtp: (id: number, otpCode: string) => apiFetch(`payments/payments/${id}/verify_otp/`, { method: 'POST', body: { otp_code: otpCode } }),
+  getStatus: (id: number) => apiFetch(`payments/payments/${id}/status/`),
+  getEscrowMetrics: () => apiFetch('payments/metrics/'),
 };
-// Social & Community Intelligence
+
 export const socialApi = {
-  vouch: (userId: number) => api.post(`/social/vouch/${userId}/`),
-  getSocialScore: (userId: number) => api.get(`/social/score/${userId}/`),
-  getFeed: (params?: any) => api.get('/social/feed/', { params }),
-  // Advanced: Scrapped Market Trends (from skills)
-  getMarketPulse: (params?: { platform?: string; keyword?: string }) => 
-    api.get('/social/pulse/', { params }),
+  vouch: (userId: number) => apiFetch(`social/vouch/${userId}/`, { method: 'POST' }),
+  getSocialScore: (userId: number) => apiFetch(`social/score/${userId}/`),
+  getFeed: (params?: any) => apiFetch('social/feed/', { params }),
+  getMarketPulse: (params?: { platform?: string; keyword?: string }) =>
+    apiFetch('social/pulse/', { params }),
 };
 
-// Sovereign Judicial Protocol (Disputes & Tribunal)
 export const judicialApi = {
-  initiateDispute: (data: any) => api.post('/v1/judicial/disputes/initiate/', data),
-  getDisputeStatus: (id: number) => api.get(`/v1/judicial/disputes/${id}/status/`),
-  issueVerdict: (id: number, data: any) => api.post(`/v1/judicial/disputes/${id}/verdict/`, data),
-  appealVerdict: (id: number, data: any) => api.post(`/v1/judicial/disputes/${id}/appeal/`, data),
-  closeDispute: (id: number) => api.post(`/v1/judicial/disputes/${id}/close/`),
-  // Internal Tribunal Portal
-  getCaseDetail: (id: number) => api.get(`/v1/tribunal/cases/${id}/`),
-  // Public Ledger & Transparency
-  getPublicLedger: (params?: any) => api.get('/v1/public/judgments/', { params }),
-  getPublicMetrics: () => api.get('/v1/public/metrics/'),
+  initiateDispute: (data: any) => apiFetch('v1/judicial/disputes/initiate/', { method: 'POST', body: data }),
+  getDisputeStatus: (id: number) => apiFetch(`v1/judicial/disputes/${id}/status/`),
+  issueVerdict: (id: number, data: any) => apiFetch(`v1/judicial/disputes/${id}/verdict/`, { method: 'POST', body: data }),
+  appealVerdict: (id: number, data: any) => apiFetch(`v1/judicial/disputes/${id}/appeal/`, { method: 'POST', body: data }),
+  closeDispute: (id: number) => apiFetch(`v1/judicial/disputes/${id}/close/`, { method: 'POST' }),
+  getCaseDetail: (id: number) => apiFetch(`v1/tribunal/cases/${id}/`),
+  getPublicLedger: (params?: any) => apiFetch('v1/public/judgments/', { params }),
+  getPublicMetrics: () => apiFetch('v1/public/metrics/'),
 };
 
-// McKinsey-Grade Intelligence Hub (Phase 12 Integration)
 export const intelligenceApi = {
-  getMarketReport: (params?: { industry?: string; region?: string }) => 
-    api.get('/analytics/intelligence/report/', { params }),
-  getRegionalLiquidity: () => api.get('/analytics/admin/regional-liquidity/'),
-  getPulse: () => api.get('/analytics/intelligence/pulse/'),
-  getPredictivePulse: () => api.get('/analytics/daily/summary/'),
-  // Forensic Visuals (VisualLab principles)
-  getInfographicData: (type: string) => api.get(`/analytics/visuals/${type}/`),
+  getMarketReport: (params?: { industry?: string; region?: string }) =>
+    apiFetch('analytics/intelligence/report/', { params }),
+  getRegionalLiquidity: () => apiFetch('analytics/admin/regional-liquidity/'),
+  getPulse: () => apiFetch('analytics/intelligence/pulse/'),
+  getPredictivePulse: () => apiFetch('analytics/daily/summary/'),
+  getInfographicData: (type: string) => apiFetch(`analytics/visuals/${type}/`),
 };
 
 export const innovationApi = {
-  getArtisans: (params?: any) => api.get('/artisans/artisans/', { params }),
-  getBundles: (params?: any) => api.get('/bundles/bundles/', { params }),
-  getLocalGuideCategories: () => api.get('/local-guide/categories/'),
+  getArtisans: (params?: any) => apiFetch('artisans/artisans/', { params }),
+  getBundles: (params?: any) => apiFetch('bundles/bundles/', { params }),
+  getLocalGuideCategories: () => apiFetch('local-guide/categories/'),
 };

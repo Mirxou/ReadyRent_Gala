@@ -288,7 +288,7 @@ export default function DashboardPage() {
                                 استعرض آخر تقارير توجهات السوق لعام 2026. بيانات حصرية مدعومة بذكاء STANDARD.Rent لتحليل الأصول والسيولة الإقليمية في الجزائر.
                             </p>
                             <div className="flex flex-wrap gap-4 pt-4">
-                                <Link href="/reports/sovereign_intel_2026_ar.md">
+                                <Link href="/reports/sovereign_intel_2026_ar.md" target="_blank" rel="noopener noreferrer">
                                     <SovereignButton size="lg" variant="secondary" className="rounded-full px-8 h-12 text-xs">
                                         تنزيل تقرير 2026 (PDF) <Download className="mr-3 w-4 h-4" />
                                     </SovereignButton>

@@ -7,9 +7,9 @@ import { ShieldCheck, Calendar, Wallet, PenTool, CheckCircle2, AlertTriangle, Ar
 import { cn, formatNumber } from '@/lib/utils';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
-import { SovereignButton } from '@/components/sovereign/sovereign-button';
-import { GlassPanel } from '@/components/sovereign/glass-panel';
-import { SovereignSparkle } from '@/components/sovereign/sovereign-sparkle';
+import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
+import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
+import { SovereignSparkle } from '@/shared/components/sovereign/sovereign-sparkle';
 import { BaridiMobForm } from '@/components/payment/baridimob-form';
 
 interface SovereignCheckoutModalProps {

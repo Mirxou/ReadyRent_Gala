@@ -7,9 +7,9 @@ import { motion } from 'framer-motion';
 import { Star, Shield, Zap, Heart, MapPin, Sparkles } from 'lucide-react';
 import { cn, formatNumber } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
-import { SovereignButton } from '@/components/sovereign/sovereign-button';
-import { SovereignGlow, SovereignSparkle } from '@/components/sovereign/sovereign-sparkle';
-import { IdentityShield } from '@/components/sovereign/identity-shield';
+import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
+import { SovereignGlow, SovereignSparkle } from '@/shared/components/sovereign/sovereign-sparkle';
+import { IdentityShield } from '@/shared/components/sovereign/identity-shield';
 
 interface ProductCardProps {
   product: any;

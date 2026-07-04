@@ -81,7 +81,7 @@ export function HighCourtMonitor() {
          
          <div className="flex gap-4 items-center">
             <SovereignButton 
-                onClick={() => window.open(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/disputes/admin/vault/certificate/`, '_blank')}
+                onClick={() => window.open('/api/disputes/admin/vault/certificate/', '_blank')}
                 variant="secondary"
                 className="h-14 px-8 rounded-full text-[10px] font-black uppercase tracking-widest"
             >

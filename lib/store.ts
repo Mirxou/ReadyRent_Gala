@@ -43,7 +43,7 @@ export const useAuthStore = create<AuthState>()(
           isAuthenticated: false,
         });
         if (typeof window !== 'undefined') {
-          window.location.href = '/auth/login';
+          window.location.href = '/login';
         }
       },
       checkAuth: async () => {

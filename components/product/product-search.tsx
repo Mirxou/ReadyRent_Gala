@@ -9,8 +9,8 @@ import { productsApi } from '@/lib/api/products';
 import { cn } from '@/lib/utils';
 import { ProductCard } from './product-card';
 import { Input } from '@/components/ui/input';
-import { SovereignButton } from '@/components/sovereign/sovereign-button';
-import { GlassPanel } from '@/components/sovereign/glass-panel';
+import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
+import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { 
@@ -20,7 +20,7 @@ import {
   SheetTitle, 
   SheetTrigger 
 } from '@/components/ui/sheet';
-import { SovereignGlow, SovereignSparkle } from '@/components/sovereign/sovereign-sparkle';
+import { SovereignGlow, SovereignSparkle } from '@/shared/components/sovereign/sovereign-sparkle';
 
 export function ProductSearch() {
   const [query, setQuery] = useState('');

@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { offlineQueue } from '@/lib/offline-queue';
 import { toast } from 'sonner';
-import axios from 'axios';
 
 export function useOfflineSync() {
     const [isSyncing, setIsSyncing] = useState(false);
@@ -14,21 +13,18 @@ export function useOfflineSync() {
             if (queue.length === 0) return;
 
             setIsSyncing(true);
-            const toastId = toast.loading(`Mise en ligne de ${queue.length} actions...`);
+            const toastId = toast.loading(`جاري مزامنة ${queue.length} عملية...`);
 
             let syncedCount = 0;
             let errorsCount = 0;
 
             for (const item of queue) {
                 try {
-                    await axios({
-                        url: item.url,
+                    await fetch(item.url, {
                         method: item.method,
-                        data: item.body,
-                        headers: {
-                            'Content-Type': 'application/json',
-                            // Add auth headers if needed, or rely on existing axios interceptors
-                        }
+                        headers: { 'Content-Type': 'application/json' },
+                        body: item.body ? JSON.stringify(item.body) : undefined,
+                        credentials: 'include',
                     });
 
                     if (item.id) {
@@ -45,10 +41,10 @@ export function useOfflineSync() {
             toast.dismiss(toastId);
 
             if (syncedCount > 0) {
-                toast.success(`✅ ${syncedCount} actions synchronisées avec succès.`);
+                toast.success(`✅ تمت مزامنة ${syncedCount} عملية بنجاح`);
             }
             if (errorsCount > 0) {
-                toast.error(`⚠️ ${errorsCount} actions ont échoué. Elles seront réessayées plus tard.`);
+                toast.error(`⚠️ فشلت ${errorsCount} عملية. سيتم إعادة المحاولة لاحقاً`);
             }
         };
 

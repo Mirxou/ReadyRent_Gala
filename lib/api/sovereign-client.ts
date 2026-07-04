@@ -1,7 +1,5 @@
-// Sovereign API Client - connects to Django backend
+// Sovereign API Client - connects to Next.js /api/ mock proxy
 import { SovereignResponse } from '@/types/sovereign';
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 // Extended options type that supports query params (compatible with fetch RequestInit)
 interface SovereignRequestOptions extends Omit<RequestInit, 'body'> {
