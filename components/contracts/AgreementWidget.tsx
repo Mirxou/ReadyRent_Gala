@@ -53,12 +53,12 @@ export const AgreementWidget = ({ agreement, currentUserId, onAgreementUpdated }
 
     return (
         <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 space-y-6 shadow-xl relative overflow-hidden group">
-            <div className="absolute inset-0 bg-gradient-to-br from-gala-purple/5 to-gala-gold/5 opacity-50 group-hover:opacity-100 transition-opacity" />
+            <div className="absolute inset-0 bg-gradient-to-br from-sovereign-gold/5 to-sovereign-gold/5 opacity-50 group-hover:opacity-100 transition-opacity" />
 
             <div className="relative z-10 flex items-center justify-between">
                 <div>
                     <h3 className="text-xl font-bold flex items-center gap-2">
-                        <FileSignature className="w-6 h-6 text-gala-gold" />
+                        <FileSignature className="w-6 h-6 text-sovereign-gold" />
                         <span>توثيق الاتفاق (Double Auth)</span>
                     </h3>
                     <p className="text-sm text-muted-foreground mt-1">
@@ -135,7 +135,7 @@ export const AgreementWidget = ({ agreement, currentUserId, onAgreementUpdated }
                 <button
                     onClick={handleSign}
                     disabled={isLoading}
-                    className="relative z-10 w-full py-3 bg-gradient-to-r from-gala-gold to-yellow-600 hover:from-yellow-500 hover:to-yellow-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                    className="relative z-10 w-full py-3 bg-gradient-to-r from-sovereign-gold to-yellow-600 hover:from-yellow-500 hover:to-yellow-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all active:scale-[0.98] flex items-center justify-center gap-2"
                 >
                     {isLoading ? (
                         <span className="animate-pulse">جاري التوقيع الرقمي...</span>
@@ -151,7 +151,7 @@ export const AgreementWidget = ({ agreement, currentUserId, onAgreementUpdated }
             {/* Digital Hash Proof */}
             {isFullySigned && agreement.digital_signature_hash && (
                 <div className="relative z-10 p-3 bg-black/20 rounded-lg border border-white/5 font-mono text-[10px] text-muted-foreground break-all text-center">
-                    <div className="flex items-center justify-center gap-2 mb-1 text-gala-cyan">
+                    <div className="flex items-center justify-center gap-2 mb-1 text-cyan-500">
                         <ShieldCheck className="w-3 h-3" />
                         <span className="uppercase tracking-widest font-bold">SHA-256 Proof</span>
                     </div>

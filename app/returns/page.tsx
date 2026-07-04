@@ -23,7 +23,7 @@ export default function ReturnsPage() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-10"
         >
-          <h1 className="text-4xl md:text-5xl font-black mb-3 bg-gradient-to-r from-gala-purple via-gala-pink to-gala-gold bg-clip-text text-transparent">
+          <h1 className="text-4xl md:text-5xl font-black mb-3 bg-gradient-to-r from-sovereign-gold via-sovereign-gold to-sovereign-gold bg-clip-text text-transparent">
             طلبات الإرجاع
           </h1>
           <p className="text-muted-foreground text-base">
@@ -41,7 +41,7 @@ export default function ReturnsPage() {
             {/* Decorative sparkle */}
             <div className="absolute top-4 left-4 w-20 h-20 opacity-30">
               <SovereignSparkle>
-                <Package className="w-8 h-8 text-gala-gold/40" />
+                <Package className="w-8 h-8 text-sovereign-gold/40" />
               </SovereignSparkle>
             </div>
 
@@ -49,9 +49,9 @@ export default function ReturnsPage() {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.3, type: 'spring', stiffness: 200 }}
-              className="w-24 h-24 mx-auto mb-6 rounded-3xl bg-gradient-to-br from-gala-purple/20 to-gala-gold/10 border border-white/10 flex items-center justify-center"
+              className="w-24 h-24 mx-auto mb-6 rounded-3xl bg-gradient-to-br from-sovereign-gold/20 to-sovereign-gold/10 border border-white/10 flex items-center justify-center"
             >
-              <Package className="w-12 h-12 text-gala-gold/80" />
+              <Package className="w-12 h-12 text-sovereign-gold/80" />
             </motion.div>
 
             <h2 className="text-2xl md:text-3xl font-bold mb-3">
@@ -67,7 +67,7 @@ export default function ReturnsPage() {
             >
               <Link
                 href="/products"
-                className="inline-flex items-center gap-2 bg-gradient-to-l from-gala-purple to-gala-pink text-white font-bold px-8 py-3 rounded-2xl text-sm shadow-lg shadow-gala-purple/25 hover:shadow-gala-purple/40 transition-shadow"
+                className="inline-flex items-center gap-2 bg-gradient-to-l from-sovereign-gold to-sovereign-gold text-white font-bold px-8 py-3 rounded-2xl text-sm shadow-lg shadow-sovereign-gold/25 hover:shadow-sovereign-gold/40 transition-shadow"
               >
                 تصفّحي المنتجات
                 <ArrowLeft className="w-4 h-4" />

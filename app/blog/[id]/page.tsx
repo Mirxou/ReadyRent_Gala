@@ -124,7 +124,7 @@ export default function BlogPostPage() {
           <Card>
             <CardContent className="pt-8">
               <div
-                className="prose prose-lg max-w-none prose-headings:text-foreground prose-p:text-muted-foreground prose-a:text-gala-purple prose-strong:text-foreground"
+                className="prose prose-lg max-w-none prose-headings:text-foreground prose-p:text-muted-foreground prose-a:text-sovereign-gold prose-strong:text-foreground"
                 dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content || '') }}
               />
             </CardContent>

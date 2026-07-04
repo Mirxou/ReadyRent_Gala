@@ -120,8 +120,8 @@ export function Navbar() {
             {/* Logo */}
             <Link href="/" className="flex items-center space-x-2 group" onClick={() => setMobileMenuOpen(false)}>
               <div className="relative group">
-                <div className="absolute -inset-1 bg-gradient-to-r from-gala-purple to-gala-pink rounded-full blur opacity-40 group-hover:opacity-100 transition duration-1000 group-hover:duration-200" />
-                <span className="relative text-2xl md:text-3xl font-black tracking-tighter bg-gradient-to-r from-gala-purple via-gala-pink to-gala-gold dark:from-white dark:via-white dark:to-white/40 bg-clip-text text-transparent group-hover:scale-105 transition-transform">
+                <div className="absolute -inset-1 bg-gradient-to-r from-sovereign-gold to-sovereign-gold rounded-full blur opacity-40 group-hover:opacity-100 transition duration-1000 group-hover:duration-200" />
+                <span className="relative text-2xl md:text-3xl font-black tracking-tighter bg-gradient-to-r from-sovereign-gold via-sovereign-gold to-sovereign-gold dark:from-white dark:via-white dark:to-white/40 bg-clip-text text-transparent group-hover:scale-105 transition-transform">
                   STANDARD
                 </span>
               </div>
@@ -137,7 +137,7 @@ export function Navbar() {
                 >
                   <button
                     onClick={() => setOpenDropdown(openDropdown === section.label ? null : section.label)}
-                    className="flex items-center gap-1 text-sm font-medium text-foreground dark:text-white/90 hover:text-gala-purple dark:hover:text-gala-purple transition-all px-3 py-2 rounded-full hover:bg-gala-purple/5"
+                    className="flex items-center gap-1 text-sm font-medium text-foreground dark:text-white/90 hover:text-sovereign-gold dark:hover:text-sovereign-gold transition-all px-3 py-2 rounded-full hover:bg-sovereign-gold/5"
                   >
                     {section.label}
                     <ChevronDown className={cn("w-3.5 h-3.5 transition-transform", openDropdown === section.label && "rotate-180")} />
@@ -148,7 +148,7 @@ export function Navbar() {
                         <Link
                           key={child.href}
                           href={child.href}
-                          className="block px-4 py-3 text-sm text-foreground dark:text-white/80 hover:text-gala-purple dark:hover:text-gala-purple hover:bg-gala-purple/5 rounded-xl transition-all"
+                          className="block px-4 py-3 text-sm text-foreground dark:text-white/80 hover:text-sovereign-gold dark:hover:text-sovereign-gold hover:bg-sovereign-gold/5 rounded-xl transition-all"
                         >
                           {child.label}
                         </Link>
@@ -164,14 +164,14 @@ export function Navbar() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="text-sm font-medium text-muted-foreground hover:text-gala-purple dark:hover:text-gala-purple transition-all px-3 py-2 rounded-full hover:bg-gala-purple/5"
+                  className="text-sm font-medium text-muted-foreground hover:text-sovereign-gold dark:hover:text-sovereign-gold transition-all px-3 py-2 rounded-full hover:bg-sovereign-gold/5"
                 >
                   {link.label}
                 </Link>
               ))}
 
               {isAuthenticated && (
-                <Link href="/dashboard" className="text-sm font-medium text-foreground dark:text-white/90 hover:text-gala-purple dark:hover:text-gala-purple transition-all px-3 py-2 rounded-full hover:bg-gala-purple/5">
+                <Link href="/dashboard" className="text-sm font-medium text-foreground dark:text-white/90 hover:text-sovereign-gold dark:hover:text-sovereign-gold transition-all px-3 py-2 rounded-full hover:bg-sovereign-gold/5">
                   لوحة التحكم
                 </Link>
               )}
@@ -187,30 +187,30 @@ export function Navbar() {
                   size="icon"
                   onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
                   aria-label="تبديل المظهر"
-                  className="rounded-full hover:bg-gala-purple/10 text-foreground dark:text-white/90 transition-colors"
+                  className="rounded-full hover:bg-sovereign-gold/10 text-foreground dark:text-white/90 transition-colors"
                 >
                   {theme === 'dark' ? (
-                    <Sun className="h-5 w-5 text-gala-gold" />
+                    <Sun className="h-5 w-5 text-sovereign-gold" />
                   ) : (
-                    <Moon className="h-5 w-5 text-gala-purple" />
+                    <Moon className="h-5 w-5 text-sovereign-gold" />
                   )}
                 </Button>
               )}
               {isAuthenticated ? (
                 <div className="flex items-center space-x-2">
                   <Link href="/cart">
-                    <Button variant="ghost" size="icon" className="relative group rounded-full hover:bg-gala-pink/10 text-foreground dark:text-white/90">
-                      <ShoppingCart className="h-5 w-5 group-hover:text-gala-pink transition-colors" />
+                    <Button variant="ghost" size="icon" className="relative group rounded-full hover:bg-sovereign-gold/10 text-foreground dark:text-white/90">
+                      <ShoppingCart className="h-5 w-5 group-hover:text-sovereign-gold transition-colors" />
                     </Button>
                   </Link>
                   <Link href="/dashboard">
-                    <Button variant="ghost" size="icon" className="rounded-full hover:bg-gala-purple/10 text-foreground dark:text-white/90">
+                    <Button variant="ghost" size="icon" className="rounded-full hover:bg-sovereign-gold/10 text-foreground dark:text-white/90">
                       <User className="h-5 w-5" />
                     </Button>
                   </Link>
                   <Button
                     onClick={() => setLogoutDialogOpen(true)}
-                    className="hidden xl:flex rounded-full bg-gradient-to-r from-gala-purple to-gala-pink hover:opacity-90 transition-all font-semibold"
+                    className="hidden xl:flex rounded-full bg-gradient-to-r from-sovereign-gold to-sovereign-gold hover:opacity-90 transition-all font-semibold"
                   >
                     خروج
                   </Button>
@@ -218,15 +218,15 @@ export function Navbar() {
               ) : (
                 <div className="flex items-center space-x-2">
                   <Link href="/login" className="hidden xl:block">
-                    <Button variant="ghost" className="rounded-full hover:bg-gala-purple/10">دخول</Button>
+                    <Button variant="ghost" className="rounded-full hover:bg-sovereign-gold/10">دخول</Button>
                   </Link>
                   <Link href="/register" className="hidden xl:block">
-                    <Button className="rounded-full bg-gradient-to-r from-gala-purple to-gala-pink hover:opacity-90 shadow-lg font-semibold">
+                    <Button className="rounded-full bg-gradient-to-r from-sovereign-gold to-sovereign-gold hover:opacity-90 shadow-lg font-semibold">
                       التسجيل
                     </Button>
                   </Link>
                   <Link href="/login" className="xl:hidden">
-                    <Button variant="ghost" size="icon" className="rounded-full hover:bg-gala-purple/10 text-foreground dark:text-white/90">
+                    <Button variant="ghost" size="icon" className="rounded-full hover:bg-sovereign-gold/10 text-foreground dark:text-white/90">
                       <User className="h-5 w-5" />
                     </Button>
                   </Link>
@@ -254,7 +254,7 @@ export function Navbar() {
                 </SheetTrigger>
                 <SheetContent side="right" className="w-[80vw] sm:w-[400px] border-l border-gray-200 dark:border-white/10 bg-background dark:card-glass overflow-y-auto">
                   <SheetHeader className="flex-shrink-0">
-                    <SheetTitle className="text-2xl font-bold bg-gradient-to-r from-gala-purple to-gala-pink bg-clip-text text-transparent">
+                    <SheetTitle className="text-2xl font-bold bg-gradient-to-r from-sovereign-gold to-sovereign-gold bg-clip-text text-transparent">
                       STANDARD
                     </SheetTitle>
                     <SheetDescription className="text-muted-foreground">كراء فاخر · خدمات · سوق مفتوح</SheetDescription>
@@ -265,7 +265,7 @@ export function Navbar() {
                       <div key={section.label}>
                         <Link
                           href={section.href}
-                          className="text-xl font-bold text-foreground dark:text-white hover:text-gala-purple dark:hover:text-gala-purple transition-colors p-2 block"
+                          className="text-xl font-bold text-foreground dark:text-white hover:text-sovereign-gold dark:hover:text-sovereign-gold transition-colors p-2 block"
                           onClick={() => setMobileMenuOpen(false)}
                         >
                           {section.label}
@@ -275,7 +275,7 @@ export function Navbar() {
                             <Link
                               key={child.href}
                               href={child.href}
-                              className="text-base text-muted-foreground hover:text-gala-purple dark:hover:text-gala-purple transition-colors py-1.5 pr-4 block"
+                              className="text-base text-muted-foreground hover:text-sovereign-gold dark:hover:text-sovereign-gold transition-colors py-1.5 pr-4 block"
                               onClick={() => setMobileMenuOpen(false)}
                             >
                               {child.label}
@@ -292,7 +292,7 @@ export function Navbar() {
                       <Link
                         key={link.href}
                         href={link.href}
-                        className="text-base text-muted-foreground hover:text-gala-purple dark:hover:text-gala-purple transition-colors p-2 block"
+                        className="text-base text-muted-foreground hover:text-sovereign-gold dark:hover:text-sovereign-gold transition-colors p-2 block"
                         onClick={() => setMobileMenuOpen(false)}
                       >
                         {link.label}
@@ -302,8 +302,8 @@ export function Navbar() {
                     {isAuthenticated ? (
                       <>
                         <div className="border-t border-gray-200 dark:border-white/10 my-3" />
-                        <Link href="/dashboard" className="text-xl font-bold text-foreground dark:text-white hover:text-gala-purple transition-colors p-2 block" onClick={() => setMobileMenuOpen(false)}>لوحة التحكم</Link>
-                        <Link href="/cart" className="text-base text-muted-foreground hover:text-gala-purple transition-colors p-2 block" onClick={() => setMobileMenuOpen(false)}>السلة</Link>
+                        <Link href="/dashboard" className="text-xl font-bold text-foreground dark:text-white hover:text-sovereign-gold transition-colors p-2 block" onClick={() => setMobileMenuOpen(false)}>لوحة التحكم</Link>
+                        <Link href="/cart" className="text-base text-muted-foreground hover:text-sovereign-gold transition-colors p-2 block" onClick={() => setMobileMenuOpen(false)}>السلة</Link>
                         <Button onClick={() => { setMobileMenuOpen(false); setLogoutDialogOpen(true); }} className="w-full mt-4 rounded-full bg-gradient-to-r from-red-500 to-pink-600 font-bold">تسجيل الخروج</Button>
                       </>
                     ) : (
@@ -312,7 +312,7 @@ export function Navbar() {
                           <Button variant="outline" className="w-full rounded-full border-2">تسجيل الدخول</Button>
                         </Link>
                         <Link href="/register" onClick={() => setMobileMenuOpen(false)}>
-                          <Button className="w-full rounded-full bg-gradient-to-r from-gala-purple to-gala-pink shadow-lg font-bold">التسجيل</Button>
+                          <Button className="w-full rounded-full bg-gradient-to-r from-sovereign-gold to-sovereign-gold shadow-lg font-bold">التسجيل</Button>
                         </Link>
                       </div>
                     )}
@@ -324,7 +324,7 @@ export function Navbar() {
         </div>
         {/* Scroll Progress */}
         <motion.div
-          className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-gala-purple via-gala-pink to-gala-gold origin-left z-50"
+          className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-sovereign-gold via-sovereign-gold to-sovereign-gold origin-left z-50"
           style={{ scaleX: scrollYProgress }}
         />
       </nav>
@@ -333,7 +333,7 @@ export function Navbar() {
       <Dialog open={logoutDialogOpen} onOpenChange={setLogoutDialogOpen}>
         <DialogContent className="sm:max-w-md bg-white/90 dark:bg-black/90 backdrop-blur-xl border border-gray-200 dark:border-white/10 rounded-2xl shadow-2xl">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-gala-purple to-gala-pink bg-clip-text text-transparent mb-2">
+            <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-sovereign-gold to-sovereign-gold bg-clip-text text-transparent mb-2">
               تسجيل الخروج
             </DialogTitle>
             <DialogDescription className="text-lg text-muted-foreground">

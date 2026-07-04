@@ -5,39 +5,6 @@
 // Replaces axios-to-Django with native fetch to /api/ mock proxy
 // ═══════════════════════════════════════════════════════════════════
 
-// ──── Type Exports ────
-export interface SovereignUser {
-  id: number;
-  email: string;
-  username: string;
-  role: 'admin' | 'staff' | 'manager' | 'renter' | 'owner';
-  is_verified: boolean;
-  is_2fa_enabled: boolean;
-  avatar?: string;
-  trust_score: number;
-}
-
-export interface SovereignBooking {
-  id: number;
-  product_id: number;
-  product_name_ar: string;
-  status: 'pending' | 'confirmed' | 'in_use' | 'completed' | 'cancelled' | 'manual_review' | 'rejected';
-  start_date: string;
-  end_date: string;
-  total_price: string;
-  escrow_status: 'pending' | 'held' | 'released' | 'refunded' | 'disputed';
-}
-
-export interface SovereignResponse<T> {
-  success: boolean;
-  data: T;
-  meta?: {
-    version?: string;
-    path?: string;
-    [key: string]: any;
-  };
-}
-
 // ──── Core Fetch Helper ────
 // Returns { data, status, meta } to be compatible with axios response pattern
 // that components use: `const res = await api.get(...); const d = res.data;`
@@ -146,43 +113,6 @@ export const authApi = {
     apiFetch('auth/security/2fa/enable/', { method: 'POST', body: data }),
 };
 
-export const verificationApi = {
-  getStatus: () => apiFetch('auth/verification/'),
-  requestPhoneVerification: (data: any) => apiFetch('auth/verification/phone/request/', { method: 'POST', body: data }),
-  verifyPhone: (data: any) => apiFetch('auth/verification/phone/verify/', { method: 'POST', body: data }),
-  uploadID: (data: FormData) => apiFetch('auth/verification/id/upload/', { method: 'POST', body: data }),
-  verifyAddress: (data: any) => apiFetch('auth/verification/address/', { method: 'POST', body: data }),
-};
-
-export const adminVerificationApi = {
-  getAll: (params?: any) => apiFetch('auth/admin/verifications/', { params }),
-  approve: (userId: number) => apiFetch(`auth/admin/verifications/${userId}/approve/`, { method: 'POST' }),
-  reject: (userId: number, reason?: string) => apiFetch(`auth/admin/verifications/${userId}/reject/`, { method: 'POST', body: { reason } }),
-};
-
-export const blacklistApi = {
-  getAll: (params?: any) => apiFetch('auth/admin/blacklist/', { params }),
-  add: (data: any) => apiFetch('auth/admin/blacklist/add/', { method: 'POST', body: data }),
-};
-
-export const staffApi = {
-  getList: (params?: any) => apiFetch('auth/staff/list/', { params }),
-  getRoles: (params?: any) => apiFetch('auth/staff/roles/', { params }),
-  createRole: (data: any) => apiFetch('auth/staff/roles/', { method: 'POST', body: data }),
-  updateRole: (id: number, data: any) => apiFetch(`auth/staff/roles/${id}/`, { method: 'PATCH', body: data }),
-  deleteRole: (id: number) => apiFetch(`auth/staff/roles/${id}/`, { method: 'DELETE' }),
-  getActivityLogs: (params?: any) => apiFetch('auth/staff/activity-logs/', { params }),
-  getActivityLog: (id: number) => apiFetch(`auth/staff/activity-logs/${id}/`),
-  getShifts: (params?: any) => apiFetch('auth/staff/shifts/', { params }),
-  createShift: (data: any) => apiFetch('auth/staff/shifts/', { method: 'POST', body: data }),
-  updateShift: (id: number, data: any) => apiFetch(`auth/staff/shifts/${id}/`, { method: 'PATCH', body: data }),
-  deleteShift: (id: number) => apiFetch(`auth/staff/shifts/${id}/`, { method: 'DELETE' }),
-  getPerformanceReviews: (params?: any) => apiFetch('auth/staff/performance-reviews/', { params }),
-  createPerformanceReview: (data: any) => apiFetch('auth/staff/performance-reviews/', { method: 'POST', body: data }),
-  updatePerformanceReview: (id: number, data: any) => apiFetch(`auth/staff/performance-reviews/${id}/`, { method: 'PATCH', body: data }),
-  deletePerformanceReview: (id: number) => apiFetch(`auth/staff/performance-reviews/${id}/`, { method: 'DELETE' }),
-};
-
 export const productsApi = {
   getAll: (params?: any) => apiFetch('products/', { params }),
   getById: (id: string) => apiFetch(`products/${id}/`),
@@ -221,16 +151,6 @@ export const bookingsApi = {
   calculateDeposit: (productId: number) => apiFetch('bookings/calculate-deposit/', { params: { product_id: productId } }),
 };
 
-export const damageAssessmentApi = {
-  create: (data: any) => apiFetch('bookings/damage-assessment/', { method: 'POST', body: data }),
-  getById: (id: number) => apiFetch(`bookings/damage-assessment/${id}/`),
-  uploadPhoto: (data: FormData) => apiFetch('bookings/damage-photos/', { method: 'POST', body: data }),
-  createInspectionChecklist: (data: any) => apiFetch('bookings/inspection-checklist/', { method: 'POST', body: data }),
-  updateInspectionChecklist: (id: number, data: any) => apiFetch(`bookings/inspection-checklist/${id}/`, { method: 'PATCH', body: data }),
-  createClaim: (data: any) => apiFetch('bookings/damage-claims/', { method: 'POST', body: data }),
-  getClaim: (id: number) => apiFetch(`bookings/damage-claims/${id}/`),
-};
-
 export const adminApi = {
   getDashboardStats: () => apiFetch('analytics/admin/dashboard/'),
   getRevenue: (params?: { days?: number }) => apiFetch('analytics/admin/revenue/', { params }),
@@ -257,23 +177,6 @@ export const adminApi = {
   getUser: (id: number) => apiFetch(`auth/admin/users/${id}/`),
   updateUser: (id: number, data: any) => apiFetch(`auth/admin/users/${id}/`, { method: 'PATCH', body: data }),
   deleteUser: (id: number) => apiFetch(`auth/admin/users/${id}/`, { method: 'DELETE' }),
-};
-
-export const notificationsApi = {
-  getAll: () => apiFetch('notifications/'),
-  markAsRead: (id: number) => apiFetch(`notifications/${id}/read/`, { method: 'PATCH' }),
-  markAllAsRead: () => apiFetch('notifications/mark-all-read/', { method: 'POST' }),
-};
-
-export const returnsApi = {
-  getAll: () => apiFetch('returns/returns/'),
-  getMyReturns: () => apiFetch('returns/returns/my_returns/'),
-  create: (data: any) => apiFetch('returns/returns/', { method: 'POST', body: data }),
-  getById: (id: number) => apiFetch(`returns/returns/${id}/`),
-  updateStatus: (id: number, status: string) => apiFetch(`returns/returns/${id}/`, { method: 'PATCH', body: { status } }),
-  approve: (id: number, data?: any) => apiFetch(`returns/returns/${id}/approve/`, { method: 'POST', body: data }),
-  markReceived: (id: number) => apiFetch(`returns/returns/${id}/mark_received/`, { method: 'POST' }),
-  completeInspection: (id: number, data: any) => apiFetch(`returns/returns/${id}/complete_inspection/`, { method: 'POST', body: data }),
 };
 
 export const reviewsApi = {
@@ -341,25 +244,6 @@ export const locationsApi = {
   getPlaceDetails: (placeId: string) => apiFetch('locations/place-details/', { method: 'POST', body: { place_id: placeId } }),
 };
 
-export const warrantiesApi = {
-  getPlans: (params?: any) => apiFetch('warranties/warranty-plans/', { params }),
-  getPlan: (id: number) => apiFetch(`warranties/warranty-plans/${id}/`),
-  calculatePrice: (planId: number, rentalPrice: number) => apiFetch(`warranties/warranty-plans/${planId}/calculate_price/`, { params: { rental_price: rentalPrice } }),
-  getPurchases: (params?: any) => apiFetch('warranties/warranty-purchases/', { params }),
-  getPurchase: (id: number) => apiFetch(`warranties/warranty-purchases/${id}/`),
-  purchase: (data: any) => apiFetch('warranties/warranty-purchases/', { method: 'POST', body: data }),
-  getClaims: (params?: any) => apiFetch('warranties/claims/', { params }),
-  getClaim: (id: number) => apiFetch(`warranties/claims/${id}/`),
-  createClaim: (data: any) => apiFetch('warranties/claims/', { method: 'POST', body: data }),
-  updateClaim: (id: number, data: any) => apiFetch(`warranties/claims/${id}/`, { method: 'PATCH', body: data }),
-  getInsurancePlans: (params?: any) => apiFetch('warranties/insurance/plans/', { params }),
-  getInsurancePlan: (id: number) => apiFetch(`warranties/insurance/plans/${id}/`),
-  calculateInsurance: (data: any) => apiFetch('warranties/insurance/calculator/', { method: 'POST', body: data }),
-  getRecommendedInsurance: (params?: any) => apiFetch('warranties/insurance/recommended/', { params }),
-  createInsuranceClaim: (data: any) => apiFetch('warranties/insurance/claims/', { method: 'POST', body: data }),
-  processInsuranceClaim: (id: number, data: any) => apiFetch(`warranties/insurance/claims/${id}/process/`, { method: 'POST', body: data }),
-};
-
 export const packagingApi = {
   getTypes: (params?: any) => apiFetch('packaging/types/', { params }),
   getType: (id: number) => apiFetch(`packaging/types/${id}/`),
@@ -392,28 +276,6 @@ export const chatbotApi = {
   sendMessage: (sessionId: number, message: string) => apiFetch(`chatbot/sessions/${sessionId}/send_message/`, { method: 'POST', body: { message } }),
   quickChat: (message: string, options?: { language?: string; [key: string]: any }) =>
     apiFetch('chatbot/quick-chat/', { method: 'POST', body: { message, language: options?.language || 'ar', ...options } }),
-};
-
-export const localGuideApi = {
-  getCategories: () => apiFetch('local-guide/categories/'),
-  getServices: (params?: any) => apiFetch('local-guide/services/', { params }),
-  getServiceById: (id: number) => apiFetch(`local-guide/services/${id}/`),
-  createReview: (data: any) => apiFetch('local-guide/reviews/', { method: 'POST', body: data }),
-  getReviews: (params?: any) => apiFetch('local-guide/reviews/', { params }),
-};
-
-export const artisansApi = {
-  getAll: (params?: any) => apiFetch('artisans/artisans/', { params }),
-  getById: (id: number) => apiFetch(`artisans/artisans/${id}/`),
-  createArtisan: (data: any) => apiFetch('artisans/artisans/', { method: 'POST', body: data }),
-  updateArtisan: (id: number, data: any) => apiFetch(`artisans/artisans/${id}/`, { method: 'PATCH', body: data }),
-  deleteArtisan: (id: number) => apiFetch(`artisans/artisans/${id}/`, { method: 'DELETE' }),
-  getProducts: (artisanId: number, params?: any) => apiFetch(`/artisans/artisans/${artisanId}/products/`, { params }),
-  getArtisanReviews: (params?: any) => apiFetch('artisans/reviews/', { params }),
-  getArtisanReview: (id: number) => apiFetch(`artisans/reviews/${id}/`),
-  createArtisanReview: (data: any) => apiFetch('artisans/reviews/', { method: 'POST', body: data }),
-  updateArtisanReview: (id: number, data: any) => apiFetch(`artisans/reviews/${id}/`, { method: 'PATCH', body: data }),
-  deleteArtisanReview: (id: number) => apiFetch(`artisans/reviews/${id}/`, { method: 'DELETE' }),
 };
 
 export const bundlesApi = {
@@ -471,68 +333,6 @@ export const disputesApi = {
   getDisputeStats: () => apiFetch('disputes/admin/disputes/stats/'),
   getTicketStats: () => apiFetch('disputes/admin/tickets/stats/'),
   getVaultIntegrity: () => apiFetch('disputes/admin/vault/integrity/'),
-};
-
-export const vendorsApi = {
-  getAll: (params?: any) => apiFetch('vendors/', { params }),
-  getById: (id: number) => apiFetch(`vendors/${id}/`),
-  register: (data: any) => apiFetch('vendors/register/', { method: 'POST', body: data }),
-  getProfile: () => apiFetch('vendors/profile/'),
-  updateProfile: (data: any) => apiFetch('vendors/profile/', { method: 'PATCH', body: data }),
-  getDashboard: () => apiFetch('vendors/dashboard/'),
-  getProducts: (params?: any) => apiFetch('vendors/products/', { params }),
-  getPerformance: (params?: any) => apiFetch('vendors/performance/', { params }),
-  adminGetAll: (params?: any) => apiFetch('vendors/admin/vendors/', { params }),
-  adminGetById: (id: number) => apiFetch(`vendors/admin/vendors/${id}/`),
-  adminCreate: (data: any) => apiFetch('vendors/admin/vendors/', { method: 'POST', body: data }),
-  adminUpdate: (id: number, data: any) => apiFetch(`vendors/admin/vendors/${id}/`, { method: 'PATCH', body: data }),
-  adminDelete: (id: number) => apiFetch(`vendors/admin/vendors/${id}/`, { method: 'DELETE' }),
-  getCommissions: (params?: any) => apiFetch('vendors/admin/commissions/', { params }),
-  processCommission: (id: number, data: any) => apiFetch(`vendors/admin/commissions/${id}/process/`, { method: 'POST', body: data }),
-};
-
-export const branchesApi = {
-  getAll: (params?: any) => apiFetch('branches/', { params }),
-  getById: (id: number) => apiFetch(`branches/${id}/`),
-  getStats: (id: number) => apiFetch(`branches/${id}/stats/`),
-  getInventory: (params?: any) => apiFetch('branches/inventory/', { params }),
-  getInventoryById: (id: number) => apiFetch(`branches/inventory/${id}/`),
-  getStaff: (params?: any) => apiFetch('branches/staff/', { params }),
-  getPerformance: (params?: any) => apiFetch('branches/performance/', { params }),
-  adminGetAll: (params?: any) => apiFetch('branches/admin/branches/', { params }),
-  adminGetById: (id: number) => apiFetch(`branches/admin/branches/${id}/`),
-  adminCreate: (data: any) => apiFetch('branches/admin/branches/', { method: 'POST', body: data }),
-  adminUpdate: (id: number, data: any) => apiFetch(`branches/admin/branches/${id}/`, { method: 'PATCH', body: data }),
-  adminDelete: (id: number) => apiFetch(`branches/admin/branches/${id}/`, { method: 'DELETE' }),
-  adminGetInventory: (params?: any) => apiFetch('branches/admin/inventory/', { params }),
-  adminGetInventoryById: (id: number) => apiFetch(`branches/admin/inventory/${id}/`),
-  adminCreateInventory: (data: any) => apiFetch('branches/admin/inventory/', { method: 'POST', body: data }),
-  adminUpdateInventory: (id: number, data: any) => apiFetch(`branches/admin/inventory/${id}/`, { method: 'PATCH', body: data }),
-  adminDeleteInventory: (id: number) => apiFetch(`branches/admin/inventory/${id}/`, { method: 'DELETE' }),
-};
-
-export const cmsApi = {
-  getPages: (params?: any) => apiFetch('cms/pages/', { params }),
-  getPage: (id: number) => apiFetch(`cms/pages/${id}/`),
-  createPage: (data: any) => apiFetch('cms/pages/', { method: 'POST', body: data }),
-  updatePage: (id: number, data: any) => apiFetch(`cms/pages/${id}/`, { method: 'PATCH', body: data }),
-  deletePage: (id: number) => apiFetch(`cms/pages/${id}/`, { method: 'DELETE' }),
-  getBlogPosts: (params?: any) => apiFetch('cms/blog/', { params }),
-  getBlogPost: (id: number) => apiFetch(`cms/blog/${id}/`),
-  createBlogPost: (data: any) => apiFetch('cms/blog/', { method: 'POST', body: data }),
-  updateBlogPost: (id: number, data: any) => apiFetch(`cms/blog/${id}/`, { method: 'PATCH', body: data }),
-  deleteBlogPost: (id: number) => apiFetch(`cms/blog/${id}/`, { method: 'DELETE' }),
-  getBanners: (params?: any) => apiFetch('cms/banners/', { params }),
-  getBanner: (id: number) => apiFetch(`cms/banners/${id}/`),
-  createBanner: (data: any) => apiFetch('cms/banners/', { method: 'POST', body: data }),
-  updateBanner: (id: number, data: any) => apiFetch(`cms/banners/${id}/`, { method: 'PATCH', body: data }),
-  deleteBanner: (id: number) => apiFetch(`cms/banners/${id}/`, { method: 'DELETE' }),
-  getFAQs: (params?: any) => apiFetch('cms/faqs/', { params }),
-  getFAQ: (id: number) => apiFetch(`cms/faqs/${id}/`),
-  createFAQ: (data: any) => apiFetch('cms/faqs/', { method: 'POST', body: data }),
-  updateFAQ: (id: number, data: any) => apiFetch(`cms/faqs/${id}/`, { method: 'PATCH', body: data }),
-  deleteFAQ: (id: number) => apiFetch(`cms/faqs/${id}/`, { method: 'DELETE' }),
-  markFAQHelpful: (id: number) => apiFetch(`cms/faqs/${id}/helpful/`, { method: 'POST' }),
 };
 
 export const analyticsApi = {

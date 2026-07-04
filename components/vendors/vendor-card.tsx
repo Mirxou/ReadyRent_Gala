@@ -42,7 +42,7 @@ export function VendorCard({ vendor }: VendorCardProps) {
             )}
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
-                <CardTitle className="group-hover:text-gala-purple transition-colors">
+                <CardTitle className="group-hover:text-sovereign-gold transition-colors">
                   {vendor.name}
                 </CardTitle>
                 {vendor.is_verified && (

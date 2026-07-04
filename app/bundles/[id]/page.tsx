@@ -112,7 +112,7 @@ export default function BundleDetailPage() {
                     className="w-full h-full object-cover"
                   />
                   {bundle.discount_percentage > 0 && (
-                    <Badge className="absolute top-4 left-4 bg-gala-pink text-lg px-4 py-2">
+                    <Badge className="absolute top-4 left-4 bg-sovereign-gold text-lg px-4 py-2">
                       <Percent className="h-4 w-4 mr-1" />
                       خصم {bundle.discount_percentage}%
                     </Badge>
@@ -155,7 +155,7 @@ export default function BundleDetailPage() {
                   <div className="flex items-center gap-4 mb-4">
                     {bundle.original_price && bundle.discounted_price && (
                       <>
-                        <div className="text-3xl font-bold text-gala-purple">
+                        <div className="text-3xl font-bold text-sovereign-gold">
                           {Number(bundle.discounted_price).toFixed(0)} دج
                         </div>
                         <div className="text-xl text-muted-foreground line-through">
@@ -183,7 +183,7 @@ export default function BundleDetailPage() {
               <div className="flex flex-col gap-4">
                 <Button
                   size="lg"
-                  className="w-full bg-gradient-to-r from-gala-purple to-gala-pink hover:opacity-90"
+                  className="w-full bg-gradient-to-r from-sovereign-gold to-sovereign-gold hover:opacity-90"
                   onClick={handleAddToCart}
                 >
                   <ShoppingCart className="h-5 w-5 mr-2" />

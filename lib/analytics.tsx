@@ -51,33 +51,6 @@ export const event = ({
 };
 
 // Specific tracking functions
-export const trackProductView = (productId: number, productName: string) => {
-    event({
-        action: 'view_item',
-        category: 'ecommerce',
-        label: productName,
-        value: productId,
-    });
-};
-
-export const trackAddToCart = (productId: number, productName: string, price: number) => {
-    event({
-        action: 'add_to_cart',
-        category: 'ecommerce',
-        label: productName,
-        value: price,
-    });
-};
-
-export const trackBooking = (bookingId: number, totalPrice: number) => {
-    event({
-        action: 'purchase',
-        category: 'ecommerce',
-        label: `Booking ${bookingId}`,
-        value: totalPrice,
-    });
-};
-
 export const trackSearch = (searchTerm: string) => {
     event({
         action: 'search',
@@ -86,60 +59,13 @@ export const trackSearch = (searchTerm: string) => {
     });
 };
 
-// Conversion Funnel Tracking
-export const trackFunnelStage = (stage: string, metadata?: Record<string, any>) => {
-    event({
-        action: 'funnel_stage',
-        category: 'conversion',
-        label: stage,
-        value: metadata?.productId,
-    });
-};
-
-// A/B Testing
-export const trackABTest = (testName: string, variant: string, conversion: boolean = false) => {
-    event({
-        action: conversion ? 'ab_test_conversion' : 'ab_test_view',
-        category: 'ab_testing',
-        label: `${testName}_${variant}`,
-    });
-};
-
 // Judicial & Dispute Tracking
-export const trackDisputeFiled = (disputeId: number, claimType: string) => {
-    event({
-        action: 'dispute_filed',
-        category: 'judicial',
-        label: claimType,
-        value: disputeId,
-    });
-};
-
 export const trackAppealFiled = (disputeId: number, reason: string) => {
     event({
         action: 'appeal_filed',
         category: 'judicial',
         label: reason,
         value: disputeId,
-    });
-};
-
-// Booking & Payment Tracking
-export const trackBookingCreated = (bookingId: number, totalPrice: number) => {
-    event({
-        action: 'booking_created',
-        category: 'ecommerce',
-        label: `Booking ${bookingId}`,
-        value: totalPrice,
-    });
-};
-
-export const trackPaymentCompleted = (bookingId: number, amount: number, method: string) => {
-    event({
-        action: 'payment_completed',
-        category: 'ecommerce',
-        label: method,
-        value: amount,
     });
 };
 

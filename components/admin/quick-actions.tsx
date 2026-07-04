@@ -64,7 +64,7 @@ export function QuickActions() {
     <Card className="card-glass border-0 rounded-[2.5rem] overflow-hidden">
       <CardHeader className="p-8 pb-4">
         <CardTitle className="text-2xl font-bold flex items-center gap-3">
-          <FileText className="h-6 w-6 text-gala-gold" />
+          <FileText className="h-6 w-6 text-sovereign-gold" />
           إجراءات سريعة
         </CardTitle>
       </CardHeader>

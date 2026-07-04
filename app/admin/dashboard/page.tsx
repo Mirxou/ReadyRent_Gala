@@ -75,10 +75,10 @@ export default function AdminDashboardPage() {
         <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/5 pb-8">
           <div>
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 rounded-xl bg-gala-purple/20 text-gala-purple">
+              <div className="p-2 rounded-xl bg-sovereign-gold/20 text-sovereign-gold">
                 <LayoutDashboard className="h-6 w-6" />
               </div>
-              <Badge variant="outline" className="border-gala-purple/30 text-gala-purple">إدارة قسنطينة</Badge>
+              <Badge variant="outline" className="border-sovereign-gold/30 text-sovereign-gold">إدارة قسنطينة</Badge>
             </div>
             <h1 className="text-5xl md:text-6xl font-black mb-2 bg-gradient-to-r from-white via-white to-white/40 bg-clip-text text-transparent">
               نظرة عامة
@@ -102,7 +102,7 @@ export default function AdminDashboardPage() {
           <TiltCard className="card-glass border-0 rounded-[2.5rem] overflow-hidden group">
             <CardHeader className="p-8 pb-4">
               <CardTitle className="text-xl font-bold flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-gala-purple/20 text-gala-purple group-hover:bg-gala-purple group-hover:text-white transition-colors">
+                <div className="p-2 rounded-xl bg-sovereign-gold/20 text-sovereign-gold group-hover:bg-sovereign-gold group-hover:text-white transition-colors">
                   <Package className="h-6 w-6" />
                 </div>
                 المنتجات
@@ -126,7 +126,7 @@ export default function AdminDashboardPage() {
           <TiltCard className="card-glass border-0 rounded-[2.5rem] overflow-hidden group">
             <CardHeader className="p-8 pb-4">
               <CardTitle className="text-xl font-bold flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-gala-pink/20 text-gala-pink group-hover:bg-gala-pink group-hover:text-white transition-colors">
+                <div className="p-2 rounded-xl bg-sovereign-gold/20 text-sovereign-gold group-hover:bg-sovereign-gold group-hover:text-white transition-colors">
                   <Calendar className="h-6 w-6" />
                 </div>
                 الحجوزات
@@ -135,7 +135,7 @@ export default function AdminDashboardPage() {
             <CardContent className="p-8 pt-0">
               <div className="text-5xl font-black mb-4">{stats?.overall?.bookings || 0}</div>
               <p className="text-sm text-muted-foreground mb-8 flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-gala-gold animate-pulse" />
+                <span className="w-2 h-2 rounded-full bg-sovereign-gold animate-pulse" />
                 {stats?.pending_actions?.bookings || 0} قيد الانتظار
               </p>
               <Button variant="outline" className="w-full h-14 rounded-2xl border-white/10 hover:bg-white/5 text-lg" asChild>
@@ -150,7 +150,7 @@ export default function AdminDashboardPage() {
           <TiltCard className="card-glass border-0 rounded-[2.5rem] overflow-hidden group">
             <CardHeader className="p-8 pb-4">
               <CardTitle className="text-xl font-bold flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-gala-cyan/20 text-gala-cyan group-hover:bg-gala-cyan group-hover:text-white transition-colors">
+                <div className="p-2 rounded-xl bg-cyan-500/20 text-cyan-500 group-hover:bg-cyan-500 group-hover:text-white transition-colors">
                   <Users className="h-6 w-6" />
                 </div>
                 المستخدمون
@@ -159,7 +159,7 @@ export default function AdminDashboardPage() {
             <CardContent className="p-8 pt-0">
               <div className="text-5xl font-black mb-4">{stats?.overall?.users || 0}</div>
               <p className="text-sm text-muted-foreground mb-8 flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-gala-purple animate-pulse" />
+                <span className="w-2 h-2 rounded-full bg-sovereign-gold animate-pulse" />
                 +{stats?.this_month?.users || 0} مستخدم جديد هذا الشهر
               </p>
               <Button variant="outline" className="w-full h-14 rounded-2xl border-white/10 hover:bg-white/5 text-lg" asChild>
@@ -178,7 +178,7 @@ export default function AdminDashboardPage() {
             <Card className="card-glass border-0 rounded-[2.5rem] overflow-hidden">
               <CardHeader className="p-8">
                 <CardTitle className="text-2xl font-bold flex items-center gap-3">
-                  <BarChart3 className="h-6 w-6 text-gala-purple" />
+                  <BarChart3 className="h-6 w-6 text-sovereign-gold" />
                   تحليلات الإيرادات
                 </CardTitle>
               </CardHeader>
@@ -203,7 +203,7 @@ export default function AdminDashboardPage() {
             <Card className="card-glass border-0 rounded-[2.5rem] overflow-hidden">
               <CardHeader className="p-8">
                 <CardTitle className="text-2xl font-bold flex items-center gap-3">
-                  <TrendingUp className="h-6 w-6 text-gala-pink" />
+                  <TrendingUp className="h-6 w-6 text-sovereign-gold" />
                   الأكثر تألقاً
                 </CardTitle>
               </CardHeader>
@@ -212,7 +212,7 @@ export default function AdminDashboardPage() {
                   {stats.top_products.map((product: any, index: number) => (
                     <div key={product.id} className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5 hover:bg-white/10 transition-colors group">
                       <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center font-black group-hover:bg-gala-pink transition-colors">
+                        <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center font-black group-hover:bg-sovereign-gold transition-colors">
                           {index + 1}
                         </div>
                         <span className="text-lg font-bold">{product.name}</span>

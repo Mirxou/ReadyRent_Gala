@@ -13,7 +13,7 @@ export default function AuthLayout({
       <ParticleField />
 
       {/* Central Glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gala-purple/20 blur-[120px] rounded-full z-0 opacity-50" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-sovereign-gold/20 blur-[120px] rounded-full z-0 opacity-50" />
 
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}

@@ -878,3 +878,62 @@ Stage Summary:
 - Removed unused CartStore from Zustand store (kept AuthStore, NotificationStore, LanguageStore)
 - `bun run lint` shows 786 pre-existing issues, zero new errors from changes
 - NOTE: components/product-card.tsx was NOT deleted because components/product-recommendations.tsx imports it via `@/components/product-card`
+
+---
+Task ID: 2
+Agent: Cleanup Agent
+Timestamp: $(date -Iseconds)
+
+## Dead Code & Broken Link Cleanup (10 Fixes)
+
+### FIX 1: Auth guard redirect (CRITICAL)
+- File: `components/auth-guard.tsx` line 25
+- Changed `router.push('/auth/login')` → `router.push('/login')`
+- Auth pages live under `(auth)` route group, so actual URL is `/login`
+
+### FIX 2: Created 3 missing placeholder pages
+- `app/admin/products/new/page.tsx` — admin new product placeholder
+- `app/products/create/page.tsx` — user product creation placeholder
+- `app/dashboard/settings/page.tsx` — settings page with 4 sections (profile, notifications, security, appearance)
+
+### FIX 3: Deleted broken test files
+- Deleted `components/__tests__/booking-calendar.test.tsx` (imports deleted booking-calendar.tsx)
+- Deleted `components/__tests__/product-card.test.tsx` (tests old duplicate)
+- Removed empty `components/__tests__/` directory
+
+### FIX 4: Removed ghost `/local-guide` from sitemap
+- File: `app/sitemap.ts`
+- Removed the local-guide URL entry (page doesn't exist)
+
+### FIX 5: Removed dead local-guide handlers from mock API
+- File: `app/api/[[...path]]/route.ts`
+- Removed `local-guide/categories` and `local-guide/services` handler cases
+- Also removed unused imports `localGuideServices` and `categories`
+
+### FIX 6: Removed dead `trackBooking` import from cart
+- File: `app/cart/page.tsx`
+- Removed `import { trackBooking } from '@/lib/analytics'` (never called)
+
+### FIX 7: Deleted 6 dead lib/api/ files
+- `lib/api/notifications.ts`, `lib/api/logistics.ts`, `lib/api/admin.ts`
+- `lib/api/auth.ts`, `lib/api/wallet.ts`, `lib/api/reviews.ts`
+- Verified zero consumers from pages/components
+
+### FIX 8: Removed 13 dead exports + 3 dead types from lib/api.ts
+- Removed types: `SovereignUser`, `SovereignBooking`, `SovereignResponse`
+- Removed APIs: `verificationApi`, `adminVerificationApi`, `blacklistApi`, `staffApi`, `damageAssessmentApi`, `notificationsApi`, `returnsApi`, `warrantiesApi`, `localGuideApi`, `artisansApi`, `vendorsApi`, `branchesApi`, `cmsApi`
+- Kept all actively-used exports (verified via grep)
+
+### FIX 9: Removed 8 dead analytics functions from lib/analytics.tsx
+- Removed: `trackProductView`, `trackAddToCart`, `trackBooking`, `trackFunnelStage`, `trackABTest`, `trackDisputeFiled`, `trackBookingCreated`, `trackPaymentCompleted`
+- Kept: `pageview`, `event`, `trackSearch`, `trackAppealFiled`, default `Analytics` component
+
+### FIX 10: Consolidated duplicate product-card.tsx
+- Updated `product-recommendations.tsx` to import from `@/components/product/product-card`
+- Deleted old `components/product-card.tsx` (sovereign version has `product: any` — interface compatible)
+
+Stage Summary:
+- All 10 fixes applied successfully
+- No new lint errors introduced (pre-existing 390 errors remain unchanged)
+- 2 new page routes created, 6 dead API files deleted, 1 duplicate component deleted
+- Net reduction: ~400 lines of dead code removed

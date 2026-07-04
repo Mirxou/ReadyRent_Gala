@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatNumber } from '@/lib/utils';
-import { trackBooking } from '@/lib/analytics';
+
 import { ParticleField } from '@/components/ui/particle-field';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MagneticButton } from '@/components/ui/magnetic-button';
@@ -143,8 +143,8 @@ export default function CartPage() {
     return (
       <div className="fixed inset-0 z-[100] flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
-          <div className="h-16 w-16 rounded-full border-t-4 border-gala-purple animate-spin"></div>
-          <p className="text-gala-purple animate-pulse font-bold">جاري استرجاع سلتكم الأنيقة...</p>
+          <div className="h-16 w-16 rounded-full border-t-4 border-sovereign-gold animate-spin"></div>
+          <p className="text-sovereign-gold animate-pulse font-bold">جاري استرجاع سلتكم الأنيقة...</p>
         </div>
       </div>
     );
@@ -189,10 +189,10 @@ export default function CartPage() {
           animate={{ opacity: 1, scale: 1 }}
           className="text-center z-10 card-glass p-12 rounded-[2.5rem] max-w-lg mx-4"
         >
-          <div className="w-24 h-24 bg-gradient-to-br from-gala-purple to-gala-pink rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-xl">
+          <div className="w-24 h-24 bg-gradient-to-br from-sovereign-gold to-sovereign-gold rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-xl">
             <ShoppingCart className="h-12 w-12 text-white" />
           </div>
-          <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-gala-purple to-gala-pink bg-clip-text text-transparent">سلتكم اللطيفة فارغة</h2>
+          <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-sovereign-gold to-sovereign-gold bg-clip-text text-transparent">سلتكم اللطيفة فارغة</h2>
           <p className="text-muted-foreground mb-8 text-lg">
             يبدو أنكم لم تختاروا بعد ما يناسب تألقكم في مناسبتكم القادمة.
           </p>
@@ -214,7 +214,7 @@ export default function CartPage() {
         className="container mx-auto px-4 py-12 relative z-10"
       >
         <div className="mb-12 text-center">
-          <h1 className="text-5xl md:text-7xl font-bold mb-4 bg-gradient-to-r from-gala-purple via-gala-pink to-gala-gold bg-clip-text text-transparent">
+          <h1 className="text-5xl md:text-7xl font-bold mb-4 bg-gradient-to-r from-sovereign-gold via-sovereign-gold to-sovereign-gold bg-clip-text text-transparent">
             حقيبة أناقتكم
           </h1>
           <p className="text-xl text-muted-foreground font-medium">
@@ -265,11 +265,11 @@ export default function CartPage() {
                             <div className="flex items-start justify-between">
                               <div>
                                 {item.product.category && (
-                                  <Badge className="mb-2 bg-gala-purple/10 text-gala-purple border-gala-purple/20">
+                                  <Badge className="mb-2 bg-sovereign-gold/10 text-sovereign-gold border-sovereign-gold/20">
                                     {item.product.category.name_ar}
                                   </Badge>
                                 )}
-                                <h3 className="font-bold text-2xl group-hover:text-gala-purple transition-colors">{item.product.name_ar}</h3>
+                                <h3 className="font-bold text-2xl group-hover:text-sovereign-gold transition-colors">{item.product.name_ar}</h3>
                               </div>
                               <MagneticButton
                                 variant="ghost"
@@ -283,13 +283,13 @@ export default function CartPage() {
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                               <div className="flex items-center gap-3 text-muted-foreground bg-white/5 p-3 rounded-2xl border border-white/10">
-                                <Calendar className="h-5 w-5 text-gala-purple" />
+                                <Calendar className="h-5 w-5 text-sovereign-gold" />
                                 <span className="text-sm font-medium">
                                   {formatDate(item.start_date)} - {formatDate(item.end_date)}
                                 </span>
                               </div>
                               <div className="flex items-center gap-3 text-muted-foreground bg-white/5 p-3 rounded-2xl border border-white/10">
-                                <div className="w-5 h-5 rounded-full bg-gala-gold/20 flex items-center justify-center text-gala-gold">
+                                <div className="w-5 h-5 rounded-full bg-sovereign-gold/20 flex items-center justify-center text-sovereign-gold">
                                   <Zap className="h-3 w-3" />
                                 </div>
                                 <span className="text-sm font-medium">
@@ -302,7 +302,7 @@ export default function CartPage() {
                               <div className="text-sm font-bold opacity-60">
                                 {item.quantity} {item.quantity === 1 ? 'قطعة فريدة' : 'قطع'}
                               </div>
-                              <div className="text-2xl font-black bg-gradient-to-r from-gala-purple to-gala-pink bg-clip-text text-transparent">
+                              <div className="text-2xl font-black bg-gradient-to-r from-sovereign-gold to-sovereign-gold bg-clip-text text-transparent">
                                 {formatNumber(itemTotal)} دج
                               </div>
                             </div>
@@ -320,7 +320,7 @@ export default function CartPage() {
           <div className="lg:col-span-1">
             <Card className="card-glass border-0 rounded-[2.5rem] overflow-hidden sticky top-24">
               <div className="p-8 space-y-8">
-                <h2 className="text-3xl font-bold bg-gradient-to-r from-gala-purple to-gala-pink bg-clip-text text-transparent">ملخص الجمال</h2>
+                <h2 className="text-3xl font-bold bg-gradient-to-r from-sovereign-gold to-sovereign-gold bg-clip-text text-transparent">ملخص الجمال</h2>
 
                 <div className="space-y-4">
                   {items.map((item: any) => {
@@ -339,13 +339,13 @@ export default function CartPage() {
                 </div>
 
                 {packagingInfo?.suggested_packaging && (
-                  <div className="p-4 bg-gala-gold/5 border border-gala-gold/20 rounded-2xl flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-gala-gold/20 flex items-center justify-center text-gala-gold">
+                  <div className="p-4 bg-sovereign-gold/5 border border-sovereign-gold/20 rounded-2xl flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-sovereign-gold/20 flex items-center justify-center text-sovereign-gold">
                       <Package className="h-6 w-6" />
                     </div>
                     <div className="flex-1">
-                      <p className="text-sm font-bold text-gala-gold">تغليف Gala الفاخر</p>
-                      <p className="text-xs text-gala-gold/80 font-medium">
+                      <p className="text-sm font-bold text-sovereign-gold">تغليف Gala الفاخر</p>
+                      <p className="text-xs text-sovereign-gold/80 font-medium">
                         {packagingInfo.suggested_packaging.name_ar || packagingInfo.suggested_packaging.name}
                       </p>
                     </div>
@@ -354,28 +354,28 @@ export default function CartPage() {
 
                 {/* Same-day Delivery Option */}
                 {sameDayInfo?.available && (
-                  <div className="p-4 bg-gala-cyan/5 border border-gala-cyan/20 rounded-2xl space-y-4">
+                  <div className="p-4 bg-cyan-500/5 border border-cyan-500/20 rounded-2xl space-y-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <Switch
                           id="same-day-delivery"
                           checked={sameDayDelivery}
                           onCheckedChange={setSameDayDelivery}
-                          className="data-[state=checked]:bg-gala-cyan"
+                          className="data-[state=checked]:bg-cyan-500"
                         />
-                        <Label htmlFor="same-day-delivery" className="cursor-pointer font-bold text-gala-cyan flex items-center gap-2">
+                        <Label htmlFor="same-day-delivery" className="cursor-pointer font-bold text-cyan-500 flex items-center gap-2">
                           <Zap className="h-4 w-4" />
                           تسليم سريع اليوم
                         </Label>
                       </div>
                       {sameDayInfo.fee > 0 && (
-                        <span className="text-sm font-black text-gala-cyan">
+                        <span className="text-sm font-black text-cyan-500">
                           +{formatNumber(sameDayInfo.fee)} دج
                         </span>
                       )}
                     </div>
                     {sameDayInfo.cutoff_time && (
-                      <p className="text-xs text-gala-cyan/70 font-bold uppercase tracking-tighter">
+                      <p className="text-xs text-cyan-500/70 font-bold uppercase tracking-tighter">
                         أطلب قبل {sameDayInfo.cutoff_time} للتوصيل الليلة
                       </p>
                     )}
@@ -386,12 +386,12 @@ export default function CartPage() {
                   {sameDayDelivery && sameDayInfo && sameDayInfo.fee > 0 && (
                     <div className="flex justify-between text-sm font-medium">
                       <span className="text-muted-foreground font-bold">رسوم السرعة القصوى</span>
-                      <span className="text-gala-cyan">{formatNumber(sameDayInfo.fee)} دج</span>
+                      <span className="text-cyan-500">{formatNumber(sameDayInfo.fee)} دج</span>
                     </div>
                   )}
                   <div className="flex justify-between items-end">
                     <span className="text-xl font-bold opacity-60">المبلغ الإجمالي</span>
-                    <span className="text-4xl font-black bg-gradient-to-r from-gala-gold to-gala-gold/60 bg-clip-text text-transparent">
+                    <span className="text-4xl font-black bg-gradient-to-r from-sovereign-gold to-sovereign-gold/60 bg-clip-text text-transparent">
                       {formatNumber(totalPrice + (sameDayDelivery && sameDayInfo ? sameDayInfo.fee : 0))} دج
                     </span>
                   </div>
@@ -401,7 +401,7 @@ export default function CartPage() {
                   {/* Branch selector near checkout */}
                   <SafeWrapper><BranchSelector /></SafeWrapper>
                   <MagneticButton
-                    className="w-full h-16 text-xl font-bold shadow-2xl shadow-gala-gold/20 bg-gradient-to-r from-gala-gold to-yellow-500 text-black border-0"
+                    className="w-full h-16 text-xl font-bold shadow-2xl shadow-sovereign-gold/20 bg-gradient-to-r from-sovereign-gold to-yellow-500 text-black border-0"
                     size="lg"
                     onClick={() => createBookingMutation.mutate()}
                     disabled={createBookingMutation.isPending}

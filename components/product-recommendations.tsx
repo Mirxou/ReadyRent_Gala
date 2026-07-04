@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ProductCard } from '@/components/product-card';
+import { ProductCard } from '@/components/product/product-card';
 import { productsApi } from '@/lib/api';
 import { Sparkles } from 'lucide-react';
 
@@ -36,7 +36,7 @@ export function ProductRecommendations({ productId, limit = 6 }: ProductRecommen
     <Card className="card-glass border-0">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-2xl">
-          <Sparkles className="h-6 w-6 text-gala-gold" />
+          <Sparkles className="h-6 w-6 text-sovereign-gold" />
           قد يعجبك أيضاً
         </CardTitle>
       </CardHeader>

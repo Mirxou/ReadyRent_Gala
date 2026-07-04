@@ -75,14 +75,14 @@ export default function DisputesPage() {
         >
           <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
             <div>
-              <h1 className="text-4xl md:text-5xl font-black mb-2 bg-gradient-to-r from-gala-purple via-gala-pink to-gala-gold bg-clip-text text-transparent">
+              <h1 className="text-4xl md:text-5xl font-black mb-2 bg-gradient-to-r from-sovereign-gold via-sovereign-gold to-sovereign-gold bg-clip-text text-transparent">
                 النزاعات والدعم
               </h1>
               <p className="text-muted-foreground text-base">إدارة النزاعات وطلبات الدعم</p>
             </div>
             <Button
               onClick={() => setShowForm(!showForm)}
-              className="bg-gradient-to-l from-gala-purple to-gala-pink text-white font-bold px-6 py-2.5 rounded-2xl shadow-lg shadow-gala-purple/20 hover:shadow-gala-purple/40 transition-shadow"
+              className="bg-gradient-to-l from-sovereign-gold to-sovereign-gold text-white font-bold px-6 py-2.5 rounded-2xl shadow-lg shadow-sovereign-gold/20 hover:shadow-sovereign-gold/40 transition-shadow"
             >
               {showForm ? 'إلغاء' : (
                 <span className="inline-flex items-center gap-2">
@@ -134,21 +134,21 @@ export default function DisputesPage() {
                     <div className="flex items-center justify-between relative mb-8 px-4">
                       <div className="absolute top-1/2 left-0 w-full h-0.5 bg-white/10 -translate-y-1/2 z-0" />
                       <div
-                        className="absolute top-1/2 right-0 h-0.5 bg-gala-purple -translate-y-1/2 z-0 transition-all duration-500"
+                        className="absolute top-1/2 right-0 h-0.5 bg-sovereign-gold -translate-y-1/2 z-0 transition-all duration-500"
                         style={{ width: `${((step - 1) / (steps.length - 1)) * 100}%` }}
                       />
                       {steps.map((s) => (
                         <div key={s.id} className="relative z-10 flex flex-col items-center gap-2">
                           <div className={cn(
                             "w-10 h-10 rounded-full flex items-center justify-center font-bold transition-all duration-300",
-                            step === s.id ? "bg-gala-purple text-white scale-110 shadow-lg shadow-gala-purple/30" :
-                            step > s.id ? "bg-gala-purple text-white" : "bg-white/10 text-white/40"
+                            step === s.id ? "bg-sovereign-gold text-white scale-110 shadow-lg shadow-sovereign-gold/30" :
+                            step > s.id ? "bg-sovereign-gold text-white" : "bg-white/10 text-white/40"
                           )}>
                             {step > s.id ? <Check className="w-5 h-5" /> : s.id}
                           </div>
                           <span className={cn(
                             "text-[10px] font-bold uppercase tracking-wider",
-                            step >= s.id ? "text-gala-purple" : "text-white/40"
+                            step >= s.id ? "text-sovereign-gold" : "text-white/40"
                           )}>
                             {s.title}
                           </span>
@@ -185,7 +185,7 @@ export default function DisputesPage() {
                           <Button
                             onClick={nextStep}
                             disabled={!canProceed()}
-                            className="rounded-2xl px-8 h-12 font-bold bg-gala-purple hover:bg-gala-purple/80 text-white shadow-lg shadow-gala-purple/20"
+                            className="rounded-2xl px-8 h-12 font-bold bg-sovereign-gold hover:bg-sovereign-gold/80 text-white shadow-lg shadow-sovereign-gold/20"
                           >
                             المتابعة
                             <ChevronRight className="w-5 h-5 mr-2" />
@@ -225,7 +225,7 @@ export default function DisputesPage() {
             {/* Decorative sparkle */}
             <div className="absolute top-4 right-4 w-20 h-20 opacity-30">
               <SovereignSparkle>
-                <Sparkles className="w-8 h-8 text-gala-gold/40" />
+                <Sparkles className="w-8 h-8 text-sovereign-gold/40" />
               </SovereignSparkle>
             </div>
 
@@ -233,9 +233,9 @@ export default function DisputesPage() {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.4, type: 'spring', stiffness: 200 }}
-              className="w-24 h-24 mx-auto mb-6 rounded-3xl bg-gradient-to-br from-gala-purple/20 to-gala-gold/10 border border-white/10 flex items-center justify-center"
+              className="w-24 h-24 mx-auto mb-6 rounded-3xl bg-gradient-to-br from-sovereign-gold/20 to-sovereign-gold/10 border border-white/10 flex items-center justify-center"
             >
-              <Shield className="w-12 h-12 text-gala-gold/80" />
+              <Shield className="w-12 h-12 text-sovereign-gold/80" />
             </motion.div>
 
             <h2 className="text-2xl md:text-3xl font-bold mb-3">
@@ -252,7 +252,7 @@ export default function DisputesPage() {
             >
               <Button
                 onClick={() => setShowForm(true)}
-                className="bg-gradient-to-l from-gala-purple to-gala-pink text-white font-bold px-8 py-3 rounded-2xl shadow-lg shadow-gala-purple/25 hover:shadow-gala-purple/40 transition-shadow"
+                className="bg-gradient-to-l from-sovereign-gold to-sovereign-gold text-white font-bold px-8 py-3 rounded-2xl shadow-lg shadow-sovereign-gold/25 hover:shadow-sovereign-gold/40 transition-shadow"
               >
                 <span className="inline-flex items-center gap-2">
                   <Plus className="w-4 h-4" />

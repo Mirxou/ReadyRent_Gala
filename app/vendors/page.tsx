@@ -55,10 +55,10 @@ export default function VendorsPage() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-12 text-center"
         >
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gala-purple/20 mb-6">
-            <Store className="h-10 w-10 text-gala-purple" />
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-sovereign-gold/20 mb-6">
+            <Store className="h-10 w-10 text-sovereign-gold" />
           </div>
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-gala-purple via-gala-pink to-gala-gold bg-clip-text text-transparent">
+          <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-sovereign-gold via-sovereign-gold to-sovereign-gold bg-clip-text text-transparent">
             الموردون والمصممون
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
@@ -75,7 +75,7 @@ export default function VendorsPage() {
         >
           <Link
             href="/vendors/dashboard"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-gala-purple/10 border border-gala-purple/20 text-gala-purple hover:bg-gala-purple/20 transition-all font-bold text-sm"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-sovereign-gold/10 border border-sovereign-gold/20 text-sovereign-gold hover:bg-sovereign-gold/20 transition-all font-bold text-sm"
           >
             <LayoutDashboard className="h-4 w-4" />
             لوحة تحكم البائع

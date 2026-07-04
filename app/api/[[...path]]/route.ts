@@ -4,8 +4,6 @@ import {
   vendors,
   artisans,
   bundles,
-  localGuideServices,
-  categories,
   reviews,
 } from '@/lib/mock-data';
 
@@ -44,14 +42,6 @@ function resolveGetMock(path: string): unknown {
   // Vendors
   if (p === 'vendors' || p === 'vendors/vendors') {
     return vendors;
-  }
-
-  // Local Guide
-  if (p === 'local-guide/categories') {
-    return categories;
-  }
-  if (p === 'local-guide/services') {
-    return localGuideServices;
   }
 
   // Artisans

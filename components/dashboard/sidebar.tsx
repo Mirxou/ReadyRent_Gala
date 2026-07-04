@@ -74,7 +74,7 @@ export function DashboardSidebar() {
             
             {/* Background Ambience */}
             <div className="absolute top-0 right-0 w-32 h-32 bg-sovereign-gold/5 rounded-full blur-[80px] -z-10" />
-            <div className="absolute bottom-0 left-0 w-40 h-40 bg-gala-purple/5 rounded-full blur-[100px] -z-10" />
+            <div className="absolute bottom-0 left-0 w-40 h-40 bg-sovereign-gold/5 rounded-full blur-[100px] -z-10" />
 
             <div className="p-6 flex-1 overflow-y-auto">
                 <div className="flex items-center gap-3 mb-10 group cursor-pointer">

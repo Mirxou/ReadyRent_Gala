@@ -47,8 +47,8 @@ export default function BundlesPage() {
           className="mb-12 text-center px-6 py-8 md:px-12 md:py-16"
         >
           <SovereignSparkle>
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gala-purple/20 mb-6">
-              <Package className="h-10 w-10 text-gala-purple" />
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-sovereign-gold/20 mb-6">
+              <Package className="h-10 w-10 text-sovereign-gold" />
             </div>
           </SovereignSparkle>
           <div className="mb-6">
@@ -106,7 +106,7 @@ export default function BundlesPage() {
                       <div className="relative p-6 pb-0">
                         {discount > 0 && (
                           <div className="absolute top-4 left-4">
-                            <Badge className="bg-gala-pink text-white border-0">
+                            <Badge className="bg-sovereign-gold text-white border-0">
                               <Percent className="h-3 w-3 ml-1" />
                               خصم {discount}%
                             </Badge>
@@ -117,7 +117,7 @@ export default function BundlesPage() {
                       <div className="p-6">
                         {/* Bundle name & rating */}
                         <div className="mb-3">
-                          <h3 className="text-xl font-bold mb-2 group-hover:text-gala-purple transition-colors leading-relaxed">
+                          <h3 className="text-xl font-bold mb-2 group-hover:text-sovereign-gold transition-colors leading-relaxed">
                             {bundle.name}
                           </h3>
                           <div className="flex items-center gap-1.5">
@@ -136,7 +136,7 @@ export default function BundlesPage() {
                         <div className="flex items-center justify-between">
                           <div>
                             <div className="flex items-center gap-2">
-                              <span className="text-2xl font-bold text-gala-purple">
+                              <span className="text-2xl font-bold text-sovereign-gold">
                                 {formatNumber(bundle.price)} دج
                               </span>
                             </div>
@@ -144,7 +144,7 @@ export default function BundlesPage() {
                               {formatNumber(bundle.originalPrice)} دج
                             </span>
                           </div>
-                          <ArrowLeft className="h-5 w-5 text-muted-foreground group-hover:text-gala-purple group-hover:translate-x-1 transition-all" />
+                          <ArrowLeft className="h-5 w-5 text-muted-foreground group-hover:text-sovereign-gold group-hover:translate-x-1 transition-all" />
                         </div>
                       </div>
                     </GlassPanel>

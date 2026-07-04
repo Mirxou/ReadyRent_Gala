@@ -104,13 +104,13 @@ export default function BlogPage() {
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                       <div className="absolute top-4 right-4">
-                        <Badge className="bg-gala-purple/90 text-white border-0">
+                        <Badge className="bg-sovereign-gold/90 text-white border-0">
                           {post.category}
                         </Badge>
                       </div>
                     </div>
                     <div className="p-6">
-                      <h3 className="text-xl font-bold mb-3 group-hover:text-gala-purple transition-colors leading-relaxed">
+                      <h3 className="text-xl font-bold mb-3 group-hover:text-sovereign-gold transition-colors leading-relaxed">
                         {post.title}
                       </h3>
                       <p className="text-sm text-muted-foreground mb-4 leading-relaxed">

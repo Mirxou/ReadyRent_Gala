@@ -87,23 +87,23 @@ export default function ArtisansPage() {
 
         {/* Filters */}
         <Card className="card-glass border-0 rounded-3xl mb-12 overflow-hidden group">
-          <div className="absolute inset-0 bg-gradient-to-r from-gala-purple/5 to-gala-pink/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="absolute inset-0 bg-gradient-to-r from-sovereign-gold/5 to-sovereign-gold/5 opacity-0 group-hover:opacity-100 transition-opacity" />
           <CardContent className="p-8 relative z-10">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="relative group/input">
-                <Search className="absolute right-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within/input:text-gala-purple transition-colors" />
+                <Search className="absolute right-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within/input:text-sovereign-gold transition-colors" />
                 <Input
                   placeholder="ابحثي عن موهبة..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="pr-12 h-14 bg-white/5 border-white/10 rounded-2xl focus:ring-2 focus:ring-gala-purple/50 focus:border-gala-purple transition-all text-lg"
+                  className="pr-12 h-14 bg-white/5 border-white/10 rounded-2xl focus:ring-2 focus:ring-sovereign-gold/50 focus:border-sovereign-gold transition-all text-lg"
                 />
               </div>
 
               <select
                 value={selectedSpecialty}
                 onChange={(e) => setSelectedSpecialty(e.target.value)}
-                className="flex h-14 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-lg ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gala-purple transition-all cursor-pointer hover:bg-white/10"
+                className="flex h-14 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-lg ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sovereign-gold transition-all cursor-pointer hover:bg-white/10"
               >
                 {SPECIALTY_OPTIONS.map((specialty) => (
                   <option key={specialty.value} value={specialty.value} className="bg-slate-900 text-white">
@@ -122,7 +122,7 @@ export default function ArtisansPage() {
                 <MagneticButton
                   variant="ghost"
                   size="sm"
-                  className="text-gala-pink hover:text-gala-pink hover:bg-gala-pink/10"
+                  className="text-sovereign-gold hover:text-sovereign-gold hover:bg-sovereign-gold/10"
                   onClick={() => {
                     setSearch('');
                     setSelectedSpecialty('');
@@ -172,12 +172,12 @@ export default function ArtisansPage() {
 
                         <div className="absolute top-4 left-4 flex gap-2">
                           {artisan.is_featured && (
-                            <Badge className="bg-gradient-to-r from-gala-gold to-yellow-500 text-black border-0 font-bold shadow-lg">
+                            <Badge className="bg-gradient-to-r from-sovereign-gold to-yellow-500 text-black border-0 font-bold shadow-lg">
                               مميزة
                             </Badge>
                           )}
                           {artisan.is_verified && (
-                            <Badge className="bg-gala-cyan text-white border-0 font-bold shadow-lg">
+                            <Badge className="bg-cyan-500 text-white border-0 font-bold shadow-lg">
                               ✓ موثقة
                             </Badge>
                           )}
@@ -197,11 +197,11 @@ export default function ArtisansPage() {
                             </div>
                           )}
                           <div className="flex-1 min-w-0 pt-16">
-                            <h3 className="font-bold text-2xl mb-2 line-clamp-1 group-hover:text-gala-purple transition-colors">
+                            <h3 className="font-bold text-2xl mb-2 line-clamp-1 group-hover:text-sovereign-gold transition-colors">
                               {artisan.name_ar || artisan.name}
                             </h3>
                             <div className="flex flex-wrap gap-2">
-                              <Badge className="bg-gala-purple/10 text-gala-purple border-gala-purple/20">
+                              <Badge className="bg-sovereign-gold/10 text-sovereign-gold border-sovereign-gold/20">
                                 <Palette className="h-3 w-3 ml-1" />
                                 {SPECIALTY_OPTIONS.find((s) => s.value === artisan.specialty)?.label || artisan.specialty}
                               </Badge>

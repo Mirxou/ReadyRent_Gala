@@ -77,13 +77,13 @@ export default function ProductsPage() {
         <div className="space-y-8">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold bg-gradient-to-r from-gala-purple to-gala-pink bg-clip-text text-transparent">
+                    <h1 className="text-3xl font-bold bg-gradient-to-r from-sovereign-gold to-sovereign-gold bg-clip-text text-transparent">
                         منتجاتي
                     </h1>
                     <p className="text-muted-foreground">إدارة مجموعتك الخاصة من الفساتين والأزياء.</p>
                 </div>
                 <Link href="/products/create">
-                    <Button className="rounded-full bg-gradient-to-r from-gala-purple to-gala-pink hover:opacity-90 shadow-lg glow-purple gap-2">
+                    <Button className="rounded-full bg-gradient-to-r from-sovereign-gold to-sovereign-gold hover:opacity-90 shadow-lg glow-purple gap-2">
                         <Plus className="w-4 h-4" />
                         إضافة منتج جديد
                     </Button>
@@ -138,7 +138,7 @@ export default function ProductsPage() {
                                     <TableCell>{formatNumber(product.price)} دج</TableCell>
                                     <TableCell className="text-center text-muted-foreground">{product.views}</TableCell>
                                     <TableCell className="text-center">
-                                        <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gala-purple/10 text-gala-purple">
+                                        <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-sovereign-gold/10 text-sovereign-gold">
                                             {product.bookings}
                                         </div>
                                     </TableCell>

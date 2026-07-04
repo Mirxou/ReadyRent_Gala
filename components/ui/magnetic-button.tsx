@@ -80,10 +80,10 @@ export const MagneticButton = forwardRef<HTMLButtonElement, MagneticButtonProps>
         const Comp = asChild ? Slot : 'button';
 
         const variantStyles = {
-            primary: 'bg-gradient-to-r from-gala-purple via-gala-pink to-gala-gold text-white shadow-lg glow-purple',
-            secondary: 'bg-gradient-to-r from-gala-cyan to-gala-purple text-white shadow-lg glow-pink',
-            outline: 'border-2 border-white/10 text-foreground hover:bg-gala-purple/10 backdrop-blur-md',
-            ghost: 'hover:bg-gala-purple/10 text-foreground'
+            primary: 'bg-gradient-to-r from-sovereign-gold via-sovereign-gold to-sovereign-gold text-white shadow-lg glow-purple',
+            secondary: 'bg-gradient-to-r from-cyan-500 to-sovereign-gold text-white shadow-lg glow-pink',
+            outline: 'border-2 border-white/10 text-foreground hover:bg-sovereign-gold/10 backdrop-blur-md',
+            ghost: 'hover:bg-sovereign-gold/10 text-foreground'
         };
 
         const sizeStyles = {

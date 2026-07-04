@@ -28,13 +28,6 @@
   --color-sovereign-white: #FDFDFD;
   --color-sovereign-blue: #1E3A5F;
 
-  /* Gala Palette - Accent Colors */
-  --color-gala-purple: #8B5CF6;
-  --color-gala-pink: #EC4899;
-  --color-gala-gold: #C5A059;
-  --color-gala-cyan: #06B6D4;
-  --color-gala-orange: #F59E0B;
-
   /* Typography - Elite Arabic Pairing */
   --font-sans: var(--font-inter), "Outfit", ui-sans-serif, system-ui, sans-serif;
   --font-arabic: var(--font-ibm-plex), "Cairo", serif;

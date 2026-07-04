@@ -52,8 +52,8 @@ export default function FAQPage() {
           className="mb-12 text-center"
         >
           <SovereignSparkle>
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gala-purple/20 mb-6">
-              <HelpCircle className="h-10 w-10 text-gala-purple" />
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-sovereign-gold/20 mb-6">
+              <HelpCircle className="h-10 w-10 text-sovereign-gold" />
             </div>
           </SovereignSparkle>
           <div className="mb-6" style={{ overflow: 'visible', width: '100%' }}>
@@ -114,7 +114,7 @@ export default function FAQPage() {
                       <h3 className="text-lg font-medium leading-relaxed">{faq.question}</h3>
                       <div className="flex-shrink-0 mt-1">
                         {openItems.includes(faq.id) ? (
-                          <ChevronUp className="h-5 w-5 text-gala-purple" />
+                          <ChevronUp className="h-5 w-5 text-sovereign-gold" />
                         ) : (
                           <ChevronDown className="h-5 w-5 text-muted-foreground" />
                         )}
