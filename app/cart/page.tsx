@@ -25,6 +25,22 @@ import { trackBooking } from '@/lib/analytics';
 import { ParticleField } from '@/components/ui/particle-field';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MagneticButton } from '@/components/ui/magnetic-button';
+import { BranchSelector } from '@/components/branch-selector';
+import { BundleSelector } from '@/components/bundle-selector';
+
+class SafeWrapper extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  render() {
+    if (this.state.hasError) return null;
+    return this.props.children;
+  }
+}
 
 export default function CartPage() {
   const router = useRouter();
@@ -211,6 +227,9 @@ export default function CartPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
           {/* Cart Items */}
           <div className="lg:col-span-2 space-y-6">
+            {/* Bundle upgrade at top of cart */}
+            <SafeWrapper><BundleSelector startDate={null} endDate={null} /></SafeWrapper>
+
             <AnimatePresence mode="popLayout">
               {items.map((item: any, index: number) => {
                 const days = Math.ceil(
@@ -381,6 +400,8 @@ export default function CartPage() {
                 </div>
 
                 <div className="space-y-4 pt-4">
+                  {/* Branch selector near checkout */}
+                  <SafeWrapper><BranchSelector /></SafeWrapper>
                   <MagneticButton
                     className="w-full h-16 text-xl font-bold shadow-2xl shadow-gala-gold/20 bg-gradient-to-r from-gala-gold to-yellow-500 text-black border-0"
                     size="lg"

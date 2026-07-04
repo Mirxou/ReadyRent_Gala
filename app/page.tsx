@@ -6,8 +6,9 @@ import { useRef, useEffect, useState } from 'react';
 import { SovereignButton } from "@/shared/components/sovereign/sovereign-button";
 import { GlassPanel } from "@/shared/components/sovereign/glass-panel";
 import { SovereignGlow, SovereignSparkle } from '@/shared/components/sovereign/sovereign-sparkle';
-import { ProductCard } from '@/components/product/product-card';
-import { products as mockProducts, artisans as mockArtisans, localGuideServices as mockGuideServices, categories as mockCategories } from '@/lib/mock-data';
+import { FeaturedProducts } from '@/components/product/featured-products';
+import { ReviewList } from '@/components/reviews/review-list';
+import { artisans as mockArtisans, localGuideServices as mockGuideServices, categories as mockCategories } from '@/lib/mock-data';
 import { formatNumber } from '@/lib/utils';
 import {
   Shirt,
@@ -26,6 +27,7 @@ import {
   Briefcase,
   Smile,
   TrendingUp,
+  MessageCircle,
 } from 'lucide-react';
 
 /* ────────────────────────────────────────────
@@ -186,64 +188,11 @@ function HeroSection() {
 }
 
 /* ════════════════════════════════════════════
-   SECTION 2 — FEATURED PRODUCTS
+   SECTION 2 — FEATURED PRODUCTS (imported)
+   Uses the standalone FeaturedProducts component
+   which fetches from API and handles its own state.
+   Falls back to nothing if API is unavailable.
    ════════════════════════════════════════════ */
-function FeaturedProducts() {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const inView = useInView(sectionRef, { once: true, margin: "-100px" });
-
-  const featured = mockProducts?.slice(0, 4) || [];
-
-  return (
-    <section ref={sectionRef} className="py-20 md:py-28 px-4">
-      <div className="max-w-7xl mx-auto">
-        {/* Section Header */}
-        <motion.div
-          initial="hidden"
-          animate={inView ? "visible" : "hidden"}
-          variants={staggerContainer}
-          className="flex items-end justify-between mb-10 md:mb-14"
-        >
-          <motion.div variants={fadeUp}>
-            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-sovereign-gold/60 mb-3">التحديد السيادي</p>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tighter">
-              المنتجات <span className="text-sovereign-gold">المميزة</span>
-            </h2>
-          </motion.div>
-          <motion.div variants={fadeUp}>
-            <Link
-              href="/products"
-              className="flex items-center gap-2 text-sovereign-gold text-sm font-bold hover:gap-3 transition-all"
-            >
-              <span>عرض الكل</span>
-              <ArrowLeft className="w-4 h-4" />
-            </Link>
-          </motion.div>
-        </motion.div>
-
-        {/* Horizontal Scrollable Row */}
-        <div
-          ref={scrollRef}
-          className="flex gap-6 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-        >
-          {featured.map((product: any, i: number) => (
-            <motion.div
-              key={product.id || i}
-              initial={{ opacity: 0, y: 30 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: i * 0.1, ease: [0.32, 0.72, 0, 1] }}
-              className="flex-shrink-0 w-[280px] sm:w-[300px] snap-start"
-            >
-              <ProductCard product={product} />
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
 
 /* ════════════════════════════════════════════
    SECTION 3 — THE 3 ECOSYSTEMS
@@ -515,6 +464,102 @@ function ServicesCategories() {
 }
 
 /* ════════════════════════════════════════════
+   SECTION 5.5 — CUSTOMER REVIEWS
+   ════════════════════════════════════════════ */
+const homepageReviews = [
+  {
+    id: 1,
+    user_email: '',
+    user_username: 'سارة بن عبد الله',
+    rating: 5,
+    title: 'تجربة زفاف رائعة',
+    comment: 'فستان الزفاف كان رائعاً! الجودة ممتازة والتطريز يدوي بامتياز. أنصح بشدة كل عروس بتجربته. الخدمة كانت سريعة والتوصيل في الموعد.',
+    is_verified_purchase: true,
+    helpful_count: 12,
+    created_at: '2024-12-15T14:30:00Z',
+  },
+  {
+    id: 2,
+    user_email: '',
+    user_username: 'كريم بوجلال',
+    rating: 4,
+    title: 'جودة عالية',
+    comment: 'البدلة كانت نظيفة ومكوية بشكل جيد. القماش ذو جودة عالية. فقط أتمنى لو كان هناك خيار لتعديل المقاس.',
+    is_verified_purchase: true,
+    helpful_count: 8,
+    created_at: '2024-12-10T09:15:00Z',
+  },
+  {
+    id: 3,
+    user_email: '',
+    user_username: 'نورة بلقاسم',
+    rating: 5,
+    title: 'تحفة فنية',
+    comment: 'القفطان الذهبي كان تحفة فنية! التطريز بالذهب الخالص جعلني أشعر بالملكية. شكراً على التجربة الرائعة.',
+    is_verified_purchase: true,
+    helpful_count: 15,
+    created_at: '2024-11-28T16:45:00Z',
+  },
+];
+
+function CustomerReviewsSection() {
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, margin: "-100px" });
+
+  return (
+    <section ref={ref} className="py-20 md:py-28 px-4">
+      <div className="max-w-7xl mx-auto">
+        {/* Section Header */}
+        <motion.div
+          initial="hidden"
+          animate={inView ? "visible" : "hidden"}
+          variants={staggerContainer}
+          className="text-center mb-14 md:mb-16"
+        >
+          <motion.div variants={fadeUp} className="mb-4">
+            <div className="w-14 h-14 mx-auto rounded-2xl bg-sovereign-gold/10 flex items-center justify-center text-sovereign-gold mb-4">
+              <MessageCircle className="w-7 h-7" />
+            </div>
+          </motion.div>
+          <motion.p variants={fadeUp} className="text-[10px] font-black uppercase tracking-[0.4em] text-sovereign-gold/60 mb-3">
+            تقييمات العملاء
+          </motion.p>
+          <motion.h2 variants={fadeUp} className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tighter">
+            ماذا يقول <span className="text-sovereign-gold">عملاؤنا</span>
+          </motion.h2>
+          <motion.div variants={fadeUp} className="mt-4">
+            <SovereignGlow color="gold" intensity="low">
+              <div className="h-1 w-24 bg-sovereign-gold/60 mx-auto rounded-full" />
+            </SovereignGlow>
+          </motion.div>
+        </motion.div>
+
+        {/* Reviews Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {homepageReviews.map((review, i) => (
+            <motion.div
+              key={review.id}
+              initial={{ opacity: 0, y: 30 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.6, delay: i * 0.12, ease: [0.32, 0.72, 0, 1] }}
+            >
+              <GlassPanel
+                variant="obsidian"
+                className="p-6 hover:border-sovereign-gold/30 transition-all duration-500 rounded-[2rem] h-full"
+              >
+                <div className="relative z-10">
+                  <ReviewList reviews={[review]} />
+                </div>
+              </GlassPanel>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ════════════════════════════════════════════
    SECTION 6 — STATISTICS BAR
    ════════════════════════════════════════════ */
 const stats = [
@@ -633,6 +678,7 @@ export default function HomePage() {
       <EcosystemsSection />
       <ArtisansSpotlight />
       <ServicesCategories />
+      <CustomerReviewsSection />
       <StatisticsBar />
       <CTASection />
     </div>

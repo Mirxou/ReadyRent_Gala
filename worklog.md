@@ -586,3 +586,176 @@ Stage Summary:
 - TypeScript errors in disputes/returns pages resolved
 - SovereignSparkle and SovereignLedger purity issues fixed
 - Footer updated with verification and wallet links
+
+---
+Task ID: T6-T7
+Agent: Homepage Enhancer
+Task: Replace local FeaturedProducts with imported component + Add Reviews section
+
+Work Log:
+- Read and analyzed app/page.tsx (640 lines, 7 sections)
+- Read components/product/featured-products.tsx — self-contained component that fetches from API via productsApi.search(), returns null on failure, does NOT accept props
+- Read components/reviews/review-list.tsx — accepts static Review[] props with fields: id, user_email, user_username, rating, title, comment, is_verified_purchase, helpful_count, created_at
+- Read lib/mock-data.ts reviews array for review data
+
+T6 — Replace local FeaturedProducts:
+- Removed local FeaturedProducts function (lines 191-246) which used mockProducts directly in horizontal scroll layout
+- Added import: `import { FeaturedProducts } from '@/components/product/featured-products'`
+- Removed unused imports: ProductCard (only used in local function), products as mockProducts
+- Left comment block explaining the replacement and that the imported component is self-contained
+- `<FeaturedProducts />` in page render now uses the imported component
+
+T7 — Add Customer Reviews section:
+- Created `homepageReviews` array with 3 hardcoded reviews mapped to ReviewList's Review interface (data sourced from mock-data.ts reviews)
+- Created `CustomerReviewsSection` component placed between ServicesCategories and StatisticsBar
+- Section includes: MessageCircle icon, "تقييمات العملاء" subtitle, "ماذا يقول عملاؤنا" heading with gold accent
+- Uses SovereignGlow, GlassPanel (obsidian variant), motion fadeUp/stagger animations
+- 3-column responsive grid (1 col mobile, 3 col desktop) with each review in a GlassPanel card
+- Each card wraps ReviewList with a single review
+- Added imports: ReviewList from reviews/review-list, MessageCircle from lucide-react
+
+Stage Summary:
+- Local FeaturedProducts replaced with self-contained imported component (T6)
+- Customer Reviews section added with 3 hardcoded reviews in sovereign dark theme (T7)
+- No new lint errors introduced (pre-existing warnings only)
+- All existing sections preserved intact
+- Page structure: Hero → FeaturedProducts → Ecosystems → Artisans → Services → Reviews → Stats → CTA
+
+---
+Task ID: T1
+Agent: Component Connector
+Task: Add vendor dashboard link to vendors page
+
+Work Log:
+- Added `LayoutDashboard` icon import from lucide-react
+- Added `Link` import from next/link
+- Inserted a centered "لوحة تحكم البائع" button/link below the page heading and above the search bar
+- Styled with `bg-gala-purple/10`, `border-gala-purple/20`, `text-gala-purple` to match page theme
+- Added motion entrance animation (fade up with 0.2s delay)
+
+Stage Summary:
+- Link added at `/vendors/dashboard` with Store/LayoutDashboard icon
+- Placed naturally between heading and search card
+- All existing code preserved
+
+---
+Task ID: T2
+Agent: Component Connector
+Task: Connect booking-wizard to product detail page
+
+Work Log:
+- Read `components/booking/booking-wizard.tsx` — it uses `useBookingStore` to control `isOpen` and `formData.productId`
+- Added imports: `BookingWizard`, `useBookingStore`, `CalendarCheck`
+- Added store hooks: `setIsOpen` (aliased as `setBookingOpen`), `updateFormData`
+- Added "احجز الآن" SovereignButton next to existing "إبرام الميثاق" button
+- Button sets `productId` in store and opens the wizard dialog
+- Includes auth check (requires login)
+- Rendered `<BookingWizard />` component (self-manages its Dialog)
+
+Stage Summary:
+- BookingWizard connected via Zustand store — no local dialog needed
+- Button placed alongside existing reserve button in price section
+- Wizard opens with 5-step flow: Date → Config → Verification → Summary → Payment
+
+---
+Task ID: T3
+Agent: Component Connector
+Task: Connect hygiene-badge to product detail page
+
+Work Log:
+- Read `components/product/hygiene-badge.tsx` — needs `productId: number` and optional `className`
+- Component uses `useQuery` to fetch latest hygiene record; returns null if not completed (graceful)
+- Added `HygieneBadge` import
+- Placed below the product title (`h1`) in the CONTRACT ENGINE column
+- Passed `product.id` as prop
+
+Stage Summary:
+- HygieneBadge renders only when hygiene status is "completed"
+- Shows green shield with "تم التعقيم بنجاح" and date
+- Returns null gracefully if no data — no crash risk
+
+---
+Task ID: T4
+Agent: Component Connector
+Task: Connect branch-selector and bundle-selector to cart page
+
+Work Log:
+- Read `components/branch-selector.tsx` — fetches branches via API, no required props
+- Read `components/bundle-selector.tsx` — needs `startDate`, `endDate` (Date | null), optional `productId`
+- Created `SafeWrapper` class component (React Error Boundary) to prevent crashes if API unavailable
+- Added `BundleSelector` wrapped in `SafeWrapper` at top of cart items column (lg:col-span-2)
+- Added `BranchSelector` wrapped in `SafeWrapper` near the checkout button in order summary sidebar
+
+Stage Summary:
+- Both components protected by SafeWrapper error boundary (renders null on error)
+- BranchSelector shows branch list for pickup selection
+- BundleSelector shows bundle upgrades (returns null if no bundles available)
+- All existing cart functionality preserved
+
+---
+Task ID: T5
+Agent: Component Connector
+Task: Connect dispute step components to disputes page
+
+Work Log:
+- Read all 3 step components: `discovery-step.tsx`, `grounds-step.tsx`, `evidence-step.tsx`
+- All use `useDisputeStore` for shared form state
+- Read `use-dispute-store.ts` — provides step, formData, nextStep, prevStep, resetWizard, setFormData
+- Replaced placeholder content with full 3-step form: DiscoveryStep → GroundsStep → EvidenceStep
+- Added stepper UI with progress bar, step numbers, and completion checkmarks
+- Added navigation: Previous/Next/Cancel buttons with step validation
+- Added submit handler using `disputesApi.initiateDispute()` (correct API method name)
+- Added success state with animated checkmark and "تم إنشاء النزاع بنجاح" message
+- Reset wizard on success or cancel
+- Used `canProceed()` validation: step 1 requires disputeType, step 2 requires subject + description
+
+Stage Summary:
+- 3-step dispute form fully connected replacing placeholder
+- Step 1: Dispute type selection (damage/refund/delivery/other)
+- Step 2: Subject, description, admissibility checkbox
+- Step 3: Evidence upload (images/videos)
+- Submit calls `disputesApi.initiateDispute()` with form data
+- Success message shown after submission with option to close
+
+---
+Task ID: T1-T5
+Agent: Component Connector
+Task: Connect all remaining high-priority unused components
+
+Work Log:
+- T1: Added "لوحة تحكم البائع" button with LayoutDashboard icon to /vendors page, linking to /vendors/dashboard
+- T2: Connected BookingWizard to product detail page via useBookingStore Zustand store + "احجز الآن" button next to "إبرام الميثاق"
+- T3: Connected HygieneBadge below product title in product detail page (returns null gracefully if no data)
+- T4: Connected BranchSelector and BundleSelector to cart page, wrapped in SafeWrapper Error Boundary
+- T5: Replaced disputes placeholder with functional 3-step form (DiscoveryStep → GroundsStep → EvidenceStep) with stepper UI
+
+Files Changed (4 files):
+- app/vendors/page.tsx (added vendor dashboard link)
+- app/products/[id]/page.tsx (BookingWizard, HygieneBadge, useBookingStore)
+- app/cart/page.tsx (BranchSelector, BundleSelector, SafeWrapper)
+- app/disputes/page.tsx (3-step dispute form replacing placeholder)
+
+Stage Summary:
+- 5 high-priority components now connected
+- All modified pages return HTTP 200
+- Zero TypeScript errors in modified files
+
+---
+Task ID: T6-T7
+Agent: Homepage Enhancer
+Task: Enhance homepage with imported FeaturedProducts and Customer Reviews section
+
+Work Log:
+- T6: Replaced local FeaturedProducts function (56 lines using mockProducts) with imported self-contained component from @/components/product/featured-products. Cleaned up unused imports (ProductCard, mockProducts).
+- T7: Added CustomerReviewsSection between Services Categories and Statistics Bar. 3 hardcoded reviews from mock data, uses ReviewList interface. Section title "ماذا يقول عملاؤنا" with Motion fadeUp/stagger animations, GlassPanel, SovereignGlow. Responsive 3-col desktop / 1-col mobile.
+
+Files Changed (1 file):
+- app/page.tsx (removed local FeaturedProducts, added import + CustomerReviewsSection)
+
+Final homepage section order: Hero → FeaturedProducts → Ecosystems → Artisans → Services → Customer Reviews → Statistics → CTA
+
+Stage Summary:
+- Homepage now has 8 sections (was 7)
+- FeaturedProducts uses API-powered component instead of static mock
+- Customer reviews provide social proof
+- All Arabic, responsive, dark theme, animated

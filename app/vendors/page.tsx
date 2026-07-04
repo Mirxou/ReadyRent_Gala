@@ -5,8 +5,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { vendorsApi } from '@/lib/api';
 import { VendorCard } from '@/components/vendors/vendor-card';
-import { Store, Search } from 'lucide-react';
+import { Store, Search, LayoutDashboard } from 'lucide-react';
 import { useState } from 'react';
+import Link from 'next/link';
 import { ParticleField } from '@/components/ui/particle-field';
 import { motion } from 'framer-motion';
 
@@ -64,6 +65,22 @@ export default function VendorsPage() {
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             اكتشف مصممينا وموردينا المميزين
           </p>
+        </motion.div>
+
+        {/* Vendor Dashboard Link */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="mb-8 flex justify-center"
+        >
+          <Link
+            href="/vendors/dashboard"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-gala-purple/10 border border-gala-purple/20 text-gala-purple hover:bg-gala-purple/20 transition-all font-bold text-sm"
+          >
+            <LayoutDashboard className="h-4 w-4" />
+            لوحة تحكم البائع
+          </Link>
         </motion.div>
 
         {/* Search */}

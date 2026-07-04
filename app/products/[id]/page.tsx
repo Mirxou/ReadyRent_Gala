@@ -43,10 +43,15 @@ import { ProductRecommendations } from '@/components/product-recommendations';
 import { LiveViewerCount } from '@/components/product/LiveViewerCount';
 import { WaitlistButton } from '@/components/waitlist-button';
 import { ShareButton } from '@/components/share-button';
+import { BookingWizard } from '@/components/booking/booking-wizard';
+import { useBookingStore } from '@/lib/hooks/use-booking-store';
+import { CalendarCheck } from 'lucide-react';
+import { HygieneBadge } from '@/components/product/hygiene-badge';
 
 export default function ProductDetailsPage() {
   const { id: slug } = useParams();
   const { user, isAuthenticated } = useAuthStore();
+  const { setIsOpen: setBookingOpen, updateFormData } = useBookingStore();
   const [selectedStartDate, setSelectedStartDate] = useState<Date | null>(null);
   const [selectedEndDate, setSelectedEndDate] = useState<Date | null>(null);
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -214,6 +219,9 @@ export default function ProductDetailsPage() {
               <h1 className="text-7xl font-black text-foreground tracking-tighter leading-tight italic">
                 {product.name_ar}<span className="text-sovereign-gold">.</span>
               </h1>
+              <div className="flex items-center gap-3">
+                <HygieneBadge productId={product.id} />
+              </div>
 
               <div className="flex items-center gap-8 flex-wrap">
                 <div className="flex items-center gap-2 text-sovereign-gold">
@@ -243,6 +251,22 @@ export default function ProductDetailsPage() {
                       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                         <SovereignButton variant="primary" size="xl" className="px-16 h-20 shadow-2xl rounded-2xl text-xl" onClick={handleReserve} withShimmer>
                           إبرام الميثاق
+                        </SovereignButton>
+                        <SovereignButton
+                          variant="outline"
+                          size="xl"
+                          className="px-8 h-20 shadow-2xl rounded-2xl text-lg border-sovereign-gold/30 text-sovereign-gold hover:bg-sovereign-gold/10"
+                          onClick={() => {
+                            if (!isAuthenticated) {
+                              toast.error('يجب تسجيل الدخول أولاً');
+                              return;
+                            }
+                            updateFormData({ productId: String(product.id) });
+                            setBookingOpen(true);
+                          }}
+                        >
+                          <CalendarCheck className="w-5 h-5 ml-2" />
+                          احجز الآن
                         </SovereignButton>
                         <WaitlistButton productId={product.id} />
                       </div>
@@ -393,6 +417,8 @@ export default function ProductDetailsPage() {
       </div>
 
       <Lightbox open={lightboxOpen} close={() => setLightboxOpen(false)} index={lightboxIndex} slides={lightboxImages} plugins={[Zoom]} />
+      
+      <BookingWizard />
       
       <SovereignCheckoutModal
         isOpen={isCheckoutOpen}
