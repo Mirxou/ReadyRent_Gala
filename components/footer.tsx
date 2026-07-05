@@ -107,9 +107,9 @@ export function Footer() {
                 { label: 'الأسئلة الشائعة', href: '/faq' },
                 { label: 'المرتجعات', href: '/returns' },
                 { label: 'التحقق', href: '/verification' },
-                { label: 'المحفظة', href: '/wallet' },
-                { label: 'الاشتراكات', href: '/subscriptions' },
-                { label: 'التحويلات', href: '/wallet' },
+                { label: 'سياسة الخصوصية', href: '/privacy' },
+                { label: 'شروط الاستخدام', href: '/terms' },
+                { label: 'اتصل بنا', href: '/contact' },
               ].map((item) => (
                 <li key={item.href}>
                   <Link href={item.href} className="text-lg font-medium text-muted-foreground/60 hover:text-foreground dark:hover:text-white transition-colors">
