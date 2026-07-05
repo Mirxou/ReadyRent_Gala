@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react';
 import { motion, useInView, type Variants } from 'framer-motion';
 import { toast } from 'sonner';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Crown,
   Check,
@@ -19,6 +20,7 @@ import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
 import { SovereignGlow } from '@/shared/components/sovereign/sovereign-sparkle';
 import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Dialog,
   DialogContent,
@@ -49,90 +51,16 @@ interface SubscriptionHistory {
 }
 
 /* ────────────────────────────────────────────
-   Data
+   Icon mapping (API doesn't provide icons)
    ──────────────────────────────────────────── */
-const plans: Plan[] = [
-  {
-    id: 'free',
-    name: 'مجاني',
-    price: 0,
-    bookingsLimit: 3,
-    icon: Shield,
-    features: [
-      'تصفح المنتجات',
-      '3 حجوزات شهرياً',
-      'دعم بالبريد',
-    ],
-  },
-  {
-    id: 'basic',
-    name: 'أساسي',
-    price: 1500,
-    bookingsLimit: 10,
-    icon: Star,
-    features: [
-      '10 حجوزات شهرياً',
-      'تأمين أساسي مجاني',
-      'دعم هاتفي',
-      'شارة "عضو أساسي"',
-    ],
-  },
-  {
-    id: 'premium',
-    name: 'مميز',
-    price: 4500,
-    bookingsLimit: null,
-    icon: Crown,
-    popular: true,
-    features: [
-      'حجوزات غير محدودة',
-      'تأمين متقدم مجاني',
-      'أولوية في العروض',
-      'خصم 10%',
-      'شارة "عضو مميز"',
-      'مستشار شخصي',
-    ],
-  },
-  {
-    id: 'vip',
-    name: 'VIP',
-    price: 9900,
-    bookingsLimit: null,
-    icon: Sparkles,
-    features: [
-      'كل مميزات Premium',
-      'توصيل مجاني',
-      'دخول مبكر للعروض',
-      'نقاط ثقة مضاعفة',
-      'شارة VIP ذهبية',
-      'دعم على مدار الساعة',
-    ],
-  },
-];
+const planIconMap: Record<string, React.ElementType> = {
+  free: Shield,
+  basic: Star,
+  premium: Crown,
+  vip: Sparkles,
+};
 
-const initialHistory: SubscriptionHistory[] = [
-  {
-    id: 'INV-2026-001',
-    date: '2026-05-01',
-    plan: 'مجاني',
-    amount: 0,
-    status: 'مدفوع',
-  },
-  {
-    id: 'INV-2026-002',
-    date: '2026-04-01',
-    plan: 'أساسي',
-    amount: 1500,
-    status: 'مدفوع',
-  },
-  {
-    id: 'INV-2026-003',
-    date: '2026-03-01',
-    plan: 'أساسي',
-    amount: 1500,
-    status: 'ملغي',
-  },
-];
+const planPopularSet = new Set(['premium']);
 
 /* ────────────────────────────────────────────
    Animation Variants
@@ -168,6 +96,90 @@ function getRenewalDate(): string {
   });
 }
 
+/* ────────────────────────────────────────────
+   Loading Skeletons
+   ──────────────────────────────────────────── */
+function ActiveSubscriptionSkeleton() {
+  return (
+    <section className="py-10 md:py-16 px-4">
+      <div className="max-w-5xl mx-auto">
+        <div className="mb-8">
+          <Skeleton className="h-3 w-24 mb-3" />
+          <Skeleton className="h-12 w-64" />
+        </div>
+        <div className="rounded-[2.5rem] border border-white/5 bg-white/[0.02] p-6 md:p-10 space-y-6">
+          <div className="flex items-center gap-4">
+            <Skeleton className="w-14 h-14 rounded-2xl" />
+            <div className="space-y-2">
+              <Skeleton className="h-8 w-32" />
+              <Skeleton className="h-4 w-28" />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Skeleton className="h-28 rounded-2xl" />
+            <Skeleton className="h-28 rounded-2xl" />
+          </div>
+          <div className="flex gap-3">
+            <Skeleton className="h-10 w-36 rounded-full" />
+            <Skeleton className="h-10 w-36 rounded-full" />
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function PlansSkeleton() {
+  return (
+    <section className="py-10 md:py-16 px-4">
+      <div className="max-w-7xl mx-auto">
+        <div className="mb-10">
+          <Skeleton className="h-3 w-24 mb-3" />
+          <Skeleton className="h-12 w-48" />
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 md:gap-6">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="rounded-[2rem] border border-white/5 bg-white/[0.02] p-6 md:p-8 space-y-5">
+              <div className="flex items-center gap-3">
+                <Skeleton className="w-12 h-12 rounded-xl" />
+                <Skeleton className="h-6 w-20" />
+              </div>
+              <Skeleton className="h-10 w-32" />
+              <div className="space-y-3">
+                {Array.from({ length: 4 }).map((_, j) => (
+                  <div key={j} className="flex items-start gap-3">
+                    <Skeleton className="w-5 h-5 rounded-full flex-shrink-0" />
+                    <Skeleton className="h-4 w-full" />
+                  </div>
+                ))}
+              </div>
+              <Skeleton className="h-10 w-full rounded-full" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function HistorySkeleton() {
+  return (
+    <section className="py-10 md:py-16 px-4 pb-24 md:pb-32">
+      <div className="max-w-5xl mx-auto">
+        <div className="mb-8">
+          <Skeleton className="h-3 w-24 mb-3" />
+          <Skeleton className="h-12 w-56" />
+        </div>
+        <div className="rounded-[2rem] border border-white/5 bg-white/[0.02] p-4 md:p-6 space-y-4">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Skeleton key={i} className="h-16 w-full rounded-2xl" />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ════════════════════════════════════════════
    SECTION 1 — ACTIVE SUBSCRIPTION
    ════════════════════════════════════════════ */
@@ -184,7 +196,9 @@ function ActiveSubscription({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: '-80px' });
-  const currentPlan = plansList.find((p) => p.id === currentPlanId)!;
+  const currentPlan = plansList.find((p) => p.id === currentPlanId);
+
+  if (!currentPlan) return null;
 
   return (
     <section ref={ref} className="py-10 md:py-16 px-4">
@@ -464,9 +478,11 @@ function PlanCard({
    ════════════════════════════════════════════ */
 function PlansSection({
   currentPlanId,
+  plansList,
   onSelectPlan,
 }: {
   currentPlanId: string;
+  plansList: Plan[];
   onSelectPlan: (plan: Plan) => void;
 }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -496,7 +512,7 @@ function PlansSection({
         </motion.div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 md:gap-6">
-          {plans.map((plan, i) => (
+          {plansList.map((plan, i) => (
             <PlanCard
               key={plan.id}
               plan={plan}
@@ -608,7 +624,7 @@ function HistorySection({ history }: { history: SubscriptionHistory[] }) {
                         </td>
                         <td className="py-4 px-3">
                           <Badge
-                            className={`${statusStyles[entry.status]} border text-[10px] font-bold px-2.5 py-0.5`}
+                            className={`${statusStyles[entry.status] || ''} border text-[10px] font-bold px-2.5 py-0.5`}
                           >
                             {entry.status}
                           </Badge>
@@ -642,7 +658,7 @@ function HistorySection({ history }: { history: SubscriptionHistory[] }) {
                     <div className="flex items-center justify-between mb-3">
                       <span className="font-bold">{entry.plan}</span>
                       <Badge
-                        className={`${statusStyles[entry.status]} border text-[10px] font-bold px-2.5 py-0.5`}
+                        className={`${statusStyles[entry.status] || ''} border text-[10px] font-bold px-2.5 py-0.5`}
                       >
                         {entry.status}
                       </Badge>
@@ -783,15 +799,64 @@ function ConfirmationDialog({
 /* ════════════════════════════════════════════
    PAGE — SUBSCRIPTIONS
    ════════════════════════════════════════════ */
+
+/** Map API plan data to local Plan type */
+function mapApiPlan(apiPlan: Record<string, unknown>): Plan {
+  const id = apiPlan.id as string;
+  const bookingsLimit = apiPlan.bookings_limit as number;
+  return {
+    id,
+    name: (apiPlan.name_ar as string) || id,
+    price: (apiPlan.price as number) || 0,
+    features: (apiPlan.features as string[]) || [],
+    icon: planIconMap[id] || Shield,
+    popular: planPopularSet.has(id),
+    bookingsLimit: bookingsLimit === -1 ? null : bookingsLimit,
+  };
+}
+
 export default function SubscriptionsPage() {
-  const [currentPlanId, setCurrentPlanId] = useState('free');
+  const queryClient = useQueryClient();
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [history, setHistory] = useState<SubscriptionHistory[]>(initialHistory);
 
   // Scroll to plans section on upgrade
   const plansRef = useRef<HTMLDivElement>(null);
+
+  // Fetch subscription data from API
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ['subscriptions'],
+    queryFn: () =>
+      fetch('/api/subscriptions')
+        .then((r) => r.json())
+        .then((d) => d.data || d),
+  });
+
+  // Derive state from API data
+  const currentPlanId = (data?.active_plan?.id as string) || 'free';
+  const plans: Plan[] = (data?.plans || []).map(mapApiPlan);
+  const history: SubscriptionHistory[] = (data?.history || []).map(
+    (h: Record<string, unknown>) => ({
+      id: (h.id as string) || '',
+      date: (h.date as string) || '',
+      plan: (h.plan as string) || '',
+      amount: (h.amount as number) || 0,
+      status: (h.status as 'مدفوع' | 'نشط' | 'ملغي') || 'مدفوع',
+    })
+  );
+
+  // Subscribe mutation
+  const subscribeMutation = useMutation({
+    mutationFn: (planId: string) =>
+      fetch('/api/subscriptions/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan_id: planId }),
+      }).then((r) => r.json()),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['subscriptions'] });
+    },
+  });
 
   const handleSelectPlan = (plan: Plan) => {
     setSelectedPlan(plan);
@@ -800,25 +865,9 @@ export default function SubscriptionsPage() {
 
   const handleConfirmSubscription = async () => {
     if (!selectedPlan) return;
-    setIsProcessing(true);
 
-    // Simulate processing
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    await subscribeMutation.mutateAsync(selectedPlan.id);
 
-    // Update current plan
-    setCurrentPlanId(selectedPlan.id);
-
-    // Add to history
-    const newEntry: SubscriptionHistory = {
-      id: `INV-2026-${String(history.length + 1).padStart(3, '0')}`,
-      date: new Date().toISOString().split('T')[0],
-      plan: selectedPlan.name,
-      amount: selectedPlan.price,
-      status: 'نشط',
-    };
-    setHistory((prev) => [newEntry, ...prev]);
-
-    setIsProcessing(false);
     setDialogOpen(false);
 
     toast.success(
@@ -837,10 +886,7 @@ export default function SubscriptionsPage() {
   };
 
   const handleCancel = () => {
-    const currentPlan = plans.find((p) => p.id === currentPlanId);
-    if (currentPlan && currentPlan.id === 'free') return;
-
-    setCurrentPlanId('free');
+    if (currentPlanId === 'free') return;
     toast.info('تم إلغاء الاشتراك والعودة إلى الخطة المجانية', {
       duration: 3000,
     });
@@ -858,12 +904,22 @@ export default function SubscriptionsPage() {
       <div className="h-24 md:h-32" />
 
       {/* Active Subscription */}
-      <ActiveSubscription
-        currentPlanId={currentPlanId}
-        plansList={plans}
-        onUpgrade={handleUpgrade}
-        onCancel={handleCancel}
-      />
+      {isLoading ? (
+        <ActiveSubscriptionSkeleton />
+      ) : isError ? (
+        <section className="py-10 md:py-16 px-4">
+          <div className="max-w-5xl mx-auto text-center">
+            <p className="text-red-400 text-sm">تعذر تحميل بيانات الاشتراك. يرجى المحاولة لاحقاً.</p>
+          </div>
+        </section>
+      ) : (
+        <ActiveSubscription
+          currentPlanId={currentPlanId}
+          plansList={plans}
+          onUpgrade={handleUpgrade}
+          onCancel={handleCancel}
+        />
+      )}
 
       {/* Decorative Divider */}
       <div className="max-w-5xl mx-auto w-full px-4">
@@ -872,10 +928,15 @@ export default function SubscriptionsPage() {
 
       {/* Plans */}
       <div ref={plansRef}>
-        <PlansSection
-          currentPlanId={currentPlanId}
-          onSelectPlan={handleSelectPlan}
-        />
+        {isLoading ? (
+          <PlansSkeleton />
+        ) : (
+          <PlansSection
+            currentPlanId={currentPlanId}
+            plansList={plans}
+            onSelectPlan={handleSelectPlan}
+          />
+        )}
       </div>
 
       {/* Decorative Divider */}
@@ -884,7 +945,11 @@ export default function SubscriptionsPage() {
       </div>
 
       {/* History */}
-      <HistorySection history={history} />
+      {isLoading ? (
+        <HistorySkeleton />
+      ) : (
+        <HistorySection history={history} />
+      )}
 
       {/* Confirmation Dialog */}
       <ConfirmationDialog
@@ -892,7 +957,7 @@ export default function SubscriptionsPage() {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         onConfirm={handleConfirmSubscription}
-        isProcessing={isProcessing}
+        isProcessing={subscribeMutation.isPending}
       />
     </div>
   );

@@ -1,12 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
 import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Settings, User, Bell, Shield, Palette, ChevronDown, ChevronUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
@@ -34,62 +36,242 @@ const notificationToggles = [
   { id: 'promo', label: 'العروض الترويجية', desc: 'أحدث العروض والخصومات' },
 ];
 
+/** Default form values used when the API response is missing fields */
+const defaultProfileData = {
+  name: '',
+  email: '',
+  phone: '',
+  city: 'الجزائر العاصمة',
+  bio: '',
+};
+
+const defaultNotifSettings = {
+  email: true,
+  sms: false,
+  push: true,
+  bookings: true,
+  promo: false,
+};
+
+const defaultSecurityData = {
+  currentPassword: '',
+  newPassword: '',
+  confirmPassword: '',
+};
+
+const defaultAppearanceData = {
+  theme: 'dark' as string,
+  language: 'ar' as string,
+};
+
+interface ProfileApiResponse {
+  user: {
+    id?: number;
+    username?: string;
+    email?: string;
+    first_name?: string;
+    last_name?: string;
+    phone?: string;
+    city?: string;
+    bio?: string;
+    notification_preferences?: Record<string, boolean>;
+    theme?: string;
+    language?: string;
+    is_2fa_enabled?: boolean;
+    [key: string]: unknown;
+  };
+}
+
+interface FormState {
+  profile: typeof defaultProfileData;
+  notifs: typeof defaultNotifSettings;
+  security: typeof defaultSecurityData;
+  appearance: typeof defaultAppearanceData;
+}
+
 export default function SettingsPage() {
+  const queryClient = useQueryClient();
   const [expandedSection, setExpandedSection] = useState<string | null>('profile');
-  const [savingProfile, setSavingProfile] = useState(false);
-  const [savingNotifs, setSavingNotifs] = useState(false);
-  const [savingSecurity, setSavingSecurity] = useState(false);
-  const [savingAppearance, setSavingAppearance] = useState(false);
 
-  // Profile state
-  const [profileData, setProfileData] = useState({
-    name: 'مستخدم سيادي',
-    email: 'user@standard.dz',
-    phone: '0770 123 456',
-    city: 'الجزائر العاصمة',
-    bio: '',
+  // ---- Fetch profile from API ----
+  const { data: profileResponse, isLoading: isProfileLoading, isError } = useQuery<ProfileApiResponse>({
+    queryKey: ['auth', 'profile'],
+    queryFn: async () => {
+      const res = await fetch('/api/auth/profile');
+      if (!res.ok) throw new Error('فشل في تحميل الملف الشخصي');
+      return res.json();
+    },
   });
 
-  // Notifications state
-  const [notifSettings, setNotifSettings] = useState({
-    email: true,
-    sms: false,
-    push: true,
-    bookings: true,
-    promo: false,
+  const apiUser = profileResponse?.user;
+
+  // ---- Local form state (initialised from API data once loaded) ----
+  const [formState, setFormState] = useState<FormState>({
+    profile: defaultProfileData,
+    notifs: defaultNotifSettings,
+    security: defaultSecurityData,
+    appearance: defaultAppearanceData,
+  });
+  const initialisedRef = useRef(false);
+
+  const profileData = formState.profile;
+  const setProfileData = (next: typeof defaultProfileData | ((prev: typeof defaultProfileData) => typeof defaultProfileData)) => {
+    setFormState((prev) => ({
+      ...prev,
+      profile: typeof next === 'function' ? (next as (prev: typeof defaultProfileData) => typeof defaultProfileData)(prev.profile) : next,
+    }));
+  };
+
+  const notifSettings = formState.notifs;
+  const setNotifSettings = (next: typeof defaultNotifSettings | ((prev: typeof defaultNotifSettings) => typeof defaultNotifSettings)) => {
+    setFormState((prev) => ({
+      ...prev,
+      notifs: typeof next === 'function' ? (next as (prev: typeof defaultNotifSettings) => typeof defaultNotifSettings)(prev.notifs) : next,
+    }));
+  };
+
+  const securityData = formState.security;
+  const setSecurityData = (next: typeof defaultSecurityData | ((prev: typeof defaultSecurityData) => typeof defaultSecurityData)) => {
+    setFormState((prev) => ({
+      ...prev,
+      security: typeof next === 'function' ? (next as (prev: typeof defaultSecurityData) => typeof defaultSecurityData)(prev.security) : next,
+    }));
+  };
+
+  const appearanceData = formState.appearance;
+  const setAppearanceData = (next: typeof defaultAppearanceData | ((prev: typeof defaultAppearanceData) => typeof defaultAppearanceData)) => {
+    setFormState((prev) => ({
+      ...prev,
+      appearance: typeof next === 'function' ? (next as (prev: typeof defaultAppearanceData) => typeof defaultAppearanceData)(prev.appearance) : next,
+    }));
+  };
+
+  // Sync form state from API data once loaded — intentionally one-shot setState to hydrate form
+  useEffect(() => {
+    if (!apiUser || initialisedRef.current) return;
+    initialisedRef.current = true;
+
+    const userName = apiUser.first_name && apiUser.last_name
+      ? `${apiUser.first_name} ${apiUser.last_name}`
+      : apiUser.username || defaultProfileData.name;
+
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setFormState({
+      profile: {
+        name: userName,
+        email: apiUser.email || defaultProfileData.email,
+        phone: apiUser.phone || defaultProfileData.phone,
+        city: (apiUser.city as string) || defaultProfileData.city,
+        bio: (apiUser.bio as string) || defaultProfileData.bio,
+      },
+      notifs: apiUser.notification_preferences && typeof apiUser.notification_preferences === 'object'
+        ? { ...defaultNotifSettings, ...apiUser.notification_preferences as Partial<typeof defaultNotifSettings> }
+        : defaultNotifSettings,
+      security: defaultSecurityData,
+      appearance: {
+        theme: (apiUser.theme as string) || defaultAppearanceData.theme,
+        language: (apiUser.language as string) || defaultAppearanceData.language,
+      },
+    });
+  }, [apiUser]);
+
+  // ---- Mutations ----
+  const saveProfileMutation = useMutation({
+    mutationFn: async (data: typeof profileData) => {
+      const res = await fetch('/api/auth/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: data.name,
+          email: data.email,
+          phone: data.phone,
+          city: data.city,
+          bio: data.bio,
+        }),
+      });
+      if (!res.ok) throw new Error('فشل في حفظ التغييرات');
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['auth', 'profile'] });
+      toast.success('تم حفظ التغييرات بنجاح');
+    },
+    onError: () => {
+      toast.error('فشل في حفظ التغييرات، يرجى المحاولة لاحقاً');
+    },
   });
 
-  // Security state
-  const [securityData, setSecurityData] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: '',
+  const saveNotifsMutation = useMutation({
+    mutationFn: async (prefs: typeof notifSettings) => {
+      const res = await fetch('/api/auth/profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ notification_preferences: prefs }),
+      });
+      if (!res.ok) throw new Error('فشل في حفظ تفضيلات الإشعارات');
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['auth', 'profile'] });
+      toast.success('تم حفظ تفضيلات الإشعارات بنجاح');
+    },
+    onError: () => {
+      toast.error('فشل في حفظ تفضيلات الإشعارات، يرجى المحاولة لاحقاً');
+    },
   });
 
-  // Appearance state
-  const [appearanceData, setAppearanceData] = useState({
-    theme: 'dark',
-    language: 'ar',
+  const changePasswordMutation = useMutation({
+    mutationFn: async (data: { currentPassword: string; newPassword: string }) => {
+      const res = await fetch('/api/auth/profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          current_password: data.currentPassword,
+          new_password: data.newPassword,
+        }),
+      });
+      if (!res.ok) throw new Error('فشل في تغيير كلمة المرور');
+      return res.json();
+    },
+    onSuccess: () => {
+      setSecurityData(defaultSecurityData);
+      toast.success('تم تغيير كلمة المرور بنجاح');
+    },
+    onError: () => {
+      toast.error('فشل في تغيير كلمة المرور، يرجى التحقق من كلمة المرور الحالية');
+    },
   });
 
+  const saveAppearanceMutation = useMutation({
+    mutationFn: async (data: typeof appearanceData) => {
+      const res = await fetch('/api/auth/profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ theme: data.theme, language: data.language }),
+      });
+      if (!res.ok) throw new Error('فشل في حفظ تفضيلات المظهر');
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['auth', 'profile'] });
+      toast.success('تم حفظ تفضيلات المظهر بنجاح');
+    },
+    onError: () => {
+      toast.error('فشل في حفظ تفضيلات المظهر، يرجى المحاولة لاحقاً');
+    },
+  });
+
+  // ---- Handlers ----
   const toggleSection = (id: string) => {
     setExpandedSection(expandedSection === id ? null : id);
   };
 
   const handleSaveProfile = () => {
-    setSavingProfile(true);
-    setTimeout(() => {
-      setSavingProfile(false);
-      toast.success('تم حفظ التغييرات بنجاح');
-    }, 1000);
+    saveProfileMutation.mutate(profileData);
   };
 
   const handleSaveNotifs = () => {
-    setSavingNotifs(true);
-    setTimeout(() => {
-      setSavingNotifs(false);
-      toast.success('تم حفظ تفضيلات الإشعارات بنجاح');
-    }, 1000);
+    saveNotifsMutation.mutate(notifSettings);
   };
 
   const handleChangePassword = () => {
@@ -101,12 +283,10 @@ export default function SettingsPage() {
       toast.error('كلمة المرور الجديدة غير متطابقة');
       return;
     }
-    setSavingSecurity(true);
-    setTimeout(() => {
-      setSavingSecurity(false);
-      setSecurityData({ currentPassword: '', newPassword: '', confirmPassword: '' });
-      toast.success('تم تغيير كلمة المرور بنجاح');
-    }, 1000);
+    changePasswordMutation.mutate({
+      currentPassword: securityData.currentPassword,
+      newPassword: securityData.newPassword,
+    });
   };
 
   const handleEnable2FA = () => {
@@ -114,11 +294,7 @@ export default function SettingsPage() {
   };
 
   const handleSaveAppearance = () => {
-    setSavingAppearance(true);
-    setTimeout(() => {
-      setSavingAppearance(false);
-      toast.success('تم حفظ تفضيلات المظهر بنجاح');
-    }, 1000);
+    saveAppearanceMutation.mutate(appearanceData);
   };
 
   const sections = [
@@ -127,6 +303,52 @@ export default function SettingsPage() {
     { id: 'security', icon: Shield, title: 'الأمان والخصوصية', desc: 'كلمة المرور، المصادقة الثنائية، الجلسات النشطة' },
     { id: 'appearance', icon: Palette, title: 'المظهر', desc: 'الوضع الداكن/الفاتح، حجم الخط، اللغة' },
   ];
+
+  // ---- Loading skeleton while fetching profile ----
+  if (isProfileLoading) {
+    return (
+      <div className="min-h-screen bg-sovereign-obsidian pt-24 pb-16" dir="rtl">
+        <div className="max-w-4xl mx-auto px-6">
+          {/* Header skeleton */}
+          <div className="flex items-center gap-4 mb-10">
+            <Skeleton className="h-12 w-12 rounded-2xl bg-white/10" />
+            <Skeleton className="h-9 w-40 bg-white/10" />
+          </div>
+          {/* Section cards skeleton */}
+          <div className="grid gap-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl p-6">
+                <div className="flex items-center gap-4">
+                  <Skeleton className="h-5 w-5 rounded bg-white/10" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-5 w-36 bg-white/10" />
+                    <Skeleton className="h-3 w-60 bg-white/10" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ---- Error state ----
+  if (isError) {
+    return (
+      <div className="min-h-screen bg-sovereign-obsidian pt-24 pb-16" dir="rtl">
+        <div className="max-w-4xl mx-auto px-6 text-center py-20">
+          <p className="text-white/60 text-lg mb-4">فشل في تحميل بيانات الملف الشخصي</p>
+          <button
+            onClick={() => queryClient.invalidateQueries({ queryKey: ['auth', 'profile'] })}
+            className="text-sovereign-gold hover:underline text-sm"
+          >
+            إعادة المحاولة
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-sovereign-obsidian pt-24 pb-16" dir="rtl">
@@ -242,9 +464,9 @@ export default function SettingsPage() {
                                 <SovereignButton
                                   variant="primary"
                                   onClick={handleSaveProfile}
-                                  isLoading={savingProfile}
+                                  isLoading={saveProfileMutation.isPending}
                                 >
-                                  {savingProfile ? 'جارٍ الحفظ...' : 'حفظ التغييرات'}
+                                  {saveProfileMutation.isPending ? 'جارٍ الحفظ...' : 'حفظ التغييرات'}
                                 </SovereignButton>
                               </div>
                             </div>
@@ -275,9 +497,9 @@ export default function SettingsPage() {
                                 <SovereignButton
                                   variant="primary"
                                   onClick={handleSaveNotifs}
-                                  isLoading={savingNotifs}
+                                  isLoading={saveNotifsMutation.isPending}
                                 >
-                                  {savingNotifs ? 'جارٍ الحفظ...' : 'حفظ التفضيلات'}
+                                  {saveNotifsMutation.isPending ? 'جارٍ الحفظ...' : 'حفظ التفضيلات'}
                                 </SovereignButton>
                               </div>
                             </div>
@@ -323,9 +545,9 @@ export default function SettingsPage() {
                                 <SovereignButton
                                   variant="primary"
                                   onClick={handleChangePassword}
-                                  isLoading={savingSecurity}
+                                  isLoading={changePasswordMutation.isPending}
                                 >
-                                  {savingSecurity ? 'جارٍ التغيير...' : 'تغيير كلمة المرور'}
+                                  {changePasswordMutation.isPending ? 'جارٍ التغيير...' : 'تغيير كلمة المرور'}
                                 </SovereignButton>
                                 <SovereignButton
                                   variant="secondary"
@@ -424,9 +646,9 @@ export default function SettingsPage() {
                                 <SovereignButton
                                   variant="primary"
                                   onClick={handleSaveAppearance}
-                                  isLoading={savingAppearance}
+                                  isLoading={saveAppearanceMutation.isPending}
                                 >
-                                  {savingAppearance ? 'جارٍ الحفظ...' : 'حفظ التفضيلات'}
+                                  {saveAppearanceMutation.isPending ? 'جارٍ الحفظ...' : 'حفظ التفضيلات'}
                                 </SovereignButton>
                               </div>
                             </div>

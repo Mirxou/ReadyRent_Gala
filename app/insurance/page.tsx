@@ -1,12 +1,15 @@
 'use client'
+
 import { formatNumber } from '@/lib/utils';
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useQuery } from '@tanstack/react-query';
 import { Shield, Check, ArrowLeft, Info, Phone, FileText } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Dialog,
   DialogContent,
@@ -20,11 +23,38 @@ import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
 import Link from 'next/link';
 import { toast } from 'sonner';
 
-const plans = [
-  {
-    id: 'basic',
-    name: 'الخطة الأساسية',
-    price: 500,
+/* ────────────────────────────────────────────
+   Types
+   ──────────────────────────────────────────── */
+interface ApiPlan {
+  id: number;
+  name_ar: string;
+  name_en: string;
+  price: number;
+  coverage_ar: string;
+  coverage_en: string;
+}
+
+interface EnrichedPlan {
+  id: string;
+  name: string;
+  price: number;
+  icon: string;
+  features: string[];
+  coverage: string;
+  color: string;
+  borderColor: string;
+  popular: boolean;
+}
+
+/* ────────────────────────────────────────────
+   Local enrichment data (API doesn't provide these)
+   ──────────────────────────────────────────── */
+const planEnrichment: Record<
+  number,
+  Omit<EnrichedPlan, 'id' | 'name' | 'price' | 'coverage'>
+> = {
+  1: {
     icon: '🛡️',
     features: [
       'تغطية التلفيات البسيطة',
@@ -32,15 +62,11 @@ const plans = [
       'مدة الكراء حتى 3 أيام',
       'دعم عبر البريد الإلكتروني',
     ],
-    coverage: 'تغطية الأساسيات: تلفيات بسيطة مثل البقع والخدوش الطفيفة',
     color: 'from-slate-600 to-slate-400',
     borderColor: 'border-slate-500/30',
     popular: false,
   },
-  {
-    id: 'advanced',
-    name: 'الخطة المتقدمة',
-    price: 1200,
+  2: {
     icon: '⚔️',
     features: [
       'تغطية التلفيات المتوسطة والكبيرة',
@@ -49,15 +75,11 @@ const plans = [
       'دعم هاتفي على مدار الساعة',
       'استبدال المنتج في حالة التلف الكلي',
     ],
-    coverage: 'تغطية شاملة: تشمل التمزق، الحروق، البقع المستعصية، وفقدان الملحقات',
     color: 'from-sovereign-gold/80 to-amber-500',
     borderColor: 'border-sovereign-gold/40',
     popular: true,
   },
-  {
-    id: 'vip',
-    name: 'خطة VIP',
-    price: 2500,
+  3: {
     icon: '👑',
     features: [
       'تغطية شاملة بلا حدود',
@@ -68,12 +90,22 @@ const plans = [
       'تأمين الشحن والنقل',
       'أولوية في المعالجة',
     ],
-    coverage: 'تغطية كاملة: كل أنواع التلف بما فيها السرقة والفقدان الكلي للمنتج',
     color: 'from-purple-600 to-pink-500',
     borderColor: 'border-purple-400/40',
     popular: false,
   },
-];
+};
+
+function mapApiToPlan(apiPlan: ApiPlan): EnrichedPlan {
+  const enrichment = planEnrichment[apiPlan.id] || planEnrichment[1];
+  return {
+    id: String(apiPlan.id),
+    name: apiPlan.name_ar,
+    price: apiPlan.price,
+    coverage: apiPlan.coverage_ar,
+    ...enrichment,
+  };
+}
 
 const steps = [
   {
@@ -107,12 +139,51 @@ const fadeUp = {
   }),
 };
 
+/* ────────────────────────────────────────────
+   Loading Skeleton
+   ──────────────────────────────────────────── */
+function PlansLoadingSkeleton() {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mb-20">
+      {Array.from({ length: 3 }).map((_, i) => (
+        <div key={i} className="rounded-[2rem] border border-white/5 bg-card p-6 space-y-5">
+          <div className="text-center">
+            <Skeleton className="w-12 h-12 rounded-full mx-auto mb-3" />
+            <Skeleton className="h-6 w-28 mx-auto mb-2" />
+            <Skeleton className="h-10 w-24 mx-auto" />
+          </div>
+          <Skeleton className="h-4 w-full" />
+          <div className="space-y-3">
+            {Array.from({ length: 4 }).map((_, j) => (
+              <div key={j} className="flex items-start gap-3">
+                <Skeleton className="w-4 h-4 rounded-full flex-shrink-0" />
+                <Skeleton className="h-4 flex-1" />
+              </div>
+            ))}
+          </div>
+          <Skeleton className="h-10 w-full rounded-full" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function InsurancePage() {
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [showConfirm, setShowConfirm] = useState(false);
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [purchasedPlan, setPurchasedPlan] = useState<string | null>(null);
 
+  // Fetch insurance plans from API
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ['insurance-plans'],
+    queryFn: () =>
+      fetch('/api/warranties/insurance')
+        .then((r) => r.json())
+        .then((d) => d.data || d),
+  });
+
+  const plans: EnrichedPlan[] = (data?.plans || []).map(mapApiToPlan);
   const selectedPlanData = plans.find((p) => p.id === selectedPlan);
 
   const handleSelectPlan = (planId: string) => {
@@ -172,73 +243,84 @@ export default function InsurancePage() {
           </motion.p>
         </motion.div>
 
+        {/* Error State */}
+        {isError && (
+          <div className="text-center mb-16">
+            <p className="text-red-400 text-sm">تعذر تحميل خطط التأمين. يرجى المحاولة لاحقاً.</p>
+          </div>
+        )}
+
         {/* Insurance Plan Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mb-20">
-          {plans.map((plan, index) => (
-            <motion.div
-              key={plan.id}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, margin: '-50px' }}
-              variants={fadeUp}
-              custom={index}
-            >
-              <Card
-                className={`relative rounded-[2rem] overflow-hidden border ${
-                  plan.popular
-                    ? 'border-sovereign-gold/50 shadow-[0_0_40px_rgba(234,179,8,0.1)]'
-                    : 'border-white/5'
-                } bg-card h-full flex flex-col`}
+        {isLoading ? (
+          <PlansLoadingSkeleton />
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mb-20">
+            {plans.map((plan, index) => (
+              <motion.div
+                key={plan.id}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: '-50px' }}
+                variants={fadeUp}
+                custom={index}
               >
-                {plan.popular && (
-                  <div className="absolute top-4 left-4">
-                    <Badge className="bg-sovereign-gold text-black font-bold text-xs">
-                      الأكثر طلباً
-                    </Badge>
-                  </div>
-                )}
+                <Card
+                  className={`relative rounded-[2rem] overflow-hidden border ${
+                    plan.popular
+                      ? 'border-sovereign-gold/50 shadow-[0_0_40px_rgba(234,179,8,0.1)]'
+                      : 'border-white/5'
+                  } bg-card h-full flex flex-col`}
+                >
+                  {plan.popular && (
+                    <div className="absolute top-4 left-4">
+                      <Badge className="bg-sovereign-gold text-black font-bold text-xs">
+                        الأكثر طلباً
+                      </Badge>
+                    </div>
+                  )}
 
-                <CardHeader className="pb-4 pt-8 text-center">
-                  <div className="text-4xl mb-3">{plan.icon}</div>
-                  <CardTitle className="text-xl font-bold mb-1">
-                    {plan.name}
-                  </CardTitle>
-                  <div className="flex items-baseline justify-center gap-1 mt-3">
-                    <span className="text-3xl md:text-4xl font-black text-sovereign-gold">
-                      {formatNumber(plan.price)}
-                    </span>
-                    <span className="text-muted-foreground text-sm">دج / لكل حجز</span>
-                  </div>
-                </CardHeader>
+                  <CardHeader className="pb-4 pt-8 text-center">
+                    <div className="text-4xl mb-3">{plan.icon}</div>
+                    <CardTitle className="text-xl font-bold mb-1">
+                      {plan.name}
+                    </CardTitle>
+                    <div className="flex items-baseline justify-center gap-1 mt-3">
+                      <span className="text-3xl md:text-4xl font-black text-sovereign-gold">
+                        {formatNumber(plan.price)}
+                      </span>
+                      <span className="text-muted-foreground text-sm">دج / لكل حجز</span>
+                    </div>
+                  </CardHeader>
 
-                <CardContent className="flex-1 flex flex-col">
-                  <p className="text-sm text-muted-foreground mb-5 text-center leading-relaxed">
-                    {plan.coverage}
-                  </p>
+                  <CardContent className="flex-1 flex flex-col">
+                    <p className="text-sm text-muted-foreground mb-5 text-center leading-relaxed">
+                      {plan.coverage}
+                    </p>
 
-                  <div className="space-y-3 flex-1 mb-6">
-                    {plan.features.map((feature) => (
-                      <div key={feature} className="flex items-start gap-3">
-                        <Check className="w-4 h-4 mt-0.5 text-emerald-500 flex-shrink-0" />
-                        <span className="text-sm">{feature}</span>
-                      </div>
-                    ))}
-                  </div>
+                    <div className="space-y-3 flex-1 mb-6">
+                      {plan.features.map((feature) => (
+                        <div key={feature} className="flex items-start gap-3">
+                          <Check className="w-4 h-4 mt-0.5 text-emerald-500 flex-shrink-0" />
+                          <span className="text-sm">{feature}</span>
+                        </div>
+                      ))}
+                    </div>
 
-                  <SovereignButton
-                    variant={plan.popular ? 'primary' : 'secondary'}
-                    className="w-full"
-                    onClick={() => handleSelectPlan(plan.id)}
-                    disabled={purchasedPlan === plan.id}
-                    isLoading={purchasedPlan === plan.id}
-                  >
-                    {purchasedPlan === plan.id ? '✓ مشتراة' : 'اختيار هذه الخطة'}
-                  </SovereignButton>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
+                    <SovereignButton
+                      variant={plan.popular ? 'primary' : 'secondary'}
+                      className="w-full"
+                      onClick={() => handleSelectPlan(plan.id)}
+                      disabled={purchasedPlan === plan.id}
+                      isLoading={purchasedPlan === plan.id}
+                    >
+                      {purchasedPlan === plan.id ? '✓ مشتراة' : 'اختيار هذه الخطة'}
+                    </SovereignButton>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+        )}
 
         {/* How It Works */}
         <motion.div

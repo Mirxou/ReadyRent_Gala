@@ -1,6 +1,7 @@
 'use client';
 
 import { motion, type Variants } from 'framer-motion';
+import { useQuery } from '@tanstack/react-query';
 import {
   Shield,
   Star,
@@ -15,33 +16,63 @@ import {
   ArrowLeft,
 } from 'lucide-react';
 import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
-import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
 
-// Hardcoded trust score data
-const trustScore = {
-  overall: 72,
-  tier: 'gold' as const,
-  tierLabel: 'ذهبي',
-  tierIcon: '🥇',
-  tierGradient: 'from-yellow-500 to-amber-400',
-  components: [
-    { key: 'payment_reliability', label: 'موثوقية الدفع', value: 85, icon: CreditCard, description: 'الالتزام بالمدفوعات وعدم التخلف' },
-    { key: 'dispute_history', label: 'سجل النزاعات', value: 60, icon: Scale, description: 'نسبة النزاعات التي حُسمت لصالحك' },
-    { key: 'contract_compliance', label: 'التزام العقود', value: 78, icon: FileCheck, description: 'مدى الالتزام بشروط عقود الإيجار' },
-    { key: 'review_sentiment', label: 'تقييمات المجتمع', value: 70, icon: Star, description: 'متوسط تقييمات المستخدمين الآخرين' },
-    { key: 'identity_verification', label: 'توثيق الهوية', value: 65, icon: IdCard, description: 'اكتمال بيانات KYC والتحقق من الهوية' },
-  ],
-};
+/* ────────────────────────────────────────────
+   Types
+   ──────────────────────────────────────────── */
+interface TrustScoreData {
+  user_id: number;
+  social_score: number;
+  vouches: number;
+}
 
-const tiers = [
+interface TrustComponent {
+  key: string;
+  label: string;
+  value: number;
+  icon: React.ElementType;
+  description: string;
+}
+
+interface TierInfo {
+  key: string;
+  label: string;
+  icon: string;
+  range: string;
+  gradient: string;
+}
+
+/* ────────────────────────────────────────────
+   Tier ladder (derived from score)
+   ──────────────────────────────────────────── */
+const tiers: TierInfo[] = [
   { key: 'bronze', label: 'برونزي', icon: '🥉', range: '0-39', gradient: 'from-amber-700 to-amber-500' },
   { key: 'silver', label: 'فضي', icon: '🥈', range: '40-59', gradient: 'from-slate-500 to-slate-300' },
   { key: 'gold', label: 'ذهبي', icon: '🥇', range: '60-79', gradient: 'from-yellow-500 to-amber-400' },
   { key: 'platinum', label: 'بلاتيني', icon: '💎', range: '80-94', gradient: 'from-indigo-500 to-purple-400' },
   { key: 'sovereign', label: 'سيادي', icon: '👑', range: '95-100', gradient: 'from-blue-600 to-cyan-400' },
+];
+
+function getTierFromScore(score: number): TierInfo {
+  if (score >= 95) return tiers[4];
+  if (score >= 80) return tiers[3];
+  if (score >= 60) return tiers[2];
+  if (score >= 40) return tiers[1];
+  return tiers[0];
+}
+
+/* ────────────────────────────────────────────
+   Component breakdown (local data — not in API)
+   ──────────────────────────────────────────── */
+const components: TrustComponent[] = [
+  { key: 'payment_reliability', label: 'موثوقية الدفع', value: 85, icon: CreditCard, description: 'الالتزام بالمدفوعات وعدم التخلف' },
+  { key: 'dispute_history', label: 'سجل النزاعات', value: 60, icon: Scale, description: 'نسبة النزاعات التي حُسمت لصالحك' },
+  { key: 'contract_compliance', label: 'التزام العقود', value: 78, icon: FileCheck, description: 'مدى الالتزام بشروط عقود الإيجار' },
+  { key: 'review_sentiment', label: 'تقييمات المجتمع', value: 70, icon: Star, description: 'متوسط تقييمات المستخدمين الآخرين' },
+  { key: 'identity_verification', label: 'توثيق الهوية', value: 65, icon: IdCard, description: 'اكتمال بيانات KYC والتحقق من الهوية' },
 ];
 
 const benefits = [
@@ -60,9 +91,57 @@ const fadeUp: Variants = {
   }),
 };
 
+/* ────────────────────────────────────────────
+   Loading Skeleton
+   ──────────────────────────────────────────── */
+function ScoreRingSkeleton() {
+  return (
+    <div className="rounded-[2.5rem] p-8 md:p-12 text-white bg-gradient-to-br from-yellow-500 to-amber-400 shadow-xl relative overflow-hidden">
+      <div className="absolute inset-0 opacity-20 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white" />
+      <div className="relative z-10 flex flex-col items-center gap-6">
+        <Skeleton className="h-7 w-36 rounded-full bg-white/20" />
+        <Skeleton className="w-44 h-44 rounded-full bg-white/20" />
+        <div className="text-center space-y-2">
+          <Skeleton className="h-6 w-48 bg-white/20 mx-auto" />
+          <Skeleton className="h-4 w-28 bg-white/20 mx-auto" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ComponentsSkeleton() {
+  return (
+    <div className="rounded-[2rem] border border-white/5 bg-white/[0.02] p-6 md:p-8 space-y-6">
+      <Skeleton className="h-4 w-32" />
+      {Array.from({ length: 5 }).map((_, i) => (
+        <div key={i} className="space-y-2">
+          <div className="flex items-center justify-between">
+            <Skeleton className="h-4 w-32" />
+            <Skeleton className="h-4 w-8" />
+          </div>
+          <Skeleton className="h-2.5 w-full rounded-full" />
+          <Skeleton className="h-3 w-48" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function TrustScorePage() {
+  // Fetch trust score from API
+  const { data, isLoading, isError } = useQuery<TrustScoreData>({
+    queryKey: ['trust-score'],
+    queryFn: () =>
+      fetch('/api/social/score/1')
+        .then((r) => r.json())
+        .then((d) => d.data || d),
+  });
+
+  const overall = data?.social_score ?? 0;
+  const tier = getTierFromScore(overall);
   const circumference = 2 * Math.PI * 72;
-  const dashOffset = circumference * (1 - trustScore.overall / 100);
+  const dashOffset = circumference * (1 - overall / 100);
 
   return (
     <div className="min-h-screen bg-background text-foreground" dir="rtl">
@@ -100,6 +179,13 @@ export default function TrustScorePage() {
           </motion.p>
         </motion.div>
 
+        {/* Error State */}
+        {isError && (
+          <div className="text-center mb-12">
+            <p className="text-red-400 text-sm">تعذر تحميل نقاط الثقة. يرجى المحاولة لاحقاً.</p>
+          </div>
+        )}
+
         {/* Score Ring Card */}
         <motion.div
           initial="hidden"
@@ -109,58 +195,62 @@ export default function TrustScorePage() {
           custom={0}
           className="mb-12"
         >
-          <div
-            className={`rounded-[2.5rem] p-8 md:p-12 text-white bg-gradient-to-br shadow-xl relative overflow-hidden ${trustScore.tierGradient}`}
-          >
-            <div className="absolute inset-0 opacity-20 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white" />
+          {isLoading ? (
+            <ScoreRingSkeleton />
+          ) : (
+            <div
+              className={`rounded-[2.5rem] p-8 md:p-12 text-white bg-gradient-to-br shadow-xl relative overflow-hidden ${tier.gradient}`}
+            >
+              <div className="absolute inset-0 opacity-20 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white" />
 
-            <div className="relative z-10 flex flex-col items-center gap-6">
-              {/* Tier badge */}
-              <div className="inline-flex items-center gap-2 bg-white/20 px-4 py-1.5 rounded-full text-sm font-bold">
-                <span>{trustScore.tierIcon}</span>
-                المستوى {trustScore.tierLabel}
-              </div>
+              <div className="relative z-10 flex flex-col items-center gap-6">
+                {/* Tier badge */}
+                <div className="inline-flex items-center gap-2 bg-white/20 px-4 py-1.5 rounded-full text-sm font-bold">
+                  <span>{tier.icon}</span>
+                  المستوى {tier.label}
+                </div>
 
-              {/* Score Ring */}
-              <div className="relative flex items-center justify-center w-44 h-44 mx-auto">
-                <svg
-                  className="absolute inset-0 w-full h-full -rotate-90"
-                  viewBox="0 0 160 160"
-                >
-                  <circle
-                    cx="80" cy="80" r={72}
-                    fill="none" stroke="currentColor"
-                    strokeWidth="10"
-                    className="text-white/20"
-                  />
-                  <motion.circle
-                    cx="80" cy="80" r={72}
-                    fill="none"
-                    strokeWidth="10"
-                    strokeLinecap="round"
-                    stroke="white"
-                    strokeDasharray={circumference}
-                    initial={{ strokeDashoffset: circumference }}
-                    animate={{ strokeDashoffset: dashOffset }}
-                    transition={{ duration: 1.4, ease: 'easeOut' }}
-                  />
-                </svg>
-                <div className="text-center z-10">
-                  <span className="text-5xl font-black">
-                    {trustScore.overall}
-                  </span>
-                  <p className="text-xs text-white/60 mt-1">/100</p>
+                {/* Score Ring */}
+                <div className="relative flex items-center justify-center w-44 h-44 mx-auto">
+                  <svg
+                    className="absolute inset-0 w-full h-full -rotate-90"
+                    viewBox="0 0 160 160"
+                  >
+                    <circle
+                      cx="80" cy="80" r={72}
+                      fill="none" stroke="currentColor"
+                      strokeWidth="10"
+                      className="text-white/20"
+                    />
+                    <motion.circle
+                      cx="80" cy="80" r={72}
+                      fill="none"
+                      strokeWidth="10"
+                      strokeLinecap="round"
+                      stroke="white"
+                      strokeDasharray={circumference}
+                      initial={{ strokeDashoffset: circumference }}
+                      animate={{ strokeDashoffset: dashOffset }}
+                      transition={{ duration: 1.4, ease: 'easeOut' }}
+                    />
+                  </svg>
+                  <div className="text-center z-10">
+                    <span className="text-5xl font-black">
+                      {overall}
+                    </span>
+                    <p className="text-xs text-white/60 mt-1">/100</p>
+                  </div>
+                </div>
+
+                <div className="text-center">
+                  <h2 className="text-xl font-bold">نقاط الثقة الخاصة بك</h2>
+                  <p className="text-white/70 text-sm mt-1">
+                    آخر تحديث: اليوم
+                  </p>
                 </div>
               </div>
-
-              <div className="text-center">
-                <h2 className="text-xl font-bold">نقاط الثقة الخاصة بك</h2>
-                <p className="text-white/70 text-sm mt-1">
-                  آخر تحديث: اليوم
-                </p>
-              </div>
             </div>
-          </div>
+          )}
         </motion.div>
 
         {/* Tier Ladder */}
@@ -185,7 +275,7 @@ export default function TrustScorePage() {
                 <div
                   key={t.key}
                   className={`flex-shrink-0 flex flex-col items-center gap-1 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                    t.key === trustScore.tier
+                    t.key === tier.key
                       ? `text-white bg-gradient-to-br shadow-md ${t.gradient}`
                       : 'bg-white/5 text-muted-foreground'
                   }`}
@@ -208,56 +298,60 @@ export default function TrustScorePage() {
           custom={2}
           className="mb-12"
         >
-          <GlassPanel
-            className="p-6 md:p-8 rounded-[2rem]"
-            variant="obsidian"
-          >
-            <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-6 flex items-center gap-2">
-              <TrendingUp className="w-4 h-4" />
-              تفاصيل المكونات
-            </h3>
-            <div className="space-y-6">
-              {trustScore.components.map((comp) => {
-                const Icon = comp.icon;
-                const color =
-                  comp.value >= 80
-                    ? 'bg-emerald-500'
-                    : comp.value >= 50
-                    ? 'bg-amber-400'
-                    : 'bg-red-400';
-                const textColor =
-                  comp.value >= 80
-                    ? 'text-emerald-500'
-                    : comp.value >= 50
-                    ? 'text-amber-400'
-                    : 'text-red-400';
+          {isLoading ? (
+            <ComponentsSkeleton />
+          ) : (
+            <GlassPanel
+              className="p-6 md:p-8 rounded-[2rem]"
+              variant="obsidian"
+            >
+              <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-6 flex items-center gap-2">
+                <TrendingUp className="w-4 h-4" />
+                تفاصيل المكونات
+              </h3>
+              <div className="space-y-6">
+                {components.map((comp) => {
+                  const Icon = comp.icon;
+                  const color =
+                    comp.value >= 80
+                      ? 'bg-emerald-500'
+                      : comp.value >= 50
+                      ? 'bg-amber-400'
+                      : 'bg-red-400';
+                  const textColor =
+                    comp.value >= 80
+                      ? 'text-emerald-500'
+                      : comp.value >= 50
+                      ? 'text-amber-400'
+                      : 'text-red-400';
 
-                return (
-                  <div key={comp.key} className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <div className="flex items-center gap-2">
-                        <Icon className="w-4 h-4 text-muted-foreground" />
-                        <span className="font-medium">{comp.label}</span>
+                  return (
+                    <div key={comp.key} className="space-y-2">
+                      <div className="flex items-center justify-between text-sm">
+                        <div className="flex items-center gap-2">
+                          <Icon className="w-4 h-4 text-muted-foreground" />
+                          <span className="font-medium">{comp.label}</span>
+                        </div>
+                        <span className={`font-bold tabular-nums ${textColor}`}>
+                          {comp.value}
+                        </span>
                       </div>
-                      <span className={`font-bold tabular-nums ${textColor}`}>
-                        {comp.value}
-                      </span>
+                      <div className="w-full h-2.5 rounded-full bg-white/5 overflow-hidden">
+                        <motion.div
+                          className={`h-full rounded-full ${color}`}
+                          initial={{ width: 0 }}
+                          whileInView={{ width: `${comp.value}%` }}
+                          viewport={{ once: true }}
+                          transition={{ duration: 1, ease: 'easeOut', delay: 0.2 }}
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground">{comp.description}</p>
                     </div>
-                    <div className="w-full h-2.5 rounded-full bg-white/5 overflow-hidden">
-                      <motion.div
-                        className={`h-full rounded-full ${color}`}
-                        initial={{ width: 0 }}
-                        whileInView={{ width: `${comp.value}%` }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 1, ease: 'easeOut', delay: 0.2 }}
-                      />
-                    </div>
-                    <p className="text-xs text-muted-foreground">{comp.description}</p>
-                  </div>
-                );
-              })}
-            </div>
-          </GlassPanel>
+                  );
+                })}
+              </div>
+            </GlassPanel>
+          )}
         </motion.div>
 
         {/* Benefits of High Trust Score */}
