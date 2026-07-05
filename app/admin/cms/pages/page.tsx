@@ -28,6 +28,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
+import { getAuthHeaders } from '@/lib/auth-helpers';
 
 interface Page {
   id: number;
@@ -80,10 +81,9 @@ export default function CMSPagesPage() {
 
   const fetchPages = async () => {
     try {
-      const token = localStorage.getItem('access_token');
       const response = await fetch('/api/cms/pages/', {
         headers: {
-          Authorization: `Bearer ${token}`,
+          ...getAuthHeaders(),
         },
       });
 
@@ -137,7 +137,6 @@ export default function CMSPagesPage() {
     }
 
     try {
-      const token = localStorage.getItem('access_token');
       const url = selectedPage ? `/api/cms/pages/${selectedPage.id}/` : '/api/cms/pages/';
       const method = selectedPage ? 'PUT' : 'POST';
 
@@ -145,7 +144,7 @@ export default function CMSPagesPage() {
         method,
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+          ...getAuthHeaders(),
         },
         body: JSON.stringify(formData),
       });

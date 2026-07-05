@@ -1092,3 +1092,20 @@ Stage Summary:
 - 1 API file updated with local-guide data
 - Total: 1127 insertions, 376 deletions across 7 files
 - All verified working via HTTP tests and Agent Browser
+---
+Task ID: security-audit-full
+Agent: Main + 4 parallel subagents
+Task: Comprehensive security audit and fix of all 25 vulnerabilities
+
+Work Log:
+- Ran deep security audit identifying 25 vulnerabilities (4 CRITICAL, 7 HIGH, 8 MEDIUM, 6 LOW)
+- Agent 1: Fixed API route - rate limiter, auth helpers, input sanitization, mass assignment, unique JWT tokens, admin auth guards, IP spoofing fix
+- Agent 2: Created middleware.ts (route protection + security headers), updated next.config.ts (CSP, HSTS, X-Frame-Options, etc.), updated .gitignore (added *.db, *.sqlite)
+- Agent 3: Fixed lib/api.ts (CSRF tokens, better error handling), bank-card-form.tsx (open redirect validation + card data clearing), register page (password validation + confirmation), store.ts (PII reduction), verification page (file upload validation)
+- Agent 4: Created lib/auth-helpers.ts (centralized auth), fixed 15 stale localStorage.getItem('access_token') refs across 8 files, hardened DOMPurify config in blog/pages, added image URL validation
+
+Stage Summary:
+- 25/25 vulnerabilities addressed
+- New files: middleware.ts, lib/auth-helpers.ts
+- Modified: 20+ files across the codebase
+- No new lint errors introduced

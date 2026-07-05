@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/store';
+import { isUserAuthenticated } from '@/lib/auth-helpers';
 import { DashboardSidebar } from '@/components/dashboard/sidebar';
 import { Loader2, ShieldCheck, Sparkles } from 'lucide-react';
 import { Navbar } from '@/components/navbar';
@@ -30,9 +31,9 @@ export default function DashboardLayout({
 
     useEffect(() => {
         const checkAuth = setTimeout(() => {
-            const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
+            const hasStoredAuth = isUserAuthenticated();
 
-            if (!isAuthenticated && !token) {
+            if (!isAuthenticated && !hasStoredAuth) {
                 router.push('/login');
             } else {
                 setIsLoading(false);

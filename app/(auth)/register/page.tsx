@@ -105,11 +105,35 @@ export default function RegisterPage() {
             <div className="relative group">
               <LockKeyhole className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-sovereign-gold transition-colors" />
               <input
-                {...register('password')}
+                {...register('password', { 
+                required: true,
+                minLength: { value: 8, message: 'كلمة المرور يجب أن تكون 8 أحرف على الأقل' },
+                pattern: { 
+                  value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+                  message: 'يجب أن تحتوي على حرف كبير وصغير ورقم' 
+                }
+              })}
                 type="password"
                 placeholder="رمز المرور الآمن"
                 className="w-full h-12 pr-12 pl-4 bg-background/50 border border-white/10 rounded-xl focus:border-sovereign-gold/50 focus:ring-1 focus:ring-sovereign-gold/50 outline-none transition-all text-right font-sans"
                 required
+              />
+            </div>
+
+            {/* Password Confirmation */}
+            <div className="relative group">
+              <LockKeyhole className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-sovereign-gold transition-colors" />
+              <input
+                {...register('password_confirm', { 
+                  required: true,
+                  validate: (val: string) => {
+                    const pwd = document.querySelector('input[name="password"]') as HTMLInputElement;
+                    return val === pwd?.value || 'كلمات المرور غير متطابقة';
+                  }
+                })}
+                type="password"
+                placeholder="تأكيد رمز المرور"
+                className="w-full h-12 pr-12 pl-4 bg-background/50 border border-white/10 rounded-xl focus:border-sovereign-gold/50 focus:ring-1 focus:ring-sovereign-gold/50 outline-none transition-all text-right font-sans"
               />
             </div>
 

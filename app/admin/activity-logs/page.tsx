@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
+import { getAuthHeaders } from '@/lib/auth-helpers';
 import {
   Table,
   TableBody,
@@ -57,7 +58,6 @@ export default function AdminActivityLogsPage() {
 
   const fetchLogs = async () => {
     try {
-      const token = localStorage.getItem('access_token');
       let url = '/api/users/staff/activity-logs/';
       const params = new URLSearchParams();
       
@@ -74,7 +74,7 @@ export default function AdminActivityLogsPage() {
 
       const response = await fetch(url, {
         headers: {
-          Authorization: `Bearer ${token}`,
+          ...getAuthHeaders(),
         },
       });
 

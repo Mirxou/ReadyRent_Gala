@@ -79,8 +79,30 @@ export default function VerificationPage() {
     return 'pending';
   };
 
+  const validateFile = (file: File): string | null => {
+    const MAX_SIZE = 10 * 1024 * 1024; // 10MB
+    const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'application/pdf'];
+
+    if (file.size > MAX_SIZE) {
+      return 'حجم الملف يتجاوز الحد الأقصى (10 ميغابايت)';
+    }
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      return 'نوع الملف غير مدعوم. يُسمح بـ: JPG, PNG, GIF, WebP, PDF';
+    }
+    return null;
+  };
+
   const handleFileSelect = (file: File | undefined) => {
     if (file) {
+      const error = validateFile(file);
+      if (error) {
+        toast.error(error);
+        setFileName(null);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+        return;
+      }
       setFileName(file.name);
     }
   };

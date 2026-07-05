@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { getAuthHeaders } from '@/lib/auth-helpers';
 import {
   Dialog,
   DialogContent,
@@ -93,12 +94,11 @@ export default function RoleSelector({ userId, onRoleAssigned }: RoleSelectorPro
 
     setLoading(true);
     try {
-      const token = localStorage.getItem('access_token');
       const response = await fetch('/api/users/staff/roles/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+          ...getAuthHeaders(),
         },
         body: JSON.stringify({
           user: userId,
@@ -134,12 +134,11 @@ export default function RoleSelector({ userId, onRoleAssigned }: RoleSelectorPro
     }
 
     try {
-      const token = localStorage.getItem('access_token');
       const response = await fetch(`/api/users/staff/roles/${roleId}/`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+          ...getAuthHeaders(),
         },
         body: JSON.stringify({ is_active: false }),
       });

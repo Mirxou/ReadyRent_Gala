@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { randomUUID } from 'crypto';
 import {
   products,
   vendors,
@@ -6,6 +7,78 @@ import {
   bundles,
   reviews,
 } from '@/lib/mock-data';
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+// ──── In-Memory Rate Limiter ────
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+const RATE_LIMIT_WINDOW = 60_000; // 1 minute
+const RATE_LIMIT_MAX = 60; // per window (general)
+const AUTH_RATE_LIMIT_MAX = 5; // stricter for auth endpoints
+
+function rateLimit(key: string, max: number = RATE_LIMIT_MAX): boolean {
+  const now = Date.now();
+  const entry = rateLimitMap.get(key);
+  if (!entry || now > entry.resetAt) {
+    rateLimitMap.set(key, { count: 1, resetAt: now + RATE_LIMIT_WINDOW });
+    return true;
+  }
+  if (entry.count >= max) return false;
+  entry.count++;
+  return true;
+}
+
+// Cleanup old entries every 5 minutes
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, entry] of rateLimitMap) {
+    if (now > entry.resetAt) rateLimitMap.delete(key);
+  }
+}, 300_000);
+
+// ──── Auth Helper ────
+function getAuthToken(request: NextRequest): string | null {
+  const authHeader = request.headers.get('authorization');
+  if (authHeader?.startsWith('Bearer ')) return authHeader.slice(7);
+  return null;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function isAuthenticated(request: NextRequest): boolean {
+  return !!getAuthToken(request);
+}
+
+function isAdmin(request: NextRequest): boolean {
+  // In mock mode, check for admin token or role header
+  const token = getAuthToken(request);
+  return token === 'mock-jwt-token-admin' || request.headers.get('x-mock-role') === 'admin';
+}
+
+function sanitizeString(val: any, maxLength: number = 500): string {
+  if (typeof val !== 'string') return '';
+  return val.slice(0, maxLength).replace(/[<>'"&]/g, (c) => ({
+    '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '&': '&amp;'
+  }[c] || c));
+}
+
+function sanitizeBody(body: any): any {
+  if (!body || typeof body !== 'object') return {};
+  const sanitized: any = {};
+  for (const [key, value] of Object.entries(body)) {
+    if (typeof value === 'string') {
+      sanitized[key] = sanitizeString(value, 2000);
+    } else if (typeof value === 'number' && isFinite(value)) {
+      sanitized[key] = value;
+    } else if (Array.isArray(value)) {
+      sanitized[key] = value.map(v => typeof v === 'string' ? sanitizeString(v, 500) : v);
+    } else if (typeof value === 'object' && value !== null) {
+      sanitized[key] = sanitizeBody(value);
+    } else {
+      sanitized[key] = value;
+    }
+  }
+  return sanitized;
+}
 
 // =============================================================================
 // Local Guide Mock Data
@@ -280,7 +353,6 @@ const localGuideServices = [
 // In-Memory Data Stores (persist during server lifetime)
 // =============================================================================
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 let cartItems: any[] = [];
 const bookings: any[] = [];
 let wishlistIds: number[] = [];
@@ -1106,6 +1178,12 @@ export async function GET(
   const { path } = await params;
   const joined = (path || []).join('/');
   const queryParams = getQueryParams(request);
+
+  const clientIp = request.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown';
+  if (!rateLimit(clientIp)) {
+    return NextResponse.json({ success: false, error: 'Too many requests' }, { status: 429 });
+  }
+
   const data = resolveGet(joined, queryParams);
   return NextResponse.json(wrap(data));
 }
@@ -1117,27 +1195,39 @@ export async function POST(
   const { path } = await params;
   const p = normPath((path || []).join('/'));
 
+  const clientIp = request.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown';
+  if (!rateLimit(clientIp)) {
+    return NextResponse.json({ success: false, error: 'Too many requests' }, { status: 429 });
+  }
+
   let body: any = {};
   try {
     const text = await request.text();
     if (text) body = JSON.parse(text);
+    body = sanitizeBody(body);
   } catch {
     // If body is not JSON (e.g., FormData), just use empty object
   }
 
   // ---- Auth: Login ----
   if (p === 'auth/login' || p === 'auth/login/') {
+    if (!rateLimit(`auth:${clientIp}`, AUTH_RATE_LIMIT_MAX)) {
+      return NextResponse.json({ success: false, error: 'Too many login attempts. Try again later.' }, { status: 429 });
+    }
     return NextResponse.json(wrap({
       user: mockUser,
-      token: 'mock-jwt-token-xyz',
+      token: randomUUID(),
     }));
   }
 
   // ---- Auth: Register ----
   if (p === 'auth/register' || p === 'auth/register/') {
+    if (!rateLimit(`auth:${clientIp}`, AUTH_RATE_LIMIT_MAX)) {
+      return NextResponse.json({ success: false, error: 'Too many registration attempts. Try again later.' }, { status: 429 });
+    }
     return NextResponse.json(wrap({
       user: { ...mockUser, id: nextId(), email: body.email || 'new@standard.dz' },
-      token: 'mock-jwt-token-new',
+      token: randomUUID(),
     }));
   }
 
@@ -1315,7 +1405,11 @@ export async function POST(
   if (p === 'reviews/create' || p === 'reviews/create/') {
     const newReview = {
       id: nextId(),
-      ...body,
+      rating: Math.min(5, Math.max(1, Number(body.rating) || 5)),
+      comment: sanitizeString(body.comment, 1000),
+      booking_id: body.booking_id,
+      product_id: body.product_id,
+      user_id: body.user_id,
       created_at: new Date().toISOString(),
       status: 'pending',
     };
@@ -1521,7 +1615,10 @@ export async function POST(
     p.startsWith('maintenance/') || p.startsWith('hygiene/') || p.startsWith('packaging/') ||
     p.startsWith('inventory/') || p.startsWith('products/admin/') || p.startsWith('auth/admin/')
   ) {
-    return NextResponse.json(wrap({ id: nextId(), ...body, created_at: new Date().toISOString() }));
+    if (!isAdmin(request)) {
+      return NextResponse.json({ success: false, error: 'Forbidden: Admin access required' }, { status: 403 });
+    }
+    return NextResponse.json(wrap({ id: nextId(), ...sanitizeBody(body), created_at: new Date().toISOString() }));
   }
 
   // ---- Bundles ----
@@ -1582,7 +1679,10 @@ export async function PATCH(
     const bkId = bookingUpdateMatch[1];
     const booking = bookings.find((b: any) => b.id === bkId);
     if (booking) {
-      Object.assign(booking, body);
+      const allowedFields = ['start_date', 'end_date', 'quantity', 'size', 'color', 'notes'];
+      for (const field of allowedFields) {
+        if (body[field] !== undefined) booking[field] = body[field];
+      }
       return NextResponse.json(wrap(booking));
     }
   }
@@ -1623,12 +1723,14 @@ export async function PATCH(
       contracts.push(contract);
     }
     contract.status = 'signed';
-    contract.renter_signature = body.ip_address || 'signed';
+    const signatureIp = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+                        request.headers.get('x-real-ip') || 'unknown';
+    contract.renter_signature = `signed@${signatureIp}`;
     contract.signed_at = new Date().toISOString();
     if (contract.parties && contract.parties.length > 0) {
       contract.parties[0].signed = true;
       contract.parties[0].signedAt = new Date().toISOString();
-      contract.parties[0].ipAddress = body.ip_address || '';
+      contract.parties[0].ipAddress = signatureIp;
     }
     return NextResponse.json(wrap(contract));
   }
@@ -1639,7 +1741,10 @@ export async function PATCH(
     p.startsWith('inventory/') || p.startsWith('products/admin/') || p.startsWith('auth/admin/') ||
     p.startsWith('bookings/admin/')
   ) {
-    return NextResponse.json(wrap({ id: 1, ...body, updated_at: new Date().toISOString() }));
+    if (!isAdmin(request)) {
+      return NextResponse.json({ success: false, error: 'Forbidden: Admin access required' }, { status: 403 });
+    }
+    return NextResponse.json(wrap({ id: 1, ...sanitizeBody(body), updated_at: new Date().toISOString() }));
   }
 
   // ---- Generic fallback ----
@@ -1692,9 +1797,12 @@ export async function DELETE(
     p.startsWith('maintenance/') || p.startsWith('hygiene/') || p.startsWith('packaging/') ||
     p.startsWith('inventory/') || p.startsWith('products/admin/') || p.startsWith('auth/admin/')
   ) {
+    if (!isAdmin(request)) {
+      return NextResponse.json({ success: false, error: 'Forbidden: Admin access required' }, { status: 403 });
+    }
     return NextResponse.json(wrap({ success: true, message: 'تم الحذف بنجاح' }));
   }
 
-  // ---- Generic fallback ----
+  // ---- Generic fallback (DELETE) ----
   return NextResponse.json(wrap({ success: true }));
 }

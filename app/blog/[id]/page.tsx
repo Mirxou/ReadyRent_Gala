@@ -11,6 +11,25 @@ import { ParticleField } from '@/components/ui/particle-field';
 import { Button } from '@/components/ui/button';
 import DOMPurify from 'dompurify';
 
+const DOMPURIFY_CONFIG = {
+  ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'b', 'i', 'u', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'a', 'blockquote', 'code', 'pre', 'span', 'div', 'img', 'figure', 'figcaption', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'hr'],
+  ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'class', 'id', 'target', 'rel', 'width', 'height', 'loading'],
+  ALLOW_DATA_ATTR: false,
+  FORBID_TAGS: ['script', 'style', 'iframe', 'object', 'embed', 'form', 'input'],
+  FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover', 'onfocus', 'onblur'],
+};
+
+function isValidImageUrl(url: string): boolean {
+  if (!url || typeof url !== 'string') return false;
+  try {
+    const parsed = new URL(url, 'https://picsum.photos');
+    const allowedHosts = ['picsum.photos', 'images.unsplash.com', 'res.cloudinary.com', 'amazonaws.com', 'localhost'];
+    return allowedHosts.some(h => parsed.hostname === h || parsed.hostname.endsWith('.' + h));
+  } catch {
+    return false;
+  }
+}
+
 export default function BlogPostPage() {
   const params = useParams();
   const postId = params.id as string;
@@ -71,7 +90,7 @@ export default function BlogPostPage() {
           {post.featured_image && (
             <div className="relative h-96 w-full overflow-hidden rounded-2xl mb-8">
               <img
-                src={post.featured_image}
+                src={isValidImageUrl(post.featured_image) ? post.featured_image : '/placeholder.svg'}
                 alt={post.title}
                 className="w-full h-full object-cover"
               />
@@ -125,7 +144,7 @@ export default function BlogPostPage() {
             <CardContent className="pt-8">
               <div
                 className="prose prose-lg max-w-none prose-headings:text-foreground prose-p:text-muted-foreground prose-a:text-sovereign-gold prose-strong:text-foreground"
-                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content || '') }}
+                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content || '', DOMPURIFY_CONFIG) }}
               />
             </CardContent>
           </Card>

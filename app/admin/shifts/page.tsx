@@ -27,6 +27,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { getAuthHeaders } from '@/lib/auth-helpers';
 
 interface Shift {
   id: number;
@@ -80,10 +81,9 @@ export default function AdminShiftsPage() {
 
   const fetchShifts = async () => {
     try {
-      const token = localStorage.getItem('access_token');
       const response = await fetch('/api/users/staff/shifts/', {
         headers: {
-          Authorization: `Bearer ${token}`,
+          ...getAuthHeaders(),
         },
       });
 
@@ -112,7 +112,6 @@ export default function AdminShiftsPage() {
 
   const fetchStaff = async () => {
     try {
-      const token = localStorage.getItem('access_token');
       const response = await fetch('/api/users/staff/list/');
       if (response.ok) {
         const data = await response.json();
@@ -156,7 +155,6 @@ export default function AdminShiftsPage() {
     }
 
     try {
-      const token = localStorage.getItem('access_token');
       const url = selectedShift
         ? `/api/users/staff/shifts/${selectedShift.id}/`
         : '/api/users/staff/shifts/';
@@ -166,7 +164,7 @@ export default function AdminShiftsPage() {
         method,
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+          ...getAuthHeaders(),
         },
         body: JSON.stringify({
           ...formData,
@@ -190,12 +188,11 @@ export default function AdminShiftsPage() {
 
   const handleToggleComplete = async (shift: Shift) => {
     try {
-      const token = localStorage.getItem('access_token');
       const response = await fetch(`/api/users/staff/shifts/${shift.id}/`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+          ...getAuthHeaders(),
         },
         body: JSON.stringify({ is_completed: !shift.is_completed }),
       });

@@ -2,6 +2,8 @@
  * WebSocket client for real-time notifications
  */
 
+import { getStoredUser } from '@/lib/auth-helpers';
+
 interface NotificationMessage {
   type: 'notification' | 'pong';
   notification?: {
@@ -37,12 +39,12 @@ class WebSocketClient {
   }
 
   private initialize(): void {
-    // Try to get user ID from localStorage or auth store
+    // Try to get user ID from Zustand persist storage
     if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('access_token');
-      // In a real app, you'd decode the JWT to get user ID
-      // For now, we'll need to get it from the auth store or API
-      this.connectFromAuth();
+      const user = getStoredUser();
+      if (user?.id) {
+        this.connect(user.id);
+      }
     }
   }
 

@@ -86,8 +86,21 @@ export function BankCardForm({
           // Redirect to 3D Secure page
           toast.info('جاري التحويل إلى صفحة التحقق الآمن...');
           onPaymentInitiated?.(response.data.payment.id, true, response.data.redirect_url);
-          // Redirect to 3D Secure page
-          window.location.href = response.data.redirect_url;
+          // Validate redirect URL before following
+          const redirectUrl = response.data.redirect_url;
+          if (redirectUrl) {
+            try {
+              const parsed = new URL(redirectUrl, window.location.origin);
+              const allowedHosts = ['standard.dz', 'www.standard.dz', 'payment.standard.dz', 'localhost', 'space-z.ai'];
+              if (allowedHosts.some(h => parsed.hostname === h || parsed.hostname.endsWith('.' + h))) {
+                window.location.href = redirectUrl;
+              } else {
+                toast.error('رابط التحويل غير آمن');
+              }
+            } catch {
+              toast.error('رابط التحويل غير صالح');
+            }
+          }
         } else {
           toast.success('تم الدفع بنجاح!');
           onPaymentInitiated?.(response.data.payment.id, false);
@@ -96,6 +109,12 @@ export function BankCardForm({
       } else {
         toast.error(response.data.error || 'فشل معالجة الدفع');
       }
+
+      // Clear sensitive card data after submission
+      setCardNumber('');
+      setCardExpiry('');
+      setCardCvv('');
+      setCardholderName('');
     } catch (error: any) {
       toast.error(error.response?.data?.error || 'حدث خطأ أثناء معالجة الدفع');
     } finally {

@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import RoleSelector from '@/components/role-selector';
+import { getAuthHeaders } from '@/lib/auth-helpers';
 import {
   Dialog,
   DialogContent,
@@ -63,7 +64,6 @@ export default function AdminStaffPage() {
   const fetchStaff = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('access_token');
       let url = '/api/users/staff/list/';
       if (roleFilter !== 'all') {
         url += `?role=${roleFilter}`;
@@ -71,7 +71,7 @@ export default function AdminStaffPage() {
 
       const response = await fetch(url, {
         headers: {
-          Authorization: `Bearer ${token}`,
+          ...getAuthHeaders(),
         },
       });
 

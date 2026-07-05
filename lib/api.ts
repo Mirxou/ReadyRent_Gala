@@ -5,6 +5,23 @@
 // Replaces axios-to-Django with native fetch to /api/ mock proxy
 // ═══════════════════════════════════════════════════════════════════
 
+// ──── CSRF Protection ────
+function getCsrfToken(): string {
+  if (typeof window === 'undefined') return '';
+  let token = sessionStorage.getItem('csrf-token');
+  if (!token) {
+    token = crypto.randomUUID();
+    sessionStorage.setItem('csrf-token', token);
+  }
+  return token;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function generateNonce(): string {
+  if (typeof window === 'undefined') return '';
+  return crypto.randomUUID().slice(0, 16);
+}
+
 // ──── Core Fetch Helper ────
 // Returns { data, status, meta } to be compatible with axios response pattern
 // that components use: `const res = await api.get(...); const d = res.data;`
@@ -37,14 +54,19 @@ async function apiFetch(
   }
 
   const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
+  const isMutating = options.method && options.method !== 'GET';
+  const headers: Record<string, string> = isFormData ? { ...options.headers } : {
+    'Content-Type': 'application/json',
+    ...options.headers,
+  };
+  if (isMutating) {
+    headers['X-CSRF-Token'] = getCsrfToken();
+  }
 
   try {
     const res = await fetch(url, {
       method: options.method || 'GET',
-      headers: isFormData ? options.headers : {
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
+      headers,
       body: isFormData ? options.body : options.body ? JSON.stringify(options.body) : undefined,
       credentials: 'include',
     });
@@ -64,9 +86,9 @@ async function apiFetch(
     // Already raw data
     return { data: json, status: res.status };
   } catch (error) {
-    // Return empty data instead of throwing — prevents page crashes
-    console.warn('API fetch failed:', path, (error as Error)?.message);
-    return { data: null, status: 0 };
+    const message = (error as Error)?.message || 'Network error';
+    console.warn('API fetch failed:', path, message);
+    return { data: { error: message }, status: 0, meta: { failed: true } };
   }
 }
 

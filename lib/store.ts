@@ -57,7 +57,15 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'auth-storage-v2', // Version bumped to invalidate old token storage
-      partialize: (state) => ({ user: state.user, isAuthenticated: state.isAuthenticated }),
+      partialize: (state) => ({
+        user: state.user ? {
+          id: state.user.id,
+          username: state.user.username,
+          role: state.user.role,
+          is_verified: state.user.is_verified,
+        } : null,
+        isAuthenticated: state.isAuthenticated,
+      }),
     }
   )
 );

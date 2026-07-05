@@ -28,6 +28,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
+import { getAuthHeaders } from '@/lib/auth-helpers';
 
 interface PerformanceReview {
   id: number;
@@ -94,10 +95,9 @@ export default function AdminPerformanceReviewsPage() {
 
   const fetchReviews = async () => {
     try {
-      const token = localStorage.getItem('access_token');
       const response = await fetch('/api/users/staff/performance-reviews/', {
         headers: {
-          Authorization: `Bearer ${token}`,
+          ...getAuthHeaders(),
         },
       });
 
@@ -114,7 +114,6 @@ export default function AdminPerformanceReviewsPage() {
 
   const fetchStaff = async () => {
     try {
-      const token = localStorage.getItem('access_token');
       const response = await fetch('/api/users/staff/list/');
       if (response.ok) {
         const data = await response.json();
@@ -168,7 +167,6 @@ export default function AdminPerformanceReviewsPage() {
     }
 
     try {
-      const token = localStorage.getItem('access_token');
       const url = selectedReview
         ? `/api/users/staff/performance-reviews/${selectedReview.id}/`
         : '/api/users/staff/performance-reviews/';
@@ -178,7 +176,7 @@ export default function AdminPerformanceReviewsPage() {
         method,
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+          ...getAuthHeaders(),
         },
         body: JSON.stringify({
           ...formData,
