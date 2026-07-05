@@ -2,12 +2,13 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { contractsApi, Contract } from '@/lib/api/contracts';
 import { ContractViewer } from '@/components/contract/contract-viewer';
 import { ContractTimeline } from '@/components/contract/contract-timeline';
+import { Contract } from '@/lib/api/contracts';
 import { Loader2, AlertCircle, ChevronRight, LayoutList } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { toast } from 'sonner';
 
 export default function ContractPage() {
   const params = useParams();
@@ -27,8 +28,33 @@ export default function ContractPage() {
   const loadContract = async () => {
     try {
       setLoading(true);
-      const res = await contractsApi.getContract(id as string);
-      setContract(res.data);
+      setError(null);
+      const res = await fetch(`/api/contracts/digital/${id}/`);
+      const json = await res.json();
+
+      if (json.success && json.data) {
+        const d = json.data;
+        // Map mock response fields to Contract interface
+        const mapped: Contract = {
+          id: typeof d.id === 'string' ? parseInt(d.id.replace(/\D/g, ''), 10) || 1 : (d.id ?? 1),
+          booking_id: typeof d.booking_id === 'string' ? parseInt(d.booking_id.replace(/\D/g, ''), 10) || 1 : (d.booking_id ?? 1),
+          status: d.status || 'draft',
+          is_finalized: d.is_finalized ?? false,
+          contract_hash: d.contract_hash || '',
+          created_at: d.created_at || new Date().toISOString(),
+          signed_at: d.signed_at || undefined,
+          renter_signature: d.renter_signature || undefined,
+          owner_signature: d.owner_signature || undefined,
+          snapshot: d.snapshot || {},
+          parties: d.parties || [],
+          terms: Array.isArray(d.terms)
+            ? d.terms.map((t: Record<string, string>) => typeof t === 'string' ? t : t.text || '').join('\n')
+            : (d.terms || ''),
+        };
+        setContract(mapped);
+      } else {
+        setError('العقد غير موجود');
+      }
     } catch {
       setError('تعذر تحميل العقد. يرجى التأكد من الرابط أو المحاولة لاحقاً.');
     } finally {
@@ -39,10 +65,39 @@ export default function ContractPage() {
   const handleSign = async (signatureData: string) => {
     if (!id) return;
     try {
-      const updatedRes = await contractsApi.signContract(id as string, signatureData);
-      setContract(updatedRes.data);
-      setTimeout(() => router.push('/wallet'), 3000);
+      const res = await fetch(`/api/contracts/digital/${id}/sign/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ip_address: signatureData.slice(0, 20) }),
+      });
+      const json = await res.json();
+
+      if (json.success && json.data) {
+        const d = json.data;
+        const mapped: Contract = {
+          id: typeof d.id === 'string' ? parseInt(d.id.replace(/\D/g, ''), 10) || 1 : (d.id ?? 1),
+          booking_id: typeof d.booking_id === 'string' ? parseInt(d.booking_id.replace(/\D/g, ''), 10) || 1 : (d.booking_id ?? 1),
+          status: d.status || 'signed',
+          is_finalized: d.is_finalized ?? true,
+          contract_hash: d.contract_hash || '',
+          created_at: d.created_at || new Date().toISOString(),
+          signed_at: d.signed_at || new Date().toISOString(),
+          renter_signature: d.renter_signature || undefined,
+          owner_signature: d.owner_signature || undefined,
+          snapshot: d.snapshot || {},
+          parties: d.parties || contract?.parties || [],
+          terms: Array.isArray(d.terms)
+            ? d.terms.map((t: Record<string, string>) => typeof t === 'string' ? t : t.text || '').join('\n')
+            : (d.terms || contract?.terms || ''),
+        };
+        setContract(mapped);
+        toast.success('تم توقيع العقد بنجاح!');
+        setTimeout(() => router.push('/dashboard/bookings'), 2000);
+      } else {
+        throw new Error('فشل توقيع العقد');
+      }
     } catch {
+      toast.error('فشل توقيع العقد. يرجى المحاولة مرة أخرى.');
       throw new Error('فشل توقيع العقد');
     }
   };
@@ -50,8 +105,8 @@ export default function ContractPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-slate-50 dark:bg-slate-950">
-        <Loader2 className="animate-spin text-indigo-600" size={48} />
-        <p className="text-slate-500 font-medium">جاري تأمين الاتصال وتوثيق العقد...</p>
+        <Loader2 className="animate-spin text-amber-600" size={48} />
+        <p className="text-slate-500 font-medium">جاري تحميل العقد...</p>
       </div>
     );
   }
@@ -67,8 +122,8 @@ export default function ContractPage() {
           <p className="text-slate-500 max-w-sm">{error || 'العقد غير موجود'}</p>
         </div>
         <Button asChild>
-          <Link href="/products" className="gap-2">
-            العودة للمتصفح
+          <Link href="/dashboard/bookings" className="gap-2">
+            العودة للحجوزات
             <ChevronRight size={16} />
           </Link>
         </Button>

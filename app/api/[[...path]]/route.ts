@@ -7,7 +7,57 @@ import {
   reviews,
 } from '@/lib/mock-data';
 
-// Mock insurance plans for warranties endpoint
+// =============================================================================
+// In-Memory Data Stores (persist during server lifetime)
+// =============================================================================
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+let cartItems: any[] = [];
+const bookings: any[] = [];
+let wishlistIds: number[] = [];
+let waitlistItems: any[] = [];
+const disputes: any[] = [];
+const notifications: any[] = [
+  {
+    id: 1,
+    type: 'trust',
+    title: 'ارتقاء الهوية السيادية',
+    message: 'تم تحديث رصيد ثقتك إلى الرقم +85 بناءً على الالتزام بالعقود.',
+    is_read: false,
+    created_at: new Date(Date.now() - 7200000).toISOString(),
+  },
+  {
+    id: 2,
+    type: 'financial',
+    title: 'تحرير ضمان ائتماني',
+    message: 'تم الإفراج عن مبلغ 12,000 DA من خزانة الضمان (Escrow).',
+    is_read: false,
+    created_at: new Date(Date.now() - 18000000).toISOString(),
+  },
+  {
+    id: 3,
+    type: 'asset',
+    title: 'مراقبة جودة الأصل',
+    message: 'أصلك "فستان قسنطيني" مر بمرحلة فحص النظافة بنجاح.',
+    is_read: true,
+    created_at: new Date(Date.now() - 86400000).toISOString(),
+  },
+  {
+    id: 4,
+    type: 'system',
+    title: 'تحديث ميثاق STANDARD',
+    message: 'تم تحديث بروتوكول التحكيم التلقائي V.2.1.',
+    is_read: true,
+    created_at: new Date(Date.now() - 172800000).toISOString(),
+  },
+];
+const contracts: any[] = [];
+const returnRequests: any[] = [];
+
+// =============================================================================
+// Helpers
+// =============================================================================
+
 const mockInsurancePlans = [
   {
     id: 1,
@@ -35,72 +85,153 @@ const mockInsurancePlans = [
   },
 ];
 
-function resolveGetMock(path: string): unknown {
-  // Normalise: strip leading/trailing slashes, collapse double slashes
-  const p = path.replace(/^\/+|\/+$/g, '').replace(/\/+/g, '/');
+/** Wrap response in sovereign envelope */
+function wrap(data: unknown, meta?: Record<string, unknown>) {
+  const response: Record<string, unknown> = {
+    success: true,
+    dignity_preserved: true,
+    data,
+  };
+  if (meta) response.meta = meta;
+  return response;
+}
 
-  // Vendors list
-  if (p === 'vendors' || p === 'vendors/vendors') {
-    return vendors;
+/** Normalise path: strip leading/trailing slashes, collapse doubles */
+function normPath(raw: string): string {
+  return raw.replace(/^\/+|\/+$/g, '').replace(/\/+/g, '/');
+}
+
+/** Extract query params from full URL */
+function getQueryParams(request: NextRequest): Record<string, string> {
+  const url = new URL(request.url, 'http://localhost');
+  const params: Record<string, string> = {};
+  url.searchParams.forEach((v, k) => {
+    params[k] = v;
+  });
+  return params;
+}
+
+/** Generate a numeric ID for new items */
+let _idCounter = 1000;
+function nextId(): number {
+  return ++_idCounter;
+}
+
+/** Mock user object (CRITICAL — dashboard pages depend on this) */
+const mockUser = {
+  id: 1,
+  username: 'مستخدم_سيادي',
+  email: 'user@standard.dz',
+  trust_score: 72,
+  is_verified: true,
+  first_name: 'مستخدم',
+  last_name: 'سيادي',
+  phone: '0770 123 456',
+  role: 'customer',
+  is_2fa_enabled: false,
+  wallet_balance: 45250,
+};
+
+// =============================================================================
+// GET Handler
+// =============================================================================
+
+function resolveGet(joined: string, queryParams: Record<string, string>): unknown {
+  const p = normPath(joined);
+
+  // ---- Health ----
+  if (p === 'health' || p === 'health/') {
+    return { status: 'sovereign_proceeding', code: 'SYSTEM_NOMINAL' };
   }
 
-  // Vendor by ID
-  const vendorMatch = p.match(/^vendors\/vendors\/(\d+)$/);
-  if (vendorMatch) {
-    const id = parseInt(vendorMatch[1], 10);
+  // ---- Auth ----
+  if (p === 'auth/me' || p === 'auth/me/' || p === 'auth/profile' || p === 'auth/profile/') {
+    return { user: mockUser };
+  }
+  if (p.startsWith('auth/')) {
+    return { user: null };
+  }
+
+  // ---- Vendors ----
+  if (p === 'vendors' || p === 'vendors/vendors' || p === 'vendors/' || p === 'vendors/vendors/') {
+    return vendors;
+  }
+  const vendorByIdMatch = p.match(/^vendors\/vendors\/(\d+)$/);
+  if (vendorByIdMatch) {
+    const id = parseInt(vendorByIdMatch[1], 10);
     return vendors.find((v: any) => v.id === id) || null;
   }
 
   // Vendor dashboard
   if (p === 'vendors/dashboard' || p === 'vendors/dashboard/') {
     return {
+      vendor: {
+        id: 1,
+        business_name_ar: 'دار القصر للأزياء',
+        status: 'active',
+        commission_rate: 5,
+      },
       total_products: 45,
+      total_bookings: 128,
       active_bookings: 12,
       total_revenue: 285000,
-      commission: 14250,
+      total_commission: 14250,
+      pending_commission: 3200,
       recent_bookings: [
-        { id: 'BK-301', product: 'فستان سهرة ذهبي', amount: 8500, status: 'active', date: '2026-01-15' },
-        { id: 'BK-298', product: 'بدلة رجالية سوداء', amount: 5000, status: 'completed', date: '2026-01-12' },
-        { id: 'BK-295', product: 'قفطان تقليدي', amount: 12000, status: 'active', date: '2026-01-10' },
-      ]
+        { id: 'BK-301', product_name: 'فستان سهرة ذهبي', sale_amount: 8500, commission_amount: 425, status: 'active', calculated_at: '2026-01-15T10:30:00Z' },
+        { id: 'BK-298', product_name: 'بدلة رجالية سوداء', sale_amount: 5000, commission_amount: 250, status: 'completed', calculated_at: '2026-01-12T14:20:00Z' },
+        { id: 'BK-295', product_name: 'قفطان تقليدي', sale_amount: 12000, commission_amount: 600, status: 'active', calculated_at: '2026-01-10T09:15:00Z' },
+      ],
     };
   }
 
   // Vendor products
-  if (p.match(/^vendors\/\d+\/products$/)) {
-    return products;
+  const vendorProductsMatch = p.match(/^vendors\/(\d+)\/products$/);
+  if (vendorProductsMatch) {
+    const vendorId = parseInt(vendorProductsMatch[1], 10);
+    return products.filter((pr: any) => pr.owner_id === vendorId);
   }
 
-  // Artisans
-  if (p === 'artisans/artisans') {
+  // ---- Artisans ----
+  if (p === 'artisans/artisans' || p === 'artisans/artisans/') {
     return artisans;
   }
 
-  // Bundles
-  if (p === 'bundles/bundles') {
+  // ---- Bundles ----
+  if (p === 'bundles/bundles' || p === 'bundles/bundles/' || p === 'bundles' || p === 'bundles/') {
     return bundles;
   }
 
-  // Returns
-  if (p.startsWith('returns/returns/my_returns') || p.startsWith('returns/my_returns')) {
-    return [];
-  }
-  if (p.startsWith('returns/returns') || p.startsWith('returns')) {
-    return [];
-  }
-
-  // Bookings
-  if (p.startsWith('bookings/cart')) {
-    return { items: [], total: 0 };
-  }
-  if (p.startsWith('bookings/waitlist')) {
-    return [];
-  }
-  if (p.startsWith('bookings')) {
-    return [];
+  // ---- Products ----
+  // Product search-suggestions
+  if (p === 'products/search-suggestions' || p === 'products/search-suggestions/') {
+    const q = (queryParams.q || '').trim();
+    if (!q) return [];
+    const suggestions = products
+      .filter((pr: any) => pr.name_ar.includes(q))
+      .slice(0, 5)
+      .map((pr: any) => pr.name_ar);
+    return suggestions;
   }
 
-  // Product recommendations (must come before single product)
+  // Product categories
+  if (p === 'products/categories' || p === 'products/categories/') {
+    return [
+      { id: 1, name_ar: 'فساتين زفاف', slug: 'wedding-dresses' },
+      { id: 2, name_ar: 'بدلات رجالية', slug: 'mens-suits' },
+      { id: 3, name_ar: 'قفطان جزائري', slug: 'caftan-algerian' },
+      { id: 4, name_ar: 'قرطاسيات', slug: 'karstassiya' },
+      { id: 5, name_ar: 'جلابيات فاخرة', slug: 'galabiya-luxury' },
+      { id: 6, name_ar: 'أزياء مناسبات', slug: 'occasion-wear' },
+    ];
+  }
+
+  // Product metadata
+  if (p === 'products/metadata' || p === 'products/metadata/') {
+    return { total: products.length, categories: [] };
+  }
+
+  // Product recommendations
   const recMatch = p.match(/^products\/(\d+)\/recommendations$/);
   if (recMatch) {
     const id = parseInt(recMatch[1], 10);
@@ -109,34 +240,311 @@ function resolveGetMock(path: string): unknown {
     return { recommendations: shuffled };
   }
 
+  // Product matching-accessories
+  const accessoryMatch = p.match(/^products\/(\d+)\/matching-accessories$/);
+  if (accessoryMatch) {
+    return products.slice(0, 3);
+  }
+
+  // Product wishlist
+  if (p === 'products/wishlist' || p === 'products/wishlist/') {
+    return products.filter((pr: any) => wishlistIds.includes(pr.id));
+  }
+
+  // Wishlist check
+  const wishlistCheckMatch = p.match(/^products\/wishlist\/check\/(\d+)$/);
+  if (wishlistCheckMatch) {
+    const id = parseInt(wishlistCheckMatch[1], 10);
+    return { is_in_wishlist: wishlistIds.includes(id) };
+  }
+
+  // Product wishlist toggle / delete (GET shouldn't happen but just in case)
   // Product detail by ID
   const productMatch = p.match(/^products\/(\d+)$/);
   if (productMatch) {
     const id = parseInt(productMatch[1], 10);
-    return products.find((pr: any) => pr.id === id) || null;
+    const product = products.find((pr: any) => pr.id === id);
+    if (product) {
+      return { ...product, owner_id: product.owner_id || Math.ceil(product.id / 4) };
+    }
+    return null;
   }
 
-  // Reviews list
-  if (p === 'reviews/reviews' || p.startsWith('reviews/reviews?')) {
-    return reviews;
+  // Products list (general) — with optional search & filters
+  if (p === 'products' || p === 'products/') {
+    let result = [...products];
+    const search = (queryParams.search || '').trim();
+    if (search) {
+      result = result.filter((pr: any) => pr.name_ar.includes(search));
+    }
+    if (queryParams.vendor_id) {
+      const vid = parseInt(queryParams.vendor_id, 10);
+      result = result.filter((pr: any) => pr.owner_id === vid);
+    }
+    if (queryParams.category) {
+      result = result.filter((pr: any) => pr.category?.slug === queryParams.category);
+    }
+    if (queryParams.min_price) {
+      const min = parseInt(queryParams.min_price, 10);
+      result = result.filter((pr: any) => pr.price_per_day >= min);
+    }
+    if (queryParams.max_price) {
+      const max = parseInt(queryParams.max_price, 10);
+      result = result.filter((pr: any) => pr.price_per_day <= max);
+    }
+    if (queryParams.location) {
+      result = result.filter((pr: any) => pr.location_name === queryParams.location);
+    }
+    if (queryParams.ordering === 'price_asc') {
+      result.sort((a: any, b: any) => a.price_per_day - b.price_per_day);
+    } else if (queryParams.ordering === 'price_desc') {
+      result.sort((a: any, b: any) => b.price_per_day - a.price_per_day);
+    }
+    return result;
   }
 
-  // Reviews (general catch-all for other review endpoints)
-  if (p.startsWith('reviews')) {
-    return reviews;
+  // Products with query params (vendor_id filter)
+  if (p.startsWith('products') && p.includes('vendor_id')) {
+    const vendorIdMatch = p.match(/vendor_id=(\d+)/);
+    if (vendorIdMatch) {
+      const vid = parseInt(vendorIdMatch[1], 10);
+      return products.filter((pr: any) => pr.owner_id === vid || pr.id <= vid * 3);
+    }
+    return products;
   }
 
-  // Notifications
-  if (p.startsWith('notifications')) {
+  // ---- Bookings ----
+  // Cart
+  if (p === 'bookings/cart' || p === 'bookings/cart/') {
+    return {
+      items: cartItems,
+      total: cartItems.reduce((s: number, i: any) => s + (i.price_per_day || i.price || 0), 0),
+    };
+  }
+
+  // Waitlist
+  if (p === 'bookings/waitlist' || p === 'bookings/waitlist/') {
+    return waitlistItems;
+  }
+
+  // Calculate deposit
+  if (p === 'bookings/calculate-deposit' || p === 'bookings/calculate-deposit/') {
+    return { deposit_amount: 5000 };
+  }
+
+  // Refunds
+  if (p === 'bookings/refunds' || p === 'bookings/refunds/') {
     return [];
   }
 
-  // Analytics
+  // Booking detail
+  const bookingDetailMatch = p.match(/^bookings\/(BK-\d+|\d+)$/);
+  if (bookingDetailMatch) {
+    const bkId = bookingDetailMatch[1];
+    return bookings.find((b: any) => b.id === bkId) || null;
+  }
+
+  // Booking cancellation policy
+  const cancelPolicyMatch = p.match(/^bookings\/(\d+)\/cancellation-policy$/);
+  if (cancelPolicyMatch) {
+    return {
+      free_cancellation_hours: 24,
+      penalty_percentage: 25,
+      description_ar: 'يمكنك الإلغاء مجاناً خلال 24 ساعة من الحجز. بعد ذلك يتم خصم 25% من المبلغ.',
+    };
+  }
+
+  // Bookings list
+  if (p === 'bookings' || p === 'bookings/' || p.startsWith('bookings/admin') || p.startsWith('bookings/admin/')) {
+    if (p.includes('stats')) {
+      return { total: bookings.length, active: bookings.filter((b: any) => b.status === 'active' || b.status === 'confirmed').length };
+    }
+    return bookings;
+  }
+
+  // ---- Reviews ----
+  if (p === 'reviews/reviews' || p.startsWith('reviews/reviews?') || p === 'reviews/reviews/' || p === 'reviews' || p === 'reviews/') {
+    return reviews;
+  }
+
+  // ---- Notifications ----
+  if (p === 'notifications' || p === 'notifications/') {
+    return notifications;
+  }
+
+  // ---- Analytics ----
+  if (p === 'analytics/user-behavior' || p === 'analytics/user-behavior/') {
+    return {
+      browsing_history: [
+        { product_id: 1, viewed_at: new Date(Date.now() - 3600000).toISOString() },
+        { product_id: 3, viewed_at: new Date(Date.now() - 7200000).toISOString() },
+        { product_id: 7, viewed_at: new Date(Date.now() - 86400000).toISOString() },
+      ],
+      preferred_categories: ['قفطان جزائري', 'بدلات رجالية'],
+      rental_frequency: 'biweekly',
+      avg_rental_duration: 3.5,
+    };
+  }
+
+  if (p === 'analytics/daily' || p === 'analytics/daily/') {
+    const days = parseInt(queryParams.days || '7', 10);
+    const data = Array.from({ length: days }, (_, i) => ({
+      date: new Date(Date.now() - i * 86400000).toISOString().split('T')[0],
+      revenue: Math.floor(Math.random() * 50000 + 20000),
+      bookings: Math.floor(Math.random() * 15 + 5),
+      new_users: Math.floor(Math.random() * 10 + 2),
+    }));
+    return data;
+  }
+
+  if (p === 'analytics/daily/summary' || p === 'analytics/daily/summary/') {
+    return {
+      total_revenue_7d: 245000,
+      total_bookings_7d: 67,
+      avg_daily_revenue: 35000,
+      growth_rate: 12.5,
+      peak_day: 'الجمعة',
+      forecast_revenue_next_7d: 280000,
+    };
+  }
+
+  if (p === 'analytics/admin/dashboard' || p === 'analytics/admin/dashboard/') {
+    return {
+      total_revenue: 1250000,
+      total_bookings: 342,
+      total_users: 1250,
+      active_listings: 189,
+      avg_rating: 4.7,
+    };
+  }
+
+  if (p === 'analytics/admin/revenue' || p === 'analytics/admin/revenue/') {
+    return {
+      revenue: Array.from({ length: 30 }, (_, i) => ({
+        date: new Date(Date.now() - (29 - i) * 86400000).toISOString().split('T')[0],
+        amount: Math.floor(Math.random() * 80000 + 30000),
+      })),
+    };
+  }
+
+  if (p === 'analytics/admin/sales-report' || p === 'analytics/admin/sales-report/') {
+    return { report: 'تقرير المبيعات الشهري - يناير 2026', generated_at: new Date().toISOString() };
+  }
+
+  if (p === 'analytics/products/top_products' || p === 'analytics/products/top_products/') {
+    return products.slice(0, 5).map((pr: any) => ({
+      product_id: pr.id,
+      name_ar: pr.name_ar,
+      total_rentals: Math.floor(Math.random() * 50 + 10),
+      revenue: Math.floor(Math.random() * 200000 + 50000),
+      avg_rating: pr.rating || 4.5,
+    }));
+  }
+
+  if (p === 'analytics/products' || p === 'analytics/products/') {
+    return products.slice(0, 5).map((pr: any) => ({
+      product_id: pr.id,
+      name_ar: pr.name_ar,
+      views: Math.floor(Math.random() * 500 + 50),
+      conversions: Math.floor(Math.random() * 30 + 5),
+    }));
+  }
+
+  if (p === 'analytics/admin/regional-liquidity' || p === 'analytics/admin/regional-liquidity/') {
+    return {
+      regions: [
+        { name: 'الجزائر العاصمة', liquidity: 450000, active_rentals: 45 },
+        { name: 'وهران', liquidity: 280000, active_rentals: 28 },
+        { name: 'قسنطينة', liquidity: 195000, active_rentals: 19 },
+        { name: 'تلمسان', liquidity: 150000, active_rentals: 15 },
+        { name: 'سطيف', liquidity: 120000, active_rentals: 12 },
+      ],
+    };
+  }
+
+  if (p === 'analytics/intelligence/report' || p === 'analytics/intelligence/report/') {
+    return {
+      title: 'تقرير الذكاء السوقي',
+      summary: 'السوق الجزائري للكراء يظهر نمواً بنسبة 12% شهرياً',
+      generated_at: new Date().toISOString(),
+    };
+  }
+
+  if (p === 'analytics/intelligence/pulse' || p === 'analytics/intelligence/pulse/') {
+    return {
+      pulse_score: 78,
+      trend: 'up',
+      signals: ['زيادة الطلب على القفطان', 'تراجع العروض المتاحة في وهران'],
+    };
+  }
+
+  if (p.startsWith('analytics/events')) {
+    return [];
+  }
+  if (p.startsWith('analytics/live/')) {
+    return { viewers: Math.floor(Math.random() * 20 + 5), active_sessions: Math.floor(Math.random() * 10 + 2) };
+  }
+  if (p.startsWith('analytics/visuals/')) {
+    return { type: 'infographic', data: {} };
+  }
   if (p.startsWith('analytics')) {
     return { revenue: 0, bookings: 0, users: 0 };
   }
 
-  // Wallet
+  // ---- Payments ----
+  if (p === 'payments/methods' || p === 'payments/methods/') {
+    return [
+      { id: '1', type: 'baridimob', name: 'البريدي موب', display_name: 'البريدي موب', icon: '📱' },
+      { id: '2', type: 'card', name: 'بطاقة بنكية', display_name: 'بطاقة بنكية', icon: '💳' },
+    ];
+  }
+
+  if (p === 'payments/metrics' || p === 'payments/metrics/') {
+    return { total_escrow: 285000, active_escrows: 12, released_this_month: 145000 };
+  }
+
+  if (p.startsWith('payments/payments/')) {
+    return { status: 'completed' };
+  }
+
+  if (p.startsWith('payments/create')) {
+    return { payment_id: `PAY-${Date.now()}`, status: 'pending' };
+  }
+
+  // ---- Social ----
+  if (p === 'social/feed' || p === 'social/feed/') {
+    return [
+      {
+        id: 1,
+        type: 'vouch',
+        user: { username: 'أمين_الجزائر', profile_image: 'https://picsum.photos/seed/user1/100/100', is_sovereign: true, trust_score: 89 },
+        target_name: 'فستان زفاف أميرة الزهراء',
+        target_image: 'https://picsum.photos/seed/product1a/100/100',
+        content: 'تجربة كراء ممتازة! الفستان كان في حالة مثالية.',
+        created_at: new Date(Date.now() - 3600000).toISOString(),
+      },
+      {
+        id: 2,
+        type: 'review',
+        user: { username: 'سارة_قسنطينة', profile_image: 'https://picsum.photos/seed/user2/100/100', is_sovereign: false, trust_score: 65 },
+        target_name: 'قفطان جزائري ملكي ذهبي',
+        target_image: 'https://picsum.photos/seed/product3a/100/100',
+        content: 'تطريز ذهبي رائع. أنصح الجميع بتجربته.',
+        created_at: new Date(Date.now() - 86400000).toISOString(),
+      },
+    ];
+  }
+
+  if (p === 'social/pulse' || p === 'social/pulse/') {
+    return { trending: 'قفطان جزائري', mentions: 142, sentiment: 'positive' };
+  }
+
+  const socialScoreMatch = p.match(/^social\/score\/(\d+)$/);
+  if (socialScoreMatch) {
+    return { user_id: parseInt(socialScoreMatch[1], 10), social_score: 72, vouches: 15 };
+  }
+
+  // ---- Wallet ----
   if (p === 'wallet' || p === 'wallet/') {
     return {
       balance: 45250,
@@ -145,16 +553,11 @@ function resolveGetMock(path: string): unknown {
         { id: 'TX-9021', type: 'ESCROW_HELD', amount: 1250, date: new Date().toISOString(), note: 'حجز فستان سهرة - مرجع #2041', hash: '0x8f2d...23e1' },
         { id: 'TX-8942', type: 'INCOME', amount: 8500, date: new Date(Date.now() - 86400000).toISOString(), note: 'تسوية حجز معدات تصوير', hash: '0x4e5f...6g7h' },
         { id: 'TX-8811', type: 'EXPENDITURE', amount: 2100, date: new Date(Date.now() - 172800000).toISOString(), note: 'رسوم فحص تقني - كاميرا سوني', hash: '0x9i0j...k1l2' },
-      ]
+      ],
     };
   }
 
-  // Wallet deposit/withdraw/transfer
-  if (p.startsWith('wallet/deposit') || p.startsWith('wallet/withdraw') || p.startsWith('wallet/transfer')) {
-    return { success: true, message: 'تمت العملية بنجاح', new_balance: 45250 };
-  }
-
-  // Subscriptions
+  // ---- Subscriptions ----
   if (p === 'subscriptions' || p === 'subscriptions/') {
     return {
       active_plan: { id: 'free', name_ar: 'مجاني', price: 0 },
@@ -168,94 +571,843 @@ function resolveGetMock(path: string): unknown {
         { id: 'SUB-001', plan: 'أساسي', amount: 1500, status: 'مدفوع', date: '2025-12-01' },
         { id: 'SUB-002', plan: 'مميز', amount: 4500, status: 'نشط', date: '2026-01-01' },
         { id: 'SUB-003', plan: 'أساسي', amount: 1500, status: 'ملغي', date: '2025-11-01' },
-      ]
+      ],
     };
   }
 
-  // Disputes
+  // ---- Disputes ----
+  if (p === 'disputes/disputes' || p === 'disputes/disputes/') {
+    return disputes;
+  }
+
+  const disputeDetailMatch = p.match(/^disputes\/disputes\/(\d+)$/);
+  if (disputeDetailMatch) {
+    const id = parseInt(disputeDetailMatch[1], 10);
+    return disputes.find((d: any) => d.id === id) || null;
+  }
+
+  // Dispute sub-endpoints
+  const disputeSubMatch = p.match(/^disputes\/disputes\/(\d+)\/(messages|history|status|verdict|evidence|judgment|audit-trail|mediation\/offers)$/);
+  if (disputeSubMatch) {
+    const sub = disputeSubMatch[2];
+    if (sub === 'messages') return [];
+    if (sub === 'history') return [
+      { label_ar: 'تقديم الشكوى', status: 'completed', timestamp: new Date(Date.now() - 86400000 * 3).toISOString() },
+      { label_ar: 'مراجعة الأدلة', status: 'completed', timestamp: new Date(Date.now() - 86400000 * 2).toISOString() },
+      { label_ar: 'الوساطة', status: 'active', timestamp: new Date(Date.now() - 86400000).toISOString() },
+      { label_ar: 'القرار النهائي', status: 'pending' },
+    ];
+    if (sub === 'status') return { status: 'under_review', phase: 'mediation' };
+    if (sub === 'verdict') return { verdict: 'pending', ruling_text: 'لم يصدر قرار بعد' };
+    if (sub === 'evidence') return [];
+    if (sub === 'judgment') return { verdict: 'pending', is_final: false };
+    if (sub === 'audit-trail') return [];
+    if (sub === 'mediation/offers') return [];
+  }
+
+  // Dispute public ledger / judicial stats
+  if (p === 'disputes/public-ledger' || p === 'disputes/public-ledger/' || p === 'v1/public/judgments' || p === 'v1/public/judgments/') {
+    return [
+      { id: 1, case_reference: 'STD-2026-001', category: 'damage', verdict: 'split', ruling_summary: 'تم تقسيم المسؤولية بين الطرفين', resolution_time_days: 5, filed_at: '2026-01-10' },
+      { id: 2, case_reference: 'STD-2026-002', category: 'non_delivery', verdict: 'full_renter', ruling_summary: 'تعويض كامل للمستأجر بسبب عدم التسليم', resolution_time_days: 3, filed_at: '2026-01-12' },
+      { id: 3, case_reference: 'STD-2026-003', category: 'quality', verdict: 'full_owner', ruling_summary: 'رفض الدعوى - المنتج مطابق للوصف', resolution_time_days: 7, filed_at: '2026-01-14' },
+    ];
+  }
+
+  if (p === 'disputes/judicial-stats' || p === 'disputes/judicial-stats/' || p === 'v1/public/metrics' || p === 'v1/public/metrics/') {
+    return { total_cases: 45, resolved_cases: 38, avg_resolution_days: 4.2, verdict_distribution: { full_renter: 15, full_owner: 12, split: 8, dismissed: 3 } };
+  }
+
+  // Dispute tickets
+  if (p === 'disputes/tickets' || p === 'disputes/tickets/') {
+    return [];
+  }
+
+  // Dispute admin stats
+  if (p === 'disputes/admin/disputes/stats' || p === 'disputes/admin/disputes/stats/') {
+    return { total: disputes.length, open: disputes.filter((d: any) => d.status !== 'closed').length };
+  }
+  if (p === 'disputes/admin/tickets/stats' || p === 'disputes/admin/tickets/stats/') {
+    return { total: 0, open: 0 };
+  }
+  if (p === 'disputes/admin/vault/integrity' || p === 'disputes/admin/vault/integrity/') {
+    return { integrity_verified: true, last_check: new Date().toISOString() };
+  }
+
+  // Dispute appeals
+  if (p === 'disputes/appeals' || p === 'disputes/appeals/') {
+    return [];
+  }
+  const appealDetailMatch = p.match(/^disputes\/appeals\/(\d+)$/);
+  if (appealDetailMatch) {
+    return { id: parseInt(appealDetailMatch[1], 10), status: 'pending' };
+  }
+  const judgmentDetailMatch = p.match(/^disputes\/judgments\/(\d+)$/);
+  if (judgmentDetailMatch) {
+    return { id: parseInt(judgmentDetailMatch[1], 10), verdict: 'pending', is_final: false };
+  }
+  const mediationOfferMatch = p.match(/^disputes\/mediation\/offers\/(\d+)\/accept$/);
+  if (mediationOfferMatch) {
+    return { accepted: true };
+  }
+
   if (p.startsWith('disputes')) {
     return [];
   }
 
-  // Warranties / Insurance
+  // ---- Contracts ----
+  const contractDigitalMatch = p.match(/^contracts\/digital\/(\d+)$/);
+  if (contractDigitalMatch) {
+    const id = parseInt(contractDigitalMatch[1], 10);
+    const existing = contracts.find((c: any) => c.id === id);
+    if (existing) return existing;
+    // Return mock contract if not found
+    return {
+      id: id,
+      booking_id: id,
+      status: 'draft',
+      is_finalized: false,
+      contract_hash: `0x${Buffer.from(`contract-${id}`).toString('hex')}`,
+      created_at: new Date().toISOString(),
+      snapshot: { terms: 'شروط الكراء القياسية' },
+      parties: [
+        { id: '1', name: 'مستخدم سيادي', role: 'renter', signed: false },
+        { id: '2', name: 'دار القصر للأزياء', role: 'owner', signed: false },
+      ],
+      terms: 'شروط وأحكام عقد الكراء المعتمد من ستاندرد. يتم تطبيق أحكام القانون التجاري الجزائري.',
+    };
+  }
+
+  if (p === 'contracts/digital' || p === 'contracts/digital/') {
+    const bookingParam = queryParams.booking;
+    if (bookingParam) {
+      const found = contracts.find((c: any) => c.booking_id === parseInt(bookingParam, 10));
+      return found || null;
+    }
+    return contracts;
+  }
+
+  // Legacy contract endpoint (contracts/1)
+  const contractLegacyMatch = p.match(/^contracts\/(\d+)$/);
+  if (contractLegacyMatch) {
+    const id = parseInt(contractLegacyMatch[1], 10);
+    const existing = contracts.find((c: any) => c.id === id);
+    if (existing) return existing;
+    return {
+      id: id,
+      booking_id: id,
+      status: 'draft',
+      is_finalized: false,
+      contract_hash: `0x${Buffer.from(`contract-${id}`).toString('hex')}`,
+      created_at: new Date().toISOString(),
+      snapshot: { terms: 'شروط الكراء القياسية' },
+      parties: [
+        { id: '1', name: 'مستخدم سيادي', role: 'renter', signed: false },
+        { id: '2', name: 'دار القصر للأزياء', role: 'owner', signed: false },
+      ],
+      terms: 'شروط وأحكام عقد الكراء المعتمد من ستاندرد.',
+    };
+  }
+
+  // ---- Returns ----
+  if (p.startsWith('returns/returns/my_returns') || p.startsWith('returns/my_returns') || p.startsWith('returns/returns') || p.startsWith('returns') || p === 'returns' || p === 'returns/') {
+    return returnRequests;
+  }
+
+  // ---- Warranties / Insurance ----
   if (p.startsWith('warranties/insurance')) {
     return { recommended_plan: null, plans: mockInsurancePlans };
   }
 
-  // Auth
-  if (p.startsWith('auth')) {
-    return { user: null };
+  // ---- Locations ----
+  if (p === 'locations/addresses' || p === 'locations/addresses/') {
+    return [
+      { id: 1, address: 'شارع ديدوش مراد، الجزائر العاصمة', city: 'الجزائر العاصمة', is_default: true, delivery_zone: 1 },
+      { id: 2, address: 'شارع لاربي بن مهيدي، وهران', city: 'وهران', is_default: false, delivery_zone: 2 },
+    ];
+  }
+  if (p.startsWith('locations/delivery-zones')) {
+    return [
+      { id: 1, name: 'الجزائر العاصمة', same_day_available: true, delivery_fee: 500 },
+      { id: 2, name: 'وهران', same_day_available: false, delivery_fee: 800 },
+    ];
+  }
+  if (p.startsWith('locations/tracking')) {
+    return [];
+  }
+  if (p.startsWith('locations')) {
+    return [];
   }
 
-  // Products with query params (vendor_id filter)
-  if (p.startsWith('products') && p.includes('vendor_id')) {
-    const vendorIdMatch = p.match(/vendor_id=(\d+)/);
-    if (vendorIdMatch) {
-      const vid = parseInt(vendorIdMatch[1], 10);
-      return products.filter((pr: any) => pr.owner_id === vid || pr.id <= vid * 3);
-    }
-    return products;
+  // ---- Chatbot ----
+  if (p.startsWith('chatbot/sessions')) {
+    return [];
   }
 
-  // Products list (general)
-  if (p === 'products' || p === 'products/') {
-    return products;
+  // ---- Judicial (v1) ----
+  if (p === 'judicial/cases' || p === 'judicial/cases/') {
+    return [
+      {
+        id: 1,
+        case_number: 'JD-2026-001',
+        title_ar: 'نزاع تلف فستان زفاف',
+        status: 'under_review',
+        filed_at: '2026-01-10',
+        category: 'damage',
+      },
+      {
+        id: 2,
+        case_number: 'JD-2026-002',
+        title_ar: 'عدم تسليم بدلة في الموعد',
+        status: 'closed',
+        filed_at: '2026-01-05',
+        category: 'non_delivery',
+      },
+      {
+        id: 3,
+        case_number: 'JD-2026-003',
+        title_ar: 'مطابقة المنتج للوصف',
+        status: 'judgment_provisional',
+        filed_at: '2026-01-08',
+        category: 'quality',
+      },
+    ];
+  }
+
+  // v1 judicial endpoints
+  const v1DisputeMatch = p.match(/^v1\/judicial\/disputes\/(\d+)\/(status|close)$/);
+  if (v1DisputeMatch) {
+    const id = v1DisputeMatch[1];
+    return { dispute_id: id, status: 'under_review' };
+  }
+  const v1CaseMatch = p.match(/^v1\/tribunal\/cases\/(\d+)$/);
+  if (v1CaseMatch) {
+    return { id: parseInt(v1CaseMatch[1], 10), case_number: `TC-${v1CaseMatch[1]}`, status: 'open' };
+  }
+  if (p.startsWith('v1/')) {
+    return [];
+  }
+
+  // ---- Maintenance / Hygiene / Packaging / Inventory ----
+  if (p.startsWith('maintenance/') || p.startsWith('hygiene/') || p.startsWith('packaging/') || p.startsWith('inventory/')) {
+    return [];
+  }
+
+  // ---- Admin ----
+  if (p.startsWith('auth/admin/')) {
+    return [];
+  }
+  if (p.startsWith('products/admin/')) {
+    return [];
+  }
+  if (p.startsWith('local-guide/')) {
+    return [];
   }
 
   // Fallback
   return {};
 }
 
-function wrap(data: unknown) {
-  return { success: true, data };
-}
+// =============================================================================
+// Route Handlers
+// =============================================================================
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ path?: string[] }> },
 ) {
   const { path } = await params;
   const joined = (path || []).join('/');
-  const data = resolveGetMock(joined);
+  const queryParams = getQueryParams(request);
+  const data = resolveGet(joined, queryParams);
   return NextResponse.json(wrap(data));
 }
 
 export async function POST(
-  _request: NextRequest,
-  _ctx: { params: Promise<{ path?: string[] }> },
+  request: NextRequest,
+  { params }: { params: Promise<{ path?: string[] }> },
 ) {
-  return NextResponse.json({
+  const { path } = await params;
+  const p = normPath((path || []).join('/'));
+
+  let body: any = {};
+  try {
+    const text = await request.text();
+    if (text) body = JSON.parse(text);
+  } catch {
+    // If body is not JSON (e.g., FormData), just use empty object
+  }
+
+  // ---- Auth: Login ----
+  if (p === 'auth/login' || p === 'auth/login/') {
+    return NextResponse.json(wrap({
+      user: mockUser,
+      token: 'mock-jwt-token-xyz',
+    }));
+  }
+
+  // ---- Auth: Register ----
+  if (p === 'auth/register' || p === 'auth/register/') {
+    return NextResponse.json(wrap({
+      user: { ...mockUser, id: nextId(), email: body.email || 'new@standard.dz' },
+      token: 'mock-jwt-token-new',
+    }));
+  }
+
+  // ---- Auth: Logout ----
+  if (p === 'auth/logout' || p === 'auth/logout/') {
+    return NextResponse.json(wrap({ message: 'تم تسجيل الخروج' }));
+  }
+
+  // ---- Auth: Password Reset ----
+  if (p.startsWith('auth/password/reset')) {
+    return NextResponse.json(wrap({ message: 'تم إرسال رابط إعادة تعيين كلمة المرور' }));
+  }
+
+  // ---- Auth: 2FA ----
+  if (p.startsWith('auth/security/2fa')) {
+    return NextResponse.json(wrap({ secret: 'JBSWY3DPEHPK3PXP', qr_code: 'data:image/png;base64,mock' }));
+  }
+
+  // ---- Bookings: Cart (add item) ----
+  if (p === 'bookings/cart/items' || p === 'bookings/cart/items/') {
+    const product = products.find((pr: any) => pr.id === body.product_id);
+    if (!product) {
+      return NextResponse.json(wrap(null), { status: 404 });
+    }
+    const cartItem = {
+      id: nextId(),
+      product_id: body.product_id,
+      product_name: product.name_ar,
+      product_image: product.primary_image || product.images?.[0]?.url,
+      price_per_day: product.price_per_day,
+      start_date: body.start_date,
+      end_date: body.end_date,
+      quantity: body.quantity || 1,
+      size: body.size || product.size_options?.[0],
+      color: body.color || product.color_options?.[0],
+      added_at: new Date().toISOString(),
+    };
+    cartItems.push(cartItem);
+    return NextResponse.json(wrap(cartItem));
+  }
+
+  // ---- Bookings: Create (from cart or directly) ----
+  if (p === 'bookings/create' || p === 'bookings/create/') {
+    const bookingId = `BK-${Date.now()}`;
+    let total_price = 0;
+    let product_name = 'منتج';
+
+    if (cartItems.length > 0) {
+      // Create from cart
+      total_price = cartItems.reduce((s: number, i: any) => s + (i.price_per_day || 0) * (i.quantity || 1), 0);
+      product_name = cartItems[0].product_name || 'منتج';
+      const newBooking = {
+        id: bookingId,
+        product_id: cartItems[0].product_id,
+        product_name,
+        start_date: cartItems[0].start_date,
+        end_date: cartItems[0].end_date,
+        total_price,
+        status: 'pending',
+        escrow_status: 'held',
+        items: [...cartItems],
+        created_at: new Date().toISOString(),
+      };
+      bookings.push(newBooking);
+      cartItems = [];
+      return NextResponse.json(wrap(newBooking));
+    } else if (body.product_id) {
+      // Create directly
+      const product = products.find((pr: any) => pr.id === body.product_id);
+      if (product) {
+        product_name = product.name_ar;
+        const days = body.end_date && body.start_date
+          ? Math.max(1, Math.ceil((new Date(body.end_date).getTime() - new Date(body.start_date).getTime()) / 86400000))
+          : 1;
+        total_price = product.price_per_day * days;
+      }
+      const newBooking = {
+        id: bookingId,
+        product_id: body.product_id,
+        product_name,
+        start_date: body.start_date,
+        end_date: body.end_date,
+        total_price,
+        status: 'pending',
+        escrow_status: 'held',
+        has_insurance: body.has_insurance || false,
+        extra_services: body.extra_services || [],
+        created_at: new Date().toISOString(),
+      };
+      bookings.push(newBooking);
+      return NextResponse.json(wrap(newBooking));
+    }
+
+    return NextResponse.json(wrap({ id: bookingId, status: 'created' }));
+  }
+
+  // ---- Bookings: Waitlist (add) ----
+  if (p === 'bookings/waitlist' || p === 'bookings/waitlist/' || p === 'bookings/waitlist/add' || p === 'bookings/waitlist/add/') {
+    const product = products.find((pr: any) => pr.id === body.product_id);
+    const waitlistItem = {
+      id: nextId(),
+      product_id: body.product_id,
+      product_name: product?.name_ar || 'منتج',
+      product_image: product?.primary_image || product?.images?.[0]?.url,
+      price_per_day: product?.price_per_day || 0,
+      preferred_start: body.preferred_start_date || body.start_date,
+      status: 'waiting',
+      added_at: new Date().toISOString(),
+    };
+    waitlistItems.push(waitlistItem);
+    return NextResponse.json(wrap(waitlistItem));
+  }
+
+  // ---- Bookings: Cancel ----
+  const bookingCancelMatch = p.match(/^bookings\/(BK-\d+|\d+)\/cancel$/);
+  if (bookingCancelMatch) {
+    const bkId = bookingCancelMatch[1];
+    const booking = bookings.find((b: any) => b.id === bkId);
+    if (booking) booking.status = 'cancelled';
+    return NextResponse.json(wrap({ message: 'تم إلغاء الحجز' }));
+  }
+
+  // ---- Bookings: Early return ----
+  const bookingEarlyReturnMatch = p.match(/^bookings\/(BK-\d+|\d+)\/early-return$/);
+  if (bookingEarlyReturnMatch) {
+    return NextResponse.json(wrap({ message: 'تم تسجيل طلب الإرجاع المبكر', refund_amount: body.refund_amount || 0 }));
+  }
+
+  // ---- Bookings: Agreement ----
+  const agreementCreateMatch = p.match(/^bookings\/(BK-\d+|\d+)\/agreement\/create$/);
+  if (agreementCreateMatch) {
+    const bookingId = agreementCreateMatch[1];
+    const contractId = nextId();
+    const newContract = {
+      id: contractId,
+      booking_id: bookingId,
+      status: 'draft',
+      is_finalized: false,
+      contract_hash: `0x${Buffer.from(`contract-${contractId}`).toString('hex')}`,
+      created_at: new Date().toISOString(),
+      snapshot: { terms: 'شروط الكراء القياسية' },
+      parties: [
+        { id: '1', name: 'مستخدم سيادي', role: 'renter', signed: false },
+        { id: '2', name: 'دار القصر للأزياء', role: 'owner', signed: false },
+      ],
+      terms: 'شروط وأحكام عقد الكراء المعتمد من ستاندرد.',
+    };
+    contracts.push(newContract);
+    return NextResponse.json(wrap(newContract));
+  }
+
+  // ---- Products: Wishlist (add) ----
+  if (p === 'products/wishlist' || p === 'products/wishlist/') {
+    const productId = body.product_id;
+    if (productId && !wishlistIds.includes(productId)) {
+      wishlistIds.push(productId);
+    }
+    return NextResponse.json(wrap({ success: true, wishlist: wishlistIds }));
+  }
+
+  // ---- Products: Wishlist toggle ----
+  const wishlistToggleMatch = p.match(/^products\/wishlist\/toggle\/(\d+)$/);
+  if (wishlistToggleMatch) {
+    const id = parseInt(wishlistToggleMatch[1], 10);
+    const idx = wishlistIds.indexOf(id);
+    if (idx >= 0) {
+      wishlistIds.splice(idx, 1);
+    } else {
+      wishlistIds.push(id);
+    }
+    return NextResponse.json(wrap({ is_in_wishlist: wishlistIds.includes(id) }));
+  }
+
+  // ---- Reviews: Create ----
+  if (p === 'reviews/create' || p === 'reviews/create/') {
+    const newReview = {
+      id: nextId(),
+      ...body,
+      created_at: new Date().toISOString(),
+      status: 'pending',
+    };
+    return NextResponse.json(wrap(newReview));
+  }
+
+  // ---- Disputes: Create ----
+  if (p === 'disputes/disputes/create' || p === 'disputes/disputes/create/' || p === 'disputes/disputes' || p === 'disputes/disputes/') {
+    const newDispute = {
+      id: nextId(),
+      booking_id: body.booking_id,
+      title: body.description?.substring(0, 50) || 'نزاع جديد',
+      description: body.description || '',
+      claim_type: body.claim_type || 'general',
+      status: 'filed',
+      priority: 'medium',
+      claimed_amount: body.claimed_amount || 0,
+      evidence_urls: body.evidence_urls || [],
+      created_at: new Date().toISOString(),
+    };
+    disputes.push(newDispute);
+    return NextResponse.json(wrap(newDispute));
+  }
+
+  // ---- Disputes: Messages ----
+  const disputeMsgMatch = p.match(/^disputes\/disputes\/(\d+)\/messages$/);
+  if (disputeMsgMatch) {
+    return NextResponse.json(wrap({ id: nextId(), ...body, created_at: new Date().toISOString() }));
+  }
+
+  // ---- Disputes: Evidence upload ----
+  const disputeEvidenceUploadMatch = p.match(/^disputes\/disputes\/(\d+)\/evidence\/upload$/);
+  if (disputeEvidenceUploadMatch) {
+    return NextResponse.json(wrap({ id: nextId(), file_name: 'evidence.jpg', uploaded: true }));
+  }
+
+  // ---- Disputes: Tickets ----
+  if (p === 'disputes/tickets/create' || p === 'disputes/tickets/create/') {
+    const newTicket = {
+      id: nextId(),
+      ...body,
+      status: 'open',
+      created_at: new Date().toISOString(),
+    };
+    return NextResponse.json(wrap(newTicket));
+  }
+
+  // ---- Disputes: Ticket messages ----
+  const ticketMsgMatch = p.match(/^disputes\/tickets\/(\d+)\/messages$/);
+  if (ticketMsgMatch) {
+    return NextResponse.json(wrap({ id: nextId(), message: body.message, created_at: new Date().toISOString() }));
+  }
+
+  // ---- Disputes: Appeals ----
+  const disputeAppealMatch = p.match(/^disputes\/judgments\/(\d+)\/appeal$/);
+  if (disputeAppealMatch) {
+    return NextResponse.json(wrap({ id: nextId(), judgment_id: parseInt(disputeAppealMatch[1], 10), status: 'pending', reason: body.reason }));
+  }
+
+  // ---- Disputes: Appeal evidence ----
+  const appealEvidenceMatch = p.match(/^disputes\/appeals\/(\d+)\/submit_evidence$/);
+  if (appealEvidenceMatch) {
+    return NextResponse.json(wrap({ submitted: true }));
+  }
+
+  // ---- Disputes: Mediation accept ----
+  const mediationAcceptMatch = p.match(/^disputes\/mediation\/offers\/(\d+)\/accept$/);
+  if (mediationAcceptMatch) {
+    return NextResponse.json(wrap({ accepted: true }));
+  }
+
+  // ---- Contracts: Generate ----
+  if (p === 'contracts/generate' || p === 'contracts/generate/') {
+    const contractId = nextId();
+    const newContract = {
+      id: contractId,
+      booking_id: body.booking_id,
+      status: 'draft',
+      is_finalized: false,
+      contract_hash: `0x${Buffer.from(`contract-${contractId}`).toString('hex')}`,
+      created_at: new Date().toISOString(),
+      snapshot: { terms: 'شروط الكراء القياسية' },
+      parties: [
+        { id: '1', name: 'مستخدم سيادي', role: 'renter', signed: false },
+        { id: '2', name: 'دار القصر للأزياء', role: 'owner', signed: false },
+      ],
+      terms: 'شروط وأحكام عقد الكراء المعتمد من ستاندرد.',
+    };
+    contracts.push(newContract);
+    return NextResponse.json(wrap(newContract));
+  }
+
+  // ---- Returns ----
+  if (p === 'returns' || p === 'returns/' || p === 'returns/returns' || p === 'returns/returns/') {
+    const newReturn = {
+      id: `RET-${nextId()}`,
+      booking_ref: body.booking_ref || body.booking_id || 'BK-unknown',
+      reason: body.reason || 'أخرى',
+      description: body.description || '',
+      status: 'pending',
+      date: new Date().toISOString(),
+      created_at: new Date().toISOString(),
+    };
+    returnRequests.push(newReturn);
+    return NextResponse.json(wrap(newReturn));
+  }
+
+  // ---- Payments: Create ----
+  if (p === 'payments/create' || p === 'payments/create/') {
+    return NextResponse.json(wrap({
+      payment_id: `PAY-${Date.now()}`,
+      status: 'pending',
+      amount: body.amount || 0,
+    }));
+  }
+
+  // ---- Payments: Verify OTP ----
+  const paymentVerifyMatch = p.match(/^payments\/payments\/([^/]+)\/verify_otp$/);
+  if (paymentVerifyMatch) {
+    return NextResponse.json(wrap({ status: 'verified', message: 'تم التحقق بنجاح' }));
+  }
+
+  // ---- Social: Vouch ----
+  const socialVouchMatch = p.match(/^social\/vouch\/(\d+)$/);
+  if (socialVouchMatch) {
+    return NextResponse.json(wrap({ vouched: true, user_id: parseInt(socialVouchMatch[1], 10) }));
+  }
+
+  // ---- Chatbot ----
+  if (p === 'chatbot/quick-chat' || p === 'chatbot/quick-chat/') {
+    return NextResponse.json(wrap({
+      response: 'أهلاً! أنا المساعد الذكي لستاندرد. كيف يمكنني مساعدتك؟',
+      session_id: `chat-${Date.now()}`,
+    }));
+  }
+
+  if (p === 'chatbot/sessions/create_anonymous' || p === 'chatbot/sessions/create_anonymous/') {
+    return NextResponse.json(wrap({
+      id: `session-${Date.now()}`,
+      language: body.language || 'ar',
+    }));
+  }
+
+  const chatSessionMsgMatch = p.match(/^chatbot\/sessions\/([^/]+)\/send_message$/);
+  if (chatSessionMsgMatch) {
+    return NextResponse.json(wrap({
+      id: `msg-${Date.now()}`,
+      response: 'شكراً لرسالتك! سأقوم بمساعدتك قريباً.',
+      is_bot: true,
+    }));
+  }
+
+  // ---- Wallet: deposit/withdraw/transfer ----
+  if (p.startsWith('wallet/deposit') || p.startsWith('wallet/withdraw') || p.startsWith('wallet/transfer')) {
+    return NextResponse.json(wrap({ success: true, message: 'تمت العملية بنجاح', new_balance: 45250 }));
+  }
+
+  // ---- Analytics: Events ----
+  if (p === 'analytics/events' || p === 'analytics/events/') {
+    return NextResponse.json(wrap({ tracked: true }));
+  }
+
+  // ---- Locations ----
+  if (p === 'locations/addresses' || p === 'locations/addresses/') {
+    return NextResponse.json(wrap({ id: nextId(), ...body, is_default: false }));
+  }
+
+  if (p === 'locations/delivery-zones' || p === 'locations/delivery-zones/') {
+    return NextResponse.json(wrap({ id: nextId(), ...body }));
+  }
+
+  if (p === 'locations/deliveries' || p === 'locations/deliveries/') {
+    return NextResponse.json(wrap({ id: nextId(), ...body, status: 'pending' }));
+  }
+
+  if (p.startsWith('locations/geocode') || p.startsWith('locations/reverse-geocode') || p.startsWith('locations/place-details')) {
+    return NextResponse.json(wrap({ coordinates: [36.7538, 3.0588] }));
+  }
+
+  // ---- Judicial v1 ----
+  if (p === 'v1/judicial/disputes/initiate' || p === 'v1/judicial/disputes/initiate/') {
+    const newCase = { id: nextId(), ...body, status: 'filed', filed_at: new Date().toISOString() };
+    return NextResponse.json(wrap(newCase));
+  }
+
+  const v1VerdictMatch = p.match(/^v1\/judicial\/disputes\/(\d+)\/verdict$/);
+  if (v1VerdictMatch) {
+    return NextResponse.json(wrap({ dispute_id: v1VerdictMatch[1], ...body, issued_at: new Date().toISOString() }));
+  }
+
+  const v1AppealMatch = p.match(/^v1\/judicial\/disputes\/(\d+)\/appeal$/);
+  if (v1AppealMatch) {
+    return NextResponse.json(wrap({ dispute_id: v1AppealMatch[1], status: 'appealed', reason: body.reason }));
+  }
+
+  const v1CloseMatch = p.match(/^v1\/judicial\/disputes\/(\d+)\/close$/);
+  if (v1CloseMatch) {
+    return NextResponse.json(wrap({ dispute_id: v1CloseMatch[1], status: 'closed' }));
+  }
+
+  // ---- Maintenance / Hygiene / Packaging / Inventory / Admin CRUD ----
+  if (
+    p.startsWith('maintenance/') || p.startsWith('hygiene/') || p.startsWith('packaging/') ||
+    p.startsWith('inventory/') || p.startsWith('products/admin/') || p.startsWith('auth/admin/')
+  ) {
+    return NextResponse.json(wrap({ id: nextId(), ...body, created_at: new Date().toISOString() }));
+  }
+
+  // ---- Bundles ----
+  if (p.startsWith('bundles/')) {
+    return NextResponse.json(wrap({ id: nextId(), ...body }));
+  }
+
+  // ---- Generic fallback for POST ----
+  return NextResponse.json(wrap({
     success: true,
     message_ar: 'تمت العملية بنجاح',
     message_en: 'Operation successful',
-  });
+  }));
 }
 
 export async function PUT(
-  _request: NextRequest,
-  _ctx: { params: Promise<{ path?: string[] }> },
+  request: NextRequest,
+  { params }: { params: Promise<{ path?: string[] }> },
 ) {
-  return NextResponse.json({
+  const { path: _path } = await params;
+  void _path;
+
+  let body: any = {};
+  try {
+    const text = await request.text();
+    if (text) body = JSON.parse(text);
+  } catch {
+    // ignore
+  }
+
+  // Generic: find in relevant arrays and update
+  return NextResponse.json(wrap({
     success: true,
-    message_ar: 'تمت العملية بنجاح',
-    message_en: 'Operation successful',
-  });
+    message_ar: 'تم التحديث بنجاح',
+    message_en: 'Updated successfully',
+    ...body,
+  }));
 }
 
 export async function PATCH(
-  _request: NextRequest,
-  _ctx: { params: Promise<{ path?: string[] }> },
+  request: NextRequest,
+  { params }: { params: Promise<{ path?: string[] }> },
 ) {
-  return NextResponse.json({
+  const { path } = await params;
+  const p = normPath((path || []).join('/'));
+
+  let body: any = {};
+  try {
+    const text = await request.text();
+    if (text) body = JSON.parse(text);
+  } catch {
+    // ignore
+  }
+
+  // ---- Bookings: Update ----
+  const bookingUpdateMatch = p.match(/^bookings\/(BK-\d+|\d+)\/update$/);
+  if (bookingUpdateMatch) {
+    const bkId = bookingUpdateMatch[1];
+    const booking = bookings.find((b: any) => b.id === bkId);
+    if (booking) {
+      Object.assign(booking, body);
+      return NextResponse.json(wrap(booking));
+    }
+  }
+
+  // ---- Bookings: Update status ----
+  const bookingStatusMatch = p.match(/^bookings\/(BK-\d+|\d+)\/status$/);
+  if (bookingStatusMatch) {
+    const bkId = bookingStatusMatch[1];
+    const booking = bookings.find((b: any) => b.id === bkId);
+    if (booking && body.status) {
+      booking.status = body.status;
+      return NextResponse.json(wrap(booking));
+    }
+  }
+
+  // ---- Reviews: Moderate ----
+  const reviewModerateMatch = p.match(/^reviews\/(\d+)\/moderate$/);
+  if (reviewModerateMatch) {
+    return NextResponse.json(wrap({ id: parseInt(reviewModerateMatch[1], 10), ...body }));
+  }
+
+  // ---- Contracts: Sign ----
+  const contractSignMatch = p.match(/^contracts\/digital\/(\d+)\/sign$/);
+  if (contractSignMatch) {
+    const id = parseInt(contractSignMatch[1], 10);
+    let contract = contracts.find((c: any) => c.id === id);
+    if (!contract) {
+      contract = {
+        id,
+        booking_id: id,
+        status: 'draft',
+        is_finalized: false,
+        contract_hash: `0x${Buffer.from(`contract-${id}`).toString('hex')}`,
+        created_at: new Date().toISOString(),
+        parties: [],
+        terms: '',
+      };
+      contracts.push(contract);
+    }
+    contract.status = 'signed';
+    contract.renter_signature = body.ip_address || 'signed';
+    contract.signed_at = new Date().toISOString();
+    if (contract.parties && contract.parties.length > 0) {
+      contract.parties[0].signed = true;
+      contract.parties[0].signedAt = new Date().toISOString();
+      contract.parties[0].ipAddress = body.ip_address || '';
+    }
+    return NextResponse.json(wrap(contract));
+  }
+
+  // ---- Maintenance / Hygiene / Packaging / Inventory / Admin CRUD ----
+  if (
+    p.startsWith('maintenance/') || p.startsWith('hygiene/') || p.startsWith('packaging/') ||
+    p.startsWith('inventory/') || p.startsWith('products/admin/') || p.startsWith('auth/admin/') ||
+    p.startsWith('bookings/admin/')
+  ) {
+    return NextResponse.json(wrap({ id: 1, ...body, updated_at: new Date().toISOString() }));
+  }
+
+  // ---- Generic fallback ----
+  return NextResponse.json(wrap({
     success: true,
-    message_ar: 'تمت العملية بنجاح',
-    message_en: 'Operation successful',
-  });
+    message_ar: 'تم التحديث بنجاح',
+    message_en: 'Updated successfully',
+  }));
 }
 
 export async function DELETE(
-  _request: NextRequest,
-  _ctx: { params: Promise<{ path?: string[] }> },
+  request: NextRequest,
+  { params }: { params: Promise<{ path?: string[] }> },
 ) {
-  return NextResponse.json({ success: true });
+  const { path } = await params;
+  const p = normPath((path || []).join('/'));
+
+  // ---- Cart: Delete item ----
+  const cartItemDeleteMatch = p.match(/^bookings\/cart\/items\/(\d+)$/);
+  if (cartItemDeleteMatch) {
+    const itemId = parseInt(cartItemDeleteMatch[1], 10);
+    cartItems = cartItems.filter((item: any) => item.id !== itemId);
+    return NextResponse.json(wrap({ success: true, message: 'تم حذف المنتج من السلة' }));
+  }
+
+  // ---- Cart: Clear all ----
+  if (p === 'bookings/cart' || p === 'bookings/cart/' || p === 'bookings/cart/items' || p === 'bookings/cart/items/') {
+    cartItems = [];
+    return NextResponse.json(wrap({ success: true, message: 'تم تفريغ السلة' }));
+  }
+
+  // ---- Wishlist: Delete item ----
+  const wishlistDeleteMatch = p.match(/^products\/wishlist\/(\d+)$/);
+  if (wishlistDeleteMatch) {
+    const id = parseInt(wishlistDeleteMatch[1], 10);
+    wishlistIds = wishlistIds.filter((wid) => wid !== id);
+    return NextResponse.json(wrap({ success: true, message: 'تم حذف المنتج من المفضلة' }));
+  }
+
+  // ---- Waitlist: Delete item ----
+  const waitlistDeleteMatch = p.match(/^bookings\/waitlist\/(\d+)$/);
+  if (waitlistDeleteMatch) {
+    const id = parseInt(waitlistDeleteMatch[1], 10);
+    waitlistItems = waitlistItems.filter((item: any) => item.id !== id);
+    return NextResponse.json(wrap({ success: true, message: 'تم حذف المنتج من لائحة الانتظار' }));
+  }
+
+  // ---- Maintenance / Hygiene / Packaging / Inventory / Admin CRUD ----
+  if (
+    p.startsWith('maintenance/') || p.startsWith('hygiene/') || p.startsWith('packaging/') ||
+    p.startsWith('inventory/') || p.startsWith('products/admin/') || p.startsWith('auth/admin/')
+  ) {
+    return NextResponse.json(wrap({ success: true, message: 'تم الحذف بنجاح' }));
+  }
+
+  // ---- Generic fallback ----
+  return NextResponse.json(wrap({ success: true }));
 }

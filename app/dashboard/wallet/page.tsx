@@ -1,20 +1,16 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { paymentsApi, authApi, bookingsApi } from '@/lib/api';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { 
   Wallet, 
   ArrowUpRight, 
   ArrowDownLeft, 
-  ShieldCheck, 
   Lock, 
   History, 
-  TrendingUp, 
-  CreditCard,
+  TrendingUp,
   Sparkles,
-  RefreshCw,
-  AlertTriangle
+  RefreshCw
 } from 'lucide-react';
 import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
 import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
@@ -24,31 +20,55 @@ import { Badge } from '@/components/ui/badge';
 import { cn, formatNumber } from '@/lib/utils';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import { toast } from 'sonner';
+
+async function fetchProfile() {
+  const res = await fetch('/api/auth/profile');
+  const json = await res.json();
+  return json.data?.user || null;
+}
+
+async function fetchWallet() {
+  const res = await fetch('/api/wallet');
+  const json = await res.json();
+  return json.data || null;
+}
+
+async function fetchBookings() {
+  const res = await fetch('/api/bookings');
+  const json = await res.json();
+  return json.data || [];
+}
 
 export default function WalletPage() {
   const { data: userProfile, isLoading: userLoading } = useQuery({
     queryKey: ['profile'],
-    queryFn: () => authApi.me().then(res => res.data),
+    queryFn: fetchProfile,
   });
 
-  const { data: payments, isLoading: paymentsLoading } = useQuery({
-    queryKey: ['payments-history'],
-    queryFn: () => paymentsApi.getAll({ limit: 10 }).then(res => res.data),
+  const { data: walletData, isLoading: walletLoading } = useQuery({
+    queryKey: ['wallet'],
+    queryFn: fetchWallet,
   });
 
   const { data: activeBookings, isLoading: bookingsLoading } = useQuery({
     queryKey: ['active-escrow'],
-    queryFn: () => bookingsApi.getAll().then(res => res.data),
+    queryFn: fetchBookings,
   });
+
+  const balance = walletData?.balance ?? userProfile?.wallet_balance ?? 0;
+  const transactions = walletData?.transactions || [];
 
   const escrowAmount = (activeBookings || []).reduce((acc: number, b: any) => {
     if (['confirmed', 'active', 'pending'].includes(b.status)) {
-       return acc + (Number(b.deposit_amount) || 0);
+       return acc + (Number(b.deposit_amount) || Number(b.total_price) || 0);
     }
     return acc;
   }, 0);
 
-  if (userLoading || paymentsLoading) {
+  const isLoading = userLoading || walletLoading || bookingsLoading;
+
+  if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-4">
         <div className="text-2xl font-black tracking-widest text-sovereign-gold animate-pulse">Sovereign Vault</div>
@@ -63,6 +83,14 @@ export default function WalletPage() {
       </div>
     );
   }
+
+  const handleDeposit = () => {
+    toast.info('ميزة قيد التطوير');
+  };
+
+  const handleWithdraw = () => {
+    toast.info('ميزة قيد التطوير');
+  };
 
   return (
     <div className="min-h-screen relative pb-20 bg-background text-right px-6" dir="rtl">
@@ -105,17 +133,17 @@ export default function WalletPage() {
                           <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em] mb-4 opacity-40">Available Sovereign Liquidity</p>
                           <h2 className="text-7xl font-black text-foreground tracking-tighter flex items-baseline gap-4 italic">
                             <SovereignSparkle active={true}>
-                               {formatNumber(userProfile?.wallet_balance || 0)}
+                               {formatNumber(balance)}
                             </SovereignSparkle>
                             <span className="text-2xl font-normal text-muted-foreground opacity-20 not-italic">DA</span>
                           </h2>
                         </div>
                         
                         <div className="flex flex-wrap items-center gap-4">
-                           <SovereignButton variant="primary" size="lg" className="px-10 h-14 shadow-2xl shadow-sovereign-gold/10 rounded-2xl" withShimmer>
+                           <SovereignButton variant="primary" size="lg" className="px-10 h-14 shadow-2xl shadow-sovereign-gold/10 rounded-2xl" withShimmer onClick={handleDeposit}>
                               <ArrowUpRight className="w-5 h-5 ml-2" /> شحن الخزانة
                            </SovereignButton>
-                           <SovereignButton variant="secondary" size="lg" className="px-10 h-14 rounded-2xl">
+                           <SovereignButton variant="secondary" size="lg" className="px-10 h-14 rounded-2xl" onClick={handleWithdraw}>
                               <ArrowDownLeft className="w-5 h-5 ml-2" /> سحب السيادة
                            </SovereignButton>
                         </div>
@@ -133,7 +161,7 @@ export default function WalletPage() {
                             </h3>
                          </div>
                          <p className="text-[10px] text-muted-foreground/60 leading-relaxed max-w-[200px] italic">
-                            "أمان المجتمع محمي بضمانات فورية يتم فك حجزها آلياً عند انتهاء العقد."
+                            &ldquo;أمان المجتمع محمي بضمانات فورية يتم فك حجزها آلياً عند انتهاء العقد.&rdquo;
                          </p>
                       </div>
                    </div>
@@ -143,7 +171,8 @@ export default function WalletPage() {
                 </GlassPanel>
             </SovereignGlow>
 
-            {/* Active Escrow Breakdown (The Shield of Protection) */}
+            {/* Active Escrow Breakdown */}
+            {activeBookings && activeBookings.filter((b: any) => ['confirmed', 'active', 'pending'].includes(b.status)).length > 0 && (
             <div className="space-y-6">
                <div className="flex items-center justify-between">
                   <h3 className="text-xl font-black flex items-center gap-3">
@@ -154,11 +183,11 @@ export default function WalletPage() {
                </div>
                
                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {(activeBookings || []).filter((b: any) => ['confirmed', 'active', 'pending'].includes(b.status)).map((b: any) => (
+                  {activeBookings.filter((b: any) => ['confirmed', 'active', 'pending'].includes(b.status)).map((b: any) => (
                     <GlassPanel key={b.id} className="p-6 border-white/5 hover:border-sovereign-gold/20 transition-all">
                        <div className="flex justify-between items-start mb-4">
                           <div className="space-y-1">
-                             <p className="text-[10px] font-black uppercase text-muted-foreground">Contract #ST-{b.id.toString().padStart(6, '0')}</p>
+                             <p className="text-[10px] font-black uppercase text-muted-foreground">Contract #{b.id}</p>
                              <h4 className="font-bold text-sm tracking-tight">{b.product_name}</h4>
                           </div>
                           <Badge className="bg-sovereign-gold/10 text-sovereign-gold border-0 text-[10px] font-black">HELD</Badge>
@@ -166,14 +195,17 @@ export default function WalletPage() {
                        <div className="flex justify-between items-end">
                           <div className="space-y-1">
                              <p className="text-[8px] text-muted-foreground uppercase">Escrow Value</p>
-                             <p className="text-lg font-black">{formatNumber(b.deposit_amount || 0)} DA</p>
+                             <p className="text-lg font-black">{formatNumber(b.deposit_amount || b.total_price || 0)} DA</p>
                           </div>
-                          <p className="text-[10px] text-muted-foreground">Release: {format(new Date(b.end_date), 'dd MMM')}</p>
+                          {b.end_date && (
+                            <p className="text-[10px] text-muted-foreground">Release: {format(new Date(b.end_date), 'dd MMM')}</p>
+                          )}
                        </div>
                     </GlassPanel>
                   ))}
                </div>
             </div>
+            )}
 
             {/* Immutable Transaction Ledger */}
             <div className="space-y-6 pt-8">
@@ -183,33 +215,35 @@ export default function WalletPage() {
                </h3>
                
                <div className="space-y-3">
-                  {payments?.results?.length > 0 ? (
-                    payments.results.map((tx: any) => (
+                  {transactions.length > 0 ? (
+                    transactions.map((tx: any) => (
                       <motion.div key={tx.id} whileHover={{ x: -4 }}>
                         <GlassPanel className="p-5 flex items-center justify-between hover:border-white/10 transition-all border-white/5 group">
                            <div className="flex items-center gap-5">
                               <div className={cn(
                                 "w-12 h-12 rounded-2xl flex items-center justify-center border transition-colors",
-                                tx.type === 'deposit' ? "bg-emerald-500/5 border-emerald-500/20 text-emerald-500" :
-                                tx.type === 'escrow_lock' ? "bg-sovereign-gold/5 border-sovereign-gold/20 text-sovereign-gold" :
-                                tx.type === 'penalty' ? "bg-red-500/5 border-red-500/20 text-red-500" :
+                                tx.type === 'INCOME' || tx.type === 'deposit' ? "bg-emerald-500/5 border-emerald-500/20 text-emerald-500" :
+                                tx.type === 'ESCROW_HELD' || tx.type === 'escrow_lock' ? "bg-sovereign-gold/5 border-sovereign-gold/20 text-sovereign-gold" :
+                                tx.type === 'penalty' || tx.type === 'EXPENDITURE' ? "bg-red-500/5 border-red-500/20 text-red-500" :
                                 "bg-white/5 border-white/10 text-muted-foreground"
                               )}>
-                                 {tx.type === 'deposit' ? <ArrowUpRight className="w-5 h-5" /> : 
-                                  tx.type === 'escrow_lock' ? <Lock className="w-4 h-4" /> :
-                                  tx.type === 'penalty' ? <AlertTriangle className="w-5 h-5" /> :
+                                 {tx.type === 'INCOME' || tx.type === 'deposit' ? <ArrowUpRight className="w-5 h-5" /> : 
+                                  tx.type === 'ESCROW_HELD' || tx.type === 'escrow_lock' ? <Lock className="w-4 h-4" /> :
                                   <ArrowDownLeft className="w-5 h-5" />}
                               </div>
                               <div className="space-y-0.5">
                                  <h4 className="font-bold text-sm text-foreground group-hover:text-sovereign-gold transition-colors">
-                                    {tx.type === 'escrow_lock' ? 'تأمين ضمان سيادي' : 
-                                     tx.type === 'escrow_release' ? 'فك رهن الضمان' : 
-                                     tx.type === 'penalty' ? 'خصم جزائي (Resolution)' : (tx.description_ar || 'معاملة مالية')}
+                                    {tx.note || (tx.type === 'escrow_lock' ? 'تأمين ضمان سيادي' : 
+                                     tx.type === 'escrow_release' ? 'فك رهن الضمان' : 'معاملة مالية')}
                                  </h4>
                                  <div className="flex items-center gap-3 text-[10px] text-muted-foreground font-medium uppercase tracking-widest opacity-40">
-                                    <span>#{tx.id.toString().padStart(8, '0')}</span>
-                                    <span className="w-1 h-1 rounded-full bg-white/20" />
-                                    <span>{tx.payment_method || 'Internal Vault'}</span>
+                                    <span>#{tx.id}</span>
+                                    {tx.hash && (
+                                      <>
+                                        <span className="w-1 h-1 rounded-full bg-white/20" />
+                                        <span>{tx.hash}</span>
+                                      </>
+                                    )}
                                  </div>
                               </div>
                            </div>
@@ -217,12 +251,12 @@ export default function WalletPage() {
                            <div className="text-left">
                               <p className={cn(
                                 "text-xl font-black tracking-tighter",
-                                tx.type === 'deposit' || tx.type === 'escrow_release' ? "text-emerald-500" : "text-foreground"
+                                tx.type === 'INCOME' || tx.type === 'deposit' || tx.type === 'escrow_release' ? "text-emerald-500" : "text-foreground"
                               )}>
-                                 {tx.type === 'deposit' || tx.type === 'escrow_release' ? '+' : '-'}{formatNumber(tx.amount)} <span className="text-xs font-normal opacity-40">DA</span>
+                                 {tx.type === 'INCOME' || tx.type === 'deposit' || tx.type === 'escrow_release' ? '+' : '-'}{formatNumber(tx.amount)} <span className="text-xs font-normal opacity-40">DA</span>
                               </p>
                               <p className="text-[10px] text-muted-foreground opacity-60">
-                                {format(new Date(tx.created_at), 'dd MMMM yyyy', { locale: ar })}
+                                {format(new Date(tx.date), 'dd MMMM yyyy', { locale: ar })}
                               </p>
                            </div>
                         </GlassPanel>
@@ -231,7 +265,7 @@ export default function WalletPage() {
                   ) : (
                     <div className="p-20 text-center bg-white/5 rounded-3xl border border-dashed border-white/10 flex flex-col items-center justify-center space-y-4">
                        <History className="w-12 h-12 text-muted-foreground/10" />
-                       <p className="text-sm text-muted-foreground font-light uppercase tracking-widest opacity-40">No Audit Logs Found</p>
+                       <p className="text-sm text-muted-foreground font-light uppercase tracking-widest opacity-40">لا توجد معاملات بعد</p>
                     </div>
                   )}
                </div>
@@ -245,7 +279,7 @@ export default function WalletPage() {
              <GlassPanel className="p-8 border-l-4 border-l-emerald-500 relative overflow-hidden">
                 <div className="absolute -top-10 -left-10 w-40 h-40 bg-emerald-500/5 rounded-full blur-3xl" />
                 <div className="flex flex-col items-center text-center relative z-10">
-                    <IdentityShield status="verified" showLabel={false} trustScore={userProfile?.trust_score || 0} className="w-20 h-20 mb-6" />
+                    <IdentityShield status={userProfile?.is_verified ? "verified" : "unverified"} showLabel={false} trustScore={userProfile?.trust_score || 0} className="w-20 h-20 mb-6" />
                     <h4 className="text-lg font-black mb-2 italic">امتيازات النخبة السيادية</h4>
                     <p className="text-xs text-muted-foreground leading-relaxed mb-8 opacity-60">
                        بناءً على سجل معاملتكم الرقمية المعاصرة، يتم تطبيق بروتوكول الخصم الآلي.

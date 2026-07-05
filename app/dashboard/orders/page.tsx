@@ -1,63 +1,62 @@
 'use client';
 
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import {
-    CheckCircle,
-    XCircle,
-    Clock,
     Calendar,
-    User,
-    MessageSquare,
+    Clock,
     Search,
-    Filter,
     ShieldCheck,
     FileSignature,
-    Scale
+    Scale,
+    Package,
+    Loader2
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { useAuthStore } from '@/lib/store';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
 import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
 import Link from 'next/link';
 import { cn, formatNumber } from '@/lib/utils';
+import { format } from 'date-fns';
+import { ar } from 'date-fns/locale';
 
-// Mock Data
-const orders = [
-    {
-        id: 'ORD-001',
-        customer: { name: 'أمينة ب.', image: 'https://i.pravatar.cc/150?u=a', rating: 4.9 },
-        product: { name: 'فستان سهرة ملكي أسود', image: 'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=800&q=80' },
-        dates: { start: '2026-03-10', end: '2026-03-12' },
-        total: 30000,
-        status: 'pending',
-        date: 'منذ ساعتين'
-    },
-    {
-        id: 'ORD-002',
-        customer: { name: 'سارة م.', image: 'https://i.pravatar.cc/150?u=s', rating: 5.0 },
-        product: { name: 'قفطان جزائري تقليدي', image: 'https://images.unsplash.com/photo-1583244562584-3860558b299e?w=800&q=80' },
-        dates: { start: '2026-03-15', end: '2026-03-16' },
-        total: 25000,
-        status: 'confirmed',
-        date: 'أمس'
-    },
-    {
-        id: 'ORD-003',
-        customer: { name: 'ليلى ك.', image: 'https://i.pravatar.cc/150?u=l', rating: 4.5 },
-        product: { name: 'فستان خطوبة وردي', image: 'https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=800&q=80' },
-        dates: { start: '2026-02-28', end: '2026-03-01' },
-        total: 18000,
-        status: 'completed',
-        date: '2026-02-20'
-    }
-];
+async function fetchBookings() {
+  const res = await fetch('/api/bookings');
+  const json = await res.json();
+  return json.data || [];
+}
+
+const statusConfig: Record<string, { label: string; className: string }> = {
+  pending: { label: 'قيد المراجعة', className: 'bg-yellow-500/10 text-yellow-500 shadow-sm shadow-yellow-500/10' },
+  confirmed: { label: 'سيادية', className: 'bg-emerald-500/10 text-emerald-500 shadow-sm shadow-emerald-500/10' },
+  active: { label: 'نشط', className: 'bg-emerald-500/10 text-emerald-500 shadow-sm shadow-emerald-500/10' },
+  completed: { label: 'تاريخية', className: 'bg-blue-500/10 text-blue-500' },
+  cancelled: { label: 'ملغاة', className: 'bg-red-500/10 text-red-500' },
+  rejected: { label: 'مرفوض', className: 'bg-red-500/10 text-red-500' },
+};
 
 export default function OrdersPage() {
     const [activeTab, setActiveTab] = useState('all');
+    const { data: bookings, isLoading } = useQuery({
+      queryKey: ['bookings'],
+      queryFn: fetchBookings,
+    });
+
+    const filteredBookings = (bookings || []).filter((b: any) => {
+      if (activeTab === 'all') return true;
+      return b.status === activeTab;
+    });
+
+    const formatRelativeTime = (dateStr: string) => {
+      try {
+        return format(new Date(dateStr), 'dd/MM/yyyy', { locale: ar });
+      } catch {
+        return dateStr;
+      }
+    };
 
     return (
         <div className="space-y-12 text-right pb-20" dir="rtl">
@@ -102,8 +101,34 @@ export default function OrdersPage() {
                 </div>
             </div>
 
+            {/* Loading State */}
+            {isLoading && (
+              <div className="flex flex-col items-center justify-center py-20 gap-4">
+                <Loader2 className="w-8 h-8 text-sovereign-gold animate-spin" />
+                <p className="text-sm text-muted-foreground">جارٍ تحميل العقود...</p>
+              </div>
+            )}
+
+            {/* Empty State */}
+            {!isLoading && filteredBookings.length === 0 && (
+              <div className="p-20 text-center bg-white/5 rounded-3xl border border-dashed border-white/10 flex flex-col items-center justify-center space-y-4">
+                <Package className="w-16 h-16 text-muted-foreground/10" />
+                <p className="text-lg text-muted-foreground font-light">لا توجد طلبات</p>
+                <p className="text-sm text-muted-foreground/60">لم يتم إنشاء أي حجوزات بعد. تصفح المنتجات وابدأ حجزك الأول.</p>
+                <Link href="/products">
+                  <SovereignButton variant="primary" size="sm" className="mt-4">
+                    تصفح المنتجات
+                  </SovereignButton>
+                </Link>
+              </div>
+            )}
+
+            {/* Bookings List */}
+            {!isLoading && filteredBookings.length > 0 && (
             <div className="grid gap-8">
-                {orders.map((order) => (
+                {filteredBookings.map((order: any) => {
+                  const cfg = statusConfig[order.status] || statusConfig.pending;
+                  return (
                     <GlassPanel key={order.id} className="p-8 group hover:border-sovereign-gold/20 transition-all duration-500 overflow-hidden relative" gradientBorder>
                         
                         {/* Status Watermark */}
@@ -113,74 +138,64 @@ export default function OrdersPage() {
 
                         <div className="flex flex-col lg:flex-row gap-10 relative z-10">
 
-                            {/* Product Visual Authority */}
-                            <div className="w-full lg:w-48 h-64 lg:h-48 rounded-[2rem] overflow-hidden relative shrink-0 shadow-2xl border border-white/5">
-                                <img src={order.product.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
-                                <div className="absolute bottom-4 right-4 bg-background/80 backdrop-blur-md rounded-lg px-3 py-1.5 text-[10px] text-foreground font-black border border-white/10 uppercase tracking-widest">
-                                    {order.id}
-                                </div>
-                            </div>
-
                             {/* Contract Details */}
                             <div className="flex-1 flex flex-col justify-between">
                                 <div className="flex flex-col md:flex-row justify-between items-start gap-4">
                                     <div className="space-y-3">
                                         <h3 className="text-3xl font-black tracking-tight text-foreground flex flex-wrap items-center gap-4">
-                                            {order.product.name}
+                                            {order.product_name || 'منتج'}
                                             <Badge className={cn(
                                                 "px-4 py-1 text-[10px] font-black uppercase border-0 rounded-full",
-                                                order.status === 'pending' ? 'bg-yellow-500/10 text-yellow-500 shadow-sm shadow-yellow-500/10' :
-                                                order.status === 'confirmed' ? 'bg-emerald-500/10 text-emerald-500 shadow-sm shadow-emerald-500/10' :
-                                                'bg-blue-500/10 text-blue-500'
+                                                cfg.className
                                             )}>
-                                                {order.status === 'pending' ? 'Awaiting Signature' :
-                                                    order.status === 'confirmed' ? 'Sovereign Contract' : 'Archived'}
+                                                {cfg.label}
                                             </Badge>
                                         </h3>
                                         <div className="flex flex-wrap items-center gap-6 text-xs text-muted-foreground font-medium">
                                             <div className="flex items-center gap-2">
                                                 <Calendar className="w-4 h-4 text-sovereign-gold" />
-                                                <span className="font-mono text-foreground">{order.dates.start} — {order.dates.end}</span>
+                                                <span className="font-mono text-foreground">
+                                                  {order.start_date ? formatRelativeTime(order.start_date) : '—'} — {order.end_date ? formatRelativeTime(order.end_date) : '—'}
+                                                </span>
                                             </div>
                                             <div className="flex items-center gap-2">
                                                 <Clock className="w-4 h-4 text-sovereign-gold" />
-                                                <span>تم الإنشاء: {order.date}</span>
+                                                <span>تم الإنشاء: {formatRelativeTime(order.created_at)}</span>
                                             </div>
                                         </div>
                                     </div>
                                     <div className="text-3xl font-black text-foreground tracking-tighter">
-                                        {formatNumber(order.total)} <span className="text-xs font-normal text-muted-foreground">DA</span>
+                                        {formatNumber(order.total_price || 0)} <span className="text-xs font-normal text-muted-foreground">DA</span>
                                     </div>
                                 </div>
 
                                 <Separator className="my-8 bg-white/5" />
 
                                 <div className="flex flex-col sm:flex-row justify-between items-center gap-6">
-                                    {/* Client Identity Shield */}
-                                    <div className="flex items-center gap-4 bg-white/5 p-4 rounded-3xl border border-white/5 pr-4 pl-8 group/identity cursor-pointer hover:bg-white/10 transition-colors">
+                                    {/* Booking ID Badge */}
+                                    <div className="flex items-center gap-4 bg-white/5 p-4 rounded-3xl border border-white/5 pr-4 pl-8">
                                         <div className="relative">
                                             <Avatar className="w-12 h-12 border-2 border-background shadow-xl">
-                                                <AvatarImage src={order.customer.image} />
-                                                <AvatarFallback className="bg-sovereign-gold/10 text-sovereign-gold font-bold">{order.customer.name[0]}</AvatarFallback>
+                                                <AvatarFallback className="bg-sovereign-gold/10 text-sovereign-gold font-bold text-sm">
+                                                  {String(order.id).slice(-2).toUpperCase()}
+                                                </AvatarFallback>
                                             </Avatar>
                                             <div className="absolute -bottom-1 -right-1 bg-emerald-500 w-4 h-4 rounded-full border-4 border-background" />
                                         </div>
                                         <div className="space-y-1">
-                                            <p className="text-sm font-black text-foreground tracking-tight">{order.customer.name}</p>
+                                            <p className="text-sm font-black text-foreground tracking-tight font-mono">#{order.id}</p>
                                             <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-emerald-500/80">
-                                               <ShieldCheck className="w-3 h-3" /> Trust Rank: {order.customer.rating}
+                                               <ShieldCheck className="w-3 h-3" /> محمي بالضمان
                                             </div>
                                         </div>
                                     </div>
 
                                     {/* Sovereign Actions */}
                                     <div className="flex items-center gap-3 w-full sm:w-auto">
-                                        <Link href={`/dashboard/orders/${order.id}`}>
-                                            <SovereignButton variant="secondary" size="sm" className="flex-1 sm:flex-none gap-2 px-6">
-                                                <FileSignature className="w-4 shadow-sm" />
-                                                تفاصيل العقد
-                                            </SovereignButton>
-                                        </Link>
+                                        <SovereignButton variant="secondary" size="sm" className="flex-1 sm:flex-none gap-2 px-6">
+                                            <FileSignature className="w-4 shadow-sm" />
+                                            تفاصيل العقد
+                                        </SovereignButton>
                                         
                                         {order.status === 'pending' ? (
                                             <SovereignButton variant="primary" size="sm" className="flex-1 sm:flex-none gap-2 px-10 shadow-lg shadow-sovereign-gold/10" withShimmer>
@@ -197,8 +212,10 @@ export default function OrdersPage() {
                             </div>
                         </div>
                     </GlassPanel>
-                ))}
+                  );
+                })}
             </div>
+            )}
             
             <footer className="mt-20 text-center py-10 border-t border-white/5">
                 <p className="text-[10px] uppercase font-black tracking-[0.5em] text-muted-foreground opacity-30">

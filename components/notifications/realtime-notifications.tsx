@@ -16,10 +16,16 @@ export function RealtimeNotifications() {
       return;
     }
 
-    // Connect WebSocket
+    // Connect WebSocket — gracefully handle errors
     if (user?.id) {
-      websocketClient.connect(user.id);
-      connectedRef.current = true;
+      try {
+        websocketClient.connect(user.id);
+        connectedRef.current = true;
+      } catch {
+        // WebSocket not available — silent fail, no crash
+        console.warn('RealtimeNotifications: WebSocket connection failed, skipping.');
+        return;
+      }
     }
 
     // Listen for notifications
@@ -44,10 +50,14 @@ export function RealtimeNotifications() {
 
     // Cleanup on unmount
     return () => {
-      unsubscribeNotification();
-      unsubscribeConnected();
-      unsubscribeDisconnected();
-      websocketClient.disconnect();
+      try {
+        unsubscribeNotification();
+        unsubscribeConnected();
+        unsubscribeDisconnected();
+        websocketClient.disconnect();
+      } catch {
+        // Cleanup errors are non-fatal
+      }
       connectedRef.current = false;
     };
   }, [isAuthenticated, user, addNotification]);
@@ -55,7 +65,11 @@ export function RealtimeNotifications() {
   // Disconnect when user logs out
   useEffect(() => {
     if (!isAuthenticated) {
-      websocketClient.disconnect();
+      try {
+        websocketClient.disconnect();
+      } catch {
+        // non-fatal
+      }
       connectedRef.current = false;
     }
   }, [isAuthenticated]);

@@ -1,8 +1,10 @@
-'use client'
+'use client';
+
 import { formatNumber } from '@/lib/utils';
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useQuery } from '@tanstack/react-query';
 import {
     Plus,
     Search,
@@ -10,7 +12,9 @@ import {
     Edit,
     Trash2,
     Eye,
-    Filter
+    Filter,
+    Loader2,
+    PackageOpen
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -32,45 +36,24 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 
-// Mock Data for now
-const products = [
-    {
-        id: 1,
-        name: 'فستان سهرة ملكي أسود',
-        price: 15000,
-        status: 'active',
-        views: 1240,
-        bookings: 12,
-        rating: 4.8,
-        image: 'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=800&q=80'
-    },
-    {
-        id: 2,
-        name: 'قفطان جزائري تقليدي',
-        price: 25000,
-        status: 'active',
-        views: 850,
-        bookings: 5,
-        rating: 5.0,
-        image: 'https://images.unsplash.com/photo-1583244562584-3860558b299e?w=800&q=80'
-    },
-    {
-        id: 3,
-        name: 'فستان زفاف بسيط',
-        price: 45000,
-        status: 'draft',
-        views: 45,
-        bookings: 0,
-        rating: 0,
-        image: 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=800&q=80'
-    },
-];
+async function fetchProducts() {
+  const res = await fetch('/api/products');
+  const json = await res.json();
+  return json.data || [];
+}
 
 export default function ProductsPage() {
     const [searchTerm, setSearchTerm] = useState('');
+    const { data: products, isLoading } = useQuery({
+      queryKey: ['my-products'],
+      queryFn: fetchProducts,
+    });
 
-    const filteredProducts = products.filter(product =>
-        product.name.toLowerCase().includes(searchTerm.toLowerCase())
+    // Mock: show first 5 as "user's products" since we don't have real auth
+    const myProducts = (products || []).slice(0, 5);
+
+    const filteredProducts = myProducts.filter((product: any) =>
+        (product.name_ar || product.name || '').includes(searchTerm)
     );
 
     return (
@@ -107,6 +90,31 @@ export default function ProductsPage() {
                     </Button>
                 </div>
 
+                {/* Loading State */}
+                {isLoading && (
+                  <div className="flex flex-col items-center justify-center py-16 gap-4">
+                    <Loader2 className="w-8 h-8 text-sovereign-gold animate-spin" />
+                    <p className="text-sm text-muted-foreground">جارٍ تحميل المنتجات...</p>
+                  </div>
+                )}
+
+                {/* Empty State */}
+                {!isLoading && filteredProducts.length === 0 && (
+                  <div className="flex flex-col items-center justify-center py-16 gap-4">
+                    <PackageOpen className="w-16 h-16 text-muted-foreground/10" />
+                    <p className="text-lg text-muted-foreground">لا توجد منتجات بعد</p>
+                    <p className="text-sm text-muted-foreground/60">أضف أول منتج لبدء استئجاره للعملاء.</p>
+                    <Link href="/products/create">
+                      <Button className="rounded-full bg-gradient-to-r from-sovereign-gold to-sovereign-gold hover:opacity-90 shadow-lg gap-2 mt-2">
+                        <Plus className="w-4 h-4" />
+                        إضافة منتج جديد
+                      </Button>
+                    </Link>
+                  </div>
+                )}
+
+                {/* Products Table */}
+                {!isLoading && filteredProducts.length > 0 && (
                 <div className="rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden">
                     <Table>
                         <TableHeader className="bg-gray-50/50 dark:bg-white/5">
@@ -114,32 +122,32 @@ export default function ProductsPage() {
                                 <TableHead className="text-right">المنتج</TableHead>
                                 <TableHead className="text-right">الحالة</TableHead>
                                 <TableHead className="text-right">السعر / يوم</TableHead>
-                                <TableHead className="text-center">المشاهدات</TableHead>
-                                <TableHead className="text-center">الحجوزات</TableHead>
+                                <TableHead className="text-center">التقييم</TableHead>
                                 <TableHead className="text-center">الإجراءات</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {filteredProducts.map((product) => (
+                            {filteredProducts.map((product: any) => (
                                 <TableRow key={product.id} className="group hover:bg-white/5 transition-colors">
                                     <TableCell className="font-medium">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-12 h-16 rounded-lg overflow-hidden relative">
-                                                <img src={product.image} alt={product.name} className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-500" />
+                                            <div className="w-12 h-16 rounded-lg overflow-hidden relative bg-white/5">
+                                                {product.primary_image && (
+                                                  <img src={product.primary_image} alt={product.name_ar} className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-500" />
+                                                )}
                                             </div>
-                                            <span className="font-semibold text-foreground/90">{product.name}</span>
+                                            <span className="font-semibold text-foreground/90">{product.name_ar}</span>
                                         </div>
                                     </TableCell>
                                     <TableCell>
-                                        <Badge variant={product.status === 'active' ? 'default' : 'secondary'} className={product.status === 'active' ? "bg-green-500/10 text-green-500 hover:bg-green-500/20" : "bg-gray-500/10 text-gray-500"}>
-                                            {product.status === 'active' ? 'نشط' : 'مسودة'}
+                                        <Badge variant="default" className="bg-green-500/10 text-green-500 hover:bg-green-500/20">
+                                            نشط
                                         </Badge>
                                     </TableCell>
-                                    <TableCell>{formatNumber(product.price)} دج</TableCell>
-                                    <TableCell className="text-center text-muted-foreground">{product.views}</TableCell>
+                                    <TableCell>{formatNumber(product.price_per_day)} دج</TableCell>
                                     <TableCell className="text-center">
                                         <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-sovereign-gold/10 text-sovereign-gold">
-                                            {product.bookings}
+                                            {product.rating || '—'}
                                         </div>
                                     </TableCell>
                                     <TableCell className="text-center">
@@ -170,6 +178,7 @@ export default function ProductsPage() {
                         </TableBody>
                     </Table>
                 </div>
+                )}
             </div>
         </div>
     );

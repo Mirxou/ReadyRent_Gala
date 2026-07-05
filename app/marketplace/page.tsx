@@ -112,7 +112,7 @@ function FeaturedVendors() {
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.6, delay: i * 0.1, ease: [0.32, 0.72, 0, 1] as [number, number, number, number] }}
             >
-              <Link href="/vendors" className="block group h-full">
+              <Link href={`/vendors/${vendor.id}`} className="block group h-full">
                 <GlassPanel
                   variant="obsidian"
                   className="p-6 md:p-8 hover:border-emerald-400/20 transition-all duration-500 rounded-[2rem] h-full"

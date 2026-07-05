@@ -165,10 +165,10 @@ export default function CheckoutPage() {
                           key={method.id}
                           variant="outline"
                           className="h-auto p-4 justify-start"
-                          onClick={() => setSelectedMethod(method.name)}
+                          onClick={() => setSelectedMethod(method.type)}
                         >
                           <div className="flex items-center gap-4 w-full">
-                            {method.name === 'baridimob' ? (
+                            {method.type === 'baridimob' ? (
                               <Smartphone className="h-6 w-6" />
                             ) : (
                               <CreditCard className="h-6 w-6" />
@@ -225,7 +225,7 @@ export default function CheckoutPage() {
                     bookingId={bookingId || undefined}
                     onPaymentCompleted={handlePaymentCompleted}
                   />
-                ) : selectedMethod === 'bank_card' ? (
+                ) : selectedMethod === 'card' ? (
                   <BankCardForm
                     amount={totalAmount}
                     bookingId={bookingId || undefined}

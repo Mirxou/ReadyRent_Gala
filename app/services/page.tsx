@@ -2,11 +2,22 @@
 
 import Link from 'next/link';
 import { motion, useInView, type Variants } from 'framer-motion';
-import { useRef } from 'react';
+import { useRef, useState, useCallback } from 'react';
 import { SovereignButton } from "@/shared/components/sovereign/sovereign-button";
 import { GlassPanel } from "@/shared/components/sovereign/glass-panel";
 import { SovereignGlow, SovereignSparkle } from '@/shared/components/sovereign/sovereign-sparkle';
 import { localGuideServices } from '@/lib/mock-data';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { toast } from 'sonner';
 import {
   Star,
   MapPin,
@@ -17,6 +28,9 @@ import {
   Palette,
   Music,
   Flower2,
+  CalendarCheck,
+  Phone,
+  StickyNote,
 } from 'lucide-react';
 
 /* ────────────────────────────────────────────
@@ -35,6 +49,149 @@ const staggerContainer = {
   hidden: {},
   visible: { transition: { staggerChildren: 0.1 } },
 };
+
+/* ════════════════════════════════════════════
+   SERVICE CATEGORIES
+   ════════════════════════════════════════════ */
+const serviceCategories = [
+  { icon: PartyPopper, name: 'أعراس', desc: 'قاعات وتنظيم أفراح', slug: 'weddings', categoryMatch: ['أماكن أعراس', 'سيارات أعراس'], gradient: 'from-rose-500/15 to-rose-500/5' },
+  { icon: Camera, name: 'تصوير', desc: 'مصورون محترفون', slug: 'photography', categoryMatch: ['مصورين'], gradient: 'from-blue-500/15 to-blue-500/5' },
+  { icon: Palette, name: 'مكياج', desc: 'مجمّلات أزياء محترفات', slug: 'makeup', categoryMatch: ['مكياج'], gradient: 'from-pink-500/15 to-pink-500/5' },
+  { icon: Music, name: 'دج', desc: 'دي جي لموسيقى لا تُنسى', slug: 'dj', categoryMatch: ['دج'], gradient: 'from-amber-500/15 to-amber-500/5' },
+  { icon: Flower2, name: 'زهور', desc: 'تنسيق زهور فاخر', slug: 'flowers', categoryMatch: ['زهور'], gradient: 'from-emerald-500/15 to-emerald-500/5' },
+  { icon: Sparkles, name: 'حفلات', desc: 'تنظيم حفلات شاملة', slug: 'parties', categoryMatch: ['تنسيق حفلات', 'طباخين'], gradient: 'from-violet-500/15 to-violet-500/5' },
+];
+
+/* ════════════════════════════════════════════
+   BOOKING DIALOG
+   ════════════════════════════════════════════ */
+function BookingDialog({
+  service,
+  open,
+  onOpenChange,
+}: {
+  service: any;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const [formData, setFormData] = useState({
+    date: '',
+    phone: '',
+    notes: '',
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!formData.date || !formData.phone) {
+        toast.error('يرجى ملء جميع الحقول المطلوبة');
+        return;
+      }
+      setIsSubmitting(true);
+      // Simulate API call
+      setTimeout(() => {
+        setIsSubmitting(false);
+        onOpenChange(false);
+        setFormData({ date: '', phone: '', notes: '' });
+        toast.success(`تم تأكيد حجز "${service.name_ar}" بنجاح! سنتواصل معك قريباً`);
+      }, 1000);
+    },
+    [formData, onOpenChange, service.name_ar]
+  );
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="bg-sovereign-obsidian border-purple-500/20 text-sovereign-white sm:max-w-lg rounded-2xl p-6 md:p-8 font-arabic" dir="rtl" showCloseButton>
+        <DialogHeader className="text-right">
+          <DialogTitle className="text-xl font-black tracking-tight text-purple-400">
+            احجز خدمة
+          </DialogTitle>
+          <DialogDescription className="text-muted-foreground text-sm mt-1">
+            أدخل تفاصيل الحجز لتأكيد طلبك
+          </DialogDescription>
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit} className="space-y-5 mt-2">
+          {/* Service name (pre-filled, read-only) */}
+          <div className="space-y-2">
+            <Label className="text-sm font-bold text-purple-400/80 flex items-center gap-2">
+              <Sparkles className="w-4 h-4" />
+              اسم الخدمة
+            </Label>
+            <Input
+              value={service.name_ar}
+              readOnly
+              className="bg-white/5 border-purple-500/20 text-sovereign-white cursor-not-allowed opacity-80 h-11"
+              dir="rtl"
+            />
+          </div>
+
+          {/* Date picker */}
+          <div className="space-y-2">
+            <Label className="text-sm font-bold text-purple-400/80 flex items-center gap-2">
+              <CalendarCheck className="w-4 h-4" />
+              تاريخ المناسبة <span className="text-red-400/70">*</span>
+            </Label>
+            <Input
+              type="date"
+              value={formData.date}
+              onChange={(e) => setFormData((prev) => ({ ...prev, date: e.target.value }))}
+              className="bg-white/5 border-purple-500/20 text-sovereign-white focus:border-purple-400/50 h-11 [color-scheme:dark]"
+              dir="ltr"
+              required
+            />
+          </div>
+
+          {/* Phone number */}
+          <div className="space-y-2">
+            <Label className="text-sm font-bold text-purple-400/80 flex items-center gap-2">
+              <Phone className="w-4 h-4" />
+              رقم الهاتف <span className="text-red-400/70">*</span>
+            </Label>
+            <Input
+              type="tel"
+              placeholder="0555 123 456"
+              value={formData.phone}
+              onChange={(e) => setFormData((prev) => ({ ...prev, phone: e.target.value }))}
+              className="bg-white/5 border-purple-500/20 text-sovereign-white placeholder:text-muted-foreground/50 focus:border-purple-400/50 h-11"
+              dir="ltr"
+              required
+            />
+          </div>
+
+          {/* Notes */}
+          <div className="space-y-2">
+            <Label className="text-sm font-bold text-purple-400/80 flex items-center gap-2">
+              <StickyNote className="w-4 h-4" />
+              ملاحظات إضافية
+            </Label>
+            <Textarea
+              placeholder="أضف أي تفاصيل أو طلبات خاصة..."
+              value={formData.notes}
+              onChange={(e) => setFormData((prev) => ({ ...prev, notes: e.target.value }))}
+              className="bg-white/5 border-purple-500/20 text-sovereign-white placeholder:text-muted-foreground/50 focus:border-purple-400/50 min-h-[80px]"
+              dir="rtl"
+            />
+          </div>
+
+          {/* Submit */}
+          <SovereignButton
+            type="submit"
+            size="lg"
+            variant="primary"
+            disabled={isSubmitting}
+            className="w-full h-12 rounded-xl bg-purple-600 hover:bg-purple-700 shadow-2xl shadow-purple-500/20 text-sm font-black"
+            withShimmer
+          >
+            {isSubmitting ? 'جارٍ التأكيد...' : 'تأكيد الحجز'}
+            {!isSubmitting && <ArrowLeft className="w-4 h-4 mr-1" />}
+          </SovereignButton>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 /* ════════════════════════════════════════════
    SECTION 1 — HERO
@@ -75,18 +232,15 @@ function HeroSection() {
 }
 
 /* ════════════════════════════════════════════
-   SECTION 2 — SERVICE CATEGORIES
+   SECTION 2 — SERVICE CATEGORIES (filterable)
    ════════════════════════════════════════════ */
-const serviceCategories = [
-  { icon: PartyPopper, name: 'أعراس', desc: 'قاعات وتنظيم أفراح', slug: 'weddings', gradient: 'from-rose-500/15 to-rose-500/5' },
-  { icon: Camera, name: 'تصوير', desc: 'مصورون محترفون', slug: 'photography', gradient: 'from-blue-500/15 to-blue-500/5' },
-  { icon: Palette, name: 'مكياج', desc: 'مجمّلات أزياء محترفات', slug: 'makeup', gradient: 'from-pink-500/15 to-pink-500/5' },
-  { icon: Music, name: 'دج', desc: 'دي جي لموسيقى لا تُنسى', slug: 'dj', gradient: 'from-amber-500/15 to-amber-500/5' },
-  { icon: Flower2, name: 'زهور', desc: 'تنسيق زهور فاخر', slug: 'flowers', gradient: 'from-emerald-500/15 to-emerald-500/5' },
-  { icon: PartyPopper, name: 'حفلات', desc: 'تنظيم حفلات شاملة', slug: 'parties', gradient: 'from-violet-500/15 to-violet-500/5' },
-];
-
-function ServiceCategoriesGrid() {
+function ServiceCategoriesGrid({
+  selectedCategory,
+  onSelectCategory,
+}: {
+  selectedCategory: string | null;
+  onSelectCategory: (slug: string | null) => void;
+}) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
 
@@ -97,7 +251,7 @@ function ServiceCategoriesGrid() {
           initial="hidden"
           animate={inView ? "visible" : "hidden"}
           variants={staggerContainer}
-          className="flex items-end justify-between mb-10 md:mb-14"
+          className="flex flex-col sm:flex-row items-start sm:items-end justify-between mb-10 md:mb-14 gap-4"
         >
           <motion.div variants={fadeUp}>
             <p className="text-[10px] font-black uppercase tracking-[0.4em] text-purple-400/60 mb-3">دليل الخدمات</p>
@@ -105,33 +259,66 @@ function ServiceCategoriesGrid() {
               أصناف <span className="text-purple-400">الخدمات</span>
             </h2>
           </motion.div>
+          {selectedCategory && (
+            <motion.div variants={fadeUp}>
+              <button
+                onClick={() => onSelectCategory(null)}
+                className="flex items-center gap-2 text-purple-400 text-sm font-bold hover:gap-3 transition-all"
+              >
+                <span>عرض الكل</span>
+                <ArrowLeft className="w-4 h-4" />
+              </button>
+            </motion.div>
+          )}
         </motion.div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-5">
-          {serviceCategories.map((cat, i) => (
-            <motion.div
-              key={cat.slug}
-              initial={{ opacity: 0, y: 30 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: i * 0.08, ease: [0.32, 0.72, 0, 1] as [number, number, number, number] }}
-            >
-              <Link href="/services" className="block group h-full">
-                <div className={`relative p-5 md:p-6 rounded-[2rem] border border-white/5 bg-gradient-to-br ${cat.gradient} backdrop-blur-sm hover:border-purple-400/20 transition-all duration-500 text-center h-full`}>
-                  <div className="space-y-3">
-                    <div className="w-12 h-12 mx-auto rounded-xl bg-purple-400/10 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform duration-500">
-                      <cat.icon className="w-6 h-6" />
+          {serviceCategories.map((cat, i) => {
+            const isActive = selectedCategory === cat.slug;
+            return (
+              <motion.div
+                key={cat.slug}
+                initial={{ opacity: 0, y: 30 }}
+                animate={inView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.6, delay: i * 0.08, ease: [0.32, 0.72, 0, 1] as [number, number, number, number] }}
+              >
+                <button
+                  onClick={() => onSelectCategory(isActive ? null : cat.slug)}
+                  className="block group h-full w-full text-right"
+                >
+                  <div
+                    className={`relative p-5 md:p-6 rounded-[2rem] border backdrop-blur-sm transition-all duration-500 text-center h-full ${
+                      isActive
+                        ? 'border-purple-400/40 bg-purple-500/10 shadow-lg shadow-purple-500/10'
+                        : 'border-white/5 bg-gradient-to-br ' + cat.gradient + ' hover:border-purple-400/20'
+                    }`}
+                  >
+                    <div className="space-y-3">
+                      <div
+                        className={`w-12 h-12 mx-auto rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-500 ${
+                          isActive
+                            ? 'bg-purple-400/20 text-purple-300'
+                            : 'bg-purple-400/10 text-purple-400'
+                        }`}
+                      >
+                        <cat.icon className="w-6 h-6" />
+                      </div>
+                      <h3
+                        className={`text-sm md:text-base font-black tracking-tight transition-colors ${
+                          isActive ? 'text-purple-300' : 'group-hover:text-purple-400'
+                        }`}
+                      >
+                        {cat.name}
+                      </h3>
+                      <p className="text-[11px] text-muted-foreground leading-relaxed line-clamp-2 hidden sm:block">
+                        {cat.desc}
+                      </p>
                     </div>
-                    <h3 className="text-sm md:text-base font-black tracking-tight group-hover:text-purple-400 transition-colors">
-                      {cat.name}
-                    </h3>
-                    <p className="text-[11px] text-muted-foreground leading-relaxed line-clamp-2 hidden sm:block">
-                      {cat.desc}
-                    </p>
                   </div>
-                </div>
-              </Link>
-            </motion.div>
-          ))}
+                </button>
+              </motion.div>
+            );
+          })}
         </div>
       </div>
     </section>
@@ -139,16 +326,28 @@ function ServiceCategoriesGrid() {
 }
 
 /* ════════════════════════════════════════════
-   SECTION 3 — FEATURED SERVICES
+   SECTION 3 — FEATURED SERVICES (with booking)
    ════════════════════════════════════════════ */
-function FeaturedServices() {
+function FeaturedServices({
+  selectedCategory,
+  onBookService,
+}: {
+  selectedCategory: string | null;
+  onBookService: (service: any) => void;
+}) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
 
-  const featured = localGuideServices.slice(0, 6);
+  // Filter services based on selected category
+  const filteredServices = selectedCategory
+    ? localGuideServices.filter((s: any) => {
+        const cat = serviceCategories.find((c) => c.slug === selectedCategory);
+        return cat && cat.categoryMatch.includes(s.category_ar);
+      })
+    : localGuideServices.slice(0, 6);
 
   return (
-    <section ref={ref} className="py-20 md:py-28 px-4">
+    <section id="services-section" ref={ref} className="py-20 md:py-28 px-4">
       <div className="max-w-7xl mx-auto">
         <motion.div
           initial="hidden"
@@ -157,40 +356,64 @@ function FeaturedServices() {
           className="flex items-end justify-between mb-10 md:mb-14"
         >
           <motion.div variants={fadeUp}>
-            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-purple-400/60 mb-3">الأفضل تقييماً</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-purple-400/60 mb-3">
+              {selectedCategory ? 'نتائج التصفية' : 'الأفضل تقييماً'}
+            </p>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tighter">
-              خدمات <span className="text-purple-400">مميزة</span>
+              {selectedCategory ? (
+                <>
+                  خدمات{' '}
+                  <span className="text-purple-400">
+                    {serviceCategories.find((c) => c.slug === selectedCategory)?.name}
+                  </span>
+                </>
+              ) : (
+                <>
+                  خدمات <span className="text-purple-400">مميزة</span>
+                </>
+              )}
             </h2>
           </motion.div>
-          <motion.div variants={fadeUp}>
-            <Link
-              href="/services"
-              className="flex items-center gap-2 text-purple-400 text-sm font-bold hover:gap-3 transition-all"
-            >
-              <span>عرض الكل</span>
-              <ArrowLeft className="w-4 h-4" />
-            </Link>
-          </motion.div>
+          {!selectedCategory && (
+            <motion.div variants={fadeUp}>
+              <Link
+                href="/local-guide"
+                className="flex items-center gap-2 text-purple-400 text-sm font-bold hover:gap-3 transition-all"
+              >
+                <span>عرض الكل</span>
+                <ArrowLeft className="w-4 h-4" />
+              </Link>
+            </motion.div>
+          )}
         </motion.div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
-          {featured.map((service: any, i: number) => (
-            <motion.div
-              key={service.id}
-              initial={{ opacity: 0, y: 30 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: i * 0.1, ease: [0.32, 0.72, 0, 1] as [number, number, number, number] }}
-            >
-              <GlassPanel
+        {filteredServices.length === 0 ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-center py-20"
+          >
+            <p className="text-muted-foreground text-lg">لا توجد خدمات في هذا التصنيف حالياً</p>
+          </motion.div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
+            {filteredServices.map((service: any, i: number) => (
+              <motion.div
+                key={service.id}
+                initial={{ opacity: 0, y: 30 }}
+                animate={inView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.6, delay: i * 0.1, ease: [0.32, 0.72, 0, 1] as [number, number, number, number] }}
+              >
+                <GlassPanel
                   variant="obsidian"
-                  className="overflow-hidden rounded-[2rem] hover:border-purple-400/20 transition-all duration-500 h-full"
+                  className="overflow-hidden rounded-[2rem] hover:border-purple-400/20 transition-all duration-500 h-full flex flex-col"
                 >
                   {/* Image */}
                   <div className="relative h-48 overflow-hidden">
                     <img
                       src={service.image}
                       alt={service.name_ar}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-sovereign-obsidian via-transparent to-transparent" />
                     {service.is_verified && (
@@ -200,9 +423,9 @@ function FeaturedServices() {
                     )}
                   </div>
 
-                  <div className="relative z-10 p-6 space-y-3">
+                  <div className="relative z-10 p-6 space-y-3 flex-1 flex flex-col">
                     <div className="flex items-start justify-between gap-2">
-                      <h3 className="text-lg font-black tracking-tight group-hover:text-purple-400 transition-colors leading-tight">
+                      <h3 className="text-lg font-black tracking-tight hover:text-purple-400 transition-colors leading-tight">
                         {service.name_ar}
                       </h3>
                       <div className="flex items-center gap-1 flex-shrink-0">
@@ -211,7 +434,7 @@ function FeaturedServices() {
                       </div>
                     </div>
 
-                    <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2">
+                    <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2 flex-1">
                       {service.description_ar}
                     </p>
 
@@ -224,11 +447,25 @@ function FeaturedServices() {
                         {service.category_ar}
                       </span>
                     </div>
+
+                    {/* Booking button */}
+                    <div className="pt-3 border-t border-white/5">
+                      <SovereignButton
+                        onClick={() => onBookService(service)}
+                        variant="primary"
+                        size="sm"
+                        className="w-full h-10 rounded-xl bg-purple-600 hover:bg-purple-700 text-xs font-black shadow-lg shadow-purple-500/10"
+                      >
+                        احجز الآن
+                        <ArrowLeft className="w-3.5 h-3.5 mr-1" />
+                      </SovereignButton>
+                    </div>
                   </div>
                 </GlassPanel>
-            </motion.div>
-          ))}
-        </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
@@ -267,7 +504,7 @@ function CTASection() {
         </motion.p>
 
         <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-          <Link href="/services">
+          <Link href="/local-guide">
             <SovereignButton size="lg" variant="primary" className="h-16 px-12 text-sm rounded-full shadow-2xl shadow-purple-500/20 bg-purple-600 hover:bg-purple-700" withShimmer>
               اكتشفي جميع الخدمات
               <ArrowLeft className="w-5 h-5" />
@@ -283,12 +520,53 @@ function CTASection() {
    PAGE — SERVICES
    ════════════════════════════════════════════ */
 export default function ServicesPage() {
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [bookingService, setBookingService] = useState<any>(null);
+  const [bookingOpen, setBookingOpen] = useState(false);
+
+  const handleSelectCategory = useCallback((slug: string | null) => {
+    setSelectedCategory(slug);
+    // Scroll to services section
+    if (slug !== null) {
+      setTimeout(() => {
+        document.getElementById('services-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    }
+  }, []);
+
+  const handleBookService = useCallback((service: any) => {
+    setBookingService(service);
+    setBookingOpen(true);
+  }, []);
+
+  const handleBookingOpenChange = useCallback((open: boolean) => {
+    setBookingOpen(open);
+    if (!open) {
+      setBookingService(null);
+    }
+  }, []);
+
   return (
     <div className="flex flex-col min-h-screen relative overflow-hidden bg-sovereign-obsidian text-sovereign-white font-arabic" dir="rtl">
       <HeroSection />
-      <ServiceCategoriesGrid />
-      <FeaturedServices />
+      <ServiceCategoriesGrid
+        selectedCategory={selectedCategory}
+        onSelectCategory={handleSelectCategory}
+      />
+      <FeaturedServices
+        selectedCategory={selectedCategory}
+        onBookService={handleBookService}
+      />
       <CTASection />
+
+      {/* Booking Dialog */}
+      {bookingService && (
+        <BookingDialog
+          service={bookingService}
+          open={bookingOpen}
+          onOpenChange={handleBookingOpenChange}
+        />
+      )}
     </div>
   );
 }

@@ -20,6 +20,7 @@ import { ChevronRight, ChevronLeft, Check, Loader2, Sparkles } from 'lucide-reac
 import { cn } from '@/lib/utils';
 import { bookingsApi } from '@/lib/api/bookings';
 import { paymentsApi } from '@/lib/api/payments';
+import { api } from '@/lib/api';
 import { toast } from 'sonner';
 
 export function BookingWizard() {
@@ -61,12 +62,22 @@ export function BookingWizard() {
         extra_services: formData.extraServices,
       });
 
-      // 2. Process Payment & Signature
-      const booking = bookingRes.data;
-      const paymentMethodId = formData.paymentMethod ?? 'visa';
-      await paymentsApi.createPayment(booking.id, paymentMethodId);
+      // 2. Extract booking data with fallback — mock returns { success, data: { id, ... } }
+      const booking = bookingRes.data || { id: 'BK-' + Date.now() };
+      const bookingId = booking.id;
 
-      setBookingRef(booking.id.toString());
+      // 3. Process Payment & Signature
+      const paymentMethodId = formData.paymentMethod ?? 'visa';
+      await paymentsApi.createPayment(Number(bookingId) || bookingId as any, paymentMethodId);
+
+      // 4. Clear the cart after successful booking
+      try {
+        await api.delete('bookings/cart/');
+      } catch {
+        // Cart clear is non-critical — don't block the flow
+      }
+
+      setBookingRef(String(bookingId));
       setIsSuccess(true);
       toast.success('تمت العملية بنجاح!', {
         description: 'تم توثيق عقدك وتحصين الدفع في الضمان.',
