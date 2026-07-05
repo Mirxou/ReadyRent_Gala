@@ -3,21 +3,23 @@ import { formatNumber } from '@/lib/utils';;
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Star, MapPin, Package, TrendingUp } from 'lucide-react';
+import { Star, MapPin, Package, TrendingUp, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 
 interface Vendor {
   id: number;
   name: string;
+  name_ar?: string;
   description?: string;
+  description_ar?: string;
   logo?: string;
   rating?: number;
   products_count?: number;
   location?: string;
   is_verified?: boolean;
   total_sales?: number;
+  website?: string;
 }
 
 interface VendorCardProps {
@@ -25,6 +27,9 @@ interface VendorCardProps {
 }
 
 export function VendorCard({ vendor }: VendorCardProps) {
+  const displayName = vendor.name_ar || vendor.name;
+  const displayDescription = vendor.description_ar || vendor.description;
+
   return (
     <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer group">
       <Link href={`/vendors/${vendor.id}`}>
@@ -34,7 +39,7 @@ export function VendorCard({ vendor }: VendorCardProps) {
               <div className="relative w-16 h-16 rounded-full overflow-hidden flex-shrink-0">
                 <Image
                   src={vendor.logo}
-                  alt={vendor.name}
+                  alt={displayName}
                   fill
                   className="object-cover"
                 />
@@ -43,7 +48,7 @@ export function VendorCard({ vendor }: VendorCardProps) {
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
                 <CardTitle className="group-hover:text-sovereign-gold transition-colors">
-                  {vendor.name}
+                  {displayName}
                 </CardTitle>
                 {vendor.is_verified && (
                   <Badge variant="default" className="bg-green-500">
@@ -61,9 +66,9 @@ export function VendorCard({ vendor }: VendorCardProps) {
           </div>
         </CardHeader>
         <CardContent>
-          {vendor.description && (
+          {displayDescription && (
             <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-              {vendor.description}
+              {displayDescription}
             </p>
           )}
           
@@ -83,17 +88,28 @@ export function VendorCard({ vendor }: VendorCardProps) {
             )}
           </div>
 
-          {vendor.total_sales !== undefined && (
-            <div className="mt-4 pt-4 border-t flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-green-500" />
-              <span className="text-sm font-medium">
-                {formatNumber(vendor.total_sales)} مبيع
-              </span>
-            </div>
-          )}
+          <div className="mt-4 pt-4 border-t flex items-center justify-between">
+            {vendor.total_sales !== undefined && (
+              <div className="flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 text-green-500" />
+                <span className="text-sm font-medium">
+                  {formatNumber(vendor.total_sales)} مبيع
+                </span>
+              </div>
+            )}
+
+            {vendor.website && (
+              <div
+                className="flex items-center gap-1 text-sovereign-gold hover:underline text-sm font-medium"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <ExternalLink className="h-4 w-4" />
+                <span>زيارة الموقع</span>
+              </div>
+            )}
+          </div>
         </CardContent>
       </Link>
     </Card>
   );
 }
-

@@ -63,8 +63,10 @@ const navSections = [
 
 const quickLinks = [
   { label: 'البحث الذكي', href: '/ai-search' },
-  { label: 'السجل القضائي', href: '/judicial' },
+  { label: 'المحفظة', href: '/wallet' },
+  { label: 'الاشتراكات', href: '/subscriptions' },
   { label: 'نقاط الثقة', href: '/trust-score' },
+  { label: 'السجل القضائي', href: '/judicial' },
 ];
 
 export function Navbar() {

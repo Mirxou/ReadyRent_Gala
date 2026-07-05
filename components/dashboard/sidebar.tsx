@@ -6,7 +6,6 @@ import { cn } from '@/lib/utils';
 import {
     LayoutDashboard,
     Package,
-    ShoppingBag,
     Wallet,
     Settings,
     LogOut,
@@ -19,7 +18,10 @@ import {
     BarChart3,
     Users,
     ListChecks,
-    ClipboardList
+    ClipboardList,
+    CalendarCheck,
+    Bell,
+    Crown
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/lib/store';
@@ -34,7 +36,9 @@ const sidebarSections = [
     {
         title: 'إدارة',
         items: [
+            { title: 'الحجوزات', href: '/dashboard/bookings', icon: CalendarCheck },
             { title: 'الخزانة', href: '/dashboard/wallet', icon: Wallet },
+            { title: 'الإشعارات', href: '/dashboard/notifications', icon: Bell },
             { title: 'سجل الرغبات', href: '/dashboard/wishlist', icon: Sparkles },
             { title: 'الأصول الملكية', href: '/dashboard/products', icon: Package },
             { title: 'العقود والطلبات', href: '/dashboard/orders', icon: FileSignature },

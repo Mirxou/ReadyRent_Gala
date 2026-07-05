@@ -1,14 +1,24 @@
 'use client'
 import { formatNumber } from '@/lib/utils';
 
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Shield, Check, ArrowLeft, Info, Phone, FileText } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
 import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
 import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
 import Link from 'next/link';
+import { toast } from 'sonner';
 
 const plans = [
   {
@@ -98,6 +108,33 @@ const fadeUp = {
 };
 
 export default function InsurancePage() {
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [isPurchasing, setIsPurchasing] = useState(false);
+  const [purchasedPlan, setPurchasedPlan] = useState<string | null>(null);
+
+  const selectedPlanData = plans.find((p) => p.id === selectedPlan);
+
+  const handleSelectPlan = (planId: string) => {
+    if (purchasedPlan) return;
+    setSelectedPlan(planId);
+    setShowConfirm(true);
+  };
+
+  const handleConfirmPurchase = () => {
+    setIsPurchasing(true);
+    setTimeout(() => {
+      setPurchasedPlan(selectedPlan);
+      setShowConfirm(false);
+      setIsPurchasing(false);
+      toast.success('تم اشتراء خطة التأمين بنجاح');
+    }, 1500);
+  };
+
+  const handleContactSupport = () => {
+    toast.info('سيتم التواصل معك قريباً');
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground" dir="rtl">
       {/* Background Ambience */}
@@ -191,8 +228,11 @@ export default function InsurancePage() {
                   <SovereignButton
                     variant={plan.popular ? 'primary' : 'secondary'}
                     className="w-full"
+                    onClick={() => handleSelectPlan(plan.id)}
+                    disabled={purchasedPlan === plan.id}
+                    isLoading={purchasedPlan === plan.id}
                   >
-                    اختيار هذه الخطة
+                    {purchasedPlan === plan.id ? '✓ مشتراة' : 'اختيار هذه الخطة'}
                   </SovereignButton>
                 </CardContent>
               </Card>
@@ -320,7 +360,7 @@ export default function InsurancePage() {
               تناسب احتياجاتك
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <SovereignButton variant="primary" size="lg">
+              <SovereignButton variant="primary" size="lg" onClick={handleContactSupport}>
                 تواصل مع الدعم
               </SovereignButton>
               <Button asChild variant="outline" className="rounded-full">
@@ -333,6 +373,65 @@ export default function InsurancePage() {
           </GlassPanel>
         </motion.div>
       </div>
+
+      {/* Confirmation Dialog */}
+      <Dialog open={showConfirm} onOpenChange={setShowConfirm}>
+        <DialogContent className="bg-sovereign-obsidian border-sovereign-gold/20 text-foreground sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-black text-sovereign-gold text-right">
+              تأكيد شراء خطة التأمين
+            </DialogTitle>
+            <DialogDescription className="text-muted-foreground text-right">
+              تأكد من تفاصيل الخطة قبل التأكيد
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedPlanData && (
+            <div className="space-y-4 my-4">
+              <div className="flex items-center gap-3">
+                <span className="text-3xl">{selectedPlanData.icon}</span>
+                <div>
+                  <p className="font-bold text-lg">{selectedPlanData.name}</p>
+                  <p className="text-sovereign-gold font-black text-xl">
+                    {formatNumber(selectedPlanData.price)} دج / لكل حجز
+                  </p>
+                </div>
+              </div>
+
+              <div className="border-t border-white/10 pt-4">
+                <p className="text-sm font-bold mb-2 text-white/70">المزايا المشمولة:</p>
+                <ul className="space-y-2">
+                  {selectedPlanData.features.map((f) => (
+                    <li key={f} className="flex items-start gap-2 text-sm">
+                      <Check className="w-4 h-4 mt-0.5 text-emerald-500 flex-shrink-0" />
+                      <span>{f}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter className="flex gap-3 sm:gap-0">
+            <SovereignButton
+              variant="primary"
+              className="flex-1"
+              onClick={handleConfirmPurchase}
+              isLoading={isPurchasing}
+            >
+              {isPurchasing ? 'جارٍ المعالجة...' : 'تأكيد الشراء'}
+            </SovereignButton>
+            <SovereignButton
+              variant="secondary"
+              className="flex-1"
+              onClick={() => setShowConfirm(false)}
+              disabled={isPurchasing}
+            >
+              إلغاء
+            </SovereignButton>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

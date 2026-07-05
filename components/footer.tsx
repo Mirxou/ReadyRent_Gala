@@ -82,6 +82,8 @@ export function Footer() {
               {[
                 { label: 'السوق المفتوح', href: '/marketplace' },
                 { label: 'البائعون', href: '/vendors' },
+                { label: 'المحفظة', href: '/wallet' },
+                { label: 'الاشتراكات', href: '/subscriptions' },
                 { label: 'نقاط الثقة', href: '/trust-score' },
                 { label: 'السجل القضائي', href: '/judicial' },
               ].map((item) => (
@@ -105,6 +107,8 @@ export function Footer() {
                 { label: 'المرتجعات', href: '/returns' },
                 { label: 'التحقق', href: '/verification' },
                 { label: 'المحفظة', href: '/wallet' },
+                { label: 'الاشتراكات', href: '/subscriptions' },
+                { label: 'التحويلات', href: '/wallet' },
               ].map((item) => (
                 <li key={item.href}>
                   <Link href={item.href} className="text-lg font-medium text-muted-foreground/60 hover:text-foreground dark:hover:text-white transition-colors">

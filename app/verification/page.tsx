@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { motion, type Variants } from 'framer-motion';
 import {
   Shield,
@@ -13,13 +13,16 @@ import {
   CheckCircle2,
   Circle,
   ArrowLeft,
+  FileCheck,
 } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
 import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
 import Link from 'next/link';
+import { toast } from 'sonner';
+
+type StepStatus = 'completed' | 'current' | 'pending';
 
 const verificationSteps = [
   {
@@ -27,28 +30,24 @@ const verificationSteps = [
     title: 'إدخال البيانات',
     description: 'أدخل بياناتك الشخصية الأساسية: الاسم الكامل، رقم الهاتف، العنوان',
     icon: User,
-    status: 'completed' as const,
   },
   {
     step: 2,
     title: 'رفع الوثائق',
     description: 'ارفع صورة واضحة من بطاقة الهوية الوطنية أو جواز السفر',
     icon: Upload,
-    status: 'current' as const,
   },
   {
     step: 3,
     title: 'المراجعة',
     description: 'يقوم فريقنا بمراجعة وثائقك والتحقق من صحتها خلال 24-48 ساعة',
     icon: FileText,
-    status: 'pending' as const,
   },
   {
     step: 4,
     title: 'الموافقة',
     description: 'بعد التحقق الناجح، ستحصل على شارة "متحقق" في ملفك الشخصي',
     icon: ShieldCheck,
-    status: 'pending' as const,
   },
 ];
 
@@ -63,11 +62,51 @@ const fadeUp: Variants = {
 
 export default function VerificationPage() {
   const [dragOver, setDragOver] = useState(false);
+  const [fileName, setFileName] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const overallStatus: 'pending' | 'in_progress' | 'verified' = 'in_progress';
-  const completedSteps = 1;
+  // Steps progress: 1 completed initially, 2 is current, 3-4 pending
+  // After submission: 2 completed, 3 current, 4 pending
+  const completedSteps = submitted ? 2 : 1;
   const totalSteps = 4;
   const progressPercent = (completedSteps / totalSteps) * 100;
+
+  const getStepStatus = (stepNum: number): StepStatus => {
+    if (stepNum <= completedSteps) return 'completed';
+    if (stepNum === completedSteps + 1) return 'current';
+    return 'pending';
+  };
+
+  const handleFileSelect = (file: File | undefined) => {
+    if (file) {
+      setFileName(file.name);
+    }
+  };
+
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    handleFileSelect(e.target.files?.[0]);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(false);
+    handleFileSelect(e.dataTransfer.files[0]);
+  };
+
+  const handleSubmit = () => {
+    if (!fileName) {
+      toast.error('يرجى اختيار ملف أولاً');
+      return;
+    }
+    setIsSubmitting(true);
+    setTimeout(() => {
+      setIsSubmitting(false);
+      setSubmitted(true);
+      toast.success('تم إرسال الوثائق بنجاح. سيتم مراجعتها خلال 24-48 ساعة.');
+    }, 2000);
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground" dir="rtl">
@@ -131,7 +170,7 @@ export default function VerificationPage() {
                 </div>
               </div>
               <Badge className="bg-amber-500/10 text-amber-400 border-amber-500/30 text-sm py-1 px-4">
-                قيد التقدم
+                {submitted ? 'قيد المراجعة' : 'قيد التقدم'}
               </Badge>
             </div>
 
@@ -139,10 +178,11 @@ export default function VerificationPage() {
             <div className="mt-6">
               <div className="w-full h-3 rounded-full bg-white/5 overflow-hidden">
                 <motion.div
+                  key={progressPercent}
                   className="h-full rounded-full bg-gradient-to-l from-sovereign-gold to-amber-500"
                   initial={{ width: 0 }}
                   animate={{ width: `${progressPercent}%` }}
-                  transition={{ duration: 1, ease: 'easeOut', delay: 0.3 }}
+                  transition={{ duration: 1, ease: 'easeOut' }}
                 />
               </div>
             </div>
@@ -167,8 +207,9 @@ export default function VerificationPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {verificationSteps.map((step, index) => {
               const Icon = step.icon;
-              const isActive = step.status === 'current';
-              const isCompleted = step.status === 'completed';
+              const status = getStepStatus(step.step);
+              const isActive = status === 'current';
+              const isCompleted = status === 'completed';
 
               return (
                 <motion.div
@@ -262,42 +303,100 @@ export default function VerificationPage() {
             variant="obsidian"
             gradientBorder
           >
-            <div
-              className={`border-2 border-dashed rounded-[2rem] p-12 transition-colors cursor-pointer ${
-                dragOver
-                  ? 'border-sovereign-gold bg-sovereign-gold/5'
-                  : 'border-white/10 hover:border-white/20'
-              }`}
-              onDragOver={(e) => {
-                e.preventDefault();
-                setDragOver(true);
-              }}
-              onDragLeave={() => setDragOver(false)}
-              onDrop={(e) => {
-                e.preventDefault();
-                setDragOver(false);
-              }}
-            >
-              <Upload className="w-12 h-12 text-sovereign-gold mx-auto mb-4" />
-              <h3 className="text-lg font-bold mb-2">اسحب الملف هنا أو انقر للاختيار</h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                يدعم: JPG, PNG, PDF — الحد الأقصى: 10 ميغابايت
-              </p>
-              <SovereignButton variant="secondary">
-                اختر ملف
-              </SovereignButton>
-            </div>
+            {/* Hidden file input */}
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileInputChange}
+              accept="image/*,.pdf"
+              className="hidden"
+            />
 
-            <div className="mt-6 flex flex-col sm:flex-row gap-4 justify-center">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <ShieldCheck className="w-4 h-4 text-emerald-500" />
-                <span>ملفاتك مشفرة ومحمية</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <ShieldX className="w-4 h-4 text-emerald-500" />
-                <span>لا يتم مشاركة بياناتك مع أطراف ثالثة</span>
-              </div>
-            </div>
+            {submitted ? (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="py-6"
+              >
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: 'spring', stiffness: 200 }}
+                  className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center"
+                >
+                  <FileCheck className="w-10 h-10 text-emerald-500" />
+                </motion.div>
+                <h3 className="text-xl font-bold mb-2 text-emerald-400">تم إرسال الوثائق بنجاح</h3>
+                <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                  سيتم مراجعة وثائقك والتواصل معك خلال 24-48 ساعة
+                </p>
+              </motion.div>
+            ) : (
+              <>
+                <div
+                  className={`border-2 border-dashed rounded-[2rem] p-12 transition-colors cursor-pointer ${
+                    fileName
+                      ? 'border-emerald-500/40 bg-emerald-500/5'
+                      : dragOver
+                      ? 'border-sovereign-gold bg-sovereign-gold/5'
+                      : 'border-white/10 hover:border-white/20'
+                  }`}
+                  onClick={() => fileInputRef.current?.click()}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    setDragOver(true);
+                  }}
+                  onDragLeave={() => setDragOver(false)}
+                  onDrop={handleDrop}
+                >
+                  {fileName ? (
+                    <>
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ type: 'spring', stiffness: 200 }}
+                        className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center"
+                      >
+                        <FileCheck className="w-8 h-8 text-emerald-500" />
+                      </motion.div>
+                      <h3 className="text-lg font-bold mb-1 text-emerald-400">تم اختيار الملف</h3>
+                      <p className="text-sm text-sovereign-gold font-bold mb-2">{fileName}</p>
+                      <p className="text-xs text-muted-foreground">انقر لتغيير الملف</p>
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="w-12 h-12 text-sovereign-gold mx-auto mb-4" />
+                      <h3 className="text-lg font-bold mb-2">اسحب الملف هنا أو انقر للاختيار</h3>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        يدعم: JPG, PNG, PDF — الحد الأقصى: 10 ميغابايت
+                      </p>
+                    </>
+                  )}
+                </div>
+
+                <div className="mt-8">
+                  <SovereignButton
+                    variant="primary"
+                    size="lg"
+                    onClick={handleSubmit}
+                    isLoading={isSubmitting}
+                  >
+                    {isSubmitting ? 'جارٍ الإرسال...' : 'إرسال الوثائق'}
+                  </SovereignButton>
+                </div>
+
+                <div className="mt-6 flex flex-col sm:flex-row gap-4 justify-center">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                    <span>ملفاتك مشفرة ومحمية</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <ShieldX className="w-4 h-4 text-emerald-500" />
+                    <span>لا يتم مشاركة بياناتك مع أطراف ثالثة</span>
+                  </div>
+                </div>
+              </>
+            )}
           </GlassPanel>
         </motion.div>
 

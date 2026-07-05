@@ -39,9 +39,36 @@ function resolveGetMock(path: string): unknown {
   // Normalise: strip leading/trailing slashes, collapse double slashes
   const p = path.replace(/^\/+|\/+$/g, '').replace(/\/+/g, '/');
 
-  // Vendors
+  // Vendors list
   if (p === 'vendors' || p === 'vendors/vendors') {
     return vendors;
+  }
+
+  // Vendor by ID
+  const vendorMatch = p.match(/^vendors\/vendors\/(\d+)$/);
+  if (vendorMatch) {
+    const id = parseInt(vendorMatch[1], 10);
+    return vendors.find((v: any) => v.id === id) || null;
+  }
+
+  // Vendor dashboard
+  if (p === 'vendors/dashboard' || p === 'vendors/dashboard/') {
+    return {
+      total_products: 45,
+      active_bookings: 12,
+      total_revenue: 285000,
+      commission: 14250,
+      recent_bookings: [
+        { id: 'BK-301', product: 'فستان سهرة ذهبي', amount: 8500, status: 'active', date: '2026-01-15' },
+        { id: 'BK-298', product: 'بدلة رجالية سوداء', amount: 5000, status: 'completed', date: '2026-01-12' },
+        { id: 'BK-295', product: 'قفطان تقليدي', amount: 12000, status: 'active', date: '2026-01-10' },
+      ]
+    };
+  }
+
+  // Vendor products
+  if (p.match(/^vendors\/\d+\/products$/)) {
+    return products;
   }
 
   // Artisans
@@ -110,8 +137,39 @@ function resolveGetMock(path: string): unknown {
   }
 
   // Wallet
-  if (p.startsWith('wallet')) {
-    return { balance: 0, transactions: [] };
+  if (p === 'wallet' || p === 'wallet/') {
+    return {
+      balance: 45250,
+      escrow_total: 12800,
+      transactions: [
+        { id: 'TX-9021', type: 'ESCROW_HELD', amount: 1250, date: new Date().toISOString(), note: 'حجز فستان سهرة - مرجع #2041', hash: '0x8f2d...23e1' },
+        { id: 'TX-8942', type: 'INCOME', amount: 8500, date: new Date(Date.now() - 86400000).toISOString(), note: 'تسوية حجز معدات تصوير', hash: '0x4e5f...6g7h' },
+        { id: 'TX-8811', type: 'EXPENDITURE', amount: 2100, date: new Date(Date.now() - 172800000).toISOString(), note: 'رسوم فحص تقني - كاميرا سوني', hash: '0x9i0j...k1l2' },
+      ]
+    };
+  }
+
+  // Wallet deposit/withdraw/transfer
+  if (p.startsWith('wallet/deposit') || p.startsWith('wallet/withdraw') || p.startsWith('wallet/transfer')) {
+    return { success: true, message: 'تمت العملية بنجاح', new_balance: 45250 };
+  }
+
+  // Subscriptions
+  if (p === 'subscriptions' || p === 'subscriptions/') {
+    return {
+      active_plan: { id: 'free', name_ar: 'مجاني', price: 0 },
+      plans: [
+        { id: 'free', name_ar: 'مجاني', price: 0, bookings_limit: 3, features: ['تصفح المنتجات', '3 حجوزات شهرياً', 'دعم بالبريد'] },
+        { id: 'basic', name_ar: 'أساسي', price: 1500, bookings_limit: 10, features: ['10 حجوزات شهرياً', 'تأمين أساسي مجاني', 'دعم هاتفي', 'شارة عضو أساسي'] },
+        { id: 'premium', name_ar: 'مميز', price: 4500, bookings_limit: -1, features: ['حجوزات غير محدودة', 'تأمين متقدم مجاني', 'أولوية في العروض', 'خصم 10%', 'شارة عضو مميز', 'مستشار شخصي'] },
+        { id: 'vip', name_ar: 'VIP', price: 9900, bookings_limit: -1, features: ['كل مميزات مميز', 'توصيل مجاني', 'دخول مبكر للعروض', 'نقاط ثقة مضاعفة', 'شارة VIP ذهبية', 'دعم على مدار الساعة'] },
+      ],
+      history: [
+        { id: 'SUB-001', plan: 'أساسي', amount: 1500, status: 'مدفوع', date: '2025-12-01' },
+        { id: 'SUB-002', plan: 'مميز', amount: 4500, status: 'نشط', date: '2026-01-01' },
+        { id: 'SUB-003', plan: 'أساسي', amount: 1500, status: 'ملغي', date: '2025-11-01' },
+      ]
+    };
   }
 
   // Disputes
@@ -127,6 +185,21 @@ function resolveGetMock(path: string): unknown {
   // Auth
   if (p.startsWith('auth')) {
     return { user: null };
+  }
+
+  // Products with query params (vendor_id filter)
+  if (p.startsWith('products') && p.includes('vendor_id')) {
+    const vendorIdMatch = p.match(/vendor_id=(\d+)/);
+    if (vendorIdMatch) {
+      const vid = parseInt(vendorIdMatch[1], 10);
+      return products.filter((pr: any) => pr.owner_id === vid || pr.id <= vid * 3);
+    }
+    return products;
+  }
+
+  // Products list (general)
+  if (p === 'products' || p === 'products/') {
+    return products;
   }
 
   // Fallback
