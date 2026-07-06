@@ -24,8 +24,11 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       const response = await authApi.login(data.email, data.password);
-      // 🛡️ Security: Tokens are HttpOnly cookies now.
-      // We only store user details in client state.
+      // 🛡️ Security: Primary auth is HttpOnly cookie (set by server).
+      // Token is also stored in localStorage for explicit Bearer header usage.
+      if (response.data?.token) {
+        localStorage.setItem('session-token', response.data.token);
+      }
       setAuth(response.data.user);
       toast.success('تم الدخول بنجاح');
       router.push('/');

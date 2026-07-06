@@ -9,7 +9,7 @@ const ADMIN_ROUTES = ['/admin'];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const token = request.cookies.get('auth-token')?.value ||
+  const token = request.cookies.get('session_token')?.value ||
                 request.headers.get('authorization')?.replace('Bearer ', '');
 
   // Check if requesting admin routes

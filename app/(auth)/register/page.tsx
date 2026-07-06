@@ -22,14 +22,25 @@ export default function RegisterPage() {
   const onSubmit = async (data: any) => {
     setIsLoading(true);
     try {
-      const response = await authApi.register(data);
+      // Map form fields to API field names
+      const registerData = {
+        email: data.email,
+        password: data.password,
+        first_name: data.first_name,
+        phone: data.phone_number,
+        username: data.first_name ? data.first_name.replace(/\s+/g, '_') : undefined,
+      };
+      const response = await authApi.register(registerData);
       if (response.data?.user) {
-        // 🛡️ Security: Cookie-Based Auth
+        // 🛡️ Security: Primary auth is HttpOnly cookie (set by server).
+        // Token is also stored in localStorage for explicit Bearer header usage.
+        if (response.data.token) {
+          localStorage.setItem('session-token', response.data.token);
+        }
         setAuth(response.data.user);
         toast.success('تم إنشاء الهوية السيادية بنجاح');
         router.push('/');
       } else {
-        // Handle direct login if register returns tokens directly
         router.push('/login');
       }
     } catch (error: any) {

@@ -1,36 +1,32 @@
 // ═══════════════════════════════════════════════════════════════
 // STANDARD.Rent — Centralized Auth Helpers
-// Replaces scattered localStorage.getItem('access_token') calls
+// Client-side token retrieval for API Authorization headers
 // ═══════════════════════════════════════════════════════════════
 
 /**
- * Get auth token from the correct storage (Zustand persist)
- * Falls back to localStorage.getItem for backward compatibility during transition
+ * Get auth token from localStorage.
+ * The real session is managed via HttpOnly cookie (set by /api/auth/login),
+ * but we also store the token in localStorage for explicit Bearer header
+ * usage in scenarios where cookies aren't sent (e.g., cross-origin).
  */
 export function getAuthToken(): string | null {
   if (typeof window === 'undefined') return null;
 
   try {
-    const stored = localStorage.getItem('auth-storage-v2');
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      // In mock mode, generate a token from user data
-      if (parsed.state?.user?.id) {
-        return `mock-jwt-token-${parsed.state.user.id}`;
-      }
-    }
+    // Primary: read session token from localStorage (set by login flow)
+    const token = localStorage.getItem('session-token');
+    if (token) return token;
   } catch {
-    // Storage corrupted or unavailable
+    // Storage unavailable
   }
 
-  // Fallback (deprecated - will be removed)
-  return localStorage.getItem('access_token');
+  return null;
 }
 
 /**
  * Get current user info from Zustand persist storage
  */
-export function getStoredUser(): { id: number; role: string; username: string } | null {
+export function getStoredUser(): { id: string; role: string; username: string } | null {
   if (typeof window === 'undefined') return null;
 
   try {
@@ -68,7 +64,9 @@ export function isAdminUser(): boolean {
 }
 
 /**
- * Get authorization headers for fetch calls
+ * Get authorization headers for fetch calls.
+ * Includes Bearer token if available in localStorage.
+ * Cookies (HttpOnly) are sent automatically by the browser.
  */
 export function getAuthHeaders(): Record<string, string> {
   const token = getAuthToken();

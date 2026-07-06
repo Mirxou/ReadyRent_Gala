@@ -4,13 +4,16 @@ import { languages } from './i18n';
 import { authApi } from './api';
 
 interface User {
-  id: number;
+  id: string;
   email: string;
   username: string;
   role: string;
   is_verified?: boolean;
   trust_score?: number;
   wallet_balance?: number;
+  first_name?: string;
+  last_name?: string;
+  phone?: string;
 }
 
 interface AuthState {
@@ -43,6 +46,7 @@ export const useAuthStore = create<AuthState>()(
           isAuthenticated: false,
         });
         if (typeof window !== 'undefined') {
+          localStorage.removeItem('session-token');
           window.location.href = '/login';
         }
       },
@@ -71,7 +75,7 @@ export const useAuthStore = create<AuthState>()(
 );
 
 interface Notification {
-  id: number;
+  id: string;
   type: string;
   title: string;
   message: string;
@@ -83,7 +87,7 @@ interface NotificationState {
   notifications: Notification[];
   unreadCount: number;
   addNotification: (notification: Notification) => void;
-  markAsRead: (id: number) => void;
+  markAsRead: (id: string) => void;
   markAllAsRead: () => void;
   clearNotifications: () => void;
   getUnreadCount: () => number;
