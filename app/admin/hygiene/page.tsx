@@ -206,7 +206,7 @@ export default function AdminHygienePage() {
         </Card>
       ) : (
         <div className="grid grid-cols-1 gap-6">
-          {records.results?.map((record: any) => (
+          {records?.map((record: any) => (
             <Card key={record.id}>
               <CardHeader>
                 <div className="flex items-start justify-between">

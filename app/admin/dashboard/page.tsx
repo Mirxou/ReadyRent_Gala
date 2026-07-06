@@ -109,10 +109,10 @@ export default function AdminDashboardPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-8 pt-0">
-              <div className="text-5xl font-black mb-4">{stats?.overall?.products || 0}</div>
+              <div className="text-5xl font-black mb-4">{stats?.active_listings || 0}</div>
               <p className="text-sm text-muted-foreground mb-8 flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                {stats?.products?.active || 0} نشط، {stats?.products?.rented || 0} مستأجر
+                {stats?.active_listings || 0} نشط
               </p>
               <Button variant="outline" className="w-full h-14 rounded-2xl border-white/10 hover:bg-white/5 text-lg" asChild>
                 <Link href="/admin/products">
@@ -133,10 +133,10 @@ export default function AdminDashboardPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-8 pt-0">
-              <div className="text-5xl font-black mb-4">{stats?.overall?.bookings || 0}</div>
+              <div className="text-5xl font-black mb-4">{stats?.total_bookings || 0}</div>
               <p className="text-sm text-muted-foreground mb-8 flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-sovereign-gold animate-pulse" />
-                {stats?.pending_actions?.bookings || 0} قيد الانتظار
+                {stats?.total_bookings || 0} حجز
               </p>
               <Button variant="outline" className="w-full h-14 rounded-2xl border-white/10 hover:bg-white/5 text-lg" asChild>
                 <Link href="/admin/bookings">
@@ -157,10 +157,10 @@ export default function AdminDashboardPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-8 pt-0">
-              <div className="text-5xl font-black mb-4">{stats?.overall?.users || 0}</div>
+              <div className="text-5xl font-black mb-4">{stats?.total_users || 0}</div>
               <p className="text-sm text-muted-foreground mb-8 flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-sovereign-gold animate-pulse" />
-                +{stats?.this_month?.users || 0} مستخدم جديد هذا الشهر
+                {stats?.avg_rating || '—'} متوسط التقييم
               </p>
               <Button variant="outline" className="w-full h-14 rounded-2xl border-white/10 hover:bg-white/5 text-lg" asChild>
                 <Link href="/admin/users">
@@ -174,7 +174,7 @@ export default function AdminDashboardPage() {
 
         {/* Revenue Chart Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-12">
-          {revenueData?.daily_revenue && revenueData.daily_revenue.length > 0 && (
+          {revenueData?.revenue && revenueData.revenue.length > 0 && (
             <Card className="card-glass border-0 rounded-[2.5rem] overflow-hidden">
               <CardHeader className="p-8">
                 <CardTitle className="text-2xl font-bold flex items-center gap-3">
@@ -184,7 +184,7 @@ export default function AdminDashboardPage() {
               </CardHeader>
               <CardContent className="p-8 pt-0">
                 <RevenueChart
-                  data={revenueData.daily_revenue}
+                  data={revenueData.revenue}
                   period={revenueData.period}
                 />
                 <div className="mt-8">
@@ -199,30 +199,16 @@ export default function AdminDashboardPage() {
             </Card>
           )}
 
-          {stats?.top_products && stats.top_products.length > 0 && (
+          {stats?.total_revenue && (
             <Card className="card-glass border-0 rounded-[2.5rem] overflow-hidden">
               <CardHeader className="p-8">
                 <CardTitle className="text-2xl font-bold flex items-center gap-3">
                   <TrendingUp className="h-6 w-6 text-sovereign-gold" />
-                  الأكثر تألقاً
+                  إجمالي الإيرادات
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-8 pt-0">
-                <div className="space-y-4">
-                  {stats.top_products.map((product: any, index: number) => (
-                    <div key={product.id} className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5 hover:bg-white/10 transition-colors group">
-                      <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center font-black group-hover:bg-sovereign-gold transition-colors">
-                          {index + 1}
-                        </div>
-                        <span className="text-lg font-bold">{product.name}</span>
-                      </div>
-                      <Badge variant="secondary" className="bg-white/5 text-muted-foreground border-white/10">
-                        {product.bookings} حجز
-                      </Badge>
-                    </div>
-                  ))}
-                </div>
+                <div className="text-5xl font-black mb-4">{stats.total_revenue} دج</div>
               </CardContent>
             </Card>
           )}

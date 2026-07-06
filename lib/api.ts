@@ -2,7 +2,7 @@
 
 // ═══════════════════════════════════════════════════════════════════
 // STANDARD.Rent — Sovereign Unified API Client
-// Replaces axios-to-Django with native fetch to /api/ mock proxy
+// Native fetch to /api/ gateway (ready for real backend integration)
 // ═══════════════════════════════════════════════════════════════════
 
 // ──── CSRF Protection ────

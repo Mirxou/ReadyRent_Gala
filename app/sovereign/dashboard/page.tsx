@@ -19,6 +19,7 @@ import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
 import { SovereignGlow, SovereignSparkle } from '@/shared/components/sovereign/sovereign-sparkle';
 import { SovereignHeartbeat } from '@/shared/components/sovereign/sovereign-heartbeat';
 import { SovereignAuditTrail } from '@/shared/components/sovereign/sovereign-audit-trail';
+import { DignifiedLoader } from '@/shared/components/sovereign/dignified-loader';
 import { Badge } from '@/components/ui/badge';
 
 
@@ -44,66 +45,65 @@ export default function SovereignDashboard() {
   const [stats, setStats] = useState<EyeStats | null>(null);
   const [ticker, setTicker] = useState<EvidenceEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // SIMULATED DATA FETCH (Switch to real API as soon as backend is reachable)
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // In real env: const res = await fetch('/api/disputes/api/sovereign-eye/stats/');
-        // const tickerRes = await fetch('/api/disputes/api/sovereign-eye/ticker/');
-        
-        // Mocking real-time feel for the "Masterpiece" certification
-        setStats({
-          active_disputes: 12,
-          total_value_locked: 15450.00,
-          integrity_score: 99.8,
-          readiness_gate: 96.0
-        });
+        const [statsRes, tickerRes] = await Promise.all([
+          fetch('/api/disputes/admin/disputes/stats/'),
+          fetch('/api/disputes/admin/vault/integrity/'),
+        ]);
 
-        const mockTicker: EvidenceEntry[] = [
-          { 
-            id: 108, 
-            action: 'KYC_LEVEL_UPGRADE', 
-            actor_email: 'premium.user@readyrent.gala', 
-            timestamp: new Date().toISOString(), 
-            metadata: { level: 'premium' },
-            hash: '0x8f2d...23e1',
-            previous_hash: '0x1a2b...c3d4'
-          },
-          { 
-            id: 107, 
-            action: 'BIOMETRIC_FACE_MATCH', 
-            actor_email: 'artisan.one@readyrent.gala', 
-            timestamp: new Date(Date.now() - 500000).toISOString(), 
-            metadata: { result: 'matched' },
-            hash: '0x4e5f...6g7h',
-            previous_hash: '0x8f2d...23e1'
-          },
-          { 
-            id: 106, 
-            action: 'ESCROW_PAYMENT_INITIATED', 
-            actor_email: 'system', 
-            timestamp: new Date(Date.now() - 1000000).toISOString(), 
-            metadata: { amount: 1250.00, method: 'E-Dahabia' },
-            hash: '0x9i0j...k1l2',
-            previous_hash: '0x4e5f...6g7h' 
-          }
-        ];
-        setTicker(mockTicker);
+        if (statsRes.status === 501 || tickerRes.status === 501) {
+          setError('البيانات غير متاحة حالياً');
+          setIsLoading(false);
+          return;
+        }
+
+        if (!statsRes.ok || !tickerRes.ok) {
+          setError('البيانات غير متاحة حالياً');
+          setIsLoading(false);
+          return;
+        }
+
+        const statsData = await statsRes.json();
+        const tickerData = await tickerRes.json();
+
+        setStats(statsData);
+        setTicker(tickerData);
+        setError(null);
+      } catch (err) {
+        if (process.env.NODE_ENV === 'development') console.error("Dashboard error:", err);
+        setError('البيانات غير متاحة حالياً');
+      } finally {
         setIsLoading(false);
-      } catch (error) {
-        if (process.env.NODE_ENV === 'development') console.error("Dashboard error:", error);
       }
     };
 
     fetchData();
-    const interval = setInterval(fetchData, 30000); // 30s refresh
+    const interval = setInterval(fetchData, 30000);
     return () => clearInterval(interval);
   }, []);
 
   return (
     <div className="min-h-screen bg-sovereign-obsidian text-sovereign-white font-arabic p-6 md:p-12 relative overflow-hidden" dir="rtl">
       
+      {isLoading && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-sovereign-obsidian/90 backdrop-blur-sm">
+          <DignifiedLoader label="جارٍ تحميل لوحة السيادة..." />
+        </div>
+      )}
+
+      {error && !isLoading && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-sovereign-obsidian/90 backdrop-blur-sm">
+          <div className="text-center space-y-4">
+            <ShieldAlert className="w-16 h-16 text-sovereign-gold mx-auto animate-pulse" />
+            <p className="text-2xl font-light italic text-sovereign-gold">{error}</p>
+          </div>
+        </div>
+      )}
+
       {/* Background Ambience */}
       <div className="absolute top-0 right-0 w-[1000px] h-[1000px] bg-sovereign-gold/5 rounded-full blur-[160px] opacity-20 pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-[800px] h-[800px] bg-sovereign-gold/2 rounded-full blur-[140px] opacity-10 pointer-events-none" />

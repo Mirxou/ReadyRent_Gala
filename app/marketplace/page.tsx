@@ -2,11 +2,12 @@
 
 import Link from 'next/link';
 import { motion, useInView } from 'framer-motion';
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { SovereignButton } from "@/shared/components/sovereign/sovereign-button";
 import { GlassPanel } from "@/shared/components/sovereign/glass-panel";
 import { SovereignGlow, SovereignSparkle } from '@/shared/components/sovereign/sovereign-sparkle';
-import { vendors, artisans } from '@/lib/mock-data';
+import { DignifiedLoader } from '@/shared/components/sovereign/dignified-loader';
+import { api } from '@/lib/api';
 import {
   Star,
   MapPin,
@@ -77,6 +78,19 @@ function HeroSection() {
 function FeaturedVendors() {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
+  const [vendors, setVendors] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    api
+      .get('vendors/vendors/')
+      .then((res: any) => {
+        const data = Array.isArray(res.data?.results) ? res.data.results : Array.isArray(res.data) ? res.data : [];
+        setVendors(data);
+      })
+      .catch(() => setVendors([]))
+      .finally(() => setIsLoading(false));
+  }, []);
 
   return (
     <section ref={ref} className="py-20 md:py-28 px-4">
@@ -104,72 +118,84 @@ function FeaturedVendors() {
           </motion.div>
         </motion.div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
-          {vendors.map((vendor: any, i: number) => (
-            <motion.div
-              key={vendor.id}
-              initial={{ opacity: 0, y: 30 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: i * 0.1, ease: [0.32, 0.72, 0, 1] as [number, number, number, number] }}
-            >
-              <Link href={`/vendors/${vendor.id}`} className="block group h-full">
-                <GlassPanel
-                  variant="obsidian"
-                  className="p-6 md:p-8 hover:border-emerald-400/20 transition-all duration-500 rounded-[2rem] h-full"
-                >
-                  <div className="relative z-10 space-y-5">
-                    <div className="flex items-start gap-4">
-                      {/* Avatar */}
-                      <div className="w-16 h-16 rounded-2xl overflow-hidden border border-white/10 group-hover:border-emerald-400/30 transition-colors flex-shrink-0">
-                        <img
-                          src={vendor.avatar}
-                          alt={vendor.name_ar}
-                          className="w-full h-full object-cover"
-                        />
+        {isLoading ? (
+          <DignifiedLoader label="جارٍ تحميل البائعين..." subLabel="يرجى الانتظار قليلاً" />
+        ) : vendors.length === 0 ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-center py-20"
+          >
+            <p className="text-muted-foreground text-lg">لا يوجد بائعون حالياً</p>
+          </motion.div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
+            {vendors.map((vendor: any, i: number) => (
+              <motion.div
+                key={vendor.id}
+                initial={{ opacity: 0, y: 30 }}
+                animate={inView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.6, delay: i * 0.1, ease: [0.32, 0.72, 0, 1] as [number, number, number, number] }}
+              >
+                <Link href={`/vendors/${vendor.id}`} className="block group h-full">
+                  <GlassPanel
+                    variant="obsidian"
+                    className="p-6 md:p-8 hover:border-emerald-400/20 transition-all duration-500 rounded-[2rem] h-full"
+                  >
+                    <div className="relative z-10 space-y-5">
+                      <div className="flex items-start gap-4">
+                        {/* Avatar */}
+                        <div className="w-16 h-16 rounded-2xl overflow-hidden border border-white/10 group-hover:border-emerald-400/30 transition-colors flex-shrink-0">
+                          <img
+                            src={vendor.avatar}
+                            alt={vendor.name_ar}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <h3 className="text-lg font-black tracking-tight group-hover:text-emerald-400 transition-colors truncate">
+                              {vendor.name_ar}
+                            </h3>
+                            {vendor.is_verified && (
+                              <BadgeCheck className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                            )}
+                          </div>
+                          <div className="flex items-center gap-3 mt-1.5">
+                            <div className="flex items-center gap-1">
+                              <Star className="w-3.5 h-3.5 fill-emerald-400 text-emerald-400" />
+                              <span className="text-sm font-bold">{Number(vendor.rating).toFixed(1)}</span>
+                            </div>
+                            <div className="flex items-center gap-1 text-muted-foreground text-xs">
+                              <MapPin className="w-3 h-3" />
+                              <span>{vendor.location}</span>
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <h3 className="text-lg font-black tracking-tight group-hover:text-emerald-400 transition-colors truncate">
-                            {vendor.name_ar}
-                          </h3>
-                          {vendor.is_verified && (
-                            <BadgeCheck className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                          )}
+
+                      <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2">
+                        {vendor.description_ar}
+                      </p>
+
+                      <div className="flex items-center justify-between pt-2 border-t border-white/5">
+                        <div className="flex items-center gap-1.5 text-muted-foreground text-xs">
+                          <Package className="w-3 h-3" />
+                          <span>{vendor.product_count} منتج</span>
                         </div>
-                        <div className="flex items-center gap-3 mt-1.5">
-                          <div className="flex items-center gap-1">
-                            <Star className="w-3.5 h-3.5 fill-emerald-400 text-emerald-400" />
-                            <span className="text-sm font-bold">{Number(vendor.rating).toFixed(1)}</span>
+                        {vendor.trust_score && (
+                          <div className="px-2.5 py-1 rounded-full bg-emerald-400/10 text-emerald-400 text-[11px] font-bold">
+                            نقاط ثقة {vendor.trust_score}%
                           </div>
-                          <div className="flex items-center gap-1 text-muted-foreground text-xs">
-                            <MapPin className="w-3 h-3" />
-                            <span>{vendor.location}</span>
-                          </div>
-                        </div>
+                        )}
                       </div>
                     </div>
-
-                    <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2">
-                      {vendor.description_ar}
-                    </p>
-
-                    <div className="flex items-center justify-between pt-2 border-t border-white/5">
-                      <div className="flex items-center gap-1.5 text-muted-foreground text-xs">
-                        <Package className="w-3 h-3" />
-                        <span>{vendor.product_count} منتج</span>
-                      </div>
-                      {vendor.trust_score && (
-                        <div className="px-2.5 py-1 rounded-full bg-emerald-400/10 text-emerald-400 text-[11px] font-bold">
-                          نقاط ثقة {vendor.trust_score}%
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </GlassPanel>
-              </Link>
-            </motion.div>
-          ))}
-        </div>
+                  </GlassPanel>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
@@ -181,6 +207,19 @@ function FeaturedVendors() {
 function FeaturedArtisans() {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
+  const [artisans, setArtisans] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    api
+      .get('artisans/artisans/')
+      .then((res: any) => {
+        const data = Array.isArray(res.data?.results) ? res.data.results : Array.isArray(res.data) ? res.data : [];
+        setArtisans(data);
+      })
+      .catch(() => setArtisans([]))
+      .finally(() => setIsLoading(false));
+  }, []);
 
   const featured = artisans.slice(0, 4);
 
@@ -210,59 +249,71 @@ function FeaturedArtisans() {
           </motion.div>
         </motion.div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 md:gap-6">
-          {featured.map((artisan: any, i: number) => (
-            <motion.div
-              key={artisan.id}
-              initial={{ opacity: 0, y: 30 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: i * 0.1, ease: [0.32, 0.72, 0, 1] as [number, number, number, number] }}
-            >
-              <Link href={`/artisans/${artisan.id}`} className="block group h-full">
-                <GlassPanel
-                  variant="obsidian"
-                  className="p-6 hover:border-emerald-400/20 transition-all duration-500 rounded-[2rem] text-center h-full"
-                >
-                  <div className="relative z-10 space-y-4">
-                    {/* Avatar */}
-                    <div className="w-20 h-20 mx-auto rounded-full overflow-hidden border-2 border-white/10 group-hover:border-emerald-400/50 transition-colors">
-                      <img
-                        src={artisan.avatar}
-                        alt={artisan.name_ar}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-
-                    <div>
-                      <h3 className="text-lg font-black tracking-tight group-hover:text-emerald-400 transition-colors">
-                        {artisan.name_ar}
-                      </h3>
-                      <p className="text-xs text-emerald-400/60 font-bold uppercase tracking-widest mt-1">
-                        {artisan.specialty_ar}
-                      </p>
-                    </div>
-
-                    {/* Rating */}
-                    <div className="flex items-center justify-center gap-1">
-                      <Star className="w-3.5 h-3.5 fill-emerald-400 text-emerald-400" />
-                      <span className="text-sm font-bold">
-                        {Number(artisan.rating).toFixed(1)}
-                      </span>
-                    </div>
-
-                    {/* Location */}
-                    {artisan.location && (
-                      <div className="flex items-center justify-center gap-1.5 text-muted-foreground text-xs">
-                        <MapPin className="w-3 h-3" />
-                        <span>{artisan.location}</span>
+        {isLoading ? (
+          <DignifiedLoader label="جارٍ تحميل الحرفيات..." subLabel="يرجى الانتظار قليلاً" />
+        ) : featured.length === 0 ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-center py-20"
+          >
+            <p className="text-muted-foreground text-lg">لا توجد حرفيات حالياً</p>
+          </motion.div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 md:gap-6">
+            {featured.map((artisan: any, i: number) => (
+              <motion.div
+                key={artisan.id}
+                initial={{ opacity: 0, y: 30 }}
+                animate={inView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.6, delay: i * 0.1, ease: [0.32, 0.72, 0, 1] as [number, number, number, number] }}
+              >
+                <Link href={`/artisans/${artisan.id}`} className="block group h-full">
+                  <GlassPanel
+                    variant="obsidian"
+                    className="p-6 hover:border-emerald-400/20 transition-all duration-500 rounded-[2rem] text-center h-full"
+                  >
+                    <div className="relative z-10 space-y-4">
+                      {/* Avatar */}
+                      <div className="w-20 h-20 mx-auto rounded-full overflow-hidden border-2 border-white/10 group-hover:border-emerald-400/50 transition-colors">
+                        <img
+                          src={artisan.avatar}
+                          alt={artisan.name_ar}
+                          className="w-full h-full object-cover"
+                        />
                       </div>
-                    )}
-                  </div>
-                </GlassPanel>
-              </Link>
-            </motion.div>
-          ))}
-        </div>
+
+                      <div>
+                        <h3 className="text-lg font-black tracking-tight group-hover:text-emerald-400 transition-colors">
+                          {artisan.name_ar}
+                        </h3>
+                        <p className="text-xs text-emerald-400/60 font-bold uppercase tracking-widest mt-1">
+                          {artisan.specialty_ar}
+                        </p>
+                      </div>
+
+                      {/* Rating */}
+                      <div className="flex items-center justify-center gap-1">
+                        <Star className="w-3.5 h-3.5 fill-emerald-400 text-emerald-400" />
+                        <span className="text-sm font-bold">
+                          {Number(artisan.rating).toFixed(1)}
+                        </span>
+                      </div>
+
+                      {/* Location */}
+                      {artisan.location && (
+                        <div className="flex items-center justify-center gap-1.5 text-muted-foreground text-xs">
+                          <MapPin className="w-3 h-3" />
+                          <span>{artisan.location}</span>
+                        </div>
+                      )}
+                    </div>
+                  </GlassPanel>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

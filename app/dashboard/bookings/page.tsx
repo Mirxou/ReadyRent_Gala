@@ -132,9 +132,10 @@ export default function BookingsPage() {
 
         <div className="grid grid-cols-1 gap-6">
         {bookings.map((booking: any) => {
-          const primaryImage = booking.product.primary_image || 
-                               booking.product.images?.[0]?.image || 
-                               'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=800&q=80&auto=format&fit=crop';
+          const primaryImage = booking.product?.primary_image || 
+                               booking.product_image || 
+                               booking.product?.images?.[0]?.image || 
+                               '/placeholder.svg';
 
           return (
             <Card key={booking.id}>
@@ -143,7 +144,7 @@ export default function BookingsPage() {
                   <div className="relative w-full md:w-32 h-40 flex-shrink-0 rounded-lg overflow-hidden">
                     <Image
                       src={primaryImage}
-                      alt={booking.product.name_ar}
+                      alt={booking.product?.name_ar || booking.product_name || 'منتج'}
                       fill
                       className="object-cover"
                     />
@@ -152,10 +153,10 @@ export default function BookingsPage() {
                   <div className="flex-1 space-y-4">
                     <div className="flex items-start justify-between">
                       <div>
-                        <h3 className="text-xl font-bold mb-1">{booking.product.name_ar}</h3>
-                        {booking.product.category && (
+                        <h3 className="text-xl font-bold mb-1">{booking.product?.name_ar || booking.product_name || 'منتج'}</h3>
+                        {booking.product?.category && (
                           <p className="text-sm text-muted-foreground">
-                            {booking.product.category.name_ar}
+                            {booking.product.category.name_ar || 'عام'}
                           </p>
                         )}
                       </div>
@@ -197,7 +198,7 @@ export default function BookingsPage() {
 
                     <div className="flex gap-2 pt-2">
                       <Button variant="outline" asChild>
-                        <Link href={`/products/${booking.product.slug || booking.product.id}`}>
+                        <Link href={`/products/${booking.product?.slug || booking.product?.id || booking.product_id}`}>
                           عرض المنتج
                         </Link>
                       </Button>

@@ -8,7 +8,8 @@ import { GlassPanel } from "@/shared/components/sovereign/glass-panel";
 import { SovereignGlow, SovereignSparkle } from '@/shared/components/sovereign/sovereign-sparkle';
 import { FeaturedProducts } from '@/components/product/featured-products';
 import { ReviewList } from '@/components/reviews/review-list';
-import { artisans as mockArtisans, localGuideServices as mockGuideServices, categories as mockCategories } from '@/lib/mock-data';
+import { innovationApi, reviewsApi } from '@/lib/api';
+import { DignifiedLoader } from '@/shared/components/sovereign/dignified-loader';
 import { formatNumber } from '@/lib/utils';
 import {
   Shirt,
@@ -26,7 +27,6 @@ import {
   Package,
   Briefcase,
   Smile,
-  TrendingUp,
   MessageCircle,
 } from 'lucide-react';
 
@@ -272,10 +272,12 @@ function EcosystemsSection() {
                     <p className="text-sm text-muted-foreground leading-relaxed flex-1">{eco.desc}</p>
 
                     <div className="pt-4">
-                      <SovereignButton variant="secondary" size="sm" className="w-full">
-                        <span>استكشفي</span>
-                        <ArrowLeft className="w-4 h-4" />
-                      </SovereignButton>
+                      <div onClick={() => window.location.href = eco.href}>
+                        <SovereignButton variant="secondary" size="sm" className="w-full">
+                          <span>استكشفي</span>
+                          <ArrowLeft className="w-4 h-4" />
+                        </SovereignButton>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -294,8 +296,18 @@ function EcosystemsSection() {
 function ArtisansSpotlight() {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
+  const [artisans, setArtisans] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const artisans = mockArtisans?.slice(0, 4) || [];
+  useEffect(() => {
+    innovationApi.getArtisans({ limit: 4 }).then((res) => {
+      if (res.data && !res.data.error && Array.isArray(res.data)) {
+        setArtisans(res.data.slice(0, 4));
+      } else if (res.data?.results && Array.isArray(res.data.results)) {
+        setArtisans(res.data.results.slice(0, 4));
+      }
+    }).catch(() => {}).finally(() => setLoading(false));
+  }, []);
 
   return (
     <section ref={ref} className="py-20 md:py-28 px-4">
@@ -323,59 +335,68 @@ function ArtisansSpotlight() {
           </motion.div>
         </motion.div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {artisans.map((artisan: any, i: number) => (
-            <motion.div
-              key={artisan.id || i}
-              initial={{ opacity: 0, y: 30 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: i * 0.1, ease: [0.32, 0.72, 0, 1] }}
-            >
-              <Link href="/artisans" className="block group">
-                <GlassPanel
-                  variant="obsidian"
-                  className="p-6 hover:border-sovereign-gold/30 transition-all duration-500 rounded-[2rem] text-center"
-                >
-                  <div className="relative z-10 space-y-4">
-                    {/* Avatar */}
-                    <div className="w-20 h-20 mx-auto rounded-full overflow-hidden border-2 border-sovereign-gold/20 group-hover:border-sovereign-gold/50 transition-colors">
-                      <img
-                        src={artisan.avatar || `https://picsum.photos/seed/artisan${i}/200/200`}
-                        alt={artisan.name_ar || 'حرفية'}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-
-                    <div>
-                      <h3 className="text-lg font-black tracking-tight group-hover:text-sovereign-gold transition-colors">
-                        {artisan.name_ar || 'حرفية'}
-                      </h3>
-                      <p className="text-xs text-sovereign-gold/60 font-bold uppercase tracking-widest mt-1">
-                        {artisan.specialty || 'حرفية محلية'}
-                      </p>
-                    </div>
-
-                    {/* Rating */}
-                    <div className="flex items-center justify-center gap-1">
-                      <Star className="w-3.5 h-3.5 fill-sovereign-gold text-sovereign-gold" />
-                      <span className="text-sm font-bold">
-                        {Number(artisan.rating || 4.8).toFixed(1)}
-                      </span>
-                    </div>
-
-                    {/* Location */}
-                    {artisan.location && (
-                      <div className="flex items-center justify-center gap-1.5 text-muted-foreground text-xs">
-                        <MapPin className="w-3 h-3" />
-                        <span>{artisan.location}</span>
+        {loading ? (
+          <DignifiedLoader label="جاري تحميل الحرفيات..." subLabel="يرجى الانتظار" className="py-12" />
+        ) : artisans.length === 0 ? (
+          <div className="text-center py-16 text-muted-foreground">
+            <Users className="w-12 h-12 mx-auto mb-4 opacity-30" />
+            <p className="text-lg font-bold">لا توجد حرفيات حالياً</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {artisans.map((artisan: any, i: number) => (
+              <motion.div
+                key={artisan.id || i}
+                initial={{ opacity: 0, y: 30 }}
+                animate={inView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.6, delay: i * 0.1, ease: [0.32, 0.72, 0, 1] }}
+              >
+                <Link href="/artisans" className="block group">
+                  <GlassPanel
+                    variant="obsidian"
+                    className="p-6 hover:border-sovereign-gold/30 transition-all duration-500 rounded-[2rem] text-center"
+                  >
+                    <div className="relative z-10 space-y-4">
+                      {/* Avatar */}
+                      <div className="w-20 h-20 mx-auto rounded-full overflow-hidden border-2 border-sovereign-gold/20 group-hover:border-sovereign-gold/50 transition-colors">
+                        <img
+                          src={artisan.avatar || artisan.image || `https://picsum.photos/seed/artisan${i}/200/200`}
+                          alt={artisan.name_ar || artisan.name || 'حرفية'}
+                          className="w-full h-full object-cover"
+                        />
                       </div>
-                    )}
-                  </div>
-                </GlassPanel>
-              </Link>
-            </motion.div>
-          ))}
-        </div>
+
+                      <div>
+                        <h3 className="text-lg font-black tracking-tight group-hover:text-sovereign-gold transition-colors">
+                          {artisan.name_ar || artisan.name || 'حرفية'}
+                        </h3>
+                        <p className="text-xs text-sovereign-gold/60 font-bold uppercase tracking-widest mt-1">
+                          {artisan.specialty || 'حرفية محلية'}
+                        </p>
+                      </div>
+
+                      {/* Rating */}
+                      <div className="flex items-center justify-center gap-1">
+                        <Star className="w-3.5 h-3.5 fill-sovereign-gold text-sovereign-gold" />
+                        <span className="text-sm font-bold">
+                          {Number(artisan.rating || 4.8).toFixed(1)}
+                        </span>
+                      </div>
+
+                      {/* Location */}
+                      {artisan.location && (
+                        <div className="flex items-center justify-center gap-1.5 text-muted-foreground text-xs">
+                          <MapPin className="w-3 h-3" />
+                          <span>{artisan.location}</span>
+                        </div>
+                      )}
+                    </div>
+                  </GlassPanel>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
@@ -397,7 +418,7 @@ function ServicesCategories() {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
 
-  const categories = mockCategories?.length ? mockCategories.slice(0, 6) : defaultServiceCategories;
+  const categories = defaultServiceCategories;
 
   return (
     <section ref={ref} className="py-20 md:py-28 px-4">
@@ -466,45 +487,21 @@ function ServicesCategories() {
 /* ════════════════════════════════════════════
    SECTION 5.5 — CUSTOMER REVIEWS
    ════════════════════════════════════════════ */
-const homepageReviews = [
-  {
-    id: 1,
-    user_email: '',
-    user_username: 'سارة بن عبد الله',
-    rating: 5,
-    title: 'تجربة زفاف رائعة',
-    comment: 'فستان الزفاف كان رائعاً! الجودة ممتازة والتطريز يدوي بامتياز. أنصح بشدة كل عروس بتجربته. الخدمة كانت سريعة والتوصيل في الموعد.',
-    is_verified_purchase: true,
-    helpful_count: 12,
-    created_at: '2024-12-15T14:30:00Z',
-  },
-  {
-    id: 2,
-    user_email: '',
-    user_username: 'كريم بوجلال',
-    rating: 4,
-    title: 'جودة عالية',
-    comment: 'البدلة كانت نظيفة ومكوية بشكل جيد. القماش ذو جودة عالية. فقط أتمنى لو كان هناك خيار لتعديل المقاس.',
-    is_verified_purchase: true,
-    helpful_count: 8,
-    created_at: '2024-12-10T09:15:00Z',
-  },
-  {
-    id: 3,
-    user_email: '',
-    user_username: 'نورة بلقاسم',
-    rating: 5,
-    title: 'تحفة فنية',
-    comment: 'القفطان الذهبي كان تحفة فنية! التطريز بالذهب الخالص جعلني أشعر بالملكية. شكراً على التجربة الرائعة.',
-    is_verified_purchase: true,
-    helpful_count: 15,
-    created_at: '2024-11-28T16:45:00Z',
-  },
-];
-
 function CustomerReviewsSection() {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    reviewsApi.getAll({ limit: 3 }).then((res) => {
+      if (res.data && !res.data.error && Array.isArray(res.data)) {
+        setReviews(res.data.slice(0, 3));
+      } else if (res.data?.results && Array.isArray(res.data.results)) {
+        setReviews(res.data.results.slice(0, 3));
+      }
+    }).catch(() => {}).finally(() => setLoading(false));
+  }, []);
 
   return (
     <section ref={ref} className="py-20 md:py-28 px-4">
@@ -534,26 +531,34 @@ function CustomerReviewsSection() {
           </motion.div>
         </motion.div>
 
-        {/* Reviews Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {homepageReviews.map((review, i) => (
-            <motion.div
-              key={review.id}
-              initial={{ opacity: 0, y: 30 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: i * 0.12, ease: [0.32, 0.72, 0, 1] }}
-            >
-              <GlassPanel
-                variant="obsidian"
-                className="p-6 hover:border-sovereign-gold/30 transition-all duration-500 rounded-[2rem] h-full"
+        {loading ? (
+          <DignifiedLoader label="جاري تحميل التقييمات..." subLabel="يرجى الانتظار" className="py-12" />
+        ) : reviews.length === 0 ? (
+          <div className="text-center py-16 text-muted-foreground">
+            <MessageCircle className="w-12 h-12 mx-auto mb-4 opacity-30" />
+            <p className="text-lg font-bold">لا توجد تقييمات حالياً</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {reviews.map((review: any, i: number) => (
+              <motion.div
+                key={review.id || i}
+                initial={{ opacity: 0, y: 30 }}
+                animate={inView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.6, delay: i * 0.12, ease: [0.32, 0.72, 0, 1] }}
               >
-                <div className="relative z-10">
-                  <ReviewList reviews={[review]} />
-                </div>
-              </GlassPanel>
-            </motion.div>
-          ))}
-        </div>
+                <GlassPanel
+                  variant="obsidian"
+                  className="p-6 hover:border-sovereign-gold/30 transition-all duration-500 rounded-[2rem] h-full"
+                >
+                  <div className="relative z-10">
+                    <ReviewList reviews={[review]} />
+                  </div>
+                </GlassPanel>
+              </motion.div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

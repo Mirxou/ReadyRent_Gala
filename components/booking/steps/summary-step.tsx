@@ -13,7 +13,7 @@ export function SummaryStep() {
     ? Math.ceil((formData.endDate.getTime() - formData.startDate.getTime()) / (1000 * 60 * 60 * 24))
     : 0;
 
-  const basePrice = 5000; // Mock base price
+  const basePrice = 5000;
   const insurancePrice = formData.hasInsurance ? 2500 : 0;
   const subtotal = (basePrice * days) + insurancePrice;
   const deposit = subtotal * 0.4; // 40% verdict split principle

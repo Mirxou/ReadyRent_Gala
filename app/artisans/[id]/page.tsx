@@ -303,9 +303,11 @@ export default function ArtisanDetailPage() {
               </div>
 
               <div className="pt-4 border-t space-y-2">
-                <Button className="w-full" size="lg">
-                  <Phone className="h-4 w-4 ml-2" />
-                  اتصل الآن
+                <Button asChild className="w-full" size="lg">
+                  <a href={`tel:${artisan.phone}`}>
+                    <Phone className="h-4 w-4 ml-2" />
+                    اتصل الآن
+                  </a>
                 </Button>
                 {artisan.whatsapp && (
                   <Button variant="outline" className="w-full" size="lg" asChild>

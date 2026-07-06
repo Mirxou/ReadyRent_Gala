@@ -26,7 +26,7 @@ export default function OfflinePage() {
                         className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium"
                         onClick={() => window.location.reload()}
                     >
-                        نحاولة الاتصال مجدداً
+                        محاولة الاتصال مجدداً
                     </Button>
 
                     <Link href="/" className="w-full">

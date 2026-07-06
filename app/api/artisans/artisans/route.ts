@@ -1,32 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { artisans } from '@/lib/mock-data';
+
+// ═══════════════════════════════════════════════════════════════════
+// Artisans API — Ready for real backend integration
+// ═══════════════════════════════════════════════════════════════════
 
 export async function GET(request: NextRequest) {
-  const { searchParams } = request.nextUrl;
-  const specialty = searchParams.get('specialty')?.toLowerCase() || '';
-  const location = searchParams.get('location')?.toLowerCase() || '';
-  const search = searchParams.get('search')?.toLowerCase() || '';
+  // When a real backend is connected, forward: specialty, location, search
+  void request;
 
-  let filtered = [...artisans];
-
-  if (specialty) {
-    filtered = filtered.filter(
-      (a) => a.specialty_ar.toLowerCase().includes(specialty) || a.specialty.toLowerCase().includes(specialty)
-    );
-  }
-
-  if (location) {
-    filtered = filtered.filter((a) => a.location.toLowerCase().includes(location));
-  }
-
-  if (search) {
-    filtered = filtered.filter(
-      (a) =>
-        a.name_ar.includes(search) ||
-        a.name.toLowerCase().includes(search) ||
-        a.bio_ar.includes(search)
-    );
-  }
-
-  return NextResponse.json({ success: true, data: filtered });
+  return NextResponse.json(
+    {
+      success: false,
+      dignity_preserved: true,
+      message_ar: 'قائمة الحرفيات غير متاحة حالياً — قيد التطوير',
+      message_en: 'Artisans list not yet available — under development',
+      code: 'NOT_IMPLEMENTED',
+    },
+    { status: 501 }
+  );
 }

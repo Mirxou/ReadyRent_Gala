@@ -1,26 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { vendors } from '@/lib/mock-data';
+
+// ═══════════════════════════════════════════════════════════════════
+// Vendors API — Ready for real backend integration
+// ═══════════════════════════════════════════════════════════════════
 
 export async function GET(request: NextRequest) {
-  const { searchParams } = request.nextUrl;
-  const location = searchParams.get('location')?.toLowerCase() || '';
-  const search = searchParams.get('search')?.toLowerCase() || '';
+  // When a real backend is connected, forward: location, search
+  void request;
 
-  let filtered = [...vendors];
-
-  if (location) {
-    filtered = filtered.filter((v) => v.location.toLowerCase().includes(location));
-  }
-
-  if (search) {
-    filtered = filtered.filter(
-      (v) =>
-        v.name_ar.includes(search) ||
-        v.name.toLowerCase().includes(search) ||
-        v.description_ar.includes(search)
-    );
-  }
-
-  const response = { success: true, data: filtered };
-  return NextResponse.json(response);
+  return NextResponse.json(
+    {
+      success: false,
+      dignity_preserved: true,
+      message_ar: 'قائمة البائعين غير متاحة حالياً — قيد التطوير',
+      message_en: 'Vendors list not yet available — under development',
+      code: 'NOT_IMPLEMENTED',
+    },
+    { status: 501 }
+  );
 }

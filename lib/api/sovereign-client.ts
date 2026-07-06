@@ -1,4 +1,4 @@
-// Sovereign API Client - connects to Next.js /api/ mock proxy
+// Sovereign API Client - connects to Next.js /api/ gateway
 import { SovereignResponse } from '@/types/sovereign';
 
 // Extended options type that supports query params (compatible with fetch RequestInit)

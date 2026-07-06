@@ -66,7 +66,7 @@ export default function ContractPage() {
     if (!id) return;
     try {
       const res = await fetch(`/api/contracts/digital/${id}/sign/`, {
-        method: 'POST',
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ip_address: signatureData.slice(0, 20) }),
       });

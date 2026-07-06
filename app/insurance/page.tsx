@@ -192,14 +192,18 @@ export default function InsurancePage() {
     setShowConfirm(true);
   };
 
-  const handleConfirmPurchase = () => {
+  const handleConfirmPurchase = async () => {
     setIsPurchasing(true);
-    setTimeout(() => {
+    try {
+      await fetch('/api/warranties/insurance/purchase', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ plan_id: selectedPlan }) });
       setPurchasedPlan(selectedPlan);
       setShowConfirm(false);
-      setIsPurchasing(false);
       toast.success('تم اشتراء خطة التأمين بنجاح');
-    }, 1500);
+    } catch {
+      toast.error('فشل شراء خطة التأمين');
+    } finally {
+      setIsPurchasing(false);
+    }
   };
 
   const handleContactSupport = () => {

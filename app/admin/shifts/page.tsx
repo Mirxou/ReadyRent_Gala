@@ -81,6 +81,8 @@ export default function AdminShiftsPage() {
 
   const fetchShifts = async () => {
     try {
+      // NOTE: /api/users/staff/shifts/ is handled by a mock API handler.
+      // If this endpoint doesn't exist yet, the shifts will be empty.
       const response = await fetch('/api/users/staff/shifts/', {
         headers: {
           ...getAuthHeaders(),

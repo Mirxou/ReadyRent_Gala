@@ -1,29 +1,18 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { products, categories } from '@/lib/mock-data';
+import { NextResponse } from 'next/server';
 
-export async function GET(request: NextRequest) {
-  const { searchParams } = request.nextUrl;
-  const query = searchParams.get('q')?.toLowerCase() || '';
+// ═══════════════════════════════════════════════════════════════════
+// Product Search Suggestions API — Ready for real backend integration
+// ═══════════════════════════════════════════════════════════════════
 
-  if (!query) {
-    return NextResponse.json({ success: true, data: [] });
-  }
-
-  const suggestions: string[] = [];
-
-  // Search product names
-  products.forEach((p) => {
-    if (p.name_ar.includes(query)) suggestions.push(p.name_ar);
-    if (p.name.toLowerCase().includes(query)) suggestions.push(p.name);
-  });
-
-  // Search category names
-  categories.forEach((c) => {
-    if (c.name_ar.includes(query)) suggestions.push(c.name_ar);
-  });
-
-  // Deduplicate and limit to 8
-  const unique = [...new Set(suggestions)].slice(0, 8);
-
-  return NextResponse.json({ success: true, data: unique });
+export async function GET() {
+  return NextResponse.json(
+    {
+      success: false,
+      dignity_preserved: true,
+      message_ar: 'اقتراحات البحث غير متاحة حالياً — قيد التطوير',
+      message_en: 'Search suggestions not yet available — under development',
+      code: 'NOT_IMPLEMENTED',
+    },
+    { status: 501 }
+  );
 }

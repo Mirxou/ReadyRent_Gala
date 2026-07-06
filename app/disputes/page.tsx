@@ -36,7 +36,7 @@ export default function DisputesPage() {
   const handleSubmit = async () => {
     setIsSubmitting(true);
     try {
-      await disputesApi.initiateDispute({
+      await disputesApi.createDispute({
         booking_id: formData.bookingId || 0,
         claim_type: formData.disputeType,
         description: formData.description + '\n\n' + formData.subject,
@@ -44,8 +44,8 @@ export default function DisputesPage() {
       toast.success('تم إنشاء النزاع بنجاح');
       setIsSuccess(true);
       resetWizard();
-    } catch (error: any) {
-      toast.error(error?.response?.data?.error || 'حدث خطأ أثناء إنشاء النزاع');
+    } catch {
+      toast.error('حدث خطأ أثناء إنشاء النزاع');
     } finally {
       setIsSubmitting(false);
     }

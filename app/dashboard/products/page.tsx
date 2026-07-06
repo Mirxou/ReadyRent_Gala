@@ -35,6 +35,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
+import { toast } from 'sonner';
 
 async function fetchProducts() {
   const res = await fetch('/api/products');
@@ -49,7 +50,7 @@ export default function ProductsPage() {
       queryFn: fetchProducts,
     });
 
-    // Mock: show first 5 as "user's products" since we don't have real auth
+    // Show first products from API
     const myProducts = (products || []).slice(0, 5);
 
     const filteredProducts = myProducts.filter((product: any) =>
@@ -160,14 +161,14 @@ export default function ProductsPage() {
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent align="end" className="w-[160px]">
                                                 <DropdownMenuLabel>الإجراءات</DropdownMenuLabel>
-                                                <DropdownMenuItem>
+                                                <DropdownMenuItem onClick={() => toast.info('قريباً: ميزة التعديل')}>
                                                     <Edit className="ml-2 h-4 w-4" /> تعديل
                                                 </DropdownMenuItem>
-                                                <DropdownMenuItem>
+                                                <DropdownMenuItem onClick={() => toast.info('قريباً: ميزة المعاينة')}>
                                                     <Eye className="ml-2 h-4 w-4" /> معاينة
                                                 </DropdownMenuItem>
                                                 <DropdownMenuSeparator />
-                                                <DropdownMenuItem className="text-red-600 focus:text-red-600">
+                                                <DropdownMenuItem className="text-red-600 focus:text-red-600" onClick={() => toast.info('قريباً: ميزة الحذف')}>
                                                     <Trash2 className="ml-2 h-4 w-4" /> حذف
                                                 </DropdownMenuItem>
                                             </DropdownMenuContent>

@@ -57,14 +57,31 @@ export function SovereignOracle() {
     setMessages(prev => [...prev, userMessage]);
     setInput('');
 
-    // Simulate AI Response
-    setTimeout(() => {
-      const assistantMessage: Message = { 
-        role: 'assistant', 
-        content: `لقد فهمت طلبك بخصوص "${input}". النظام السيادي يقوم بمعالجة استفسارك حالياً وفقاً لبروتوكول "STANDARD"...` 
-      };
-      setMessages(prev => [...prev, assistantMessage]);
-    }, 1200);
+    // Call chatbot API for AI response
+    setMessages(prev => [...prev, { role: 'assistant', content: 'جاري التفكير...' }]);
+
+    fetch('/api/chatbot/quick-chat/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: input, language: 'ar' }),
+      credentials: 'include',
+    })
+      .then((res) => res.json())
+      .then((json) => {
+        const reply = json?.data?.reply || json?.data?.reply_ar || 'عذراً، لم أتمكن من معالجة طلبك حالياً.';
+        setMessages(prev => {
+          const updated = [...prev];
+          updated[updated.length - 1] = { role: 'assistant', content: reply };
+          return updated;
+        });
+      })
+      .catch(() => {
+        setMessages(prev => {
+          const updated = [...prev];
+          updated[updated.length - 1] = { role: 'assistant', content: 'عذراً، حدث خطأ في الاتصال. حاول مرة أخرى.' };
+          return updated;
+        });
+      });
   };
 
   return (

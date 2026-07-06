@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Package, Plus, ChevronDown, ChevronUp, Clock, Eye } from 'lucide-react';
 import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
@@ -41,6 +41,23 @@ export default function ReturnsPage() {
   const [description, setDescription] = useState('');
   const [fileName, setFileName] = useState<string | null>(null);
 
+  useEffect(() => {
+    fetch('/api/returns/returns')
+      .then((r) => r.json())
+      .then((d) => {
+        const list = Array.isArray(d) ? d : (d?.data || d?.results || []);
+        setReturns(list.map((r: any) => ({
+          id: r.id || `RET-${String(r.booking_ref || '').padStart(4, '0')}`,
+          bookingRef: r.booking_ref || r.bookingRef || '',
+          reason: r.reason || '',
+          description: r.description || '',
+          date: r.created_at ? new Date(r.created_at).toLocaleDateString('ar-DZ', { year: 'numeric', month: 'long', day: 'numeric' }) : new Date().toLocaleDateString('ar-DZ', { year: 'numeric', month: 'long', day: 'numeric' }),
+          status: r.status || 'قيد المراجعة',
+          fileName: r.file_name || r.fileName || undefined,
+        })));
+      })
+      .catch(() => {});
+  }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -62,31 +79,41 @@ export default function ReturnsPage() {
     }
 
     setIsSubmitting(true);
-    setTimeout(() => {
-      const newReturn: ReturnRequest = {
-        id: `RET-${String(returns.length + 1).padStart(4, '0')}`,
-        bookingRef: bookingRef,
-        reason: reason,
-        description: description,
-        date: new Date().toLocaleDateString('ar-DZ', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
-        }),
-        status: 'قيد المراجعة',
-        fileName: fileName || undefined,
-      };
+    try {
+      const res = await fetch('/api/returns', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ booking_ref: bookingRef, reason, description }) });
+      const json = await res.json();
+      if (res.ok) {
+        const newReturn: ReturnRequest = {
+          id: json?.data?.id || `RET-${String(returns.length + 1).padStart(4, '0')}`,
+          bookingRef: bookingRef,
+          reason: reason,
+          description: description,
+          date: new Date().toLocaleDateString('ar-DZ', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          }),
+          status: 'قيد المراجعة',
+          fileName: fileName || undefined,
+        };
 
-      setReturns([newReturn, ...returns]);
+        setReturns([newReturn, ...returns]);
+        setIsSubmitting(false);
+        setShowForm(false);
+        setBookingRef('');
+        setReason('');
+        setDescription('');
+        setFileName(null);
+
+        toast.success('تم إرسال طلب الإرجاع بنجاح');
+      } else {
+        toast.error(json?.error || 'فشل إرسال طلب الإرجاع');
+        setIsSubmitting(false);
+      }
+    } catch {
+      toast.error('حدث خطأ أثناء الإرسال');
       setIsSubmitting(false);
-      setShowForm(false);
-      setBookingRef('');
-      setReason('');
-      setDescription('');
-      setFileName(null);
-
-      toast.success('تم إرسال طلب الإرجاع بنجاح');
-    }, 1500);
+    }
   };
 
   const toggleReturnExpand = (id: string) => {

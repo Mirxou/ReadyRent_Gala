@@ -21,6 +21,7 @@ import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
 import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
 import { Badge } from '@/components/ui/badge';
 import { cn, formatNumber } from '@/lib/utils';
+import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SovereignGlow, SovereignSparkle } from '@/shared/components/sovereign/sovereign-sparkle';
 import { useRouter } from 'next/navigation';
@@ -78,7 +79,13 @@ export default function WishlistPage() {
                             <div className="absolute top-6 right-6 z-10 flex gap-2">
                                <Badge className="bg-sovereign-gold text-black text-[9px] font-black px-3 py-1">Heritage Grade</Badge>
                             </div>
-                            <button className="absolute top-6 left-6 z-10 w-10 h-10 bg-white/10 rounded-full flex items-center justify-center text-red-500 hover:scale-110 transition-transform">
+                            <button className="absolute top-6 left-6 z-10 w-10 h-10 bg-white/10 rounded-full flex items-center justify-center text-red-500 hover:scale-110 transition-transform" onClick={() => {
+                               productsApi.removeFromWishlist(item.id).then(() => {
+                                 toast.info('تمت إزالة المنتج من قائمة الأمنيات');
+                               }).catch(() => {
+                                 toast.error('حدث خطأ أثناء الإزالة');
+                               });
+                            }}>
                                <Heart className="w-5 h-5 fill-red-500" />
                             </button>
                             {/* Simulated Image Placeholder */}
@@ -99,7 +106,7 @@ export default function WishlistPage() {
                                    <p className="text-[10px] uppercase font-black tracking-widest text-muted-foreground opacity-40 italic">القيمة اليومية</p>
                                    <p className="text-2xl font-black text-sovereign-gold">{formatNumber(item.price_per_day)} <span className="text-xs font-normal">DA</span></p>
                                 </div>
-                                <SovereignButton variant="primary" className="h-12 px-8 rounded-xl shadow-xl shadow-sovereign-gold/10">
+                                <SovereignButton variant="primary" className="h-12 px-8 rounded-xl shadow-xl shadow-sovereign-gold/10" onClick={() => router.push(`/products/${item.id}`)}>
                                    احجز الآن
                                 </SovereignButton>
                              </div>

@@ -21,9 +21,7 @@ import {
     ClipboardList,
     CalendarCheck,
     Bell,
-    Crown
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/lib/store';
 
 const sidebarSections = [
@@ -109,15 +107,14 @@ export function DashboardSidebar() {
                                     const isActive = pathname === item.href;
 
                                     return (
-                                        <Link key={item.href} href={item.href}>
-                                            <button
-                                                className={cn(
-                                                    "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 group relative overflow-hidden text-sm",
-                                                    isActive
-                                                        ? "bg-white/5 text-foreground shadow-lg shadow-black/10 border border-white/10"
-                                                        : "text-muted-foreground hover:text-foreground hover:bg-white/5"
-                                                )}
-                                            >
+                                        <Link key={item.href} href={item.href}
+                                            className={cn(
+                                                "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 group relative overflow-hidden text-sm",
+                                                isActive
+                                                    ? "bg-white/5 text-foreground shadow-lg shadow-black/10 border border-white/10"
+                                                    : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+                                            )}
+                                        >
                                                 {isActive && (
                                                     <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-sovereign-gold rounded-l-full shadow-[0_0_10px_rgba(180,146,84,0.4)]" />
                                                 )}
@@ -131,7 +128,6 @@ export function DashboardSidebar() {
                                                 )}>
                                                     {item.title}
                                                 </span>
-                                            </button>
                                         </Link>
                                     );
                                 })}

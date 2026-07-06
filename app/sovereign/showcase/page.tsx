@@ -16,13 +16,7 @@ export default function SovereignShowcasePage() {
     setMode('DISPUTE');
   }, [setMode]);
 
-  const mockReceiptStages = [
-    { label_ar: 'بدء النزاع', timestamp: '2026-02-10 14:00', status: 'completed' as const },
-    { label_ar: 'جمع الأدلة', timestamp: '2026-02-10 14:30', status: 'completed' as const },
-    { label_ar: 'التحليل السيادي', timestamp: '2026-02-10 14:35', status: 'completed' as const },
-    { label_ar: 'المراجعة القضائية', status: 'active' as const },
-    { label_ar: 'الحكم النهائي', status: 'pending' as const },
-  ];
+  const receiptStages: Array<{ label_ar?: string; timestamp?: string; status: 'completed' | 'active' | 'pending' }> = [];
 
   return (
     <div className="min-h-screen p-12 pb-32 space-y-24 bg-slate-50 dark:bg-slate-950 transition-colors duration-700">
@@ -67,12 +61,12 @@ export default function SovereignShowcasePage() {
         </h2>
         <div className="flex flex-col md:flex-row gap-12 items-center justify-center">
           <JusticeReceipt
-            stages={mockReceiptStages}
+            stages={receiptStages}
             disputeId="DSP-9928-XA"
           />
 
           <JusticeReceipt
-            stages={mockReceiptStages.map(s => ({ ...s, status: 'completed' }))}
+            stages={receiptStages.map(s => ({ ...s, status: 'completed' }))}
             disputeId="DSP-9928-FINAL"
             finalVerdict="حكم لصالح المؤجر (تعويض كامل)"
           />

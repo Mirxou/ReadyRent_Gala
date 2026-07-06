@@ -46,7 +46,7 @@ export default function AdminUsersPage() {
     return null;
   }
 
-  const filteredUsers = users?.results?.filter((u: any) => {
+  const filteredUsers = users?.filter((u: any) => {
     if (search) {
       const searchLower = search.toLowerCase();
       return (

@@ -2,12 +2,13 @@
 
 import Link from 'next/link';
 import { motion, useInView, type Variants } from 'framer-motion';
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { SovereignButton } from "@/shared/components/sovereign/sovereign-button";
 import { GlassPanel } from "@/shared/components/sovereign/glass-panel";
 import { SovereignGlow, SovereignSparkle } from '@/shared/components/sovereign/sovereign-sparkle';
+import { DignifiedLoader } from '@/shared/components/sovereign/dignified-loader';
+import { productsApi } from '@/lib/api';
 import { ProductCard } from '@/components/product/product-card';
-import { products, categories } from '@/lib/mock-data';
 import { Input } from '@/components/ui/input';
 import {
   Search,
@@ -91,6 +92,19 @@ function HeroSection() {
 function CategoriesGrid() {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
+  const [categories, setCategories] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    productsApi
+      .getCategories()
+      .then((res: any) => {
+        const data = Array.isArray(res.data?.results) ? res.data.results : Array.isArray(res.data) ? res.data : [];
+        setCategories(data);
+      })
+      .catch(() => setCategories([]))
+      .finally(() => setIsLoading(false));
+  }, []);
 
   return (
     <section ref={ref} className="py-20 md:py-28 px-4">
@@ -109,36 +123,48 @@ function CategoriesGrid() {
           </motion.div>
         </motion.div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-5">
-          {categories.map((cat, i) => (
-            <motion.div
-              key={cat.id}
-              initial={{ opacity: 0, y: 30 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: i * 0.08, ease: [0.32, 0.72, 0, 1] as [number, number, number, number] }}
-            >
-              <Link href={`/products?category=${cat.slug}`} className="block group h-full">
-                <div className="relative p-5 md:p-6 rounded-[2rem] border border-white/5 bg-white/[0.02] backdrop-blur-sm hover:border-sovereign-gold/20 hover:bg-sovereign-gold/5 transition-all duration-500 text-center h-full">
-                  <div className="space-y-3">
-                    <div className="w-14 h-14 mx-auto rounded-2xl overflow-hidden border border-white/10 group-hover:border-sovereign-gold/30 transition-colors">
-                      <img
-                        src={cat.icon}
-                        alt={cat.name_ar}
-                        className="w-full h-full object-cover"
-                      />
+        {isLoading ? (
+          <DignifiedLoader label="جارٍ تحميل التصنيفات..." subLabel="يرجى الانتظار قليلاً" />
+        ) : categories.length === 0 ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-center py-20"
+          >
+            <p className="text-muted-foreground text-lg">لا توجد تصنيفات حالياً</p>
+          </motion.div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-5">
+            {categories.map((cat, i) => (
+              <motion.div
+                key={cat.id}
+                initial={{ opacity: 0, y: 30 }}
+                animate={inView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.6, delay: i * 0.08, ease: [0.32, 0.72, 0, 1] as [number, number, number, number] }}
+              >
+                <Link href={`/products?category=${cat.slug}`} className="block group h-full">
+                  <div className="relative p-5 md:p-6 rounded-[2rem] border border-white/5 bg-white/[0.02] backdrop-blur-sm hover:border-sovereign-gold/20 hover:bg-sovereign-gold/5 transition-all duration-500 text-center h-full">
+                    <div className="space-y-3">
+                      <div className="w-14 h-14 mx-auto rounded-2xl overflow-hidden border border-white/10 group-hover:border-sovereign-gold/30 transition-colors">
+                        <img
+                          src={cat.icon}
+                          alt={cat.name_ar}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <h3 className="text-sm md:text-base font-black tracking-tight group-hover:text-sovereign-gold transition-colors">
+                        {cat.name_ar}
+                      </h3>
+                      <p className="text-[11px] text-muted-foreground">
+                        {cat.product_count} منتج
+                      </p>
                     </div>
-                    <h3 className="text-sm md:text-base font-black tracking-tight group-hover:text-sovereign-gold transition-colors">
-                      {cat.name_ar}
-                    </h3>
-                    <p className="text-[11px] text-muted-foreground">
-                      {cat.product_count} منتج
-                    </p>
                   </div>
-                </div>
-              </Link>
-            </motion.div>
-          ))}
-        </div>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
@@ -150,6 +176,19 @@ function CategoriesGrid() {
 function FeaturedProducts() {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
+  const [products, setProducts] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    productsApi
+      .getAll()
+      .then((res: any) => {
+        const data = Array.isArray(res.data?.results) ? res.data.results : Array.isArray(res.data) ? res.data : [];
+        setProducts(data);
+      })
+      .catch(() => setProducts([]))
+      .finally(() => setIsLoading(false));
+  }, []);
 
   const featured = products.slice(0, 8);
 
@@ -179,18 +218,30 @@ function FeaturedProducts() {
           </motion.div>
         </motion.div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-          {featured.map((product: any, i: number) => (
-            <motion.div
-              key={product.id}
-              initial={{ opacity: 0, y: 30 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: i * 0.08, ease: [0.32, 0.72, 0, 1] as [number, number, number, number] }}
-            >
-              <ProductCard product={product} />
-            </motion.div>
-          ))}
-        </div>
+        {isLoading ? (
+          <DignifiedLoader label="جارٍ تحميل المنتجات..." subLabel="يرجى الانتظار قليلاً" />
+        ) : featured.length === 0 ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-center py-20"
+          >
+            <p className="text-muted-foreground text-lg">لا توجد منتجات حالياً</p>
+          </motion.div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+            {featured.map((product: any, i: number) => (
+              <motion.div
+                key={product.id}
+                initial={{ opacity: 0, y: 30 }}
+                animate={inView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.6, delay: i * 0.08, ease: [0.32, 0.72, 0, 1] as [number, number, number, number] }}
+              >
+                <ProductCard product={product} />
+              </motion.div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

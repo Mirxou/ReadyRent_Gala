@@ -2,11 +2,12 @@
 
 import Link from 'next/link';
 import { motion, useInView, type Variants } from 'framer-motion';
-import { useRef, useState, useCallback } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 import { SovereignButton } from "@/shared/components/sovereign/sovereign-button";
 import { GlassPanel } from "@/shared/components/sovereign/glass-panel";
 import { SovereignGlow, SovereignSparkle } from '@/shared/components/sovereign/sovereign-sparkle';
-import { localGuideServices } from '@/lib/mock-data';
+import { DignifiedLoader } from '@/shared/components/sovereign/dignified-loader';
+import { api } from '@/lib/api';
 import {
   Dialog,
   DialogContent,
@@ -82,22 +83,30 @@ function BookingDialog({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = useCallback(
-    (e: React.FormEvent) => {
+    async (e: React.FormEvent) => {
       e.preventDefault();
       if (!formData.date || !formData.phone) {
         toast.error('يرجى ملء جميع الحقول المطلوبة');
         return;
       }
       setIsSubmitting(true);
-      // Simulate API call
-      setTimeout(() => {
-        setIsSubmitting(false);
+      try {
+        await api.post('local-guide/services/book/', {
+          service_id: service.id,
+          date: formData.date,
+          phone: formData.phone,
+          notes: formData.notes,
+        });
         onOpenChange(false);
         setFormData({ date: '', phone: '', notes: '' });
         toast.success(`تم تأكيد حجز "${service.name_ar}" بنجاح! سنتواصل معك قريباً`);
-      }, 1000);
+      } catch {
+        toast.error('حدث خطأ أثناء تأكيد الحجز. يرجى المحاولة مرة أخرى.');
+      } finally {
+        setIsSubmitting(false);
+      }
     },
-    [formData, onOpenChange, service.name_ar]
+    [formData, onOpenChange, service]
   );
 
   return (
@@ -337,14 +346,27 @@ function FeaturedServices({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
+  const [services, setServices] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    api
+      .get('local-guide/services/')
+      .then((res: any) => {
+        const data = Array.isArray(res.data?.results) ? res.data.results : Array.isArray(res.data) ? res.data : [];
+        setServices(data);
+      })
+      .catch(() => setServices([]))
+      .finally(() => setIsLoading(false));
+  }, []);
 
   // Filter services based on selected category
   const filteredServices = selectedCategory
-    ? localGuideServices.filter((s: any) => {
+    ? services.filter((s: any) => {
         const cat = serviceCategories.find((c) => c.slug === selectedCategory);
         return cat && cat.categoryMatch.includes(s.category_ar);
       })
-    : localGuideServices.slice(0, 6);
+    : services.slice(0, 6);
 
   return (
     <section id="services-section" ref={ref} className="py-20 md:py-28 px-4">
@@ -387,13 +409,17 @@ function FeaturedServices({
           )}
         </motion.div>
 
-        {filteredServices.length === 0 ? (
+        {isLoading ? (
+          <DignifiedLoader label="جارٍ تحميل الخدمات..." subLabel="يرجى الانتظار قليلاً" />
+        ) : filteredServices.length === 0 ? (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="text-center py-20"
           >
-            <p className="text-muted-foreground text-lg">لا توجد خدمات في هذا التصنيف حالياً</p>
+            <p className="text-muted-foreground text-lg">
+              {selectedCategory ? 'لا توجد خدمات في هذا التصنيف حالياً' : 'لا توجد خدمات حالياً'}
+            </p>
           </motion.div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">

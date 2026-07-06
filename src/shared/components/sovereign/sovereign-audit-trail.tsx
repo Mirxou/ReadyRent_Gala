@@ -22,35 +22,7 @@ interface AuditLog {
   description: string;
 }
 
-const mockLogs: AuditLog[] = [
-  { 
-    id: 'TRX-1092', 
-    action: 'ESCROW_RELEASE', 
-    timestamp: '2026-04-01T11:20:00Z', 
-    status: 'sealed', 
-    hash: '0x8f2d...23e1', 
-    actor: 'Tribunal Engine v1.0', 
-    description: 'Final verdict executed for Dispute #44. Funds distributed.' 
-  },
-  { 
-    id: 'TRX-1091', 
-    action: 'VERDICT_RENDERED', 
-    timestamp: '2026-04-01T11:15:00Z', 
-    status: 'sealed', 
-    hash: '0x4e5f...6g7h', 
-    actor: 'Judge @algiers_court', 
-    description: 'Manual verdict issued in favor of Owner. Evidence consistency 98%.' 
-  },
-  { 
-    id: 'TRX-1090', 
-    action: 'EVIDENCE_LOCK', 
-    timestamp: '2026-04-01T11:05:00Z', 
-    status: 'sealed', 
-    hash: '0x1a2b...c3d4', 
-    actor: 'System Auto-Vault', 
-    description: 'WORM lock applied to 12 photographic evidence entries for Dispute #44.' 
-  },
-];
+const auditLogs: AuditLog[] = [];
 
 export function SovereignAuditTrail() {
   return (
@@ -73,7 +45,7 @@ export function SovereignAuditTrail() {
       </div>
 
       <div className="space-y-16">
-        {mockLogs.map((log, index) => (
+        {auditLogs.map((log, index) => (
           <motion.div
             key={log.id}
             initial={{ opacity: 0, y: 20 }}

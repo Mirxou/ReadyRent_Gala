@@ -172,9 +172,9 @@ export default function ReportsPage() {
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        {revenueData?.daily_revenue && (
+        {revenueData?.revenue && (
           <RevenueChart 
-            data={revenueData.daily_revenue} 
+            data={revenueData.revenue} 
             period={revenueData.period}
           />
         )}

@@ -231,14 +231,14 @@ export default function AdminPackagingPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {types?.results?.length === 0 ? (
+              {types?.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={4} className="text-center py-8">
                     <p className="text-muted-foreground">لا توجد أنواع تغليف</p>
                   </TableCell>
                 </TableRow>
               ) : (
-                types?.results?.map((type: { id: number; name?: string; description?: string; is_active?: boolean }) => (
+                types?.map((type: { id: number; name?: string; description?: string; is_active?: boolean }) => (
                   <TableRow key={type.id}>
                     <TableCell className="font-medium">{type.name || '-'}</TableCell>
                     <TableCell>{type.description || '-'}</TableCell>
@@ -285,14 +285,14 @@ export default function AdminPackagingPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {materials?.results?.length === 0 ? (
+              {materials?.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center py-8">
                     <p className="text-muted-foreground">لا توجد مواد تغليف</p>
                   </TableCell>
                 </TableRow>
               ) : (
-                materials?.results?.map((material: { id: number; name?: string; material_type?: string; quantity_available?: number; is_available?: boolean }) => (
+                materials?.map((material: { id: number; name?: string; material_type?: string; quantity_available?: number; is_available?: boolean }) => (
                   <TableRow key={material.id}>
                     <TableCell className="font-medium">{material.name || '-'}</TableCell>
                     <TableCell>{material.material_type || '-'}</TableCell>
@@ -340,14 +340,14 @@ export default function AdminPackagingPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {rules?.results?.length === 0 ? (
+              {rules?.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center py-8">
                     <p className="text-muted-foreground">لا توجد قواعد تغليف</p>
                   </TableCell>
                 </TableRow>
               ) : (
-                rules?.results?.map((rule: { id: number; name?: string; product_type?: string; priority?: number; is_active?: boolean }) => (
+                rules?.map((rule: { id: number; name?: string; product_type?: string; priority?: number; is_active?: boolean }) => (
                   <TableRow key={rule.id}>
                     <TableCell className="font-medium">{rule.name || '-'}</TableCell>
                     <TableCell>{rule.product_type || '-'}</TableCell>
@@ -394,14 +394,14 @@ export default function AdminPackagingPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {instances?.results?.length === 0 ? (
+              {instances?.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={4} className="text-center py-8">
                     <p className="text-muted-foreground">لا توجد حالات تغليف</p>
                   </TableCell>
                 </TableRow>
               ) : (
-                instances?.results?.map((instance: { id: number; product_name?: string; packaging_type_name?: string; status?: string; created_at?: string }) => (
+                instances?.map((instance: { id: number; product_name?: string; packaging_type_name?: string; status?: string; created_at?: string }) => (
                   <TableRow key={instance.id}>
                     <TableCell className="font-medium">
                       {instance.product_name || 'منتج غير معروف'}

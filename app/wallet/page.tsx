@@ -40,24 +40,6 @@ interface Transaction {
   hash: string;
 }
 
-function generateHash(): string {
-  const chars = '0123456789abcdef';
-  const segments = ['8f2d', '23e1', 'a4b5', 'c6d7'];
-  segments[0] = '';
-  for (let i = 0; i < 4; i++) {
-    let seg = '';
-    for (let j = 0; j < 4; j++) {
-      seg += chars[Math.floor(Math.random() * chars.length)];
-    }
-    segments[i] = seg;
-  }
-  return `0x${segments[0]}${segments[1]}...${segments[2]}${segments[3]}`;
-}
-
-function generateTxId(): string {
-  return `TX-${Math.floor(9000 + Math.random() * 1000)}`;
-}
-
 const TABS: { key: TabKey; label: string; icon: React.ReactNode }[] = [
   { key: 'balance', label: 'الرصيد', icon: <Wallet className="w-4 h-4" /> },
   { key: 'deposit', label: 'الإيداع والسحب', icon: <ArrowLeftRight className="w-4 h-4" /> },
@@ -114,8 +96,15 @@ export default function SovereignWallet() {
   ]);
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 800);
-    return () => clearTimeout(timer);
+    fetch('/api/wallet')
+      .then((r) => r.json())
+      .then((d) => {
+        if (d?.data?.balance !== undefined) {
+          setBalance(d.data.balance);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setIsLoading(false));
   }, []);
 
   const switchToTab = useCallback((tab: TabKey, mode?: DepositMode) => {
@@ -132,30 +121,32 @@ export default function SovereignWallet() {
     setDwMethod('baridimob');
   }, []);
 
-  const handleDeposit = useCallback(() => {
+  const handleDeposit = useCallback(async () => {
     const amount = parseFloat(dwAmount);
     if (!amount || amount <= 0) {
       toast.error('يرجى إدخال مبلغ صحيح');
       return;
     }
     setDwLoading(true);
-    setTimeout(() => {
-      setBalance(prev => prev + amount);
-      setTransactions(prev => [{
-        id: generateTxId(),
-        type: 'INCOME' as const,
-        amount,
-        date: new Date().toISOString(),
-        note: dwMethod === 'baridimob' ? 'إيداع عبر البريدي موب' : 'إيداع ببطاقة بنكية',
-        hash: generateHash(),
-      }, ...prev]);
+    try {
+      const res = await fetch('/api/wallet/deposit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount, method: dwMethod }) });
+      const json = await res.json();
+      if (res.ok) {
+        if (json?.data?.balance !== undefined) setBalance(json.data.balance);
+        else setBalance(prev => prev + amount);
+        toast.success('تم الإيداع بنجاح');
+        handleDwReset();
+      } else {
+        toast.error(json?.error || 'فشل الإيداع');
+      }
+    } catch {
+      toast.error('حدث خطأ أثناء الإيداع');
+    } finally {
       setDwLoading(false);
-      toast.success('تم الإيداع بنجاح');
-      handleDwReset();
-    }, 1500);
+    }
   }, [dwAmount, dwMethod, handleDwReset]);
 
-  const handleWithdraw = useCallback(() => {
+  const handleWithdraw = useCallback(async () => {
     const amount = parseFloat(dwAmount);
     if (!amount || amount <= 0) {
       toast.error('يرجى إدخال مبلغ صحيح');
@@ -166,23 +157,25 @@ export default function SovereignWallet() {
       return;
     }
     setDwLoading(true);
-    setTimeout(() => {
-      setBalance(prev => prev - amount);
-      setTransactions(prev => [{
-        id: generateTxId(),
-        type: 'EXPENDITURE' as const,
-        amount,
-        date: new Date().toISOString(),
-        note: dwMethod === 'baridimob' ? 'سحب عبر البريدي موب' : 'سحب ببطاقة بنكية',
-        hash: generateHash(),
-      }, ...prev]);
+    try {
+      const res = await fetch('/api/wallet/withdraw', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount, method: dwMethod }) });
+      const json = await res.json();
+      if (res.ok) {
+        if (json?.data?.balance !== undefined) setBalance(json.data.balance);
+        else setBalance(prev => prev - amount);
+        toast.success('تم السحب بنجاح');
+        handleDwReset();
+      } else {
+        toast.error(json?.error || 'فشل السحب');
+      }
+    } catch {
+      toast.error('حدث خطأ أثناء السحب');
+    } finally {
       setDwLoading(false);
-      toast.success('تم السحب بنجاح');
-      handleDwReset();
-    }, 1500);
+    }
   }, [dwAmount, balance, dwMethod, handleDwReset]);
 
-  const handleTransfer = useCallback(() => {
+  const handleTransfer = useCallback(async () => {
     const amount = parseFloat(trAmount);
     if (!trRecipient.trim()) {
       toast.error('يرجى إدخال رقم المستلم');
@@ -197,22 +190,24 @@ export default function SovereignWallet() {
       return;
     }
     setTrLoading(true);
-    setTimeout(() => {
-      setBalance(prev => prev - amount);
-      setTransactions(prev => [{
-        id: generateTxId(),
-        type: 'EXPENDITURE' as const,
-        amount,
-        date: new Date().toISOString(),
-        note: `تحويل إلى ${trRecipient}${trNote ? ` - ${trNote}` : ''}`,
-        hash: generateHash(),
-      }, ...prev]);
+    try {
+      const res = await fetch('/api/wallet/transfer', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount, recipient_phone: trRecipient }) });
+      const json = await res.json();
+      if (res.ok) {
+        if (json?.data?.balance !== undefined) setBalance(json.data.balance);
+        else setBalance(prev => prev - amount);
+        toast.success('تم التحويل بنجاح');
+        setTrRecipient('');
+        setTrAmount('');
+        setTrNote('');
+      } else {
+        toast.error(json?.error || 'فشل التحويل');
+      }
+    } catch {
+      toast.error('حدث خطأ أثناء التحويل');
+    } finally {
       setTrLoading(false);
-      toast.success('تم التحويل بنجاح');
-      setTrRecipient('');
-      setTrAmount('');
-      setTrNote('');
-    }, 1500);
+    }
   }, [trRecipient, trAmount, trNote, balance]);
 
   if (isLoading) return (
@@ -414,7 +409,7 @@ export default function SovereignWallet() {
                             <p className="text-sm text-white/40 leading-relaxed font-light">&ldquo;بناءً على عمليات الشهر الحالي، ارتفعت درجة النزاهة المالية لديك بنسبة 1.2%. أنت الآن مؤهل للحصول على سقف سحب أعلى في بروتوكول الفخامة.&rdquo;</p>
                         </div>
                         <div className="w-full md:w-auto">
-                            <SovereignButton variant="secondary">تحميل كشف الحساب السيادي</SovereignButton>
+                            <SovereignButton variant="secondary" onClick={() => toast.info('جارٍ تحميل الكشف...')}>تحميل كشف الحساب السيادي</SovereignButton>
                         </div>
                     </div>
                 </div>

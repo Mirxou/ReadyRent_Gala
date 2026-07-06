@@ -117,17 +117,21 @@ export default function VerificationPage() {
     handleFileSelect(e.dataTransfer.files[0]);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!fileName) {
       toast.error('يرجى اختيار ملف أولاً');
       return;
     }
     setIsSubmitting(true);
-    setTimeout(() => {
+    try {
+      await fetch('/api/verification', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ document_type: 'id_card', file_name: fileName }) });
       setIsSubmitting(false);
       setSubmitted(true);
       toast.success('تم إرسال الوثائق بنجاح. سيتم مراجعتها خلال 24-48 ساعة.');
-    }, 2000);
+    } catch {
+      toast.error('فشل إرسال الوثائق');
+      setIsSubmitting(false);
+    }
   };
 
   return (

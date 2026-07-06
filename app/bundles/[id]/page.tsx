@@ -27,7 +27,7 @@ export default function BundleDetailPage() {
   const handleAddToCart = async () => {
     if (!isAuthenticated) {
       toast.error('يجب تسجيل الدخول أولاً');
-      router.push('/login?redirect=/bundles/' + bundleId);
+      router.push('/login');
       return;
     }
 

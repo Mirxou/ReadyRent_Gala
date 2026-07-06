@@ -99,7 +99,7 @@ export default function BookingDetailsPage() {
             </h1>
         </div>
         <div className="flex gap-4">
-            <SovereignButton variant="secondary" size="sm" className="gap-2">
+            <SovereignButton variant="secondary" size="sm" className="gap-2" onClick={() => toast.info('جارٍ تحميل نسخة PDF...')}>
                 <Download className="w-4 h-4" /> تحميل نسخة PDF
             </SovereignButton>
         </div>
@@ -274,7 +274,7 @@ export default function BookingDetailsPage() {
                             <p className="text-sm font-black">إشعار الاسترجاع المالي (Automatic Refund)</p>
                             <p className="text-xs text-muted-foreground">تمت إعادة مبلغ {formatNumber(booking.total_price * 0.2)} DA إلى محفظتكم السيادية.</p>
                         </div>
-                        <SovereignButton variant="secondary" size="sm" className="mt-4 md:mt-0 gap-2 border-emerald-500/20 text-emerald-500">
+                        <SovereignButton variant="secondary" size="sm" className="mt-4 md:mt-0 gap-2 border-emerald-500/20 text-emerald-500" onClick={() => toast.info('جارٍ تحميل الفاتورة...')}>
                              تحميل الفاتورة النهائية
                         </SovereignButton>
                     </div>
@@ -327,11 +327,11 @@ export default function BookingDetailsPage() {
 
                 <div className="space-y-4">
                     <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground opacity-40">Agreement Tools</p>
-                    <SovereignButton variant="secondary" className="w-full justify-between px-6">
+                        <SovereignButton variant="secondary" className="w-full justify-between px-6" onClick={() => toast.info('قريباً: ميزة المراسلة')}>
                         <span className="flex items-center gap-3"><MessageSquare className="w-4 h-4" /> مراسلة المالك</span>
                         <ChevronRight className="w-4 h-4" />
                     </SovereignButton>
-                    <SovereignButton variant="secondary" className="w-full justify-between px-6">
+                    <SovereignButton variant="secondary" className="w-full justify-between px-6" onClick={() => toast.info('قريباً: ميزة تمديد العقد')}>
                         <span className="flex items-center gap-3"><Clock className="w-4 h-4" /> تمديد العقد</span>
                         <ChevronRight className="w-4 h-4" />
                     </SovereignButton>

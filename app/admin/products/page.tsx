@@ -50,7 +50,7 @@ export default function AdminProductsPage() {
     return null;
   }
 
-  const filteredProducts = products?.results?.filter((product: any) => {
+  const filteredProducts = products?.filter((product: any) => {
     if (search) {
       const searchLower = search.toLowerCase();
       return (

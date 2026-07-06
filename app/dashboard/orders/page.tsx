@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
 import {
     Calendar,
     Clock,
@@ -20,6 +21,7 @@ import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
 import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
 import Link from 'next/link';
 import { cn, formatNumber } from '@/lib/utils';
+import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 
@@ -39,6 +41,7 @@ const statusConfig: Record<string, { label: string; className: string }> = {
 };
 
 export default function OrdersPage() {
+    const router = useRouter();
     const [activeTab, setActiveTab] = useState('all');
     const { data: bookings, isLoading } = useQuery({
       queryKey: ['bookings'],
@@ -192,17 +195,17 @@ export default function OrdersPage() {
 
                                     {/* Sovereign Actions */}
                                     <div className="flex items-center gap-3 w-full sm:w-auto">
-                                        <SovereignButton variant="secondary" size="sm" className="flex-1 sm:flex-none gap-2 px-6">
+                                        <SovereignButton variant="secondary" size="sm" className="flex-1 sm:flex-none gap-2 px-6" onClick={() => router.push(`/dashboard/orders/${order.id}`)}>
                                             <FileSignature className="w-4 shadow-sm" />
                                             تفاصيل العقد
                                         </SovereignButton>
                                         
                                         {order.status === 'pending' ? (
-                                            <SovereignButton variant="primary" size="sm" className="flex-1 sm:flex-none gap-2 px-10 shadow-lg shadow-sovereign-gold/10" withShimmer>
+                                            <SovereignButton variant="primary" size="sm" className="flex-1 sm:flex-none gap-2 px-10 shadow-lg shadow-sovereign-gold/10" withShimmer onClick={() => toast.info('جارٍ إبرام العقد...')}>
                                                 إبرام العقد
                                             </SovereignButton>
                                         ) : (
-                                            <SovereignButton variant="secondary" size="sm" className="flex-1 sm:flex-none gap-2 px-6">
+                                            <SovereignButton variant="secondary" size="sm" className="flex-1 sm:flex-none gap-2 px-6" onClick={() => toast.info('جارٍ التنفيذ...')}>
                                                 <Scale className="w-4 h-4 text-sovereign-gold" />
                                                 إجراء تحميلي
                                             </SovereignButton>

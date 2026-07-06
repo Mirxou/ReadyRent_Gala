@@ -133,7 +133,7 @@ export default function AdminInventoryPage() {
     return null;
   }
 
-  const filteredItems = items?.results?.filter((item: any) => {
+  const filteredItems = items?.filter((item: any) => {
     if (search) {
       const searchLower = search.toLowerCase();
       return (
@@ -148,7 +148,7 @@ export default function AdminInventoryPage() {
       return item.quantity === 0;
     }
     return true;
-  }) || items?.results || [];
+  }) || items || [];
 
   const getStockStatus = (item: any) => {
     if (item.quantity === 0) {
@@ -175,7 +175,7 @@ export default function AdminInventoryPage() {
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{items?.results?.length || 0}</div>
+            <div className="text-2xl font-bold">{items?.length || 0}</div>
           </CardContent>
         </Card>
 
@@ -186,7 +186,7 @@ export default function AdminInventoryPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-orange-500">
-              {stockAlerts?.results?.length || 0}
+              {stockAlerts?.length || 0}
             </div>
           </CardContent>
         </Card>
@@ -242,7 +242,7 @@ export default function AdminInventoryPage() {
       </Card>
 
       {/* Stock Alerts */}
-      {stockAlerts?.results && stockAlerts.results.length > 0 && (
+      {stockAlerts && stockAlerts.length > 0 && (
         <Card className="mb-6 border-orange-500/50">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -252,7 +252,7 @@ export default function AdminInventoryPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              {stockAlerts.results.slice(0, 5).map((alert: any) => (
+              {stockAlerts.slice(0, 5).map((alert: any) => (
                 <div
                   key={alert.id}
                   className="flex items-center justify-between p-3 bg-orange-500/10 rounded-lg"

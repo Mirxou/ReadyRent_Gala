@@ -101,7 +101,7 @@ export function VendorCard({ vendor }: VendorCardProps) {
             {vendor.website && (
               <div
                 className="flex items-center gap-1 text-sovereign-gold hover:underline text-sm font-medium"
-                onClick={(e) => e.stopPropagation()}
+                onClick={(e) => { e.stopPropagation(); if (vendor.website) window.open(vendor.website, '_blank', 'noopener,noreferrer'); }}
               >
                 <ExternalLink className="h-4 w-4" />
                 <span>زيارة الموقع</span>

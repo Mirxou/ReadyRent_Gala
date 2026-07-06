@@ -100,7 +100,7 @@ export default function BookingDetailPage() {
                             </Badge>
                         </div>
                         <p className="text-muted-foreground text-lg font-light italic">
-                            سيادة التعاقد: {booking.product?.name}
+                            سيادة التعاقد: {booking.product?.name || booking.product_name || 'منتج'}
                         </p>
                     </div>
 
@@ -145,17 +145,17 @@ export default function BookingDetailPage() {
 
                                 <div className="space-y-6 flex-1">
                                     <div className="flex items-center gap-4">
-                                        {booking.product.images?.[0] && (
+                                        {booking.product?.images?.[0] && (
                                             <img 
-                                                src={booking.product.images[0].photo} 
-                                                alt={booking.product.name}
+                                                src={booking.product.images[0].photo || booking.product_image || '/placeholder.svg'} 
+                                                alt={booking.product?.name || 'منتج'}
                                                 className="w-20 h-20 object-cover rounded-2xl border border-white/10"
                                             />
                                         )}
                                         <div className="space-y-1">
                                             <span className="text-[10px] font-black uppercase text-sovereign-gold">التفاصيل الفنية</span>
-                                            <h3 className="text-xl font-black italic">{booking.product.name}</h3>
-                                            <p className="text-xs text-white/40">{booking.product.price_per_day} DA / يوم</p>
+                                            <h3 className="text-xl font-black italic">{booking.product?.name || booking.product_name || 'منتج'}</h3>
+                                            <p className="text-xs text-white/40">{booking.product?.price_per_day || '—'} DA / يوم</p>
                                         </div>
                                     </div>
                                     <SovereignButton variant="secondary" size="sm" className="w-full">

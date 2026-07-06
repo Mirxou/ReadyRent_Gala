@@ -28,13 +28,6 @@ import { Badge } from '@/components/ui/badge';
 
 const AR_MONTHS = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
 
-const MOCK_DATA = Array.from({ length: 12 }).map((_, i) => ({
-  month: AR_MONTHS[i % 12],
-  price: 150000 + (Math.sin(i / 2) * 20000) + (i * 5000), // More organic growth
-  liquidity: 75 + (Math.cos(i / 2) * 15), 
-  risk: Math.max(5, 35 - (i * 2.5) + (Math.random() * 5)),
-}));
-
 export function SovereignPredictivePulse() {
   
   const CustomTooltip = ({ active, payload, label }: any) => {
@@ -104,7 +97,7 @@ export function SovereignPredictivePulse() {
           <div className="lg:col-span-3 space-y-8">
             <div className="h-[350px] w-full relative">
               <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart data={MOCK_DATA} margin={{ top: 20, right: 0, left: 0, bottom: 0 }}>
+                <ComposedChart data={[]} margin={{ top: 20, right: 0, left: 0, bottom: 0 }}>
                   <defs>
                     <linearGradient id="priceGradient" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#C5A059" stopOpacity={0.4}/>

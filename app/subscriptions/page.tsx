@@ -848,7 +848,7 @@ export default function SubscriptionsPage() {
   // Subscribe mutation
   const subscribeMutation = useMutation({
     mutationFn: (planId: string) =>
-      fetch('/api/subscriptions/subscribe', {
+      fetch('/api/subscriptions/purchase', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ plan_id: planId }),
@@ -885,11 +885,16 @@ export default function SubscriptionsPage() {
     plansRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const handleCancel = () => {
+  const handleCancel = async () => {
     if (currentPlanId === 'free') return;
-    toast.info('تم إلغاء الاشتراك والعودة إلى الخطة المجانية', {
-      duration: 3000,
-    });
+    try {
+      await fetch('/api/subscriptions/cancel', { method: 'POST' });
+      toast.info('تم إلغاء الاشتراك والعودة إلى الخطة المجانية', {
+        duration: 3000,
+      });
+    } catch {
+      toast.error('فشل إلغاء الاشتراك');
+    }
   };
 
   return (
