@@ -34,9 +34,6 @@ export function middleware(request: NextRequest) {
   // Security headers for all responses
   const response = NextResponse.next();
 
-  // Prevent clickjacking
-  response.headers.set('X-Frame-Options', 'DENY');
-
   // Prevent MIME type sniffing
   response.headers.set('X-Content-Type-Options', 'nosniff');
 
