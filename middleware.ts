@@ -46,8 +46,9 @@ export function middleware(request: NextRequest) {
   // Referrer Policy
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
 
-  // Permissions Policy - restrict browser features
-  response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(self), payment=()');
+  // Permissions Policy - restrict browser features (allow camera for verification)
+  const allowCamera = pathname === '/verification';
+  response.headers.set('Permissions-Policy', `camera=(${allowCamera ? 'self' : ''}), microphone=(), geolocation=(self), payment=()`);
 
   // HSTS (only in production-like environments)
   if (request.headers.get('x-forwarded-proto') === 'https') {

@@ -46,6 +46,8 @@ model User {
   activityLogs    ActivityLog[]
   sentVouches     SocialVouch[] @relation("VouchSender")
   receivedVouches SocialVouch[] @relation("VouchReceiver")
+  identityVerification IdentityVerification?
+  verificationVotes VerificationVote[] @relation("VerificationVoter")
 
   @@map("users")
 }
@@ -591,4 +593,44 @@ model ChatSession {
   createdAt DateTime @default(now()) @map("created_at")
 
   @@map("chat_sessions")
+}
+
+// ──── Identity Verification ────
+// AI face verification + 5-vouch community review system
+model IdentityVerification {
+  id              String   @id @default(cuid())
+  userId          String   @unique @map("user_id")
+  facePhoto       String   @map("face_photo") // base64 encoded face capture
+  status          String   @default("pending") @map("status") // pending, ai_approved, ai_rejected, community_review, verified, rejected
+  aiAnalysis      String?  @map("ai_analysis") // JSON: AI analysis result from VLM
+  aiScore         Int      @default(0) @map("ai_score") // 0-100 AI confidence score
+  approvalCount   Int      @default(0) @map("approval_count")
+  rejectionCount  Int      @default(0) @map("rejection_count")
+  requiredApprovals Int    @default(5) @map("required_approvals") // needs 5 verified users to approve
+  rejectionReason String?  @map("rejection_reason")
+  reviewedAt      DateTime? @map("reviewed_at")
+  verifiedAt      DateTime? @map("verified_at")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  votes           VerificationVote[]
+
+  @@map("identity_verifications")
+}
+
+// ──── Verification Vote (by already-verified users) ────
+model VerificationVote {
+  id               String   @id @default(cuid())
+  verificationId   String   @map("verification_id")
+  voterId          String   @map("voter_id") // the verified user who voted
+  vote             String   @map("vote") // approve, reject
+  comment          String?
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  verification     IdentityVerification @relation(fields: [verificationId], references: [id], onDelete: Cascade)
+  voter            User     @relation("VerificationVoter", fields: [voterId], references: [id], onDelete: Cascade)
+
+  @@unique([verificationId, voterId]) // one vote per verified user per verification
+  @@map("verification_votes")
 }

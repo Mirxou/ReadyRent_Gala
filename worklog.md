@@ -26,3 +26,115 @@ Stage Summary:
 - **Admin Analytics**: Dashboard stats, revenue data, top products, daily summary
 - **No mock data remains** anywhere in the codebase
 - All API responses use the sovereign envelope format: { success, dignity_preserved, data }
+
+---
+Task ID: 3
+Agent: Verification API Builder
+Task: Create 4 backend API routes for the identity verification system
+
+Work Log:
+- Created `app/api/verification/submit/route.ts` (POST) — Submits face photo for AI verification
+  - Auth required via getSessionFromRequest
+  - Validates face_photo is a valid data URL
+  - Checks for duplicate/active verification requests (allows resubmission if rejected/ai_rejected)
+  - Uses z-ai-web-dev-sdk VLM (`createVision`) to analyze face photo with structured JSON prompt
+  - Handles markdown-wrapped JSON responses from VLM
+  - Creates IdentityVerification record with status 'ai_approved' (if recommendation=approve && confidence>=60) or 'ai_rejected'
+  - Creates Notification for user on both approval and rejection
+  - Returns sovereign envelope with id, status, ai_score, ai_analysis, required_approvals, created_at
+
+- Created `app/api/verification/status/route.ts` (GET) — Gets current user's verification status
+  - Auth required
+  - Returns { status: 'not_submitted' } if no record found
+  - Returns full verification record with parsed ai_analysis, vote counts, timestamps
+  - Includes all votes with voter username, first/last name, vote, comment, created_at
+
+- Created `app/api/verification/pending/route.ts` (GET) — Gets pending verification queue
+  - Auth required + checks user.isVerified === true (403 if not)
+  - Finds all IdentityVerification records with status 'community_review'
+  - Filters out verifications the current user already voted on
+  - Returns: id, user (id, username, first_name, last_name), face_photo, ai_score, approval/rejection counts, required_approvals, created_at
+
+- Created `app/api/verification/vote/route.ts` (POST) — Vote on a verification (approve/reject)
+  - Auth required + checks user.isVerified === true (403 with Arabic message "يجب أن تكون موثقاً للتصويت")
+  - Validates verification_id and vote (must be 'approve' or 'reject')
+  - Checks verification exists, status is 'community_review', user hasn't already voted
+  - Creates VerificationVote record, increments approval/rejection count
+  - If approvalCount >= 5: sets status='verified', verifiedAt=now(), updates User.isVerified=true, trustScore+=15, creates notification
+  - If rejectionCount >= 3: sets status='rejected', reviewedAt=now(), creates notification
+  - Returns updated verification data
+
+Stage Summary:
+- **4 API routes** created under `app/api/verification/`
+- All routes use sovereign envelope format with Arabic/English error messages
+- VLM integration in submit route for real AI face analysis
+- Proper auth guards (basic auth + verified-user checks for voting/pending)
+- Notification creation on key state transitions
+- Database schema already in sync (IdentityVerification + VerificationVote models existed)
+- No lint errors in any of the new files
+- All routes follow existing project patterns (auth-server, db imports, error handling)
+
+---
+Task ID: 5
+Agent: Verification Page Builder
+Task: Rewrite verification page with comprehensive identity verification UI and add verificationApi to api.ts
+
+Work Log:
+- Added `verificationApi` to `lib/api.ts` with 4 methods: submit, getStatus, getPending, vote
+- Completely rewrote `app/verification/page.tsx` as a comprehensive identity verification page
+- Implemented 3-stage verification flow:
+  - Stage 1 (Face Capture): Webcam feed with circular face guide overlay, capture button, photo preview, retake option, file upload fallback when camera unavailable, "تحليل بالذكاء الاصطناعي" submit button with AI analysis loading animation
+  - Stage 2 (Community Review): Progress bar (X/5 approvals), animated approval indicators, list of received approvals with voter name/date/comment, auto-refresh every 10 seconds
+  - Stage 3 (Verified/Rejected): Success state with green checkmark and unlocked benefits, failure state with AI issues list and retry button
+- Added Community Review Queue section (visible only for verified users via `useAuthStore`): Fetches pending verifications, displays cards with face photo/name/AI score/approval progress, approve/reject buttons with comment modal
+- Used all required design system components: GlassPanel (obsidian variant), SovereignButton, Badge, Button, Framer Motion animations, Lucide icons, toast from sonner, formatNumber from utils
+- Full RTL Arabic layout, dark obsidian theme with sovereign-gold accents
+- Responsive design with mobile-first approach
+- Proper camera stream cleanup on unmount (useEffect cleanup)
+- Security notice section and "How it works" 3-step guide
+- Benefits grid (6 items with icons)
+- Fixed all lint warnings (unused imports, no-img-element) — zero lint errors in final output
+
+Stage Summary:
+- **lib/api.ts**: Added `verificationApi` export with submit/getStatus/getPending/vote methods
+- **app/verification/page.tsx**: ~1495 lines, comprehensive single-file verification page
+- 6 major sections: Hero, Status Card, Main Content (stage-based), Community Review Queue, Benefits, How It Works
+- Comment modal for approve/reject with optional comment text
+- Auto-refresh for pending community review status (10s interval)
+- File upload fallback when camera access denied
+- Zero lint errors in both modified files
+---
+Task ID: 3
+Agent: Main Orchestrator
+Task: Build AI face verification + 5-approval community review system for identity verification
+
+Work Log:
+- Analyzed existing Prisma schema (IdentityVerification + VerificationVote models already existed)
+- Updated middleware.ts to allow camera access on /verification page (Permissions-Policy)
+- Pushed Prisma schema to database (was already in sync)
+- Created 4 backend API routes:
+  - POST /api/verification/submit — VLM AI face analysis using z-ai-web-dev-sdk
+  - GET /api/verification/status — Current user verification status + votes
+  - GET /api/verification/pending — Community review queue (verified users only)
+  - POST /api/verification/vote — Cast approve/reject vote (5 approvals = verified)
+- Added verificationApi client to lib/api.ts with 4 methods
+- Completely rebuilt app/verification/page.tsx (~1530 lines) with:
+  - Camera capture with circular face guide overlay
+  - File upload fallback for devices without camera
+  - AI analysis loading animation
+  - Community review progress (X/5 approvals)
+  - Auto-refresh every 10s for pending states
+  - Community review queue section (for verified users only)
+  - Approve/reject with optional comment
+  - Responsive RTL Arabic design with sovereign theme
+- Fixed fetchStatus/submitForAI ordering (used-before-declaration error)
+- Fixed API-to-frontend field mapping (user_name, face_photo_url, approvals, ai_issues)
+- Fixed pending route to include both 'ai_approved' and 'community_review' statuses
+- Verified both / and /verification return HTTP 200 with correct content (96KB and 79KB respectively)
+
+Stage Summary:
+- **Verification Flow**: Camera capture → VLM AI analysis → Community review (5 approvals) → Verified
+- **AI Integration**: z-ai-web-dev-sdk VLM analyzes face photos for quality, visibility, real face detection
+- **Community System**: Only verified users can vote; 5 approvals = verified, 3 rejections = rejected
+- **All routes return proper sovereign envelope format**: { success, dignity_preserved, data }
+- **Zero new lint errors** from verification files

@@ -415,3 +415,11 @@ export const innovationApi = {
   getBundles: (params?: any) => apiFetch('bundles/bundles/', { params }),
   getLocalGuideCategories: () => apiFetch('local-guide/categories/'),
 };
+
+export const verificationApi = {
+  submit: (facePhoto: string) => apiFetch('verification/submit/', { method: 'POST', body: { face_photo: facePhoto } }),
+  getStatus: () => apiFetch('verification/status/'),
+  getPending: () => apiFetch('verification/pending/'),
+  vote: (verificationId: string, vote: 'approve' | 'reject', comment?: string) =>
+    apiFetch('verification/vote/', { method: 'POST', body: { verification_id: verificationId, vote, comment } }),
+};
