@@ -181,7 +181,8 @@ export default function VerificationPage() {
   const [voteComment, setVoteComment] = useState('');
 
   // Auth store
-  const { isAuthenticated, is_verified } = useAuthStore();
+  const { user, isAuthenticated } = useAuthStore();
+  const is_verified = user?.is_verified || false;
 
   // ──── Camera Functions ────
   const startCamera = useCallback(async () => {
@@ -342,7 +343,7 @@ export default function VerificationPage() {
 
   // ──── Community Review Queue ────
   const fetchPendingQueue = useCallback(async () => {
-    if (!is_verified) return;
+    if (!user?.is_verified) return;
     setLoadingQueue(true);
     try {
       const { data } = await verificationApi.getPending();
@@ -353,13 +354,13 @@ export default function VerificationPage() {
     } finally {
       setLoadingQueue(false);
     }
-  }, [is_verified]);
+  }, [user?.is_verified]);
 
   useEffect(() => {
-    if (is_verified) {
+    if (user?.is_verified) {
       fetchPendingQueue();
     }
-  }, [is_verified, fetchPendingQueue]);
+  }, [user?.is_verified, fetchPendingQueue]);
 
   const handleVote = useCallback(
     async (verificationId: string, vote: 'approve' | 'reject', comment?: string) => {
@@ -1141,7 +1142,7 @@ export default function VerificationPage() {
         </AnimatePresence>
 
         {/* ──── Community Review Queue (for verified users) ──── */}
-        {is_verified && verificationStatus !== 'loading' && (
+        {user?.is_verified && verificationStatus !== 'loading' && (
           <motion.div
             initial="hidden"
             whileInView="visible"

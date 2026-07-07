@@ -77,7 +77,7 @@ export async function POST(request: Request) {
       );
     }
 
-    if (verification.status !== 'community_review') {
+    if (verification.status !== 'community_review' && verification.status !== 'ai_approved') {
       return NextResponse.json(
         {
           success: false,
@@ -120,6 +120,14 @@ export async function POST(request: Request) {
         comment: comment || null,
       },
     });
+
+    // Transition ai_approved → community_review on first vote
+    if (verification.status === 'ai_approved') {
+      await db.identityVerification.update({
+        where: { id: verification_id },
+        data: { status: 'community_review' },
+      });
+    }
 
     // Update the verification counts
     const updatedVerification = await db.identityVerification.update({
