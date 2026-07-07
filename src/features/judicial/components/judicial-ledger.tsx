@@ -41,10 +41,11 @@ export function JudicialLedger() {
   });
 
   // 2. Fetch User's Active Disputes (From disputesApi as per api.ts)
-  const { data: myDisputes, isLoading: isLoadingPrivate } = useQuery({
+  const { data: myDisputesRaw, isLoading: isLoadingPrivate } = useQuery({
     queryKey: ['my-disputes'],
     queryFn: () => disputesApi.getDisputes().then(res => res.data),
   });
+  const myDisputes = Array.isArray(myDisputesRaw) ? myDisputesRaw : (myDisputesRaw?.disputes || []);
 
   // 3. Status Badge Color Mapper
   const statusColors: any = {
