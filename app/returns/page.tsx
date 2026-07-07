@@ -66,7 +66,7 @@ export default function ReturnsPage() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!bookingRef.trim()) {

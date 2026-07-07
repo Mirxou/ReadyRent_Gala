@@ -19,7 +19,7 @@ export function RealtimeNotifications() {
     // Connect WebSocket — gracefully handle errors
     if (user?.id) {
       try {
-        websocketClient.connect(user.id);
+        websocketClient.connect(Number(user.id));
         connectedRef.current = true;
       } catch {
         // WebSocket not available — silent fail, no crash

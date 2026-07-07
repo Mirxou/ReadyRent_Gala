@@ -16,9 +16,9 @@ export default function CreateProductPage() {
           <div className="flex flex-col items-center justify-center py-16 text-center space-y-4">
             <Plus className="w-16 h-16 text-sovereign-gold/40" />
             <p className="text-white/40 text-lg">نموذج إضافة المنتج سيكون متاحاً قريباً</p>
-            <SovereignButton variant="secondary" asChild>
-              <Link href="/products">تصفح المنتجات</Link>
-            </SovereignButton>
+            <Link href="/products">
+              <SovereignButton variant="secondary">تصفح المنتجات</SovereignButton>
+            </Link>
           </div>
         </GlassPanel>
       </div>

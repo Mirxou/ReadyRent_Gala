@@ -253,7 +253,7 @@ export default function ProductDetailsPage() {
                           إبرام الميثاق
                         </SovereignButton>
                         <SovereignButton
-                          variant="outline"
+                          variant="ghost"
                           size="xl"
                           className="px-8 h-20 shadow-2xl rounded-2xl text-lg border-sovereign-gold/30 text-sovereign-gold hover:bg-sovereign-gold/10"
                           onClick={() => {

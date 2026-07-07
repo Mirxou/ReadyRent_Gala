@@ -88,10 +88,10 @@ export async function GET(request: NextRequest) {
     if (minPrice || maxPrice) {
       where.pricePerDay = {};
       if (minPrice) {
-        (where.pricePerDay as Prisma.IntNullableFilter).gte = parseInt(minPrice, 10);
+        where.pricePerDay = { ...where.pricePerDay, gte: parseInt(minPrice, 10) };
       }
       if (maxPrice) {
-        (where.pricePerDay as Prisma.IntNullableFilter).lte = parseInt(maxPrice, 10);
+        where.pricePerDay = { ...where.pricePerDay, lte: parseInt(maxPrice, 10) };
       }
     }
 

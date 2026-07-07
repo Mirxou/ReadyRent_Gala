@@ -94,7 +94,7 @@ export const AgreementRecorder = ({ bookingId }: AgreementRecorderProps) => {
         return (
             <AgreementWidget
                 agreement={agreement}
-                currentUserId={user?.id || 0}
+                currentUserId={Number(user?.id) || 0}
                 onAgreementUpdated={(updated) => setAgreement(updated)}
             />
         );

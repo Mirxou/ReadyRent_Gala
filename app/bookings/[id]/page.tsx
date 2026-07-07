@@ -28,6 +28,8 @@ interface BookingDetail {
     status: string;
     escrow_status: 'HELD' | 'RELEASED' | 'REFUNDED' | 'INITIATED';
     vault_address?: string;
+    product_name?: string;
+    product_image?: string;
     product: {
         id: number;
         name: string;

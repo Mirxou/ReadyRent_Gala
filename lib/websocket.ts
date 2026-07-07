@@ -21,7 +21,7 @@ class WebSocketClient {
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
   private reconnectDelay = 1000;
-  private userId: number | null = null;
+  private userId: string | number | null = null;
   private listeners: Map<string, Set<(data: any) => void>> = new Map();
   private isConnecting = false;
 
@@ -32,7 +32,7 @@ class WebSocketClient {
     }
   }
 
-  private getWebSocketUrl(userId: number): string {
+  private getWebSocketUrl(userId: string | number): string {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const host = process.env.NEXT_PUBLIC_WS_URL || window.location.host;
     return `${protocol}//${host}/ws/notifications/${userId}/`;
@@ -48,7 +48,7 @@ class WebSocketClient {
     }
   }
 
-  public connect(userId: number): void {
+  public connect(userId: string | number): void {
     if (this.isConnecting || (this.ws && this.ws.readyState === WebSocket.OPEN)) {
       return;
     }

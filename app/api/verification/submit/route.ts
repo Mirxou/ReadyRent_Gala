@@ -69,6 +69,7 @@ export async function POST(request: Request) {
     const vlmPrompt = `You are a face verification AI for STANDARD.Rent platform (Algeria). Analyze this photo and respond ONLY with valid JSON: { "is_real_face": boolean, "face_quality": "high"|"medium"|"low", "face_visible": boolean, "has_multiple_faces": boolean, "confidence_score": 0-100, "issues": string[], "recommendation": "approve"|"reject" }`;
 
     const vlmResponse = await zai.chat.completions.createVision({
+      model: 'default',
       messages: [
         {
           role: 'user',

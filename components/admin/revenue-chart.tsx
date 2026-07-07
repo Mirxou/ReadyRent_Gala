@@ -1,5 +1,6 @@
-import { formatNumber } from '@/lib/utils';
 'use client';
+
+import { formatNumber } from '@/lib/utils';
 
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';

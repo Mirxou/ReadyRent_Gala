@@ -51,6 +51,10 @@
   ],
   "exclude": [
     "node_modules",
-    "behavior_layer/**"
+    "behavior_layer/**",
+    "examples/**",
+    "skills/**",
+    "download/**",
+    "upload/**"
   ]
 }

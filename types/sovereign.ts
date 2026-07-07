@@ -46,7 +46,7 @@ export interface VisualAssets {
 }
 
 export interface ReceiptStage {
-  label_ar: string;
+  label_ar?: string;
   label_en?: string;
   status: 'completed' | 'active' | 'pending';
   timestamp?: string;
