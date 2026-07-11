@@ -42,16 +42,16 @@ export default function ReturnsPage() {
   const [fileName, setFileName] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('/api/returns/returns')
+    fetch('/api/returns')
       .then((r) => r.json())
       .then((d) => {
         const list = Array.isArray(d) ? d : (d?.data || d?.results || []);
         setReturns(list.map((r: any) => ({
-          id: r.id || `RET-${String(r.booking_ref || '').padStart(4, '0')}`,
-          bookingRef: r.booking_ref || r.bookingRef || '',
+          id: r.id || `RET-${String(r.bookingRef || '').padStart(4, '0')}`,
+          bookingRef: r.bookingRef || r.booking_ref || '',
           reason: r.reason || '',
           description: r.description || '',
-          date: r.created_at ? new Date(r.created_at).toLocaleDateString('ar-DZ', { year: 'numeric', month: 'long', day: 'numeric' }) : new Date().toLocaleDateString('ar-DZ', { year: 'numeric', month: 'long', day: 'numeric' }),
+          date: r.createdAt ? new Date(r.createdAt).toLocaleDateString('ar-DZ', { year: 'numeric', month: 'long', day: 'numeric' }) : new Date().toLocaleDateString('ar-DZ', { year: 'numeric', month: 'long', day: 'numeric' }),
           status: r.status || 'قيد المراجعة',
           fileName: r.file_name || r.fileName || undefined,
         })));
@@ -80,7 +80,7 @@ export default function ReturnsPage() {
 
     setIsSubmitting(true);
     try {
-      const res = await fetch('/api/returns', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ booking_ref: bookingRef, reason, description }) });
+      const res = await fetch('/api/returns/create', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ booking_id: bookingRef, reason, description }) });
       const json = await res.json();
       if (res.ok) {
         const newReturn: ReturnRequest = {

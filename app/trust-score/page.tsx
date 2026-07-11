@@ -19,6 +19,7 @@ import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
+import { useAuthStore } from '@/lib/store';
 
 /* ────────────────────────────────────────────
    Types
@@ -129,16 +130,23 @@ function ComponentsSkeleton() {
 }
 
 export default function TrustScorePage() {
-  // Fetch trust score from API
+  const { user, isAuthenticated } = useAuthStore();
+
+  // Use store trust_score as primary, API as supplementary
+  const storeScore = user?.trust_score;
+
+  // Fetch trust score from API (supplementary)
   const { data, isLoading, isError } = useQuery<TrustScoreData>({
-    queryKey: ['trust-score'],
+    queryKey: ['trust-score', user?.id],
     queryFn: () =>
-      fetch('/api/social/score/1')
+      fetch('/api/social/score/' + user!.id)
         .then((r) => r.json())
         .then((d) => d.data || d),
+    enabled: !!user?.id && isAuthenticated,
   });
 
-  const overall = data?.social_score ?? 0;
+  // Primary: store score, fallback to API, fallback to 0
+  const overall = storeScore ?? data?.social_score ?? 0;
   const tier = getTierFromScore(overall);
   const circumference = 2 * Math.PI * 72;
   const dashOffset = circumference * (1 - overall / 100);
@@ -148,6 +156,20 @@ export default function TrustScorePage() {
       <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-sovereign-gold/5 rounded-full blur-[160px] opacity-20 pointer-events-none" />
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20 relative z-10">
+        {/* Not logged in state */}
+        {!isAuthenticated && (
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 bg-red-500/10 text-red-400 border border-red-500/30 rounded-full py-2 px-6 text-sm font-bold mb-6">
+              <Shield className="w-4 h-4" />
+              يرجى تسجيل الدخول لعرض نقاط ثقتك
+            </div>
+            <p className="text-muted-foreground mb-6">قم بتسجيل الدخول للاطلاع على نقاط الثقة الخاصة بك والمزايا المتاحة.</p>
+            <Button asChild className="rounded-full bg-sovereign-gold text-black hover:bg-sovereign-gold/90">
+              <Link href="/login">تسجيل الدخول</Link>
+            </Button>
+          </div>
+        )}
+
         {/* Hero */}
         <motion.div
           initial="hidden"

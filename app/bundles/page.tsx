@@ -2,24 +2,111 @@
 
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Search, Package, Star, Percent, ArrowLeft } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Search, Package, Star, Percent, ArrowLeft, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { ParticleField } from '@/components/ui/particle-field';
 import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
 import { SovereignSparkle, SovereignGlow } from '@/shared/components/sovereign/sovereign-sparkle';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { formatNumber } from '@/lib/utils';
 
-const bundles = [
-  { id: 1, name: 'باقة العروس الملكية', description: 'فستان زفاف + قفطان + قرطاسية + حذاء', price: 15000, originalPrice: 22000, items: 4, rating: 4.9 },
-  { id: 2, name: 'باقة حفل الخطوبة', description: 'فساتين سهرة + إكسسوارات + مكياج', price: 8000, originalPrice: 12000, items: 3, rating: 4.7 },
-  { id: 3, name: 'باقة العائلة', description: '3 أزياء نسائية متطابقة مع إكسسوارات', price: 10000, originalPrice: 15000, items: 3, rating: 4.8 },
-  { id: 4, name: 'باقة المناسبات الرسمية', description: 'بدلة + قميص + حذاء + ربطة عنق', price: 6000, originalPrice: 9000, items: 4, rating: 4.6 },
-];
+interface ApiBundle {
+  id: number;
+  name: string;
+  nameAr: string;
+  descriptionAr: string;
+  discountPercentage: number;
+  totalPrice: number;
+  image: string;
+  includes: string;
+  validDays: number;
+}
+
+interface DisplayBundle {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  originalPrice: number;
+  items: number;
+  rating: number;
+}
+
+function mapApiBundle(b: ApiBundle): DisplayBundle {
+  let includesCount = 0;
+  try {
+    const parsed = JSON.parse(b.includes);
+    includesCount = Array.isArray(parsed) ? parsed.length : 0;
+  } catch {
+    includesCount = 0;
+  }
+  const originalPrice = b.discountPercentage > 0
+    ? Math.round(b.totalPrice / (1 - b.discountPercentage / 100))
+    : b.totalPrice;
+  return {
+    id: b.id,
+    name: b.nameAr || b.name,
+    description: b.descriptionAr,
+    price: b.totalPrice,
+    originalPrice,
+    items: includesCount,
+    rating: 4.8,
+  };
+}
+
+function BundlesLoadingSkeleton() {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {Array.from({ length: 3 }).map((_, i) => (
+        <div key={i} className="space-y-4">
+          <GlassPanel variant="obsidian" className="!rounded-2xl !p-6 space-y-5">
+            <div className="flex justify-between">
+              <Skeleton className="h-5 w-16 rounded-full" />
+              <Skeleton className="h-4 w-24" />
+            </div>
+            <Skeleton className="h-6 w-40" />
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-4 w-4" />
+              <Skeleton className="h-4 w-12" />
+              <Skeleton className="h-4 w-20" />
+            </div>
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-3/4" />
+            <div className="flex items-center justify-between pt-4">
+              <div className="space-y-2">
+                <Skeleton className="h-7 w-28" />
+                <Skeleton className="h-4 w-20" />
+              </div>
+              <Skeleton className="h-5 w-5" />
+            </div>
+          </GlassPanel>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default function BundlesPage() {
   const [search, setSearch] = useState('');
+  const [bundles, setBundles] = useState<DisplayBundle[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isError, setIsError] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/bundles/bundles')
+      .then((r) => r.json())
+      .then((d) => {
+        const list = d?.data || [];
+        setBundles(list.map(mapApiBundle));
+        setIsLoading(false);
+      })
+      .catch(() => {
+        setIsError(true);
+        setIsLoading(false);
+      });
+  }, []);
 
   const filteredBundles = bundles.filter((bundle) => {
     if (search) {
@@ -85,7 +172,17 @@ export default function BundlesPage() {
           </div>
         </GlassPanel>
 
-        {filteredBundles.length > 0 ? (
+        {isLoading ? (
+          <BundlesLoadingSkeleton />
+        ) : isError ? (
+          <GlassPanel variant="obsidian" className="!rounded-2xl text-center !p-12">
+            <AlertCircle className="h-12 w-12 mx-auto mb-4 text-red-400" />
+            <p className="text-muted-foreground mb-2">تعذر تحميل الحزم. يرجى المحاولة لاحقاً.</p>
+            <button onClick={() => window.location.reload()} className="text-sovereign-gold text-sm hover:underline">
+              إعادة المحاولة
+            </button>
+          </GlassPanel>
+        ) : filteredBundles.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredBundles.map((bundle, index) => {
               const discount = getDiscount(bundle.originalPrice, bundle.price);

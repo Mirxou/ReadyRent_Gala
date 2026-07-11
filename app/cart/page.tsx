@@ -16,7 +16,8 @@ import {
   Calendar,
   Zap,
   Package,
-  ArrowRight
+  ArrowRight,
+  MapPin
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatNumber } from '@/lib/utils';
@@ -45,39 +46,12 @@ export default function CartPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [sameDayDelivery, setSameDayDelivery] = useState(false);
+  const [deliveryAddress, setDeliveryAddress] = useState('');
 
   const { data: cart, isLoading } = useQuery({
     queryKey: ['cart'],
     queryFn: () => fetch('/api/bookings/cart').then(r => r.json()).then(d => d.data || d),
   });
-
-  // Get user's default address to determine delivery zone
-  const { data: addresses } = useQuery({
-    queryKey: ['addresses'],
-    queryFn: () => fetch('/api/locations/addresses/').then(r => r.json()).then(d => d.data || d || []),
-  });
-
-  // Determine delivery zone from default address using useMemo (Professor 0 approved)
-  const deliveryZoneId = React.useMemo(() => {
-    if (addresses && Array.isArray(addresses)) {
-      const defaultAddress = addresses.find((addr: any) => addr.is_default);
-      return defaultAddress?.delivery_zone || null;
-    }
-    return null;
-  }, [addresses]);
-
-  // Check same-day delivery availability
-  const { data: sameDayInfo } = useQuery({
-    queryKey: ['same-day-delivery', deliveryZoneId],
-    queryFn: () => fetch('/api/locations/delivery-zones/' + deliveryZoneId + '/same-day/').then(r => r.json()).then(d => d.data || d),
-    enabled: !!deliveryZoneId,
-  });
-
-  React.useEffect(() => {
-    if (sameDayInfo && !sameDayInfo.available) {
-      setSameDayDelivery(false);
-    }
-  }, [sameDayInfo]);
 
   const removeFromCartMutation = useMutation({
     mutationFn: (itemId: number) => fetch('/api/bookings/cart/items/' + itemId, { method: 'DELETE' }).then(r => r.json()),
@@ -159,18 +133,8 @@ export default function CartPage() {
     return sum + (item.product.price_per_day * days * item.quantity);
   }, 0);
 
-  // Get packaging suggestions for first item (if available)
+  // Get first item for packaging display
   const firstItem = items[0];
-  const rentalDays = firstItem ? Math.ceil(
-    (new Date(firstItem.end_date).getTime() - new Date(firstItem.start_date).getTime()) /
-    (1000 * 60 * 60 * 24)
-  ) + 1 : 0;
-
-  const { data: packagingInfo } = useQuery({
-    queryKey: ['packaging-suggestion', firstItem?.product?.id, rentalDays],
-    queryFn: () => fetch('/api/packaging/types/').then(r => r.json()).then(d => d.data || d || []),
-    enabled: !!firstItem?.product?.id,
-  });
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('ar-EG', {
@@ -338,7 +302,7 @@ export default function CartPage() {
                   })}
                 </div>
 
-                {packagingInfo?.suggested_packaging && (
+                {firstItem && (
                   <div className="p-4 bg-sovereign-gold/5 border border-sovereign-gold/20 rounded-2xl flex items-center gap-4">
                     <div className="w-12 h-12 rounded-xl bg-sovereign-gold/20 flex items-center justify-center text-sovereign-gold">
                       <Package className="h-6 w-6" />
@@ -346,53 +310,60 @@ export default function CartPage() {
                     <div className="flex-1">
                       <p className="text-sm font-bold text-sovereign-gold">تغليف Gala الفاخر</p>
                       <p className="text-xs text-sovereign-gold/80 font-medium">
-                        {packagingInfo.suggested_packaging.name_ar || packagingInfo.suggested_packaging.name}
+                        تغليف أنيق يليق بمناسبتكم
                       </p>
                     </div>
                   </div>
                 )}
+
+                {/* Delivery Address */}
+                <div className="p-4 bg-white/5 border border-white/10 rounded-2xl space-y-3">
+                  <div className="flex items-center gap-2 text-sm font-bold">
+                    <MapPin className="h-4 w-4 text-sovereign-gold" />
+                    <span>عنوان التوصيل</span>
+                  </div>
+                  <input
+                    type="text"
+                    value={deliveryAddress}
+                    onChange={(e) => setDeliveryAddress(e.target.value)}
+                    placeholder="أدخل عنوان التوصيل الكامل..."
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-sovereign-gold/30 focus:border-sovereign-gold/30 transition-all"
+                    dir="rtl"
+                  />
+                </div>
 
                 {/* Same-day Delivery Option */}
-                {sameDayInfo?.available && (
-                  <div className="p-4 bg-cyan-500/5 border border-cyan-500/20 rounded-2xl space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <Switch
-                          id="same-day-delivery"
-                          checked={sameDayDelivery}
-                          onCheckedChange={setSameDayDelivery}
-                          className="data-[state=checked]:bg-cyan-500"
-                        />
-                        <Label htmlFor="same-day-delivery" className="cursor-pointer font-bold text-cyan-500 flex items-center gap-2">
-                          <Zap className="h-4 w-4" />
-                          تسليم سريع اليوم
-                        </Label>
-                      </div>
-                      {sameDayInfo.fee > 0 && (
-                        <span className="text-sm font-black text-cyan-500">
-                          +{formatNumber(sameDayInfo.fee)} دج
-                        </span>
-                      )}
+                <div className="p-4 bg-cyan-500/5 border border-cyan-500/20 rounded-2xl">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Switch
+                        id="same-day-delivery"
+                        checked={sameDayDelivery}
+                        onCheckedChange={setSameDayDelivery}
+                        className="data-[state=checked]:bg-cyan-500"
+                      />
+                      <Label htmlFor="same-day-delivery" className="cursor-pointer font-bold text-cyan-500 flex items-center gap-2">
+                        <Zap className="h-4 w-4" />
+                        تسليم سريع اليوم
+                      </Label>
                     </div>
-                    {sameDayInfo.cutoff_time && (
-                      <p className="text-xs text-cyan-500/70 font-bold uppercase tracking-tighter">
-                        أطلب قبل {sameDayInfo.cutoff_time} للتوصيل الليلة
-                      </p>
-                    )}
+                    <span className="text-sm font-black text-cyan-500">
+                      +500 دج
+                    </span>
                   </div>
-                )}
+                </div>
 
                 <div className="pt-8 border-t border-white/10 space-y-4">
-                  {sameDayDelivery && sameDayInfo && sameDayInfo.fee > 0 && (
+                  {sameDayDelivery && (
                     <div className="flex justify-between text-sm font-medium">
                       <span className="text-muted-foreground font-bold">رسوم السرعة القصوى</span>
-                      <span className="text-cyan-500">{formatNumber(sameDayInfo.fee)} دج</span>
+                      <span className="text-cyan-500">500 دج</span>
                     </div>
                   )}
                   <div className="flex justify-between items-end">
                     <span className="text-xl font-bold opacity-60">المبلغ الإجمالي</span>
                     <span className="text-4xl font-black bg-gradient-to-r from-sovereign-gold to-sovereign-gold/60 bg-clip-text text-transparent">
-                      {formatNumber(totalPrice + (sameDayDelivery && sameDayInfo ? sameDayInfo.fee : 0))} دج
+                      {formatNumber(totalPrice + (sameDayDelivery ? 500 : 0))} دج
                     </span>
                   </div>
                 </div>

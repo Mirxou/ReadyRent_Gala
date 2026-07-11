@@ -195,3 +195,52 @@ Stage Summary:
 - تم اكتشاف وإصلاح 5 أخطاء حرجة
 - النظام يعمل بشكل كامل: Frontend + Backend متصلان
 - جميع APIs تُرجع 401 عند عدم تسجيل الدخول (سلوك صحيح)
+
+---
+Task ID: 7
+Agent: Main Orchestrator
+Task: مراجعة شاملة لكل الميزات المتفق عليها وتصليح غير المربوطة
+
+Work Log:
+- مراجعة شاملة لكل الملفات: 48 API route, 55+ صفحة, 34 نموذج Prisma, ~231 طريقة API client
+- اكتشاف أن 61% من طرق API غير مستخدمة (142/231)
+- اكتشاف 23+ مكون غير مستورد أبداً
+- اكتشاف نظام API مزدوج (lib/api.ts + lib/api/*.ts) يسبب ارتباك
+
+**إصلاحات صفحات الفرونت اند (6 صفحات):**
+
+1. `/bundles` — استبدال البيانات المكتوبة يدوياً بـ API حقيقي (`/api/bundles/bundles`)
+2. `/insurance` — تصحيح endpoint من `/api/warranties/insurance` إلى `/api/insurance`
+3. `/returns` — تصحيح endpoint من `/api/returns/returns` إلى `/api/returns` و `/api/returns/create`
+4. `/cart` — إزالة استدعاءات APIs غير موجودة (locations, packaging) واستبدالها بحقول محلية
+5. `/trust-score` — استبدال user_id=1 المكتوب يدوياً بـ user.id من useAuthStore
+6. `/subscriptions` — إزالة استدعاء API غير موجود وتحويل زر الاشتراك لإشعار toast
+
+**APIs جديدة تم إنشاؤها (7):**
+
+7. `POST /api/wallet/transfer` — تحويل أموال بين المستخدمين (Prisma transaction)
+8. `GET /api/social/score/[userId]` — نقاط الثقة مع تفصيل مكوناتها
+9. `POST /api/social/vouch/[userId]` — تأييد مستخدم (+5 نقاط ثقة)
+10. `GET /api/social/feed` — آخر التأييدات (20recent)
+11. `GET /api/payments/methods` — طرق الدفع المتاحة (بريدي موب، CCP، بطاقة، محفظة)
+12. `PUT /api/auth/profile` — تحديث الملف الشخصي (أضيف للملف الموجود)
+13. `POST /api/insurance/purchase` — شراء تأمين (خصم من المحفظة + transaction)
+
+**حماية أمنية (5 endpoints):**
+14. إضافة auth إلى `/api/analytics/admin/dashboard`
+15. إضافة auth إلى `/api/analytics/admin/revenue`
+16. إضافة auth إلى `/api/analytics/admin/sales-report`
+17. إضافة auth إلى `/api/analytics/intelligence/report`
+18. إضافة auth إلى `/api/analytics/daily/summary`
+
+**إصلاحات أخرى:**
+19. إصلاح `myDisputes?.map is not a function` في JudicialLedger (Array.isArray guard)
+20. إزالة X-Frame-Options: DENY و frame-ancestors من middleware و next.config.ts
+21. إعادة ملء قاعدة البيانات بعد force-reset
+
+Stage Summary:
+- تم إصلاح 6 صفحات فرونت اند كانت تستدعي APIs خاطئة/غير موجودة
+- تم إنشاء 7 APIs جديدة مفقودة
+- تم حماية 5 endpoints أدمين بدون مصادقة
+- كل الصفحات ترجع 200، كل APIs الجديدة تعمل
+- 20 إصلاح إجمالي في هذه الجلسة

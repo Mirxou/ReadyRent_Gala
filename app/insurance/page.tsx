@@ -28,11 +28,12 @@ import { toast } from 'sonner';
    ──────────────────────────────────────────── */
 interface ApiPlan {
   id: number;
-  name_ar: string;
-  name_en: string;
+  nameAr: string;
+  nameEn: string;
   price: number;
-  coverage_ar: string;
-  coverage_en: string;
+  coverageAr: string;
+  coverageEn: string;
+  isActive: boolean;
 }
 
 interface EnrichedPlan {
@@ -100,9 +101,9 @@ function mapApiToPlan(apiPlan: ApiPlan): EnrichedPlan {
   const enrichment = planEnrichment[apiPlan.id] || planEnrichment[1];
   return {
     id: String(apiPlan.id),
-    name: apiPlan.name_ar,
+    name: apiPlan.nameAr,
     price: apiPlan.price,
-    coverage: apiPlan.coverage_ar,
+    coverage: apiPlan.coverageAr,
     ...enrichment,
   };
 }
@@ -178,12 +179,12 @@ export default function InsurancePage() {
   const { data, isLoading, isError } = useQuery({
     queryKey: ['insurance-plans'],
     queryFn: () =>
-      fetch('/api/warranties/insurance')
+      fetch('/api/insurance')
         .then((r) => r.json())
-        .then((d) => d.data || d),
+        .then((d) => d.data || []),
   });
 
-  const plans: EnrichedPlan[] = (data?.plans || []).map(mapApiToPlan);
+  const plans: EnrichedPlan[] = (Array.isArray(data) ? data : []).map(mapApiToPlan);
   const selectedPlanData = plans.find((p) => p.id === selectedPlan);
 
   const handleSelectPlan = (planId: string) => {
@@ -194,16 +195,9 @@ export default function InsurancePage() {
 
   const handleConfirmPurchase = async () => {
     setIsPurchasing(true);
-    try {
-      await fetch('/api/warranties/insurance/purchase', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ plan_id: selectedPlan }) });
-      setPurchasedPlan(selectedPlan);
-      setShowConfirm(false);
-      toast.success('تم اشتراء خطة التأمين بنجاح');
-    } catch {
-      toast.error('فشل شراء خطة التأمين');
-    } finally {
-      setIsPurchasing(false);
-    }
+    setShowConfirm(false);
+    setIsPurchasing(false);
+    toast.info('سيتم إضافة هذه الميزة قريباً');
   };
 
   const handleContactSupport = () => {

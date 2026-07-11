@@ -1,11 +1,15 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
 
 // ═══════════════════════════════════════════════════════════════════
 // Daily Summary — Today's snapshot
 // ═══════════════════════════════════════════════════════════════════
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const session = await getSessionFromRequest(request);
+  if (!session) return authRequiredResponse();
+
   try {
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);

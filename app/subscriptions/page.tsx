@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import { motion, useInView, type Variants } from 'framer-motion';
 import { toast } from 'sonner';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import {
   Crown,
   Check,
@@ -816,7 +816,6 @@ function mapApiPlan(apiPlan: Record<string, unknown>): Plan {
 }
 
 export default function SubscriptionsPage() {
-  const queryClient = useQueryClient();
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
@@ -845,19 +844,7 @@ export default function SubscriptionsPage() {
     })
   );
 
-  // Subscribe mutation
-  const subscribeMutation = useMutation({
-    mutationFn: (planId: string) =>
-      fetch('/api/subscriptions/purchase', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan_id: planId }),
-      }).then((r) => r.json()),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['subscriptions'] });
-    },
-  });
-
+  // Subscribe handler — shows a coming-soon toast (backend endpoint not yet available)
   const handleSelectPlan = (plan: Plan) => {
     setSelectedPlan(plan);
     setDialogOpen(true);
@@ -866,17 +853,12 @@ export default function SubscriptionsPage() {
   const handleConfirmSubscription = async () => {
     if (!selectedPlan) return;
 
-    await subscribeMutation.mutateAsync(selectedPlan.id);
-
     setDialogOpen(false);
 
-    toast.success(
-      `تم الاشتراك في خطة ${selectedPlan.name} بنجاح!`,
-      {
-        description: `ستبدأ في الاستفادة من جميع مميزات خطة ${selectedPlan.name} فوراً.`,
-        duration: 4000,
-      }
-    );
+    toast.info('سيتم تفعيل الاشتراك قريباً', {
+      description: `خطة ${selectedPlan.name} ستكون متاحة للاشتراك قريباً. شكراً لاهتمامكم!`,
+      duration: 4000,
+    });
 
     setSelectedPlan(null);
   };
@@ -962,7 +944,7 @@ export default function SubscriptionsPage() {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         onConfirm={handleConfirmSubscription}
-        isProcessing={subscribeMutation.isPending}
+        isProcessing={false}
       />
     </div>
   );
