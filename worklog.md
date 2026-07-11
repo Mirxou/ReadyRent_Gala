@@ -244,3 +244,1372 @@ Stage Summary:
 - تم حماية 5 endpoints أدمين بدون مصادقة
 - كل الصفحات ترجع 200، كل APIs الجديدة تعمل
 - 20 إصلاح إجمالي في هذه الجلسة
+
+---
+Task ID: audit-api
+Agent: API Auditor
+Task: Deep audit of all API routes for unused/orphaned endpoints
+
+Work Log:
+- Discovered 51 API route files under app/api/ (including catch-all [[...path]])
+- Discovered TWO parallel API client systems:
+  1. `lib/api.ts` (newer, native fetch, used by most pages via `import { xxxApi } from '@/lib/api'`)
+  2. `lib/api/*.ts` + `lib/api/index.ts` (older, SovereignClient class, used by some pages via explicit imports like `from '@/lib/api/disputes'`)
+- Traced every API client method to its target URL and matched against actual route paths
+- Searched all page.tsx, component files, and lib files for direct `fetch('/api/...')` calls
+- Searched all .tsx/.ts files for client method imports and usages
+
+## COMPLETE ROUTE-BY-ROUTE AUDIT
+
+### ✅ CORRECTLY USED (43 routes) — Frontend calls match actual route paths
+
+| # | Route Path | Methods | Called By |
+|---|-----------|---------|-----------|
+| 1 | /api/auth/login | POST | `authApi.login()` in lib/api.ts → `app/(auth)/login/page.tsx` |
+| 2 | /api/auth/register | POST | `authApi.register()` in lib/api.ts → `app/(auth)/register/page.tsx` |
+| 3 | /api/auth/logout | POST | `authApi.logout()` in lib/api.ts (via context) |
+| 4 | /api/auth/profile | GET, PUT | direct `fetch('/api/auth/profile')` in `dashboard/settings`, `dashboard/wallet`; `authApi.me()` in lib/api.ts |
+| 5 | /api/products | GET | `productsApi.getAll()` in lib/api.ts; direct fetch in `dashboard/products`, `vendors/[id]`; many components |
+| 6 | /api/products/[id] | GET | `productsApi.getById()` in lib/api.ts → `app/products/[id]/page.tsx` |
+| 7 | /api/products/wishlist | GET, POST | `productsApi.getWishlist()`, `addToWishlist()` in lib/api.ts → `dashboard/wishlist` |
+| 8 | /api/products/wishlist/[id] | DELETE | `productsApi.removeFromWishlist()` in lib/api.ts |
+| 9 | /api/products/search-suggestions | GET | `productsApi.getSearchSuggestions()` in lib/api.ts → `product-search.tsx` |
+| 10 | /api/products/categories | GET | `productsApi.getCategories()` in lib/api.ts → `app/rentals` |
+| 11 | /api/bookings | GET | direct `fetch('/api/bookings')` in `dashboard/wallet`, `dashboard/orders`; `bookingsApi.getAll()` in lib/api.ts |
+| 12 | /api/bookings/[id] | GET, PATCH | `bookingsApi.getById()` in lib/api.ts → `app/bookings/[id]/page.tsx` |
+| 13 | /api/bookings/create | POST | direct fetch in `app/cart/page.tsx`; `bookingsApi.create()` in lib/api.ts → `app/checkout` |
+| 14 | /api/bookings/cart | GET | direct `fetch('/api/bookings/cart')` in `app/cart/page.tsx`; `bookingsApi.getCart()` |
+| 15 | /api/bookings/cart/items | POST | `bookingsApi.addToCart()` in lib/api.ts |
+| 16 | /api/bookings/cart/items/[id] | DELETE | direct fetch in `app/cart/page.tsx`; `bookingsApi.removeFromCart()` |
+| 17 | /api/payments/create | POST | `paymentsApi.create()` in lib/api.ts → `app/checkout/page.tsx` |
+| 18 | /api/payments/methods | GET | `paymentsApi.getMethods()` in lib/api.ts → `bank-card-form.tsx`, `baridimob-form.tsx` |
+| 19 | /api/wallet | GET | direct `fetch('/api/wallet')` in `app/wallet/page.tsx`, `dashboard/wallet` |
+| 20 | /api/wallet/deposit | POST | direct `fetch('/api/wallet/deposit')` in `app/wallet/page.tsx` |
+| 21 | /api/wallet/withdraw | POST | direct `fetch('/api/wallet/withdraw')` in `app/wallet/page.tsx` |
+| 22 | /api/wallet/transfer | POST | direct `fetch('/api/wallet/transfer')` in `app/wallet/page.tsx` |
+| 23 | /api/reviews | GET | `reviewsApi.getAll()` in lib/api.ts → product pages |
+| 24 | /api/reviews/create | POST | `reviewsApi.create()` in lib/api.ts → `review-form.tsx` |
+| 25 | /api/returns | GET | direct `fetch('/api/returns')` in `app/returns/page.tsx` |
+| 26 | /api/returns/create | POST | direct `fetch('/api/returns/create')` in `app/returns/page.tsx` |
+| 27 | /api/insurance | GET | direct `fetch('/api/insurance')` in `app/insurance/page.tsx` |
+| 28 | /api/notifications | GET | direct `fetch('/api/notifications')` in `dashboard/notifications/page.tsx` |
+| 29 | /api/health | GET | `sovereignClient.getSystemStatus()` → `SovereignContext.tsx` |
+| 30 | /api/subscriptions | GET | direct `fetch('/api/subscriptions')` in `app/subscriptions/page.tsx` |
+| 31 | /api/verification/submit | POST | `verificationApi.submit()` in lib/api.ts → `app/verification/page.tsx` |
+| 32 | /api/verification/status | GET | `verificationApi.getStatus()` in lib/api.ts → `app/verification/page.tsx` |
+| 33 | /api/verification/pending | GET | `verificationApi.getPending()` in lib/api.ts → `app/verification/page.tsx` |
+| 34 | /api/verification/vote | POST | `verificationApi.vote()` in lib/api.ts → `app/verification/page.tsx` |
+| 35 | /api/social/feed | GET | `socialApi.getFeed()` in lib/api.ts → `social-feed.tsx` |
+| 36 | /api/social/score/[userId] | GET | direct `fetch('/api/social/score/...')` in `trust-score/page.tsx`; `socialApi.getSocialScore()` |
+| 37 | /api/social/vouch/[userId] | POST | `socialApi.vouch()` in lib/api.ts → `vouch-button.tsx` |
+| 38 | /api/chatbot/quick-chat | POST | `chatbotApi.quickChat()` in lib/api.ts; direct fetch in `sovereign-oracle.tsx` |
+| 39 | /api/bundles/bundles | GET | direct fetch in `bundles/page.tsx`, `bundles/[id]/page.tsx`; `bundlesApi.getAll()`, `innovationApi.getBundles()` |
+| 40 | /api/vendors/vendors | GET | direct `fetch('/api/vendors/vendors')` in `vendors/page.tsx`, `vendors/[id]/page.tsx` |
+| 41 | /api/artisans/artisans | GET | direct fetch in `artisans/page.tsx`, `artisans/[id]/page.tsx`; `innovationApi.getArtisans()` |
+| 42 | /api/analytics/intelligence/report | GET | `intelligenceApi.getMarketReport()` in lib/api.ts → `dashboard/reports` |
+| 43 | /api/analytics/live/activity/[productId] | GET | `analyticsApi.getProductActivity()` in lib/api.ts → `product-heartbeat.tsx` |
+| 44 | /api/analytics/admin/revenue | GET | `adminApi.getRevenue()` in lib/api.ts → `admin/reports`, `admin/dashboard` |
+| 45 | /api/analytics/admin/sales-report | GET | `adminApi.getSalesReport()` in lib/api.ts → `admin/reports` |
+| 46 | /api/analytics/admin/dashboard | GET | `adminApi.getDashboardStats()` in lib/api.ts → `admin/dashboard` |
+| 47 | /api/analytics/events | GET, POST | direct fetch in `lib/conversion-funnel.ts`, `lib/ab-testing.ts`; `analyticsApi.trackEvent()` |
+| 48 | /api/analytics/daily/summary | GET | `adminApi.getDailyAnalyticsSummary()`, `intelligenceApi.getPredictivePulse()` in lib/api.ts |
+| 49 | /api/[[...path]] | ALL | catch-all gateway; rate limiter; handles all unmatched paths (501/404); health check fallback |
+
+### ⚠️ MISALIGNED (4 routes) — Route exists but ALL frontend clients call WRONG URL → hits catch-all → returns 501
+
+| # | Actual Route | Frontend Calls Instead | Pages Affected |
+|---|-------------|----------------------|----------------|
+| 1 | /api/disputes (GET) | /api/disputes/disputes/ | `app/disputes/page.tsx`, `dashboard/disputes/page.tsx`, `dashboard/disputes/[id]/page.tsx`, `sovereign-ledger.tsx`, `judicial-ledger.tsx` |
+| 2 | /api/disputes/create (POST) | /api/disputes/disputes/create/ | `app/disputes/page.tsx`, `dashboard/orders/[id]/page.tsx` |
+| 3 | /api/contracts (GET) | /api/contracts/digital/ | `app/contracts/_id_/page.tsx` (via contractsApi.getByBookingId) |
+| 4 | /api/contracts/[id] (GET) | /api/contracts/digital/${id}/ | `app/contracts/[id]/page.tsx` (direct fetch), `app/contracts/_id_/page.tsx` (via contractsApi.getContract) |
+
+Root cause: `lib/api.ts` `disputesApi` prepends `disputes/disputes/` instead of `disputes/`. `lib/api/contracts.ts` uses `/contracts/digital/` paths from the old Django-style API instead of `/contracts/`.
+
+### ❌ COMPLETELY ORPHANED (4 routes) — Route exists but NO frontend code calls it at all
+
+| # | Route Path | Methods | Notes |
+|---|-----------|---------|-------|
+| 1 | /api/insurance/purchase | POST | Purchase endpoint exists but insurance page only fetches plan list; no "buy" button wired |
+| 2 | /api/notifications/[id] | PATCH, DELETE | Mark-read and delete exist but no page calls them; `notificationsApi` not imported anywhere |
+| 3 | /api/payments/payments | GET | Lists user payments but `paymentsApi.getAll()` never called from any page |
+| 4 | /api/analytics/products/top_products | GET | `adminApi.getTopProducts()` exists in client but never imported/called from any page |
+
+### 💀 DEAD CLIENT METHODS — Defined in API clients but point to non-existent routes (always return 501)
+
+**In lib/api.ts:**
+- `authApi.passwordResetRequest()` → /api/auth/password/reset/request/ → NO ROUTE
+- `authApi.passwordResetConfirm()` → /api/auth/password/reset/confirm/ → NO ROUTE
+- `authApi.generate2FASecret()` → /api/auth/security/2fa/generate/ → NO ROUTE
+- `authApi.enable2FA()` → /api/auth/security/2fa/enable/ → NO ROUTE
+- `productsApi.getMetadata()` → /api/products/metadata/ → NO ROUTE
+- `productsApi.getMatchingAccessories()` → /api/products/{id}/matching-accessories/ → NO ROUTE
+- `productsApi.getRecommendations()` → /api/products/{id}/recommendations/ → NO ROUTE
+- `productsApi.toggleWishlist()` → /api/products/wishlist/toggle/{id}/ → NO ROUTE
+- `productsApi.checkWishlist()` → /api/products/wishlist/check/{id}/ → NO ROUTE
+- `bookingsApi.update()` → /api/bookings/{id}/update/ → NO ROUTE
+- `bookingsApi.updateStatus()` → /api/bookings/{id}/status/ → NO ROUTE
+- `bookingsApi.cancel()` → /api/bookings/{id}/cancel/ → NO ROUTE
+- `bookingsApi.getWaitlist()` → /api/bookings/waitlist/ → NO ROUTE
+- `bookingsApi.addToWaitlist()` → /api/bookings/waitlist/add/ → NO ROUTE
+- `bookingsApi.removeFromWaitlist()` → /api/bookings/waitlist/{id}/ → NO ROUTE
+- `bookingsApi.getCancellationPolicy()` → /api/bookings/{id}/cancellation-policy/ → NO ROUTE
+- `bookingsApi.earlyReturn()` → /api/bookings/{id}/early-return/ → NO ROUTE
+- `bookingsApi.getRefunds()` → /api/bookings/refunds/ → NO ROUTE
+- `bookingsApi.calculateDeposit()` → /api/bookings/calculate-deposit/ → NO ROUTE
+- `reviewsApi.moderate()` → /api/reviews/{id}/moderate/ → NO ROUTE
+- `maintenanceApi.*` (15 methods) → /api/maintenance/* → NO ROUTES
+- `hygieneApi.*` (10 methods) → /api/hygiene/* → NO ROUTES
+- `packagingApi.*` (16 methods) → /api/packaging/* → NO ROUTES
+- `inventoryApi.*` (15 methods) → /api/inventory/* → NO ROUTES
+- `locationsApi.*` (20 methods) → /api/locations/* → NO ROUTES
+- `paymentsApi.getAll()` → /api/payments/payments/ → ORPHANED route
+- `paymentsApi.getById()` → /api/payments/payments/{id}/ → NO ROUTE
+- `paymentsApi.update()` → /api/payments/payments/{id}/ → NO ROUTE
+- `paymentsApi.delete()` → /api/payments/payments/{id}/ → NO ROUTE
+- `paymentsApi.verifyOtp()` → /api/payments/payments/{id}/verify_otp/ → NO ROUTE
+- `paymentsApi.getStatus()` → /api/payments/payments/{id}/status/ → NO ROUTE
+- `paymentsApi.getEscrowMetrics()` → /api/payments/metrics/ → NO ROUTE
+- `socialApi.getMarketPulse()` → /api/social/pulse/ → NO ROUTE
+- `judicialApi.*` (7 methods) → /api/v1/judicial/*, /api/v1/tribunal/*, /api/v1/public/* → NO ROUTES
+- `intelligenceApi.getRegionalLiquidity()` → /api/analytics/admin/regional-liquidity/ → NO ROUTE
+- `intelligenceApi.getPulse()` → /api/analytics/intelligence/pulse/ → NO ROUTE
+- `intelligenceApi.getInfographicData()` → /api/analytics/visuals/{type}/ → NO ROUTE
+- `adminApi.exportRevenueCSV()` → /api/analytics/admin/revenue/export/ → NO ROUTE
+- `adminApi.getAllBookings()` → /api/bookings/admin/ → NO ROUTE
+- `adminApi.updateBooking()` → /api/bookings/admin/{id}/ → NO ROUTE
+- `adminApi.getBookingStats()` → /api/bookings/admin/stats/ → NO ROUTE
+- `adminApi.getAllProducts()` → /api/products/admin/products/ → NO ROUTE
+- `adminApi.createProduct()` → /api/products/admin/products/ → NO ROUTE
+- `adminApi.updateProduct()` → /api/products/admin/products/{id}/ → NO ROUTE
+- `adminApi.deleteProduct()` → /api/products/admin/products/{id}/ → NO ROUTE
+- `adminApi.getAllCategories()` → /api/products/admin/categories/ → NO ROUTE
+- `adminApi.createCategory()` → /api/products/admin/categories/ → NO ROUTE
+- `adminApi.updateCategory()` → /api/products/admin/categories/{id}/ → NO ROUTE
+- `adminApi.deleteCategory()` → /api/products/admin/categories/{id}/ → NO ROUTE
+- `adminApi.getAllVariants()` → /api/products/admin/variants/ → NO ROUTE
+- `adminApi.createVariant()` → /api/products/admin/variants/ → NO ROUTE
+- `adminApi.updateVariant()` → /api/products/admin/variants/{id}/ → NO ROUTE
+- `adminApi.deleteVariant()` → /api/products/admin/variants/{id}/ → NO ROUTE
+- `adminApi.getAllUsers()` → /api/auth/admin/users/ → NO ROUTE
+- `adminApi.getUser()` → /api/auth/admin/users/{id}/ → NO ROUTE
+- `adminApi.updateUser()` → /api/auth/admin/users/{id}/ → NO ROUTE
+- `adminApi.deleteUser()` → /api/auth/admin/users/{id}/ → NO ROUTE
+- `disputesApi.getDispute()` → /api/disputes/disputes/{id}/ → NO ROUTE (double path)
+- `disputesApi.createDisputeMessage()` → /api/disputes/disputes/{id}/messages/ → NO ROUTE
+- `disputesApi.getTickets()` → /api/disputes/tickets/ → NO ROUTE
+- `disputesApi.getTicket()` → /api/disputes/tickets/{id}/ → NO ROUTE
+- `disputesApi.createTicket()` → /api/disputes/tickets/create/ → NO ROUTE
+- `disputesApi.createTicketMessage()` → /api/disputes/tickets/{id}/messages/ → NO ROUTE
+- `disputesApi.getDisputeStats()` → /api/disputes/admin/disputes/stats/ → NO ROUTE
+- `disputesApi.getTicketStats()` → /api/disputes/admin/tickets/stats/ → NO ROUTE
+- `disputesApi.getVaultIntegrity()` → /api/disputes/admin/vault/integrity/ → NO ROUTE
+- `chatbotApi.createSession()` → /api/chatbot/sessions/create_anonymous/ → NO ROUTE
+- `chatbotApi.getMySessions()` → /api/chatbot/sessions/my_sessions/ → NO ROUTE
+- `chatbotApi.getSession()` → /api/chatbot/sessions/{id}/ → NO ROUTE
+- `chatbotApi.sendMessage()` → /api/chatbot/sessions/{id}/send_message/ → NO ROUTE
+- `bundlesApi.getCategories()` → /api/bundles/categories/ → NO ROUTE
+- `bundlesApi.getCategory()` → /api/bundles/categories/{id}/ → NO ROUTE
+- `bundlesApi.createCategory()` → /api/bundles/categories/ → NO ROUTE
+- `bundlesApi.updateCategory()` → /api/bundles/categories/{id}/ → NO ROUTE
+- `bundlesApi.deleteCategory()` → /api/bundles/categories/{id}/ → NO ROUTE
+- `bundlesApi.getById()` → /api/bundles/bundles/{id}/ → NO ROUTE
+- `bundlesApi.createBundle()` → /api/bundles/bundles/ → NO ROUTE
+- `bundlesApi.updateBundle()` → /api/bundles/bundles/{id}/ → NO ROUTE
+- `bundlesApi.deleteBundle()` → /api/bundles/bundles/{id}/ → NO ROUTE
+- `bundlesApi.calculatePrice()` → /api/bundles/bundles/{id}/calculate_price/ → NO ROUTE
+- `bundlesApi.getBundleBookings()` → /api/bundles/bookings/ → NO ROUTE
+- `bundlesApi.getBundleBooking()` → /api/bundles/bookings/{id}/ → NO ROUTE
+- `bundlesApi.createBooking()` → /api/bundles/bookings/ → NO ROUTE
+- `bundlesApi.updateBundleBooking()` → /api/bundles/bookings/{id}/ → NO ROUTE
+- `bundlesApi.deleteBundleBooking()` → /api/bundles/bookings/{id}/ → NO ROUTE
+- `bundlesApi.getBundleReviews()` → /api/bundles/reviews/ → NO ROUTE
+- `bundlesApi.getBundleReview()` → /api/bundles/reviews/{id}/ → NO ROUTE
+- `bundlesApi.createBundleReview()` → /api/bundles/reviews/ → NO ROUTE
+- `bundlesApi.updateBundleReview()` → /api/bundles/reviews/{id}/ → NO ROUTE
+- `bundlesApi.deleteBundleReview()` → /api/bundles/reviews/{id}/ → NO ROUTE
+- `analyticsApi.getEvent()` → /api/analytics/events/{id}/ → NO ROUTE
+- `analyticsApi.getProductAnalytics()` → /api/analytics/products/ → NO ROUTE
+- `analyticsApi.getProductAnalytic()` → /api/analytics/products/{id}/ → NO ROUTE
+- `analyticsApi.getDailyAnalytics()` → /api/analytics/daily/ → NO ROUTE
+- `analyticsApi.getDailyAnalytic()` → /api/analytics/daily/{id}/ → NO ROUTE
+- `analyticsApi.getUserBehavior()` → /api/analytics/user-behavior/ → NO ROUTE
+- `analyticsApi.getUserBehaviorById()` → /api/analytics/user-behavior/{id}/ → NO ROUTE
+
+**In lib/api/auth.ts (old client, path mismatch):**
+- `authApi.login()` → /api/users/login/ → NO ROUTE (actual is /api/auth/login/)
+- `authApi.register()` → /api/users/register/ → NO ROUTE (actual is /api/auth/register/)
+- `authApi.logout()` → /api/users/logout/ → NO ROUTE (actual is /api/auth/logout/)
+- `authApi.getProfile()` → /api/users/profile/ → NO ROUTE (actual is /api/auth/profile/)
+- `verificationApi.requestPhoneVerification()` → /api/users/verify-phone/request/ → NO ROUTE
+- `verificationApi.verifyPhone()` → /api/users/verify-phone/confirm/ → NO ROUTE
+- `verificationApi.uploadID()` → /api/users/verify-id/ → NO ROUTE
+- `verificationApi.verifyAddress()` → /api/users/verify-address/ → NO ROUTE
+
+**In lib/api/products.ts (old client, path mismatch):**
+- `productsApi.search()` → /api/products/?... → ✅ works (trailing slash)
+- `productsApi.getRecommendations()` → /api/products/{id}/recommendations/ → NO ROUTE
+
+**In lib/api/bookings.ts (old client, path mismatch):**
+- `bookingsApi.update()` → /api/bookings/{id}/update/ → NO ROUTE (actual route handles PATCH at /api/bookings/{id}/)
+- `bookingsApi.cancel()` → /api/bookings/{id}/cancel/ → NO ROUTE
+- `bookingsApi.calculateDeposit()` → /api/bookings/calculate-deposit/ → NO ROUTE
+- `bookingsApi.generateAgreement()` → /api/bookings/{id}/agreement/create/ → NO ROUTE
+
+**In lib/api/wallet.ts (old client, ALL paths wrong):**
+- `walletApi.getBalance()` → /api/payments/wallet/balance/ → NO ROUTE (actual is /api/wallet/)
+- `walletApi.getTransactions()` → /api/payments/wallet/transactions/ → NO ROUTE
+- `walletApi.topUp()` → /api/payments/wallet/top-up/ → NO ROUTE
+- `walletApi.getTransaction()` → /api/payments/wallet/transactions/{id}/ → NO ROUTE
+
+**In lib/api/reviews.ts (old client, ALL paths wrong):**
+- `reviewsApi.listForProduct()` → /api/reviews/reviews/?product_id=... → NO ROUTE (actual is /api/reviews/?product_id=...)
+- `reviewsApi.listMyReviews()` → /api/reviews/reviews/my_reviews/ → NO ROUTE
+- `reviewsApi.createReview()` → /api/reviews/reviews/ → NO ROUTE (actual is /api/reviews/create/)
+- `reviewsApi.getMyTrustScore()` → /api/reviews/trust-score/my/ → NO ROUTE
+- `reviewsApi.getUserTrustScore()` → /api/reviews/trust-score/{userId}/ → NO ROUTE
+
+**In lib/api/disputes.ts (old client, ALL paths wrong):**
+- `disputesApi.listDisputes()` → /api/disputes/disputes/ → NO ROUTE (double path)
+- `disputesApi.getDispute()` → /api/disputes/disputes/{id}/ → NO ROUTE
+- `disputesApi.initiateDispute()` → /api/disputes/disputes/create/ → NO ROUTE
+- `disputesApi.getDisputeStatus()` → /api/disputes/disputes/{id}/status/ → NO ROUTE
+- `disputesApi.getDisputeVerdict()` → /api/disputes/disputes/{id}/verdict/ → NO ROUTE
+- `disputesApi.getDisputeHistory()` → /api/disputes/disputes/{id}/history/ → NO ROUTE
+- `disputesApi.createMessage()` → /api/disputes/disputes/{id}/messages/ → NO ROUTE
+- `disputesApi.getEvidenceLogs()` → /api/disputes/disputes/{id}/evidence/ → NO ROUTE
+- `disputesApi.uploadEvidence()` → /api/disputes/disputes/{id}/evidence/upload/ → NO ROUTE
+- `disputesApi.getMediationOffers()` → /api/disputes/disputes/{id}/mediation/offers/ → NO ROUTE
+- `disputesApi.acceptOffer()` → /api/disputes/mediation/offers/{id}/accept/ → NO ROUTE
+- `disputesApi.fileAppeal()` → /api/disputes/judgments/{id}/appeal/ → NO ROUTE
+- `disputesApi.getPublicLedger()` → /api/disputes/public-ledger/ → NO ROUTE
+- `supportApi.*` (4 methods) → /api/disputes/tickets/* → NO ROUTES
+
+**In lib/api/contracts.ts (old client, ALL paths wrong):**
+- `contractsApi.getById()` → /api/contracts/digital/{id}/ → NO ROUTE (actual is /api/contracts/{id}/)
+- `contractsApi.getByBookingId()` → /api/contracts/digital/?booking=... → NO ROUTE
+- `contractsApi.generate()` → /api/contracts/generate/ → NO ROUTE
+- `contractsApi.sign()` → /api/contracts/digital/{id}/sign/ → NO ROUTE
+
+**In lib/api/notifications.ts (old client, ALL paths wrong):**
+- `notificationsApi.list()` → /api/notifications/notifications/ → NO ROUTE (double path)
+- `notificationsApi.get()` → /api/notifications/notifications/{id}/ → NO ROUTE
+- `notificationsApi.markRead()` → /api/notifications/notifications/{id}/mark_read/ → NO ROUTE
+- `notificationsApi.markAllRead()` → /api/notifications/notifications/mark_all_read/ → NO ROUTE
+- `notificationsApi.getUnreadCount()` → /api/notifications/notifications/unread_count/ → NO ROUTE
+
+**In lib/api/payments.ts (old client, partial mismatch):**
+- `paymentsApi.getMethods()` → /api/payments/methods/ → ✅ works
+- `paymentsApi.createPayment()` → /api/payments/create/ → ✅ works
+- `paymentsApi.getStatus()` → /api/payments/payments/{id}/status/ → NO ROUTE
+- `paymentsApi.verifyOtp()` → /api/payments/payments/{id}/verify_otp/ → NO ROUTE
+
+**In lib/api/appeals.ts (old client, ALL paths wrong):**
+- `appealsApi.*` (4 methods) → /api/disputes/appeals/* → NO ROUTES
+- `judgmentsApi.*` (3 methods) → /api/disputes/judgments/* → NO ROUTES
+- `judicialLedgerApi.*` (3 methods) → /api/disputes/public-ledger/*, /api/disputes/judicial-stats/ → NO ROUTES
+
+**In lib/api/logistics.ts (old client, ALL paths wrong):**
+- `locationsApi.*` (7 methods) → /api/locations/* → NO ROUTES
+- `logisticsApi.getReturns()` → /api/returns/returns/my_returns/ → NO ROUTE (actual is /api/returns/)
+- `logisticsApi.createReturn()` → /api/returns/returns/ → NO ROUTE (actual is /api/returns/create)
+- `logisticsApi.getPackagingTypes()` → /api/packaging/types/ → NO ROUTE
+- `logisticsApi.getSuggestedPackaging()` → /api/packaging/instances/suggested_for_booking/ → NO ROUTE
+- `warrantiesApi.*` (3 methods) → /api/warranties/* → NO ROUTES
+
+**In lib/api/innovation.ts (old client, partial match):**
+- `chatbotApi.createSession()` → /api/chatbot/sessions/create_anonymous/ → NO ROUTE
+- `chatbotApi.sendMessage()` → /api/chatbot/sessions/{id}/send_message/ → NO ROUTE
+- `chatbotApi.quickChat()` → /api/chatbot/quick-chat/ → ✅ works
+- `innovationApi.getArtisans()` → /api/artisans/artisans/ → ✅ works
+- `innovationApi.getBundles()` → /api/bundles/bundles/ → ✅ works
+- `innovationApi.getLocalGuideCategories()` → /api/local-guide/categories/ → NO ROUTE
+
+### BROKEN IMPORTS
+- `components/booking/artisan-integration.tsx` imports `artisansApi` from `@/lib/api` — `artisansApi` does NOT exist in `lib/api.ts`. Should use `innovationApi.getArtisans()` instead.
+- `components/wallet/wallet-dashboard.tsx` imports `walletApi` from `@/lib/api/wallet` — ALL walletApi methods point to `/api/payments/wallet/*` which don't exist. The actual wallet routes are at `/api/wallet/*`.
+- `src/shared/components/sovereign/2fa-enrollment.tsx` imports `authApi` from `@/lib/api` — 2FA methods don't have backend routes.
+
+### ADDITIONAL FINDINGS: Direct fetch calls to non-existent routes
+- `fetch('/api/branches/')` → NO ROUTE (role-selector.tsx, admin/shifts)
+- `fetch('/api/users/staff/roles/')` → NO ROUTE (role-selector.tsx)
+- `fetch('/api/users/staff/performance-reviews/')` → NO ROUTE (admin/performance-reviews)
+- `fetch('/api/users/staff/list/')` → NO ROUTE (admin/performance-reviews, admin/shifts)
+- `fetch('/api/users/staff/shifts/')` → NO ROUTE (admin/shifts)
+- `fetch('/api/cms/blog/' + postId)` → NO ROUTE (blog/[id]/page.tsx)
+- `fetch('/api/cms/pages/')` → NO ROUTE (admin/cms/pages)
+- `fetch('/api/cms/pages/' + slug)` → NO ROUTE (pages/[slug]/page.tsx)
+- `fetch('/api/contact/')` → NO ROUTE (contact/page.tsx)
+- `fetch('/api/notifications/push/subscribe/')` → NO ROUTE (lib/push-notifications.ts)
+- `fetch('/api/notifications/push/unsubscribe/')` → NO ROUTE (lib/push-notifications.ts)
+- `fetch('/api/disputes/admin/disputes/stats/')` → NO ROUTE (sovereign/dashboard)
+- `fetch('/api/disputes/admin/vault/integrity/')` → NO ROUTE (sovereign/dashboard)
+- `fetch('/api/subscriptions/cancel')` (POST) → NO ROUTE (subscriptions/page.tsx)
+
+Stage Summary:
+- **51 total API route files** under app/api/
+- **43 routes correctly used** by frontend (path matches, data flows through)
+- **4 routes MISALIGNED** — exist but unreachable due to wrong client paths (disputes x2, contracts x2)
+- **4 routes completely ORPHANED** — exist but no frontend code calls them (insurance/purchase, notifications/[id], payments/payments, analytics/products/top_products)
+- **~150+ dead client methods** defined in lib/api.ts and lib/api/*.ts that point to non-existent routes
+- **Two parallel API client systems** create confusion: `lib/api.ts` (fetch-based, mostly correct) vs `lib/api/*.ts` (SovereignClient-based, many wrong Django-style paths)
+- **16 direct fetch() calls** in pages point to routes that don't exist at all
+- **1 broken import**: `artisan-integration.tsx` imports non-existent `artisansApi` from `@/lib/api`
+- **Priority fixes**: (1) Fix disputes/contracts client paths in lib/api.ts, (2) Wire insurance/purchase and notifications/[id], (3) Delete or document dead client methods in lib/api/*.ts
+---
+Task ID: audit-frontend
+Agent: Frontend Auditor
+Task: Deep audit of all frontend pages for disconnected features
+
+Work Log:
+- Audited 67 page.tsx files across all routes under /app/
+- Cross-referenced each API call against existing /app/api/ route.ts files (59 routes found)
+- Identified 14 API endpoints called by frontend that DO NOT EXIST in backend
+- Found 7 pages using entirely hardcoded/mock data with zero API calls
+- Found 9 pages with forms/buttons that go nowhere (dead actions)
+- Found 12 pages with "coming soon" / placeholder / hardcoded data patterns
+- Found 16 TODO/FIXME/placeholder comments indicating incomplete features
+
+=== DETAILED PAGE-BY-PAGE FINDINGS ===
+
+--- ABOUT (/about/page.tsx) ---
+API Calls: NONE
+Hardcoded Data: YES - features array is fully hardcoded inline
+Forms/Buttons: NONE (only Link to /products)
+Status: ✅ Static page, no API needed. All content is hardcoded by design.
+
+--- AI-SEARCH (/ai-search/page.tsx) ---
+API Calls:
+  1. productsApi.search() → /api/products (EXISTS ✅)
+  2. chatbotApi.quickChat() → /api/chatbot/quick-chat (EXISTS ✅)
+  3. trackSearch() → analytics (lib function, non-blocking)
+Hardcoded Data: QUICK_SUGGESTIONS array is hardcoded
+Forms/Buttons: Search form is functional, connected to real API
+Status: ✅ Fully connected. Minor: suggestion chips are hardcoded.
+
+--- ARTISANS (/artisans/page.tsx) ---
+API Calls:
+  1. fetch('/api/artisans/artisans?search=...') → EXISTS ✅
+Hardcoded Data: SPECIALTY_OPTIONS array is hardcoded
+Forms/Buttons: Search and filter are functional
+Status: ✅ Fully connected to backend.
+
+--- ARTISANS/[id] (/artisans/[id]/page.tsx) ---
+API Calls:
+  1. fetch('/api/artisans/artisans?id=...') → EXISTS ✅
+  2. VouchButton → /api/social/vouch/[userId] (EXISTS ✅)
+Hardcoded Data: SPECIALTY_LABELS map is hardcoded
+Forms/Buttons: Vouch button functional
+Status: ✅ Connected. Minor: fetches ALL artisans then filters client-side instead of using a dedicated /api/artisans/artisans/[id] endpoint.
+
+--- BLOG (/blog/page.tsx) ---
+API Calls: NONE
+Hardcoded Data: YES - blogPosts array of 4 items fully hardcoded inline
+Forms/Buttons: Search is client-side filter only
+Status: ⚠️ ENTIRELY HARDCODED. No /api/cms/blog endpoint exists. Links to /blog/[id] which tries /api/cms/blog/[id] (MISSING ❌).
+
+--- BLOG/[id] (/blog/[id]/page.tsx) ---
+API Calls:
+  1. fetch('/api/cms/blog/' + id) → MISSING ❌
+Hardcoded Data: NO
+Forms/Buttons: NONE
+Status: ❌ API /api/cms/blog/[id] does NOT exist in backend. Page will always show "المقال غير موجود".
+
+--- BOOKINGS/[id] (/bookings/[id]/page.tsx) ---
+API Calls:
+  1. api.get('/bookings/${id}/') → goes through proxy to backend (EXISTS via /api/[[...path]]/route.ts ✅)
+Hardcoded Data: NO
+Forms/Buttons: SovereignButton "عرض بروتوكول الأصل" - NO onClick handler (DEAD BUTTON ⚠️)
+Status: ✅ Data loads. One button has no action.
+
+--- BOOKINGS/[id]/TRACKING (/bookings/[id]/tracking/page.tsx) ---
+API Calls:
+  1. locationsApi.getMyDeliveries() → proxy (MISSING - no /api/locations/ or delivery endpoint ❌)
+Hardcoded Data: NO
+Forms/Buttons: NONE
+Status: ❌ locationsApi.getMyDeliveries() calls a non-existent API. Page always shows "لا توجد معلومات تتبع".
+
+--- BOOKINGS/[id]/CANCEL (/bookings/[id]/cancel/page.tsx) ---
+API Calls:
+  1. api.get('/bookings/${id}/cancellation-policy/') → proxy (MISSING ❌)
+  2. api.post('/bookings/${id}/cancel/', ...) → proxy (MISSING ❌)
+Hardcoded Data: NO
+Forms/Buttons: Cancel form submit → calls missing endpoint
+Status: ❌ Both cancellation-policy and cancel endpoints DO NOT exist. Form submission will fail.
+
+--- BUNDLES (/bundles/page.tsx) ---
+API Calls:
+  1. fetch('/api/bundles/bundles') → EXISTS ✅
+Hardcoded Data: rating is hardcoded to 4.8 in mapApiBundle()
+Forms/Buttons: NONE
+Status: ✅ Connected. Minor: rating value is fabricated client-side.
+
+--- BUNDLES/[id] (/bundles/[id]/page.tsx) ---
+API Calls:
+  1. fetch('/api/bundles/bundles?id=...') → EXISTS ✅
+  2. fetch('/api/bookings/', { method: 'POST' }) → EXISTS ✅
+Hardcoded Data: NO
+Forms/Buttons: "إضافة للسلة" calls POST /api/bookings/ with bundle_id
+Status: ✅ Connected.
+
+--- CART (/cart/page.tsx) ---
+API Calls:
+  1. fetch('/api/bookings/cart') → EXISTS ✅
+  2. fetch('/api/bookings/cart/items/' + itemId, { DELETE }) → EXISTS ✅
+  3. fetch('/api/bookings/create/', { POST }) → EXISTS ✅
+Hardcoded Data: NO
+Forms/Buttons: Remove item, create booking - all functional
+Status: ✅ Fully connected. Delivery address input is NOT sent to API (only same_day_delivery is sent).
+
+--- CHECKOUT (/checkout/page.tsx) ---
+API Calls:
+  1. paymentsApi.getMethods() → /api/payments/methods (EXISTS ✅)
+  2. bookingsApi.getById() → /api/bookings/[id] (EXISTS ✅)
+  3. BaridiMobForm → /api/payments/create (EXISTS ✅)
+  4. BankCardForm → /api/payments/create (EXISTS ✅)
+Hardcoded Data: NO
+Forms/Buttons: Payment forms functional
+Status: ✅ Fully connected. Wilaya selection is UI-only (not sent to backend).
+
+--- CONTACT (/contact/page.tsx) ---
+API Calls:
+  1. fetch('/api/contact/', { POST }) → MISSING ❌ (no /api/contact/ route)
+Hardcoded Data: contactInfo and socialLinks arrays hardcoded; socialLinks href is '#' (DEAD ⚠️)
+Forms/Buttons: Contact form → POST /api/contact/ → will 404
+Status: ❌ /api/contact/ endpoint MISSING. Social media links are all '#'.
+
+--- CONTRACTS/[id] (/contracts/[id]/page.tsx) ---
+API Calls:
+  1. fetch('/api/contracts/digital/${id}/') → MISSING ❌ (only /api/contracts/ and /api/contracts/[id]/ exist)
+  2. fetch('/api/contracts/digital/${id}/sign/', { PATCH }) → MISSING ❌
+Hardcoded Data: Comment says "Map mock response fields"
+Forms/Buttons: Sign contract button → calls missing endpoint
+Status: ❌ Both /api/contracts/digital/ endpoints MISSING. The API has /api/contracts/[id]/ but NOT /api/contracts/digital/[id]/.
+
+--- DISPUTES (/disputes/page.tsx) ---
+API Calls:
+  1. disputesApi.createDispute() → /api/disputes/create (EXISTS ✅)
+Hardcoded Data: NO
+Forms/Buttons: Multi-step dispute creation form → functional
+Status: ✅ Connected.
+
+--- DISPUTES/[id] (/disputes/[id]/page.tsx) ---
+API Calls:
+  1. disputesApi.getDisputeStatus() → proxy (needs /api/disputes/[id]/ or similar, NOT directly available ❌)
+  2. disputesApi.getDisputeVerdict() → MISSING ❌
+  3. disputesApi.getDisputeHistory() → MISSING ❌
+ 4. VouchButton → /api/social/vouch/[userId] (EXISTS ✅)
+Hardcoded: buildFallbackStages() creates fake data when API fails
+Forms/Buttons: Appeal link is present
+Status: ❌ Multiple dispute detail APIs MISSING. Page relies on fallback mock data.
+
+--- DISPUTES/[id]/APPEAL (/disputes/[id]/appeal/page.tsx) ---
+API Calls:
+  1. disputesApi.getDisputeStatus() → MISSING (as above ❌)
+  2. disputesApi.getDisputeVerdict() → MISSING ❌
+  3. appealsApi.fileAppeal() → MISSING ❌ (no /api/appeals/ endpoint)
+Hardcoded Data: APPEAL_REASONS array hardcoded
+Forms/Buttons: Submit appeal → calls missing endpoint
+Status: ❌ Appeals system is entirely disconnected. No /api/appeals/ endpoint exists.
+
+--- FAQ (/faq/page.tsx) ---
+API Calls: NONE
+Hardcoded Data: YES - faqs array of 8 items fully hardcoded inline
+Forms/Buttons: Search is client-side filter only
+Status: ⚠️ ENTIRELY HARDCODED. No API for FAQ content management.
+
+--- FORGOT-PASSWORD (/forgot-password/page.tsx) ---
+API Calls:
+  1. authApi.passwordResetRequest(email) → proxy → /api/auth/ (MISSING specific reset endpoint ❌)
+Hardcoded Data: NO
+Forms/Buttons: Form submits email
+Status: ⚠️ authApi.passwordResetRequest likely calls a Django endpoint not proxied in Next.js API routes.
+
+--- INSURANCE (/insurance/page.tsx) ---
+API Calls:
+  1. fetch('/api/insurance') → EXISTS ✅
+Hardcoded Data: planEnrichment, steps, reasons all hardcoded locally
+Forms/Buttons: "اختيار هذه الخطة" → handleConfirmPurchase does NOTHING (DEAD ⚠️)
+  "تواصل مع الدعم" → handleContactSupport does NOTHING (DEAD ⚠️)
+Status: ⚠️ Fetches plans from API but purchase flow is dead. Toast says "سيتم إضافة هذه الميزة قريباً".
+
+--- JUDICIAL (/judicial/page.tsx) ---
+API Calls: JudicialLedger component (needs internal check)
+Hardcoded Data: NO
+Forms/Buttons: N/A (display only)
+Status: ⚠️ Uses JudicialLedger component which calls /api/disputes/admin/disputes/stats/ and /api/disputes/admin/vault/integrity/ (MISSING ❌).
+
+--- MARKETPLACE (/marketplace/page.tsx) ---
+API Calls:
+  1. api.get('vendors/vendors/') → /api/vendors/vendors (EXISTS ✅)
+  2. api.get('artisans/artisans/') → /api/artisans/artisans (EXISTS ✅)
+Hardcoded Data: serviceCategories in services page only
+Forms/Buttons: CTA links to /register
+Status: ✅ Connected.
+
+--- OFFLINE (/offline/page.tsx) ---
+API Calls: NONE
+Hardcoded Data: YES (offline fallback page)
+Forms/Buttons: "محاولة الاتصال مجدداً" → window.location.reload()
+Status: ✅ Static fallback page, no API needed.
+
+--- PAGES/[SLUG] (/pages/[slug]/page.tsx) ---
+API Calls:
+  1. fetch('/api/cms/pages/' + slug) → MISSING ❌ (no /api/cms/pages/ route)
+Hardcoded Data: NO
+Forms/Buttons: NONE
+Status: ❌ /api/cms/pages/ endpoint MISSING. Page always shows "الصفحة غير موجودة".
+
+--- PRIVACY (/privacy/page.tsx) ---
+API Calls: NONE
+Hardcoded Data: YES - sections array fully hardcoded
+Forms/Buttons: NONE
+Status: ✅ Static legal page, hardcoded by design.
+
+--- PRODUCTS (/products/page.tsx) ---
+API Calls: ProductSearch component (delegates to products API)
+Hardcoded Data: NO
+Forms/Buttons: NONE
+Status: ✅ Connected via ProductSearch component.
+
+--- PRODUCTS/[id] (/products/[id]/page.tsx) ---
+API Calls:
+  1. productsApi.getBySlug() / getById() → /api/products (EXISTS ✅)
+  2. bookingsApi.calculateDeposit() → proxy (likely MISSING ❌)
+  3. reviewsApi.getAll() → /api/reviews (EXISTS ✅)
+  4. bookingsApi.create() → /api/bookings (EXISTS ✅)
+  5. ProductHeartbeat → /api/analytics/live/activity/[productId] (EXISTS ✅)
+  6. LiveViewerCount → analytics (component)
+ 7. WaitlistButton → bookingsApi.addToWaitlist (proxy, likely MISSING ❌)
+Hardcoded Data: specs (color, fabric, size) use fallback strings like 'ذهبي' (minor)
+Forms/Buttons: "إبرام الميثاق" and "احجز الآن" are functional
+Status: ✅ Mostly connected. Deposit calculation and waitlist endpoints likely missing.
+
+--- PRODUCTS/CREATE (/products/create/page.tsx) ---
+API Calls: NONE
+Hardcoded Data: YES - "نموذج إضافة المنتج سيكون متاحاً قريباً"
+Forms/Buttons: "تصفح المنتجات" link only
+Status: ❌ ENTIRELY PLACEHOLDER. No API, no form, no functionality.
+
+--- PRODUCTS/[id]/VARIANTS (/products/[id]/variants/page.tsx) ---
+API Calls:
+  1. api.get(`/products/${params.id}/variants/`) → proxy (MISSING ❌)
+  2. api.post('/products/admin/variants/', ...) → proxy (MISSING ❌)
+  3. api.patch(`/products/admin/variants/${id}/`, ...) → proxy (MISSING ❌)
+  4. api.delete(`/products/admin/variants/${id}/`) → proxy (MISSING ❌)
+Hardcoded Data: NO
+Forms/Buttons: Full CRUD form → all call MISSING endpoints
+Status: ❌ Product variants admin endpoints DO NOT EXIST in backend.
+
+--- RENTALS (/rentals/page.tsx) ---
+API Calls:
+  1. productsApi.getCategories() → /api/products/categories (EXISTS ✅)
+  2. productsApi.getAll() → /api/products (EXISTS ✅)
+Hardcoded Data: steps array hardcoded
+Forms/Buttons: Search is decorative (links to /products)
+Status: ✅ Connected.
+
+--- RESET-PASSWORD (/reset-password/page.tsx) ---
+API Calls:
+  1. authApi.passwordResetConfirm(token, uid, password, passwordConfirm) → proxy (MISSING ❌)
+Hardcoded Data: NO
+Forms/Buttons: Form submit → calls missing endpoint
+Status: ❌ authApi.passwordResetConfirm likely calls Django endpoint not proxied.
+
+--- RETURNS (/returns/page.tsx) ---
+API Calls:
+  1. fetch('/api/returns') → EXISTS ✅
+  2. fetch('/api/returns/create', { POST }) → EXISTS ✅
+Hardcoded Data: reasons array hardcoded, fileName display only (file not uploaded to server)
+Forms/Buttons: Return form → functional; file upload UI exists but file is NOT actually sent to server
+Status: ✅ Mostly connected. ⚠️ File upload is UI-only (reads filename but doesn't upload).
+
+--- SERVICES (/services/page.tsx) ---
+API Calls:
+  1. api.get('local-guide/services/') → MISSING ❌ (no /api/local-guide/ routes)
+  2. api.post('local-guide/services/book/', ...) → MISSING ❌
+Hardcoded Data: serviceCategories array hardcoded, categoryMatch for filtering
+Forms/Buttons: Booking dialog → calls MISSING endpoint
+Status: ❌ /api/local-guide/services/ and /api/local-guide/services/book/ DO NOT EXIST. Entire services booking is broken.
+
+--- TERMS (/terms/page.tsx) ---
+API Calls: NONE
+Hardcoded Data: YES - sections array fully hardcoded
+Forms/Buttons: NONE
+Status: ✅ Static legal page, hardcoded by design.
+
+--- TRUST-SCORE (/trust-score/page.tsx) ---
+API Calls:
+  1. fetch('/api/social/score/' + user.id) → /api/social/score/[userId] (EXISTS ✅)
+Hardcoded Data: components array (5 items) is HARDCODED with static values (NOT from API)
+  benefits array is hardcoded
+Forms/Buttons: NONE
+Status: ⚠️ Overall score from API but component breakdown (85, 60, 78, 70, 65) is COMPLETELY HARDCODED. Misleading to users.
+
+--- VENDORS (/vendors/page.tsx) ---
+API Calls:
+  1. fetch('/api/vendors/vendors') → EXISTS ✅
+Hardcoded Data: NO
+Forms/Buttons: Search is client-side filter
+Status: ✅ Connected.
+
+--- VENDORS/[id] (/vendors/[id]/page.tsx) ---
+API Calls:
+  1. fetch('/api/vendors/vendors') → EXISTS ✅
+  2. fetch('/api/products') → EXISTS ✅
+Hardcoded Data: NO
+Forms/Buttons: External link → vendor.website
+Status: ✅ Connected. Inefficiently fetches ALL vendors then filters.
+
+--- VENDORS/DASHBOARD (/vendors/dashboard/page.tsx) ---
+API Calls:
+  1. api.get('/vendors/dashboard/') → MISSING ❌ (no /api/vendors/dashboard/ route)
+Hardcoded Data: NO
+Forms/Buttons: Display only
+Status: ❌ /api/vendors/dashboard/ DOES NOT EXIST. Page will show error.
+
+--- VERIFICATION (/verification/page.tsx) ---
+API Calls:
+  1. verificationApi.getStatus() → /api/verification/status (EXISTS ✅)
+  2. verificationApi.submit() → /api/verification/submit (EXISTS ✅)
+  3. verificationApi.getPending() → /api/verification/pending (EXISTS ✅)
+  4. verificationApi.vote() → /api/verification/vote (EXISTS ✅)
+Hardcoded Data: NO
+Forms/Buttons: Camera capture, submit, vote - all functional
+Status: ✅ Fully connected.
+
+--- WALLET (/wallet/page.tsx) ---
+API Calls:
+  1. fetch('/api/wallet') → EXISTS ✅
+  2. fetch('/api/wallet/deposit', POST) → EXISTS ✅
+   3. fetch('/api/wallet/withdraw', POST) → EXISTS ✅
+  4. fetch('/api/wallet/transfer', POST) → EXISTS ✅
+Hardcoded Data: YES - initial balance useState(45250.00) is hardcoded (overridden by API after fetch)
+Forms/Buttons: Deposit, withdraw, transfer forms → functional
+Status: ✅ Connected. ⚠️ Initial balance hardcoded before API loads.
+
+--- SUBSCRIPTIONS (/subscriptions/page.tsx) ---
+API Calls:
+  1. fetch('/api/subscriptions') → EXISTS ✅
+  2. fetch('/api/subscriptions/cancel', POST) → MISSING ❌ (no /api/subscriptions/cancel)
+Hardcoded Data: Plan enrichment details (features, icons) mapped locally; "مدفوع" subscriptions list hardcoded
+Forms/Buttons: "اشتراك" → calls MISSING cancel endpoint (toast: "قريباً" instead of subscribing); "إلغاء الاشتراك" → calls MISSING
+Status: ❌ /api/subscriptions/cancel MISSING. Subscribe/cancel flow is broken. Toast says "سيتم تفعيل الاشتراك قريباً".
+
+--- SOVEREIGN/DASHBOARD (/sovereign/dashboard/page.tsx) ---
+API Calls:
+  1. fetch('/api/disputes/admin/disputes/stats/') → MISSING ❌
+  2. fetch('/api/disputes/admin/vault/integrity/') → MISSING ❌
+Hardcoded Data: NO
+Forms/Buttons: Display only
+Status: ❌ Both admin dispute endpoints MISSING.
+
+--- SOVEREIGN/SHOWCASE & PRESENTATION ---
+API Calls: Not checked (display only components likely)
+Hardcoded Data: N/A
+Forms/Buttons: N/A
+Status: ⏭️ Not fully audited (display pages).
+
+--- DASHBOARD/SETTINGS (/dashboard/settings/page.tsx) ---
+API Calls:
+  1. fetch('/api/auth/profile') (GET, PATCH, PUT) → /api/auth/profile (EXISTS ✅)
+Hardcoded Data: NO
+Forms/Buttons: Full profile edit form → functional
+Status: ✅ Connected.
+
+--- DASHBOARD/WISHLIST (/dashboard/wishlist/page.tsx) ---
+API Calls:
+  1. productsApi.getWishlist() → /api/products/wishlist (EXISTS ✅)
+  2. productsApi.removeFromWishlist() → /api/products/wishlist/[id] (EXISTS ✅)
+Hardcoded Data: "Simulated Image Placeholder" comment
+Forms/Buttons: Remove from wishlist → functional
+Status: ✅ Connected.
+
+--- DASHBOARD/DISPUTES & DASHBOARD/DISPUTES/[id] ---
+API Calls:
+  1. disputesApi.getDisputes() → proxy (needs /api/disputes/ which EXISTS ✅)
+  2. disputesApi.createDispute() → /api/disputes/create (EXISTS ✅)
+Hardcoded Data: NO
+Forms/Buttons: "أدخل رسالتك الرسمية..." input is decorative (no submit handler ⚠️)
+Status: ✅ Mostly connected. Royal message input in detail page is decorative.
+
+--- DASHBOARD/WALLET (/dashboard/wallet/page.tsx) ---
+API Calls:
+  1. fetch('/api/auth/profile') → EXISTS ✅
+  2. fetch('/api/wallet') → EXISTS ✅
+  3. fetch('/api/bookings') → EXISTS ✅
+Hardcoded Data: NO
+Forms/Buttons: Display only
+Status: ✅ Connected.
+
+--- DASHBOARD/ORDERS & DASHBOARD/ORDERS/[id] ---
+API Calls:
+  1. fetch('/api/bookings') → EXISTS ✅
+  2. bookingsApi.getById() → EXISTS ✅
+  3. disputesApi.createDispute() → EXISTS ✅
+Hardcoded Data: NO
+Forms/Buttons: "ارسال مشكلة" → toast.info('قريباً') (DEAD ⚠️); "تمديد العقد" → toast.info('قريباً') (DEAD ⚠️); "مراسلة" → toast.info('قريباً') (DEAD ⚠️)
+Status: ⚠️ Data loads. 3 action buttons are dead placeholders showing "coming soon" toasts.
+
+--- DASHBOARD/BOOKINGS ---
+API Calls: bookingsApi.getAll() → EXISTS ✅
+Hardcoded Data: '/placeholder.svg' fallback for missing images
+Forms/Buttons: Display only
+Status: ✅ Connected.
+
+--- DASHBOARD/NOTIFICATIONS ---
+API Calls: fetch('/api/notifications') → EXISTS ✅
+Hardcoded Data: NO
+Forms/Buttons: Display only
+Status: ✅ Connected.
+
+--- DASHBOARD/ANALYTICS ---
+API Calls:
+  1. authApi.me() → EXISTS ✅
+  2. analyticsApi.getUserBehavior() → MISSING ❌ (no /api/analytics/events/behavior or similar)
+  3. analyticsApi.getDailyAnalytics() → /api/analytics/daily/summary (EXISTS ✅)
+Hardcoded Data: NO
+Forms/Buttons: Display only
+Status: ⚠️ getUserBehavior endpoint likely missing.
+
+--- DASHBOARD/PRODUCTS ---
+API Calls: fetch('/api/products') → EXISTS ✅
+Hardcoded Data: NO
+Forms/Buttons: "قريباً: ميزة التعديل", "قريباً: ميزة المعاينة", "قريباً: ميزة الحذف" → all DEAD ⚠️
+Status: ⚠️ Data loads but 3 product management features are dead placeholders.
+
+--- DASHBOARD/ARTISANS ---
+API Calls: innovationApi.getArtisans() → proxy (MISSING ❌)
+Hardcoded Data: "Placeholder for real avatar data if exists" comment
+Forms/Buttons: Display only
+Status: ❌ innovationApi.getArtisans() endpoint MISSING.
+
+--- DASHBOARD/SOCIAL ---
+API Calls: NO API calls found (page appears to have no data fetching)
+Hardcoded Data: N/A
+Forms/Buttons: N/A
+Status: ⚠️ Page appears to have no data source - may be empty.
+
+--- DASHBOARD/STANDARDIZE ---
+API Calls: NONE found
+Hardcoded Data: Input values like "45,000" hardcoded; full layout is static mockup
+Forms/Buttons: NO functional actions
+Status: ❌ ENTIRELY STATIC MOCKUP. Not connected to any backend. Appears to be a UI design prototype.
+
+--- DASHBOARD/WAITLIST ---
+API Calls:
+  1. bookingsApi.getWaitlist() → proxy (MISSING ❌)
+  2. bookingsApi.removeFromWaitlist() → proxy (MISSING ❌)
+Hardcoded Data: NO
+Forms/Buttons: "إزالة من القائمة" → calls missing endpoint
+Status: ❌ Waitlist API endpoints MISSING.
+
+--- DASHBOARD/REPORTS ---
+API Calls:
+  1. intelligenceApi.getRegionalLiquidity() → MISSING ❌
+  2. intelligenceApi.getPulse() → MISSING ❌
+  3. intelligenceApi.getMarketReport() → MISSING ❌
+Hardcoded Data: NO
+Forms/Buttons: Display only
+Status: ❌ ALL 3 intelligence API endpoints MISSING.
+
+--- ADMIN/DASHBOARD ---
+API Calls:
+  1. adminApi.getDashboardStats() → proxy (MISSING ❌)
+  2. adminApi.getRevenue() → /api/analytics/admin/revenue (EXISTS ✅)
+Hardcoded Data: NO
+Forms/Buttons: Display only
+Status: ⚠️ getDashboardStats endpoint likely missing.
+
+--- ADMIN/USERS ---
+API Calls: adminApi.getAllUsers() → proxy (MISSING ❌)
+Hardcoded Data: NO
+Forms/Buttons: Display + role filter
+Status: ❌ admin users API endpoint MISSING.
+
+--- ADMIN/ACTIVITY-LOGS ---
+API Calls: fetch('/api/users/staff/activity-logs/') → MISSING ❌
+Hardcoded Data: NO
+Forms/Buttons: Display only
+Status: ❌ Activity logs endpoint MISSING.
+
+--- ADMIN/BOOKINGS ---
+API Calls:
+  1. adminApi.getAllBookings() → proxy (MISSING ❌)
+  2. adminApi.getBookingStats() → proxy (MISSING ❌)
+Hardcoded Data: NO
+Forms/Buttons: Display + refresh
+Status: ❌ Admin bookings APIs MISSING.
+
+--- ADMIN/BRANCHES ---
+API Calls:
+  1. api.get('/branches/admin/branches/') → MISSING ❌
+  2. api.post('/branches/admin/branches/') → MISSING ❌
+  3. api.patch('/branches/admin/branches/${id}/') → MISSING ❌
+  4. api.delete('/branches/admin/branches/${id}/') → MISSING ❌
+Hardcoded Data: NO
+Forms/Buttons: Full CRUD form → all call MISSING endpoints
+Status: ❌ ALL branch admin endpoints MISSING.
+
+--- ADMIN/PRODUCTS & ADMIN/PRODUCTS/NEW ---
+API Calls:
+  1. adminApi.getAllProducts() → proxy (MISSING ❌)
+  2. adminApi.deleteProduct() → proxy (MISSING ❌)
+Hardcoded Data: products/new: "نموذج إضافة المنتج سيكون متاحاً قريباً" (PLACEHOLDER)
+Forms/Buttons: products: search + delete; products/new: PLACEHOLDER
+Status: ❌ Admin products APIs MISSING. Products/new is entirely placeholder.
+
+--- ADMIN/INVENTORY ---
+API Calls:
+  1. inventoryApi.getItems() → proxy (MISSING ❌)
+  2. inventoryApi.getStockAlerts() → proxy (MISSING ❌)
+  3-5. inventoryApi CRUD operations → proxy (MISSING ❌)
+Hardcoded Data: NO
+Forms/Buttons: Full CRUD form → all call MISSING endpoints
+Status: ❌ ALL inventory APIs MISSING.
+
+--- ADMIN/MAINTENANCE ---
+API Calls: maintenanceApi CRUD → proxy (MISSING ❌)
+Hardcoded Data: NO
+Forms/Buttons: Full CRUD form → all call MISSING endpoints
+Status: ❌ ALL maintenance APIs MISSING.
+
+--- ADMIN/STAFF ---
+API Calls: fetch('/api/users/staff/list/') → MISSING ❌
+Hardcoded Data: NO
+Forms/Buttons: Display only
+Status: ❌ Staff management endpoint MISSING.
+
+--- ADMIN/SHIFTS ---
+API Calls:
+  1. fetch('/api/users/staff/shifts/') → MISSING ❌
+  2. fetch('/api/branches/') → MISSING ❌
+  3. fetch('/api/users/staff/list/') → MISSING ❌
+  4. Shift CRUD → MISSING ❌
+Hardcoded Data: NO (comment: "handled by a mock API handler")
+Forms/Buttons: Full CRUD form → all call MISSING endpoints
+Status: ❌ ALL shift/staff APIs MISSING. Code comment confirms mock handler.
+
+--- ADMIN/PERFORMANCE-REVIEWS ---
+API Calls:
+  1. fetch('/api/users/staff/performance-reviews/') → MISSING ❌
+  2. fetch('/api/users/staff/list/') → MISSING ❌
+Hardcoded Data: NO
+Forms/Buttons: Full review form → calls MISSING endpoints
+Status: ❌ Performance reviews APIs MISSING.
+
+--- ADMIN/DAMAGE-ASSESSMENT ---
+API Calls:
+  1. api.get('/bookings/damage-assessment/') → MISSING ❌
+  2. api.patch('/bookings/damage-assessment/${id}/') → MISSING ❌
+Hardcoded Data: NO
+Forms/Buttons: Status update buttons → call MISSING endpoint
+Status: ❌ Damage assessment APIs MISSING.
+
+--- ADMIN/REPORTS ---
+API Calls:
+  1. adminApi.getRevenue() → EXISTS ✅
+  2. adminApi.getSalesReport() → EXISTS ✅
+  3. adminApi.exportRevenueCSV() → proxy (MISSING ❌)
+Hardcoded Data: NO
+Forms/Buttons: Export buttons → call MISSING endpoint
+Status: ⚠️ Revenue/sales data loads. CSV export endpoint MISSING.
+
+--- ADMIN/FORECASTING ---
+API Calls:
+  1. api.get('/analytics/forecasts/') → MISSING ❌
+  2. api.post('/analytics/forecasts/generate/') → MISSING ❌
+ 3. api.get('/analytics/regional-liquidity/') → MISSING ❌
+Hardcoded Data: NO
+Forms/Buttons: Generate forecast → calls MISSING endpoint
+Status: ❌ ALL forecasting APIs MISSING.
+
+--- ADMIN/CMS/PAGES ---
+API Calls:
+  1. fetch('/api/cms/pages/') → MISSING ❌
+  2. fetch('/api/cms/pages/${id}/', PUT/POST/DELETE) → MISSING ❌
+Hardcoded Data: NO
+Forms/Buttons: Full CRUD form → all call MISSING endpoints
+Status: ❌ ALL CMS page management APIs MISSING. Also breaks /pages/[slug] frontend page.
+
+--- ADMIN/PACKAGING ---
+API Calls: packagingApi CRUD → proxy (MISSING ❌)
+Hardcoded Data: NO
+Forms/Buttons: Full CRUD for types, materials, rules → all call MISSING
+Status: ❌ ALL packaging APIs MISSING.
+
+--- ADMIN/HYGIENE ---
+API Calls: hygieneApi CRUD → proxy (MISSING ❌)
+Hardcoded Data: NO
+Forms/Buttons: Full CRUD → all call MISSING
+Status: ❌ ALL hygiene APIs MISSING.
+
+--- (AUTH)/LOGIN (/login) ---
+API Calls: authApi.login() → proxy to backend
+Hardcoded Data: NO
+Forms/Buttons: Login form → functional
+Status: ✅ Connected.
+
+--- (AUTH)/REGISTER (/register) ---
+API Calls: authApi.register() → proxy to backend
+Hardcoded Data: NO
+Forms/Buttons: Register form → functional
+Status: ✅ Connected.
+
+=== SUMMARY OF MISSING API ENDPOINTS (16 total) ===
+
+1. /api/contact/ (POST) - Contact form
+2. /api/cms/blog/ (GET, GET /:id) - Blog system
+3. /api/cms/pages/ (GET, POST, PUT, DELETE /:id) - CMS pages
+4. /api/contracts/digital/:id/ (GET, PATCH sign) - Digital contracts
+5. /api/locations/ (GET deliveries) - Location/delivery tracking
+6. /api/local-guide/services/ (GET, POST book) - Services
+7. /api/users/staff/activity-logs/ (GET) - Activity logs
+8. /api/users/staff/list/ (GET) - Staff list
+9. /api/users/staff/performance-reviews/ (GET, POST /:id, PUT /:id) - Reviews
+10. /api/users/staff/shifts/ (GET, POST /:id, PATCH /:id, DELETE /:id) - Shifts
+11. /api/branches/admin/branches/ (GET, POST, PATCH /:id, DELETE /:id) - Branches
+12. /api/products/:id/variants/ (GET, POST admin/variants/:id, DELETE) - Variants
+13. /api/analytics/forecasts/ (GET, POST generate) - Forecasting
+14. /api/analytics/regional-liquidity/ (GET) - Intelligence
+15. /api/subscriptions/cancel/ (POST) - Subscriptions
+16. /api/appeals/ (POST) - Appeals
+17. /api/bookings/:id/cancellation-policy/ (GET) - Cancellation policy
+18. /api/bookings/:id/cancel/ (POST) - Cancel booking
+19. /api/disputes/[id]/ (GET status, verdict, history) - Dispute detail
+20. /api/disputes/admin/disputes/stats/ (GET) - Dispute stats
+21. /api/disputes/admin/vault/integrity/ (GET) - Vault integrity
+22. /api/vendors/dashboard/ (GET) - Vendor dashboard
+23. /api/bookings/damage-assessment/ (GET, PATCH) - Damage assessment
+24. /api/users/staff/performance-reviews/ - Admin reviews
+25. Additional admin APIs: getDashboardStats, getAllUsers, getAllBookings, getBookingStats, getAllProducts, deleteProduct, inventoryApi, maintenanceApi, packagingApi, hygieneApi
+
+=== PAGES WITH HARDCODED DATA (no API) ===
+1. /about - Static content (by design)
+2. /blog - 4 blog posts hardcoded
+3. /faq - 8 FAQ items hardcoded
+4. /privacy - Static legal content (by design)
+5. /terms - Static legal content (by design)
+6. /products/create - Entire page is placeholder
+7. /dashboard/standardize - Entire page is static mockup
+8. /dashboard/social - No data fetching
+
+=== DEAD BUTTONS / PLACEHOLDER ACTIONS ===
+1. /bookings/[id] - "عرض بروتوكول الأصل" button has no onClick
+2. /insurance - Purchase button does nothing (toast: "قريباً")
+3. /insurance - Contact support button does nothing (toast: "قريباً")
+4. /subscriptions - Subscribe shows toast "قريباً" instead of subscribing
+5. /subscriptions - Cancel shows toast "قريباً" instead of cancelling
+6. /dashboard/orders/[id] - "ارسال مشكلة" → dead toast
+7. /dashboard/orders/[id] - "تمديد العقد" → dead toast
+8. /dashboard/orders/[id] - "مراسلة" → dead toast
+9. /dashboard/products - "ميزة التعديل", "ميزة المعاينة", "ميزة الحذف" → dead toasts
+10. /contact - Social media links all point to '#'
+11. /returns - File upload reads filename but doesn't actually upload
+
+=== COMPONENT-LEVEL HARDCODED DATA (misleading) ===
+1. /trust-score - Component breakdown values (85, 60, 78, 70, 65) are hardcoded, NOT from API
+2. /wallet - Initial balance (45250.00) hardcoded before API response
+3. /bundles - Rating always shows 4.8 for all bundles
+4. /insurance - Plan features/icons enriched locally, not from API
+5. /subscriptions - Plan icons, benefits enriched locally
+
+Stage Summary:
+- 16+ pages are FULLY FUNCTIONAL and properly connected to their APIs
+- 13 pages use HARDCODED data where they should use APIs (blog, FAQ, CMS, admin/standardize, etc.)
+- 25+ API endpoints are called by frontend but DO NOT EXIST in backend (contact, CMS blog, CMS pages, digital contracts, services, local-guide, branches, staff, shifts, variants, forecasts, appeals, subscriptions/cancel, waitlist, packaging, hygiene, maintenance, inventory, performance-reviews, etc.)
+- 11 buttons/actions are DEAD (show "coming soon" toast or have no handler)
+- Admin panel is ~90% disconnected - nearly every admin subpage calls missing APIs
+- Dashboard has several disconnected sub-features (standardize is pure mockup, analytics intelligence APIs missing, social has no data, products CRUD is dead)
+- The dispute/appeal system is partially built (create works) but detail view, verdict, history, and appeals are all disconnected
+- Services/Local Guide is entirely disconnected (no API routes exist)
+- File upload in returns page is UI-only (filename captured but file not sent)
+
+---
+Task ID: audit-schema
+Agent: Schema Auditor
+Task: Deep audit of Prisma schema vs actual feature implementation
+
+Work Log:
+- Read complete prisma/schema.prisma (34 models, 636 lines)
+- Mapped all 50 API route files under app/api/
+- Mapped all 73 frontend page.tsx files under app/
+- Traced all lib/api/*.ts client wrappers (15 files) and their endpoint paths
+- Cross-referenced each model: schema → API route → frontend page
+- Checked every field for read/write usage across all API routes
+- Checked all model relationships for query usage
+- Checked string "enum" values for consistency between schema comments and actual API usage
+
+## Model-by-Model Connectivity Status:
+
+### User
+- API: auth/login (reads), auth/register (creates), auth/profile (reads, updates firstName/lastName/phone), social/score (reads trustScore, isVerified), social/vouch (updates trustScore), verification/vote (updates isVerified, trustScore), wallet/* (reads/writes walletBalance), insurance/purchase (reads walletBalance, writes walletBalance)
+- Frontend: login, register, dashboard/settings, trust-score, verification, wallet, dashboard/wallet
+- **Unused fields**: `is2FaEnabled`, `twoFaSecret` — NEVER read or written by any API route
+- **Unused relations**: `subscriptions` (UserSubscription[]), `activityLogs` (ActivityLog[]), `waitlistItems` (WaitlistItem[]) — none of these have API routes that query through User
+- Status: PARTIAL — core fields wired, several fields/relations orphaned
+
+### Category
+- API: products/categories (GET list — reads id, nameAr, nameEn, slug, icon, productCount)
+- Frontend: products page, marketplace page, product detail page (via include)
+- No create/update/delete API
+- Status: PARTIAL (read-only)
+
+### Product
+- API: products (GET list), products/[id] (GET detail with category, vendor, reviews includes), products/search-suggestions, analytics/products/top_products, analytics/intelligence/report, analytics/admin/dashboard, analytics/admin/sales-report
+- Frontend: products page, product detail page, AI search, admin products page, dashboard/products, dashboard/standardize
+- **No POST/PUT/DELETE API** — admin/products/new page exists but frontend calls `adminApi.createProduct()` → `/products/admin/products/` which hits 501
+- All schema fields ARE read by at least one API
+- Status: PARTIAL — read is fully wired, write (CRUD) is missing
+
+### Vendor
+- API: vendors/vendors (GET list with search, location, isActive filter, _count.products)
+- Frontend: vendors page, vendors/[id] page
+- No create/update/delete API
+- Fields `commissionRate`, `joinedDate` read by API; `website` read by API
+- Status: PARTIAL (read-only)
+
+### Artisan
+- API: artisans/artisans (GET list with search, specialty, location filters)
+- Frontend: artisans page, artisans/[id] page
+- No create/update/delete API
+- All fields read by API
+- Status: PARTIAL (read-only)
+
+### Bundle + BundleItem
+- API: bundles/bundles (GET list with items → products include)
+- Frontend: bundles page, bundles/[id] page
+- No create/update/delete API
+- BundleItem only accessed through Bundle include — no independent API
+- Status: PARTIAL (read-only, BundleItem is include-only)
+
+### Review
+- API: reviews (GET list by product_id with status filter), reviews/create (POST — creates with status 'pending')
+- Frontend: product detail page (lists reviews + review form)
+- **No admin approval API** — reviews created as 'pending' but never transitioned to 'approved'/'rejected'
+- **No update/delete API**
+- Status: PARTIAL — create works, but approval workflow is broken (pending reviews stay pending forever)
+
+### Booking
+- API: bookings (GET user list), bookings/[id] (GET, PATCH), bookings/create (POST), bookings/cart (GET), bookings/cart/items (POST, DELETE)
+- Frontend: dashboard/orders, dashboard/bookings, cart, checkout, bookings/[id], bookings/[id]/cancel, bookings/[id]/tracking
+- **MISMATCH**: `lib/api/bookings.ts` calls `/bookings/${id}/cancel/` and `/bookings/${id}/update/` — NEITHER exists as a route; cancel page will 501
+- Status: PARTIAL — core CRUD works, but lib/api wrapper paths don't match actual routes
+
+### CartItem
+- API: bookings/cart (GET), bookings/cart/items (POST), bookings/cart/items/[id] (DELETE)
+- Frontend: cart page
+- All fields read/written
+- Status: FULLY WIRED
+
+### Wishlist
+- API: products/wishlist (GET, POST), products/wishlist/[id] (DELETE)
+- Frontend: dashboard/wishlist page, product detail page (via WaitlistButton component)
+- Status: FULLY WIRED
+
+### WaitlistItem
+- **NO API route exists** — the model is in schema but no route queries `db.waitlistItem`
+- Frontend: /dashboard/waitlist page calls `bookingsApi.getWaitlist()` → hits 501
+- Frontend: WaitlistButton component on product detail page (calls non-existent endpoint)
+- Status: ORPHANED — schema model exists, frontend page exists, but NO backend route
+
+### Notification
+- API: notifications (GET list), notifications/[id] (PATCH mark-read, DELETE)
+- Frontend: dashboard/notifications page (uses direct fetch('/api/notifications'))
+- **MISMATCH**: `lib/api/notifications.ts` wraps calls to `/notifications/notifications/` (double path) — would 404/501
+- No "mark all read" API (frontend wrapper calls it but no route exists)
+- Status: PARTIAL — direct fetch works, lib/api wrapper has path bug
+
+### Dispute
+- API: disputes (GET user list), disputes/create (POST)
+- Frontend: disputes page, disputes/[id], dashboard/disputes, dashboard/disputes/[id]
+- **MISMATCH**: `lib/api/disputes.ts` calls `/disputes/disputes/`, `/disputes/disputes/${id}/status/`, `/disputes/disputes/${id}/history/`, etc. — ALL hit 501 (real routes are `/disputes/` and `/disputes/create/`)
+- No status update API, no message API
+- Status: PARTIAL — create works, but detail/history/status/message features all hit 501 via lib/api wrapper
+
+### DisputeMessage
+- **NO API route** — the model is in schema but never queried
+- Dispute detail pages reference message UI but no backend route exists
+- Status: COMPLETELY ORPHANED
+
+### Contract
+- API: contracts (GET user list), contracts/[id] (GET single)
+- Frontend: contracts/[id] page, contracts/_id_ page
+- **MISMATCH**: `lib/api/contracts.ts` calls `/contracts/digital/${id}/` and `/contracts/digital/${id}/sign/` — NEITHER exists (real routes are `/contracts/` and `/contracts/[id]/`)
+- No sign/finalize API
+- Status: PARTIAL — list/detail read works, but frontend lib/api paths are wrong, no write operations
+
+### ReturnRequest
+- API: returns (GET user list), returns/create (POST)
+- Frontend: returns page
+- No status update API (admin cannot approve/reject)
+- Status: PARTIAL — read+create works, no update workflow
+
+### Payment
+- API: payments/payments (GET list), payments/create (POST), payments/methods (GET — hardcoded, no DB query)
+- Frontend: checkout page (via paymentsApi)
+- **MISMATCH**: `lib/api/payments.ts` also calls `/payments/payments/${id}/status/` and `/payments/payments/${id}/verify_otp/` — NEITHER exists
+- Status: PARTIAL — create/list works, verify/status flows missing
+
+### Transaction
+- API: wallet (GET balance + transactions), wallet/deposit (POST creates Transaction), wallet/withdraw (POST creates Transaction), wallet/transfer (POST creates 2 Transactions), insurance/purchase (POST creates Transaction)
+- Frontend: wallet page, dashboard/wallet page
+- Status: FULLY WIRED
+
+### SubscriptionPlan
+- API: subscriptions (GET list of active plans)
+- Frontend: subscriptions page (calls /api/subscriptions)
+- **No purchase/cancel API** — frontend has cancel button calling `/api/subscriptions/cancel` → 501
+- Status: PARTIAL — read-only, no purchase/cancel
+
+### UserSubscription
+- **NO API route** — model exists in schema with full relation to User and SubscriptionPlan
+- Never queried, created, or referenced by any API route
+- Status: COMPLETELY ORPHANED MODEL
+
+### InsurancePlan
+- API: insurance (GET list), insurance/purchase (POST — deducts wallet, creates Transaction + Notification)
+- Frontend: insurance page
+- Status: FULLY WIRED
+
+### Address
+- API: auth/profile (PUT — creates/updates default address via upsert)
+- **No dedicated CRUD** — `lib/api/logistics.ts` has `locationsApi.getMyAddresses()` and `createAddress()` calling `/locations/addresses/` → 501
+- **Unused field**: `deliveryZoneId` — never read or written (DeliveryZone has no API)
+- Status: PARTIAL — only default address upsert via profile update
+
+### DeliveryZone
+- **NO API route** — model exists in schema, only referenced in seed.ts
+- `lib/api/logistics.ts` calls `/locations/delivery-zones/` → 501
+- Status: COMPLETELY ORPHANED
+
+### LocalGuideCategory + LocalGuideService
+- **NO API route** — models exist in schema, only referenced in seed.ts
+- Frontend: /services page calls `/local-guide/services/` and `/local-guide/categories/` → 501
+- Status: COMPLETELY ORPHANED
+
+### CMSPage
+- **NO API route** — model exists in schema, only referenced in seed.ts
+- Frontend: /pages/[slug] calls `/api/cms/pages/${slug}` → 501
+- Status: PARTIALLY ORPHANED (schema + frontend page, no backend route)
+
+### BlogPost
+- **NO API route** — model exists in schema, only referenced in seed.ts
+- Frontend: /blog page uses HARDCODED data (no API call at all)
+- Frontend: /blog/[id] calls `/api/cms/blog/${id}` → 501
+- Status: PARTIALLY ORPHANED (schema + frontend pages, no backend route)
+
+### ActivityLog
+- **NO API route** — model exists in schema, only referenced in seed.ts (createMany)
+- Frontend: /admin/activity-logs calls `/api/users/staff/activity-logs/` → 501
+- Status: COMPLETELY ORPHANED
+
+### Branch
+- **NO API route** — model exists in schema, only referenced in seed.ts
+- Frontend: /admin/branches calls `/api/branches/admin/branches/` → 501
+- Status: PARTIALLY ORPHANED (schema + frontend page, no backend route)
+
+### SocialVouch
+- API: social/feed (GET list with sender/receiver includes), social/vouch/[userId] (POST create), social/score/[userId] (count query)
+- Frontend: trust-score page, dashboard/social page (SocialCommander component)
+- Status: FULLY WIRED
+
+### IdentityVerification
+- API: verification/submit (POST — VLM AI analysis + create), verification/status (GET with votes include), verification/pending (GET queue for verified users)
+- Frontend: /verification page (camera capture, status display, voting UI, pending queue)
+- Status: FULLY WIRED
+
+### VerificationVote
+- API: verification/vote (POST create + update approval/rejection counts + auto-verify/reject), verification/status (include votes), verification/pending (include votes for current user)
+- Frontend: /verification page (vote UI with approve/reject + comment)
+- Status: FULLY WIRED
+
+### ChatSession
+- **NO API route** — model exists in schema, never queried
+- Chatbot quick-chat API returns `session_id: null`
+- Status: COMPLETELY ORPHANED
+
+## Schema Models Referenced in Task but NOT in Schema:
+- **RentalOrder** → mapped to Booking
+- **Wallet** → no model; walletBalance is a User field
+- **Blog** / **BlogCategory** / **BlogComment** → only BlogPost exists (no category, no comment)
+- **SearchHistory** → not in schema
+- **UserPreference** → not in schema
+- **Return** / **ReturnItem** → only ReturnRequest exists
+- **Insurance** → only InsurancePlan exists
+- **TrustEvent** → not in schema
+- **SupportTicket** → not in schema (lib/api/disputes.ts references `/disputes/tickets/` which doesn't exist)
+
+## Unused User Fields (never read/written by any API):
+- `is2FaEnabled` (Boolean) — no 2FA flow exists
+- `twoFaSecret` (String?) — no 2FA flow exists
+
+## Unused Relationships (never traversed in any query):
+- `User.subscriptions` → UserSubscription (model is completely orphaned)
+- `User.activityLogs` → ActivityLog (model is completely orphaned)
+- `User.waitlistItems` → WaitlistItem (no API queries through this)
+- `Product.waitlistItems` → WaitlistItem (no API queries through this)
+- `Address.deliveryZoneId` → DeliveryZone (DeliveryZone is orphaned, field never populated)
+
+## String Enum Inconsistencies:
+- **Transaction.type**: Schema comment documents "INCOME, EXPENDITURE, ESCROW_HELD, ESCROW_RELEASED, ESCROW_REFUNDED, DEPOSIT, WITHDRAWAL, TRANSFER" but actual API writes: `'DEPOSIT'`, `'WITHDRAWAL'`, `'transfer_out'`, `'transfer_in'`, `'insurance_purchase'` — 5 of 9 documented values are NEVER used
+- **Booking.status**: Documents "pending, confirmed, active, completed, cancelled" — only 'pending' is ever written (create). Status transitions (confirmed→active→completed) have no API endpoint
+- **Dispute.status**: Documents "filed, under_review, mediation, resolved, closed" — only 'filed' is ever written. No admin endpoints to advance status
+- **Review.status**: Documents "pending, approved, rejected" — reviews created as 'pending' but no admin endpoint to approve/reject
+
+## Critical lib/api Path Mismatches (frontend clients call wrong endpoints):
+- `lib/api/contracts.ts` → `/contracts/digital/${id}/` but real route is `/contracts/${id}`
+- `lib/api/disputes.ts` → `/disputes/disputes/` but real route is `/disputes/`
+- `lib/api/notifications.ts` → `/notifications/notifications/` but real route is `/notifications/`
+- `lib/api/bookings.ts` → `/bookings/${id}/cancel/` and `/bookings/${id}/update/` — neither exists
+- `lib/api/payments.ts` → `/payments/payments/${id}/status/` and `/payments/payments/${id}/verify_otp/` — neither exists
+- `lib/api/logistics.ts` → `/locations/addresses/`, `/locations/delivery-zones/`, `/returns/returns/` — none exist
+
+Stage Summary:
+- **Models with full frontend+backend wiring**: CartItem, Wishlist, Transaction, InsurancePlan, SocialVouch, IdentityVerification, VerificationVote (8 models)
+- **Models with backend only (API exists, no meaningful frontend)**: None — all models with API routes have at least one frontend page
+- **Models with partial wiring** (read works, write/workflow incomplete):
+  - User (2FA fields orphaned, several relations unused)
+  - Category (read-only)
+  - Product (read-only, no CRUD admin API)
+  - Vendor (read-only)
+  - Artisan (read-only)
+  - Bundle + BundleItem (read-only)
+  - Review (create works, approval workflow broken)
+  - Booking (CRUD exists, but cancel/update paths in lib/api mismatch)
+  - Notification (read+mark-read+delete work, lib/api wrapper has path bug)
+  - Dispute (create works, detail/history/status/message all 501 via wrapper)
+  - Contract (read works, sign/finalize missing, lib/api paths wrong)
+  - ReturnRequest (create+list works, no status update)
+  - Payment (create+list works, verify_otp missing)
+  - SubscriptionPlan (list works, no purchase/cancel)
+  - Address (only default upsert via profile)
+- **Completely orphaned models** (schema exists, no API route):
+  - UserSubscription — full model with relations, never queried
+  - WaitlistItem — model + frontend page, no backend route
+  - ActivityLog — model + frontend page, no backend route
+  - ChatSession — model, never queried
+  - CMSPage — model + frontend page, no backend route
+  - BlogPost — model + frontend pages, no backend route (blog list uses hardcoded data)
+  - DeliveryZone — model, no frontend page, no API
+  - Branch — model + frontend page, no backend route
+  - LocalGuideCategory + LocalGuideService — models + frontend page, no backend route
+  - DisputeMessage — model, no API, never queried
+- **Not in schema but referenced by frontend/lib**: SearchHistory, UserPreference, TrustEvent, SupportTicket, BlogCategory, BlogComment, Return, ReturnItem, Wallet (as model), RentalOrder, Insurance (as model)
+---
+Task ID: audit-requirements
+Agent: Requirements Auditor
+Task: Find and analyze initial requirements vs actual implementation
+
+Work Log:
+- Searched entire project for requirements documents: found worklog.md (4 previous task entries), agent-ctx/6-api-builder.md, review-results.txt, upload/Pasted Content_1783078370435.txt (comprehensive GLM review of original ReadyRent Gala project), public/reports/sovereign_intel_2026_ar.md (marketing report)
+- No formal requirements.md or specification document exists in the project
+- Requirements were inferred from: (1) the original GLM review in Pasted Content, (2) lib/api.ts (231 API client methods = planned feature set), (3) Prisma schema (34 models = planned data model), (4) navigation structure in navbar.tsx, (5) sitemap.ts, (6) page content and "قريباً" placeholders
+- Read all key files: app/page.tsx, app/layout.tsx, app/sitemap.ts, lib/api.ts, components/navbar.tsx
+- Grep-searched all page.tsx files for placeholder text: قريباً، coming soon, سيتم إضافة
+- Checked every component in components/, src/features/, src/shared/, shared/ for import usage
+- Cross-referenced every API client method in lib/api.ts against 59 actual backend routes
+- Checked lib/api/ secondary API system (16 files) for usage
+
+Stage Summary:
+
+## 1. Features from initial requirements with NO implementation (no page, no route)
+
+### Entire API sections defined in lib/api.ts but with ZERO backend routes:
+- **maintenanceApi** (13 methods): periods CRUD, schedules CRUD, records CRUD — admin/maintenance page exists but uses hardcoded data
+- **hygieneApi** (11 methods): hygiene-records CRUD, certificates CRUD — admin/hygiene page exists but uses hardcoded data
+- **locationsApi** (19 methods): addresses CRUD, delivery-zones CRUD, deliveries CRUD, tracking, geocode, reverse-geocode, place-details — NO frontend page at all
+- **packagingApi** (16 methods): types CRUD, materials CRUD, rules CRUD, instances CRUD, suggested-for-booking — admin/packaging page exists but uses hardcoded data
+- **inventoryApi** (16 methods): inventory CRUD, stock-alerts CRUD, stock-movements CRUD — admin/inventory page exists but uses hardcoded data
+- **judicialApi** (7 methods): v1/judicial/disputes/*, v1/tribunal/cases/*, v1/public/* — judicial page exists but uses frontend-only JudicialLedger component with no backend
+- **chatbotApi sessions** (4 methods): create_anonymous, my_sessions, get session, send_message — only quick-chat route exists
+- **intelligenceApi** (3 methods): regional-liquidity, pulse, visuals — no backend routes
+
+### Individual API methods with no backend route (from sections that DO have partial routes):
+- **authApi**: password/reset/request, password/reset/confirm, 2fa/generate, 2fa/enable (4)
+- **productsApi**: metadata, matching-accessories, recommendations, wishlist/toggle, wishlist/check (5)
+- **bookingsApi**: update, status, cancel, waitlist (3 methods), cancellation-policy, early-return, refunds, calculate-deposit (10)
+- **adminApi**: revenue/export, bookings/admin/* (3), products/admin/* (6), auth/admin/users/* (3) (13)
+- **bundlesApi**: categories CRUD (5), individual bundle, calculate_price, bookings CRUD (4), reviews CRUD (4) (16)
+- **disputesApi**: individual dispute, messages, tickets CRUD (5), admin stats (3) (10)
+- **analyticsApi**: individual events, products analytics, daily analytics, user-behavior (6)
+- **paymentsApi**: individual payment, verify_otp, status, metrics (4)
+- **socialApi**: pulse (1)
+- **innovationApi**: local-guide/categories (1)
+- **reviewsApi**: moderate (1)
+
+**Total API methods with no backend: ~142 methods (61% of 231 total)**
+
+### Navigation link with NO page:
+- **/local-guide** — referenced in navbar under "الخدمات > الدليل المحلي", no app/local-guide/ directory exists, leads to 404
+
+## 2. Pages that are empty/placeholder ("قريباً" pattern):
+
+1. **/products/create** — "نموذج إضافة المنتج سيكون متاحاً قريباً" (26 lines, just a placeholder card)
+2. **/admin/products/new** — "نموذج إضافة المنتج سيكون متاحاً قريباً" (26 lines, identical placeholder)
+
+## 3. Pages with partial/placeholder functionality:
+
+1. **/subscriptions** — Subscribe button shows toast "سيتم تفعيل الاشتراك قريباً" instead of processing
+2. **/insurance** — Purchase button shows toast "سيتم إضافة هذه الميزة قريباً"; contact button shows "سيتم التواصل معك قريباً"
+3. **/dashboard/products** — Dropdown menu items all show "قريباً: ميزة التعديل/المعاينة/الحذف"
+4. **/dashboard/orders/[id]** — "قريباً: ميزة المراسلة" and "قريباً: ميزة تمديد العقد" buttons are non-functional
+
+## 4. Built but UNUSED components (never imported from outside their own file):
+
+### components/ (root level):
+- **product-card.tsx** — root-level duplicate of components/product/product-card.tsx, only imported by unused accessory-suggestions.tsx
+- **accessory-suggestions.tsx** — never imported by any page
+- **hijri-calendar.tsx** — never imported
+- **id-upload.tsx** — never imported
+- **CommunityProductForm.tsx** — never imported
+- **damage-inspection.tsx** — never imported
+- **dispute-form.tsx** — root-level duplicate, never imported (disputes page uses components/disputes/dispute-form.tsx instead)
+- **insurance-selector.tsx** — never imported
+- **booking-calendar.tsx** — never imported
+- **BookingStatusCard.tsx** — never imported
+- **chatbot.tsx** — standalone chatbot component, never imported (SovereignConcierge and SovereignOracle are used instead)
+
+### components/ subdirectories:
+- **communication/call-interface.tsx** — never imported
+- **booking/artisan-integration.tsx** — never imported
+- **trust/TrustScoreDashboard.tsx** — never imported by any page (trust-score page has its own implementation)
+- **wallet/wallet-dashboard.tsx** — never imported by wallet page (wallet page has its own inline implementation)
+- **wallet/transaction-history.tsx** — never imported (same reason)
+- **disputes/dispute-card.tsx** — only referenced by ui/skeletons.tsx, never used in an actual page
+- **contracts/AgreementWidget.tsx** — only imported by AgreementRecorder.tsx which IS used, so indirectly used
+
+### components/ui/:
+- **interactive-product-card.tsx** — never imported
+- **skeletons.tsx** — never imported
+- **bento-grid.tsx** — never imported
+- **3d-card.tsx** — never imported
+- **spotlight.tsx** — never imported
+
+### src/features/:
+- **finance/components/escrow-pulse.tsx** — never imported (escrow-tracker.tsx IS used)
+
+### lib/api/ (secondary API system — 5 of 16 files never imported):
+- **admin.ts** — never imported (pages use adminApi from lib/api.ts instead)
+- **auth.ts** — never imported
+- **logistics.ts** — never imported
+- **notifications.ts** — never imported
+- **index.ts** — never imported
+
+**Total unused components/files: ~33**
+
+## 5. Dual API system confusion:
+- **lib/api.ts** — Primary unified API client (231 methods), used by most pages
+- **lib/api/*.ts** — Secondary modular API system (16 files), only 5 are used (appeals, contracts, disputes, innovation, sovereign-client)
+- The remaining 11 files (admin, auth, bookings, logistics, notifications, payments, products, reviews, wallet, index) duplicate functionality already in lib/api.ts but use different patterns (e.g., TypeScript types, axios-style)
+
+## 6. Prisma models with no frontend or API:
+(As documented in previous audit) CMSPage, LocalGuideCategory, LocalGuideService, DeliveryZone, DisputeMessage
+
+## 7. Duplicate/legacy code:
+- **contracts/[id]/page.tsx** vs **contracts/_id_/page.tsx** — two contract pages for same route
+- **components/product-card.tsx** vs **components/product/product-card.tsx** — two product card components
+- **components/dispute-form.tsx** vs **components/disputes/dispute-form.tsx** — two dispute form components
+- **src/app/** directory — appears to be an earlier/alternate version of the app, contains duplicate layouts, globals.css, page.tsx
+- **public/public/** — duplicate of public/ directory
+- **shared/** at root — re-export shims pointing to src/shared/
