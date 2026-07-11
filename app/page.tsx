@@ -18,11 +18,6 @@ import {
   ArrowLeft,
   Star,
   MapPin,
-  Camera,
-  Palette,
-  Music,
-  Flower2,
-  PartyPopper,
   Users,
   Package,
   Briefcase,
@@ -88,114 +83,7 @@ function useAnimatedCounter(target: number, duration: number = 2000) {
 }
 
 /* ════════════════════════════════════════════
-   SECTION 1 — HERO
-   ════════════════════════════════════════════ */
-const heroCards = [
-  {
-    icon: Shirt,
-    title: 'الكراء',
-    subtitle: 'فساتين، بدلات، قفطان',
-    desc: 'استأجري أرقى الملابس الفاخرة لمناسباتك بأسعار تنافسية',
-    href: '/rentals',
-    gradient: 'from-sovereign-gold/20 via-sovereign-obsidian to-sovereign-gold/5',
-  },
-  {
-    icon: Sparkles,
-    title: 'الخدمات',
-    subtitle: 'تصوير، مكياج، دج، قاعات',
-    desc: 'اكتشفي أفضل مزودي الخدمات لمناسباتك المميزة',
-    href: '/services',
-    gradient: 'from-purple-500/15 via-sovereign-obsidian to-purple-500/5',
-  },
-  {
-    icon: Store,
-    title: 'السوق',
-    subtitle: 'بائعون وحرفيات',
-    desc: 'سوق مفتوح لبيع وشراء منتجات الحرفيين والبائعين المحليين',
-    href: '/marketplace',
-    gradient: 'from-emerald-500/15 via-sovereign-obsidian to-emerald-500/5',
-  },
-];
-
-function HeroSection() {
-  return (
-    <section className="relative pt-24 pb-20 md:pt-40 md:pb-32 px-4 overflow-hidden">
-      {/* Background glow */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-sovereign-gold/8 rounded-full blur-[200px] opacity-30 pointer-events-none" />
-
-      <div className="max-w-7xl mx-auto relative z-10">
-        {/* Brand Heading */}
-        <motion.div
-          initial="hidden"
-          animate="visible"
-          className="text-center mb-16 md:mb-24"
-        >
-          <motion.div custom={0} variants={fadeUp} className="mb-6">
-            <SovereignSparkle active={true}>
-              <span className="inline-block px-6 py-2 rounded-full border border-sovereign-gold/20 bg-sovereign-gold/5 text-sovereign-gold text-[10px] font-black tracking-[0.4em] uppercase backdrop-blur-md">
-                المنصة الأولى في الجزائر
-              </span>
-            </SovereignSparkle>
-          </motion.div>
-
-          <motion.h1 custom={1} variants={fadeUp} className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-tighter leading-none">
-            <SovereignGlow color="gold" intensity="high">
-              STAND<span className="text-sovereign-gold">ARD.</span>
-            </SovereignGlow>
-          </motion.h1>
-
-          <motion.p custom={2} variants={fadeUp} className="mt-6 md:mt-8 text-lg sm:text-xl md:text-2xl text-muted-foreground font-light leading-relaxed max-w-2xl mx-auto">
-            منصة الكراء الفاخر والخدمات في الجزائر
-          </motion.p>
-        </motion.div>
-
-        {/* 3 Ecosystem Cards */}
-        <motion.div
-          initial="hidden"
-          animate="visible"
-          variants={staggerContainer}
-          className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6"
-        >
-          {heroCards.map((card, i) => (
-            <motion.div key={card.title} custom={i + 3} variants={fadeUp}>
-              <Link href={card.href} className="block group">
-                <GlassPanel
-                  variant="obsidian"
-                  className={`relative p-6 md:p-8 h-full bg-gradient-to-br ${card.gradient} hover:border-sovereign-gold/40 transition-all duration-500 rounded-[2rem]`}
-                >
-                  <div className="relative z-10 space-y-5">
-                    <div className="w-14 h-14 rounded-2xl bg-sovereign-gold/10 flex items-center justify-center text-sovereign-gold group-hover:bg-sovereign-gold/20 transition-colors">
-                      <card.icon className="w-7 h-7" />
-                    </div>
-                    <div>
-                      <h3 className="text-2xl md:text-3xl font-black tracking-tight">{card.title}</h3>
-                      <p className="text-xs text-sovereign-gold/70 font-bold uppercase tracking-widest mt-1">{card.subtitle}</p>
-                    </div>
-                    <p className="text-sm text-muted-foreground leading-relaxed">{card.desc}</p>
-                    <div className="flex items-center gap-2 text-sovereign-gold text-xs font-bold uppercase tracking-widest pt-2 group-hover:gap-3 transition-all">
-                      <span>اكتشفي الآن</span>
-                      <ArrowLeft className="w-4 h-4" />
-                    </div>
-                  </div>
-                </GlassPanel>
-              </Link>
-            </motion.div>
-          ))}
-        </motion.div>
-      </div>
-    </section>
-  );
-}
-
-/* ════════════════════════════════════════════
-   SECTION 2 — FEATURED PRODUCTS (imported)
-   Uses the standalone FeaturedProducts component
-   which fetches from API and handles its own state.
-   Falls back to nothing if API is unavailable.
-   ════════════════════════════════════════════ */
-
-/* ════════════════════════════════════════════
-   SECTION 3 — THE 3 ECOSYSTEMS
+   HERO — النظام البيئي الثلاثي
    ════════════════════════════════════════════ */
 const ecosystems = [
   {
@@ -230,33 +118,52 @@ const accentStyles: Record<string, string> = {
   'emerald-400': 'bg-emerald-400/10 text-emerald-400',
 };
 
-function EcosystemsSection() {
-  const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-100px" });
-
+function HeroEcosystem() {
   return (
-    <section ref={ref} className="py-20 md:py-28 px-4">
-      <div className="max-w-7xl mx-auto">
+    <section className="relative pt-24 pb-20 md:pt-40 md:pb-32 px-4 overflow-hidden">
+      {/* Background glow */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-sovereign-gold/8 rounded-full blur-[200px] opacity-30 pointer-events-none" />
+
+      <div className="max-w-7xl mx-auto relative z-10">
+        {/* Brand Heading */}
         <motion.div
           initial="hidden"
-          animate={inView ? "visible" : "hidden"}
+          animate="visible"
           variants={staggerContainer}
-          className="text-center mb-14 md:mb-20"
+          className="text-center mb-16 md:mb-24"
         >
-          <motion.p variants={fadeUp} className="text-[10px] font-black uppercase tracking-[0.4em] text-sovereign-gold/60 mb-3">المنظومة المتكاملة</motion.p>
-          <motion.h2 variants={fadeUp} className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tighter">
-            النظام البيئي <span className="text-sovereign-gold">الثلاثي</span>
-          </motion.h2>
+          <motion.div custom={0} variants={fadeUp} className="mb-6">
+            <SovereignSparkle active={true}>
+              <span className="inline-block px-6 py-2 rounded-full border border-sovereign-gold/20 bg-sovereign-gold/5 text-sovereign-gold text-[10px] font-black tracking-[0.4em] uppercase backdrop-blur-md">
+                المنصة الأولى في الجزائر
+              </span>
+            </SovereignSparkle>
+          </motion.div>
+
+          <motion.h1 custom={1} variants={fadeUp} className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-tighter leading-none">
+            <SovereignGlow color="gold" intensity="high">
+              STAND<span className="text-sovereign-gold">ARD.</span>
+            </SovereignGlow>
+          </motion.h1>
+
+          <motion.p custom={2} variants={fadeUp} className="mt-4 md:mt-6 text-[10px] font-black uppercase tracking-[0.4em] text-sovereign-gold/60">
+            النظام البيئي الثلاثي
+          </motion.p>
+
+          <motion.p custom={3} variants={fadeUp} className="mt-4 text-base sm:text-lg md:text-xl text-muted-foreground font-light leading-relaxed max-w-2xl mx-auto">
+            منصة الكراء الفاخر وخدمات المناسبات والسوق المحلي في الجزائر
+          </motion.p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+        {/* 3 Ecosystem Cards */}
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={staggerContainer}
+          className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8"
+        >
           {ecosystems.map((eco, i) => (
-            <motion.div
-              key={eco.title}
-              initial={{ opacity: 0, y: 40 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.7, delay: i * 0.15, ease: [0.32, 0.72, 0, 1] }}
-            >
+            <motion.div key={eco.title} custom={i + 4} variants={fadeUp}>
               <Link href={eco.href} className="block group h-full">
                 <div className={`relative h-full rounded-[2.5rem] p-8 md:p-10 border border-white/5 bg-gradient-to-br ${eco.gradient} backdrop-blur-xl overflow-hidden transition-all duration-500 hover:border-white/10 hover:scale-[1.02]`}>
                   {/* Internal Glow */}
@@ -284,14 +191,14 @@ function EcosystemsSection() {
               </Link>
             </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );
 }
 
 /* ════════════════════════════════════════════
-   SECTION 4 — ARTISANS SPOTLIGHT
+   ARTISANS SPOTLIGHT
    ════════════════════════════════════════════ */
 function ArtisansSpotlight() {
   const ref = useRef<HTMLDivElement>(null);
@@ -402,90 +309,10 @@ function ArtisansSpotlight() {
   );
 }
 
-/* ════════════════════════════════════════════
-   SECTION 5 — SERVICES CATEGORIES
-   ════════════════════════════════════════════ */
-const defaultServiceCategories = [
-  { icon: PartyPopper, name: 'أعراس', desc: 'تنظيم وتجهيز حفلات الزفاف والمناسبات الكبرى', slug: 'weddings' },
-  { icon: Camera, name: 'تصوير', desc: 'مصورون محترفون لكل لحظة مميزة', slug: 'photography' },
-  { icon: Palette, name: 'مكياج', desc: 'مجمّلات أزياء محترفات لكل ذوق', slug: 'makeup' },
-  { icon: Music, name: 'دج', desc: 'دي جي محترفون لموسيقى لا تُنسى', slug: 'dj' },
-  { icon: Flower2, name: 'زهور', desc: 'تنسيق زهور فاخر لجميع المناسبات', slug: 'flowers' },
-  { icon: PartyPopper, name: 'حفلات', desc: 'تنظيم حفلات خاصة وشاملة', slug: 'parties' },
-];
 
-function ServicesCategories() {
-  const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-100px" });
-
-  const categories = defaultServiceCategories;
-
-  return (
-    <section ref={ref} className="py-20 md:py-28 px-4">
-      <div className="max-w-7xl mx-auto">
-        <motion.div
-          initial="hidden"
-          animate={inView ? "visible" : "hidden"}
-          variants={staggerContainer}
-          className="flex items-end justify-between mb-10 md:mb-14"
-        >
-          <motion.div variants={fadeUp}>
-            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-sovereign-gold/60 mb-3">دليل الخدمات</p>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tighter">
-              خدمات <span className="text-sovereign-gold">المناسبات</span>
-            </h2>
-          </motion.div>
-          <motion.div variants={fadeUp}>
-            <Link
-              href="/services"
-              className="flex items-center gap-2 text-sovereign-gold text-sm font-bold hover:gap-3 transition-all"
-            >
-              <span>عرض الكل</span>
-              <ArrowLeft className="w-4 h-4" />
-            </Link>
-          </motion.div>
-        </motion.div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-5">
-          {categories.map((cat: any, i: number) => {
-            const IconComp = cat.icon || (defaultServiceCategories[i]?.icon) || Sparkles;
-            return (
-              <motion.div
-                key={cat.id || cat.slug || i}
-                initial={{ opacity: 0, y: 30 }}
-                animate={inView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.6, delay: i * 0.08, ease: [0.32, 0.72, 0, 1] }}
-              >
-                <Link href="/services" className="block group">
-                  <div className="relative p-5 md:p-6 rounded-[2rem] border border-white/5 bg-white/[0.02] backdrop-blur-sm hover:border-sovereign-gold/20 hover:bg-sovereign-gold/5 transition-all duration-500 text-center h-full">
-                    <div className="space-y-3">
-                      <div className="w-12 h-12 mx-auto rounded-xl bg-sovereign-gold/10 flex items-center justify-center text-sovereign-gold group-hover:scale-110 transition-transform duration-500">
-                        {typeof IconComp === 'string' ? (
-                          <Sparkles className="w-6 h-6" />
-                        ) : (
-                          <IconComp className="w-6 h-6" />
-                        )}
-                      </div>
-                      <h3 className="text-sm md:text-base font-black tracking-tight group-hover:text-sovereign-gold transition-colors">
-                        {cat.name_ar || cat.name || 'خدمة'}
-                      </h3>
-                      <p className="text-[11px] text-muted-foreground leading-relaxed line-clamp-2 hidden sm:block">
-                        {cat.description || cat.desc || ''}
-                      </p>
-                    </div>
-                  </div>
-                </Link>
-              </motion.div>
-            );
-          })}
-        </div>
-      </div>
-    </section>
-  );
-}
 
 /* ════════════════════════════════════════════
-   SECTION 5.5 — CUSTOMER REVIEWS
+   CUSTOMER REVIEWS
    ════════════════════════════════════════════ */
 function CustomerReviewsSection() {
   const ref = useRef<HTMLDivElement>(null);
@@ -565,7 +392,7 @@ function CustomerReviewsSection() {
 }
 
 /* ════════════════════════════════════════════
-   SECTION 6 — STATISTICS BAR
+   STATISTICS BAR
    ════════════════════════════════════════════ */
 const stats = [
   { value: 500, suffix: '+', label: 'منتج', icon: Package },
@@ -621,7 +448,7 @@ function StatItem({ stat, index }: { stat: typeof stats[0]; index: number }) {
 }
 
 /* ════════════════════════════════════════════
-   SECTION 7 — CTA SECTION
+   CTA SECTION
    ════════════════════════════════════════════ */
 function CTASection() {
   const ref = useRef<HTMLDivElement>(null);
@@ -678,11 +505,9 @@ function CTASection() {
 export default function HomePage() {
   return (
     <div className="flex flex-col min-h-screen relative overflow-hidden bg-sovereign-obsidian text-sovereign-white font-arabic" dir="rtl">
-      <HeroSection />
+      <HeroEcosystem />
       <FeaturedProducts />
-      <EcosystemsSection />
       <ArtisansSpotlight />
-      <ServicesCategories />
       <CustomerReviewsSection />
       <StatisticsBar />
       <CTASection />
