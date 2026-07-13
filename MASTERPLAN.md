@@ -621,4 +621,246 @@ app/contracts/_id_/page.tsx — نسخة مكررة من contracts/[id]/page.tsx
 
 ---
 
-*هذه الخطة مبنية على تحليل كامل لكل سطر كود في المشروع. كل مهمة محددة بملفاتها وصفحاتها المتأثرة. لا شيء من الخيال — كل ما ذُكر له أساس في الكود الحالي.*
+# 🔍 الملحق أ: التنقيب العميق في المتطلبات الأصلية والفجوات المكتشفة
+
+### المرجعية: الملف الأصلي `upload/Pasted Content_1783078370435.txt` (2870 سطر — المحادثة الكاملة مع GLM)
+
+---
+
+## الفجوات التي لم تُغطَّها الخطة الأصلية
+
+### ❌ الفجوة 1: ماركت بلايس — الذراع الثالث غير مكتمل
+**الوضع الأصلي:** المشروع مقسّم لـ 3 أذرع: كراء + خدمات + ماركت بلايس
+**الحالي:** صفحة `/marketplace` موجودة وتعرض بائعين وحرفيات (جمالياً ممتازة) لكن:
+- لا يوجد نظام "بيع" حقيقي — المنتجات الحالية كلها للكراء فقط
+- لا يوجد نموذج `MarketplaceListing` في Prisma للمنتجات المعروضة للبيع
+- لا يوجد فرق واضح بين `/products` (الكراء) و `/marketplace` (البيع)
+- البائعون والحرفيات يظهرون لكن لا يمكنهم إدارة منتجاتهم
+
+**الحل المقترح:**
+- إضافة حقل `listingType` لنموذج Product: `'rental' | 'sale'`
+- أو إنشاء نموذج `MarketplaceListing` منفصل
+- تعديل `/marketplace` لعرض منتجات `listingType: 'sale'` فقط
+- إضافة فلاتر للسوق (فئة، مدينة، السعر، الحالة)
+
+---
+
+### ❌ الفجوة 2: نظام التحقق من الهوية (Verification/KYC) — كود بلا API
+**الوضع الأصلي:** Django لديه نظام كامل: Face Matching + Community Review + AI Analysis
+**الحالي:**
+- نموذج `IdentityVerification` في Prisma (حقلان: facePhoto, status, aiAnalysis, aiScore, requiredApprovals)
+- نموذج `VerificationVote` (فحص المجتمع)
+- صفحة `/verification` ضخمة (1533 سطر!) ومكتملة بصرياً
+- `verificationApi` في lib/api.ts (4 methods: submit, getStatus, getPending, vote)
+- **لكن لا يوجد أي API route** تحت `app/api/verification/`
+
+**الحل المقترح:**
+- إنشاء `POST /api/verification/submit` — رفع الصورة
+- إنشاء `GET /api/verification/status` — حالة التحقق
+- إنشاء `GET /api/verification/pending` — للمحققين
+- إنشاء `POST /api/verification/[id]/vote` — تصويت المجتمع
+- ربط صفحة `/verification` بهذه APIs
+
+---
+
+### ❌ الفجوة 3: نظام الباقات (Bundles) — عرض فقط
+**الوضع الأصلي:** Django لديه BundleBookingViewSet مع حساب الأسعار atomically
+**الحالي:**
+- نموذج `Bundle` + `BundleItem` في Prisma
+- صفحتان: `/bundles` (قائمة) و `/bundles/[id]` (تفاصيل)
+- API واحد فقط: `GET /api/bundles/bundles`
+- **لا يوجد** API لحجز باقة، ولا حساب سعر
+
+**الحل المقترح:**
+- إنشاء `GET /api/bundles/[id]` — تفاصيل الباقة مع المنتجات
+- إنشاء `POST /api/bundles/[id]/book` — حجز باقة (ينشئ Booking لكل BundleItem)
+- تعديل صفحة `/bundles/[id]` لعرض المنتجات وأسعار الحجز
+
+---
+
+### ❌ الفجوة 4: نظام البائعين (Vendors) — تسجيل وإدارة ناقصة
+**الوضع الأصلي:** Django لديه 10 نقاط API: register, profile, dashboard, performance, commissions
+**الحالي:**
+- نموذج `Vendor` في Prisma
+- صفحات: `/vendors` (قائمة)، `/vendors/[id]` (تفاصيل)، `/vendors/dashboard`
+- API واحد: `GET /api/vendors/vendors`
+- **لا يوجد** تسجيل بائع، لا إدارة منتجات، لا تتبع أداء
+
+**الحل المقترح:**
+- إضافة `role: 'vendor'` عند التسجيل (حقل موجود بالفعل)
+- إنشاء `GET /api/vendors/dashboard` — إحصائيات البائع
+- إنشاء `POST/PUT/DELETE /api/vendors/products` — CRUD منتجات البائع
+- تعديل صفحة `/vendors/dashboard` لعرض بيانات حقيقية
+
+---
+
+### ❌ الفجوة 5: إدارة المنتجات للأدمين/البائعين — placeholder
+**الحالي:**
+- `/products/create` — "نموذج إضافة المنتج سيكون متاحاً قريباً"
+- `/admin/products/new` — نفس النص
+- لا يوجد `POST /api/products` (إنشاء)
+- لا يوجد `PUT /api/products/[id]` (تحديث)
+- لا يوجد `DELETE /api/products/[id]` (حذف)
+
+**الحل المقترح:**
+- إضافة POST/PUT/DELETE لـ `/api/products`
+- بناء نموذج إضافة/تعديل منتج حقيقي (صور، ألوان، مقاسات، سعر، فئة)
+- حماية المسارات بـ auth (vendor أو admin)
+
+---
+
+### ❌ الفجوة 6: إدارة المستخدمين للأدمين — بيانات وهمية
+**الحالي:**
+- `/admin/users` صفحة موجودة
+- `adminApi.getAllUsers()` موجود في lib/api.ts
+- **لا يوجد** `GET /api/admin/users` في الخادم
+
+**الحل المقترح:**
+- إنشاء `GET /api/admin/users` — قائمة المستخدمين مع فلترة
+- إنشاء `PATCH /api/admin/users/[id]` — تحديث (حظر/تفعيل/تغيير دور)
+- تعديل صفحة `/admin/users` لعرض بيانات حقيقية
+
+---
+
+### ❌ الفجوة 7: نظام الفروع (Branches) — نموذج يتيم
+**الحالي:**
+- نموذج `Branch` في Prisma
+- صفحة `/admin/branches` موجودة
+- **لا يوجد** أي API لـ Branches
+
+**الحل المقترح:**
+- إنشاء CRUD API لـ Branches
+- أو إزالة الصفحة مؤقتاً (فروع ليست أولوية للمنصة الحالية)
+
+---
+
+### ❌ الفجوة 8: الإشعارات اللحظية (Real-time) — WebSocket مفقود
+**الوضع الأصلي:** Django لديه 5 قنوات WebSocket
+**الحالي:**
+- `components/notifications/realtime-notifications.tsx` موجود لكن لا يعمل (لا WebSocket server)
+- الإشعارات تعمل بـ polling فقط (fetch عند فتح الصفحة)
+
+**الحل المقترح (مرحلة 6):**
+- إنشاء mini-service WebSocket بـ socket.io
+- إشعارات لحظية + تحديث حالة الحجز
+- أو استخدام polling ذكي (كل 30 ثانية) كبديل أبسط
+
+---
+
+### ❌ الفجوة 9: Sitemap ناقص جداً
+**الحالي:** 11 route فقط في sitemap.ts
+**المفقود:**
+- `/services`, `/rentals`, `/marketplace` — الأذرع الثلاثة
+- `/subscriptions`, `/insurance`, `/vendors`, `/contact`
+- `/wallet`, `/cart`, `/checkout`, `/disputes`, `/returns`
+- `/bundles`, `/artisans`, `/trust-score`, `/judicial`
+- `/about`, `/faq`, `/privacy`, `/terms`, `/blog`
+
+**الحل المقترح:**
+- إضافة كل الصفحات العامة لـ sitemap
+- إضافة مسارات ديناميكية: `/products/[id]`, `/artisans/[id]`, `/vendors/[id]`, `/blog/[id]`
+
+---
+
+### ❌ الفجوة 10: الصفحات الإدارية غير المناسبة
+هذه الصفحات من حقبة Django الصناعية ولا تناسب منصة كراء فاخر:
+- `/admin/maintenance` — صيانة صناعية (no API)
+- `/admin/hygiene` — شهادات نظافة صناعية (no API)
+- `/admin/packaging` — إدارة تغليف صناعي (no API)
+- `/admin/inventory` — مخزون معقد (no API)
+- `/admin/damage-assessment` — تقييم أضرار معقد (no API)
+- `/admin/forecasting` — تنبؤات AI (no API)
+- `/admin/performance-reviews` — مراجعات أداء الموظفين (no API)
+- `/admin/shifts` — إدارة الورديات (no API)
+- `/admin/staff` — إدارة الموظفين (no API)
+- `/admin/activity-logs` — سجل النشاط (no API)
+
+**الحل المقترح:**
+- إخفاء هذه الصفحات من القائمة الجانبية (أو إزالتها)
+- الاحتفاظ بها كـ stubs للمراحل المتقدمة
+
+---
+
+### ⚠️ الفجوة 11: المكونات/الصفحات السيادية (Sovereign) — ديمو فقط
+**الحالي:**
+- `/sovereign/dashboard` — بيانات وهمية
+- `/sovereign/presentation` — عرض شرائح ثابت
+- `/sovereign/showcase` — معرض مكونات
+
+**القرار:** هذه صفحات تسويقية/عرضية — لا تحتاج بيانات حقيقية
+
+---
+
+### ⚠️ الفجوة 12: لغة ثانية وثالثة
+**الوضع الأصلي:** دعم عربي/فرنسي/إنجليزي
+**الحالي:** `language-switcher.tsx` موجود لكن لا يعمل (لا ملفات ترجمة)
+
+**الحل المقترح:** إنشاء نظام i18n بسيط مع ملفات JSON لكل لغة
+
+---
+
+## ✅ ما تم اكتشافه أنه يعمل فعلاً (تأكيد إيجابي)
+
+بعد التنقيب العميق، هذه الميزات تعمل بالفعل ولم تُذكر في التدقيق الأول:
+
+1. ✅ `/rentals` — صفحة كراء كاملة مع تصنيفات ومنتجات حقيقية
+2. ✅ `/marketplace` — صفحة سوق مع بائعين وحرفيات حقيقيين
+3. ✅ `/services` — صفحة خدمات مع API حقيقي و6 تصنيفات
+4. ✅ `/verification` — صفحة تحقق ضخمة (1533 سطر) تنتظر API فقط
+5. ✅ `/bundles` و `/bundles/[id]` — صفحات باقات موجودة
+6. ✅ `/vendors/dashboard` — لوحة تحكم البائع موجودة
+7. ✅ `/returns` — نظام الإرجاع يعمل (قائمة + إنشاء)
+8. ✅ `/wallet` — المحفظة تعمل (رصيد + إيداع + تحويل + سحب)
+9. ✅ `/social` — صفحة الضمان الاجتماعي موجودة
+10. ✅ `/dashboard/social` — نبض مجتمعي في الداشبورد
+11. ✅ `/dashboard/analytics` — تحليلات الداشبورد
+12. ✅ `/dashboard/reports` — تقارير الداشبورد
+
+---
+
+## 📊 الخلاصة الكمية بعد التنقيب
+
+| البعد | الرقم |
+|-------|-------|
+| صفحات إجمالية | **83** |
+| API routes إجمالية | **70** |
+| Prisma models | **34** |
+| مكونات واجهة | **~83 + 42 shadcn + 16 sovereign** |
+| طرق API client | **172** |
+| فجوات حرجة جديدة (ليست في MASTERPLAN) | **10** |
+| ميزات تعمل لكن لم يُدرك أنها تعمل | **12** |
+
+---
+
+## 🔄 ترتيب التنفيذ المُحدَّث
+
+بعد دمج الفجوات المكتشفة مع الخطة الأصلية:
+
+**الدفعة صفر (الإصلاحات التي تمت فعلاً في الجلسات السابقة):**
+- ✅ إصلاح مسارات النزاعات والعقود والإشعارات والمحفظة
+- ✅ بناء APIs: خدمات، مدونة، CMS، قائمة انتظار، حالة الحجز، رسائل النزاعات
+- ✅ تنظيف 33 ملف ميت + 8 ملفات API مكررة
+- ✅ ربط أزرار التأمين والاشتراك والتواصل
+
+**الدفعة الأولى (الفجوات 1-7 + ما بقي من المرحلة 1):**
+1. Verification API (الفجوة 2) — الصفحة جاهزة، فقط API مطلوب
+2. Product CRUD API (الفجوة 5) — الأهم للبائعين
+3. Bundle Booking API (الفجوة 3) — 3 ملفات فقط
+4. Admin Users API (الفجوة 6) — صفحة جاهزة
+5. Marketplace listing type (الفجوة 1) — إضافة حقل واحد
+6. Sitemap fix (الفجوة 9) — تحديث ملف واحد
+7. إخفاء صفحات الإدارة غير المناسبة (الفجوة 10)
+
+**الدفعة الثانية (الفجوات 4, 7, 8):**
+1. Vendor Dashboard API (الفجوة 4)
+2. Branch API أو إزالة (الفجوة 7)
+3. Real-time notifications (الفجوة 8) — WebSocket mini-service
+
+**الدفعة الثالثة (الفجوة 12 + المراحل 4-6):**
+1. Multi-language (الفجوة 12)
+2. لوحة التحكم الكاملة (المرحلة 4)
+3. ميزات متقدمة (المرحلة 6)
+
+---
+
+*هذا الملحق مبني على تنقيب عميق في 2870 سطر من المحادثة الأصلية مع GLM، و34 نموذج Prisma، و172 طريقة API، و83 صفحة، و70 API route. كل فجوة موثقة بملفها وموقعها في الكود.*
