@@ -7,7 +7,7 @@ import { SovereignButton } from "@/shared/components/sovereign/sovereign-button"
 import { GlassPanel } from "@/shared/components/sovereign/glass-panel";
 import { SovereignGlow, SovereignSparkle } from '@/shared/components/sovereign/sovereign-sparkle';
 import { DignifiedLoader } from '@/shared/components/sovereign/dignified-loader';
-import { api } from '@/lib/api';
+
 import {
   Dialog,
   DialogContent,
@@ -91,12 +91,21 @@ function BookingDialog({
       }
       setIsSubmitting(true);
       try {
-        await api.post('local-guide/services/book/', {
-          service_id: service.id,
-          date: formData.date,
-          phone: formData.phone,
-          notes: formData.notes,
+        const res = await fetch('/api/services/book', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            serviceId: service.id,
+            date: formData.date,
+            phone: formData.phone,
+            notes: formData.notes,
+          }),
         });
+        const json = await res.json();
+        if (!res.ok || !json.success) {
+          throw new Error(json.message_ar || 'Booking failed');
+        }
         onOpenChange(false);
         setFormData({ date: '', phone: '', notes: '' });
         toast.success(`تم تأكيد حجز "${service.name_ar}" بنجاح! سنتواصل معك قريباً`);
@@ -350,10 +359,10 @@ function FeaturedServices({
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    api
-      .get('local-guide/services/')
-      .then((res: any) => {
-        const data = Array.isArray(res.data?.results) ? res.data.results : Array.isArray(res.data) ? res.data : [];
+    fetch('/api/services?limit=50', { credentials: 'include' })
+      .then((res) => res.json())
+      .then((json: any) => {
+        const data = Array.isArray(json.data) ? json.data : [];
         setServices(data);
       })
       .catch(() => setServices([]))

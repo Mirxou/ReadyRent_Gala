@@ -196,12 +196,28 @@ export default function InsurancePage() {
   const handleConfirmPurchase = async () => {
     setIsPurchasing(true);
     setShowConfirm(false);
-    setIsPurchasing(false);
-    toast.info('سيتم إضافة هذه الميزة قريباً');
+    try {
+      const res = await fetch('/api/insurance/purchase', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan_id: selectedPlan }),
+      });
+      const json = await res.json();
+      if (res.ok && json.success) {
+        toast.success('تم شراء خطة التأمين بنجاح');
+        if (selectedPlan) setPurchasedPlan(selectedPlan);
+      } else {
+        toast.error(json.message_ar || 'فشل في شراء خطة التأمين');
+      }
+    } catch {
+      toast.error('حدث خطأ أثناء معالجة طلب الشراء');
+    } finally {
+      setIsPurchasing(false);
+    }
   };
 
   const handleContactSupport = () => {
-    toast.info('سيتم التواصل معك قريباً');
+    window.open('https://wa.me/213000000000', '_blank');
   };
 
   return (

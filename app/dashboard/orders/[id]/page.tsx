@@ -327,11 +327,11 @@ export default function BookingDetailsPage() {
 
                 <div className="space-y-4">
                     <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground opacity-40">Agreement Tools</p>
-                        <SovereignButton variant="secondary" className="w-full justify-between px-6" onClick={() => toast.info('قريباً: ميزة المراسلة')}>
+                        <SovereignButton variant="secondary" className="w-full justify-between px-6" onClick={() => toast.info('ميزة المراسلة غير متاحة حالياً')}>
                         <span className="flex items-center gap-3"><MessageSquare className="w-4 h-4" /> مراسلة المالك</span>
                         <ChevronRight className="w-4 h-4" />
                     </SovereignButton>
-                    <SovereignButton variant="secondary" className="w-full justify-between px-6" onClick={() => toast.info('قريباً: ميزة تمديد العقد')}>
+                    <SovereignButton variant="secondary" className="w-full justify-between px-6" onClick={() => toast.info('ميزة تمديد العقد غير متاحة حالياً')}>
                         <span className="flex items-center gap-3"><Clock className="w-4 h-4" /> تمديد العقد</span>
                         <ChevronRight className="w-4 h-4" />
                     </SovereignButton>

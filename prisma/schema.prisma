@@ -310,7 +310,7 @@ model Dispute {
   title         String?
   description   String?
   claimType     String?  @map("claim_type") // damage, non_delivery, quality, general
-  status        String   @default("filed") // filed, under_review, mediation, resolved, closed
+  status        String   @default("filed") // filed, under_review, mediation, appealed, resolved, closed
   priority      String   @default("medium")
   claimedAmount Int      @default(0) @map("claimed_amount")
   evidenceUrls  String   @default("[]") @map("evidence_urls") // JSON
@@ -328,6 +328,7 @@ model DisputeMessage {
   id        String   @id @default(cuid())
   disputeId String   @map("dispute_id")
   senderId  String?  @map("sender_id")
+  type      String   @default("message") // message, appeal, system
   message   String
   createdAt DateTime @default(now()) @map("created_at")
 

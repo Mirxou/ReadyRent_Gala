@@ -25,9 +25,17 @@ import { useAuthStore } from '@/lib/store';
    Types
    ──────────────────────────────────────────── */
 interface TrustScoreData {
-  user_id: number;
-  social_score: number;
-  vouches: number;
+  user_id: string;
+  trust_score: number;
+  is_verified: boolean;
+  vouch_count: number;
+  breakdown: {
+    payment_reliability: number;
+    dispute_history: number;
+    verification_level: number;
+    community_vouches: number;
+    rental_history: number;
+  };
 }
 
 interface TrustComponent {
@@ -66,15 +74,19 @@ function getTierFromScore(score: number): TierInfo {
 }
 
 /* ────────────────────────────────────────────
-   Component breakdown (local data — not in API)
+   Component breakdown template (labels/icons/descriptions)
+   Values are derived from API breakdown at runtime
    ──────────────────────────────────────────── */
-const components: TrustComponent[] = [
-  { key: 'payment_reliability', label: 'موثوقية الدفع', value: 85, icon: CreditCard, description: 'الالتزام بالمدفوعات وعدم التخلف' },
-  { key: 'dispute_history', label: 'سجل النزاعات', value: 60, icon: Scale, description: 'نسبة النزاعات التي حُسمت لصالحك' },
-  { key: 'contract_compliance', label: 'التزام العقود', value: 78, icon: FileCheck, description: 'مدى الالتزام بشروط عقود الإيجار' },
-  { key: 'review_sentiment', label: 'تقييمات المجتمع', value: 70, icon: Star, description: 'متوسط تقييمات المستخدمين الآخرين' },
-  { key: 'identity_verification', label: 'توثيق الهوية', value: 65, icon: IdCard, description: 'اكتمال بيانات KYC والتحقق من الهوية' },
-];
+function buildComponents(breakdown?: TrustScoreData['breakdown'], totalScore?: number): TrustComponent[] {
+  const bd = breakdown;
+  return [
+    { key: 'payment_reliability', label: 'موثوقية الدفع', value: bd?.payment_reliability ?? Math.round((totalScore ?? 0) * 0.95), icon: CreditCard, description: 'الالتزام بالمدفوعات وعدم التخلف' },
+    { key: 'dispute_history', label: 'سجل النزاعات', value: bd?.dispute_history ?? Math.round((totalScore ?? 0) * 0.75), icon: Scale, description: 'نسبة النزاعات التي حُسمت لصالحك' },
+    { key: 'rental_history', label: 'سجل الكراء', value: bd?.rental_history ?? Math.round((totalScore ?? 0) * 0.88), icon: FileCheck, description: 'مدى الالتزام بشروط عقود الإيجار' },
+    { key: 'community_vouches', label: 'تزكيات المجتمع', value: bd?.community_vouches ?? Math.round((totalScore ?? 0) * 0.82), icon: Star, description: 'عدد التزكيات التي حصلت عليها' },
+    { key: 'verification_level', label: 'مستوى التوثيق', value: bd?.verification_level ?? Math.round((totalScore ?? 0) * 0.70), icon: IdCard, description: 'اكتمال بيانات KYC والتحقق من الهوية' },
+  ];
+}
 
 const benefits = [
   { title: 'أسعار أفضل', description: 'حصل على خصومات حصرية على منتجات مختارة', icon: '💰' },
@@ -136,17 +148,18 @@ export default function TrustScorePage() {
   const storeScore = user?.trust_score;
 
   // Fetch trust score from API (supplementary)
-  const { data, isLoading, isError } = useQuery<TrustScoreData>({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ['trust-score', user?.id],
     queryFn: () =>
       fetch('/api/social/score/' + user!.id)
         .then((r) => r.json())
-        .then((d) => d.data || d),
+        .then((d) => d.data),
     enabled: !!user?.id && isAuthenticated,
   });
 
   // Primary: store score, fallback to API, fallback to 0
-  const overall = storeScore ?? data?.social_score ?? 0;
+  const overall = storeScore ?? data?.trust_score ?? 0;
+  const components = buildComponents(data?.breakdown, overall);
   const tier = getTierFromScore(overall);
   const circumference = 2 * Math.PI * 72;
   const dashOffset = circumference * (1 - overall / 100);

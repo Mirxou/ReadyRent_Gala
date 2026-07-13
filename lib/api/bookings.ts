@@ -33,10 +33,10 @@ export const bookingsApi = {
     sovereignClient.get<Booking>(`/bookings/${id}/`),
 
   update: (id: number, data: any) => 
-    sovereignClient.patch<Booking>(`/bookings/${id}/update/`, data),
+    sovereignClient.patch<Booking>(`/bookings/${id}`, data),
 
   cancel: (id: number) => 
-    sovereignClient.post<void>(`/bookings/${id}/cancel/`),
+    sovereignClient.post<void>(`/bookings/${id}/cancel`),
 
   calculateDeposit: (productId: number) => 
     sovereignClient.get<{ deposit_amount: number }>('/bookings/calculate-deposit/', { 

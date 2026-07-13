@@ -36,7 +36,7 @@ export default function BlogPostPage() {
 
   const { data: post, isLoading } = useQuery({
     queryKey: ['blog-post', postId],
-    queryFn: () => fetch('/api/cms/blog/' + postId).then(r => r.json()).then(d => d.data || d),
+    queryFn: () => fetch('/api/blog/' + postId).then(r => r.json()).then(d => d.data || d),
     enabled: !!postId,
   });
 

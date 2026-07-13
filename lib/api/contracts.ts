@@ -29,13 +29,13 @@ export const contractsApi = {
    * Get contract details by ID
    */
   getById: (id: number) => 
-    sovereignClient.get<Contract>(`/contracts/digital/${id}/`),
+    sovereignClient.get<Contract>(`/contracts/${id}`),
 
   /**
    * Get contract for a specific booking
    */
   getByBookingId: (bookingId: number) => 
-    sovereignClient.get<Contract>(`/contracts/digital/?booking=${bookingId}`),
+    sovereignClient.get<Contract>(`/contracts?booking=${bookingId}`),
 
   /**
    * Generate a new contract for a booking
@@ -47,8 +47,8 @@ export const contractsApi = {
    * Sign a contract
    */
   sign: (contractId: number, ipAddress: string) => 
-    // ContractViewSet action route: /contracts/digital/<pk>/sign/
-    sovereignClient.post<Contract>(`/contracts/digital/${contractId}/sign/`, { ip_address: ipAddress }),
+    // ContractViewSet action route: /contracts/<pk>/sign
+    sovereignClient.post<Contract>(`/contracts/${contractId}/sign`, { ip_address: ipAddress }),
 
   /**
    * Backward-compatible aliases (used by some pages).

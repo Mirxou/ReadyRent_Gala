@@ -818,6 +818,7 @@ function mapApiPlan(apiPlan: Record<string, unknown>): Plan {
 export default function SubscriptionsPage() {
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [isSubscribing, setIsSubscribing] = useState(false);
 
   // Scroll to plans section on upgrade
   const plansRef = useRef<HTMLDivElement>(null);
@@ -853,14 +854,26 @@ export default function SubscriptionsPage() {
   const handleConfirmSubscription = async () => {
     if (!selectedPlan) return;
 
+    setIsSubscribing(true);
     setDialogOpen(false);
-
-    toast.info('سيتم تفعيل الاشتراك قريباً', {
-      description: `خطة ${selectedPlan.name} ستكون متاحة للاشتراك قريباً. شكراً لاهتمامكم!`,
-      duration: 4000,
-    });
-
-    setSelectedPlan(null);
+    try {
+      const res = await fetch('/api/subscriptions/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ planId: selectedPlan.id }),
+      });
+      const json = await res.json();
+      if (res.ok && json.success) {
+        toast.success(`تم تفعيل اشتراك خطة ${selectedPlan.name} بنجاح`);
+      } else {
+        toast.error(json.message_ar || 'فشل في تفعيل الاشتراك');
+      }
+    } catch {
+      toast.error('حدث خطأ أثناء معالجة طلب الاشتراك');
+    } finally {
+      setIsSubscribing(false);
+      setSelectedPlan(null);
+    }
   };
 
   const handleUpgrade = () => {
@@ -870,12 +883,19 @@ export default function SubscriptionsPage() {
   const handleCancel = async () => {
     if (currentPlanId === 'free') return;
     try {
-      await fetch('/api/subscriptions/cancel', { method: 'POST' });
-      toast.info('تم إلغاء الاشتراك والعودة إلى الخطة المجانية', {
-        duration: 3000,
+      const res = await fetch('/api/subscriptions/cancel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ planId: currentPlanId }),
       });
+      const json = await res.json();
+      if (res.ok && json.success) {
+        toast.success('تم إلغاء الاشتراك والعودة إلى الخطة المجانية');
+      } else {
+        toast.error(json.message_ar || 'فشل إلغاء الاشتراك');
+      }
     } catch {
-      toast.error('فشل إلغاء الاشتراك');
+      toast.error('حدث خطأ أثناء إلغاء الاشتراك');
     }
   };
 
@@ -944,7 +964,7 @@ export default function SubscriptionsPage() {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         onConfirm={handleConfirmSubscription}
-        isProcessing={false}
+        isProcessing={isSubscribing}
       />
     </div>
   );

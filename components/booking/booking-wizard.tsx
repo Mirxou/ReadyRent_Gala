@@ -18,9 +18,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { ChevronRight, ChevronLeft, Check, Loader2, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { bookingsApi } from '@/lib/api/bookings';
-import { paymentsApi } from '@/lib/api/payments';
-import { api } from '@/lib/api';
+import { bookingsApi, paymentsApi, api } from '@/lib/api';
 import { toast } from 'sonner';
 
 export function BookingWizard() {
@@ -68,7 +66,7 @@ export function BookingWizard() {
 
       // 3. Process Payment & Signature
       const paymentMethodId = formData.paymentMethod ?? 'visa';
-      await paymentsApi.createPayment(Number(bookingId) || bookingId as any, paymentMethodId);
+      await paymentsApi.create({ booking_id: Number(bookingId) || bookingId, payment_method: paymentMethodId });
 
       // 4. Clear the cart after successful booking
       try {

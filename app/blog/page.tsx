@@ -8,17 +8,41 @@ import { motion } from 'framer-motion';
 import { ParticleField } from '@/components/ui/particle-field';
 import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
 import { SovereignGlow } from '@/shared/components/sovereign/sovereign-sparkle';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
-const blogPosts = [
-  { id: 1, title: 'أحدث صيحات الموضة لعرس 2026', excerpt: 'اكتشفي أحدث الاتجاهات في عالم أزياء الأعراس الجزائرية والعالمية لسنة 2026.', date: '2026-01-15', category: 'موضة', readTime: '5 دقائق', image: 'https://picsum.photos/seed/blog1/600/400' },
-  { id: 2, title: 'دليل اختيار الفستان المثالي', excerpt: 'نصائح ذهبية لاختيار الفستان الذي يناسب قامتك ولون بشرتك ومناسبتك.', date: '2026-01-10', category: 'نصائح', readTime: '7 دقائق', image: 'https://picsum.photos/seed/blog2/600/400' },
-  { id: 3, title: 'قفطان جزائري: تراث وتحديث', excerpt: 'رحلة القفطان الجزائري من التقليد إلى الموضة العصرية مع الحفاظ على الهوية.', date: '2026-01-05', category: 'تراث', readTime: '8 دقائق', image: 'https://picsum.photos/seed/blog3/600/400' },
-  { id: 4, title: 'كيف تجهزين لعرسك في الجزائر', excerpt: 'دليل شامل لتحضيرات العرس من اختيار الفستان إلى تنسيق الحفل.', date: '2025-12-28', category: 'أعراس', readTime: '10 دقائق', image: 'https://picsum.photos/seed/blog4/600/400' },
-];
+interface BlogPostItem {
+  id: string;
+  title: string;
+  excerpt: string;
+  date: string;
+  category: string;
+  readTime: string;
+  image: string | null;
+}
 
 export default function BlogPage() {
   const [search, setSearch] = useState('');
+  const [blogPosts, setBlogPosts] = useState<BlogPostItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/blog')
+      .then((res) => res.json())
+      .then((data) => {
+        const posts = (data.data || []).map((p: Record<string, unknown>) => ({
+          id: p.id,
+          title: p.title,
+          excerpt: p.excerpt || '',
+          date: p.created_at,
+          category: p.category || '',
+          readTime: p.read_time || `${Math.max(1, Math.ceil(((p.content as string) || '').length / 500))} دقائق`,
+          image: p.featured_image || `https://picsum.photos/seed/${p.id}/600/400`,
+        }));
+        setBlogPosts(posts);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
 
   const filteredPosts = blogPosts.filter((post) => {
     if (search) {
@@ -81,7 +105,11 @@ export default function BlogPage() {
           </div>
         </GlassPanel>
 
-        {filteredPosts.length > 0 ? (
+        {loading ? (
+          <GlassPanel variant="obsidian" className="!rounded-2xl text-center !p-12">
+            <p className="text-muted-foreground">جاري تحميل المقالات...</p>
+          </GlassPanel>
+        ) : filteredPosts.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {filteredPosts.map((post, index) => (
               <motion.div
@@ -98,7 +126,7 @@ export default function BlogPage() {
                   >
                     <div className="relative h-52 w-full overflow-hidden">
                       <img
-                        src={post.image}
+                        src={post.image || '/placeholder.svg'}
                         alt={post.title}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       />

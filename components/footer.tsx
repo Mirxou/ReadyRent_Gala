@@ -61,7 +61,6 @@ export function Footer() {
             <ul className="space-y-4">
               {[
                 { label: 'خدمات المناسبات', href: '/services' },
-                { label: 'الدليل المحلي', href: '/local-guide' },
                 { label: 'البحث الذكي', href: '/ai-search' },
                 { label: 'الحرفيات', href: '/artisans' },
                 { label: 'التأمين', href: '/insurance' },

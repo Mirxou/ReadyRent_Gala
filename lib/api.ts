@@ -142,15 +142,11 @@ export const productsApi = {
   getCategories: () => apiFetch('products/categories/'),
   getMetadata: () => apiFetch('products/metadata/'),
   getSearchSuggestions: (query: string) => apiFetch('products/search-suggestions/', { params: { q: query } }),
-  getMatchingAccessories: (productId: number, limit?: number) =>
-    apiFetch(`products/${productId}/matching-accessories/`, { params: { limit: limit || 5 } }),
   getRecommendations: (productId: number, limit?: number) =>
     apiFetch(`products/${productId}/recommendations/`, { params: { limit: limit || 6 } }),
   getWishlist: () => apiFetch('products/wishlist/'),
   addToWishlist: (productId: number) => apiFetch('products/wishlist/', { method: 'POST', body: { product_id: productId } }),
   removeFromWishlist: (id: number) => apiFetch(`products/wishlist/${id}/`, { method: 'DELETE' }),
-  toggleWishlist: (productId: number) => apiFetch(`products/wishlist/toggle/${productId}/`, { method: 'POST' }),
-  checkWishlist: (productId: number) => apiFetch(`products/wishlist/check/${productId}/`),
 };
 
 export const bookingsApi = {
@@ -161,15 +157,9 @@ export const bookingsApi = {
   addToCart: (data: any) => apiFetch('bookings/cart/items/', { method: 'POST', body: data }),
   removeFromCart: (id: number) => apiFetch(`bookings/cart/items/${id}/`, { method: 'DELETE' }),
   createBookingFromCart: (data?: any) => apiFetch('bookings/create/', { method: 'POST', body: data }),
-  update: (id: number, data: any) => apiFetch(`bookings/${id}/update/`, { method: 'PATCH', body: data }),
-  updateStatus: (id: number, status: string) => apiFetch(`bookings/${id}/status/`, { method: 'PATCH', body: { status } }),
-  cancel: (id: number) => apiFetch(`bookings/${id}/cancel/`, { method: 'POST' }),
   getWaitlist: () => apiFetch('bookings/waitlist/'),
   addToWaitlist: (data: any) => apiFetch('bookings/waitlist/add/', { method: 'POST', body: data }),
   removeFromWaitlist: (id: number) => apiFetch(`bookings/waitlist/${id}/`, { method: 'DELETE' }),
-  getCancellationPolicy: (id: number) => apiFetch(`bookings/${id}/cancellation-policy/`),
-  earlyReturn: (id: number, data: any) => apiFetch(`bookings/${id}/early-return/`, { method: 'POST', body: data }),
-  getRefunds: (params?: any) => apiFetch('bookings/refunds/', { params }),
   calculateDeposit: (productId: number) => apiFetch('bookings/calculate-deposit/', { params: { product_id: productId } }),
 };
 
@@ -178,33 +168,18 @@ export const adminApi = {
   getRevenue: (params?: { days?: number }) => apiFetch('analytics/admin/revenue/', { params }),
   exportRevenueCSV: (params?: { days?: number }) => apiFetch('analytics/admin/revenue/export/', { params }),
   getDailyAnalyticsSummary: (params?: { days?: number }) => apiFetch('analytics/daily/summary/', { params }),
-  getTopProducts: (params?: { metric?: string }) => apiFetch('analytics/products/top_products/', { params }),
   getSalesReport: (params?: { days?: number; export?: boolean }) => apiFetch('analytics/admin/sales-report/', { params }),
   getAllBookings: (params?: any) => apiFetch('bookings/admin/', { params }),
   updateBooking: (id: number, data: any) => apiFetch(`bookings/admin/${id}/`, { method: 'PATCH', body: data }),
   getBookingStats: () => apiFetch('bookings/admin/stats/'),
   getAllProducts: (params?: any) => apiFetch('products/admin/products/', { params }),
-  createProduct: (data: any) => apiFetch('products/admin/products/', { method: 'POST', body: data }),
-  updateProduct: (id: number, data: any) => apiFetch(`products/admin/products/${id}/`, { method: 'PATCH', body: data }),
   deleteProduct: (id: number) => apiFetch(`products/admin/products/${id}/`, { method: 'DELETE' }),
-  getAllCategories: () => apiFetch('products/admin/categories/'),
-  createCategory: (data: any) => apiFetch('products/admin/categories/', { method: 'POST', body: data }),
-  updateCategory: (id: number, data: any) => apiFetch(`products/admin/categories/${id}/`, { method: 'PATCH', body: data }),
-  deleteCategory: (id: number) => apiFetch(`products/admin/categories/${id}/`, { method: 'DELETE' }),
-  getAllVariants: (params?: any) => apiFetch('products/admin/variants/', { params }),
-  createVariant: (data: any) => apiFetch('products/admin/variants/', { method: 'POST', body: data }),
-  updateVariant: (id: number, data: any) => apiFetch(`products/admin/variants/${id}/`, { method: 'PATCH', body: data }),
-  deleteVariant: (id: number) => apiFetch(`products/admin/variants/${id}/`, { method: 'DELETE' }),
   getAllUsers: (params?: any) => apiFetch('auth/admin/users/', { params }),
-  getUser: (id: number) => apiFetch(`auth/admin/users/${id}/`),
-  updateUser: (id: number, data: any) => apiFetch(`auth/admin/users/${id}/`, { method: 'PATCH', body: data }),
-  deleteUser: (id: number) => apiFetch(`auth/admin/users/${id}/`, { method: 'DELETE' }),
 };
 
 export const reviewsApi = {
   getAll: (params?: any) => apiFetch('reviews/', { params }),
   create: (data: any) => apiFetch('reviews/create/', { method: 'POST', body: data }),
-  moderate: (id: number, status: string) => apiFetch(`reviews/${id}/moderate/`, { method: 'PATCH', body: { status } }),
 };
 
 export const maintenanceApi = {
@@ -293,36 +268,15 @@ export const packagingApi = {
 
 export const chatbotApi = {
   createSession: (data?: { language?: string }) => apiFetch('chatbot/sessions/create_anonymous/', { method: 'POST', body: data || {} }),
-  getMySessions: () => apiFetch('chatbot/sessions/my_sessions/'),
-  getSession: (id: number) => apiFetch(`chatbot/sessions/${id}/`),
   sendMessage: (sessionId: number, message: string) => apiFetch(`chatbot/sessions/${sessionId}/send_message/`, { method: 'POST', body: { message } }),
   quickChat: (message: string, options?: { language?: string; [key: string]: any }) =>
     apiFetch('chatbot/quick-chat/', { method: 'POST', body: { message, language: options?.language || 'ar', ...options } }),
 };
 
 export const bundlesApi = {
-  getCategories: (params?: any) => apiFetch('bundles/categories/', { params }),
-  getCategory: (id: number) => apiFetch(`bundles/categories/${id}/`),
-  createCategory: (data: any) => apiFetch('bundles/categories/', { method: 'POST', body: data }),
-  updateCategory: (id: number, data: any) => apiFetch(`bundles/categories/${id}/`, { method: 'PATCH', body: data }),
-  deleteCategory: (id: number) => apiFetch(`bundles/categories/${id}/`, { method: 'DELETE' }),
   getAll: (params?: any) => apiFetch('bundles/bundles/', { params }),
-  getById: (id: number) => apiFetch(`bundles/bundles/${id}/`),
-  createBundle: (data: any) => apiFetch('bundles/bundles/', { method: 'POST', body: data }),
-  updateBundle: (id: number, data: any) => apiFetch(`bundles/bundles/${id}/`, { method: 'PATCH', body: data }),
-  deleteBundle: (id: number) => apiFetch(`bundles/bundles/${id}/`, { method: 'DELETE' }),
   calculatePrice: (bundleId: number, params: { start_date: string; end_date: string }) =>
     apiFetch(`bundles/bundles/${bundleId}/calculate_price/`, { params }),
-  getBundleBookings: (params?: any) => apiFetch('bundles/bookings/', { params }),
-  getBundleBooking: (id: number) => apiFetch(`bundles/bookings/${id}/`),
-  createBooking: (data: any) => apiFetch('bundles/bookings/', { method: 'POST', body: data }),
-  updateBundleBooking: (id: number, data: any) => apiFetch(`bundles/bookings/${id}/`, { method: 'PATCH', body: data }),
-  deleteBundleBooking: (id: number) => apiFetch(`bundles/bookings/${id}/`, { method: 'DELETE' }),
-  getBundleReviews: (params?: any) => apiFetch('bundles/reviews/', { params }),
-  getBundleReview: (id: number) => apiFetch(`bundles/reviews/${id}/`),
-  createBundleReview: (data: any) => apiFetch('bundles/reviews/', { method: 'POST', body: data }),
-  updateBundleReview: (id: number, data: any) => apiFetch(`bundles/reviews/${id}/`, { method: 'PATCH', body: data }),
-  deleteBundleReview: (id: number) => apiFetch(`bundles/reviews/${id}/`, { method: 'DELETE' }),
 };
 
 export const inventoryApi = {
@@ -344,41 +298,28 @@ export const inventoryApi = {
 };
 
 export const disputesApi = {
-  getDisputes: (params?: any) => apiFetch('disputes/disputes/', { params }),
-  getDispute: (id: number) => apiFetch(`disputes/disputes/${id}/`),
-  createDispute: (data: any) => apiFetch('disputes/disputes/create/', { method: 'POST', body: data }),
-  createDisputeMessage: (disputeId: number, data: any) => apiFetch(`disputes/disputes/${disputeId}/messages/`, { method: 'POST', body: data }),
-  getTickets: (params?: any) => apiFetch('disputes/tickets/', { params }),
-  getTicket: (id: number) => apiFetch(`disputes/tickets/${id}/`),
-  createTicket: (data: any) => apiFetch('disputes/tickets/create/', { method: 'POST', body: data }),
-  createTicketMessage: (ticketId: number, data: any) => apiFetch(`disputes/tickets/${ticketId}/messages/`, { method: 'POST', body: data }),
-  getDisputeStats: () => apiFetch('disputes/admin/disputes/stats/'),
-  getTicketStats: () => apiFetch('disputes/admin/tickets/stats/'),
-  getVaultIntegrity: () => apiFetch('disputes/admin/vault/integrity/'),
+  getDisputes: (params?: any) => apiFetch('disputes/', { params }),
+  getDispute: (id: number) => apiFetch(`disputes/${id}`),
+  createDispute: (data: any) => apiFetch('disputes/create', { method: 'POST', body: data }),
+  createDisputeMessage: (disputeId: number, data: any) => apiFetch(`disputes/${disputeId}/messages`, { method: 'POST', body: data }),
+  getTickets: (params?: any) => apiFetch('disputes/', { params }),
+  getTicket: (id: number) => apiFetch(`disputes/${id}`),
+  createTicket: (data: any) => apiFetch('disputes/create', { method: 'POST', body: data }),
+  createTicketMessage: (ticketId: number, data: any) => apiFetch(`disputes/${ticketId}/messages`, { method: 'POST', body: data }),
 };
 
 export const analyticsApi = {
   trackEvent: (data: any) => apiFetch('analytics/events/', { method: 'POST', body: data }),
   getEvents: (params?: any) => apiFetch('analytics/events/', { params }),
-  getEvent: (id: number) => apiFetch(`analytics/events/${id}/`),
-  getProductAnalytics: (params?: any) => apiFetch('analytics/products/', { params }),
-  getProductAnalytic: (id: number) => apiFetch(`analytics/products/${id}/`),
   getDailyAnalytics: (params?: any) => apiFetch('analytics/daily/', { params }),
-  getDailyAnalytic: (id: number) => apiFetch(`analytics/daily/${id}/`),
   getUserBehavior: (params?: any) => apiFetch('analytics/user-behavior/', { params }),
-  getUserBehaviorById: (id: number) => apiFetch(`analytics/user-behavior/${id}/`),
   getProductActivity: (productId: number) => apiFetch(`analytics/live/activity/${productId}/`),
 };
 
 export const paymentsApi = {
   getMethods: () => apiFetch('payments/methods/'),
-  getAll: (params?: any) => apiFetch('payments/payments/', { params }),
-  getById: (id: number) => apiFetch(`payments/payments/${id}/`),
   create: (data: any) => apiFetch('payments/create/', { method: 'POST', body: data }),
-  update: (id: number, data: any) => apiFetch(`payments/payments/${id}/`, { method: 'PATCH', body: data }),
-  delete: (id: number) => apiFetch(`payments/payments/${id}/`, { method: 'DELETE' }),
   verifyOtp: (id: number, otpCode: string) => apiFetch(`payments/payments/${id}/verify_otp/`, { method: 'POST', body: { otp_code: otpCode } }),
-  getStatus: (id: number) => apiFetch(`payments/payments/${id}/status/`),
   getEscrowMetrics: () => apiFetch('payments/metrics/'),
 };
 
@@ -386,8 +327,6 @@ export const socialApi = {
   vouch: (userId: number) => apiFetch(`social/vouch/${userId}/`, { method: 'POST' }),
   getSocialScore: (userId: number) => apiFetch(`social/score/${userId}/`),
   getFeed: (params?: any) => apiFetch('social/feed/', { params }),
-  getMarketPulse: (params?: { platform?: string; keyword?: string }) =>
-    apiFetch('social/pulse/', { params }),
 };
 
 export const judicialApi = {
@@ -406,8 +345,6 @@ export const intelligenceApi = {
     apiFetch('analytics/intelligence/report/', { params }),
   getRegionalLiquidity: () => apiFetch('analytics/admin/regional-liquidity/'),
   getPulse: () => apiFetch('analytics/intelligence/pulse/'),
-  getPredictivePulse: () => apiFetch('analytics/daily/summary/'),
-  getInfographicData: (type: string) => apiFetch(`analytics/visuals/${type}/`),
 };
 
 export const innovationApi = {

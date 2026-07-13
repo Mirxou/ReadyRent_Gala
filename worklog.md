@@ -1613,3 +1613,255 @@ Stage Summary:
 - **src/app/** directory — appears to be an earlier/alternate version of the app, contains duplicate layouts, globals.css, page.tsx
 - **public/public/** — duplicate of public/ directory
 - **shared/** at root — re-export shims pointing to src/shared/
+---
+Task ID: 1b
+Agent: API Builder
+Task: Create 4 missing API routes (contact, subscriptions/cancel, subscriptions/subscribe, bookings/[id]/cancel)
+
+Work Log:
+- Read worklog.md, prisma/schema.prisma, lib/auth-server.ts, and existing API routes (wallet, bookings/[id], subscriptions, bookings/create) to understand patterns
+- Confirmed model names: UserSubscription (not Subscription), Booking (no cancelledAt field — status update only), Transaction, Notification, SubscriptionPlan
+- Created 4 new API route files, all following sovereign envelope pattern { success, dignity_preserved, data }
+- All files pass TypeScript compilation (no new errors introduced)
+
+Files Created:
+1. **app/api/contact/route.ts** — POST, no auth required
+   - Accepts { name, email, subject, message }, validates required fields
+   - Stores as Notification (type='contact') for first admin user (best-effort)
+   - Returns Arabic success message
+
+2. **app/api/subscriptions/cancel/route.ts** — POST, auth required
+   - Accepts { planId }, finds active UserSubscription for user+plan
+   - Updates status to 'cancelled'
+   - Creates Notification for user
+   - Returns Arabic success message
+
+3. **app/api/subscriptions/subscribe/route.ts** — POST, auth required
+   - Accepts { planId }, validates plan exists and is active
+   - Checks user walletBalance >= plan.price, checks no duplicate active subscription
+   - Uses db.$transaction to atomically: deduct wallet, create UserSubscription (30-day duration), create Transaction
+   - Creates Notification for user
+   - Returns subscription details with dates
+
+4. **app/api/bookings/[id]/cancel/route.ts** — POST, auth required
+   - Uses Next.js 15 params: Promise<{ id: string }> pattern
+   - Checks authorization: booking owner OR admin/staff role
+   - Only allows cancel if status is 'pending' or 'confirmed'
+   - Refund logic: 100% if > 48h before startDate, 50% if less (parsing startDate string from Booking model)
+   - Uses db.$transaction to atomically: update booking status, credit wallet, create Transaction
+   - Creates Notification with refund details
+
+Stage Summary:
+- 4 new API routes created, all following existing codebase patterns
+- All use sovereign envelope format with Arabic error messages
+- All use try/catch error handling with appropriate HTTP status codes
+- No new TypeScript errors introduced (pre-existing errors unrelated)
+---
+Task ID: 1a
+Agent: Path Fixer
+Task: Fix broken API paths in frontend API client files to match actual backend route structure
+
+Work Log:
+- Verified actual API route files under app/api/ to confirm correct path structures
+- Fixed disputesApi in lib/api.ts: removed double `disputes/disputes/` prefix, redirected ticket endpoints to disputes, fixed admin paths
+- Fixed contractsApi in lib/api/contracts.ts: changed `/contracts/digital/${id}/` → `/contracts/${id}`, query param path, and sign path
+- Fixed notificationsApi in lib/api/notifications.ts: removed double `notifications/notifications/` prefix, renamed mark_all_read → read-all, unread_count → unread-count
+- Fixed walletApi in lib/api/wallet.ts: changed `/payments/wallet/` prefix → `/wallet/`, top-up → deposit
+- Fixed bookingsApi in lib/api/bookings.ts: changed `/bookings/${id}/update/` → `/bookings/${id}` (PATCH), removed trailing slash from cancel
+- Verified paymentsApi in lib/api/payments.ts: no bare `/payments/payments/` path to fix; sub-paths with ID segments left as-is per instructions
+- No logic or HTTP method changes made; only URL paths were corrected
+
+Stage Summary:
+- **6 files edited**: lib/api.ts, lib/api/contracts.ts, lib/api/notifications.ts, lib/api/wallet.ts, lib/api/bookings.ts
+- **1 file verified but unchanged**: lib/api/payments.ts (no matching bare path found)
+- All paths now align with actual Next.js file-system routes under app/api/
+- HTTP methods preserved exactly as they were
+---
+Task ID: 1c
+Agent: Frontend Fixer
+Task: Wire dead buttons and broken links across 6 frontend files
+
+Work Log:
+- app/insurance/page.tsx: Replaced dead `handleConfirmPurchase` (showed "قريباً" toast) with real POST to `/api/insurance/purchase` sending `{ plan_id: selectedPlan }`. Shows success/error toasts. Sets `purchasedPlan` state on success.
+- app/insurance/page.tsx: Replaced dead `handleContactSupport` (showed "قريباً" toast) with `window.open('https://wa.me/213000000000', '_blank')`.
+- app/trust-score/page.tsx: Updated `TrustScoreData` interface to match actual API response (user_id as string, trust_score, breakdown object). Replaced hardcoded `components` array (values [85,60,78,70,65]) with `buildComponents()` function that uses real API breakdown data, falling back to score-derived values when API data unavailable. Mapped 5 breakdown keys: payment_reliability, dispute_history, rental_history, community_vouches, verification_level.
+- app/dashboard/orders/[id]/page.tsx: Replaced "قريباً: ميزة المراسلة" toast with honest "ميزة المراسلة غير متاحة حالياً". Replaced "قريباً: ميزة تمديد العقد" toast with honest "ميزة تمديد العقد غير متاحة حالياً". Dispute button was already properly wired.
+- components/navbar.tsx: Removed dead `{ label: 'الدليل المحلي', href: '/local-guide' }` from navSections[1].children (الخدمات dropdown).
+- components/footer.tsx: Removed dead `{ label: 'الدليل المحلي', href: '/local-guide' }` from footer services links.
+- app/subscriptions/page.tsx: Replaced dead `handleConfirmSubscription` (showed "سيتم تفعيل الاشتراك قريباً" toast) with real POST to `/api/subscriptions/subscribe` sending `{ planId: selectedPlan.id }`. Added `isSubscribing` loading state wired to ConfirmationDialog.
+- app/subscriptions/page.tsx: Enhanced `handleCancel` to check response status and show success/error toasts instead of always showing info toast. Sends `{ planId: currentPlanId }` body.
+
+Stage Summary:
+- **6 files edited**: app/insurance/page.tsx, app/trust-score/page.tsx, app/dashboard/orders/[id]/page.tsx, components/navbar.tsx, components/footer.tsx, app/subscriptions/page.tsx
+- **0 new dependencies added**
+- All pre-existing lint errors remain unchanged; no new lint errors introduced
+- Insurance purchase uses correct `plan_id` field matching backend API contract
+- Trust score breakdown now dynamically reflects real API data from `/api/social/score/[userId]`
+---
+Task ID: 2a
+Agent: Services Builder
+Task: Build Services API routes + fix services page to use native fetch
+
+## Findings
+- **LocalGuideService** and **LocalGuideCategory** models **exist** in schema.prisma (lines 483-518)
+- LocalGuideService fields: nameAr, descriptionAr, imageUrl, city, rating, reviewCount, priceRange, phone, whatsapp, isVerified, featured, category (relation)
+- LocalGuideCategory fields: nameAr, nameEn, slug, icon, serviceCount
+- No `isActive` field on LocalGuideService; `featured` used for ordering
+- The `api` client (`lib/api.ts`) auto-unwraps sovereign envelope `{ success, data }` → returns `{ data }`; native fetch must unwrap manually
+- Services page expected service objects with: `id`, `name_ar`, `description_ar`, `image`, `rating`, `is_verified`, `location`, `category_ar`
+- Booking model has no `type` field; used `extraServices` JSON to store `{ type: 'service', service_id, phone }`
+
+## Changes Made
+
+### New Files Created (3)
+1. **app/api/services/route.ts** — GET handler
+   - Public (no auth)
+   - Query params: `?category=slug`, `?search=text`, `?limit=N` (default 20)
+   - Queries `db.localGuideService.findMany` with category include
+   - Maps DB fields to frontend-expected format (e.g., `imageUrl` → `image`, `city` → `location`, `category.nameAr` → `category_ar`)
+   - Returns sovereign envelope `{ success: true, dignity_preserved: true, data: [...] }`
+
+2. **app/api/services/categories/route.ts** — GET handler
+   - Public (no auth)
+   - Queries `db.localGuideCategory.findMany`; falls back to 6 hardcoded categories if DB empty or error
+   - Hardcoded: weddings, photography, makeup, dj, flowers, parties
+
+3. **app/api/services/book/route.ts** — POST handler
+   - Auth required (uses `getSessionFromRequest`)
+   - Body: `{ serviceId, date, phone, notes }`
+   - Creates Booking record with `extraServices` JSON containing service metadata
+   - Creates Notification for user
+   - Returns sovereign envelope
+
+### Files Modified (1)
+4. **app/services/page.tsx** — Data fetching migration
+   - Removed `import { api } from '@/lib/api'`
+   - Replaced `api.get('local-guide/services/')` → `fetch('/api/services?limit=50', { credentials: 'include' })` with manual envelope unwrap (`json.data`)
+   - Replaced `api.post('local-guide/services/book/', { service_id: ... })` → `fetch('/api/services/book', { method: 'POST', ... })` with `serviceId` (camelCase) field name and error checking
+   - ALL UI/design preserved exactly — only data fetching logic changed
+
+## Next Actions
+- Seed `local_guide_categories` and `local_guide_services` tables with real data for the services page to display listings
+- Consider adding server-side category filtering (currently client-side via `categoryMatch`) to reduce payload size
+- Add rate limiting to the booking endpoint
+---
+Task ID: 2d
+Agent: Content Builder
+Task: Build Blog API routes, CMS Pages API routes, Waitlist API routes, and fix blog/pages UI to use real APIs
+
+## Changes Made
+
+### Part A: Blog System
+1. **POST+GET /api/blog/route.ts** — Public GET with ?page, ?limit, ?search pagination; Admin-only POST to create BlogPost (validates session + admin/staff role, auto-generates slug from title)
+2. **GET /api/blog/[id]/route.ts** — Public single post by id or slug fallback; returns 404 for unpublished/missing posts
+3. **Fixed /blog/page.tsx** — Replaced hardcoded `blogPosts` array with `useEffect` + `fetch('/api/blog')`; added loading state; mapped API fields (`created_at`→`date`, `featured_image`→`image`, estimated `readTime`); kept all UI/design intact
+4. **Fixed /blog/[id]/page.tsx** — Changed `fetch('/api/cms/blog/' + postId)` → `fetch('/api/blog/' + postId)` to match new route
+
+### Part B: CMS Pages
+5. **GET /api/cms/pages/route.ts** — Public list of published CMSPages
+6. **GET /api/cms/pages/[slug]/route.ts** — Public single page by slug; 404 if not found/unpublished
+7. **Verified /pages/[slug]/page.tsx** — Already calls `/api/cms/pages/${slug}` correctly; no changes needed
+
+### Part C: Waitlist
+8. **GET /api/bookings/waitlist/route.ts** — Auth-required; returns user's waitlist items with product info joined
+9. **POST /api/bookings/waitlist/route.ts** — Auth-required; validates productId exists; prevents duplicates (409); creates WaitlistItem + Notification
+10. **DELETE /api/bookings/waitlist/[id]/route.ts** — Auth-required; owner-only deletion; 404/403 guards
+
+### Patterns Followed
+- Sovereign envelope: `{ success, dignity_preserved, data, meta }` on success; `{ success, dignity_preserved, message_ar, message_en, code }` on error
+- Auth via `getSessionFromRequest` + `authRequiredResponse`
+- All Prisma models (BlogPost, CMSPage, WaitlistItem, Notification) confirmed to exist in schema
+- Field mapping: `imageUrl` → `featured_image`, `createdAt` → `created_at/published_at` for frontend compatibility
+
+### Files Created (6)
+- app/api/blog/route.ts
+- app/api/blog/[id]/route.ts
+- app/api/cms/pages/route.ts
+- app/api/cms/pages/[slug]/route.ts
+- app/api/bookings/waitlist/route.ts
+- app/api/bookings/waitlist/[id]/route.ts
+
+### Files Modified (2)
+- app/blog/page.tsx (hardcoded → API fetch)
+- app/blog/[id]/page.tsx (API path fix)
+
+---
+Task ID: 2b
+Agent: Workflow Builder
+Task: Build booking status + disputes workflow APIs
+Date: $(date -u +%Y-%m-%dT%H:%M:%SZ)
+
+### Summary
+Built 9 API routes for booking status transitions, dispute management, review moderation, and password reset flows. Updated Prisma schema to support dispute appeals.
+
+### Schema Changes
+- `Dispute.status` enum: added `appealed` state
+- `DisputeMessage`: added `type` field (`message`, `appeal`, `system`) with default `message`
+
+### Files Created (8)
+- `app/api/bookings/[id]/status/route.ts` — PATCH with strict state machine (pending→confirmed→active→completed), rejects cancellation via this route
+- `app/api/disputes/[id]/route.ts` — GET single dispute with user, booking+product, messages, approval/rejection counts
+- `app/api/disputes/[id]/messages/route.ts` — POST message, auto-transitions filed→under_review, notifies owner
+- `app/api/disputes/[id]/history/route.ts` — GET timeline of all messages ordered by createdAt
+- `app/api/disputes/[id]/appeal/route.ts` — POST appeal (owner only, from resolved/closed→appealed), creates appeal + system messages
+- `app/api/reviews/[id]/moderate/route.ts` — PATCH approve/reject (admin/staff/vendor), notifies review author
+- `app/api/auth/forgot-password/route.ts` — POST, stores token in ActivityLog, always returns success (prevents enumeration)
+- `app/api/auth/reset-password/route.ts` — POST, validates token from ActivityLog, bcrypt hash, transactional update
+
+### Files Modified (2)
+- `prisma/schema.prisma` — Dispute status + DisputeMessage type field
+- `app/api/bookings/[id]/route.ts` — Enhanced GET with full includes (product, user, cart items, reviews, contracts), admin/staff access
+
+### Key Design Decisions
+- Booking status transitions enforced via whitelist map; cancellation rejected with USE_CANCEL_ROUTE code
+- Forgot-password uses ActivityLog for token storage (dev-mode); always returns generic success
+- Reset-password validates expiry (1h), cleans up tokens on use
+- Dispute messages auto-transition status from `filed` → `under_review`
+- Appeal creates both an `appeal`-typed message and a `system` status-change message
+- All routes use sovereign envelope (`{ success, dignity_preserved, data }`), Arabic error messages
+- All routes pass `tsc --noEmit` with zero new errors
+---
+Task ID: 5
+Agent: Code Cleaner
+Task: Clean dead code — Phase 5 (files, components, duplicate dirs, dead API methods)
+
+Work Log:
+- Verified ALL files before deletion with grep — no file deleted without confirming zero active imports
+- Deleted 8 lib/api/ files: admin.ts, auth.ts, logistics.ts, notifications.ts, index.ts, payments.ts, reviews.ts, wallet.ts
+- SKIPPED 3 lib/api/ files that have active imports (products.ts, bookings.ts, sovereign-client.ts) — these use sovereignClient pattern with different return types than lib/api.ts
+- Deleted 22 unused component files + 2 orphaned test files (24 total)
+- Deleted 4 empty directories: components/__tests__, components/communication, components/trust, components/wallet
+- Deleted src/app/ (old duplicate app — layout, page, api/route, globals.css)
+- Deleted public/public/ (exact duplicate of public/)
+- Deleted app/contracts/_id_/ (duplicate of app/contracts/[id]/)
+- Cleaned lib/api.ts: removed ~50 dead API methods across 9 API objects
+- Fixed 1 broken import in components/booking/booking-wizard.tsx (paymentsApi.createPayment → paymentsApi.create)
+- Preserved 6 API objects originally marked for full deletion (maintenanceApi, hygieneApi, locationsApi, packagingApi, inventoryApi, judicialApi) — all actively used by admin/feature pages
+- Preserved authApi methods (passwordResetRequest, passwordResetConfirm, generate2FASecret, enable2FA) — used by forgot-password, reset-password, 2fa-enrollment pages
+- Preserved analyticsApi.getDailyAnalytics and analyticsApi.getUserBehavior — used by analytics page
+- Preserved intelligenceApi.getMarketReport, getRegionalLiquidity, getPulse — used by reports page
+- Final verification: zero broken imports remain
+
+Files Deleted (33 total):
+- lib/api/admin.ts, auth.ts, logistics.ts, notifications.ts, index.ts, payments.ts, reviews.ts, wallet.ts (8)
+- components/product-card.tsx, accessory-suggestions.tsx, hijri-calendar.tsx, id-upload.tsx, CommunityProductForm.tsx, damage-inspection.tsx, dispute-form.tsx, insurance-selector.tsx, booking-calendar.tsx, BookingStatusCard.tsx, chatbot.tsx (11)
+- components/communication/call-interface.tsx, booking/artisan-integration.tsx, trust/TrustScoreDashboard.tsx, wallet/wallet-dashboard.tsx, wallet/transaction-history.tsx, disputes/dispute-card.tsx (6)
+- components/ui/interactive-product-card.tsx, skeletons.tsx, bento-grid.tsx, 3d-card.tsx, spotlight.tsx (5)
+- components/__tests__/product-card.test.tsx, booking-calendar.test.tsx (2)
+- src/app/ (directory — 4 files), public/public/ (directory — 13 files), app/contracts/_id_/page.tsx (1)
+
+Files Modified:
+- lib/api.ts — removed ~50 dead methods, kept all actively-used methods
+- components/booking/booking-wizard.tsx — fixed broken imports
+
+NOT Deleted (audit said unused but grep proved otherwise):
+- lib/api/products.ts (imported by 4 files: ai-search, product-search, featured-products, sitemap)
+- lib/api/bookings.ts (imported by booking-wizard.tsx)
+- lib/api/sovereign-client.ts (imported by SovereignContext.tsx)
+
+Stage Summary:
+- 33 files deleted, 2 files modified
+- lib/api.ts reduced from 425 lines to 362 lines (63 lines / ~50 methods removed)
+- Zero broken imports after cleanup
+- 3 lib/api/ files preserved despite audit marking them unused — active imports confirmed by grep
+
