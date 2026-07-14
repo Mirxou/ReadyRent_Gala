@@ -83,6 +83,7 @@ model Product {
   trustScore    Int      @default(0) @map("trust_score")
   isPremium     Boolean  @default(false) @map("is_premium")
   isVerified    Boolean  @default(false) @map("is_verified")
+  listingType   String   @default("rental") @map("listing_type") // rental, sale
   sizeOptions   String   @default("[]") @map("size_options") // JSON array
   colorOptions  String   @default("[]") @map("color_options") // JSON array
   depositAmount Int      @default(5000) @map("deposit_amount")

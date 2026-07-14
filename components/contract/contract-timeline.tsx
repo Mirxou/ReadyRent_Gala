@@ -2,7 +2,19 @@
 
 import { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Contract } from '@/lib/api/contracts';
+interface Contract {
+  id: string;
+  booking_id: string;
+  status: 'draft' | 'signed' | 'finalized' | 'void';
+  is_finalized: boolean;
+  contract_hash: string;
+  renter_signature?: string;
+  signed_at?: string;
+  snapshot: any;
+  parties?: any[];
+  terms?: string;
+}
+
 import {
   FileText,
   PenLine,

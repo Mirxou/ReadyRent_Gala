@@ -6,13 +6,11 @@ import { bookingsApi, disputesApi } from '@/lib/api';
 import { 
   ShieldCheck, 
   Calendar, 
-  Clock, 
-  MapPin, 
+  MapPin,
   FileSignature, 
   AlertTriangle, 
   ChevronRight,
   Download,
-  MessageSquare,
   Scale,
   ArrowLeft,
   Loader2,
@@ -327,12 +325,8 @@ export default function BookingDetailsPage() {
 
                 <div className="space-y-4">
                     <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground opacity-40">Agreement Tools</p>
-                        <SovereignButton variant="secondary" className="w-full justify-between px-6" onClick={() => toast.info('ميزة المراسلة غير متاحة حالياً')}>
-                        <span className="flex items-center gap-3"><MessageSquare className="w-4 h-4" /> مراسلة المالك</span>
-                        <ChevronRight className="w-4 h-4" />
-                    </SovereignButton>
-                    <SovereignButton variant="secondary" className="w-full justify-between px-6" onClick={() => toast.info('ميزة تمديد العقد غير متاحة حالياً')}>
-                        <span className="flex items-center gap-3"><Clock className="w-4 h-4" /> تمديد العقد</span>
+                    <SovereignButton variant="secondary" className="w-full justify-between px-6" onClick={() => router.push(`/disputes/create?booking_id=${booking.id}`)}>
+                        <span className="flex items-center gap-3"><AlertTriangle className="w-4 h-4" /> إرسال مشكلة</span>
                         <ChevronRight className="w-4 h-4" />
                     </SovereignButton>
                 </div>

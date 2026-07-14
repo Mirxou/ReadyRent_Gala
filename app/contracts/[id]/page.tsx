@@ -4,8 +4,20 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ContractViewer } from '@/components/contract/contract-viewer';
 import { ContractTimeline } from '@/components/contract/contract-timeline';
-import { Contract } from '@/lib/api/contracts';
 import { Loader2, AlertCircle, ChevronRight, LayoutList } from 'lucide-react';
+
+interface Contract {
+  id: string;
+  booking_id: string;
+  status: 'draft' | 'signed' | 'finalized' | 'void';
+  is_finalized: boolean;
+  contract_hash: string;
+  renter_signature?: string;
+  signed_at?: string;
+  snapshot: any;
+  parties?: any[];
+  terms?: string;
+}
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { toast } from 'sonner';

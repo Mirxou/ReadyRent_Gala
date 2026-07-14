@@ -1,47 +1,84 @@
 import { MetadataRoute } from 'next';
 import { db } from '@/lib/db';
 
-const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://standard.rent';
+const BASE_URL = 'https://standard.rent';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  // ──── Static Pages ────
   const staticPages: MetadataRoute.Sitemap = [
-    { url: baseUrl, lastModified: new Date(), changeFrequency: 'daily', priority: 1 },
-    { url: `${baseUrl}/products`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
-    { url: `${baseUrl}/rentals`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
-    { url: `${baseUrl}/services`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
-    { url: `${baseUrl}/marketplace`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
-    { url: `${baseUrl}/bundles`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
-    { url: `${baseUrl}/artisans`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${baseUrl}/vendors`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${baseUrl}/subscriptions`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
-    { url: `${baseUrl}/insurance`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
-    { url: `${baseUrl}/blog`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${baseUrl}/contact`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
-    { url: `${baseUrl}/about`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
-    { url: `${baseUrl}/faq`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
-    { url: `${baseUrl}/privacy`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.4 },
-    { url: `${baseUrl}/terms`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.4 },
-    { url: `${baseUrl}/trust-score`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
+    { url: BASE_URL, lastModified: new Date(), changeFrequency: 'daily', priority: 1.0 },
+    { url: `${BASE_URL}/rentals`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
+    { url: `${BASE_URL}/marketplace`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
+    { url: `${BASE_URL}/services`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.9 },
+    { url: `${BASE_URL}/bundles`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
+    { url: `${BASE_URL}/artisans`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
+    { url: `${BASE_URL}/vendors`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
+    { url: `${BASE_URL}/insurance`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${BASE_URL}/subscriptions`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${BASE_URL}/contact`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${BASE_URL}/blog`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.7 },
+    { url: `${BASE_URL}/trust-score`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${BASE_URL}/returns`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${BASE_URL}/disputes`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
+    { url: `${BASE_URL}/social`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
+    { url: `${BASE_URL}/verification`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
   ];
 
-  // Dynamic pages from database
+  // ──── Dynamic Pages (DB-driven) ────
   try {
-    const [products, blogPosts, artisans, vendors] = await Promise.all([
-      db.product.findMany({ select: { id: true, updatedAt: true }, take: 100 }),
-      db.blogPost.findMany({ where: { status: 'published' }, select: { id: true, updatedAt: true }, take: 50 }),
-      db.artisan.findMany({ select: { id: true, updatedAt: true }, take: 50 }),
-      db.vendor.findMany({ select: { id: true, updatedAt: true }, take: 50 }),
+    const [products, bundles, artisans, vendors, blogPosts] = await Promise.all([
+      db.product.findMany({
+        where: { isAvailable: true },
+        select: { id: true, updatedAt: true },
+      }),
+      db.bundle.findMany({ select: { id: true } }),
+      db.artisan.findMany({ select: { id: true } }),
+      db.vendor.findMany({
+        where: { isActive: true },
+        select: { id: true },
+      }),
+      db.blogPost.findMany({
+        where: { status: 'published' },
+        select: { id: true, updatedAt: true },
+      }),
     ]);
 
     const dynamicPages: MetadataRoute.Sitemap = [
-      ...products.map(p => ({ url: `${baseUrl}/products/${p.id}`, lastModified: p.updatedAt, changeFrequency: 'weekly' as const, priority: 0.7 })),
-      ...blogPosts.map(p => ({ url: `${baseUrl}/blog/${p.id}`, lastModified: p.updatedAt, changeFrequency: 'weekly' as const, priority: 0.6 })),
-      ...artisans.map(a => ({ url: `${baseUrl}/artisans/${a.id}`, lastModified: a.updatedAt, changeFrequency: 'weekly' as const, priority: 0.6 })),
-      ...vendors.map(v => ({ url: `${baseUrl}/vendors/${v.id}`, lastModified: v.updatedAt, changeFrequency: 'weekly' as const, priority: 0.6 })),
+      ...products.map((p) => ({
+        url: `${BASE_URL}/products/${p.id}`,
+        lastModified: p.updatedAt || new Date(),
+        changeFrequency: 'weekly' as const,
+        priority: 0.8,
+      })),
+      ...bundles.map((b) => ({
+        url: `${BASE_URL}/bundles/${b.id}`,
+        lastModified: new Date(),
+        changeFrequency: 'weekly' as const,
+        priority: 0.7,
+      })),
+      ...artisans.map((a) => ({
+        url: `${BASE_URL}/artisans/${a.id}`,
+        lastModified: new Date(),
+        changeFrequency: 'weekly' as const,
+        priority: 0.7,
+      })),
+      ...vendors.map((v) => ({
+        url: `${BASE_URL}/vendors/${v.id}`,
+        lastModified: new Date(),
+        changeFrequency: 'weekly' as const,
+        priority: 0.7,
+      })),
+      ...blogPosts.map((b) => ({
+        url: `${BASE_URL}/blog/${b.id}`,
+        lastModified: b.updatedAt || new Date(),
+        changeFrequency: 'monthly' as const,
+        priority: 0.6,
+      })),
     ];
 
     return [...staticPages, ...dynamicPages];
   } catch {
+    // Fallback: return static pages only if DB fails
     return staticPages;
   }
 }

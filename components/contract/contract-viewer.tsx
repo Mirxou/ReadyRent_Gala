@@ -17,8 +17,20 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Contract } from '@/lib/api/contracts';
 import { toast } from 'sonner';
+
+interface Contract {
+  id: string;
+  booking_id: string;
+  status: 'draft' | 'signed' | 'finalized' | 'void';
+  is_finalized: boolean;
+  contract_hash: string;
+  renter_signature?: string;
+  signed_at?: string;
+  snapshot: any;
+  parties?: any[];
+  terms?: string;
+}
 
 interface ContractViewerProps {
   contract: Contract;

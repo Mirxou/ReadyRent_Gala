@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { disputesApi } from '@/lib/api';
-import { appealsApi } from '@/lib/api/appeals';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Scale,
@@ -61,7 +60,15 @@ export default function AppealFilingPage() {
       if (!verdict?.id) throw new Error('لم يتم العثور على حكم للطعن فيه');
       const reason =
         selectedReason === 'other' ? customText : `${selectedReason}: ${customText}`;
-      return appealsApi.fileAppeal(verdict.id, reason);
+      const res = await fetch(`/api/disputes/${disputeId}/appeal`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason, description: customText }),
+        credentials: 'include',
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error || 'فشل تقديم الاستئناف');
+      return json;
     },
     onSuccess: () => {
       trackAppealFiled(Number(disputeId), selectedReason);

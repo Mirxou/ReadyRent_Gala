@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { 
   Bell, 
   CreditCard, 
@@ -21,8 +21,10 @@ import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SovereignSparkle } from '@/shared/components/sovereign/sovereign-sparkle';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import React from 'react';
 
 async function fetchNotifications() {
   const res = await fetch('/api/notifications');
@@ -46,6 +48,22 @@ const typeColorMap: Record<string, string> = {
 
 export default function NotificationsPage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const [isMarkingAllRead, setIsMarkingAllRead] = React.useState(false);
+
+  const handleMarkAllRead = async () => {
+    setIsMarkingAllRead(true);
+    try {
+      const res = await fetch('/api/notifications/read-all', { method: 'PATCH', credentials: 'include' });
+      if (!res.ok) throw new Error();
+      toast.success('تم تعليم جميع الإشعارات كمقروءة');
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+    } catch {
+      toast.error('فشل في تحديث الإشعارات');
+    } finally {
+      setIsMarkingAllRead(false);
+    }
+  };
 
   const { data: notifications, isLoading } = useQuery({
     queryKey: ['notifications'],
@@ -77,6 +95,14 @@ export default function NotificationsPage() {
         <div className="flex gap-4">
            <SovereignButton variant="secondary" className="h-14 px-8 rounded-xl border-white/5 opacity-40">
               تصفية السجل <Filter className="w-4 h-4 ml-3" />
+           </SovereignButton>
+           <SovereignButton
+             variant="secondary"
+             className="h-14 px-8 rounded-xl border-sovereign-gold/20 text-sovereign-gold"
+             onClick={handleMarkAllRead}
+             disabled={isMarkingAllRead}
+           >
+              {isMarkingAllRead ? 'جارٍ القراءة...' : 'قراءة الكل'}
            </SovereignButton>
            <SovereignButton variant="secondary" onClick={() => router.back()} className="h-14 px-8 rounded-xl group border-white/5">
               <ArrowRight className="w-5 h-5 ml-4" /> العودة

@@ -46,7 +46,6 @@ import { ShareButton } from '@/components/share-button';
 import { BookingWizard } from '@/components/booking/booking-wizard';
 import { useBookingStore } from '@/lib/hooks/use-booking-store';
 import { CalendarCheck } from 'lucide-react';
-import { HygieneBadge } from '@/components/product/hygiene-badge';
 
 export default function ProductDetailsPage() {
   const { id: slug } = useParams();
@@ -219,9 +218,7 @@ export default function ProductDetailsPage() {
               <h1 className="text-7xl font-black text-foreground tracking-tighter leading-tight italic">
                 {product.name_ar}<span className="text-sovereign-gold">.</span>
               </h1>
-              <div className="flex items-center gap-3">
-                <HygieneBadge productId={product.id} />
-              </div>
+
 
               <div className="flex items-center gap-8 flex-wrap">
                 <div className="flex items-center gap-2 text-sovereign-gold">

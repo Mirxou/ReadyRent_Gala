@@ -49,6 +49,7 @@ function transformProduct(product: Record<string, unknown>) {
     is_verified: product.isVerified,
     trust_score: product.trustScore,
     is_premium: product.isPremium,
+    listing_type: product.listingType,
     deposit_amount: product.depositAmount,
     size_options: safeJsonParse(product.sizeOptions as string, []),
     color_options: safeJsonParse(product.colorOptions as string, []),
@@ -66,6 +67,7 @@ export async function GET(request: NextRequest) {
     const maxPrice = searchParams.get('max_price');
     const location = searchParams.get('location') || undefined;
     const availability = searchParams.get('availability');
+    const listingType = searchParams.get('listing_type') || undefined;
     const ordering = searchParams.get('ordering') || 'newest';
     const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
     const limit = Math.min(50, Math.max(1, parseInt(searchParams.get('limit') || '20', 10)));
@@ -103,6 +105,10 @@ export async function GET(request: NextRequest) {
       where.isAvailable = true;
     } else if (availability === 'unavailable') {
       where.isAvailable = false;
+    }
+
+    if (listingType) {
+      where.listingType = listingType;
     }
 
     // Build orderBy

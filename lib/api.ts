@@ -118,13 +118,13 @@ export const api = {
 
 export const authApi = {
   login: (email: string, password: string) =>
-    apiFetch('auth/login/', { method: 'POST', body: { email, password } }),
+    apiFetch('auth/login', { method: 'POST', body: { email, password } }),
   register: (data: any) =>
-    apiFetch('auth/register/', { method: 'POST', body: data }),
+    apiFetch('auth/register', { method: 'POST', body: data }),
   logout: () =>
-    apiFetch('auth/logout/', { method: 'POST' }),
+    apiFetch('auth/logout', { method: 'POST' }),
   me: () =>
-    apiFetch('auth/profile/'),
+    apiFetch('auth/profile'),
   passwordResetRequest: (email: string) =>
     apiFetch('auth/forgot-password', { method: 'POST', body: { email } }),
   passwordResetConfirm: (token: string, uid: string, password: string, passwordConfirm: string) =>
@@ -132,31 +132,31 @@ export const authApi = {
 };
 
 export const productsApi = {
-  getAll: (params?: any) => apiFetch('products/', { params }),
-  getById: (id: string) => apiFetch(`products/${id}/`),
-  getBySlug: (slug: string) => apiFetch(`products/${slug}/`),
-  getCategories: () => apiFetch('products/categories/'),
-  getSearchSuggestions: (query: string) => apiFetch('products/search-suggestions/', { params: { q: query } }),
-  getWishlist: () => apiFetch('products/wishlist/'),
-  addToWishlist: (productId: number) => apiFetch('products/wishlist/', { method: 'POST', body: { product_id: productId } }),
-  removeFromWishlist: (id: number) => apiFetch(`products/wishlist/${id}/`, { method: 'DELETE' }),
+  getAll: (params?: any) => apiFetch('products', { params }),
+  getById: (id: string) => apiFetch(`products/${id}`),
+  getBySlug: (slug: string) => apiFetch(`products/${slug}`),
+  getCategories: () => apiFetch('products/categories'),
+  getSearchSuggestions: (query: string) => apiFetch('products/search-suggestions', { params: { q: query } }),
+  getWishlist: () => apiFetch('products/wishlist'),
+  addToWishlist: (productId: number) => apiFetch('products/wishlist', { method: 'POST', body: { product_id: productId } }),
+  removeFromWishlist: (id: number) => apiFetch(`products/wishlist/${id}`, { method: 'DELETE' }),
 };
 
 export const bookingsApi = {
-  create: (data: any) => apiFetch('bookings/create/', { method: 'POST', body: data }),
-  getAll: () => apiFetch('bookings/'),
-  getById: (id: string) => apiFetch(`bookings/${id}/`),
-  getCart: () => apiFetch('bookings/cart/'),
-  addToCart: (data: any) => apiFetch('bookings/cart/items/', { method: 'POST', body: data }),
-  removeFromCart: (id: number) => apiFetch(`bookings/cart/items/${id}/`, { method: 'DELETE' }),
-  createBookingFromCart: (data?: any) => apiFetch('bookings/create/', { method: 'POST', body: data }),
-  getWaitlist: () => apiFetch('bookings/waitlist/'),
-  addToWaitlist: (data: any) => apiFetch('bookings/waitlist/', { method: 'POST', body: data }),
-  removeFromWaitlist: (id: number) => apiFetch(`bookings/waitlist/${id}/`, { method: 'DELETE' }),
+  create: (data: any) => apiFetch('bookings/create', { method: 'POST', body: data }),
+  getAll: () => apiFetch('bookings'),
+  getById: (id: string) => apiFetch(`bookings/${id}`),
+  getCart: () => apiFetch('bookings/cart'),
+  addToCart: (data: any) => apiFetch('bookings/cart/items', { method: 'POST', body: data }),
+  removeFromCart: (id: number) => apiFetch(`bookings/cart/items/${id}`, { method: 'DELETE' }),
+  createBookingFromCart: (data?: any) => apiFetch('bookings/create', { method: 'POST', body: data }),
+  getWaitlist: () => apiFetch('bookings/waitlist'),
+  addToWaitlist: (data: any) => apiFetch('bookings/waitlist', { method: 'POST', body: data }),
+  removeFromWaitlist: (id: number) => apiFetch(`bookings/waitlist/${id}`, { method: 'DELETE' }),
 };
 
 export const disputesApi = {
-  getDisputes: (params?: any) => apiFetch('disputes/', { params }),
+  getDisputes: (params?: any) => apiFetch('disputes', { params }),
   getDispute: (id: string) => apiFetch(`disputes/${id}`),
   createDispute: (data: any) => apiFetch('disputes/create', { method: 'POST', body: data }),
   createDisputeMessage: (id: string, data: any) => apiFetch(`disputes/${id}/messages`, { method: 'POST', body: data }),
@@ -166,76 +166,76 @@ export const disputesApi = {
 };
 
 export const adminApi = {
-  getDashboardStats: () => apiFetch('analytics/admin/dashboard/'),
-  getRevenue: (params?: { days?: number }) => apiFetch('analytics/admin/revenue/', { params }),
-  getDailyAnalyticsSummary: (params?: { days?: number }) => apiFetch('analytics/daily/summary/', { params }),
-  getSalesReport: (params?: { days?: number; export?: boolean }) => apiFetch('analytics/admin/sales-report/', { params }),
-  getAllUsers: (params?: any) => apiFetch('admin/users/', { params }),
-  updateUser: (id: string, data: any) => apiFetch(`admin/users/${id}/`, { method: 'PATCH', body: data }),
-  getAllBookings: (params?: any) => apiFetch('admin/bookings/', { params }),
-  getBookingStats: () => apiFetch('admin/bookings/stats/'),
-  getAllProducts: (params?: any) => apiFetch('products/admin/', { params }),
-  createProduct: (data: any) => apiFetch('products/admin/', { method: 'POST', body: data }),
-  updateProduct: (id: string, data: any) => apiFetch(`products/admin/${id}/`, { method: 'PUT', body: data }),
-  deleteProduct: (id: string) => apiFetch(`products/admin/${id}/`, { method: 'DELETE' }),
+  getDashboardStats: () => apiFetch('analytics/admin/dashboard'),
+  getRevenue: (params?: { days?: number }) => apiFetch('analytics/admin/revenue', { params }),
+  getDailyAnalyticsSummary: (params?: { days?: number }) => apiFetch('analytics/daily/summary', { params }),
+  getSalesReport: (params?: { days?: number; export?: boolean }) => apiFetch('analytics/admin/sales-report', { params }),
+  getAllUsers: (params?: any) => apiFetch('admin/users', { params }),
+  updateUser: (id: string, data: any) => apiFetch(`admin/users/${id}`, { method: 'PATCH', body: data }),
+  getAllBookings: (params?: any) => apiFetch('admin/bookings', { params }),
+  getBookingStats: () => apiFetch('admin/bookings/stats'),
+  getAllProducts: (params?: any) => apiFetch('products/admin', { params }),
+  createProduct: (data: any) => apiFetch('products/admin', { method: 'POST', body: data }),
+  updateProduct: (id: string, data: any) => apiFetch(`products/admin/${id}`, { method: 'PUT', body: data }),
+  deleteProduct: (id: string) => apiFetch(`products/admin/${id}`, { method: 'DELETE' }),
 };
 
 export const reviewsApi = {
-  getAll: (params?: any) => apiFetch('reviews/', { params }),
-  create: (data: any) => apiFetch('reviews/create/', { method: 'POST', body: data }),
+  getAll: (params?: any) => apiFetch('reviews', { params }),
+  create: (data: any) => apiFetch('reviews/create', { method: 'POST', body: data }),
 };
 
 export const chatbotApi = {
   quickChat: (message: string, options?: { language?: string; [key: string]: any }) =>
-    apiFetch('chatbot/quick-chat/', { method: 'POST', body: { message, language: options?.language || 'ar', ...options } }),
+    apiFetch('chatbot/quick-chat', { method: 'POST', body: { message, language: options?.language || 'ar', ...options } }),
 };
 
 export const bundlesApi = {
-  getAll: (params?: any) => apiFetch('bundles/bundles/', { params }),
+  getAll: (params?: any) => apiFetch('bundles/bundles', { params }),
   calculatePrice: (id: string, params: { start_date: string; end_date: string }) =>
-    apiFetch(`bundles/${id}/calculate-price/`, { params }),
+    apiFetch(`bundles/${id}/calculate-price`, { params }),
 };
 
 export const cancellationApi = {
-  getPolicy: (bookingId: string) => apiFetch(`bookings/${bookingId}/cancellation-policy/`),
+  getPolicy: (bookingId: string) => apiFetch(`bookings/${bookingId}/cancellation-policy`),
 };
 
 export const depositApi = {
   calculateDeposit: (params: { product_id: string; start_date: string; end_date: string }) =>
-    apiFetch('bookings/calculate-deposit/', { params }),
+    apiFetch('bookings/calculate-deposit', { params }),
 };
 
 export const analyticsApi = {
-  trackEvent: (data: any) => apiFetch('analytics/events/', { method: 'POST', body: data }),
-  getEvents: (params?: any) => apiFetch('analytics/events/', { params }),
-  getProductActivity: (productId: number) => apiFetch(`analytics/live/activity/${productId}/`),
+  trackEvent: (data: any) => apiFetch('analytics/events', { method: 'POST', body: data }),
+  getEvents: (params?: any) => apiFetch('analytics/events', { params }),
+  getProductActivity: (productId: number) => apiFetch(`analytics/live/activity/${productId}`),
 };
 
 export const paymentsApi = {
-  getMethods: () => apiFetch('payments/methods/'),
-  create: (data: any) => apiFetch('payments/create/', { method: 'POST', body: data }),
+  getMethods: () => apiFetch('payments/methods'),
+  create: (data: any) => apiFetch('payments/create', { method: 'POST', body: data }),
 };
 
 export const socialApi = {
-  vouch: (userId: number) => apiFetch(`social/vouch/${userId}/`, { method: 'POST' }),
-  getSocialScore: (userId: number) => apiFetch(`social/score/${userId}/`),
-  getFeed: (params?: any) => apiFetch('social/feed/', { params }),
+  vouch: (userId: number) => apiFetch(`social/vouch/${userId}`, { method: 'POST' }),
+  getSocialScore: (userId: number) => apiFetch(`social/score/${userId}`),
+  getFeed: (params?: any) => apiFetch('social/feed', { params }),
 };
 
 export const intelligenceApi = {
   getMarketReport: (params?: { industry?: string; region?: string }) =>
-    apiFetch('analytics/intelligence/report/', { params }),
+    apiFetch('analytics/intelligence/report', { params }),
 };
 
 export const innovationApi = {
-  getArtisans: (params?: any) => apiFetch('artisans/artisans/', { params }),
-  getBundles: (params?: any) => apiFetch('bundles/bundles/', { params }),
+  getArtisans: (params?: any) => apiFetch('artisans/artisans', { params }),
+  getBundles: (params?: any) => apiFetch('bundles/bundles', { params }),
 };
 
 export const verificationApi = {
-  submit: (facePhoto: string) => apiFetch('verification/submit/', { method: 'POST', body: { face_photo: facePhoto } }),
-  getStatus: () => apiFetch('verification/status/'),
-  getPending: () => apiFetch('verification/pending/'),
+  submit: (facePhoto: string) => apiFetch('verification/submit', { method: 'POST', body: { face_photo: facePhoto } }),
+  getStatus: () => apiFetch('verification/status'),
+  getPending: () => apiFetch('verification/pending'),
   vote: (verificationId: string, vote: 'approve' | 'reject', comment?: string) =>
-    apiFetch('verification/vote/', { method: 'POST', body: { verification_id: verificationId, vote, comment } }),
+    apiFetch('verification/vote', { method: 'POST', body: { verification_id: verificationId, vote, comment } }),
 };
