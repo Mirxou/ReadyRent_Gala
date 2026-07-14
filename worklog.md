@@ -2009,3 +2009,41 @@ Stage Summary:
 - 8 broken import files fixed
 - All 5 critical security vulnerabilities verified patched
 - Dev server running clean
+
+---
+Task ID: 3
+Agent: Fix Broken Pages Sub-Agent
+Task: Fix remaining broken pages — connect frontend to real APIs, remove hardcoded data
+
+Work Log:
+- **Fix 1 (Admin Users)**: Verified — imports already from `@/lib/api`, response format `{ data: [...] }` matches `.then(res => res.data)` pattern. No changes needed.
+- **Fix 2 (Admin Bookings)**: Verified — imports already from `@/lib/api`, response format matches. No changes needed.
+- **Fix 3 (Admin Products)**: 
+  - Fixed `product.status === 'available'` → `product.is_available` (API returns boolean, not string)
+  - Fixed `product.price_per_day` → `product.daily_rate` (API field name)
+  - Connected edit button: wrapped in `<Link>` to `/admin/products/new?editId=${product.id}`
+  - Fixed delete mutation type `(id: number)` → `(id: string)` (CUID string IDs)
+- **Fix 4 (Dashboard Products)**:
+  - Added imports: `useRouter`, `useMutation`, `useQueryClient`, `adminApi`
+  - Replaced `toast.info('قريباً: ميزة التعديل')` → `router.push(/products/create?editId=...)`
+  - Replaced `toast.info('قريباً: ميزة المعاينة')` → `router.push(/products/${slug})`
+  - Replaced `toast.info('قريباً: ميزة الحذف')` → real `deleteMutation` calling `adminApi.deleteProduct()`
+  - Added deleteMutation with success/error toasts and query invalidation
+- **Fix 5 (Wallet Page `/wallet`)**:
+  - Removed hardcoded `balance = 45250.00` → `balance = 0`
+  - Removed hardcoded `escrowTotal = 12800.00` → `escrowTotal = 0` (calculated from API)
+  - Removed 3 hardcoded mock transactions → empty `Transaction[]`
+  - Updated `useEffect` to load both balance AND transactions from `/api/wallet`
+  - Added escrow total calculation from ESCROW_HELD/escrow_lock transactions
+  - Updated Transaction interface to be flexible (`type: string`, optional fields)
+  - Added empty state UI when no transactions
+  - Added support for API field names (`created_at` vs `date`, `deposit`/`penalty` types)
+  - Made `hash` display conditional (API may return null)
+- **Fix 6 (Dashboard Wallet `/dashboard/wallet`)**: Verified — already uses `useQuery` with `fetchWallet()` from `/api/wallet`, shows empty state, no hardcoded data. No changes needed.
+
+Stage Summary:
+- 4 files modified, 2 files verified as already correct
+- All "قريباً" (coming soon) dead buttons now connected to real actions
+- All hardcoded mock data removed from wallet page
+- Field name mismatches between API responses and component usage fixed
+- Build verified — no new errors introduced in modified files

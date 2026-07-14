@@ -4,7 +4,9 @@ import { formatNumber } from '@/lib/utils';
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useQuery } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { adminApi } from '@/lib/api';
 import {
     Plus,
     Search,
@@ -44,10 +46,23 @@ async function fetchProducts() {
 }
 
 export default function ProductsPage() {
+    const router = useRouter();
+    const queryClient = useQueryClient();
     const [searchTerm, setSearchTerm] = useState('');
     const { data: products, isLoading } = useQuery({
       queryKey: ['my-products'],
       queryFn: fetchProducts,
+    });
+
+    const deleteMutation = useMutation({
+      mutationFn: (id: string) => adminApi.deleteProduct(id),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['my-products'] });
+        toast.success('تم حذف المنتج بنجاح');
+      },
+      onError: () => {
+        toast.error('حدث خطأ أثناء حذف المنتج');
+      },
     });
 
     // Show first products from API
@@ -161,14 +176,18 @@ export default function ProductsPage() {
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent align="end" className="w-[160px]">
                                                 <DropdownMenuLabel>الإجراءات</DropdownMenuLabel>
-                                                <DropdownMenuItem onClick={() => toast.info('قريباً: ميزة التعديل')}>
+                                                <DropdownMenuItem onClick={() => router.push(`/products/create?editId=${product.id}`)}>
                                                     <Edit className="ml-2 h-4 w-4" /> تعديل
                                                 </DropdownMenuItem>
-                                                <DropdownMenuItem onClick={() => toast.info('قريباً: ميزة المعاينة')}>
+                                                <DropdownMenuItem onClick={() => router.push(`/products/${product.slug || product.id}`)}>
                                                     <Eye className="ml-2 h-4 w-4" /> معاينة
                                                 </DropdownMenuItem>
                                                 <DropdownMenuSeparator />
-                                                <DropdownMenuItem className="text-red-600 focus:text-red-600" onClick={() => toast.info('قريباً: ميزة الحذف')}>
+                                                <DropdownMenuItem className="text-red-600 focus:text-red-600" onClick={() => {
+                                                  if (confirm('هل أنت متأكد من حذف هذا المنتج؟')) {
+                                                    deleteMutation.mutate(product.id);
+                                                  }
+                                                }}>
                                                     <Trash2 className="ml-2 h-4 w-4" /> حذف
                                                 </DropdownMenuItem>
                                             </DropdownMenuContent>

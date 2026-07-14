@@ -36,7 +36,7 @@ export default function AdminProductsPage() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => adminApi.deleteProduct(id),
+    mutationFn: (id: string) => adminApi.deleteProduct(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-products'] });
       toast.success('تم حذف المنتج بنجاح');
@@ -102,8 +102,8 @@ export default function AdminProductsPage() {
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <CardTitle className="text-lg">{product.name_ar || product.name}</CardTitle>
-                  <Badge variant={product.status === 'available' ? 'default' : 'secondary'}>
-                    {product.status}
+                  <Badge variant={product.is_available ? 'default' : 'secondary'}>
+                    {product.is_available ? 'متاح' : 'غير متاح'}
                   </Badge>
                 </div>
               </CardHeader>
@@ -113,16 +113,18 @@ export default function AdminProductsPage() {
                     الفئة: {product.category?.name_ar || '-'}
                   </p>
                   <p className="text-lg font-bold">
-                    {Number(product.price_per_day).toFixed(0)} دج/يوم
+                    {Number(product.daily_rate || product.price_per_day).toFixed(0)} دج/يوم
                   </p>
                   {product.is_featured && (
                     <Badge variant="outline">مميز</Badge>
                   )}
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm" className="flex-1">
-                    <Edit className="h-4 w-4 mr-2" />
-                    تعديل
+                  <Button variant="outline" size="sm" className="flex-1" asChild>
+                    <Link href={`/admin/products/new?editId=${product.id}`}>
+                      <Edit className="h-4 w-4 mr-2" />
+                      تعديل
+                    </Link>
                   </Button>
                   <Button
                     variant="destructive"

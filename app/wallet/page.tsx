@@ -33,11 +33,12 @@ type DepositMode = 'deposit' | 'withdraw';
 
 interface Transaction {
   id: string;
-  type: 'INCOME' | 'EXPENDITURE' | 'ESCROW_HELD' | 'ESCROW_RELEASED';
+  type: string;
   amount: number;
-  date: string;
-  note: string;
-  hash: string;
+  date?: string;
+  created_at?: string;
+  note?: string;
+  hash?: string;
 }
 
 const TABS: { key: TabKey; label: string; icon: React.ReactNode }[] = [
@@ -47,8 +48,8 @@ const TABS: { key: TabKey; label: string; icon: React.ReactNode }[] = [
 ];
 
 export default function SovereignWallet() {
-  const [balance, setBalance] = useState(45250.00);
-  const [escrowTotal] = useState(12800.00);
+  const [balance, setBalance] = useState(0);
+  const [escrowTotal, setEscrowTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TabKey>('balance');
   const [depositMode, setDepositMode] = useState<DepositMode>('deposit');
@@ -68,32 +69,7 @@ export default function SovereignWallet() {
   const [trNote, setTrNote] = useState('');
   const [trLoading, setTrLoading] = useState(false);
 
-  const [transactions, setTransactions] = useState<Transaction[]>(() => [
-    { 
-      id: 'TX-9021', 
-      type: 'ESCROW_HELD' as const, 
-      amount: 1250.00, 
-      date: new Date().toISOString(), 
-      note: 'حجز فستان سهرة - مرجع #2041',
-      hash: '0x8f2d...23e1'
-    },
-    { 
-      id: 'TX-8942', 
-      type: 'INCOME' as const, 
-      amount: 8500.00, 
-      date: new Date(Date.now() - 86400000).toISOString(), 
-      note: 'تسوية حجز معدات تصوير',
-      hash: '0x4e5f...6g7h'
-    },
-    { 
-      id: 'TX-8811', 
-      type: 'EXPENDITURE' as const, 
-      amount: 2100.00, 
-      date: new Date(Date.now() - 172800000).toISOString(), 
-      note: 'رسوم فحص تقني - كاميرا سوني',
-      hash: '0x9i0j...k1l2'
-    }
-  ]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
 
   useEffect(() => {
     fetch('/api/wallet')
@@ -102,6 +78,14 @@ export default function SovereignWallet() {
         if (d?.data?.balance !== undefined) {
           setBalance(d.data.balance);
         }
+        if (Array.isArray(d?.data?.transactions)) {
+          setTransactions(d.data.transactions);
+        }
+        // Calculate escrow total from transactions
+        const escrow = (d?.data?.transactions || [])
+          .filter((t: any) => t.type === 'ESCROW_HELD' || t.type === 'escrow_lock')
+          .reduce((sum: number, t: any) => sum + (Number(t.amount) || 0), 0);
+        setEscrowTotal(escrow);
       })
       .catch(() => {})
       .finally(() => setIsLoading(false));
@@ -363,41 +347,46 @@ export default function SovereignWallet() {
                     </div>
 
                     <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2" style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(197,160,89,0.2) transparent' }}>
-                        {transactions.map((tx) => (
+                        {transactions.length > 0 ? transactions.map((tx) => (
                             <motion.div key={tx.id} layout initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="group">
                                  <GlassPanel className="p-6 flex justify-between items-center group-hover:bg-white/[0.02] transition-colors rounded-3xl" gradientBorder>
                                     <div className="flex gap-6 items-center min-w-0">
                                         <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border border-white/5 shrink-0 ${
-                                            tx.type === 'INCOME' ? 'bg-emerald-500/10 text-emerald-500' : 
-                                            tx.type === 'EXPENDITURE' ? 'bg-red-500/10 text-red-500' : 'bg-sovereign-gold/10 text-sovereign-gold'
+                                            tx.type === 'INCOME' || tx.type === 'deposit' ? 'bg-emerald-500/10 text-emerald-500' : 
+                                            tx.type === 'EXPENDITURE' || tx.type === 'penalty' ? 'bg-red-500/10 text-red-500' : 'bg-sovereign-gold/10 text-sovereign-gold'
                                         }`}>
-                                            {tx.type === 'INCOME' ? <ArrowDownLeft className="w-6 h-6" /> : 
-                                             tx.type === 'EXPENDITURE' ? <ArrowUpRight className="w-6 h-6" /> : <Lock className="w-6 h-6" />}
+                                            {tx.type === 'INCOME' || tx.type === 'deposit' ? <ArrowDownLeft className="w-6 h-6" /> : 
+                                             tx.type === 'EXPENDITURE' || tx.type === 'penalty' ? <ArrowUpRight className="w-6 h-6" /> : <Lock className="w-6 h-6" />}
                                         </div>
                                         <div className="space-y-1 min-w-0">
                                             <div className="flex gap-3 items-center flex-wrap">
-                                                <span className="font-black text-base md:text-lg tracking-tighter truncate">{tx.note}</span>
-                                                <Badge variant="outline" className="text-[9px] uppercase border-white/10 opacity-60 shrink-0">#{tx.id}</Badge>
+                                                <span className="font-black text-base md:text-lg tracking-tighter truncate">{tx.note || 'معاملة مالية'}</span>
+                                                <Badge variant="outline" className="text-[9px] uppercase border-white/10 opacity-60 shrink-0">#{tx.id?.slice(0, 8) || tx.id}</Badge>
                                             </div>
-                                            <div className="text-xs text-muted-foreground font-light">{new Date(tx.date).toLocaleDateString('ar-DZ')} • {new Date(tx.date).toLocaleTimeString('ar-DZ')}</div>
+                                            <div className="text-xs text-muted-foreground font-light">{new Date(tx.date || tx.created_at).toLocaleDateString('ar-DZ')}</div>
                                         </div>
                                     </div>
 
                                     <div className="flex gap-6 items-center shrink-0 mr-4">
                                         <div className="text-left">
                                             <span className={`text-lg md:text-xl font-black font-mono ${
-                                                tx.type === 'INCOME' ? 'text-emerald-500' : 
-                                                tx.type === 'EXPENDITURE' ? 'text-red-500' : 'text-sovereign-gold'
+                                                tx.type === 'INCOME' || tx.type === 'deposit' ? 'text-emerald-500' : 
+                                                tx.type === 'EXPENDITURE' || tx.type === 'penalty' ? 'text-red-500' : 'text-sovereign-gold'
                                             }`}>
-                                                {tx.type === 'INCOME' ? '+' : '-'}{formatNumber(tx.amount)} دج
+                                                {tx.type === 'INCOME' || tx.type === 'deposit' || tx.type === 'ESCROW_RELEASED' || tx.type === 'escrow_release' ? '+' : '-'}{formatNumber(tx.amount)} دج
                                             </span>
-                                            <code className="text-[8px] font-mono opacity-20 block group-hover:opacity-60 transition-opacity mt-1">{tx.hash}</code>
+                                            {tx.hash && <code className="text-[8px] font-mono opacity-20 block group-hover:opacity-60 transition-opacity mt-1">{tx.hash}</code>}
                                         </div>
                                         <ChevronRight className="w-5 h-5 text-muted-foreground opacity-20 group-hover:opacity-100 group-hover:-translate-x-2 transition-all cursor-pointer" />
                                     </div>
                                  </GlassPanel>
                             </motion.div>
-                        ))}
+                        )) : (
+                            <div className="p-12 text-center">
+                                <Database className="w-12 h-12 text-muted-foreground/20 mx-auto mb-4" />
+                                <p className="text-muted-foreground/60 text-sm">لا توجد معاملات بعد</p>
+                            </div>
+                        )}
                     </div>
 
                     <div className="p-8 md:p-10 bg-sovereign-gold/5 border border-sovereign-gold/10 rounded-[3rem] flex flex-col md:flex-row gap-8 items-center justify-between">
