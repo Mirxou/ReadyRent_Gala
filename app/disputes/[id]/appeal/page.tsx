@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { judgmentsApi, appealsApi } from '@/lib/api/appeals';
-import { disputesApi } from '@/lib/api/disputes';
+import { disputesApi } from '@/lib/api';
+import { appealsApi } from '@/lib/api/appeals';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Scale,
@@ -43,13 +43,13 @@ export default function AppealFilingPage() {
   // Get dispute + verdict
   const { data: statusRes, isLoading: loadingDispute } = useQuery({
     queryKey: ['dispute-status', disputeId],
-    queryFn: () => disputesApi.getDisputeStatus(Number(disputeId)),
+    queryFn: () => disputesApi.getDisputeStatus(Number(disputeId)).then(res => res.data),
     enabled: !!disputeId,
   });
 
   const { data: verdictRes, isLoading: loadingVerdict } = useQuery({
     queryKey: ['dispute-verdict', disputeId],
-    queryFn: () => disputesApi.getDisputeVerdict(Number(disputeId)),
+    queryFn: () => disputesApi.getDisputeVerdict(Number(disputeId)).then(res => res.data),
     enabled: !!disputeId,
   });
 

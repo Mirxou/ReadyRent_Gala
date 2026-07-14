@@ -2,8 +2,8 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { productsApi, type Product } from '@/lib/api/products';
-import { chatbotApi } from '@/lib/api/innovation';
+import { productsApi } from '@/lib/api';
+import { chatbotApi } from '@/lib/api';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Sparkles,

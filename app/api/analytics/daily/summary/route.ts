@@ -10,6 +10,15 @@ export async function GET(request: NextRequest) {
   const session = await getSessionFromRequest(request);
   if (!session) return authRequiredResponse();
 
+  // Role check: admin/staff only
+  const user = await db.user.findUnique({ where: { id: session.userId }, select: { role: true } });
+  if (!user || (user.role !== 'admin' && user.role !== 'staff')) {
+    return NextResponse.json(
+      { success: false, dignity_preserved: true, message_en: 'Forbidden', code: 'FORBIDDEN' },
+      { status: 403 }
+    );
+  }
+
   try {
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);

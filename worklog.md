@@ -1899,3 +1899,113 @@ Stage Summary:
   10. Inappropriate admin pages — 10 pages from industrial Django era
 - Confirmed 12 features that actually work but were missed in audit
 - Updated MASTERPLAN.md with Appendix A (complete gap analysis + execution order)
+
+---
+Task ID: Dead Page & Component Cleanup
+Agent: Sub-agent (Dead Code Removal)
+Task: Remove dead pages, unused components, duplicate files, and hide non-functional admin nav items
+
+Work Log:
+- **Task 1 — Industrial Admin Pages DELETED (6 directories removed):**
+  - `app/admin/maintenance/` (industrial maintenance tracking)
+  - `app/admin/hygiene/` (industrial hygiene certificates)
+  - `app/admin/packaging/` (industrial packaging management)
+  - `app/admin/inventory/` (industrial inventory management)
+  - `app/admin/damage-assessment/` (industrial damage inspection)
+  - `app/admin/forecasting/` (AI forecasting — overkill for rental platform)
+- **Task 2 — Dead Components:** All 22 listed component files were already missing (deleted in prior sessions). No action needed.
+- **Task 3 — Duplicate/Old Files:** Both `app/contracts/_id_/` and `src/app/` were already missing. No action needed.
+- **Task 4 — Dead 2FA Component:** `shared/components/sovereign/2fa-enrollment.tsx` already missing. No action needed.
+- **Task 5 — Hide non-functional admin pages from sidebar:** Searched all `.tsx`/`.ts` files for links to `/admin/shifts`, `/admin/staff`, `/admin/performance-reviews`, `/admin/activity-logs`, `/admin/branches`. Found ZERO navigation references — these 5 pages are already orphaned (not linked from any sidebar, dashboard, or nav component). The admin area uses `QuickActions` + dashboard cards, none of which reference these pages. No changes needed.
+
+Stage Summary:
+- 6 industrial admin page directories deleted (the only actual deletions required)
+- 29 other files were already cleaned up in previous sessions
+- 5 non-functional admin pages confirmed already hidden from navigation
+- No regressions introduced
+
+---
+Task ID: Dead API Client Code Cleanup
+Agent: Sub-agent (Dead Code Removal)
+Task: Remove all dead API client code that has NO backend routes
+
+Work Log:
+- **Step 1 — Deleted dead files from lib/api/ (4 files):**
+  - `lib/api/products.ts` (wrong paths, conflicts with lib/api.ts)
+  - `lib/api/bookings.ts` (wrong paths)
+  - `lib/api/sovereign-client.ts` (never imported)
+  - `lib/api/disputes.ts` (all methods had double /disputes/disputes/ path — completely broken)
+  - Kept: `lib/api/contracts.ts`, `lib/api/innovation.ts`, `lib/api/appeals.ts`
+- **Step 2 — Cleaned lib/api.ts — removed entire dead API objects:**
+  - `maintenanceApi` (~14 methods, no backend routes)
+  - `hygieneApi` (~12 methods, no backend routes)
+  - `locationsApi` (~20 methods, no backend routes)
+  - `packagingApi` (~16 methods, no backend routes)
+  - `inventoryApi` (~15 methods, no backend routes)
+  - `judicialApi` (~7 methods, no backend routes)
+  - `disputesApi` (~8 methods, no backend routes)
+- **Step 2b — Removed dead methods from kept API objects:**
+  - `authApi`: removed `generate2FASecret`, `enable2FA`
+  - `productsApi`: removed `getMetadata`, `getRecommendations`
+  - `bookingsApi`: removed `calculateDeposit`
+  - `adminApi`: removed `getAllBookings`, `updateBooking`, `getBookingStats`, `getAllProducts`, `deleteProduct`, `exportRevenueCSV`
+  - `paymentsApi`: removed `verifyOtp`, `getEscrowMetrics`
+  - `analyticsApi`: removed `getDailyAnalytics`, `getUserBehavior`
+  - `chatbotApi`: removed `createSession`, `sendMessage` (kept `quickChat`)
+  - `intelligenceApi`: removed `getRegionalLiquidity`, `getPulse` (kept `getMarketReport`)
+  - `bundlesApi`: removed `calculatePrice` (kept `getAll`)
+- **Step 3 — Fixed password reset path mismatch:**
+  - `authApi.passwordResetRequest`: `auth/password/reset/request/` → `auth/forgot-password`
+  - `authApi.passwordResetConfirm`: `auth/password/reset/confirm/` → `auth/reset-password`
+- **Step 4 — Fixed bookingsApi.addToWaitlist path:**
+  - `bookings/waitlist/add/` → `bookings/waitlist/`
+
+Stage Summary:
+- 4 dead files deleted from lib/api/
+- 6 entire dead API objects removed from lib/api.ts (~100 dead methods eliminated)
+- 9 additional dead methods removed from kept API objects
+- 2 path mismatches fixed (password reset + waitlist)
+- File reduced from 362 lines to 212 lines
+- Known follow-up: ~15 component/page files still import removed symbols (disputesApi, locationsApi, hygieneApi, judicialApi, etc.) — these are dead UI pages that reference non-existent APIs and need separate cleanup
+---
+Task ID: major-repair-phase1
+Agent: Main Orchestrator
+Task: Major repair — comprehensive audit + security verification + dead code removal + build missing APIs + fix broken imports
+
+Work Log:
+- Launched 3 parallel audit agents: pages audit, API routes audit, original specs excavation
+- Pages audit: 80 pages analyzed — 38 WORKS, 14 PARTIAL, 28 BROKEN
+- API routes audit: 68 route files audited, all security issues already fixed from prior sessions
+- Dead code cleanup agent: deleted 4 lib/api/*.ts files, removed ~100 dead methods from lib/api.ts
+- Dead pages agent: removed 6 industrial admin page directories (maintenance, hygiene, packaging, inventory, damage-assessment, forecasting)
+- Verified all 5 security vulnerabilities already patched: wallet deposit limits, booking validation, PATCH bypass prevention, admin role checks, review moderation ownership
+- Built 8 new API routes:
+  - GET /api/admin/users (list with pagination, search, role filter)
+  - PATCH /api/admin/users/[id] (update user, prevent self-role-change)
+  - GET /api/admin/bookings (list with filters, pagination)
+  - GET /api/admin/bookings/stats (booking statistics)
+  - GET+POST /api/products/admin (list + create product)
+  - PUT+DELETE /api/products/admin/[id] (update + delete product)
+  - GET /api/bookings/[id]/cancellation-policy (refund calculation: 100% >48h, 50% 24-48h, 0% <24h)
+  - GET /api/bundles/[id]/calculate-price (bundle price with discount)
+  - GET /api/bookings/calculate-deposit (30% deposit calculation)
+- Fixed 8 files with broken imports after lib/api/ cleanup:
+  - app/disputes/[id]/page.tsx — now imports from @/lib/api
+  - app/disputes/[id]/appeal/page.tsx — now imports from @/lib/api + @/lib/api/appeals
+  - components/disputes/steps/evidence-step.tsx — now imports from @/lib/api
+  - app/sitemap.ts — rewrote to use Prisma directly, added all missing pages
+  - components/product/featured-products.tsx — uses productsApi.getAll()
+  - components/product/product-search.tsx — uses productsApi.getAll()
+  - app/ai-search/page.tsx — fixed imports
+  - contexts/SovereignContext.tsx — removed sovereignClient dependency
+  - app/bookings/[id]/tracking/page.tsx — rewrote to use bookingsApi instead of deleted locationsApi
+- Updated lib/api.ts: added disputesApi, expanded adminApi (8 methods), added bundlesApi.calculatePrice, cancellationApi, depositApi
+- Dev server confirmed running without compilation errors
+
+Stage Summary:
+- 8 new API routes built (admin users, admin bookings, admin products CRUD, cancellation policy, bundle price, deposit calc)
+- 4 dead API client files deleted + ~100 dead methods removed
+- 6 industrial admin pages removed
+- 8 broken import files fixed
+- All 5 critical security vulnerabilities verified patched
+- Dev server running clean

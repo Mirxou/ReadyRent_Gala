@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { useDisputeStore } from '@/lib/hooks/use-dispute-store';
-import { disputesApi } from '@/lib/api/disputes';
+import { disputesApi } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Upload, X, FileText, Image as ImageIcon, Video, ShieldCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';

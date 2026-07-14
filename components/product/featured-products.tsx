@@ -1,10 +1,20 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { productsApi, Product } from '@/lib/api/products';
+import { productsApi } from '@/lib/api';
 import { ProductCard } from '@/components/product/product-card';
 import { Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
+
+type Product = {
+  id: string;
+  name: string;
+  name_ar?: string;
+  primary_image?: string;
+  daily_rate: number;
+  category?: { name: string; name_ar?: string };
+  is_available?: boolean;
+};
 
 export function FeaturedProducts() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -13,10 +23,9 @@ export function FeaturedProducts() {
   useEffect(() => {
     async function fetchFeatured() {
       try {
-        // Fetch latest/popular items (assuming no filter brings latest)
-        const res = await productsApi.search('', { sortBy: 'newest' }, 1);
+        const res = await productsApi.getAll({ limit: 3, sort: 'newest' });
         if (res?.data && Array.isArray(res.data)) {
-          setProducts(res.data.slice(0, 3)); // show top 3
+          setProducts(res.data.slice(0, 3));
         }
       } catch (error) {
         console.error("Failed to fetch featured products:", error);
@@ -36,7 +45,7 @@ export function FeaturedProducts() {
   }
 
   if (products.length === 0) {
-    return null; // Return nothing if no products available from backend
+    return null;
   }
 
   return (
@@ -50,7 +59,7 @@ export function FeaturedProducts() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {products.map((p, i) => (
-            <motion.div 
+            <motion.div
               key={p.id}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}

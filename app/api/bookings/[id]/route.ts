@@ -190,8 +190,21 @@ export async function PATCH(
 
     const body = await request.json();
 
+    // Security: status changes MUST go through /api/bookings/[id]/status
+    // to enforce the state machine. Ignore status field here.
+    if (body.status !== undefined) {
+      return NextResponse.json(
+        {
+          success: false,
+          dignity_preserved: true,
+          message_en: 'Use the /status endpoint to change booking status',
+          code: 'USE_STATUS_ENDPOINT',
+        },
+        { status: 400 }
+      );
+    }
+
     const updateData: Record<string, unknown> = {};
-    if (body.status !== undefined) updateData.status = body.status;
     if (body.escrow_status !== undefined) updateData.escrowStatus = body.escrow_status;
     if (body.has_insurance !== undefined) updateData.hasInsurance = body.has_insurance;
     if (body.extra_services !== undefined) updateData.extraServices = JSON.stringify(body.extra_services);

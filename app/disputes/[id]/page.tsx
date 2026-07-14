@@ -3,7 +3,14 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { disputesApi, DisputeHistoryStage } from '@/lib/api/disputes';
+import { disputesApi } from '@/lib/api';
+
+type DisputeHistoryStage = {
+  phase: string;
+  label_ar: string;
+  timestamp?: string;
+  description?: string;
+};
 import { SovereignSeal } from '@/shared/components/sovereign/sovereign-seal';
 import { JusticeReceipt } from '@/shared/components/sovereign/justice-receipt';
 import { DignifiedLoader } from '@/shared/components/sovereign/dignified-loader';

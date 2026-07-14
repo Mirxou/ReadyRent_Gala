@@ -46,14 +46,7 @@ export async function PATCH(
       select: { role: true },
     });
     const isAdmin = currentUser?.role === 'admin' || currentUser?.role === 'staff';
-    const isVendorOwner = currentUser?.role === 'vendor' && review.product?.vendorId
-      ? await db.user.findFirst({
-          where: {
-            id: session.userId,
-            role: 'vendor',
-          },
-        }).then(() => true)
-      : false;
+    const isVendorOwner = currentUser?.role === 'vendor' && review?.product?.vendorId === session.userId;
 
     if (!isAdmin && !isVendorOwner) {
       return NextResponse.json(

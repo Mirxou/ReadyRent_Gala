@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Search, Filter, X, LayoutGrid, List as ListIcon, Sparkles, Activity, ShieldCheck, Heart } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDebounce } from '@/lib/hooks/use-debounce';
-import { productsApi } from '@/lib/api/products';
+import { productsApi } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import { ProductCard } from './product-card';
 import { Input } from '@/components/ui/input';
@@ -42,7 +42,7 @@ export function ProductSearch() {
 
   const { data: productsData, isLoading } = useQuery({
     queryKey: ['products-search', debouncedQuery, filters],
-    queryFn: () => productsApi.search(debouncedQuery, filters).then(res => res.data),
+    queryFn: () => productsApi.getAll({ search: debouncedQuery, category: filters.category, price_min: filters.priceMin, price_max: filters.priceMax, sort: filters.sortBy }).then(res => res.data),
   });
 
   const products = Array.isArray(productsData)

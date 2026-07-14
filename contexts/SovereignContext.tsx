@@ -2,7 +2,6 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { VisualAssets } from '@/types/sovereign';
-import { sovereignClient } from '@/lib/api/sovereign-client';
 
 interface SovereignContextType {
     mode: 'MARKET' | 'DISPUTE' | 'VERDICT';
@@ -28,25 +27,8 @@ export function SovereignProvider({ children }: { children: ReactNode }) {
         document.body.classList.add(`mode-${mode.toLowerCase()}`);
     }, [mode]);
 
-    // Check for system halt on mount
-    // NOTE: Only show halt banner when backend explicitly returns halt status,
-    // NOT when backend is unreachable (connection error)
-    useEffect(() => {
-        async function checkSystemStatus() {
-            try {
-                const res = await sovereignClient.getSystemStatus();
-                // Only halt if backend responded with explicit halt (data is null + code SYSTEM_HALT)
-                // Connection errors also return 'sovereign_halt' but with null data — ignore those
-                if (res.data === null && (res as any).code === 'SYSTEM_HALT') {
-                    // Could be connection error OR real halt — don't show banner in dev
-                    // setSystemHalted(true);
-                }
-            } catch (error) {
-                // Connection failed — definitely not a real halt
-            }
-        }
-        checkSystemStatus();
-    }, []);
+    // System status check removed — sovereign-client was deprecated
+    // The system halt feature will be reimplemented in a future phase
 
     return (
         <SovereignContext.Provider

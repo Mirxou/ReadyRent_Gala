@@ -11,30 +11,75 @@ export async function POST(request: Request) {
 
   const body = await request.json();
 
-  // Look up product for name/image if product_id provided
-  let productName = body.product_name ?? null;
-  let productImage = body.product_image ?? null;
-
-  if (body.product_id) {
-    const product = await db.product.findUnique({
-      where: { id: body.product_id },
-      select: { name: true, nameAr: true, primaryImage: true },
-    });
-    if (product) {
-      productName = productName ?? product.nameAr ?? product.name;
-      productImage = productImage ?? product.primaryImage;
-    }
+  // ── Date validation ──
+  if (!body.start_date || !body.end_date) {
+    return NextResponse.json(
+      { success: false, dignity_preserved: true, message_en: 'start_date and end_date are required', code: 'VALIDATION_ERROR' },
+      { status: 400 }
+    );
   }
+
+  const startDate = new Date(body.start_date);
+  const endDate = new Date(body.end_date);
+  const now = new Date();
+
+  if (startDate >= endDate) {
+    return NextResponse.json(
+      { success: false, dignity_preserved: true, message_en: 'start_date must be before end_date', code: 'VALIDATION_ERROR' },
+      { status: 400 }
+    );
+  }
+
+  if (startDate < now) {
+    return NextResponse.json(
+      { success: false, dignity_preserved: true, message_en: 'start_date cannot be in the past', code: 'VALIDATION_ERROR' },
+      { status: 400 }
+    );
+  }
+
+  // ── Product validation: must exist and be available ──
+  if (!body.product_id) {
+    return NextResponse.json(
+      { success: false, dignity_preserved: true, message_en: 'product_id is required', code: 'VALIDATION_ERROR' },
+      { status: 400 }
+    );
+  }
+
+  const product = await db.product.findUnique({
+    where: { id: body.product_id },
+    select: { name: true, nameAr: true, primaryImage: true, isAvailable: true, dailyRate: true },
+  });
+
+  if (!product) {
+    return NextResponse.json(
+      { success: false, dignity_preserved: true, message_en: 'Product not found', code: 'NOT_FOUND' },
+      { status: 404 }
+    );
+  }
+
+  if (!product.isAvailable) {
+    return NextResponse.json(
+      { success: false, dignity_preserved: true, message_en: 'Product is not available for booking', code: 'PRODUCT_UNAVAILABLE' },
+      { status: 400 }
+    );
+  }
+
+  // ── Server-side price calculation (ignore client-supplied total_price) ──
+  const numberOfDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+  const calculatedTotalPrice = (product.dailyRate ?? 0) * numberOfDays * (body.quantity ?? 1);
+
+  const productName = body.product_name ?? product.nameAr ?? product.name;
+  const productImage = body.product_image ?? product.primaryImage;
 
   const booking = await db.booking.create({
     data: {
       userId: session.userId,
-      productId: body.product_id ?? null,
+      productId: body.product_id,
       productName,
       productImage,
-      startDate: body.start_date ?? null,
-      endDate: body.end_date ?? null,
-      totalPrice: body.total_price ?? 0,
+      startDate,
+      endDate,
+      totalPrice: calculatedTotalPrice,
       status: 'pending',
       escrowStatus: body.escrow_status ?? 'none',
       hasInsurance: body.has_insurance ?? false,
