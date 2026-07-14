@@ -1,4 +1,31 @@
-import { sovereignClient } from './sovereign-client';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+async function apiFetch(
+  path: string,
+  options: { method?: string; body?: any; params?: Record<string, any> } = {},
+): Promise<{ data: any; status: number }> {
+  let url = `/api/${path.replace(/^\/+/, '')}`;
+  if (options.params) {
+    const qs = new URLSearchParams();
+    Object.entries(options.params).forEach(([k, v]) => {
+      if (v !== undefined && v !== null) qs.append(k, String(v));
+    });
+    const qStr = qs.toString();
+    if (qStr) url += (url.includes('?') ? '&' : '?') + qStr;
+  }
+  const res = await fetch(url, {
+    method: options.method || 'GET',
+    headers: { 'Content-Type': 'application/json' },
+    body: options.body ? JSON.stringify(options.body) : undefined,
+    credentials: 'include',
+  });
+  if (res.status === 204) return { data: { success: true }, status: 204 };
+  const json = await res.json();
+  if (json && typeof json === 'object' && 'success' in json && 'data' in json) {
+    return { data: json.data, status: res.status };
+  }
+  return { data: json, status: res.status };
+}
 
 export interface ContractParty {
   id: string | number;
@@ -25,36 +52,10 @@ export interface Contract {
 }
 
 export const contractsApi = {
-  /**
-   * Get contract details by ID
-   */
-  getById: (id: number) => 
-    sovereignClient.get<Contract>(`/contracts/${id}`),
-
-  /**
-   * Get contract for a specific booking
-   */
-  getByBookingId: (bookingId: number) => 
-    sovereignClient.get<Contract>(`/contracts?booking=${bookingId}`),
-
-  /**
-   * Generate a new contract for a booking
-   */
-  generate: (bookingId: number) => 
-    sovereignClient.post<Contract>('/contracts/generate/', { booking_id: bookingId }),
-
-  /**
-   * Sign a contract
-   */
-  sign: (contractId: number, ipAddress: string) => 
-    // ContractViewSet action route: /contracts/<pk>/sign
-    sovereignClient.post<Contract>(`/contracts/${contractId}/sign`, { ip_address: ipAddress }),
-
-  /**
-   * Backward-compatible aliases (used by some pages).
-   * Note: returns SovereignResponse<Contract> (same as getById/sign).
-   */
+  getById: (id: number) => apiFetch(`contracts/${id}`),
+  getByBookingId: (bookingId: number) => apiFetch(`contracts?booking=${bookingId}`),
+  generate: (bookingId: number) => apiFetch('contracts/generate/', { method: 'POST', body: { booking_id: bookingId } }),
+  sign: (contractId: number, ipAddress: string) => apiFetch(`contracts/${contractId}/sign`, { method: 'POST', body: { ip_address: ipAddress } }),
   getContract: (id: string | number) => contractsApi.getById(Number(id)),
-  signContract: (contractId: string | number, ipAddress: string) =>
-    contractsApi.sign(Number(contractId), ipAddress),
+  signContract: (contractId: string | number, ipAddress: string) => contractsApi.sign(Number(contractId), ipAddress),
 };

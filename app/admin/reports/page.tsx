@@ -47,7 +47,7 @@ export default function ReportsPage() {
 
   const handleExportRevenue = async () => {
     try {
-      const response = await adminApi.exportRevenueCSV({ days });
+      const response = await adminApi.getRevenue({ days, export: true });
       const blob = new Blob([response.data], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement('a');
       const url = URL.createObjectURL(blob);

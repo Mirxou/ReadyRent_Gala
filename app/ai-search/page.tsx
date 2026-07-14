@@ -35,6 +35,8 @@ const QUICK_SUGGESTIONS = [
 ];
 
 // ── Product card (compact) ────────────────────────────────────────────────────
+type Product = { id: string; name: string; name_ar?: string; primary_image?: string; daily_rate: number; images?: any[]; category?: any; };
+
 function ProductCard({ product }: { product: Product }) {
   const mainImage = product.images?.find((i) => i.is_main)?.url ?? product.images?.[0]?.url;
 
@@ -213,7 +215,7 @@ export default function AISearchPage() {
 
   const { data, isFetching } = useQuery({
     queryKey: ['ai-search', committedQuery],
-    queryFn: () => productsApi.search(committedQuery, {}, 1),
+    queryFn: () => productsApi.getAll({ search: committedQuery, limit: 10 }).then(res => res.data),
     enabled: committedQuery.length > 1,
     staleTime: 2 * 60 * 1000,
   });

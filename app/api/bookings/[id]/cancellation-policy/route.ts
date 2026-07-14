@@ -31,10 +31,11 @@ export async function GET(
     }
 
     // Can only cancel pending or confirmed bookings
-    const canCancel = booking.status === 'pending' || booking.status === 'confirmed';
+    let canCancel = booking.status === 'pending' || booking.status === 'confirmed';
 
     // Calculate refund percentage based on hours until start
-    const hoursUntilStart = (booking.startDate.getTime() - Date.now()) / (1000 * 60 * 60);
+    const startDate = new Date(booking.startDate as string | Date);
+    const hoursUntilStart = (startDate.getTime() - Date.now()) / (1000 * 60 * 60);
     let refundPercentage = 0;
     let policyMessage = '';
 

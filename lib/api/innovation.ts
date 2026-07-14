@@ -1,20 +1,33 @@
-import { sovereignClient } from './sovereign-client';
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
-export const chatbotApi = {
-  createSession: (data?: { language?: string }) => 
-    sovereignClient.post<any>('/chatbot/sessions/create_anonymous/', data || {}),
-  sendMessage: (sessionId: number, message: string) => 
-    sovereignClient.post<any>(`/chatbot/sessions/${sessionId}/send_message/`, { message }),
-  quickChat: (message: string, options?: { language?: string; trust_score?: number }) => 
-    sovereignClient.post<any>('/chatbot/quick-chat/', { 
-      message, 
-      language: options?.language || 'ar',
-      trust_score: options?.trust_score
-    }),
-};
+async function apiFetch(
+  path: string,
+  options: { method?: string; body?: any; params?: Record<string, any> } = {},
+): Promise<{ data: any; status: number }> {
+  let url = `/api/${path.replace(/^\/+/, '')}`;
+  if (options.params) {
+    const qs = new URLSearchParams();
+    Object.entries(options.params).forEach(([k, v]) => {
+      if (v !== undefined && v !== null) qs.append(k, String(v));
+    });
+    const qStr = qs.toString();
+    if (qStr) url += (url.includes('?') ? '&' : '?') + qStr;
+  }
+  const res = await fetch(url, {
+    method: options.method || 'GET',
+    headers: { 'Content-Type': 'application/json' },
+    body: options.body ? JSON.stringify(options.body) : undefined,
+    credentials: 'include',
+  });
+  if (res.status === 204) return { data: { success: true }, status: 204 };
+  const json = await res.json();
+  if (json && typeof json === 'object' && 'success' in json && 'data' in json) {
+    return { data: json.data, status: res.status };
+  }
+  return { data: json, status: res.status };
+}
 
-export const innovationApi = { // Unified Artisans + Bundles + Local Guide
-  getArtisans: (params?: any) => sovereignClient.get<any[]>('/artisans/artisans/', { params }),
-  getBundles: (params?: any) => sovereignClient.get<any[]>('/bundles/bundles/', { params }),
-  getLocalGuideCategories: () => sovereignClient.get<any[]>('/local-guide/categories/'),
+export const innovationApi = {
+  getArtisans: (params?: any) => apiFetch('artisans/artisans/', { params }),
+  getBundles: (params?: any) => apiFetch('bundles/bundles/', { params }),
 };
