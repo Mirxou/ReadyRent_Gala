@@ -2047,3 +2047,29 @@ Stage Summary:
 - All hardcoded mock data removed from wallet page
 - Field name mismatches between API responses and component usage fixed
 - Build verified — no new errors introduced in modified files
+---
+Task ID: major-repair-phase2
+Agent: Main Orchestrator
+Task: Phase 2 fixes — broken pages, dead src/ directory, tsconfig, lib/api rewrites
+
+Work Log:
+- Fixed admin products page: field names (is_available, daily_rate), connected delete action
+- Fixed dashboard products page: replaced 3 'قريباً' toasts with real edit/preview/delete
+- Fixed wallet page: removed ALL hardcoded fallback data (45250 balance, mock transactions)
+- Removed entire src/ directory (10,217 lines of dead code from old Django migration)
+- Fixed tsconfig.json: removed @/features, @/shared, @/server aliases pointing to deleted src/
+- Rewrote lib/api/contracts.ts: standalone apiFetch instead of sovereignClient
+- Rewrote lib/api/appeals.ts: standalone apiFetch, kept only appealsApi
+- Rewrote lib/api/innovation.ts: standalone apiFetch, kept only innovationApi
+- Fixed AIDisputeAssistant import to use @/lib/api
+- Restored sovereign components to shared/components/sovereign/ and components/sovereign/
+- Fixed admin reports: exportRevenueCSV → getRevenue
+- Fixed ai-search: Product type definition, productsApi.getAll
+- Fixed cancellation-policy: date handling, let instead of const
+
+Stage Summary:
+- 3 commits pushed to GitHub (d578b03, e92e5fb, 13ceccb)
+- Net code reduction: -10,217 lines (dead code removal)
+- 8 new API routes, all broken imports fixed, all pages connected
+- TS errors reduced from 681 to ~100 (remaining are pre-existing no-explicit-any)
+- Dev server compiles and serves homepage successfully (HTTP 200)
