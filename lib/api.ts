@@ -134,7 +134,6 @@ export const authApi = {
 export const productsApi = {
   getAll: (params?: any) => apiFetch('products', { params }),
   getById: (id: string) => apiFetch(`products/${id}`),
-  getBySlug: (slug: string) => apiFetch(`products/${slug}`),
   getCategories: () => apiFetch('products/categories'),
   getSearchSuggestions: (query: string) => apiFetch('products/search-suggestions', { params: { q: query } }),
   getWishlist: () => apiFetch('products/wishlist'),
@@ -222,20 +221,77 @@ export const socialApi = {
   getFeed: (params?: any) => apiFetch('social/feed', { params }),
 };
 
-export const intelligenceApi = {
-  getMarketReport: (params?: { industry?: string; region?: string }) =>
-    apiFetch('analytics/intelligence/report', { params }),
-};
-
-export const innovationApi = {
-  getArtisans: (params?: any) => apiFetch('artisans/artisans', { params }),
-  getBundles: (params?: any) => apiFetch('bundles/bundles', { params }),
-};
-
 export const verificationApi = {
   submit: (facePhoto: string) => apiFetch('verification/submit', { method: 'POST', body: { face_photo: facePhoto } }),
   getStatus: () => apiFetch('verification/status'),
   getPending: () => apiFetch('verification/pending'),
   vote: (verificationId: string, vote: 'approve' | 'reject', comment?: string) =>
     apiFetch('verification/vote', { method: 'POST', body: { verification_id: verificationId, vote, comment } }),
+};
+
+// ──── الأنظمة المساندة ────
+
+export const artisansApi = {
+  getAll: (params?: any) => apiFetch('artisans/artisans', { params }),
+};
+
+export const vendorsApi = {
+  getAll: (params?: any) => apiFetch('vendors/vendors', { params }),
+  getDashboard: () => apiFetch('vendors/dashboard'),
+};
+
+export const servicesApi = {
+  getAll: (params?: any) => apiFetch('services', { params }),
+  getCategories: () => apiFetch('services/categories'),
+  book: (data: any) => apiFetch('services/book', { method: 'POST', body: data }),
+};
+
+export const contractsApi = {
+  getById: (id: string | number) => apiFetch(`contracts/${id}`),
+  getByBookingId: (bookingId: number) => apiFetch(`contracts?booking=${bookingId}`),
+  sign: (contractId: number, ipAddress: string) =>
+    apiFetch(`contracts/${contractId}/sign`, { method: 'POST', body: { ip_address: ipAddress } }),
+};
+
+export const returnsApi = {
+  getAll: (params?: any) => apiFetch('returns', { params }),
+  create: (data: any) => apiFetch('returns/create', { method: 'POST', body: data }),
+};
+
+export const walletApi = {
+  getBalance: () => apiFetch('wallet'),
+  deposit: (data: any) => apiFetch('wallet/deposit', { method: 'POST', body: data }),
+  withdraw: (data: any) => apiFetch('wallet/withdraw', { method: 'POST', body: data }),
+  transfer: (data: any) => apiFetch('wallet/transfer', { method: 'POST', body: data }),
+};
+
+export const notificationsApi = {
+  getAll: (params?: any) => apiFetch('notifications', { params }),
+  markRead: (id: number) => apiFetch(`notifications/${id}`, { method: 'PATCH', body: { is_read: true } }),
+  markAllRead: () => apiFetch('notifications/read-all', { method: 'PATCH' }),
+};
+
+export const insuranceApi = {
+  getAll: () => apiFetch('insurance'),
+  purchase: (data: any) => apiFetch('insurance/purchase', { method: 'POST', body: data }),
+};
+
+export const subscriptionsApi = {
+  getAll: () => apiFetch('subscriptions'),
+  subscribe: (data: any) => apiFetch('subscriptions/subscribe', { method: 'POST', body: data }),
+  cancel: () => apiFetch('subscriptions/cancel', { method: 'POST' }),
+};
+
+export const blogApi = {
+  getAll: (params?: any) => apiFetch('blog', { params }),
+  getById: (id: string) => apiFetch(`blog/${id}`),
+};
+
+export const cmsApi = {
+  getPages: (params?: any) => apiFetch('cms/pages', { params }),
+  getBySlug: (slug: string) => apiFetch(`cms/pages/${slug}`),
+};
+
+export const contactApi = {
+  submit: (data: any) => apiFetch('contact', { method: 'POST', body: data }),
 };

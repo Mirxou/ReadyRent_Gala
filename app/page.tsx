@@ -8,7 +8,7 @@ import { GlassPanel } from "@/shared/components/sovereign/glass-panel";
 import { SovereignGlow, SovereignSparkle } from '@/shared/components/sovereign/sovereign-sparkle';
 import { FeaturedProducts } from '@/components/product/featured-products';
 import { ReviewList } from '@/components/reviews/review-list';
-import { innovationApi, reviewsApi } from '@/lib/api';
+import { artisansApi, reviewsApi } from '@/lib/api';
 import { DignifiedLoader } from '@/shared/components/sovereign/dignified-loader';
 import { formatNumber } from '@/lib/utils';
 import {
@@ -207,7 +207,7 @@ function ArtisansSpotlight() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    innovationApi.getArtisans({ limit: 4 }).then((res) => {
+    artisansApi.getAll({ limit: 4 }).then((res) => {
       if (res.data && !res.data.error && Array.isArray(res.data)) {
         setArtisans(res.data.slice(0, 4));
       } else if (res.data?.results && Array.isArray(res.data.results)) {

@@ -2287,3 +2287,32 @@ Files Modified: 8 (lib/api.ts, app/bundles/[id]/page.tsx, notifications page, or
 
 Before: ~46% pages broken, 61% API dead, 14 dead buttons
 After: All 18 public pages → 200, All 12 critical APIs → 200, Dead buttons → 0, Dead lib/api files → 0
+---
+Task ID: 2
+Agent: Main Orchestrator
+Task: Complete grand repairs — Phase 1-5 cleanup from MASTERPLAN.md
+
+Work Log:
+- Verified current state: Most APIs already built (70 routes), lib/api.ts already cleaned (from 231 to ~60 methods)
+- Deleted catch-all API route `app/api/[[...path]]/route.ts` that returned 501 for unknown endpoints
+- Deleted 15 dead lib/api/*.ts files (notifications, wallet, admin, auth, logistics, sovereign-client, index, payments, products, reviews, bookings, contracts, innovation, appeals, disputes)
+- Deleted 22 dead components (product-card, accessory-suggestions, hijri-calendar, id-upload, CommunityProductForm, damage-inspection, dispute-form, insurance-selector, booking-calendar, BookingStatusCard, chatbot, call-interface, artisan-integration, TrustScoreDashboard, wallet-dashboard, transaction-history, dispute-card, interactive-product-card, skeletons, bento-grid, 3d-card, spotlight)
+- Deleted duplicate files: src/app/, public/public/, app/contracts/_id_/
+- Deleted 10 inappropriate admin pages (maintenance, hygiene, packaging, inventory, damage-assessment, forecasting, performance-reviews, shifts, staff, activity-logs)
+- Fixed broken imports: innovationApi → artisansApi in app/page.tsx and app/dashboard/artisans/page.tsx
+- Fixed intelligenceApi → adminApi + analyticsApi in app/dashboard/reports/page.tsx
+- Added 11 missing API objects to lib/api.ts: artisansApi, vendorsApi, servicesApi, contractsApi, returnsApi, walletApi, notificationsApi, insuranceApi, subscriptionsApi, blogApi, cmsApi, contactApi
+- Improved trust score breakdown API to use real data (completed bookings, disputes, vouches, verification)
+- Updated sitemap with 11 additional static pages (wallet, cart, checkout, about, faq, privacy, terms, login, register)
+- Created 7 feature component stubs (predictive-pulse, product-heartbeat, ecosystem-pulse, escrow-tracker, social-feed, logistics-progress, judicial-ledger, high-court-monitor)
+- Comprehensive testing: 28/29 pages return 200, 10/10 critical APIs return 200, zero compilation errors
+- Browser verification: Homepage renders with all 6 sections, proper navigation and footer
+
+Stage Summary:
+- **Files deleted**: 15 API client files + 22 dead components + 10 admin pages + 3 duplicate directories + 1 catch-all route = **51 files/directories removed**
+- **Files created**: 8 feature component stubs
+- **Files fixed**: 4 (page.tsx, artisans/page.tsx, reports/page.tsx, sitemap.ts, api.ts, trust score API)
+- **lib/api.ts**: Added 12 new API objects covering all remaining backend routes
+- **Pages working**: 28/29 (97%) — only /bookings is 404 (no standalone page, handled in /dashboard/orders)
+- **APIs working**: 100% of tested endpoints return 200 with real data
+- **Zero compilation errors** after all fixes

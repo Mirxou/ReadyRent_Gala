@@ -46,18 +46,54 @@ export async function GET(
       );
     }
 
-    // Count vouches
-    const vouchCount = await db.socialVouch.count({
-      where: { receiverId: userId },
-    });
+    // Fetch all breakdown data in parallel
+    const [vouchCount, totalBookings, completedBookings, totalDisputes, favorableDisputes] =
+      await Promise.all([
+        db.socialVouch.count({ where: { receiverId: userId } }),
 
-    // Build breakdown with mock component scores
+        db.booking.count({
+          where: {
+            userId,
+            status: { in: ['confirmed', 'active', 'completed', 'cancelled'] },
+          },
+        }),
+
+        db.booking.count({
+          where: { userId, status: 'completed' },
+        }),
+
+        db.dispute.count({
+          where: { userId },
+        }),
+
+        db.dispute.count({
+          where: {
+            userId,
+            status: { in: ['resolved', 'closed'] },
+          },
+        }),
+      ]);
+
+    // Build breakdown from real data
     const breakdown = {
-      payment_reliability: Math.round(user.trustScore * 0.3),
-      dispute_history: Math.round(user.trustScore * 0.2),
-      verification_level: user.isVerified ? 100 : 0,
-      community_vouches: Math.min(vouchCount * 10, 100),
-      rental_history: Math.round(user.trustScore * 0.3),
+      // Completed bookings / total meaningful bookings. Base score of 70 for new users.
+      payment_reliability:
+        totalBookings === 0
+          ? 70
+          : Math.round((completedBookings / totalBookings) * 100),
+
+      // Favorable disputes (resolved/closed) / total disputes. No disputes = 95 (good).
+      dispute_history:
+        totalDisputes === 0
+          ? 95
+          : Math.round((favorableDisputes / totalDisputes) * 100),
+
+      verification_level: user.isVerified ? 100 : 30,
+
+      community_vouches: Math.min(vouchCount * 15, 100),
+
+      // More completed rentals = higher score. 10+ completed = 100.
+      rental_history: Math.min(completedBookings * 10, 100),
     };
 
     return NextResponse.json({

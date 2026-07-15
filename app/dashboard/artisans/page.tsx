@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from '@tanstack/react-query';
-import { innovationApi } from '@/lib/api';
+import { artisansApi } from '@/lib/api';
 import { 
   Users, 
   Scissors, 
@@ -30,7 +30,7 @@ export default function ArtisansPage() {
 
   const { data: artisans = [], isLoading } = useQuery({
     queryKey: ['artisans'],
-    queryFn: () => innovationApi.getArtisans().then(res => res.data),
+    queryFn: () => artisansApi.getAll().then(res => res.data),
   });
 
   const categories = [

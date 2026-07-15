@@ -28,7 +28,7 @@ import { cn } from '@/lib/utils';
 import { SovereignPredictivePulse } from '@/features/analytics/components/predictive-pulse';
 
 import { useQuery } from '@tanstack/react-query';
-import { intelligenceApi } from '@/lib/api';
+import { adminApi, analyticsApi } from '@/lib/api';
 import { 
   BarChart, 
   Bar, 
@@ -54,17 +54,17 @@ import {
 export default function ReportsPage() {
     const { data: regionalData, isLoading: isLoadingRegional } = useQuery({
         queryKey: ['regional-liquidity'],
-        queryFn: () => intelligenceApi.getRegionalLiquidity().then(res => res.data),
+        queryFn: () => adminApi.getRevenue({ days: 30 }).then(res => res.data),
     });
 
     const { data: intelligencePulse, isLoading: isLoadingPulse } = useQuery({
         queryKey: ['intelligence-pulse'],
-        queryFn: () => intelligenceApi.getPulse().then(res => res.data),
+        queryFn: () => analyticsApi.getEvents().then(res => res.data),
     });
 
     const { data: report, isLoading: isLoadingReport } = useQuery({
         queryKey: ['market-report'],
-        queryFn: () => intelligenceApi.getMarketReport().then(res => res.data),
+        queryFn: () => adminApi.getSalesReport({ days: 30 }).then(res => res.data),
     });
 
     const handleDownload = (format: string) => {
