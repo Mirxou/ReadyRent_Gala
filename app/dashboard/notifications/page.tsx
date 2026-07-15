@@ -14,6 +14,7 @@ import {
   Filter,
   ArrowRight
 } from 'lucide-react';
+import { notificationsApi } from '@/lib/api';
 import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
 import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
 import { Badge } from '@/components/ui/badge';
@@ -69,6 +70,27 @@ export default function NotificationsPage() {
     queryKey: ['notifications'],
     queryFn: fetchNotifications,
   });
+
+  const handleMarkRead = async (id: string) => {
+    try {
+      const res = await notificationsApi.markRead(id as any);
+      if (res.status === 0 || res.data?.error) throw new Error();
+      queryClient.setQueryData(['notifications'], (old: any[]) =>
+        old?.map((n: any) => (n.id === id ? { ...n, is_read: true } : n))
+      );
+    } catch {
+      toast.error('فشل في تحديث الإشعار');
+    }
+  };
+
+  // Real stats calculated from notifications data
+  const total = notifications?.length || 0;
+  const unreadCount = notifications?.filter((n: any) => !n.is_read).length || 0;
+  const readCount = total - unreadCount;
+  const readPct = total > 0 ? Math.round((readCount / total) * 100) : 0;
+  const unreadPct = total > 0 ? Math.round((unreadCount / total) * 100) : 0;
+  const systemCount = notifications?.filter((n: any) => n.type === 'system').length || 0;
+  const systemPct = total > 0 ? Math.round((systemCount / total) * 100) : 0;
 
   const formatTime = (dateStr: string) => {
     try {
@@ -147,6 +169,11 @@ export default function NotificationsPage() {
                        initial={{ opacity: 0, x: 40 }}
                        animate={{ opacity: 1, x: 0 }}
                        transition={{ delay: i * 0.1 }}
+                       onClick={() => { if (!n.is_read) handleMarkRead(n.id); }}
+                       role="button"
+                       tabIndex={0}
+                       onKeyDown={(e) => { if (e.key === 'Enter' && !n.is_read) handleMarkRead(n.id); }}
+                       className={cn(!n.is_read && "cursor-pointer")}
                      >
                        <GlassPanel className={cn("p-8 group hover:border-sovereign-gold/20 transition-all duration-700 relative overflow-hidden", !n.is_read && "border-sovereign-gold/10")} gradientBorder>
                           <div className={cn(
@@ -197,9 +224,9 @@ export default function NotificationsPage() {
 
               <div className="space-y-6">
                  {[
-                   { label: 'كفاءة الاستجابة', value: '98%', color: 'gold' },
-                   { label: 'التزام العقود', value: '100%', color: 'blue' },
-                   { label: 'سلامة الأصول', value: '94%', color: 'gold' }
+                   { label: 'نسبة المقروء', value: `${readPct}%`, color: 'gold' as const },
+                   { label: 'نسبة غير المقروء', value: `${unreadPct}%`, color: 'blue' as const },
+                   { label: 'مؤشر النظام', value: `${systemPct}%`, color: 'gold' as const }
                  ].map((stat, i) => (
                    <div key={i} className="space-y-2">
                       <div className="flex justify-between text-[10px] font-black uppercase tracking-widest opacity-60 italic">

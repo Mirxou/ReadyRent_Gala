@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { productsApi, bookingsApi, authApi, reviewsApi } from '@/lib/api';
+import { productsApi, bookingsApi, depositApi, authApi, reviewsApi } from '@/lib/api';
 import { useAuthStore } from '@/lib/store';
 import { 
   ShieldCheck, 
@@ -60,12 +60,12 @@ export default function ProductDetailsPage() {
   // Data Fetching
   const { data: product, isLoading } = useQuery({
     queryKey: ['product', slug],
-    queryFn: () => productsApi.getBySlug(slug as string).catch(() => productsApi.getById(slug as string)).then((res) => res.data),
+    queryFn: () => productsApi.getById(slug as string).then((res) => res.data),
   });
 
   const { data: depositData } = useQuery({
     queryKey: ['deposit', product?.id],
-    queryFn: () => bookingsApi.calculateDeposit(product!.id).then((res) => res.data),
+    queryFn: () => depositApi.calculateDeposit({ product_id: product!.id, start_date: selectedStartDate?.toISOString().split('T')[0] || '', end_date: selectedEndDate?.toISOString().split('T')[0] || '' }).then((res) => res.data),
     enabled: !!product?.id && isAuthenticated,
   });
 

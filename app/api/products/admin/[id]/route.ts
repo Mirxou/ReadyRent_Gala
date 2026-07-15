@@ -1,11 +1,69 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
 
 // ═══════════════════════════════════════════════════════════════
+// GET /api/products/admin/[id] — Get single product for edit
 // PUT /api/products/admin/[id] — Update product
 // DELETE /api/products/admin/[id] — Delete product
 // ═══════════════════════════════════════════════════════════════
+export async function GET(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const session = getSessionFromRequest(_request);
+  if (!session) return authRequiredResponse();
+
+  const user = await db.user.findUnique({ where: { id: session.userId }, select: { role: true } });
+  if (!user || (user.role !== 'admin' && user.role !== 'staff' && user.role !== 'vendor')) {
+    return NextResponse.json({ success: false, message_en: 'Forbidden', code: 'FORBIDDEN' }, { status: 403 });
+  }
+
+  try {
+    const { id } = await params;
+    const product = await db.product.findUnique({
+      where: { id },
+      include: {
+        category: { select: { id: true, name: true, nameAr: true, slug: true } },
+      },
+    });
+
+    if (!product) {
+      return NextResponse.json({ success: false, message_en: 'Product not found', code: 'NOT_FOUND' }, { status: 404 });
+    }
+
+    // Vendor can only fetch their own products
+    if (user.role === 'vendor' && product.vendorId !== session.userId) {
+      return NextResponse.json({ success: false, message_en: 'Not your product', code: 'FORBIDDEN' }, { status: 403 });
+    }
+
+    const raw = product as Record<string, unknown>;
+
+    const data = {
+      id: product.id,
+      name: product.name,
+      name_ar: product.nameAr,
+      description: product.description,
+      daily_rate: (raw.dailyRate ?? raw.pricePerDay ?? null) as number | null,
+      primary_image: product.primaryImage,
+      images: product.images,
+      sizes: (raw.sizes ?? raw.sizeOptions ?? '[]') as string,
+      colors: (raw.colors ?? raw.colorOptions ?? '[]') as string,
+      is_available: product.isAvailable,
+      category: product.category,
+      category_id: product.categoryId,
+      ...(raw.descriptionAr !== undefined ? { description_ar: raw.descriptionAr as string | null } : {}),
+      created_at: product.createdAt.toISOString(),
+      updated_at: product.updatedAt.toISOString(),
+    };
+
+    return NextResponse.json({ success: true, dignity_preserved: true, data });
+  } catch (error) {
+    console.error('[Admin Product GET API] Error:', error);
+    return NextResponse.json({ success: false, message_en: 'Error fetching product', code: 'INTERNAL_ERROR' }, { status: 500 });
+  }
+}
+
 export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> }

@@ -9,7 +9,14 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Search, Shield } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Search, Ban, CheckCircle2, Loader2 } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -18,6 +25,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { toast } from 'sonner';
 
 export default function AdminUsersPage() {
   const router = useRouter();
@@ -42,6 +50,23 @@ export default function AdminUsersPage() {
     enabled: isAuthenticated && (user?.role === 'admin' || user?.role === 'staff'),
   });
 
+  // Track per-user updating states for optimistic feedback
+  const [updatingUserId, setUpdatingUserId] = useState<string | null>(null);
+
+  const updateUserMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: { role?: string; is_active?: boolean } }) =>
+      adminApi.updateUser(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+      toast.success('تم التحديث بنجاح');
+      setUpdatingUserId(null);
+    },
+    onError: (err: { data?: { message_en?: string } }) => {
+      toast.error(err?.data?.message_en || 'حدث خطأ أثناء التحديث');
+      setUpdatingUserId(null);
+    },
+  });
+
   if (!isAuthenticated || (user?.role !== 'admin' && user?.role !== 'staff')) {
     return null;
   }
@@ -57,15 +82,17 @@ export default function AdminUsersPage() {
     return true;
   }) || users || [];
 
-  const getRoleBadge = (role: string) => {
-    const roles: Record<string, { label: string; variant: 'default' | 'secondary' | 'outline' }> = {
-      admin: { label: 'مدير', variant: 'default' },
-      staff: { label: 'موظف', variant: 'secondary' },
-      customer: { label: 'عميل', variant: 'outline' },
-    };
-    const config = roles[role] || { label: role, variant: 'outline' };
-    return <Badge variant={config.variant}>{config.label}</Badge>;
+  const handleRoleChange = (userId: string, newRole: string) => {
+    setUpdatingUserId(userId);
+    updateUserMutation.mutate({ id: userId, data: { role: newRole } });
   };
+
+  const handleToggleBan = (userId: string, currentActive: boolean) => {
+    setUpdatingUserId(userId);
+    updateUserMutation.mutate({ id: userId, data: { is_active: !currentActive } });
+  };
+
+  const isUpdating = (userId: string) => updatingUserId === userId && updateUserMutation.isPending;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -115,24 +142,68 @@ export default function AdminUsersPage() {
                 <TableHead>الدور</TableHead>
                 <TableHead>الحالة</TableHead>
                 <TableHead>تاريخ التسجيل</TableHead>
+                <TableHead>إجراءات</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredUsers.map((u: any) => (
                 <TableRow key={u.id}>
-                  <TableCell className="font-medium">{u.id}</TableCell>
+                  <TableCell className="font-medium text-xs font-mono">{u.id.slice(0, 8)}</TableCell>
                   <TableCell>{u.email}</TableCell>
                   <TableCell>{u.username}</TableCell>
-                  <TableCell>{getRoleBadge(u.role)}</TableCell>
                   <TableCell>
-                    {u.is_verified ? (
-                      <Badge variant="default">مؤكد</Badge>
-                    ) : (
-                      <Badge variant="outline">غير مؤكد</Badge>
-                    )}
+                    <Select
+                      value={u.role}
+                      onValueChange={(value) => handleRoleChange(u.id, value)}
+                      disabled={isUpdating(u.id) || u.id === user?.id}
+                    >
+                      <SelectTrigger size="sm" className="w-24">
+                        {isUpdating(u.id) ? (
+                          <Loader2 className="size-3.5 animate-spin" />
+                        ) : (
+                          <SelectValue />
+                        )}
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="customer">عميل</SelectItem>
+                        <SelectItem value="vendor">بائع</SelectItem>
+                        <SelectItem value="admin">مدير</SelectItem>
+                        <SelectItem value="staff">موظف</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-1.5">
+                      <Badge variant={u.is_active !== false ? 'default' : 'destructive'}>
+                        {u.is_active !== false ? 'نشط' : 'محظور'}
+                      </Badge>
+                      {u.is_verified && (
+                        <Badge variant="outline" className="text-emerald-600 border-emerald-300">
+                          مؤكد
+                        </Badge>
+                      )}
+                    </div>
                   </TableCell>
                   <TableCell>
                     {new Date(u.created_at).toLocaleDateString('ar-EG')}
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant={u.is_active !== false ? 'outline' : 'default'}
+                      size="sm"
+                      disabled={isUpdating(u.id) || u.id === user?.id}
+                      onClick={() => handleToggleBan(u.id, u.is_active !== false)}
+                      className="gap-1.5"
+                    >
+                      {isUpdating(u.id) ? (
+                        <Loader2 className="size-3.5 animate-spin" />
+                      ) : u.is_active !== false ? (
+                        <Ban className="size-3.5" />
+                      ) : (
+                        <CheckCircle2 className="size-3.5" />
+                      )}
+                      {u.is_active !== false ? 'حظر' : 'تفعيل'}
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}

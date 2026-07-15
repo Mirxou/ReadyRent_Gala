@@ -408,7 +408,7 @@ function FeaturedServices({
           {!selectedCategory && (
             <motion.div variants={fadeUp}>
               <Link
-                href="/local-guide"
+                href="/services"
                 className="flex items-center gap-2 text-purple-400 text-sm font-bold hover:gap-3 transition-all"
               >
                 <span>عرض الكل</span>
@@ -539,7 +539,7 @@ function CTASection() {
         </motion.p>
 
         <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-          <Link href="/local-guide">
+          <Link href="/services">
             <SovereignButton size="lg" variant="primary" className="h-16 px-12 text-sm rounded-full shadow-2xl shadow-purple-500/20 bg-purple-600 hover:bg-purple-700" withShimmer>
               اكتشفي جميع الخدمات
               <ArrowLeft className="w-5 h-5" />

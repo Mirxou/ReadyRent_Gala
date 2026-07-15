@@ -52,7 +52,7 @@ export default function BranchesPage() {
 
   const loadBranches = async () => {
     try {
-      const response = await api.get('/branches/admin/branches/');
+      const response = await api.get('/admin/branches/');
       setBranches(response.data.results || response.data);
     } catch (error: any) {
       toast({
@@ -83,13 +83,13 @@ export default function BranchesPage() {
       };
 
       if (editingBranch) {
-        await api.patch(`/branches/admin/branches/${editingBranch.id}/`, submitData);
+        await api.patch(`/admin/branches/${editingBranch.id}`, submitData);
         toast({
           title: 'تم التحديث',
           description: 'تم تحديث الفرع بنجاح',
         });
       } else {
-        await api.post('/branches/admin/branches/', submitData);
+        await api.post('/admin/branches/', submitData);
         toast({
           title: 'تم الإضافة',
           description: 'تم إضافة الفرع بنجاح',
@@ -142,7 +142,7 @@ export default function BranchesPage() {
     if (!confirm('هل أنت متأكد من حذف هذا الفرع؟')) return;
 
     try {
-      await api.delete(`/branches/admin/branches/${branchId}/`);
+      await api.delete(`/admin/branches/${branchId}`);
       toast({
         title: 'تم الحذف',
         description: 'تم حذف الفرع بنجاح',

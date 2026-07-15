@@ -565,8 +565,14 @@ model ActivityLog {
 model Branch {
   id        String   @id @default(cuid())
   name      String
+  nameAr    String?  @map("name_ar")
+  code      String?  @unique
   city      String?
   address   String?
+  phone     String?
+  email     String?
+  latitude  Float?
+  longitude Float?
   isActive  Boolean  @default(true) @map("is_active")
   createdAt DateTime @default(now()) @map("created_at")
 

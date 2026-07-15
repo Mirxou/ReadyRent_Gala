@@ -57,6 +57,16 @@ export default function CheckoutPage() {
     setPaymentCompleted(true);
     queryClient.invalidateQueries({ queryKey: ['bookings', 'cart'] });
 
+    // Update booking status to 'confirmed' after successful payment
+    if (bookingId) {
+      fetch(`/api/bookings/${bookingId}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'confirmed' }),
+        credentials: 'include',
+      }).catch(() => {});
+    }
+
     // Redirect to bookings page after 2 seconds
     setTimeout(() => {
       router.push('/dashboard/bookings');
