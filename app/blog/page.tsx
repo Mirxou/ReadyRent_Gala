@@ -9,6 +9,7 @@ import { ParticleField } from '@/components/ui/particle-field';
 import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
 import { SovereignGlow } from '@/shared/components/sovereign/sovereign-sparkle';
 import { useState, useEffect } from 'react';
+import { blogApi } from '@/lib/api';
 
 interface BlogPostItem {
   id: string;
@@ -26,16 +27,16 @@ export default function BlogPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/blog')
-      .then((res) => res.json())
-      .then((data) => {
-        const posts = (data.data || []).map((p: Record<string, unknown>) => ({
+    blogApi
+      .getAll()
+      .then((res) => {
+        const posts = (res.data || []).map((p: Record<string, unknown>) => ({
           id: p.id,
           title: p.title,
           excerpt: p.excerpt || '',
           date: p.created_at,
           category: p.category || '',
-          readTime: p.read_time || `${Math.max(1, Math.ceil(((p.content as string) || '').length / 500))} دقائق`,
+          readTime: `${p.read_time || Math.max(1, Math.ceil(((p.content as string) || '').length / 500))} دقائق`,
           image: p.featured_image || `https://picsum.photos/seed/${p.id}/600/400`,
         }));
         setBlogPosts(posts);

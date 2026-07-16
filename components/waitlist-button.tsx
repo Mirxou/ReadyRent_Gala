@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 import { Bell } from 'lucide-react';
 
 interface WaitlistButtonProps {
-  productId: number;
+  productId: string;
 }
 
 export function WaitlistButton({ productId }: WaitlistButtonProps) {
@@ -46,7 +46,7 @@ export function WaitlistButton({ productId }: WaitlistButtonProps) {
     <Button
       variant="outline"
       onClick={() => {
-        addToWaitlistMutation.mutate({ product_id: productId });
+        addToWaitlistMutation.mutate({ productId });
       }}
       disabled={addToWaitlistMutation.isPending}
     >

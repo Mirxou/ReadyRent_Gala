@@ -2415,3 +2415,68 @@ Stage Summary:
 - `disputesApi` now has `appeal()` method; duplicate methods removed
 - Appeal page correctly checks dispute status (resolved/closed) instead of non-existent verdict object
 - Appeal page uses `disputesApi.appeal()` instead of raw fetch
+
+---
+Task ID: 3-d-e
+Agent: Fix Agent
+Task: Notifications fixes + Payments display fixes + Seed payments
+
+Work Log:
+- Fixed `notificationsApi.markRead` parameter type from `number` to `string` in lib/api.ts
+- Replaced raw `fetch('/api/notifications')` with `notificationsApi.getAll()` in notifications page
+- Replaced raw `fetch('/api/notifications/read-all')` with `notificationsApi.markAllRead()` in notifications page
+- Removed `id as any` cast from `notificationsApi.markRead(id)` call (type now matches)
+- Removed unused `fetchNotifications` helper function from notifications page
+- Added `paymentsApi.getAll()` method to lib/api.ts (calls `payments/payments`)
+- Replaced raw `fetch('/api/payments/payments')` with `paymentsApi.getAll()` in wallet page
+- Removed unused `fetchPayments` helper function from wallet page
+- Added 4 seed payments for demo user in prisma/seed.ts and ran direct seed:
+  - Completed baridimob payment (15,000 DA, escrow released, 7 days ago)
+  - Completed card payment (8,500 DA, escrow released, 3 days ago)
+  - Pending baridimob payment (22,000 DA, escrow held, 2 days ago)
+  - Failed card payment (5,000 DA, no escrow, 1 day ago)
+
+Stage Summary:
+- All dashboard pages now use centralized API client (`@/lib/api`) consistently — no raw fetch calls remain for notifications or payments
+- Type safety improved: `markRead` accepts `string` (matching CUID IDs in DB)
+- Payments history section on wallet page will now display 4 demo payments with varied statuses
+
+---
+Task ID: 3-a
+Agent: Blog System Fixer
+Task: Blog System Fixes — schema fields, API routes, seed data, frontend API calls
+
+Work Log:
+- Added 3 new optional fields to BlogPost model in prisma/schema.prisma: `category` (default "عام"), `readTime` (mapped to read_time), `authorName` (mapped to author_name)
+- Ran `bunx prisma db push` to sync schema — new columns added to blog_posts table
+- Updated `/app/api/blog/route.ts` GET handler: mapped response now includes `category`, `read_time` (computed from content length if not set), `author_name` (fallback to "فريق STANDARD.Rent")
+- Updated `/app/api/blog/[id]/route.ts` GET handler: same new fields added; also fixed `author` field to use authorName instead of authorId
+- Updated `seed-content.ts`: all 3 blog posts now include `category` ("أزياء", "نصائح الكراء", "عام"), `authorName` ("فريق STANDARD.Rent"), and `readTime` (5, 8, 6)
+- Ran seed script — 3 blog posts updated successfully
+- Fixed `app/blog/page.tsx`: replaced raw `fetch('/api/blog')` with `blogApi.getAll()` from `@/lib/api`
+- Fixed `app/blog/[id]/page.tsx`: replaced raw fetch with `blogApi.getById(postId)` while keeping React Query
+
+Stage Summary:
+- **Schema**: BlogPost now has category, read_time, author_name columns
+- **API**: Both list and detail endpoints return the new fields with smart fallbacks
+- **Seed Data**: All 3 posts enriched with category, author name, and read time
+- **Frontend**: Blog list and detail pages now use the unified blogApi client
+
+---
+Task ID: 3-b-c
+Agent: Main Agent
+Task: CMS System Fixes + Waitlist Fixes
+
+Work Log:
+- **lib/api.ts**: Added `cmsApi.create()`, `cmsApi.update()`, `cmsApi.delete()` methods; changed `bookingsApi.removeFromWaitlist` param type from `number` to `string`
+- **app/api/cms/pages/route.ts**: Added POST handler (admin/staff only) — creates CMSPage with auto-slugified title, validates required fields, checks duplicate slugs. Modified GET to accept `?all=true` param for admin (returns draft+published)
+- **app/api/cms/pages/[slug]/route.ts**: Added PUT handler (admin/staff only, updates by id) and DELETE handler (admin/staff only, deletes by id). GET now falls back to id lookup if slug not found
+- **app/admin/cms/pages/page.tsx**: Complete rewrite — removed mismatched schema fields (title_ar, content_ar, page_type, is_featured, order). Now matches actual CMSPage model (id, title, slug, content, status). Uses GlassPanel + SovereignButton components. List view with edit/delete actions, inline create/edit form with auto-slug generation and status toggle (draft/published). Uses cmsApi from @/lib/api
+- **components/waitlist-button.tsx**: Changed `productId` type from `number` to `string`; changed API body from `{ product_id: productId }` to `{ productId }` to match backend expectation
+- **app/dashboard/waitlist/page.tsx**: Changed `item.notified` to `item.status === 'notified'`; changed `item.preferred_start_date` to `item.preferred_start`; changed `removeFromWaitlistMutation` type from `id: number` to `id: string`
+
+Stage Summary:
+- **CMS Backend**: Full CRUD (GET list, GET single, POST create, PUT update, DELETE) — all write endpoints admin/staff protected
+- **CMS Frontend**: Admin page rewritten to match actual schema, using cmsApi and Sovereign components
+- **Waitlist Frontend**: Field name fixes to match WaitlistItem model (status, preferred_start) and API response format
+- **lib/api.ts**: bookingsApi.removeFromWaitlist type fixed (string not number), cmsApi write methods added

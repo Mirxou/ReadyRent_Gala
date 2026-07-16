@@ -23,6 +23,7 @@ import { cn, formatNumber } from '@/lib/utils';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { toast } from 'sonner';
+import { paymentsApi } from '@/lib/api';
 
 async function fetchProfile() {
   const res = await fetch('/api/auth/profile');
@@ -42,11 +43,7 @@ async function fetchBookings() {
   return json.data || [];
 }
 
-async function fetchPayments() {
-  const res = await fetch('/api/payments/payments');
-  const json = await res.json();
-  return json.data || [];
-}
+
 
 export default function WalletPage() {
   const { data: userProfile, isLoading: userLoading } = useQuery({
@@ -66,7 +63,10 @@ export default function WalletPage() {
 
   const { data: payments, isLoading: paymentsLoading } = useQuery({
     queryKey: ['payments-history'],
-    queryFn: fetchPayments,
+    queryFn: async () => {
+      const res = await paymentsApi.getAll();
+      return res.data || [];
+    },
   });
 
   const balance = walletData?.balance ?? userProfile?.wallet_balance ?? 0;

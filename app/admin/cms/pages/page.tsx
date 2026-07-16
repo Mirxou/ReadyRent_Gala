@@ -1,351 +1,331 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
+import { useState, useEffect, useCallback } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
-import { getAuthHeaders } from '@/lib/auth-helpers';
+import { Badge } from '@/components/ui/badge';
+import { GlassPanel } from '@/components/sovereign/glass-panel';
+import { SovereignButton } from '@/components/sovereign/sovereign-button';
+import { cmsApi } from '@/lib/api';
+import { toast } from 'sonner';
+import { Plus, Pencil, Trash2, Loader2, FileText, ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
 
-interface Page {
-  id: number;
+// ──── Types matching actual CMSPage model ────
+interface CMSPage {
+  id: string;
   title: string;
-  title_ar: string;
   slug: string;
-  page_type: string;
   content: string;
-  content_ar: string;
-  status: string;
-  is_featured: boolean;
-  order: number;
+  status: 'draft' | 'published';
+  created_at: string;
+  updated_at: string;
 }
 
-const PAGE_TYPES: Record<string, string> = {
-  about: 'من نحن',
-  terms: 'شروط الخدمة',
-  privacy: 'سياسة الخصوصية',
-  contact: 'اتصل بنا',
-  faq: 'الأسئلة الشائعة',
-  custom: 'صفحة مخصصة',
-};
-
-const STATUS_CHOICES: Record<string, string> = {
-  draft: 'مسودة',
-  published: 'منشور',
-  archived: 'مؤرشف',
-};
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/[^\w\-\u0600-\u06FF]+/g, '')
+    .replace(/\-+/g, '-');
+}
 
 export default function CMSPagesPage() {
-  const [pages, setPages] = useState<Page[]>([]);
+  const [pages, setPages] = useState<CMSPage[]>([]);
   const [loading, setLoading] = useState(true);
-  const [open, setOpen] = useState(false);
-  const [selectedPage, setSelectedPage] = useState<Page | null>(null);
-  const [formData, setFormData] = useState({
+  const [saving, setSaving] = useState(false);
+  const [editing, setEditing] = useState(false); // false = list view, true = form view
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [form, setForm] = useState({
     title: '',
-    title_ar: '',
     slug: '',
-    page_type: 'custom',
     content: '',
-    content_ar: '',
-    status: 'draft',
-    is_featured: false,
-    order: 0,
+    status: 'draft' as 'draft' | 'published',
   });
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchPages();
-  }, []);
-
-  const fetchPages = async () => {
+  const fetchPages = useCallback(async () => {
+    setLoading(true);
     try {
-      const response = await fetch('/api/cms/pages/', {
-        headers: {
-          ...getAuthHeaders(),
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setPages(data.results || data);
-      }
-    } catch (error) {
-      console.error('Error fetching pages:', error);
+      const res = await cmsApi.getPages({ all: 'true' });
+      setPages(res.data || []);
+    } catch {
+      toast.error('فشل تحميل الصفحات');
     } finally {
       setLoading(false);
     }
+  }, []);
+
+  useEffect(() => {
+    fetchPages();
+  }, [fetchPages]);
+
+  const openCreate = () => {
+    setSelectedId(null);
+    setForm({ title: '', slug: '', content: '', status: 'draft' });
+    setEditing(true);
   };
 
-  const handleCreatePage = () => {
-    setSelectedPage(null);
-    setFormData({
-      title: '',
-      title_ar: '',
-      slug: '',
-      page_type: 'custom',
-      content: '',
-      content_ar: '',
-      status: 'draft',
-      is_featured: false,
-      order: 0,
-    });
-    setOpen(true);
-  };
-
-  const handleEditPage = (page: Page) => {
-    setSelectedPage(page);
-    setFormData({
+  const openEdit = (page: CMSPage) => {
+    setSelectedId(page.id);
+    setForm({
       title: page.title,
-      title_ar: page.title_ar,
       slug: page.slug,
-      page_type: page.page_type,
-      content: page.content,
-      content_ar: page.content_ar,
-      status: page.status,
-      is_featured: page.is_featured,
-      order: page.order,
+      content: page.content || '',
+      status: page.status as 'draft' | 'published',
     });
-    setOpen(true);
+    setEditing(true);
   };
 
-  const handleSavePage = async () => {
-    if (!formData.title || !formData.title_ar || !formData.slug) {
-      alert('يرجى ملء جميع الحقول المطلوبة');
+  const handleSave = async () => {
+    if (!form.title.trim()) {
+      toast.error('العنوان مطلوب');
       return;
     }
 
+    setSaving(true);
     try {
-      const url = selectedPage ? `/api/cms/pages/${selectedPage.id}/` : '/api/cms/pages/';
-      const method = selectedPage ? 'PUT' : 'POST';
-
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          ...getAuthHeaders(),
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (response.ok) {
-        setOpen(false);
-        fetchPages();
+      if (selectedId) {
+        await cmsApi.update(selectedId, form);
+        toast.success('تم تحديث الصفحة بنجاح');
       } else {
-        const error = await response.json();
-        alert(error.detail || 'حدث خطأ أثناء حفظ الصفحة');
+        await cmsApi.create(form);
+        toast.success('تم إنشاء الصفحة بنجاح');
       }
-    } catch (error) {
-      console.error('Error saving page:', error);
-      alert('حدث خطأ أثناء حفظ الصفحة');
+      setEditing(false);
+      fetchPages();
+    } catch (err: any) {
+      const msg = err?.data?.message_en || 'حدث خطأ أثناء الحفظ';
+      toast.error(msg);
+    } finally {
+      setSaving(false);
     }
   };
 
-  return (
-    <div className="container mx-auto py-8">
-      <div className="mb-6 flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold mb-2">إدارة الصفحات</h1>
-          <p className="text-gray-600">إدارة الصفحات الثابتة (من نحن، الشروط، الخصوصية، إلخ)</p>
+  const handleDelete = async (id: string) => {
+    if (!confirm('هل أنت متأكد من حذف هذه الصفحة؟')) return;
+
+    setDeletingId(id);
+    try {
+      await cmsApi.delete(id);
+      toast.success('تم حذف الصفحة بنجاح');
+      fetchPages();
+    } catch {
+      toast.error('فشل حذف الصفحة');
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  // ──── Form View ────
+  if (editing) {
+    return (
+      <div className="container mx-auto py-8 px-4">
+        <div className="mb-6">
+          <button
+            onClick={() => setEditing(false)}
+            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            العودة للقائمة
+          </button>
+          <h1 className="text-3xl font-bold">
+            {selectedId ? 'تعديل الصفحة' : 'إنشاء صفحة جديدة'}
+          </h1>
         </div>
-        <Button onClick={handleCreatePage}>إضافة صفحة جديدة</Button>
+
+        <GlassPanel className="max-w-3xl mx-auto !p-6">
+          <div className="space-y-5">
+            {/* Title */}
+            <div className="space-y-2">
+              <Label htmlFor="title">العنوان</Label>
+              <Input
+                id="title"
+                placeholder="أدخل عنوان الصفحة"
+                value={form.title}
+                onChange={(e) => {
+                  const title = e.target.value;
+                  setForm({
+                    ...form,
+                    title,
+                    // Auto-generate slug from title when creating new page
+                    slug: selectedId ? form.slug : slugify(title),
+                  });
+                }}
+              />
+            </div>
+
+            {/* Slug */}
+            <div className="space-y-2">
+              <Label htmlFor="slug">الرابط (Slug)</Label>
+              <Input
+                id="slug"
+                placeholder="page-slug"
+                dir="ltr"
+                value={form.slug}
+                onChange={(e) => setForm({ ...form, slug: e.target.value })}
+              />
+            </div>
+
+            {/* Content */}
+            <div className="space-y-2">
+              <Label htmlFor="content">المحتوى</Label>
+              <Textarea
+                id="content"
+                placeholder="أدخل محتوى الصفحة..."
+                rows={12}
+                value={form.content}
+                onChange={(e) => setForm({ ...form, content: e.target.value })}
+                className="resize-y"
+              />
+            </div>
+
+            {/* Status Toggle */}
+            <div className="space-y-2">
+              <Label>الحالة</Label>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setForm({ ...form, status: 'draft' })}
+                  className={`px-4 py-2 rounded-lg border-2 text-sm font-medium transition-all ${
+                    form.status === 'draft'
+                      ? 'border-amber-500 bg-amber-50 text-amber-700'
+                      : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                  }`}
+                >
+                  مسودة
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setForm({ ...form, status: 'published' })}
+                  className={`px-4 py-2 rounded-lg border-2 text-sm font-medium transition-all ${
+                    form.status === 'published'
+                      ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
+                      : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                  }`}
+                >
+                  منشور
+                </button>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-3 pt-4">
+              <SovereignButton
+                variant="primary"
+                size="md"
+                isLoading={saving}
+                onClick={handleSave}
+              >
+                {selectedId ? 'حفظ التعديلات' : 'إنشاء الصفحة'}
+              </SovereignButton>
+              <SovereignButton
+                variant="secondary"
+                size="md"
+                onClick={() => setEditing(false)}
+              >
+                إلغاء
+              </SovereignButton>
+            </div>
+          </div>
+        </GlassPanel>
+      </div>
+    );
+  }
+
+  // ──── List View ────
+  return (
+    <div className="container mx-auto py-8 px-4">
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold mb-1">إدارة الصفحات</h1>
+          <p className="text-muted-foreground text-sm">
+            إدارة الصفحات الثابتة للموقع
+          </p>
+        </div>
+        <SovereignButton variant="primary" size="sm" onClick={openCreate}>
+          <Plus className="h-4 w-4" />
+          صفحة جديدة
+        </SovereignButton>
       </div>
 
       {loading ? (
-        <div className="text-center py-8">جاري التحميل...</div>
+        <div className="flex items-center justify-center py-16">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      ) : pages.length === 0 ? (
+        <GlassPanel className="text-center py-16">
+          <FileText className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+          <p className="text-lg font-medium text-muted-foreground">لا توجد صفحات بعد</p>
+          <p className="text-sm text-muted-foreground mt-1">
+            أنشئ أول صفحة لك
+          </p>
+        </GlassPanel>
       ) : (
-        <div className="bg-white rounded-lg shadow">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>العنوان</TableHead>
-                <TableHead>النوع</TableHead>
-                <TableHead>الحالة</TableHead>
-                <TableHead>مميز</TableHead>
-                <TableHead>الترتيب</TableHead>
-                <TableHead>الإجراءات</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {pages.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-gray-500">
-                    لا توجد صفحات
-                  </TableCell>
-                </TableRow>
-              ) : (
-                pages.map((page) => (
-                  <TableRow key={page.id}>
-                    <TableCell>{page.title_ar || page.title}</TableCell>
-                    <TableCell>{PAGE_TYPES[page.page_type] || page.page_type}</TableCell>
-                    <TableCell>
-                      <span
-                        className={`px-2 py-1 rounded text-xs ${
-                          page.status === 'published'
-                            ? 'bg-green-100 text-green-800'
-                            : page.status === 'draft'
-                            ? 'bg-yellow-100 text-yellow-800'
-                            : 'bg-gray-100 text-gray-800'
-                        }`}
-                      >
-                        {STATUS_CHOICES[page.status] || page.status}
-                      </span>
-                    </TableCell>
-                    <TableCell>{page.is_featured ? '✓' : '-'}</TableCell>
-                    <TableCell>{page.order}</TableCell>
-                    <TableCell>
-                      <Button variant="outline" size="sm" onClick={() => handleEditPage(page)}>
-                        تعديل
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+        <div className="space-y-3 max-h-[70vh] overflow-y-auto">
+          {pages.map((page) => (
+            <GlassPanel key={page.id} className="!p-4 !rounded-2xl">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                {/* Page Info */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-3 mb-1">
+                    <h3 className="font-semibold text-base truncate">
+                      {page.title}
+                    </h3>
+                    <Badge
+                      variant={page.status === 'published' ? 'default' : 'secondary'}
+                      className={
+                        page.status === 'published'
+                          ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-100'
+                          : 'bg-amber-100 text-amber-700 hover:bg-amber-100'
+                      }
+                    >
+                      {page.status === 'published' ? 'منشور' : 'مسودة'}
+                    </Badge>
+                  </div>
+                  <p className="text-sm text-muted-foreground truncate" dir="ltr">
+                    /{page.slug}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {new Date(page.updated_at).toLocaleDateString('ar-EG', {
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </p>
+                </div>
+
+                {/* Actions */}
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    onClick={() => openEdit(page)}
+                    className="p-2 rounded-lg border border-gray-200 hover:border-sovereign-gold hover:text-sovereign-gold transition-colors"
+                    title="تعديل"
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(page.id)}
+                    disabled={deletingId === page.id}
+                    className="p-2 rounded-lg border border-gray-200 hover:border-red-500 hover:text-red-500 transition-colors disabled:opacity-50"
+                    title="حذف"
+                  >
+                    {deletingId === page.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
+              </div>
+            </GlassPanel>
+          ))}
         </div>
       )}
-
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{selectedPage ? 'تعديل الصفحة' : 'إضافة صفحة جديدة'}</DialogTitle>
-            <DialogDescription>إنشاء أو تعديل صفحة ثابتة</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="title">العنوان (إنجليزي)</Label>
-                <Input
-                  id="title"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                />
-              </div>
-              <div>
-                <Label htmlFor="title_ar">العنوان (عربي)</Label>
-                <Input
-                  id="title_ar"
-                  value={formData.title_ar}
-                  onChange={(e) => setFormData({ ...formData, title_ar: e.target.value })}
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="slug">الرابط (Slug)</Label>
-                <Input
-                  id="slug"
-                  value={formData.slug}
-                  onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                />
-              </div>
-              <div>
-                <Label htmlFor="page_type">نوع الصفحة</Label>
-                <Select
-                  value={formData.page_type}
-                  onValueChange={(value) => setFormData({ ...formData, page_type: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(PAGE_TYPES).map(([value, label]) => (
-                      <SelectItem key={value} value={value}>
-                        {label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div>
-              <Label htmlFor="content">المحتوى (إنجليزي)</Label>
-              <Textarea
-                id="content"
-                value={formData.content}
-                onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                rows={8}
-              />
-            </div>
-            <div>
-              <Label htmlFor="content_ar">المحتوى (عربي)</Label>
-              <Textarea
-                id="content_ar"
-                value={formData.content_ar}
-                onChange={(e) => setFormData({ ...formData, content_ar: e.target.value })}
-                rows={8}
-              />
-            </div>
-            <div className="grid grid-cols-3 gap-4">
-              <div>
-                <Label htmlFor="status">الحالة</Label>
-                <Select
-                  value={formData.status}
-                  onValueChange={(value) => setFormData({ ...formData, status: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(STATUS_CHOICES).map(([value, label]) => (
-                      <SelectItem key={value} value={value}>
-                        {label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="order">الترتيب</Label>
-                <Input
-                  id="order"
-                  type="number"
-                  value={formData.order}
-                  onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) || 0 })}
-                />
-              </div>
-              <div className="flex items-center gap-2 pt-8">
-                <input
-                  type="checkbox"
-                  id="is_featured"
-                  checked={formData.is_featured}
-                  onChange={(e) => setFormData({ ...formData, is_featured: e.target.checked })}
-                />
-                <Label htmlFor="is_featured">صفحة مميزة</Label>
-              </div>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setOpen(false)}>
-              إلغاء
-            </Button>
-            <Button onClick={handleSavePage}>حفظ</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
-

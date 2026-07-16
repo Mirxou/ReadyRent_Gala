@@ -10,6 +10,7 @@ import { motion } from 'framer-motion';
 import { ParticleField } from '@/components/ui/particle-field';
 import { Button } from '@/components/ui/button';
 import DOMPurify from 'dompurify';
+import { blogApi } from '@/lib/api';
 
 const DOMPURIFY_CONFIG = {
   ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'b', 'i', 'u', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'a', 'blockquote', 'code', 'pre', 'span', 'div', 'img', 'figure', 'figcaption', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'hr'],
@@ -36,7 +37,7 @@ export default function BlogPostPage() {
 
   const { data: post, isLoading } = useQuery({
     queryKey: ['blog-post', postId],
-    queryFn: () => fetch('/api/blog/' + postId).then(r => r.json()).then(d => d.data || d),
+    queryFn: () => blogApi.getById(postId).then((r) => r.data),
     enabled: !!postId,
   });
 

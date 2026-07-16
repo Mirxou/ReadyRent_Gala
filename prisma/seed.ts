@@ -283,6 +283,16 @@ async function main() {
     ],
   });
 
+  // ──── Payments ────
+  await db.payment.createMany({
+    data: [
+      { id: cid('pay', 1), userId: demoUserId, amount: 15000, method: 'baridimob', status: 'completed', escrowStatus: 'released', createdAt: new Date(Date.now() - 7 * 86400000) },
+      { id: cid('pay', 2), userId: demoUserId, amount: 8500, method: 'card', status: 'completed', escrowStatus: 'released', createdAt: new Date(Date.now() - 3 * 86400000) },
+      { id: cid('pay', 3), userId: demoUserId, amount: 22000, method: 'baridimob', status: 'pending', escrowStatus: 'held', createdAt: new Date(Date.now() - 2 * 86400000) },
+      { id: cid('pay', 4), userId: demoUserId, amount: 5000, method: 'card', status: 'failed', escrowStatus: null, createdAt: new Date(Date.now() - 86400000) },
+    ],
+  });
+
   // ──── CMS Pages ────
   await db.cMSPage.createMany({
     data: [

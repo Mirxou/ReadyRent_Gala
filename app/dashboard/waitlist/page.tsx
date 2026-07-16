@@ -18,7 +18,7 @@ export default function WaitlistPage() {
   });
 
   const removeFromWaitlistMutation = useMutation({
-    mutationFn: (id: number) => bookingsApi.removeFromWaitlist(id),
+    mutationFn: (id: string) => bookingsApi.removeFromWaitlist(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['waitlist'] });
       toast.success('تم إزالة المنتج من لائحة الانتظار');
@@ -73,15 +73,15 @@ export default function WaitlistPage() {
             <CardHeader>
               <div className="flex items-start justify-between">
                 <CardTitle className="text-lg">{item.product?.name_ar || item.product?.name}</CardTitle>
-                {item.notified && (
+                {item.status === 'notified' && (
                   <Badge variant="default">تم الإشعار</Badge>
                 )}
               </div>
             </CardHeader>
             <CardContent>
-              {item.preferred_start_date && (
+              {item.preferred_start && (
                 <p className="text-sm text-muted-foreground mb-2">
-                  تاريخ مفضل: {new Date(item.preferred_start_date).toLocaleDateString('ar-EG')}
+                  تاريخ مفضل: {new Date(item.preferred_start).toLocaleDateString('ar-EG')}
                 </p>
               )}
               <div className="flex gap-2 mt-4">

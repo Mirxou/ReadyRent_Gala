@@ -78,6 +78,9 @@ async function main() {
 
 على منصة ستاندرد نوفر مجموعة حصرية من فساتين الزفاف لأشهر المصممين بسعار كراء تنافسية. كل فستان يتم فحصه وتنظيفه بعناية بعد كل استعمال لضمان ظهورك بأبهى حلة في يومك الأجمل. احجزي فستانك الآن واستمتعي بتجربة كراء لا تُنسى.`,
       status: 'published',
+      category: 'أزياء',
+      authorName: 'فريق STANDARD.Rent',
+      readTime: 5,
     },
     {
       slug: 'tips-choosing-perfect-rental-dress',
@@ -91,6 +94,9 @@ async function main() {
 
 على ستاندرد نوفر صوراً مفصلة لكل فستان من زوايا متعددة مع معلومات دقيقة عن المقاسات والأقمشة. كما نوفر خدمة الاستشارة المجانية عبر الدردشة لمساعدتك في اختيار الفستان المثالي لمناسبتك القادمة.`,
       status: 'published',
+      category: 'نصائح الكراء',
+      authorName: 'فريق STANDARD.Rent',
+      readTime: 8,
     },
     {
       slug: 'how-trust-system-works',
@@ -104,6 +110,9 @@ async function main() {
 
 ثالثاً - الضمان المالي: يتم احتجاز مبلغ الضمان مؤقتاً في محفظة رقمية آمنة ولا يُصرف للبائع إلا بعد تأكيد استلام المنتج بحالة جيدة. في حالة نزاع يتدخل فريق الدعم لحل المشكلة بشكل عادل وشفاف. هذا النظام يحمي حقوق جميع الأطراف ويجعل تجربة الكراء مريحة وآمنة.`,
       status: 'published',
+      category: 'عام',
+      authorName: 'فريق STANDARD.Rent',
+      readTime: 6,
     },
   ];
 
@@ -137,6 +146,9 @@ async function main() {
         content: post.content,
         excerpt: post.excerpt,
         status: post.status,
+        category: post.category,
+        authorName: post.authorName,
+        readTime: post.readTime,
       },
       create: {
         title: post.title,
@@ -144,6 +156,9 @@ async function main() {
         content: post.content,
         excerpt: post.excerpt,
         status: post.status,
+        category: post.category,
+        authorName: post.authorName,
+        readTime: post.readTime,
       },
     });
     console.log(`  ✅ Blog post "${post.slug}" → id: ${result.id}`);

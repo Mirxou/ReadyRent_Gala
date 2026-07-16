@@ -27,11 +27,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import React from 'react';
 
-async function fetchNotifications() {
-  const res = await fetch('/api/notifications');
-  const json = await res.json();
-  return json.data || [];
-}
+
 
 const typeIconMap: Record<string, any> = {
   trust: UserCheck,
@@ -55,8 +51,8 @@ export default function NotificationsPage() {
   const handleMarkAllRead = async () => {
     setIsMarkingAllRead(true);
     try {
-      const res = await fetch('/api/notifications/read-all', { method: 'PATCH', credentials: 'include' });
-      if (!res.ok) throw new Error();
+      const res = await notificationsApi.markAllRead();
+      if (res.status === 0 || res.data?.error) throw new Error();
       toast.success('تم تعليم جميع الإشعارات كمقروءة');
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
     } catch {
@@ -68,12 +64,15 @@ export default function NotificationsPage() {
 
   const { data: notifications, isLoading } = useQuery({
     queryKey: ['notifications'],
-    queryFn: fetchNotifications,
+    queryFn: async () => {
+      const res = await notificationsApi.getAll();
+      return res.data || [];
+    },
   });
 
   const handleMarkRead = async (id: string) => {
     try {
-      const res = await notificationsApi.markRead(id as any);
+      const res = await notificationsApi.markRead(id);
       if (res.status === 0 || res.data?.error) throw new Error();
       queryClient.setQueryData(['notifications'], (old: any[]) =>
         old?.map((n: any) => (n.id === id ? { ...n, is_read: true } : n))

@@ -55,6 +55,9 @@ export async function GET(request: NextRequest) {
         excerpt: post.excerpt ?? '',
         featured_image: post.imageUrl ?? null,
         status: post.status,
+        category: post.category ?? 'عام',
+        read_time: post.readTime ?? Math.max(1, Math.ceil((post.content ?? '').length / 500)),
+        author_name: post.authorName ?? 'فريق STANDARD.Rent',
         created_at: post.createdAt.toISOString(),
       })),
       meta: {

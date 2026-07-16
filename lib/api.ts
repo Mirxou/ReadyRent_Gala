@@ -152,7 +152,7 @@ export const bookingsApi = {
   createBookingFromCart: (data?: any) => apiFetch('bookings/create', { method: 'POST', body: data }),
   getWaitlist: () => apiFetch('bookings/waitlist'),
   addToWaitlist: (data: any) => apiFetch('bookings/waitlist', { method: 'POST', body: data }),
-  removeFromWaitlist: (id: number) => apiFetch(`bookings/waitlist/${id}`, { method: 'DELETE' }),
+  removeFromWaitlist: (id: string) => apiFetch(`bookings/waitlist/${id}`, { method: 'DELETE' }),
 };
 
 export const disputesApi = {
@@ -212,6 +212,7 @@ export const analyticsApi = {
 };
 
 export const paymentsApi = {
+  getAll: () => apiFetch('payments/payments'),
   getMethods: () => apiFetch('payments/methods'),
   create: (data: any) => apiFetch('payments/create', { method: 'POST', body: data }),
 };
@@ -268,7 +269,7 @@ export const walletApi = {
 
 export const notificationsApi = {
   getAll: (params?: any) => apiFetch('notifications', { params }),
-  markRead: (id: number) => apiFetch(`notifications/${id}`, { method: 'PATCH', body: { is_read: true } }),
+  markRead: (id: string) => apiFetch(`notifications/${id}`, { method: 'PATCH', body: { is_read: true } }),
   markAllRead: () => apiFetch('notifications/read-all', { method: 'PATCH' }),
 };
 
@@ -291,6 +292,9 @@ export const blogApi = {
 export const cmsApi = {
   getPages: (params?: any) => apiFetch('cms/pages', { params }),
   getBySlug: (slug: string) => apiFetch(`cms/pages/${slug}`),
+  create: (data: any) => apiFetch('cms/pages', { method: 'POST', body: data }),
+  update: (id: string, data: any) => apiFetch(`cms/pages/${id}`, { method: 'PUT', body: data }),
+  delete: (id: string) => apiFetch(`cms/pages/${id}`, { method: 'DELETE' }),
 };
 
 export const contactApi = {

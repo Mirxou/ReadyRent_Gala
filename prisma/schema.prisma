@@ -533,16 +533,19 @@ model CMSPage {
 }
 
 model BlogPost {
-  id        String   @id @default(cuid())
-  title     String
-  slug      String   @unique
-  content   String?
-  excerpt   String?
-  imageUrl  String?  @map("image_url")
-  status    String   @default("draft") // draft, published
-  authorId  String?  @map("author_id")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  content     String?
+  excerpt     String?
+  imageUrl    String?  @map("image_url")
+  status      String   @default("draft") // draft, published
+  authorId    String?  @map("author_id")
+  category    String?  @default("عام")
+  readTime    Int?     @map("read_time")
+  authorName  String?  @map("author_name")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
 
   @@map("blog_posts")
 }
