@@ -2,7 +2,6 @@
 
 import { motion } from "framer-motion";
 import { SocialCommander } from "@/features/social/components/social-commander";
-import { SovereignConcierge } from "@/shared/components/sovereign/sovereign-concierge";
 
 export default function SocialPage() {
   return (
@@ -14,9 +13,6 @@ export default function SocialPage() {
       dir="rtl"
     >
       <SocialCommander />
-
-      {/* 🤖 GLOBAL CONCIERGE */}
-      <SovereignConcierge />
     </motion.div>
   );
 }

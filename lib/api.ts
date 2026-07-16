@@ -139,6 +139,7 @@ export const productsApi = {
   getWishlist: () => apiFetch('products/wishlist'),
   addToWishlist: (productId: number) => apiFetch('products/wishlist', { method: 'POST', body: { product_id: productId } }),
   removeFromWishlist: (id: number) => apiFetch(`products/wishlist/${id}`, { method: 'DELETE' }),
+  getRecommendations: (id: string) => apiFetch(`products/${id}/recommendations`),
 };
 
 export const bookingsApi = {
@@ -192,6 +193,8 @@ export const reviewsApi = {
 export const chatbotApi = {
   quickChat: (message: string, options?: { language?: string; [key: string]: any }) =>
     apiFetch('chatbot/quick-chat', { method: 'POST', body: { message, language: options?.language || 'ar', ...options } }),
+  chat: (message: string, sessionId: string, language: string = 'ar') =>
+    apiFetch('chatbot/chat', { method: 'POST', body: { message, sessionId, language } }),
 };
 
 export const bundlesApi = {

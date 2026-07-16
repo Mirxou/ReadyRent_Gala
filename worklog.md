@@ -2543,3 +2543,70 @@ Stage Summary:
 - **Branches Page**: Branch.id is correctly typed as string (CUID) matching Prisma schema
 - **adminApi**: Branch CRUD methods available for frontend consumption
 - **BookingTable**: Booking.id correctly typed as string; total_days computed from date range instead of referencing non-existent API field
+
+---
+Task ID: 6-a
+Agent: LLM Chatbot Builder
+Task: Build Smart AI Chatbot with LLM for STANDARD.Rent
+
+Work Log:
+- Created `/app/api/chatbot/chat/route.ts` — new LLM-powered chatbot API endpoint
+  - POST endpoint accepting `{ message, sessionId?, language? }`
+  - Uses `z-ai-web-dev-sdk` for LLM completions (server-side only)
+  - Arabic system prompt covering all STANDARD.Rent features: dress rental, event services, insurance, escrow, trust scores
+  - In-memory conversation history with Map<sessionId, messages[]>, limited to 20 messages per session
+  - Graceful fallback to rule-based responses if LLM fails
+  - Friendly Arabic/English error messages for failures
+- Replaced placeholder `SovereignConcierge` component with full chat UI
+  - Floating chat widget with gold accent button (bottom-left, with pulse animation)
+  - Glassmorphism chat window with dark obsidian theme matching STANDARD.Rent design system
+  - Message bubbles with user/assistant avatars and typing indicator (animated dots)
+  - Session ID generated via `crypto.randomUUID()` on mount
+  - Direct `fetch()` to `/api/chatbot/chat` (no SDK on client side)
+  - RTL/LTR support from `useLanguageStore`
+  - Framer Motion animations for open/close, message appearance
+  - Auto-scroll to latest message, auto-focus input on open
+  - Welcome message on first open
+  - Disabled duplicate render from `app/dashboard/social/page.tsx` (removed extra SovereignConcierge import)
+- Added `chatbotApi.chat()` method to `lib/api.ts`
+
+Stage Summary:
+- **LLM Chatbot API**: New route at `/api/chatbot/chat` with z-ai-web-dev-sdk integration, conversation memory, and fallback
+- **SovereignConcierge**: Transformed from null placeholder to fully functional floating chat widget
+- **Old route preserved**: `/api/chatbot/quick-chat` rule-based endpoint untouched as fallback
+- **No z-ai-web-dev-sdk on client**: SDK only used in API route (server-side)
+
+---
+Task ID: 6-b
+Agent: Main
+Task: Build AI Product Recommendations API
+
+Work Log:
+- Created `/app/api/products/[id]/recommendations/route.ts` — GET endpoint for AI-powered product recommendations
+  - Fetches current product from DB by ID
+  - Gets up to 10 candidate products from the same category (excluding current), with category and vendor relations
+  - Falls back to any available products if same-category pool is empty
+  - Sends candidate list to LLM via `z-ai-web-dev-sdk` with Arabic prompt asking for best 4 complementary/similar products
+  - 5-second timeout on LLM call via `Promise.race` — gracefully falls back to category-based picks
+  - Parses CUID-like IDs from LLM response using regex `/[a-z0-9]{20,}/g`
+  - Preserves AI ordering with `Map`-based sort, fills remaining slots from category candidates
+  - Properly typed with `ProductWithRelations` interface (no `any`)
+  - Returns products in same format as product detail API (snake_case fields, nested category/vendor)
+- Added `getRecommendations(id: string)` to `productsApi` in `lib/api.ts`
+- Rewrote `components/product-recommendations.tsx`:
+  - Changed from grid layout to horizontal scrollable row (max 4 cards)
+  - Uses `GlassPanel` with `gradientBorder` as section container
+  - Section heading: "توصيات ذكية" with Sparkles icon and subtitle
+  - Compact `RecommendationCard` with aspect-[3/4] image, price overlay, category label, product name
+  - Framer Motion hover animation (`whileHover: y -6`)
+  - Skeleton loading state (4 placeholder cards)
+  - Silently hides on error or empty results (`isError` check returns null)
+  - React Query with `retry: 1` and 5-minute `staleTime`
+  - Typed with `RecommendationProduct` interface (no `any`)
+  - Removed unused `ProductCard` import, uses custom compact card instead
+- Zero lint errors in all new/modified files
+
+Stage Summary:
+- **Recommendations API**: LLM-powered endpoint at `/api/products/[id]/recommendations` with 5s timeout and category fallback
+- **Frontend**: Horizontal scrollable recommendation row with GlassPanel, skeleton loading, error-silent behavior
+- **API Client**: `productsApi.getRecommendations(id)` added for frontend consumption
