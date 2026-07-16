@@ -4,27 +4,31 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { RatingStars } from './rating-stars';
 import { CheckCircle } from 'lucide-react';
-import Image from 'next/image';
+
+interface ReviewUser {
+  id: string;
+  username: string;
+}
 
 interface Review {
   id: number;
-  user_email: string;
-  user_username: string;
+  user_id: string;
+  booking_id: number | null;
+  product_id: string;
+  reviewer_name: string;
   rating: number;
-  title: string;
-  comment: string;
-  is_verified_purchase: boolean;
-  helpful_count: number;
-  images?: Array<{ id: number; image: string; alt_text: string }>;
+  comment: string | null;
+  is_verified: boolean;
+  status: string;
   created_at: string;
+  user: ReviewUser | null;
 }
 
 interface ReviewListProps {
   reviews: Review[];
-  productId?: number;
 }
 
-export function ReviewList({ reviews, productId }: ReviewListProps) {
+export function ReviewList({ reviews }: ReviewListProps) {
   if (!reviews || reviews.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
@@ -41,10 +45,10 @@ export function ReviewList({ reviews, productId }: ReviewListProps) {
             <div className="flex items-start justify-between mb-2">
               <div className="flex items-center gap-2">
                 <div>
-                  <p className="font-semibold">{review.user_username || review.user_email}</p>
+                  <p className="font-semibold">{review.user?.username || review.reviewer_name}</p>
                   <RatingStars rating={review.rating} size="sm" showValue />
                 </div>
-                {review.is_verified_purchase && (
+                {review.is_verified && (
                   <Badge variant="secondary" className="gap-1">
                     <CheckCircle className="h-3 w-3" />
                     شراء موثق
@@ -56,28 +60,8 @@ export function ReviewList({ reviews, productId }: ReviewListProps) {
               </span>
             </div>
 
-            <h4 className="font-semibold mb-2">{review.title}</h4>
-            <p className="text-muted-foreground mb-4">{review.comment}</p>
-
-            {review.images && review.images.length > 0 && (
-              <div className="grid grid-cols-3 gap-2 mb-4">
-                {review.images.map((image) => (
-                  <div key={image.id} className="relative aspect-square rounded-lg overflow-hidden">
-                    <Image
-                      src={image.image}
-                      alt={image.alt_text || 'Review image'}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {review.helpful_count > 0 && (
-              <p className="text-xs text-muted-foreground">
-                {review.helpful_count} شخص وجد هذا مفيداً
-              </p>
+            {review.comment && (
+              <p className="text-muted-foreground mb-4">{review.comment}</p>
             )}
           </CardContent>
         </Card>
@@ -85,4 +69,3 @@ export function ReviewList({ reviews, productId }: ReviewListProps) {
     </div>
   );
 }
-

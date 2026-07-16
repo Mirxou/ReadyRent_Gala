@@ -2316,3 +2316,102 @@ Stage Summary:
 - **Pages working**: 28/29 (97%) — only /bookings is 404 (no standalone page, handled in /dashboard/orders)
 - **APIs working**: 100% of tested endpoints return 200 with real data
 - **Zero compilation errors** after all fixes
+---
+Task ID: 2-g
+Agent: Password + API Consistency Fix Agent
+Task: Fix password reset validation, standardize API client usage
+
+Work Log:
+- Changed password minimum length validation in `/app/api/auth/reset-password/route.ts` from 6 → 8 characters to match frontend requirement
+- Updated Arabic/English error messages to reflect the new 8-char minimum
+- Removed `uid` parameter from `authApi.passwordResetConfirm` in `lib/api.ts` (API never used it)
+- Updated `/app/reset-password/page.tsx` call to `authApi.passwordResetConfirm(token, password, passwordConfirm)` — removed `uid` argument
+- Replaced raw `fetch('/api/services?limit=50')` with `servicesApi.getAll({ limit: 50 })` in `/app/services/page.tsx`
+- Replaced raw `fetch('/api/services/book', ...)` with `servicesApi.book(...)` in `/app/services/page.tsx` BookingDialog
+- Added `servicesApi` import to services page
+- Fixed duplicate `bookingsApi` import in `/app/dashboard/orders/page.tsx` (was already migrated to use `bookingsApi.getAll()`)
+
+Stage Summary:
+- Password reset validation is now consistent: both frontend and backend enforce minimum 8 characters
+- Removed dead `uid` parameter from password reset API call chain
+- Services page now uses `servicesApi` from `lib/api.ts` instead of raw `fetch`
+- Orders page already used `bookingsApi` — cleaned up duplicate import
+- No new lint errors introduced (all errors are pre-existing `no-explicit-any`)
+---
+Task ID: 2-b
+Agent: Reviews Fix Agent
+Task: Fix ReviewForm missing product_id + ReviewList data shape mismatch
+
+Work Log:
+- Read worklog.md, review-form.tsx, review-list.tsx, /api/reviews/create/route.ts, /api/reviews/route.ts to understand the actual data flow
+- Identified Bug 1: ReviewForm mutation was sending `{ booking_id, rating, comment: title+'\n'+comment }` but the API requires `product_id` and separate `title`/`comment` fields
+- Fixed review-form.tsx line 26: added `product_id: productId` and changed `comment: title + '\n' + comment` to `title, comment` as separate fields
+- Identified Bug 2: ReviewList interface had `user_email`, `user_username`, `is_verified_purchase`, `helpful_count`, `images` but the API returns `user.username`, `reviewer_name`, `is_verified`, `comment`, `created_at`
+- Rewrote review-list.tsx: replaced interface with correct API shape (ReviewUser nested, is_verified, reviewer_name, comment as nullable string)
+- Removed unused `Image` import and `images`/`helpful_count`/`title` rendering sections (not in API response)
+- Removed unused `productId` prop from ReviewListProps to fix lint warning
+- Updated callers: removed `productId` prop from `<ReviewList>` in app/products/[id]/page.tsx
+- Fixed app/artisans/[id]/page.tsx line 196: changed `review.user_email` to `review.user?.username || review.reviewer_name`
+
+Stage Summary:
+- ReviewForm now sends `product_id`, `booking_id`, `rating`, `title`, `comment` matching API expectations
+- ReviewList interface and rendering fully aligned with actual API response shape
+- No new lint errors introduced in changed files
+---
+Task ID: 2-c
+Agent: Booking Status Fix Agent
+Task: Add booking status transition UI + fix search in orders page
+
+Work Log:
+- Added `updateStatus(id, status)` method to `bookingsApi` in `lib/api.ts` — calls `PATCH /api/bookings/{id}/status` with `{ status }` body
+- Fixed orders list page (`app/dashboard/orders/page.tsx`):
+  - Replaced raw `fetch('/api/bookings')` with `bookingsApi.getAll()` from the unified API client
+  - Added `searchQuery` state and wired the search Input's `onChange` handler
+  - Client-side filtering by product name (`product_name` or `product.name_ar`) and booking ID (string match, case-insensitive)
+  - Updated `statusConfig` colors to match spec: pending=yellow, confirmed=blue, active=green, completed=emerald, cancelled=red
+- Fixed order detail page (`app/dashboard/orders/[id]/page.tsx`):
+  - Imported `useAuthStore` to get current user and `useQueryClient` for cache invalidation
+  - Added `updateStatusMutation` using `bookingsApi.updateStatus()` with success toast and query invalidation
+  - Added status transition buttons (SovereignButton) in the header area, only visible to booking owner:
+    - `pending` → "تأكيد الحجز" (green button) → `{ status: 'confirmed' }`
+    - `confirmed` → "تفعيل الحجز" (blue button) → `{ status: 'active' }`
+    - `active` → "إتمام الحجز" (gold button) → `{ status: 'completed' }`
+  - Added `statusBadgeColors` map and `statusLabels` map for proper Arabic status badge rendering
+  - Updated existing hardcoded status badge to use the dynamic color map
+
+Stage Summary:
+- Booking status state machine (pending→confirmed→active→completed) now fully wired from UI to API
+- Search input in orders list filters bookings client-side by product name or booking ID
+- Orders list uses unified `bookingsApi.getAll()` instead of raw fetch
+- Status badge colors follow spec across both list and detail pages
+- No new lint errors introduced in modified files
+
+---
+Task ID: 2-de
+Agent: Dispute Fix Agent
+Task: Fix dispute dashboard detail with real API data, wire chat, fix appeals
+
+Work Log:
+- Replaced inefficient `getDisputes().find()` with direct `disputesApi.getDispute(id)` in dashboard dispute detail
+- Replaced hardcoded timeline with dynamic `buildTimelineFromHistory()` that derives stages from dispute status flow and history API data
+- Replaced hardcoded chat messages with real messages from dispute detail response (`messages` relation), with type-based styling (system=centered, appeal=orange banner, message=chat bubbles with sender info)
+- Wired chat input to `disputesApi.createDisputeMessage(id, { content: text })` with Enter key support, loading state, and query invalidation
+- Replaced hardcoded evidence vault with real `evidence_urls` from dispute data, showing images inline and documents with filenames
+- Added booking info card showing product name, image, and price from dispute.booking relation
+- Added `appeal(id, data)` method to `disputesApi` in lib/api.ts
+- Removed duplicate `getDisputeStatus` and `getDisputeVerdict` methods (both were identical to `getDispute`)
+- Fixed appeal page to use single `disputesApi.getDispute(id)` query instead of separate status/verdict calls
+- Fixed appeal guard logic: checks `dispute?.status === 'resolved' || dispute?.status === 'closed'` instead of checking for a non-existent verdict object
+- Replaced raw `fetch()` in appeal mutation with `disputesApi.appeal(id, data)`
+- Fixed verdict summary section in appeal page to show dispute fields (title, claim_type, description, claimed_amount, status) instead of missing verdict properties
+- Updated `app/disputes/[id]/page.tsx` to use `getDispute` instead of removed `getDisputeStatus`/`getDisputeVerdict`
+- Status colors follow spec: filed=yellow, under_review=blue, mediation=purple, appealed=orange, resolved=green, closed=gray
+- Fixed TypeScript errors: removed non-existent `Appeal` import, handled `string | undefined` from `useParams()`, removed unused imports
+- All modified files pass `tsc --noEmit` with no new errors
+
+Stage Summary:
+- Dashboard dispute detail now fetches single dispute efficiently, shows real timeline from history API, real chat messages with type-based styling, and real evidence from dispute data
+- Chat is fully functional: send messages, auto-scroll, loading states, disabled when resolved/closed
+- `disputesApi` now has `appeal()` method; duplicate methods removed
+- Appeal page correctly checks dispute status (resolved/closed) instead of non-existent verdict object
+- Appeal page uses `disputesApi.appeal()` instead of raw fetch

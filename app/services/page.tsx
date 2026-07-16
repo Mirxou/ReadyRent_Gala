@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { motion, useInView, type Variants } from 'framer-motion';
 import { useRef, useState, useEffect, useCallback } from 'react';
 import { SovereignButton } from "@/shared/components/sovereign/sovereign-button";
+import { servicesApi } from '@/lib/api';
 import { GlassPanel } from "@/shared/components/sovereign/glass-panel";
 import { SovereignGlow, SovereignSparkle } from '@/shared/components/sovereign/sovereign-sparkle';
 import { DignifiedLoader } from '@/shared/components/sovereign/dignified-loader';
@@ -91,20 +92,14 @@ function BookingDialog({
       }
       setIsSubmitting(true);
       try {
-        const res = await fetch('/api/services/book', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({
-            serviceId: service.id,
-            date: formData.date,
-            phone: formData.phone,
-            notes: formData.notes,
-          }),
+        const res = await servicesApi.book({
+          serviceId: service.id,
+          date: formData.date,
+          phone: formData.phone,
+          notes: formData.notes,
         });
-        const json = await res.json();
-        if (!res.ok || !json.success) {
-          throw new Error(json.message_ar || 'Booking failed');
+        if (res.status >= 400 || res.meta?.failed) {
+          throw new Error(res.data?.message_ar || 'Booking failed');
         }
         onOpenChange(false);
         setFormData({ date: '', phone: '', notes: '' });
@@ -359,10 +354,9 @@ function FeaturedServices({
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/services?limit=50', { credentials: 'include' })
-      .then((res) => res.json())
-      .then((json: any) => {
-        const data = Array.isArray(json.data) ? json.data : [];
+    servicesApi.getAll({ limit: 50 })
+      .then((res) => {
+        const data = Array.isArray(res.data) ? res.data : [];
         setServices(data);
       })
       .catch(() => setServices([]))

@@ -6,10 +6,15 @@ import Link from 'next/link';
 import { disputesApi } from '@/lib/api';
 
 type DisputeHistoryStage = {
-  phase: string;
-  label_ar: string;
+  phase?: string;
+  label_ar?: string;
   timestamp?: string;
   description?: string;
+  type?: string;
+  message?: string;
+  created_at?: string;
+  is_status_change?: boolean;
+  status?: string;
 };
 import { SovereignSeal } from '@/shared/components/sovereign/sovereign-seal';
 import { JusticeReceipt } from '@/shared/components/sovereign/justice-receipt';
@@ -19,16 +24,14 @@ import { AIDisputeAssistant } from '@/components/disputes/AIDisputeAssistant';
 import { AlertCircle, Scale } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-// Map backend phase names to Arabic labels
-const PHASE_LABELS: Record<string, string> = {
+// Map backend status names to Arabic labels
+const STATUS_LABELS: Record<string, string> = {
   'filed': 'تقديم النزاع',
-  'evidence_collection': 'جمع الأدلة',
-  'mediation': 'جلسة الوساطة',
   'under_review': 'قيد المراجعة القضائية',
-  'judgment_issued': 'صدور الحكم',
-  'appeal': 'مرحلة الاستئناف',
+  'mediation': 'جلسة الوساطة',
+  'appealed': 'مرحلة الاستئناف',
+  'resolved': 'تم الفصل',
   'closed': 'القضية مغلقة',
-  'Completed': 'مكتملة',
 };
 
 function buildFallbackStages(dispute: any): DisputeHistoryStage[] {
@@ -36,15 +39,12 @@ function buildFallbackStages(dispute: any): DisputeHistoryStage[] {
     {
       label_ar: 'إنشاء النزاع',
       timestamp: dispute?.created_at,
-      status: 'completed',
     },
     {
       label_ar: 'التحليل والتصنيف',
-      status: 'completed',
     },
     {
-      label_ar: PHASE_LABELS[dispute?.current_phase] || dispute?.current_phase || 'قيد المعالجة',
-      status: dispute?.current_phase === 'Completed' ? 'completed' : 'active',
+      label_ar: STATUS_LABELS[dispute?.status] || dispute?.status || 'قيد المعالجة',
     },
   ];
 }
@@ -60,7 +60,8 @@ export default function DisputeDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [dispute, setDispute] = useState<any | null>(null);
   const [receiptStages, setReceiptStages] = useState<DisputeHistoryStage[]>([]);
-  const [verdict, setVerdict] = useState<any | null>(null);
+
+  const isResolved = dispute?.status === 'resolved' || dispute?.status === 'closed';
 
   useEffect(() => {
     async function fetchDisputeData() {
@@ -70,42 +71,30 @@ export default function DisputeDetailPage() {
         setMode('DISPUTE');
         setLoading(true);
 
-        const statusRes = await disputesApi.getDisputeStatus(Number(id));
+        // Single fetch for dispute (replaces getDisputeStatus + getDisputeVerdict)
+        const res = await disputesApi.getDispute(id);
 
-        if (statusRes.status === 'sovereign_halt') {
+        if (res.meta?.failed) {
           setLoading(false);
           return;
         }
 
-        setDispute(statusRes.data);
+        setDispute(res.data);
 
-        if (statusRes.visual_assets) {
-          setVisualAssets(statusRes.visual_assets);
-          setMode(statusRes.visual_assets.mode);
-        }
-
-        if (statusRes.data?.current_phase === 'Completed') {
-          try {
-            const verdictRes = await disputesApi.getDisputeVerdict(Number(id));
-            if (verdictRes.data) {
-              setVerdict(verdictRes.data);
-              setMode('VERDICT');
-            }
-          } catch (e) {
-            // Verdict fetch skipped or failed
-          }
+        if (res.data?.status === 'resolved' || res.data?.status === 'closed') {
+          setMode('VERDICT');
         }
 
         // Try real backend history, fallback to intelligent stage construction
         try {
-          const historyRes = await disputesApi.getDisputeHistory(Number(id));
+          const historyRes = await disputesApi.getDisputeHistory(id);
           if (historyRes.data && Array.isArray(historyRes.data) && historyRes.data.length > 0) {
             setReceiptStages(historyRes.data);
           } else {
-            setReceiptStages(buildFallbackStages(statusRes.data));
+            setReceiptStages(buildFallbackStages(res.data));
           }
         } catch {
-          setReceiptStages(buildFallbackStages(statusRes.data));
+          setReceiptStages(buildFallbackStages(res.data));
         }
 
       } catch (err) {
@@ -151,14 +140,14 @@ export default function DisputeDetailPage() {
               ملف النزاع #{id}
             </h1>
             <div className="text-sm text-slate-500 font-mono">
-              PHASE: {dispute?.current_phase}
+              STATUS: {dispute?.status} {dispute?.claim_type ? `| TYPE: ${dispute.claim_type}` : ''}
             </div>
           </div>
           <SovereignSeal
-            type={verdict ? 'BALANCE_GOLD' : 'SHIELD_SILVER'}
+            type={isResolved ? 'BALANCE_GOLD' : 'SHIELD_SILVER'}
             refId={`DSP-${id}`}
             className="w-24 h-24"
-            animate={!verdict}
+            animate={!isResolved}
           />
         </div>
       </header>
@@ -166,28 +155,24 @@ export default function DisputeDetailPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-8">
 
-          {/* Verdict Card */}
-          {verdict && (
+          {/* Resolution Summary Card (replaces verdict card) */}
+          {isResolved && (
             <div className="bg-white dark:bg-slate-900 p-8 rounded-xl shadow-xl border-t-4 border-amber-500">
-              <h2 className="text-2xl font-serif font-bold text-amber-600 mb-4">الحُكم القضائي</h2>
-              <p className="text-lg text-slate-800 dark:text-slate-200 leading-relaxed">
-                {verdict.ruling_text || 'تم الفصل في النزاع.'}
-              </p>
-              {verdict.renter_share !== undefined && (
-                <div className="mt-4 flex gap-3 text-sm">
-                  <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full font-bold">
-                    المستأجر: {verdict.renter_share}%
-                  </span>
-                  <span className="bg-amber-100 text-amber-700 px-3 py-1 rounded-full font-bold">
-                    المالك: {100 - verdict.renter_share}%
-                  </span>
-                </div>
-              )}
+              <h2 className="text-2xl font-serif font-bold text-amber-600 mb-4">ملخص الفصل في القضية</h2>
+              <div className="text-lg text-slate-800 dark:text-slate-200 leading-relaxed space-y-3">
+                <p><strong>العنوان:</strong> {dispute?.title || 'بدون عنوان'}</p>
+                {dispute?.description && (
+                  <p><strong>الوصف:</strong> {dispute.description}</p>
+                )}
+                <p><strong>نوع الطلب:</strong> {dispute?.claim_type || 'عام'}</p>
+                <p><strong>المبلغ المطالب:</strong> {dispute?.claimed_amount || 0} دج</p>
+                <p><strong>الحالة النهائية:</strong> {dispute?.status}</p>
+              </div>
               <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 text-sm text-slate-500 flex justify-between">
-                <span>القاضي: Sovereign Core</span>
+                <span>بواسطة: Sovereign Core</span>
                 <span>
-                  التاريخ: {verdict.finalized_at 
-                    ? new Date(verdict.finalized_at).toLocaleDateString('ar-DZ') 
+                  التاريخ: {dispute?.updated_at
+                    ? new Date(dispute.updated_at).toLocaleDateString('ar-DZ')
                     : 'N/A'}
                 </span>
               </div>
@@ -216,14 +201,14 @@ export default function DisputeDetailPage() {
             ) : (
               <p className="text-slate-400 italic">لا توجد تفاصيل إضافية متاحة حالياً.</p>
             )}
-            {dispute?.claimed_amount && (
+            {dispute?.claimed_amount ? (
               <div className="mt-4 flex items-center gap-2 text-sm text-slate-500">
                 <span className="font-medium">المبلغ المطالب به:</span>
                 <span className="font-bold text-slate-800 dark:text-slate-200">
                   {dispute.claimed_amount} دج
                 </span>
               </div>
-            )}
+            ) : null}
           </div>
         </div>
 
@@ -232,7 +217,6 @@ export default function DisputeDetailPage() {
           <JusticeReceipt
             stages={receiptStages}
             disputeId={id || ''}
-            finalVerdict={verdict?.verdict}
           />
         </div>
       </div>

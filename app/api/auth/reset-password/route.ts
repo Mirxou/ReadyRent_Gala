@@ -41,13 +41,13 @@ export async function POST(request: Request) {
     }
 
     // Validate password strength
-    if (password.length < 6) {
+    if (password.length < 8) {
       return NextResponse.json(
         {
           success: false,
           dignity_preserved: true,
-          message_ar: 'كلمة المرور يجب أن تكون 6 أحرف على الأقل',
-          message_en: 'Password must be at least 6 characters',
+          message_ar: 'كلمة المرور يجب أن تكون 8 أحرف على الأقل',
+          message_en: 'Password must be at least 8 characters',
           code: 'WEAK_PASSWORD',
         },
         { status: 400 }

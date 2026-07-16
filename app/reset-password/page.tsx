@@ -62,7 +62,7 @@ export default function ResetPasswordPage() {
 
     setIsLoading(true);
     try {
-      await authApi.passwordResetConfirm(token, uid, password, passwordConfirm);
+      await authApi.passwordResetConfirm(token, password, passwordConfirm);
       setSuccess(true);
       toast.success('تم إعادة تعيين كلمة المرور بنجاح');
       

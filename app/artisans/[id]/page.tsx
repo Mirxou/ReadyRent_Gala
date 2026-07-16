@@ -193,7 +193,7 @@ export default function ArtisanDetailPage() {
                     <div key={review.id} className="border-b pb-4 last:border-0">
                       <div className="flex items-start justify-between mb-2">
                         <div>
-                          <p className="font-semibold">{review.user_email}</p>
+                          <p className="font-semibold">{review.user?.username || review.reviewer_name}</p>
                           <div className="flex items-center gap-2 mt-1">
                             <RatingStars rating={review.rating} size="sm" />
                             <span className="text-xs text-muted-foreground">

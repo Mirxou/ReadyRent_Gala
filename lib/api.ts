@@ -127,8 +127,8 @@ export const authApi = {
     apiFetch('auth/profile'),
   passwordResetRequest: (email: string) =>
     apiFetch('auth/forgot-password', { method: 'POST', body: { email } }),
-  passwordResetConfirm: (token: string, uid: string, password: string, passwordConfirm: string) =>
-    apiFetch('auth/reset-password', { method: 'POST', body: { token, uid, password, password_confirm: passwordConfirm } }),
+  passwordResetConfirm: (token: string, password: string, passwordConfirm: string) =>
+    apiFetch('auth/reset-password', { method: 'POST', body: { token, password, password_confirm: passwordConfirm } }),
 };
 
 export const productsApi = {
@@ -145,6 +145,7 @@ export const bookingsApi = {
   create: (data: any) => apiFetch('bookings/create', { method: 'POST', body: data }),
   getAll: () => apiFetch('bookings'),
   getById: (id: string) => apiFetch(`bookings/${id}`),
+  updateStatus: (id: string, status: string) => apiFetch(`bookings/${id}/status`, { method: 'PATCH', body: { status } }),
   getCart: () => apiFetch('bookings/cart'),
   addToCart: (data: any) => apiFetch('bookings/cart/items', { method: 'POST', body: data }),
   removeFromCart: (id: number) => apiFetch(`bookings/cart/items/${id}`, { method: 'DELETE' }),
@@ -156,12 +157,12 @@ export const bookingsApi = {
 
 export const disputesApi = {
   getDisputes: (params?: any) => apiFetch('disputes', { params }),
-  getDispute: (id: string) => apiFetch(`disputes/${id}`),
+  getDispute: (id: string | number) => apiFetch(`disputes/${id}`),
   createDispute: (data: any) => apiFetch('disputes/create', { method: 'POST', body: data }),
-  createDisputeMessage: (id: string, data: any) => apiFetch(`disputes/${id}/messages`, { method: 'POST', body: data }),
-  getDisputeHistory: (id: number) => apiFetch(`disputes/${id}/history`),
-  getDisputeStatus: (id: number) => apiFetch(`disputes/${id}`),
-  getDisputeVerdict: (id: number) => apiFetch(`disputes/${id}`),
+  createDisputeMessage: (id: string | number, data: any) => apiFetch(`disputes/${id}/messages`, { method: 'POST', body: data }),
+  getDisputeHistory: (id: string | number) => apiFetch(`disputes/${id}/history`),
+  appeal: (id: string | number, data: { reason: string; description: string }) =>
+    apiFetch(`disputes/${id}/appeal`, { method: 'POST', body: data }),
 };
 
 export const adminApi = {

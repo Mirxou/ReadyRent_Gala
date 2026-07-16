@@ -3,6 +3,7 @@
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { bookingsApi, disputesApi } from '@/lib/api';
+import { useAuthStore } from '@/lib/store';
 import { 
   ShieldCheck, 
   Calendar, 
@@ -32,6 +33,7 @@ import Link from 'next/link';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { cn, formatNumber } from '@/lib/utils';
+import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -40,12 +42,26 @@ import { Textarea } from '@/components/ui/textarea';
 export default function BookingDetailsPage() {
   const { id } = useParams();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [isDisputeModalOpen, setIsDisputeModalOpen] = React.useState(false);
   const [disputeReason, setDisputeReason] = React.useState('');
+  const { user } = useAuthStore();
 
   const { data: booking, isLoading } = useQuery({
     queryKey: ['booking', id],
     queryFn: () => bookingsApi.getById(id as string).then(res => res.data),
+  });
+
+  const updateStatusMutation = useMutation({
+    mutationFn: ({ bookingId, status }: { bookingId: string; status: string }) =>
+      bookingsApi.updateStatus(bookingId, status),
+    onSuccess: () => {
+      toast.success('تم تحديث حالة الحجز بنجاح');
+      queryClient.invalidateQueries({ queryKey: ['booking', id] });
+    },
+    onError: (error: any) => {
+      toast.error(error?.data?.error || 'فشل في تحديث حالة الحجز');
+    },
   });
 
   const createDisputeMutation = useMutation({
@@ -83,6 +99,34 @@ export default function BookingDetailsPage() {
 
   if (!booking) return <div className="p-20 text-center">Agreement Not Found</div>;
 
+  // Check if current user is the booking owner
+  const isOwner = user && (user.id === booking.userId || user.id === booking.user_id);
+
+  // Status transition config
+  const statusTransitions: Record<string, { nextStatus: string; label: string; className: string } | null> = {
+    pending: { nextStatus: 'confirmed', label: 'تأكيد الحجز', className: 'bg-green-600 border-green-600 text-white hover:bg-green-500' },
+    confirmed: { nextStatus: 'active', label: 'تفعيل الحجز', className: 'bg-blue-600 border-blue-600 text-white hover:bg-blue-500' },
+    active: { nextStatus: 'completed', label: 'إتمام الحجز', className: 'bg-sovereign-gold border-sovereign-gold text-sovereign-black hover:bg-sovereign-gold-light' },
+  };
+
+  const statusBadgeColors: Record<string, string> = {
+    pending: 'bg-yellow-500/10 text-yellow-500',
+    confirmed: 'bg-blue-500/10 text-blue-500',
+    active: 'bg-green-500/10 text-green-500',
+    completed: 'bg-emerald-500/10 text-emerald-500',
+    cancelled: 'bg-red-500/10 text-red-500',
+  };
+
+  const transition = statusTransitions[booking.status];
+
+  const statusLabels: Record<string, string> = {
+    pending: 'قيد المراجعة',
+    confirmed: 'مؤكد',
+    active: 'نشط',
+    completed: 'مكتمل',
+    cancelled: 'ملغي',
+  };
+
   return (
     <div className="space-y-12 pb-20 text-right" dir="rtl">
       
@@ -96,10 +140,21 @@ export default function BookingDetailsPage() {
                 صك العقد السيادي <span className="text-sovereign-gold">#ST-{booking.id.toString().padStart(6, '0')}</span>
             </h1>
         </div>
-        <div className="flex gap-4">
+        <div className="flex gap-4 flex-wrap">
             <SovereignButton variant="secondary" size="sm" className="gap-2" onClick={() => toast.info('جارٍ تحميل نسخة PDF...')}>
                 <Download className="w-4 h-4" /> تحميل نسخة PDF
             </SovereignButton>
+            {isOwner && transition && (
+              <SovereignButton
+                variant="secondary"
+                size="sm"
+                className={cn("gap-2", transition.className)}
+                isLoading={updateStatusMutation.isPending}
+                onClick={() => updateStatusMutation.mutate({ bookingId: booking.id, status: transition.nextStatus })}
+              >
+                {transition.label}
+              </SovereignButton>
+            )}
         </div>
       </div>
 
@@ -175,9 +230,9 @@ export default function BookingDetailsPage() {
                             </div>
                             <Badge className={cn(
                                 "px-4 py-1.5 text-xs font-black uppercase rounded-full",
-                                booking.status === 'confirmed' ? "bg-emerald-500/10 text-emerald-500" : "bg-sovereign-blue/10 text-sovereign-blue"
+                                statusBadgeColors[booking.status] || 'bg-sovereign-blue/10 text-sovereign-blue'
                             )}>
-                                {booking.status}
+                                {statusLabels[booking.status] || booking.status}
                             </Badge>
                         </div>
 

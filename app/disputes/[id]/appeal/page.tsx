@@ -39,36 +39,28 @@ export default function AppealFilingPage() {
   const [customText, setCustomText] = useState('');
   const [step, setStep] = useState<'form' | 'success'>('form');
 
-  // Get dispute + verdict
-  const { data: statusRes, isLoading: loadingDispute } = useQuery({
-    queryKey: ['dispute-status', disputeId],
-    queryFn: () => disputesApi.getDisputeStatus(Number(disputeId)).then(res => res.data),
+  // Get dispute — single query instead of separate status/verdict
+  const { data: dispute, isLoading } = useQuery({
+    queryKey: ['dispute', disputeId],
+    queryFn: () => disputesApi.getDispute(String(disputeId)).then(res => res.data),
     enabled: !!disputeId,
   });
 
-  const { data: verdictRes, isLoading: loadingVerdict } = useQuery({
-    queryKey: ['dispute-verdict', disputeId],
-    queryFn: () => disputesApi.getDisputeVerdict(Number(disputeId)).then(res => res.data),
-    enabled: !!disputeId,
-  });
-
-  const dispute = statusRes?.data;
-  const verdict = verdictRes?.data;
+  const canAppeal = dispute?.status === 'resolved' || dispute?.status === 'closed';
 
   const { mutate: fileAppeal, isPending } = useMutation({
     mutationFn: async () => {
-      if (!verdict?.id) throw new Error('لم يتم العثور على حكم للطعن فيه');
+      if (!canAppeal) throw new Error('لا يمكن تقديم استئناف على هذه القضية');
       const reason =
-        selectedReason === 'other' ? customText : `${selectedReason}: ${customText}`;
-      const res = await fetch(`/api/disputes/${disputeId}/appeal`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reason, description: customText }),
-        credentials: 'include',
+        selectedReason === 'other' ? customText.trim() : `${selectedReason}: ${customText.trim()}`;
+      const res = await disputesApi.appeal(String(disputeId), {
+        reason,
+        description: customText.trim(),
       });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json?.error || 'فشل تقديم الاستئناف');
-      return json;
+      if (res.meta?.failed || res.status >= 400) {
+        throw new Error(res.data?.error || 'فشل تقديم الاستئناف');
+      }
+      return res.data;
     },
     onSuccess: () => {
       trackAppealFiled(Number(disputeId), selectedReason);
@@ -80,7 +72,6 @@ export default function AppealFilingPage() {
     },
   });
 
-  const isLoading = loadingDispute || loadingVerdict;
   const canSubmit = selectedReason && (selectedReason !== 'other' || customText.trim().length > 20);
 
   if (isLoading) {
@@ -91,8 +82,8 @@ export default function AppealFilingPage() {
     );
   }
 
-  // Guard: only allow appeal on completed disputes with verdicts
-  if (!verdict) {
+  // Guard: only allow appeal on resolved/closed disputes
+  if (!dispute || !canAppeal) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4 p-8 bg-slate-50 dark:bg-slate-950">
         <AlertTriangle className="w-12 h-12 text-amber-500" />
@@ -100,7 +91,9 @@ export default function AppealFilingPage() {
           لا يمكن تقديم استئناف
         </h2>
         <p className="text-slate-500 text-center max-w-sm">
-          لم يصدر حكم بعد في هذه القضية، أو أن القضية لا تزال قيد النظر.
+          {dispute
+            ? `حالة القضية الحالية هي "${dispute.status}" — يمكن تقديم الاستئناف فقط بعد الفصل أو الإغلاق.`
+            : 'لم يتم العثور على القضية، أو أن القضية لا تزال قيد النظر.'}
         </p>
         <Link href={`/disputes/${disputeId}`}>
           <Button variant="outline">العودة إلى ملف القضية</Button>
@@ -151,25 +144,21 @@ export default function AppealFilingPage() {
                 </p>
               </div>
 
-              {/* Verdict summary */}
+              {/* Dispute resolution summary (from dispute object, not a verdict) */}
               <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-2xl p-5">
                 <h3 className="text-sm font-bold text-amber-700 dark:text-amber-300 mb-3 flex items-center gap-2">
                   <Gavel className="w-4 h-4" />
-                  الحكم المطعون فيه
+                  ملخص الفصل في القضية
                 </h3>
-                <p className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
-                  {verdict.ruling_text || 'حكم قاطع'}
-                </p>
-                {verdict.renter_share !== undefined && (
-                  <div className="mt-3 flex gap-3 text-xs">
-                    <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-bold">
-                      المستأجر: {verdict.renter_share}%
-                    </span>
-                    <span className="bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-bold">
-                      المالك: {100 - verdict.renter_share}%
-                    </span>
-                  </div>
-                )}
+                <div className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed space-y-2">
+                  <p><strong>العنوان:</strong> {dispute.title || 'بدون عنوان'}</p>
+                  <p><strong>نوع الطلب:</strong> {dispute.claim_type || 'عام'}</p>
+                  {dispute.description && (
+                    <p><strong>الوصف:</strong> {dispute.description}</p>
+                  )}
+                  <p><strong>المبلغ المطالب:</strong> {dispute.claimed_amount || 0} دج</p>
+                  <p><strong>الحالة الحالية:</strong> {dispute.status}</p>
+                </div>
               </div>
 
               {/* Warning */}

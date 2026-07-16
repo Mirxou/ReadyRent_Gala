@@ -397,7 +397,7 @@ export default function ProductDetailsPage() {
             </div>
             <GlassPanel className="p-10 space-y-10" gradientBorder>
               <div className="space-y-6">
-                <ReviewList reviews={productReviews || []} productId={product.id} />
+                <ReviewList reviews={productReviews || []} />
               </div>
               <div className="border-t border-white/5 pt-8">
                 <h4 className="text-lg font-bold mb-6">أضف تقييمك</h4>

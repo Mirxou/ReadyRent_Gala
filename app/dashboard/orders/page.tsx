@@ -21,21 +21,16 @@ import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
 import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
 import Link from 'next/link';
 import { cn, formatNumber } from '@/lib/utils';
+import { bookingsApi } from '@/lib/api';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 
-async function fetchBookings() {
-  const res = await fetch('/api/bookings');
-  const json = await res.json();
-  return json.data || [];
-}
-
 const statusConfig: Record<string, { label: string; className: string }> = {
   pending: { label: 'قيد المراجعة', className: 'bg-yellow-500/10 text-yellow-500 shadow-sm shadow-yellow-500/10' },
-  confirmed: { label: 'سيادية', className: 'bg-emerald-500/10 text-emerald-500 shadow-sm shadow-emerald-500/10' },
-  active: { label: 'نشط', className: 'bg-emerald-500/10 text-emerald-500 shadow-sm shadow-emerald-500/10' },
-  completed: { label: 'تاريخية', className: 'bg-blue-500/10 text-blue-500' },
+  confirmed: { label: 'مؤكد', className: 'bg-blue-500/10 text-blue-500 shadow-sm shadow-blue-500/10' },
+  active: { label: 'نشط', className: 'bg-green-500/10 text-green-500 shadow-sm shadow-green-500/10' },
+  completed: { label: 'مكتمل', className: 'bg-emerald-500/10 text-emerald-500 shadow-sm shadow-emerald-500/10' },
   cancelled: { label: 'ملغاة', className: 'bg-red-500/10 text-red-500' },
   rejected: { label: 'مرفوض', className: 'bg-red-500/10 text-red-500' },
 };
@@ -43,14 +38,23 @@ const statusConfig: Record<string, { label: string; className: string }> = {
 export default function OrdersPage() {
     const router = useRouter();
     const [activeTab, setActiveTab] = useState('all');
+    const [searchQuery, setSearchQuery] = useState('');
     const { data: bookings, isLoading } = useQuery({
       queryKey: ['bookings'],
-      queryFn: fetchBookings,
+      queryFn: () => bookingsApi.getAll().then(res => res.data),
     });
 
     const filteredBookings = (bookings || []).filter((b: any) => {
-      if (activeTab === 'all') return true;
-      return b.status === activeTab;
+      // Tab filter
+      if (activeTab !== 'all' && b.status !== activeTab) return false;
+      // Search filter
+      if (searchQuery.trim()) {
+        const q = searchQuery.trim().toLowerCase();
+        const productName = (b.product_name || b.product?.name_ar || '').toLowerCase();
+        const bookingId = String(b.id).toLowerCase();
+        return productName.includes(q) || bookingId.includes(q);
+      }
+      return true;
     });
 
     const formatRelativeTime = (dateStr: string) => {
@@ -100,6 +104,8 @@ export default function OrdersPage() {
                     <Input 
                         placeholder="البحث في الأصول أو الهويات..." 
                         className="pl-10 pr-6 h-12 bg-white/5 border-white/5 rounded-2xl w-full md:w-80 focus:ring-sovereign-gold/30"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
                     />
                 </div>
             </div>
