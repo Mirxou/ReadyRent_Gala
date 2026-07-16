@@ -35,10 +35,11 @@ export function ProductSearch() {
 
   const debouncedQuery = useDebounce(query, 400);
 
-  const { data: categories } = useQuery({
+  const { data: categoriesRaw } = useQuery({
     queryKey: ['categories'],
     queryFn: () => productsApi.getCategories().then(res => res.data),
   });
+  const categories = Array.isArray(categoriesRaw) ? categoriesRaw : [];
 
   const { data: productsData, isLoading } = useQuery({
     queryKey: ['products-search', debouncedQuery, filters],
