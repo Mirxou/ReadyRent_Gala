@@ -24,7 +24,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 interface BookingActionsProps {
   booking: any;
-  onStatusUpdate?: (id: number, status: string) => void;
+  onStatusUpdate?: (id: string, status: string) => void;
   onRefresh?: () => void;
 }
 

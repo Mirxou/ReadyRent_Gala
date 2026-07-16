@@ -5,11 +5,12 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface SalesByCategory {
-  product__category__name_ar: string | null;
-  product__category__name: string | null;
+  name: string;
   count: number;
   revenue: number;
-  avg_price: number;
+  product__category__name_ar?: string;
+  product__category__name?: string;
+  avg_price?: number;
 }
 
 interface SalesByCategoryChartProps {
@@ -18,10 +19,10 @@ interface SalesByCategoryChartProps {
 
 export function SalesByCategoryChart({ data }: SalesByCategoryChartProps) {
   const chartData = data.map((item) => ({
-    category: item.product__category__name_ar || item.product__category__name || 'بدون فئة',
+    category: item.name || item.product__category__name_ar || item.product__category__name || 'بدون فئة',
     revenue: parseFloat(item.revenue.toString()),
     bookings: item.count,
-    avgPrice: parseFloat(item.avg_price.toString()),
+    avgPrice: item.avg_price ? parseFloat(item.avg_price.toString()) : 0,
   }));
 
   return (

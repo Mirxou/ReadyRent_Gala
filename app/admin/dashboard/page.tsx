@@ -109,10 +109,10 @@ export default function AdminDashboardPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-8 pt-0">
-              <div className="text-5xl font-black mb-4">{stats?.active_listings || 0}</div>
+              <div className="text-5xl font-black mb-4">{stats?.active_products || 0}</div>
               <p className="text-sm text-muted-foreground mb-8 flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                {stats?.active_listings || 0} نشط
+                {stats?.active_products || 0} نشط
               </p>
               <Button variant="outline" className="w-full h-14 rounded-2xl border-white/10 hover:bg-white/5 text-lg" asChild>
                 <Link href="/admin/products">
@@ -174,7 +174,7 @@ export default function AdminDashboardPage() {
 
         {/* Revenue Chart Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-12">
-          {revenueData?.revenue && revenueData.revenue.length > 0 && (
+          {revenueData?.data && revenueData.data.length > 0 && (
             <Card className="card-glass border-0 rounded-[2.5rem] overflow-hidden">
               <CardHeader className="p-8">
                 <CardTitle className="text-2xl font-bold flex items-center gap-3">
@@ -184,8 +184,7 @@ export default function AdminDashboardPage() {
               </CardHeader>
               <CardContent className="p-8 pt-0">
                 <RevenueChart
-                  data={revenueData.revenue}
-                  period={revenueData.period}
+                  data={revenueData.data}
                 />
                 <div className="mt-8">
                   <Button variant="outline" className="w-full h-12 rounded-2xl border-white/10" asChild>

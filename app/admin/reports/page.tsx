@@ -1,5 +1,5 @@
 'use client'
-import { formatNumber } from '@/lib/utils';;
+import { formatNumber } from '@/lib/utils';
 
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,11 +8,9 @@ import { adminApi } from '@/lib/api';
 import { useAuthStore } from '@/lib/store';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Download, RefreshCw } from 'lucide-react';
+import { Download } from 'lucide-react';
 import { RevenueChart } from '@/components/admin/revenue-chart';
 import { SalesByCategoryChart } from '@/components/admin/sales-by-category-chart';
-import { SalesByStatusChart } from '@/components/admin/sales-by-status-chart';
-import { TopProductsChart } from '@/components/admin/top-products-chart';
 
 export default function ReportsPage() {
   const router = useRouter();
@@ -33,7 +31,7 @@ export default function ReportsPage() {
     queryKey: ['admin-revenue', days],
     queryFn: () => adminApi.getRevenue({ days }).then((res) => res.data),
     enabled: isAuthenticated && (user?.role === 'admin' || user?.role === 'staff'),
-    refetchInterval: 300000, // Refresh every 5 minutes for reports
+    refetchInterval: 300000,
     refetchOnWindowFocus: true,
   });
 
@@ -41,7 +39,7 @@ export default function ReportsPage() {
     queryKey: ['admin-sales-report', days],
     queryFn: () => adminApi.getSalesReport({ days }).then((res) => res.data),
     enabled: isAuthenticated && (user?.role === 'admin' || user?.role === 'staff'),
-    refetchInterval: 300000, // Refresh every 5 minutes for reports
+    refetchInterval: 300000,
     refetchOnWindowFocus: true,
   });
 
@@ -93,6 +91,11 @@ export default function ReportsPage() {
     );
   }
 
+  // Compute summary from flat API fields
+  const totalBookings = salesReport?.total_bookings || 0;
+  const totalRevenue = salesReport?.total_revenue || 0;
+  const avgBookingValue = totalBookings > 0 ? Math.round(totalRevenue / totalBookings) : 0;
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8 flex items-center justify-between">
@@ -115,48 +118,36 @@ export default function ReportsPage() {
       </div>
 
       {/* Summary Cards */}
-      {salesReport?.summary && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">إجمالي الحجوزات</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{salesReport.summary.total_bookings}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">إجمالي الإيرادات</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {formatNumber(salesReport.summary.total_revenue)} دج
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">متوسط قيمة الحجز</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {formatNumber(salesReport.summary.avg_booking_value)} دج
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">متوسط مدة الكراء</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {salesReport.summary.avg_rental_days.toFixed(1)} يوم
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">إجمالي الحجوزات</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalBookings}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">إجمالي الإيرادات</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {formatNumber(totalRevenue)} دج
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">متوسط قيمة الحجز</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {formatNumber(avgBookingValue)} دج
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Export Buttons */}
       <div className="flex gap-2 mb-6">
@@ -170,70 +161,19 @@ export default function ReportsPage() {
         </Button>
       </div>
 
-      {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        {revenueData?.revenue && (
-          <RevenueChart 
-            data={revenueData.revenue} 
-            period={revenueData.period}
-          />
-        )}
-        {salesReport?.sales_by_status && (
-          <SalesByStatusChart data={salesReport.sales_by_status} />
+      {/* Revenue Chart */}
+      <div className="mb-6">
+        {revenueData?.data && revenueData.data.length > 0 && (
+          <RevenueChart data={revenueData.data} />
         )}
       </div>
 
-      <div className="grid grid-cols-1 gap-6 mb-6">
-        {salesReport?.sales_by_category && salesReport.sales_by_category.length > 0 && (
-          <SalesByCategoryChart data={salesReport.sales_by_category} />
+      {/* Category Chart */}
+      <div className="mb-6">
+        {salesReport?.categories && salesReport.categories.length > 0 && (
+          <SalesByCategoryChart data={salesReport.categories} />
         )}
       </div>
-
-      <div className="grid grid-cols-1 gap-6">
-        {salesReport?.sales_by_product && salesReport.sales_by_product.length > 0 && (
-          <TopProductsChart data={salesReport.sales_by_product} limit={10} />
-        )}
-      </div>
-
-      {/* Top Customers Table */}
-      {salesReport?.top_customers && salesReport.top_customers.length > 0 && (
-        <Card className="mt-6">
-          <CardHeader>
-            <CardTitle>أفضل العملاء</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-right p-2">العميل</th>
-                    <th className="text-right p-2">البريد الإلكتروني</th>
-                    <th className="text-right p-2">عدد الحجوزات</th>
-                    <th className="text-right p-2">إجمالي الإنفاق</th>
-                    <th className="text-right p-2">متوسط قيمة الحجز</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {salesReport.top_customers.map((customer: any, index: number) => (
-                    <tr key={customer.user__id || index} className="border-b">
-                      <td className="p-2">
-                        {customer.user__first_name || customer.user__last_name
-                          ? `${customer.user__first_name || ''} ${customer.user__last_name || ''}`.trim()
-                          : 'مستخدم'}
-                      </td>
-                      <td className="p-2">{customer.user__email}</td>
-                      <td className="p-2">{customer.booking_count}</td>
-                      <td className="p-2">{formatNumber(customer.total_spent)} دج</td>
-                      <td className="p-2">{formatNumber(customer.avg_booking_value)} دج</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }
-

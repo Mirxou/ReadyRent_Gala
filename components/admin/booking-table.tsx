@@ -15,12 +15,11 @@ import { Check, X, Edit, MoreHorizontal } from 'lucide-react';
 import { BookingActions } from './booking-actions';
 
 interface Booking {
-  id: number;
+  id: string;
   user: any;
   product: any;
   start_date: string;
   end_date: string;
-  total_days: number;
   total_price: number;
   status: string;
   created_at: string;
@@ -28,7 +27,7 @@ interface Booking {
 
 interface BookingTableProps {
   bookings: Booking[];
-  onStatusUpdate?: (id: number, status: string) => void;
+  onStatusUpdate?: (id: string, status: string) => void;
   onRefresh?: () => void;
 }
 
@@ -52,6 +51,13 @@ export function BookingTable({ bookings, onStatusUpdate, onRefresh }: BookingTab
       month: 'short',
       day: 'numeric',
     });
+  };
+
+  const getTotalDays = (booking: Booking) => {
+    if (booking.start_date && booking.end_date) {
+      return Math.ceil((new Date(booking.end_date).getTime() - new Date(booking.start_date).getTime()) / (1000 * 60 * 60 * 24));
+    }
+    return 0;
   };
 
   if (!bookings || bookings.length === 0) {
@@ -87,7 +93,7 @@ export function BookingTable({ bookings, onStatusUpdate, onRefresh }: BookingTab
               <TableCell>{booking.product?.name_ar || booking.product?.name || '-'}</TableCell>
               <TableCell>{formatDate(booking.start_date)}</TableCell>
               <TableCell>{formatDate(booking.end_date)}</TableCell>
-              <TableCell>{booking.total_days} يوم</TableCell>
+              <TableCell>{getTotalDays(booking)} يوم</TableCell>
               <TableCell>{Number(booking.total_price).toFixed(0)} دج</TableCell>
               <TableCell>{getStatusBadge(booking.status)}</TableCell>
               <TableCell>{formatDate(booking.created_at)}</TableCell>

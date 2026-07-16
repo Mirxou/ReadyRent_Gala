@@ -178,6 +178,10 @@ export const adminApi = {
   createProduct: (data: any) => apiFetch('products/admin', { method: 'POST', body: data }),
   updateProduct: (id: string, data: any) => apiFetch(`products/admin/${id}`, { method: 'PUT', body: data }),
   deleteProduct: (id: string) => apiFetch(`products/admin/${id}`, { method: 'DELETE' }),
+  getAllBranches: () => apiFetch('admin/branches'),
+  createBranch: (data: any) => apiFetch('admin/branches', { method: 'POST', body: data }),
+  updateBranch: (id: string, data: any) => apiFetch(`admin/branches/${id}`, { method: 'PATCH', body: data }),
+  deleteBranch: (id: string) => apiFetch(`admin/branches/${id}`, { method: 'DELETE' }),
 };
 
 export const reviewsApi = {

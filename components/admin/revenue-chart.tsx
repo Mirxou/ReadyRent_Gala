@@ -6,9 +6,11 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface DailyRevenue {
-  day: string;
+  date?: string;
+  day?: string;
   revenue: number;
-  count: number;
+  bookings?: number;
+  count?: number;
 }
 
 interface RevenueChartProps {
@@ -23,9 +25,9 @@ interface RevenueChartProps {
 export function RevenueChart({ data, period }: RevenueChartProps) {
   // Format data for display
   const chartData = data.map((item) => ({
-    date: new Date(item.day).toLocaleDateString('ar-DZ', { month: 'short', day: 'numeric' }),
+    date: new Date(item.date || item.day || '').toLocaleDateString('ar-DZ', { month: 'short', day: 'numeric' }),
     revenue: parseFloat(item.revenue.toString()),
-    bookings: item.count,
+    bookings: item.bookings || item.count || 0,
   }));
 
   return (

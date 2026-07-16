@@ -11,7 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { MapPin, Plus, Edit, Trash2, Users, Package } from 'lucide-react';
 
 interface Branch {
-  id: number;
+  id: string;
   name: string;
   name_ar: string;
   code: string;
@@ -138,7 +138,7 @@ export default function BranchesPage() {
     setShowForm(true);
   };
 
-  const handleDelete = async (branchId: number) => {
+  const handleDelete = async (branchId: string) => {
     if (!confirm('هل أنت متأكد من حذف هذا الفرع؟')) return;
 
     try {

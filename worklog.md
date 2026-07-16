@@ -2480,3 +2480,66 @@ Stage Summary:
 - **CMS Frontend**: Admin page rewritten to match actual schema, using cmsApi and Sovereign components
 - **Waitlist Frontend**: Field name fixes to match WaitlistItem model (status, preferred_start) and API response format
 - **lib/api.ts**: bookingsApi.removeFromWaitlist type fixed (string not number), cmsApi write methods added
+
+---
+Task ID: 4-a-d
+Agent: Main
+Task: Fix admin dashboard and reports data shape mismatches with actual API responses
+
+Work Log:
+- **components/admin/stats-cards.tsx**: Rewrote StatsCardsProps interface from nested structure (`overall.users`, `this_month.revenue`, etc.) to flat structure matching API (`total_users`, `total_products`, `total_bookings`, `total_revenue`, `active_products`, `pending_bookings`, `completed_bookings`). Updated all StatCard value/subtitle bindings.
+- **app/admin/dashboard/page.tsx**: Changed `stats?.active_listings` → `stats?.active_products` (2 occurrences in hero card). Changed `revenueData?.revenue` → `revenueData?.data` for revenue chart. Removed `period` prop from RevenueChart (not in API).
+- **components/admin/revenue-chart.tsx**: Updated DailyRevenue interface to accept both `date` (API) and `day` (legacy) fields, both `bookings` (API) and `count` (legacy) fields. Mapping logic uses fallback chain: `item.date || item.day`.
+- **components/admin/sales-by-category-chart.tsx**: Updated SalesByCategory interface — `name` is now primary field, `product__category__name_ar`/`product__category__name` are optional fallbacks. `avg_price` made optional with safe fallback.
+- **app/admin/reports/page.tsx**: Rewrote to match actual API shapes:
+  - Summary cards now compute from flat `salesReport.total_bookings` and `salesReport.total_revenue` (including avg_booking_value calculation)
+  - Revenue chart uses `revenueData.data` instead of `revenueData.revenue`
+  - Category chart uses `salesReport.categories` instead of `salesReport.sales_by_category`
+  - Removed SalesByStatusChart, TopProductsChart, and top_customers table (data not provided by API)
+  - Removed unused imports (SalesByStatusChart, TopProductsChart, RefreshCw)
+  - Fixed double-semicolon import typo
+
+Stage Summary:
+- **Admin Dashboard**: StatsCards, hero card, and revenue chart all now consume flat API response correctly
+- **Admin Reports**: Page simplified to show only data the API actually provides — summary cards (computed), revenue chart, and category breakdown chart
+- **No visual redesign** — all changes are data-mapping fixes only
+
+---
+Task ID: 4-b-c
+Agent: Main Orchestrator
+Task: Fix field name mismatches in Product Admin API, Branches page types, adminApi methods, and BookingTable types
+
+Work Log:
+- **Fix 1: Product Admin API field names**
+  - `app/api/products/admin/route.ts` (GET + POST):
+    - Removed `descriptionAr` from search OR clause (Product model has only `description`)
+    - Removed `description_ar: p.descriptionAr` from GET response mapping
+    - Changed `p.dailyRate` → `p.pricePerDay` in GET response mapping
+    - Removed `p.weeklyRate`, `p.monthlyRate` from GET response mapping (fields don't exist)
+    - Changed `p.sizes` → `p.sizeOptions`, `p.colors` → `p.colorOptions` in GET response mapping
+    - In POST handler: changed `dailyRate` → `pricePerDay`, `descriptionAr` → merged into `description`, removed `weeklyRate`/`monthlyRate`/`condition`, changed `sizes` → `sizeOptions`, `colors` → `colorOptions`; added JSON.stringify safety for images/sizes/colors
+  - `app/api/products/admin/[id]/route.ts` (GET + PUT):
+    - Removed `as Record<string, unknown>` cast and raw fallbacks in GET — directly use typed Prisma fields
+    - Changed `raw.dailyRate ?? raw.pricePerDay` → `product.pricePerDay`
+    - Changed `raw.sizes ?? raw.sizeOptions` → `product.sizeOptions`
+    - Changed `raw.colors ?? raw.colorOptions` → `product.colorOptions`
+    - Removed `descriptionAr` conditional spread from GET response
+    - In PUT handler: changed `dailyRate` → `pricePerDay`, removed `weeklyRate`/`monthlyRate`/`condition`, changed `sizes` → `sizeOptions`, `colors` → `colorOptions`; mapped `description_ar` body field to `description` Prisma field
+- **Fix 2: Branches page type mismatch**
+  - `app/admin/branches/page.tsx`: Changed `id: number` → `id: string` in Branch interface
+  - Changed `handleDelete(branchId: number)` → `handleDelete(branchId: string)`
+- **Fix 3: Added branch methods to adminApi**
+  - `lib/api.ts`: Added `getAllBranches`, `createBranch`, `updateBranch`, `deleteBranch` to adminApi object
+- **Fix 4: BookingTable type mismatch and total_days computation**
+  - `components/admin/booking-table.tsx`: Changed `id: number` → `id: string` in Booking interface
+  - Removed `total_days: number` from Booking interface (not in API response)
+  - Changed `onStatusUpdate` param type from `id: number` to `id: string`
+  - Added `getTotalDays()` helper that computes days from `start_date` and `end_date`
+  - Replaced `booking.total_days` reference with `getTotalDays(booking)` call
+  - `components/admin/booking-actions.tsx`: Changed `onStatusUpdate` param type from `id: number` to `id: string`
+
+Stage Summary:
+- **Product Admin API**: All Prisma field references now match the actual schema (pricePerDay, sizeOptions, colorOptions, description)
+- **Branches Page**: Branch.id is correctly typed as string (CUID) matching Prisma schema
+- **adminApi**: Branch CRUD methods available for frontend consumption
+- **BookingTable**: Booking.id correctly typed as string; total_days computed from date range instead of referencing non-existent API field

@@ -47,24 +47,14 @@ export function StatCard({ title, value, icon, trend, subtitle }: StatCardProps)
 
 interface StatsCardsProps {
   stats?: {
-    overall?: {
-      users?: number;
-      products?: number;
-      bookings?: number;
-      revenue?: number;
-    };
-    this_month?: {
-      users?: number;
-      bookings?: number;
-      revenue?: number;
-    };
-    products?: {
-      active?: number;
-      rented?: number;
-    };
-    pending_actions?: {
-      bookings?: number;
-    };
+    total_users?: number;
+    total_products?: number;
+    total_bookings?: number;
+    total_revenue?: number;
+    active_products?: number;
+    active_bookings?: number;
+    pending_bookings?: number;
+    completed_bookings?: number;
   };
 }
 
@@ -73,27 +63,27 @@ export function StatsCards({ stats }: StatsCardsProps) {
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       <StatCard
         title="إجمالي المستخدمين"
-        value={stats?.overall?.users || 0}
+        value={stats?.total_users || 0}
         icon={<Users className="h-4 w-4 text-muted-foreground" />}
-        subtitle={`+${stats?.this_month?.users || 0} هذا الشهر`}
+        subtitle={`${stats?.total_users || 0} مسجل`}
       />
       <StatCard
         title="إجمالي المنتجات"
-        value={stats?.overall?.products || 0}
+        value={stats?.total_products || 0}
         icon={<Package className="h-4 w-4 text-muted-foreground" />}
-        subtitle={`${stats?.products?.active || 0} نشط`}
+        subtitle={`${stats?.active_products || 0} نشط`}
       />
       <StatCard
         title="إجمالي الحجوزات"
-        value={stats?.overall?.bookings || 0}
+        value={stats?.total_bookings || 0}
         icon={<Calendar className="h-4 w-4 text-muted-foreground" />}
-        subtitle={`${stats?.pending_actions?.bookings || 0} قيد الانتظار`}
+        subtitle={`${stats?.pending_bookings || 0} قيد الانتظار`}
       />
       <StatCard
         title="إجمالي الإيرادات"
-        value={`${(stats?.overall?.revenue || 0).toFixed(0)} دج`}
+        value={`${(stats?.total_revenue || 0).toLocaleString('ar-DZ')} دج`}
         icon={<DollarSign className="h-4 w-4 text-muted-foreground" />}
-        subtitle={`${(stats?.this_month?.revenue || 0).toFixed(0)} دج هذا الشهر`}
+        subtitle={`${stats?.completed_bookings || 0} حجز مكتمل`}
       />
     </div>
   );
