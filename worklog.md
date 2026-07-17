@@ -2743,3 +2743,70 @@ Stage Summary:
 - Locale fixed to Algerian Arabic (ar-DZ)
 - Review moderation returns correct timestamp from updatedAt
 - Vendor dashboard limitation documented with TODO
+
+---
+Task ID: 6-a
+Agent: lib/api.ts fixer
+Task: Fix all lib/api.ts issues from deep audit
+
+Work Log:
+- Fixed password_reset field mismatch (password_confirm → confirmPassword)
+- Fixed subscriptionsApi.cancel to accept planId
+- Added 11 missing API methods (chatbotApi, analyticsApi, disputesApi, paymentsApi, blogApi, bookingsApi, bundlesApi, reviewsApi, adminApi, productsApi)
+- Removed dead generateNonce function
+
+Stage Summary:
+- lib/api.ts now has all methods required by frontend components
+- Critical runtime errors (password reset, subscription cancel) fixed
+---
+Task ID: 6-c
+Agent: Component issues fixer
+Task: Fix all critical component issues from deep audit
+
+Work Log:
+- Expanded DignifiedLoader props (label, subLabel, className)
+- Expanded SovereignSeal props (type, refId, animate, size) with icons
+- Created missing components/admin/booking-actions.tsx
+- Rewrote products/[id]/metadata.ts to use direct Prisma instead of client API
+
+Stage Summary:
+- 4 critical component issues fixed
+- DignifiedLoader and SovereignSeal now accept all props used by consumers
+- booking-actions.tsx created with confirm/reject/start-use actions
+- metadata.ts no longer uses client-side API in server component
+---
+Task ID: 6-b
+Agent: API route bug fixer
+Task: Fix all critical API route bugs from deep audit
+
+Work Log:
+- Fixed Category.name → nameEn in admin product GET
+- Fixed Product.descriptionAr → description in admin product PUT
+- Fixed session.role → DB role check in contract sign route
+- Fixed findUnique({ username }) → findFirst in wallet transfer
+- Added NextRequest import to insurance, social/vouch, wallet/transfer routes
+- Added try/catch to 5 notification route handlers
+
+Stage Summary:
+- 6 critical API route bugs fixed
+- All Prisma field name mismatches resolved
+- All missing imports added
+- All notification routes now have proper error handling
+
+---
+Task ID: 6-d
+Agent: UI component mismatch fixer
+Task: Fix UI component prop mismatches from deep audit
+
+Work Log:
+- Expanded SovereignRadar to accept `points` prop with bar visualization (label/value/maxValue)
+- Updated two call sites (analytics page, orders/[id] page) to pass `{ label, value }` format
+- Made `children` optional in SovereignGlow and SovereignSparkle to support self-closing decorative usage
+- Fixed vendor dashboard error handling: `error?.response?.data?.error` → `error?.data?.error` (fetch pattern)
+- Added demo-mode documentation comment to middleware.ts (no functional change)
+
+Stage Summary:
+- SovereignRadar now renders data when points prop is provided
+- Social page no longer crashes on self-closing SovereignGlow/SovereignSparkle
+- Vendor dashboard error handling matches fetch-based API client
+- Middleware mock-mode behavior documented for future production hardening

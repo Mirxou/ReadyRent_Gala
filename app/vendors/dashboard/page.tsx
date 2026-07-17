@@ -45,7 +45,7 @@ export default function VendorDashboardPage() {
     } catch (error: any) {
       toast({
         title: 'خطأ',
-        description: error?.response?.data?.error || 'فشل تحميل لوحة التحكم',
+        description: error?.data?.error || 'فشل تحميل لوحة التحكم',
         variant: 'destructive',
       });
     } finally {

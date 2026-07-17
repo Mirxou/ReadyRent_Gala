@@ -3,7 +3,7 @@
 // POST /api/wallet/transfer
 // ═══════════════════════════════════════════════════════════════
 
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
 
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Find recipient by username
-    const recipient = await db.user.findUnique({
+    const recipient = await db.user.findFirst({
       where: { username: recipient_username },
     });
 

@@ -23,7 +23,7 @@ interface Particle {
   color: string;
 }
 
-export function SovereignSparkle({ children, active = true }: { children: React.ReactNode, active?: boolean }) {
+export function SovereignSparkle({ children, active = true }: { children?: React.ReactNode, active?: boolean }) {
   // Use useState + useEffect to avoid hydration mismatch (Math.random is non-deterministic)
   const [particles, setParticles] = useState<Particle[]>([]);
 
@@ -83,13 +83,15 @@ export function SovereignSparkle({ children, active = true }: { children: React.
       <div className="relative z-20">
         {children}
       </div>
+      {/* Decorative fallback when used without children */}
+      {!children && <div className="absolute inset-0" />}
     </div>
   );
 }
 
 // 🛡️ High-Fidelity Glow Variant
 export function SovereignGlow({ children, color = "gold", intensity = "medium", className = "" }: { 
-  children: React.ReactNode,
+  children?: React.ReactNode,
   color?: "gold" | "blue" | "obsidian" | "emerald" | "purple",
   intensity?: "low" | "medium" | "high",
   className?: string
@@ -115,6 +117,8 @@ export function SovereignGlow({ children, color = "gold", intensity = "medium", 
          style={{ backgroundColor: glowColors[color] }}
        />
        {children}
+       {/* Decorative fallback when used without children */}
+       {!children && <div className="relative" />}
     </div>
   );
 }

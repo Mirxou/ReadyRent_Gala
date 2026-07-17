@@ -140,9 +140,9 @@ export default function AnalyticsPage() {
                    <SovereignRadar 
                      className="h-[350px] border-none" 
                      points={[
-                       { x: 40, y: 30, label: 'Algiers Cluster' },
-                       { x: 70, y: 50, label: 'Oran Pulse' },
-                       { x: 30, y: 70, label: 'Constantine Node' }
+                       { value: 78, label: 'Algiers Cluster' },
+                       { value: 62, label: 'Oran Pulse' },
+                       { value: 45, label: 'Constantine Node' }
                      ]}
                    />
                 </GlassPanel>

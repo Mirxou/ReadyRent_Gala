@@ -24,7 +24,7 @@ export async function GET(
     const product = await db.product.findUnique({
       where: { id },
       include: {
-        category: { select: { id: true, name: true, nameAr: true, slug: true } },
+        category: { select: { id: true, nameEn: true, nameAr: true, slug: true } },
       },
     });
 

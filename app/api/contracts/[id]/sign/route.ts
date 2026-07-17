@@ -24,8 +24,11 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     );
   }
 
-  // Ownership check: only the booking owner or an admin may sign
-  if (contract.booking.userId !== session.userId && session.role !== 'admin') {
+  // Ownership check: only the booking owner or an admin/staff may sign
+  const user = await db.user.findUnique({ where: { id: session.userId }, select: { role: true } });
+  if (!user) return authRequiredResponse();
+  const isAdmin = user.role === 'admin' || user.role === 'staff';
+  if (contract.booking.userId !== session.userId && !isAdmin) {
     return NextResponse.json(
       { success: false, message: 'غير مصرح' },
       { status: 403 }

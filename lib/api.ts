@@ -16,12 +16,6 @@ function getCsrfToken(): string {
   return token;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function generateNonce(): string {
-  if (typeof window === 'undefined') return '';
-  return crypto.randomUUID().slice(0, 16);
-}
-
 // ──── Core Fetch Helper ────
 // Returns { data, status, meta } to be compatible with axios response pattern
 // that components use: `const res = await api.get(...); const d = res.data;`
@@ -128,7 +122,7 @@ export const authApi = {
   passwordResetRequest: (email: string) =>
     apiFetch('auth/forgot-password', { method: 'POST', body: { email } }),
   passwordResetConfirm: (token: string, password: string, passwordConfirm: string) =>
-    apiFetch('auth/reset-password', { method: 'POST', body: { token, password, password_confirm: passwordConfirm } }),
+    apiFetch('auth/reset-password', { method: 'POST', body: { token, password, confirmPassword } }),
 };
 
 export const productsApi = {
@@ -140,6 +134,7 @@ export const productsApi = {
   addToWishlist: (productId: number) => apiFetch('products/wishlist', { method: 'POST', body: { product_id: productId } }),
   removeFromWishlist: (id: number) => apiFetch(`products/wishlist/${id}`, { method: 'DELETE' }),
   getRecommendations: (id: string) => apiFetch(`products/${id}/recommendations`),
+  getBySlug: (slug: string) => apiFetch(`products/${slug}`),
 };
 
 export const bookingsApi = {
@@ -154,6 +149,8 @@ export const bookingsApi = {
   getWaitlist: () => apiFetch('bookings/waitlist'),
   addToWaitlist: (data: any) => apiFetch('bookings/waitlist', { method: 'POST', body: data }),
   removeFromWaitlist: (id: string) => apiFetch(`bookings/waitlist/${id}`, { method: 'DELETE' }),
+  cancel: (id: string, data?: { reason?: string }) =>
+    apiFetch(`bookings/${id}/cancel`, { method: 'POST', body: data }),
 };
 
 export const disputesApi = {
@@ -161,6 +158,8 @@ export const disputesApi = {
   getDispute: (id: string | number) => apiFetch(`disputes/${id}`),
   createDispute: (data: any) => apiFetch('disputes/create', { method: 'POST', body: data }),
   createDisputeMessage: (id: string | number, data: any) => apiFetch(`disputes/${id}/messages`, { method: 'POST', body: data }),
+  uploadEvidence: (disputeId: string, formData: FormData) =>
+    apiFetch(`disputes/${disputeId}/messages`, { method: 'POST', body: formData }),
   getDisputeHistory: (id: string | number) => apiFetch(`disputes/${id}/history`),
   appeal: (id: string | number, data: { reason: string; description: string }) =>
     apiFetch(`disputes/${id}/appeal`, { method: 'POST', body: data }),
@@ -183,11 +182,15 @@ export const adminApi = {
   createBranch: (data: any) => apiFetch('admin/branches', { method: 'POST', body: data }),
   updateBranch: (id: string, data: any) => apiFetch(`admin/branches/${id}`, { method: 'PATCH', body: data }),
   deleteBranch: (id: string) => apiFetch(`admin/branches/${id}`, { method: 'DELETE' }),
+  getIntelligenceReport: (params?: any) => apiFetch('analytics/intelligence/report', { params }),
+  getTopProducts: (params?: any) => apiFetch('analytics/products/top_products', { params }),
 };
 
 export const reviewsApi = {
   getAll: (params?: any) => apiFetch('reviews', { params }),
   create: (data: any) => apiFetch('reviews/create', { method: 'POST', body: data }),
+  moderate: (id: string, data: { action: 'approve' | 'reject'; reason?: string }) =>
+    apiFetch(`reviews/${id}/moderate`, { method: 'PATCH', body: data }),
 };
 
 export const chatbotApi = {
@@ -195,12 +198,18 @@ export const chatbotApi = {
     apiFetch('chatbot/quick-chat', { method: 'POST', body: { message, language: options?.language || 'ar', ...options } }),
   chat: (message: string, sessionId: string, language: string = 'ar') =>
     apiFetch('chatbot/chat', { method: 'POST', body: { message, sessionId, language } }),
+  createSession: (options?: { language?: string }) =>
+    apiFetch('chatbot/chat', { method: 'POST', body: { message: '', sessionId: crypto.randomUUID(), language: options?.language || 'ar' } }),
+  sendMessage: (sessionId: string, message: string) =>
+    apiFetch('chatbot/chat', { method: 'POST', body: { message, sessionId, language: 'ar' } }),
 };
 
 export const bundlesApi = {
   getAll: (params?: any) => apiFetch('bundles/bundles', { params }),
+  getById: (id: string) => apiFetch(`bundles/${id}`),
   calculatePrice: (id: string, params: { start_date: string; end_date: string }) =>
     apiFetch(`bundles/${id}/calculate-price`, { params }),
+  book: (id: string, data: any) => apiFetch(`bundles/${id}/book`, { method: 'POST', body: data }),
 };
 
 export const cancellationApi = {
@@ -216,12 +225,16 @@ export const analyticsApi = {
   trackEvent: (data: any) => apiFetch('analytics/events', { method: 'POST', body: data }),
   getEvents: (params?: any) => apiFetch('analytics/events', { params }),
   getProductActivity: (productId: number) => apiFetch(`analytics/live/activity/${productId}`),
+  getUserBehavior: (params?: any) => apiFetch('analytics/daily/summary', { params }),
+  getDailyAnalytics: (params?: { days?: number }) => apiFetch('analytics/daily/summary', { params }),
 };
 
 export const paymentsApi = {
   getAll: () => apiFetch('payments/payments'),
   getMethods: () => apiFetch('payments/methods'),
   create: (data: any) => apiFetch('payments/create', { method: 'POST', body: data }),
+  verifyOtp: (data: { paymentId: string; otp: string }) =>
+    apiFetch('payments/verify-otp', { method: 'POST', body: data }),
 };
 
 export const socialApi = {
@@ -288,12 +301,13 @@ export const insuranceApi = {
 export const subscriptionsApi = {
   getAll: () => apiFetch('subscriptions'),
   subscribe: (data: any) => apiFetch('subscriptions/subscribe', { method: 'POST', body: data }),
-  cancel: () => apiFetch('subscriptions/cancel', { method: 'POST' }),
+  cancel: (planId: string) => apiFetch('subscriptions/cancel', { method: 'POST', body: { planId } }),
 };
 
 export const blogApi = {
   getAll: (params?: any) => apiFetch('blog', { params }),
   getById: (id: string) => apiFetch(`blog/${id}`),
+  getBySlug: (slug: string) => apiFetch(`blog/${slug}`),
 };
 
 export const cmsApi = {

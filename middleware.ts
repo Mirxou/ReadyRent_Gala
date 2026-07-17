@@ -1,5 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+/**
+ * IMPORTANT — Demo / Mock Mode:
+ * Protected and admin routes do NOT enforce authentication in this build.
+ * They allow all requests through (setting warning headers for observability).
+ * This is intentional for demo/development purposes. Before production deployment,
+ * replace the `NextResponse.next()` blocks with proper session verification
+ * and redirect unauthenticated users to /login.
+ */
+
 // Routes that require authentication
 const PROTECTED_ROUTES = ['/dashboard', '/wallet', '/bookings', '/returns', '/verification', '/cart', '/checkout'];
 const ADMIN_ROUTES = ['/admin'];

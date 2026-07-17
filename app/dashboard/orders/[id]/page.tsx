@@ -205,8 +205,8 @@ export default function BookingDetailsPage() {
                            <SovereignRadar 
                              className="h-32 border-none bg-transparent" 
                              points={[
-                                { x: 50, y: 50, label: 'Asset Location' },
-                                { x: 20, y: 20, label: 'Hub Node' }
+                                { value: 85, label: 'Asset Location' },
+                                { value: 60, label: 'Hub Node' }
                              ]}
                            />
                        </GlassPanel>

@@ -10,6 +10,7 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  try {
   const session = getSessionFromRequest(request);
   if (!session) return authRequiredResponse();
 
@@ -44,12 +45,20 @@ export async function PATCH(
   };
 
   return NextResponse.json({ success: true, dignity_preserved: true, data });
+  } catch (error) {
+    console.error('[Notification PATCH] Error:', error);
+    return NextResponse.json(
+      { success: false, dignity_preserved: true, message_en: 'Error marking notification as read', code: 'INTERNAL_ERROR' },
+      { status: 500 }
+    );
+  }
 }
 
 export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  try {
   const session = getSessionFromRequest(request);
   if (!session) return authRequiredResponse();
 
@@ -75,4 +84,11 @@ export async function DELETE(
     dignity_preserved: true,
     data: { id },
   });
+  } catch (error) {
+    console.error('[Notification DELETE] Error:', error);
+    return NextResponse.json(
+      { success: false, dignity_preserved: true, message_en: 'Error deleting notification', code: 'INTERNAL_ERROR' },
+      { status: 500 }
+    );
+  }
 }
