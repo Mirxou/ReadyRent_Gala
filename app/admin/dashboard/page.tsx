@@ -10,12 +10,11 @@ import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
-import { Package, Calendar, Users, ArrowRight, TrendingUp, BarChart3, ChevronLeft, LayoutDashboard, Settings, LogOut } from 'lucide-react';
+import { Package, Calendar, Users, ArrowRight, TrendingUp, BarChart3, LayoutDashboard, Settings } from 'lucide-react';
 import { RevenueChart } from '@/components/admin/revenue-chart';
 import { QuickActions } from '@/components/admin/quick-actions';
 import { ParticleField } from '@/components/ui/particle-field';
-import { motion, AnimatePresence } from 'framer-motion';
-import { MagneticButton } from '@/components/ui/magnetic-button';
+import { motion } from 'framer-motion';
 import { TiltCard } from '@/components/ui/tilt-card';
 import { HighCourtMonitor } from '@/features/judicial/components/high-court-monitor';
 

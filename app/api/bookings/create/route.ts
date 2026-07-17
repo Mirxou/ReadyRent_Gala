@@ -47,7 +47,7 @@ export async function POST(request: Request) {
 
   const product = await db.product.findUnique({
     where: { id: body.product_id },
-    select: { name: true, nameAr: true, primaryImage: true, isAvailable: true, pricePerDay: true },
+    select: { name: true, nameAr: true, primaryImage: true, isAvailable: true, pricePerDay: true, vendorId: true },
   });
 
   if (!product) {
@@ -71,6 +71,34 @@ export async function POST(request: Request) {
   const productName = body.product_name ?? product.nameAr ?? product.name;
   const productImage = body.product_image ?? product.primaryImage;
 
+  // Fetch renter and vendor info for contract parties
+  const [renter, vendor] = await Promise.all([
+    db.user.findUnique({
+      where: { id: session.userId },
+      select: { id: true, firstName: true, lastName: true, email: true, phone: true },
+    }),
+    product.vendorId
+      ? db.vendor.findUnique({
+          where: { id: product.vendorId },
+          select: { id: true, name: true, nameAr: true, city: true },
+        })
+      : Promise.resolve(null),
+  ]);
+
+  const parties = JSON.stringify([
+    {
+      role: 'renter',
+      name: renter ? `${renter.firstName || ''} ${renter.lastName || ''}`.trim() : 'Unknown',
+      email: renter?.email ?? null,
+      phone: renter?.phone ?? null,
+    },
+    {
+      role: 'owner',
+      name: vendor?.nameAr || vendor?.name || 'STANDARD.Rent',
+      city: vendor?.city ?? null,
+    },
+  ]);
+
   const booking = await db.booking.create({
     data: {
       userId: session.userId,
@@ -88,6 +116,16 @@ export async function POST(request: Request) {
       size: body.size ?? null,
       color: body.color ?? null,
       notes: body.notes ?? null,
+    },
+  });
+
+  // Auto-create a draft contract for the booking
+  await db.contract.create({
+    data: {
+      bookingId: booking.id,
+      status: 'draft',
+      parties,
+      terms: `عقد إيجار ${productName} — من ${body.start_date} إلى ${body.end_date}`,
     },
   });
 

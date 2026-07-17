@@ -9,7 +9,6 @@ import {
   Sparkles,
   Search,
   Loader2,
-  Mic,
   ArrowRight,
   Tag,
   MapPin,

@@ -78,6 +78,7 @@ export function Navbar() {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const { scrollYProgress } = useScroll();
 
+  // setMounted: standard Next.js hydration pattern — React compiler warning is a false positive
   useEffect(() => {
     setMounted(true);
     const handleScroll = () => {

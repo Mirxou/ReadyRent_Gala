@@ -189,10 +189,9 @@ export default function BookingDetailPage() {
                         </h2>
 
                         <EscrowTracker
-                            state={escrowStateMap[booking.escrow_status] || 'pending'}
+                            bookingId={booking.id}
                             amount={booking.total_price}
-                            currency="DA"
-                            updatedAt={new Date(booking.updated_at).toLocaleDateString('ar-DZ')}
+                            status={escrowStateMap[booking.escrow_status] || 'pending'}
                         />
 
                         {/* Additional Sovereign Insight */}

@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MapPin, Star, Phone, Mail, Instagram, Facebook, Palette } from 'lucide-react';
+import { MapPin, Phone, Mail, Instagram, Facebook, Palette } from 'lucide-react';
 import { MapLocation } from '@/components/map-location';
 import { RatingStars } from '@/components/reviews/rating-stars';
 import { VouchButton } from '@/shared/components/sovereign/vouch-button';
@@ -130,10 +130,7 @@ export default function ArtisanDetailPage() {
 
           {/* Vouch Button */}
           <div className="flex justify-start">
-            <VouchButton
-              targetUserId={Number(artisanId)}
-              viewerRiskScore={10}
-            />
+            <VouchButton userId={artisanId} />
           </div>
 
           {/* Portfolio */}

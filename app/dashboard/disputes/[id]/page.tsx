@@ -87,7 +87,7 @@ function buildTimelineFromHistory(history: any[], disputeStatus: string): any[] 
       (disputeStatus === 'closed' && stage.status === 'resolved');
     
     // If appealed, insert appeal stage after mediation
-    let dateStr = statusChanges[stage.status] ? new Date(statusChanges[stage.status]).toLocaleDateString('ar-DZ') : '--';
+    const dateStr = statusChanges[stage.status] ? new Date(statusChanges[stage.status]).toLocaleDateString('ar-DZ') : '--';
 
     return {
       ...stage,

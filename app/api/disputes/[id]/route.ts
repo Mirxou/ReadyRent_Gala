@@ -51,13 +51,8 @@ export async function GET(
       );
     }
 
-    // Authorization: dispute owner, booking vendor, or admin/staff
+    // Authorization: dispute owner or admin/staff
     const isOwner = dispute.userId === session.userId;
-    const isVendor = dispute.booking?.product?.vendorId
-      ? await db.vendor.findUnique({
-          where: { id: dispute.booking.product.vendorId },
-        }).then(() => false) // vendors aren't directly linked to users in this schema
-      : false;
     const currentUser = await db.user.findUnique({
       where: { id: session.userId },
       select: { role: true },

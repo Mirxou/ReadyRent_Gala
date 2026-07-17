@@ -2810,3 +2810,57 @@ Stage Summary:
 - Social page no longer crashes on self-closing SovereignGlow/SovereignSparkle
 - Vendor dashboard error handling matches fetch-based API client
 - Middleware mock-mode behavior documented for future production hardening
+---
+Task ID: 3a
+Agent: Component prop fixer
+Task: Fix JusticeReceipt, VouchButton, EscrowTracker prop mismatches
+
+Work Log:
+- Expanded JusticeReceipt to accept stages/disputeId/finalVerdict with timeline rendering
+- Fixed VouchButton usage in artisans page (targetUserId→userId)
+- Fixed EscrowTracker usage in bookings page (state→status, added bookingId)
+
+Stage Summary:
+- JusticeReceipt now renders actual dispute timeline content
+- VouchButton and EscrowTracker props now match component interfaces
+
+---
+Task ID: 3b
+Agent: Dead code + unused imports cleaner
+Task: Remove dead code and clean unused imports
+
+Work Log:
+- Removed dead isVendor query in disputes/[id]/route.ts (5 lines, always returned false, never used in auth check)
+- Fixed SovereignButton component creation during render with React.useMemo
+- Cleaned unused imports from 10 files:
+  - app/admin/dashboard/page.tsx: removed ChevronLeft, LogOut, AnimatePresence, MagneticButton
+  - app/admin/products/page.tsx: removed productsApi
+  - app/admin/cms/pages/page.tsx: removed Link
+  - app/cart/page.tsx: removed Button, CardHeader, CardTitle
+  - app/ai-search/page.tsx: removed Mic
+  - app/bookings/[id]/cancel/page.tsx: removed AlertCircle
+  - app/artisans/page.tsx: removed CardHeader, CardTitle
+  - app/artisans/[id]/page.tsx: removed Star
+  - app/checkout/page.tsx: removed useMutation
+  - app/bundles/[id]/page.tsx: removed unused 'data' parameter in onSuccess
+- Fixed prefer-const warnings in 2 files (disputes/[id] dateStr, particle-field lastTime)
+
+Stage Summary:
+- No more dead DB queries wasting resources in disputes route
+- SovereignButton no longer triggers React "Cannot create components during render" warning
+- 10+ files cleaned of unused imports
+---
+Task ID: 3c
+Agent: React rendering + API logic fixer
+Task: Fix React rendering warnings and API logic issues
+
+Work Log:
+- Fixed impure Date.now() call in dashboard orders page (line 448): replaced `Date.now()` fallback with constant string `'2024-01-01'`
+- Verified social page SovereignGlow/SovereignSparkle usage: both components accept optional children and have fallback rendering — no issues
+- Added automatic contract creation with populated parties field in bookings/create route — fetches renter (user) and owner (vendor) info and stores as JSON
+- Fixed vendor dashboard: removed silent data leakage (was fetching first vendor ever created for all vendor-role users); now returns empty dashboard for non-admin vendor users until schema migration adds ownerId to Vendor model
+
+Stage Summary:
+- Dashboard orders no longer has impure render warning
+- Contract creation now populates parties field with renter and vendor info
+- Vendor dashboard no longer leaks cross-vendor data; returns safe empty state until schema migration

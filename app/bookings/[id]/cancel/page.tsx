@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { CancellationPolicy } from '@/components/cancellation-policy';
 import { api } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
-import { AlertCircle, XCircle } from 'lucide-react';
+import { XCircle } from 'lucide-react';
 
 export default function CancelBookingPage() {
   const params = useParams();

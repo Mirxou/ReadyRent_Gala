@@ -29,9 +29,10 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  // Find the vendor linked to this user via products
-  // TODO: Vendor model has no userId field. Currently fetches the first vendor ever created
-  // for non-admin vendor-role users. Add userId to Vendor schema to properly link users.
+  // Find the vendor linked to this user
+  // NOTE: Vendor model currently has no userId field. The user→vendor link
+  // requires a schema migration (add ownerId to Vendor). Until then, vendor-role
+  // users see an empty dashboard instead of silently showing the first vendor's data.
   let vendorIds: string[] = [];
 
   if (user.role === 'admin') {
@@ -39,29 +40,30 @@ export async function GET(request: NextRequest) {
     const allVendors = await db.vendor.findMany({ select: { id: true } });
     vendorIds = allVendors.map(v => v.id);
   } else {
-    // Vendor user: falls back to first vendor since there's no user→vendor link
-    // This is a known limitation — see TODO above
-    const vendor = await db.vendor.findFirst({
-      select: { id: true },
-      orderBy: { createdAt: 'asc' },
-    });
-    vendorIds = vendor ? [vendor.id] : [];
+    // TODO (schema migration): Add ownerId to Vendor model and query:
+    //   const vendor = await db.vendor.findFirst({ where: { ownerId: session.userId } });
+    // Until the migration, return empty dashboard for vendor-role users to avoid
+    // leaking another vendor's data.
+    vendorIds = [];
   }
 
   // Get vendor's products and their booking stats
-  const vendorProducts = await db.product.findMany({
-    where: vendorIds.length > 0 ? { vendorId: { in: vendorIds } } : {},
-    select: {
-      id: true,
-      name: true,
-      nameAr: true,
-      pricePerDay: true,
-      isAvailable: true,
-      rating: true,
-      vendorId: true,
-      createdAt: true,
-    },
-  });
+  // If no vendor IDs resolved (non-admin without schema link), return empty results
+  const vendorProducts = vendorIds.length > 0
+    ? await db.product.findMany({
+        where: { vendorId: { in: vendorIds } },
+        select: {
+          id: true,
+          name: true,
+          nameAr: true,
+          pricePerDay: true,
+          isAvailable: true,
+          rating: true,
+          vendorId: true,
+          createdAt: true,
+        },
+      })
+    : [];
 
   const productIds = vendorProducts.map(p => p.id);
 

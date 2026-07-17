@@ -52,7 +52,7 @@ export default function BundleDetailPage() {
       if (!res.ok) throw new Error(json?.message || 'فشل حجز الباقة');
       return json;
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       toast.success('تم حجز الباقة بنجاح!');
       router.push('/dashboard/orders');
     },

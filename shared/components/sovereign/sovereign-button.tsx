@@ -45,8 +45,7 @@ const SovereignButton = React.forwardRef<HTMLButtonElement, SovereignButtonProps
             xl: "h-24 px-16 text-lg font-black uppercase tracking-[0.4em] rounded-full",
         };
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const Component: any = href ? motion(Link) : motion.button;
+        const Component = React.useMemo(() => href ? motion(Link) : motion.button, [href]);
 
         return (
             <Component

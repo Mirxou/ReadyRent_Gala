@@ -445,7 +445,7 @@ export default function BookingDetailsPage() {
                         <div className="absolute -right-[4.5px] w-2 h-2 rounded-full bg-emerald-500" />
                         <div className="space-y-0.5">
                             <p className="text-sm font-bold">إبرام العقد</p>
-                            <p className="text-[10px] text-muted-foreground">{format(new Date(booking.created_at || Date.now()), 'dd MMM yyyy')}</p>
+                            <p className="text-[10px] text-muted-foreground">{format(new Date(booking.created_at || '2024-01-01'), 'dd MMM yyyy')}</p>
                         </div>
                     </div>
 

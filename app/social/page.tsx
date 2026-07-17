@@ -1,15 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
 import { SovereignGlow, SovereignSparkle } from '@/shared/components/sovereign/sovereign-sparkle';
 import { DignifiedLoader } from '@/shared/components/sovereign/dignified-loader';
 import { Users, Shield, Heart, TrendingUp } from 'lucide-react';
-import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { ParticleField } from '@/components/ui/particle-field';
 import { useAuthStore } from '@/lib/store';
@@ -19,14 +16,7 @@ import { socialApi } from '@/lib/api';
 export default function SocialPage() {
   const router = useRouter();
   const { isAuthenticated } = useAuthStore();
-  const [userId, setUserId] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      const store = useAuthStore.getState();
-      setUserId(store.user?.id || null);
-    }
-  }, [isAuthenticated]);
+  // userId available via useAuthStore if needed for future features
 
   const { data: feedData, isLoading: feedLoading } = useQuery({
     queryKey: ['social-feed'],
