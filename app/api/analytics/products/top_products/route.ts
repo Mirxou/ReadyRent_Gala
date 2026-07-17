@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
 
 // ═══════════════════════════════════════════════════════════════════
 // Top Products — By bookings, revenue, or rating
 // ═══════════════════════════════════════════════════════════════════
 
 export async function GET(request: NextRequest) {
+  const session = getSessionFromRequest(request);
+  if (!session) return authRequiredResponse();
+
   try {
     const { searchParams } = new URL(request.url);
     const metric = searchParams.get('metric') || 'revenue';

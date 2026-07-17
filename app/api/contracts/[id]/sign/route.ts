@@ -7,16 +7,28 @@ import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
 // Updates contract status to 'signed' and confirms the booking
 // ═══════════════════════════════════════════════════════════════
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  try {
   const { id } = await params;
   const session = getSessionFromRequest(request);
   if (!session) return authRequiredResponse();
 
-  const contract = await db.contract.findUnique({ where: { id } });
+  const contract = await db.contract.findUnique({
+    where: { id },
+    include: { booking: true },
+  });
 
-  if (!contract) {
+  if (!contract?.booking) {
     return NextResponse.json(
       { success: false, message: 'العقد غير موجود' },
       { status: 404 }
+    );
+  }
+
+  // Ownership check: only the booking owner or an admin may sign
+  if (contract.booking.userId !== session.userId && session.role !== 'admin') {
+    return NextResponse.json(
+      { success: false, message: 'غير مصرح' },
+      { status: 403 }
     );
   }
 
@@ -43,4 +55,11 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   }
 
   return NextResponse.json({ success: true, data: updated });
+  } catch (error) {
+    console.error('[Contract Sign API] Error:', error);
+    return NextResponse.json(
+      { success: false, dignity_preserved: true, message: 'Internal error' },
+      { status: 500 }
+    );
+  }
 }

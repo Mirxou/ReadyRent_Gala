@@ -132,7 +132,7 @@ export default function BlogPostPage() {
             {post.published_at && (
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4" />
-                <span>{new Date(post.published_at).toLocaleDateString('ar-EG', {
+                <span>{new Date(post.published_at).toLocaleDateString('ar-DZ', {
                   year: 'numeric',
                   month: 'long',
                   day: 'numeric'

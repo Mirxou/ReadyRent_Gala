@@ -30,7 +30,7 @@ export async function GET(
       include: {
         items: {
           include: {
-            product: { select: { id: true, name: true, nameAr: true, dailyRate: true, primaryImage: true, isAvailable: true } },
+            product: { select: { id: true, name: true, nameAr: true, pricePerDay: true, primaryImage: true, isAvailable: true } },
           },
         },
       },
@@ -44,7 +44,7 @@ export async function GET(
 
     let individualTotal = 0;
     const itemBreakdown = bundle.items.map(item => {
-      const dailyRate = item.product?.dailyRate ?? 0;
+      const dailyRate = item.product?.pricePerDay ?? 0;
       const itemTotal = dailyRate * numberOfDays * (item.quantity || 1);
       individualTotal += itemTotal;
       return {

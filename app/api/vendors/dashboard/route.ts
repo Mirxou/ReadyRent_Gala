@@ -30,7 +30,8 @@ export async function GET(request: NextRequest) {
   }
 
   // Find the vendor linked to this user via products
-  // Since Vendor has no userId, find vendor records that own products
+  // TODO: Vendor model has no userId field. Currently fetches the first vendor ever created
+  // for non-admin vendor-role users. Add userId to Vendor schema to properly link users.
   let vendorIds: string[] = [];
 
   if (user.role === 'admin') {
@@ -38,9 +39,8 @@ export async function GET(request: NextRequest) {
     const allVendors = await db.vendor.findMany({ select: { id: true } });
     vendorIds = allVendors.map(v => v.id);
   } else {
-    // Vendor user: find vendor records that have products (first match or all for this user)
-    // We look up by checking if any vendor ID is associated through product ownership
-    // Since there's no direct user→vendor link, we get the first vendor as the user's vendor
+    // Vendor user: falls back to first vendor since there's no user→vendor link
+    // This is a known limitation — see TODO above
     const vendor = await db.vendor.findFirst({
       select: { id: true },
       orderBy: { createdAt: 'asc' },

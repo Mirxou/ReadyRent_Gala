@@ -132,11 +132,11 @@ export function SovereignConcierge() {
 
       const data = await res.json();
 
-      if (data.success && data.response) {
+      if (data.success && data.data?.response) {
         const assistantMessage: ChatMessage = {
           id: crypto.randomUUID(),
           role: 'assistant',
-          content: data.response,
+          content: data.data.response,
           timestamp: Date.now(),
         };
         setMessages((prev) => [...prev, assistantMessage]);

@@ -137,7 +137,7 @@ export default function CartPage() {
   const firstItem = items[0];
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('ar-EG', {
+    return new Date(dateString).toLocaleDateString('ar-DZ', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',

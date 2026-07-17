@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
       db.transaction.create({
         data: {
           userId: session.userId,
-          type: 'insurance_purchase',
+          type: 'EXPENDITURE',
           amount: plan.price,
           note: `شراء خطة التأمين: ${planName}`,
           hash: `tx_${crypto.randomUUID().replace(/-/g, '').slice(0, 16)}`,

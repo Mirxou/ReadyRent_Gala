@@ -120,7 +120,6 @@ export async function POST(request: NextRequest) {
         dignity_preserved: true,
         data: {
           user: formatUserResponse(user),
-          token,
         },
       },
       { status: 201 }

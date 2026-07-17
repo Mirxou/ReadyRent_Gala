@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
 
 // ═══════════════════════════════════════════════════════════════════
 // Analytics Events — Track & retrieve (in-memory for now)
@@ -21,6 +22,9 @@ function generateId(): string {
 }
 
 export async function POST(request: NextRequest) {
+  const session = getSessionFromRequest(request);
+  if (!session) return authRequiredResponse();
+
   try {
     const body = await request.json();
     const { event_type, target_id, metadata } = body;
@@ -78,6 +82,9 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
+  const session = getSessionFromRequest(request);
+  if (!session) return authRequiredResponse();
+
   try {
     const { searchParams } = new URL(request.url);
     const limit = Math.min(Math.max(parseInt(searchParams.get('limit') || '50', 10) || 50, 1), 200);

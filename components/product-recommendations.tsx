@@ -93,7 +93,7 @@ export function ProductRecommendations({ productId }: ProductRecommendationsProp
   });
 
   // Silently hide on error
-  if (isError || (!isLoading && (!data || !data.recommendations || data.recommendations.length === 0))) {
+  if (isError || (!isLoading && (!data || !Array.isArray(data) || data.length === 0))) {
     return null;
   }
 
@@ -118,7 +118,7 @@ export function ProductRecommendations({ productId }: ProductRecommendationsProp
     );
   }
 
-  const recommendations = (data.recommendations || []).slice(0, 4);
+  const recommendations = (Array.isArray(data) ? data : []).slice(0, 4);
 
   return (
     <section className="space-y-8">

@@ -9,6 +9,7 @@ export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  try {
   const session = getSessionFromRequest(request);
   if (!session) return authRequiredResponse();
 
@@ -34,4 +35,11 @@ export async function DELETE(
     dignity_preserved: true,
     data: { id },
   });
+  } catch (error) {
+    console.error('[Wishlist API] Error:', error);
+    return NextResponse.json(
+      { success: false, dignity_preserved: true, message: 'Internal error' },
+      { status: 500 }
+    );
+  }
 }

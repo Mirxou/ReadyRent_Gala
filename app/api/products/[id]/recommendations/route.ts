@@ -137,13 +137,14 @@ export async function GET(
 
       // Still no products at all — return empty
       if (candidates.length === 0) {
-        return NextResponse.json({ success: true, recommendations: [] });
+        return NextResponse.json({ success: true, dignity_preserved: true, data: [] });
       }
 
       // Not enough candidates to warrant AI — return directly
       return NextResponse.json({
         success: true,
-        recommendations: candidates.slice(0, 4).map(formatProduct),
+        dignity_preserved: true,
+        data: candidates.slice(0, 4).map(formatProduct),
       });
     }
 
@@ -226,7 +227,8 @@ ${candidatesList}
 
     return NextResponse.json({
       success: true,
-      recommendations,
+      dignity_preserved: true,
+      data: recommendations,
     });
   } catch (error) {
     console.error('[Recommendations API] Error:', error);

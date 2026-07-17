@@ -214,7 +214,7 @@ export async function PATCH(
     if (body.notes !== undefined) updateData.notes = body.notes;
     if (body.start_date !== undefined) updateData.startDate = body.start_date;
     if (body.end_date !== undefined) updateData.endDate = body.end_date;
-    if (body.total_price !== undefined) updateData.totalPrice = body.total_price;
+    // Security: total_price is recalculated server-side during creation — never accept it from PATCH
     if (body.product_name !== undefined) updateData.productName = body.product_name;
     if (body.product_image !== undefined) updateData.productImage = body.product_image;
 

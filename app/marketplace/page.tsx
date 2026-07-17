@@ -181,7 +181,7 @@ function FeaturedVendors() {
                       <div className="flex items-center justify-between pt-2 border-t border-white/5">
                         <div className="flex items-center gap-1.5 text-muted-foreground text-xs">
                           <Package className="w-3 h-3" />
-                          <span>{vendor.product_count} منتج</span>
+                          <span>{vendor.products_count} منتج</span>
                         </div>
                         {vendor.trust_score && (
                           <div className="px-2.5 py-1 rounded-full bg-emerald-400/10 text-emerald-400 text-[11px] font-bold">

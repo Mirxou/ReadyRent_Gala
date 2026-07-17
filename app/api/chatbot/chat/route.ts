@@ -94,8 +94,11 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({
         success: true,
-        response: responseText,
-        sessionId: sid,
+        dignity_preserved: true,
+        data: {
+          response: responseText,
+          sessionId: sid,
+        },
       });
     } catch (llmError) {
       console.error('LLM Error:', llmError);
@@ -105,9 +108,12 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({
         success: true,
-        response: fallbackResponse,
-        sessionId: sid,
-        fallback: true,
+        dignity_preserved: true,
+        data: {
+          response: fallbackResponse,
+          sessionId: sid,
+          fallback: true,
+        },
       });
     }
   } catch (error) {

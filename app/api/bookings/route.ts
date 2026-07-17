@@ -6,6 +6,7 @@ import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
 // GET /api/bookings — List user bookings
 // ═══════════════════════════════════════════════════════════════
 export async function GET(request: Request) {
+  try {
   const session = getSessionFromRequest(request);
   if (!session) return authRequiredResponse();
 
@@ -45,4 +46,11 @@ export async function GET(request: Request) {
   }));
 
   return NextResponse.json({ success: true, dignity_preserved: true, data });
+  } catch (error) {
+    console.error('[Bookings API] Error:', error);
+    return NextResponse.json(
+      { success: false, dignity_preserved: true, message: 'Internal error' },
+      { status: 500 }
+    );
+  }
 }

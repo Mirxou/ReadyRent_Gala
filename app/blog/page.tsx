@@ -149,7 +149,7 @@ export default function BlogPage() {
                         <div className="flex items-center gap-4">
                           <div className="flex items-center gap-1.5">
                             <Calendar className="h-3.5 w-3.5" />
-                            <span>{new Date(post.date).toLocaleDateString('ar-EG')}</span>
+                            <span>{new Date(post.date).toLocaleDateString('ar-DZ')}</span>
                           </div>
                           <div className="flex items-center gap-1.5">
                             <Clock className="h-3.5 w-3.5" />

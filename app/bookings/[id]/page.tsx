@@ -16,7 +16,6 @@ import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
 import { SovereignSeal } from '@/shared/components/sovereign/sovereign-seal';
 import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
 import { Badge } from '@/components/ui/badge';
-import { AgreementRecorder } from '@/components/AgreementRecorder';
 import { EscrowTracker } from '@/features/finance/components/escrow-tracker';
 import type { EscrowState } from '@/features/finance/components/escrow-tracker';
 
@@ -178,7 +177,7 @@ export default function BookingDetailPage() {
                                 </Badge>
                             </div>
                             <GlassPanel className="p-10 rounded-[3rem]" variant="obsidian" gradientBorder>
-                                <AgreementRecorder bookingId={booking.id} />
+                                {/* AgreementRecorder removed — component deleted */}
                             </GlassPanel>
                         </div>
                     </div>

@@ -7,6 +7,7 @@ import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
 // POST /api/products/wishlist — Add product to wishlist (upsert)
 // ═══════════════════════════════════════════════════════════════
 export async function GET(request: Request) {
+  try {
   const session = getSessionFromRequest(request);
   if (!session) return authRequiredResponse();
 
@@ -42,9 +43,17 @@ export async function GET(request: Request) {
   }));
 
   return NextResponse.json({ success: true, dignity_preserved: true, data });
+  } catch (error) {
+    console.error('[Wishlist API] Error:', error);
+    return NextResponse.json(
+      { success: false, dignity_preserved: true, message: 'Internal error' },
+      { status: 500 }
+    );
+  }
 }
 
 export async function POST(request: Request) {
+  try {
   const session = getSessionFromRequest(request);
   if (!session) return authRequiredResponse();
 
@@ -85,4 +94,11 @@ export async function POST(request: Request) {
   };
 
   return NextResponse.json({ success: true, dignity_preserved: true, data }, { status: 201 });
+  } catch (error) {
+    console.error('[Wishlist API] Error:', error);
+    return NextResponse.json(
+      { success: false, dignity_preserved: true, message: 'Internal error' },
+      { status: 500 }
+    );
+  }
 }

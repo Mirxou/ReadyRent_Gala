@@ -100,7 +100,7 @@ export async function PATCH(
     const data = {
       id: updated.id,
       status: updated.status,
-      updated_at: updated.createdAt.toISOString(),
+      updated_at: updated.updatedAt.toISOString(),
     };
 
     return NextResponse.json({ success: true, dignity_preserved: true, data });

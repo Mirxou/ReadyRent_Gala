@@ -47,7 +47,7 @@ export async function POST(request: Request) {
 
   const product = await db.product.findUnique({
     where: { id: body.product_id },
-    select: { name: true, nameAr: true, primaryImage: true, isAvailable: true, dailyRate: true },
+    select: { name: true, nameAr: true, primaryImage: true, isAvailable: true, pricePerDay: true },
   });
 
   if (!product) {
@@ -66,7 +66,7 @@ export async function POST(request: Request) {
 
   // ── Server-side price calculation (ignore client-supplied total_price) ──
   const numberOfDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-  const calculatedTotalPrice = (product.dailyRate ?? 0) * numberOfDays * (body.quantity ?? 1);
+  const calculatedTotalPrice = (product.pricePerDay ?? 0) * numberOfDays * (body.quantity ?? 1);
 
   const productName = body.product_name ?? product.nameAr ?? product.name;
   const productImage = body.product_image ?? product.primaryImage;
@@ -77,8 +77,8 @@ export async function POST(request: Request) {
       productId: body.product_id,
       productName,
       productImage,
-      startDate,
-      endDate,
+      startDate: body.start_date,
+      endDate: body.end_date,
       totalPrice: calculatedTotalPrice,
       status: 'pending',
       escrowStatus: body.escrow_status ?? 'none',

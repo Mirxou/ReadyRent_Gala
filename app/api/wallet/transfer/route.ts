@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
       db.transaction.create({
         data: {
           userId: sender.id,
-          type: 'transfer_out',
+          type: 'TRANSFER',
           amount: amount,
           note: transferNote,
           hash: `tx_${crypto.randomUUID().replace(/-/g, '').slice(0, 16)}`,
@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
       db.transaction.create({
         data: {
           userId: recipient.id,
-          type: 'transfer_in',
+          type: 'INCOME',
           amount: amount,
           note: transferNote,
           hash: `tx_${crypto.randomUUID().replace(/-/g, '').slice(0, 16)}`,

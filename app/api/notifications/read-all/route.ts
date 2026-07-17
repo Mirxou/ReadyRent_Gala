@@ -16,6 +16,7 @@ export async function PATCH(request: NextRequest) {
 
   return NextResponse.json({
     success: true,
-    message: 'تم تعليم جميع الإشعارات كمقروءة',
+    dignity_preserved: true,
+    data: { updated: true },
   });
 }

@@ -41,9 +41,9 @@ export async function GET(request: NextRequest) {
       db.product.findMany({
         where,
         include: {
-          category: { select: { id: true, name: true, nameAr: true } },
-          vendor: { select: { id: true, username: true, firstName: true, lastName: true } },
-          _count: { select: { bookings: true, reviews: true, wishlists: true } },
+          category: { select: { id: true, nameAr: true, nameEn: true, slug: true } },
+          vendor: { select: { id: true, name: true, nameAr: true, avatar: true, rating: true } },
+          _count: { select: { bookings: true, reviews: true, wishlistItems: true } },
         },
         orderBy: { createdAt: 'desc' },
         skip: (page - 1) * limit,
@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
       vendor: p.vendor,
       booking_count: p._count.bookings,
       review_count: p._count.reviews,
-      wishlist_count: p._count.wishlists,
+      wishlist_count: p._count.wishlistItems,
       created_at: p.createdAt.toISOString(),
       updated_at: p.updatedAt.toISOString(),
     }));
@@ -125,7 +125,7 @@ export async function POST(request: NextRequest) {
         colorOptions: typeof body.colors === 'string' ? body.colors : JSON.stringify(body.colors || []),
         isAvailable: body.is_available !== false,
         slug,
-        categoryId: body.category_id || null,
+        categoryId: body.category_id,
         vendorId: user.role === 'vendor' ? session.userId : (body.vendor_id || null),
       },
     });

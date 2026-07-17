@@ -6,6 +6,7 @@ import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
 // POST /api/payments/create — Create a payment record
 // ═══════════════════════════════════════════════════════════════
 export async function POST(request: Request) {
+  try {
   const session = getSessionFromRequest(request);
   if (!session) return authRequiredResponse();
 
@@ -51,4 +52,11 @@ export async function POST(request: Request) {
   };
 
   return NextResponse.json({ success: true, dignity_preserved: true, data }, { status: 201 });
+  } catch (error) {
+    console.error('[Payments API] Error:', error);
+    return NextResponse.json(
+      { success: false, dignity_preserved: true, message: 'Internal error' },
+      { status: 500 }
+    );
+  }
 }

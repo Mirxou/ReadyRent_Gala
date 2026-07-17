@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
 
     const product = await db.product.findUnique({
       where: { id: productId },
-      select: { name: true, nameAr: true, dailyRate: true, weeklyRate: true, monthlyRate: true },
+      select: { name: true, nameAr: true, pricePerDay: true },
     });
 
     if (!product) {
@@ -33,17 +33,8 @@ export async function GET(request: NextRequest) {
 
     const numberOfDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
 
-    // Calculate total based on best rate
-    let totalAmount: number;
-    if (numberOfDays >= 30 && product.monthlyRate) {
-      const months = numberOfDays / 30;
-      totalAmount = product.monthlyRate * months;
-    } else if (numberOfDays >= 7 && product.weeklyRate) {
-      const weeks = numberOfDays / 7;
-      totalAmount = product.weeklyRate * weeks;
-    } else {
-      totalAmount = product.dailyRate * numberOfDays;
-    }
+    // Calculate total based on daily rate
+    const totalAmount = product.pricePerDay * numberOfDays;
 
     // Sovereign trust system: 30% deposit
     const depositPercentage = 30;
@@ -59,7 +50,7 @@ export async function GET(request: NextRequest) {
         start_date: startDateStr,
         end_date: endDateStr,
         number_of_days: numberOfDays,
-        daily_rate: product.dailyRate,
+        daily_rate: product.pricePerDay,
         total_amount: Math.ceil(totalAmount),
         deposit_percentage: depositPercentage,
         deposit_amount: depositAmount,
