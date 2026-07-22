@@ -30,6 +30,38 @@ function errorResponse(
   );
 }
 
+const productIncludes = {
+  category: {
+    select: { id: true, nameAr: true, nameEn: true, slug: true, icon: true },
+  },
+  vendor: {
+    select: {
+      id: true,
+      name: true,
+      nameAr: true,
+      avatar: true,
+      logo: true,
+      rating: true,
+      trustScore: true,
+      isVerified: true,
+      location: true,
+      city: true,
+      productsCount: true,
+      totalSales: true,
+    },
+  },
+  reviews: {
+    where: { status: 'approved' },
+    take: 5,
+    orderBy: { createdAt: 'desc' },
+    include: {
+      user: {
+        select: { id: true, username: true },
+      },
+    },
+  },
+};
+
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -37,81 +69,20 @@ export async function GET(
   try {
     const { id } = await params;
 
-    // Try to find by id first, then by slug
     let product;
     try {
       product = await db.product.findUnique({
         where: { id },
-        include: {
-          category: {
-            select: { id: true, nameAr: true, nameEn: true, slug: true, icon: true },
-          },
-          vendor: {
-            select: {
-              id: true,
-              name: true,
-              nameAr: true,
-              avatar: true,
-              logo: true,
-              rating: true,
-              trustScore: true,
-              isVerified: true,
-              location: true,
-              city: true,
-              productsCount: true,
-              totalSales: true,
-            },
-          },
-          reviews: {
-            where: { status: 'approved' },
-            take: 5,
-            orderBy: { createdAt: 'desc' },
-            include: {
-              user: {
-                select: { id: true, username: true },
-              },
-            },
-          },
-        },
+        include: productIncludes,
       });
     } catch {
-      // Not a valid cuid, try slug
+      // Not a valid cuid format — fall through to slug lookup
     }
 
     if (!product) {
       product = await db.product.findUnique({
         where: { slug: id },
-        include: {
-          category: {
-            select: { id: true, nameAr: true, nameEn: true, slug: true, icon: true },
-          },
-          vendor: {
-            select: {
-              id: true,
-              name: true,
-              nameAr: true,
-              avatar: true,
-              logo: true,
-              rating: true,
-              trustScore: true,
-              isVerified: true,
-              location: true,
-              city: true,
-              productsCount: true,
-              totalSales: true,
-            },
-          },
-          reviews: {
-            where: { status: 'approved' },
-            take: 5,
-            orderBy: { createdAt: 'desc' },
-            include: {
-              user: {
-                select: { id: true, username: true },
-              },
-            },
-          },
-        },
+        include: productIncludes,
       });
     }
 
@@ -124,7 +95,7 @@ export async function GET(
       );
     }
 
-    const transformedReviews = product.reviews.map((review) => ({
+    const transformedReviews = product.reviews.map((review: { id: string; userId: string; reviewerName: string; rating: number; comment: string | null; isVerified: boolean; status: string; createdAt: Date; user: { id: string; username: string | null } | null }) => ({
       id: review.id,
       user_id: review.userId,
       reviewer_name: review.reviewerName,
@@ -148,6 +119,7 @@ export async function GET(
         slug: product.slug,
         description: product.description ?? null,
         price_per_day: product.pricePerDay,
+        listing_type: product.listingType,
         images: safeJsonParse(product.images, []),
         primary_image: product.primaryImage ?? null,
         category: product.category

@@ -131,8 +131,8 @@ export const productsApi = {
   getCategories: () => apiFetch('products/categories'),
   getSearchSuggestions: (query: string) => apiFetch('products/search-suggestions', { params: { q: query } }),
   getWishlist: () => apiFetch('products/wishlist'),
-  addToWishlist: (productId: number) => apiFetch('products/wishlist', { method: 'POST', body: { product_id: productId } }),
-  removeFromWishlist: (id: number) => apiFetch(`products/wishlist/${id}`, { method: 'DELETE' }),
+  addToWishlist: (productId: string) => apiFetch('products/wishlist', { method: 'POST', body: { product_id: productId } }),
+  removeFromWishlist: (id: string) => apiFetch(`products/wishlist/${id}`, { method: 'DELETE' }),
   getRecommendations: (id: string) => apiFetch(`products/${id}/recommendations`),
   getBySlug: (slug: string) => apiFetch(`products/${slug}`),
 };
@@ -144,7 +144,7 @@ export const bookingsApi = {
   updateStatus: (id: string, status: string) => apiFetch(`bookings/${id}/status`, { method: 'PATCH', body: { status } }),
   getCart: () => apiFetch('bookings/cart'),
   addToCart: (data: any) => apiFetch('bookings/cart/items', { method: 'POST', body: data }),
-  removeFromCart: (id: number) => apiFetch(`bookings/cart/items/${id}`, { method: 'DELETE' }),
+  removeFromCart: (id: string) => apiFetch(`bookings/cart/items/${id}`, { method: 'DELETE' }),
   createBookingFromCart: (data?: any) => apiFetch('bookings/create', { method: 'POST', body: data }),
   getWaitlist: () => apiFetch('bookings/waitlist'),
   addToWaitlist: (data: any) => apiFetch('bookings/waitlist', { method: 'POST', body: data }),
@@ -155,13 +155,13 @@ export const bookingsApi = {
 
 export const disputesApi = {
   getDisputes: (params?: any) => apiFetch('disputes', { params }),
-  getDispute: (id: string | number) => apiFetch(`disputes/${id}`),
+  getDispute: (id: string) => apiFetch(`disputes/${id}`),
   createDispute: (data: any) => apiFetch('disputes/create', { method: 'POST', body: data }),
-  createDisputeMessage: (id: string | number, data: any) => apiFetch(`disputes/${id}/messages`, { method: 'POST', body: data }),
+  createDisputeMessage: (id: string, data: any) => apiFetch(`disputes/${id}/messages`, { method: 'POST', body: data }),
   uploadEvidence: (disputeId: string, formData: FormData) =>
     apiFetch(`disputes/${disputeId}/messages`, { method: 'POST', body: formData }),
-  getDisputeHistory: (id: string | number) => apiFetch(`disputes/${id}/history`),
-  appeal: (id: string | number, data: { reason: string; description: string }) =>
+  getDisputeHistory: (id: string) => apiFetch(`disputes/${id}/history`),
+  appeal: (id: string, data: { reason: string; description: string }) =>
     apiFetch(`disputes/${id}/appeal`, { method: 'POST', body: data }),
 };
 
@@ -238,8 +238,8 @@ export const paymentsApi = {
 };
 
 export const socialApi = {
-  vouch: (userId: number) => apiFetch(`social/vouch/${userId}`, { method: 'POST' }),
-  getSocialScore: (userId: number) => apiFetch(`social/score/${userId}`),
+  vouch: (userId: string) => apiFetch(`social/vouch/${userId}`, { method: 'POST' }),
+  getSocialScore: (userId: string) => apiFetch(`social/score/${userId}`),
   getFeed: (params?: any) => apiFetch('social/feed', { params }),
 };
 
@@ -269,10 +269,10 @@ export const servicesApi = {
 };
 
 export const contractsApi = {
-  getById: (id: string | number) => apiFetch(`contracts/${id}`),
-  getByBookingId: (bookingId: number) => apiFetch(`contracts?booking=${bookingId}`),
-  sign: (contractId: number, ipAddress: string) =>
-    apiFetch(`contracts/${contractId}/sign`, { method: 'POST', body: { ip_address: ipAddress } }),
+  getById: (id: string) => apiFetch(`contracts/${id}`),
+  getByBookingId: (bookingId: string) => apiFetch(`contracts?booking=${bookingId}`),
+  sign: (contractId: string, ipAddress?: string) =>
+    apiFetch(`contracts/${contractId}/sign`, { method: 'POST' }),
 };
 
 export const returnsApi = {

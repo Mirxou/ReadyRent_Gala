@@ -57,25 +57,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Check user has enough wallet balance
-    const user = await db.user.findUnique({
-      where: { id: session.userId },
-      select: { walletBalance: true },
-    });
-
-    if (!user || user.walletBalance < plan.price) {
-      return NextResponse.json(
-        {
-          success: false,
-          dignity_preserved: true,
-          message_ar: 'رصيد المحفظة غير كافي للاشتراك في هذه الخطة',
-          message_en: 'Insufficient wallet balance to subscribe to this plan',
-          code: 'INSUFFICIENT_BALANCE',
-        },
-        { status: 400 }
-      );
-    }
-
     // Check if user already has an active subscription for this plan
     const existingSub = await db.userSubscription.findFirst({
       where: {
@@ -100,16 +81,28 @@ export async function POST(request: Request) {
 
     const now = new Date();
     const endDate = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); // +30 days
+    const planName = plan.nameAr || plan.nameEn || planId;
 
-    // Deduct price from wallet and create subscription in a transaction
-    await db.$transaction([
+    // Use interactive transaction to atomically check balance, deduct, and create subscription
+    const result = await db.$transaction(async (tx) => {
+      // Check balance inside transaction
+      const user = await tx.user.findUnique({
+        where: { id: session.userId },
+        select: { walletBalance: true },
+      });
+
+      if (!user || (user.walletBalance ?? 0) < plan.price) {
+        return { error: 'INSUFFICIENT_BALANCE' } as const;
+      }
+
       // Deduct from wallet
-      db.user.update({
+      await tx.user.update({
         where: { id: session.userId },
         data: { walletBalance: { decrement: plan.price } },
-      }),
+      });
+
       // Create subscription
-      db.userSubscription.create({
+      const subscription = await tx.userSubscription.create({
         data: {
           userId: session.userId,
           planId,
@@ -118,25 +111,41 @@ export async function POST(request: Request) {
           startDate: now,
           endDate,
         },
-      }),
+      });
+
       // Create transaction record
-      db.transaction.create({
+      const transaction = await tx.transaction.create({
         data: {
           userId: session.userId,
           type: 'EXPENDITURE',
           amount: plan.price,
-          note: `اشتراك في خطة ${plan.nameAr || plan.nameEn || planId}`,
+          note: `اشتراك في خطة ${planName}`,
         },
-      }),
-    ]);
+      });
 
-    // Create notification
+      return { subscription, transaction } as const;
+    });
+
+    if ('error' in result) {
+      return NextResponse.json(
+        {
+          success: false,
+          dignity_preserved: true,
+          message_ar: 'رصيد المحفظة غير كافي للاشتراك في هذه الخطة',
+          message_en: 'Insufficient wallet balance to subscribe to this plan',
+          code: result.error,
+        },
+        { status: 400 }
+      );
+    }
+
+    // Create notification (outside transaction — non-critical)
     await db.notification.create({
       data: {
         userId: session.userId,
         type: 'system',
         title: 'تم الاشتراك بنجاح',
-        message: `تم الاشتراك في خطة "${plan.nameAr || plan.nameEn || planId}" بنجاح. اشتراكك صالح لمدة 30 يوماً.`,
+        message: `تم الاشتراك في خطة "${planName}" بنجاح. اشتراكك صالح لمدة 30 يوماً.`,
       },
     });
 

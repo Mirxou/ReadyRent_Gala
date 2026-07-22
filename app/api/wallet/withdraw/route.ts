@@ -12,63 +12,69 @@ export async function POST(request: Request) {
 
   const body = await request.json();
 
-  if (!body.amount || typeof body.amount !== 'number' || body.amount <= 0) {
+  if (!body.amount || typeof body.amount !== 'number' || body.amount <= 0 || !Number.isInteger(body.amount)) {
     return NextResponse.json(
       {
         success: false,
         dignity_preserved: true,
-        message_en: 'A valid positive amount is required',
+        message_en: 'A valid positive integer amount is required',
         code: 'VALIDATION_ERROR',
       },
       { status: 400 }
     );
   }
 
-  // Check balance
-  const user = await db.user.findUnique({
-    where: { id: session.userId },
-    select: { walletBalance: true },
+  // Use interactive transaction to atomically check balance and decrement
+  const result = await db.$transaction(async (tx) => {
+    const user = await tx.user.findUnique({
+      where: { id: session.userId },
+      select: { walletBalance: true },
+    });
+
+    if (!user || (user.walletBalance ?? 0) < body.amount) {
+      return { error: 'INSUFFICIENT_BALANCE' } as const;
+    }
+
+    const updatedUser = await tx.user.update({
+      where: { id: session.userId },
+      data: { walletBalance: { decrement: body.amount } },
+      select: { walletBalance: true },
+    });
+
+    const transaction = await tx.transaction.create({
+      data: {
+        userId: session.userId,
+        type: 'WITHDRAWAL',
+        amount: body.amount,
+        note: body.note || 'wallet_withdrawal',
+      },
+    });
+
+    return { updatedUser, transaction } as const;
   });
 
-  if (!user || user.walletBalance < body.amount) {
+  if ('error' in result) {
     return NextResponse.json(
       {
         success: false,
         dignity_preserved: true,
         message_en: 'Insufficient wallet balance',
-        code: 'INSUFFICIENT_BALANCE',
+        code: result.error,
       },
       { status: 400 }
     );
   }
 
-  // Create transaction & update balance atomically
-  const [updatedUser, transaction] = await db.$transaction([
-    db.user.update({
-      where: { id: session.userId },
-      data: { walletBalance: { decrement: body.amount } },
-      select: { walletBalance: true },
-    }),
-    db.transaction.create({
-      data: {
-        userId: session.userId,
-        type: 'WITHDRAWAL',
-        amount: body.amount,
-        note: 'wallet_withdrawal',
-      },
-    }),
-  ]);
-
   const data = {
-    balance: updatedUser.walletBalance,
+    balance: result.updatedUser.walletBalance,
     transaction: {
-      id: transaction.id,
-      user_id: transaction.userId,
-      type: transaction.type,
-      amount: transaction.amount,
-      note: transaction.note,
-      hash: transaction.hash,
-      created_at: transaction.createdAt.toISOString(),
+      id: result.transaction.id,
+      user_id: result.transaction.userId,
+      type: result.transaction.type,
+      amount: result.transaction.amount,
+      note: result.transaction.note,
+      hash: result.transaction.hash,
+      created_at: result.transaction.createdAt.toISOString(),
     },
   };
 

@@ -54,7 +54,9 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       dignity_preserved: true,
-      message: 'إذا كان البريد مسجلاً، سيصلك رابط إعادة التعيين',
+      data: null,
+      message_ar: 'إذا كان البريد مسجلاً، سيصلك رابط إعادة التعيين',
+      message_en: 'If the email is registered, a reset link will be sent',
     });
   } catch (error) {
     console.error('[Forgot Password API] Error:', error);
@@ -63,7 +65,9 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       dignity_preserved: true,
-      message: 'إذا كان البريد مسجلاً، سيصلك رابط إعادة التعيين',
+      data: null,
+      message_ar: 'إذا كان البريد مسجلاً، سيصلك رابط إعادة التعيين',
+      message_en: 'If the email is registered, a reset link will be sent',
     });
   }
 }

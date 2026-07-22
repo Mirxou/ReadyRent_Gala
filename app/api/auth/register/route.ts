@@ -14,7 +14,7 @@ const VALID_ROLES = ['customer', 'vendor'];
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { email, password, username, first_name, last_name, phone, role } = body;
+    const { email, password, confirmPassword, username, first_name, last_name, phone, role } = body;
 
     // Validate required fields
     if (!email || !password) {
@@ -45,14 +45,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate password strength (min 6 chars)
-    if (password.length < 6) {
+    // Validate password confirmation
+    if (password !== confirmPassword) {
       return NextResponse.json(
         {
           success: false,
           dignity_preserved: true,
-          message_ar: 'كلمة المرور يجب أن تكون 6 أحرف على الأقل',
-          message_en: 'Password must be at least 6 characters',
+          message_ar: 'كلمة المرور وتأكيدها غير متطابقتين',
+          message_en: 'Password and confirmation do not match',
+          code: 'PASSWORD_MISMATCH',
+        },
+        { status: 400 }
+      );
+    }
+
+    // Validate password strength (min 8 chars)
+    if (password.length < 8) {
+      return NextResponse.json(
+        {
+          success: false,
+          dignity_preserved: true,
+          message_ar: 'كلمة المرور يجب أن تكون 8 أحرف على الأقل',
+          message_en: 'Password must be at least 8 characters',
           code: 'WEAK_PASSWORD',
         },
         { status: 400 }

@@ -2864,3 +2864,42 @@ Stage Summary:
 - Dashboard orders no longer has impure render warning
 - Contract creation now populates parties field with renter and vendor info
 - Vendor dashboard no longer leaks cross-vendor data; returns safe empty state until schema migration
+---
+Task ID: 5
+Agent: Main Orchestrator
+Task: Round 5 Deep Runtime/Logic Audit — 3 parallel audit batches then fix critical/high/medium issues
+
+Work Log:
+- Launched 3 parallel audit agents covering all 70+ API routes
+- Batch 1: auth, payments, wallet, contracts, insurance — found 41 issues (5 critical, 6 high)
+- Batch 2: bookings subsystem — found 15 issues (3 critical, 5 high)
+- Batch 3: products, disputes, reviews, social, blog, subscriptions, admin, analytics, chatbot, bundles, notifications — found 37 issues (1 critical, 11 high)
+- Verified unconfirmed findings: notifications/read-all (safe), notifications/[id] (safe), social/vouch (safe — has self-vouch + duplicate prevention)
+- Fixed 20 files across all severity levels
+
+Fixes applied:
+1. **wallet/withdraw**: Race condition — replaced separate balance check + transaction with interactive $transaction that checks balance inside
+2. **wallet/transfer**: Race condition + recipient inactive check — interactive transaction, added isActive check on recipient, integer validation, removed stale external balance read
+3. **wallet/deposit**: Replaced in-memory daily deposit tracking (lost on restart) with DB aggregate query, added integer validation
+4. **wallet/route.ts GET**: Added null user check (was silently returning 0 balance for deleted users)
+5. **bookings/create**: Added try/catch (was completely missing), date format validation (Invalid Date), quantity validation (positive integer), double-booking check (overlapping dates query), null pricePerDay rejection
+6. **bookings/cart/items**: Added product existence validation, server-side price (was trusting client-supplied price_per_day), duplicate cart item prevention, quantity validation
+7. **contracts/[id]/sign**: Added double-sign prevention (status must be 'draft'), added full sovereign envelope error responses, made contract update + booking confirm atomic ($transaction)
+8. **contracts/route.ts + contracts/[id]/route.ts**: Wrapped JSON.parse in safeJsonParse helper to prevent crash on malformed DB data
+9. **payments/create**: Added booking ownership verification (was allowing payments on any user's booking), added payment method whitelist validation, fixed 3DSecure logic (now uses resolved method after default)
+10. **insurance/purchase**: Added booking_id requirement, booking ownership check, duplicate insurance prevention, race condition fix (interactive transaction), linked to booking.hasInsurance
+11. **subscriptions/subscribe**: Moved balance check inside interactive transaction to prevent race condition
+12. **products/admin/[id]**: Added active bookings check before DELETE (returns 409), added JSON.stringify for images/sizes/colors in PUT, added listingType field to GET response, added dignity_preserved to error responses
+13. **products/[id]/route.ts**: Added missing listingType in detail response, extracted shared include constant to fix duplicated code, tightened error catch to only swallow CUID format errors, fixed any type
+14. **auth/register**: Increased password minimum from 6 to 8 characters (consistent with reset-password), added confirmPassword validation
+15. **auth/forgot-password**: Added data: null field to response (was missing, breaking client apiFetch unwrap)
+16. **bookings/[id] GET**: Fixed info leak (403→404 for unauthorized access, preventing booking ID enumeration)
+17. **lib/api.ts**: Fixed 8 methods with incorrect number types → string (addToWishlist, removeFromWishlist, removeFromCart, socialApi.vouch, getSocialScore, contractsApi.sign, getByBookingId, getDispute, appeal, createDisputeMessage, getDisputeHistory)
+
+Stage Summary:
+- 20 files modified with 25+ security/logic fixes
+- 0 new lint errors in app/ or lib/ (only pre-existing no-explicit-any in skills/)
+- All critical race conditions resolved (wallet withdraw/transfer/deposit/insurance/subscription)
+- All authorization gaps fixed (payment booking ownership, insurance booking linkage, booking ID enumeration)
+- All input validation gaps fixed (dates, quantities, payment methods, product prices)
+- Business logic gaps closed (double-booking, double-signing, duplicate cart items, duplicate insurance)

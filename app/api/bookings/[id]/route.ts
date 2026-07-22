@@ -61,11 +61,11 @@ export async function GET(
         {
           success: false,
           dignity_preserved: true,
-          message_ar: 'غير مصرح بالوصول إلى هذا الحجز',
-          message_en: 'Not authorized to access this booking',
-          code: 'FORBIDDEN',
+          message_ar: 'الحجز غير موجود',
+          message_en: 'Booking not found',
+          code: 'NOT_FOUND',
         },
-        { status: 403 }
+        { status: 404 }
       );
     }
 

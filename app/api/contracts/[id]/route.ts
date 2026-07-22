@@ -2,6 +2,15 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
 
+function safeJsonParse<T>(str: string | null, fallback: T): T {
+  if (!str) return fallback;
+  try {
+    return JSON.parse(str) as T;
+  } catch {
+    return fallback;
+  }
+}
+
 // ═══════════════════════════════════════════════════════════════
 // GET /api/contracts/[id] — Get a single contract
 // ═══════════════════════════════════════════════════════════════
@@ -45,10 +54,10 @@ export async function GET(
     is_finalized: contract.isFinalized,
     contract_hash: contract.contractHash,
     terms: contract.terms,
-    parties: contract.parties ? JSON.parse(contract.parties) : [],
+    parties: safeJsonParse(contract.parties, []),
     renter_signature: contract.renterSignature,
     signed_at: contract.signedAt?.toISOString() ?? null,
-    snapshot: contract.snapshot ? JSON.parse(contract.snapshot) : null,
+    snapshot: safeJsonParse(contract.snapshot, null),
     created_at: contract.createdAt.toISOString(),
     updated_at: contract.updatedAt.toISOString(),
     booking: contract.booking

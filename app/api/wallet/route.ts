@@ -15,7 +15,14 @@ export async function GET(request: Request) {
     select: { walletBalance: true },
   });
 
-  const balance = user?.walletBalance ?? 0;
+  if (!user) {
+    return NextResponse.json(
+      { success: false, dignity_preserved: true, message_en: 'User not found', code: 'NOT_FOUND' },
+      { status: 404 }
+    );
+  }
+
+  const balance = user.walletBalance ?? 0;
 
   const transactions = await db.transaction.findMany({
     where: { userId: session.userId },

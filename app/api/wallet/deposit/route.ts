@@ -14,26 +14,6 @@ import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
 const MAX_DEPOSIT_PER_TRANSACTION = 100000;
 const MAX_DEPOSIT_PER_DAY = 500000;
 
-// In-memory daily deposit tracking (resets on server restart)
-const dailyDeposits = new Map<string, { date: string; total: number }>();
-
-function getDailyTotal(userId: string): number {
-  const today = new Date().toISOString().split('T')[0];
-  const record = dailyDeposits.get(userId);
-  if (!record || record.date !== today) return 0;
-  return record.total;
-}
-
-function addDailyDeposit(userId: string, amount: number): void {
-  const today = new Date().toISOString().split('T')[0];
-  const record = dailyDeposits.get(userId);
-  if (!record || record.date !== today) {
-    dailyDeposits.set(userId, { date: today, total: amount });
-  } else {
-    record.total += amount;
-  }
-}
-
 export async function POST(request: Request) {
   try {
   const session = getSessionFromRequest(request);
@@ -41,12 +21,12 @@ export async function POST(request: Request) {
 
   const body = await request.json();
 
-  if (!body.amount || typeof body.amount !== 'number' || body.amount <= 0) {
+  if (!body.amount || typeof body.amount !== 'number' || body.amount <= 0 || !Number.isInteger(body.amount)) {
     return NextResponse.json(
       {
         success: false,
         dignity_preserved: true,
-        message_en: 'A valid positive amount is required',
+        message_en: 'A valid positive integer amount is required',
         code: 'VALIDATION_ERROR',
       },
       { status: 400 }
@@ -66,8 +46,20 @@ export async function POST(request: Request) {
     );
   }
 
-  // Daily deposit limit
-  const currentDailyTotal = getDailyTotal(session.userId);
+  // Daily deposit limit — track from DB to survive restarts
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+
+  const todayDeposits = await db.transaction.aggregate({
+    where: {
+      userId: session.userId,
+      type: 'DEPOSIT',
+      createdAt: { gte: todayStart },
+    },
+    _sum: { amount: true },
+  });
+
+  const currentDailyTotal = todayDeposits._sum.amount ?? 0;
   if (currentDailyTotal + body.amount > MAX_DEPOSIT_PER_DAY) {
     return NextResponse.json(
       {
@@ -96,9 +88,6 @@ export async function POST(request: Request) {
       },
     }),
   ]);
-
-  // Track daily deposit
-  addDailyDeposit(session.userId, body.amount);
 
   const data = {
     balance: user.walletBalance,

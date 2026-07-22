@@ -16,7 +16,7 @@ export async function GET(
 
   const user = await db.user.findUnique({ where: { id: session.userId }, select: { role: true } });
   if (!user || (user.role !== 'admin' && user.role !== 'staff' && user.role !== 'vendor')) {
-    return NextResponse.json({ success: false, message_en: 'Forbidden', code: 'FORBIDDEN' }, { status: 403 });
+    return NextResponse.json({ success: false, dignity_preserved: true, message_en: 'Forbidden', code: 'FORBIDDEN' }, { status: 403 });
   }
 
   try {
@@ -29,12 +29,12 @@ export async function GET(
     });
 
     if (!product) {
-      return NextResponse.json({ success: false, message_en: 'Product not found', code: 'NOT_FOUND' }, { status: 404 });
+      return NextResponse.json({ success: false, dignity_preserved: true, message_en: 'Product not found', code: 'NOT_FOUND' }, { status: 404 });
     }
 
     // Vendor can only fetch their own products
     if (user.role === 'vendor' && product.vendorId !== session.userId) {
-      return NextResponse.json({ success: false, message_en: 'Not your product', code: 'FORBIDDEN' }, { status: 403 });
+      return NextResponse.json({ success: false, dignity_preserved: true, message_en: 'Not your product', code: 'FORBIDDEN' }, { status: 403 });
     }
 
     const data = {
@@ -47,6 +47,7 @@ export async function GET(
       images: product.images,
       sizes: product.sizeOptions,
       colors: product.colorOptions,
+      listing_type: product.listingType,
       is_available: product.isAvailable,
       category: product.category,
       category_id: product.categoryId,
@@ -57,7 +58,7 @@ export async function GET(
     return NextResponse.json({ success: true, dignity_preserved: true, data });
   } catch (error) {
     console.error('[Admin Product GET API] Error:', error);
-    return NextResponse.json({ success: false, message_en: 'Error fetching product', code: 'INTERNAL_ERROR' }, { status: 500 });
+    return NextResponse.json({ success: false, dignity_preserved: true, message_en: 'Error fetching product', code: 'INTERNAL_ERROR' }, { status: 500 });
   }
 }
 
@@ -70,19 +71,19 @@ export async function PUT(
 
   const user = await db.user.findUnique({ where: { id: session.userId }, select: { role: true } });
   if (!user || (user.role !== 'admin' && user.role !== 'staff' && user.role !== 'vendor')) {
-    return NextResponse.json({ success: false, message_en: 'Forbidden', code: 'FORBIDDEN' }, { status: 403 });
+    return NextResponse.json({ success: false, dignity_preserved: true, message_en: 'Forbidden', code: 'FORBIDDEN' }, { status: 403 });
   }
 
   try {
     const { id } = await params;
     const existing = await db.product.findUnique({ where: { id } });
     if (!existing) {
-      return NextResponse.json({ success: false, message_en: 'Product not found', code: 'NOT_FOUND' }, { status: 404 });
+      return NextResponse.json({ success: false, dignity_preserved: true, message_en: 'Product not found', code: 'NOT_FOUND' }, { status: 404 });
     }
 
     // Vendor can only edit their own products
     if (user.role === 'vendor' && existing.vendorId !== session.userId) {
-      return NextResponse.json({ success: false, message_en: 'Not your product', code: 'FORBIDDEN' }, { status: 403 });
+      return NextResponse.json({ success: false, dignity_preserved: true, message_en: 'Not your product', code: 'FORBIDDEN' }, { status: 403 });
     }
 
     const body = await request.json();
@@ -93,12 +94,14 @@ export async function PUT(
     if (body.description_ar !== undefined) updateData.description = body.description_ar;
     if (body.daily_rate !== undefined) updateData.pricePerDay = body.daily_rate;
     if (body.primary_image !== undefined) updateData.primaryImage = body.primary_image;
-    if (body.images !== undefined) updateData.images = body.images;
-    if (body.sizes !== undefined) updateData.sizeOptions = body.sizes;
-    if (body.colors !== undefined) updateData.colorOptions = body.colors;
+    // Ensure JSON fields are serialized before storing
+    if (body.images !== undefined) updateData.images = typeof body.images === 'string' ? body.images : JSON.stringify(body.images);
+    if (body.sizes !== undefined) updateData.sizeOptions = typeof body.sizes === 'string' ? body.sizes : JSON.stringify(body.sizes);
+    if (body.colors !== undefined) updateData.colorOptions = typeof body.colors === 'string' ? body.colors : JSON.stringify(body.colors);
     if (body.is_available !== undefined) updateData.isAvailable = body.is_available;
     if (body.category_id !== undefined) updateData.categoryId = body.category_id;
     if (body.slug !== undefined) updateData.slug = body.slug;
+    if (body.listing_type !== undefined) updateData.listingType = body.listing_type;
 
     const updated = await db.product.update({ where: { id }, data: updateData });
 
@@ -109,7 +112,7 @@ export async function PUT(
     });
   } catch (error) {
     console.error('[Admin Product Update API] Error:', error);
-    return NextResponse.json({ success: false, message_en: 'Error updating product', code: 'INTERNAL_ERROR' }, { status: 500 });
+    return NextResponse.json({ success: false, dignity_preserved: true, message_en: 'Error updating product', code: 'INTERNAL_ERROR' }, { status: 500 });
   }
 }
 
@@ -122,14 +125,34 @@ export async function DELETE(
 
   const user = await db.user.findUnique({ where: { id: session.userId }, select: { role: true } });
   if (!user || (user.role !== 'admin' && user.role !== 'staff')) {
-    return NextResponse.json({ success: false, message_en: 'Forbidden', code: 'FORBIDDEN' }, { status: 403 });
+    return NextResponse.json({ success: false, dignity_preserved: true, message_en: 'Forbidden', code: 'FORBIDDEN' }, { status: 403 });
   }
 
   try {
     const { id } = await params;
     const existing = await db.product.findUnique({ where: { id } });
     if (!existing) {
-      return NextResponse.json({ success: false, message_en: 'Product not found', code: 'NOT_FOUND' }, { status: 404 });
+      return NextResponse.json({ success: false, dignity_preserved: true, message_en: 'Product not found', code: 'NOT_FOUND' }, { status: 404 });
+    }
+
+    // Check for active bookings before deletion
+    const activeBookings = await db.booking.count({
+      where: {
+        productId: id,
+        status: { in: ['pending', 'confirmed', 'active'] },
+      },
+    });
+
+    if (activeBookings > 0) {
+      return NextResponse.json(
+        {
+          success: false,
+          dignity_preserved: true,
+          message_en: `Cannot delete product with ${activeBookings} active booking(s). Cancel them first.`,
+          code: 'ACTIVE_BOOKINGS',
+        },
+        { status: 409 }
+      );
     }
 
     await db.product.delete({ where: { id } });
@@ -137,6 +160,6 @@ export async function DELETE(
     return NextResponse.json({ success: true, dignity_preserved: true, message_en: 'Product deleted' });
   } catch (error) {
     console.error('[Admin Product Delete API] Error:', error);
-    return NextResponse.json({ success: false, message_en: 'Error deleting product', code: 'INTERNAL_ERROR' }, { status: 500 });
+    return NextResponse.json({ success: false, dignity_preserved: true, message_en: 'Error deleting product', code: 'INTERNAL_ERROR' }, { status: 500 });
   }
 }
