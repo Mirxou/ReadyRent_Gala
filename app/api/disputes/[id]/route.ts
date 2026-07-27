@@ -20,7 +20,7 @@ export async function GET(
       where: { id },
       include: {
         user: {
-          select: { id: true, email: true, username: true, firstName: true, lastName: true, role: true },
+          select: { id: true, username: true, firstName: true, lastName: true, role: true },
         },
         booking: {
           include: {
@@ -96,7 +96,6 @@ export async function GET(
       user: dispute.user
         ? {
             id: dispute.user.id,
-            email: dispute.user.email,
             username: dispute.user.username,
             first_name: dispute.user.firstName,
             last_name: dispute.user.lastName,

@@ -8,12 +8,8 @@ import {
   FileSignature,
   History as HistoryIcon,
   CreditCard,
-  Car,
-  Home,
-  AlertTriangle,
   Loader2,
   Sparkles,
-  MapPin,
   Clock,
   ArrowRight,
   BrainCircuit,
@@ -33,7 +29,7 @@ import Link from 'next/link';
 import { cn, formatNumber } from '@/lib/utils';
 
 import { useQuery } from '@tanstack/react-query';
-import { bookingsApi, authApi } from '@/lib/api';
+import { bookingsApi, authApi, disputesApi } from '@/lib/api';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 
@@ -69,9 +65,22 @@ export default function DashboardPage() {
     enabled: isAuthenticated
   });
 
-  const activeBookings = bookings.filter((b: any) => ['pending', 'confirmed', 'in_use'].includes(b.status));
+  const activeBookings = bookings.filter((b: Record<string, unknown>) => ['pending', 'confirmed', 'in_use'].includes(b.status as string));
+  const completedBookings = bookings.filter((b: Record<string, unknown>) => ['completed', 'returned'].includes(b.status as string));
+  const totalNonActive = completedBookings.length + bookings.filter((b: Record<string, unknown>) => ['cancelled', 'disputed'].includes(b.status as string)).length;
 
-  const trustScore = user?.trust_score || 0;
+  // Real compliance: completed / (completed + cancelled) — N/A if no data
+  const complianceRate = totalNonActive > 0
+    ? Math.round((completedBookings.length / totalNonActive) * 100)
+    : null;
+
+  // Real safety rating from user trust_score scaled to 5.0
+  const trustScoreValue = user?.trust_score ?? 0;
+  const safetyRating = trustScoreValue > 0
+    ? Math.min(5, Math.max(0, (trustScoreValue / 100) * 5)).toFixed(1)
+    : null;
+
+  const trustScore = trustScoreValue;
   const isElite = trustScore >= 100; // Phase 10 Obsidian Tier
   const isSovereign = trustScore >= 1; 
   const is2FAEnabled = (user as any)?.is_2fa_enabled;
@@ -143,8 +152,8 @@ export default function DashboardPage() {
         </div>
 
         <p className="text-muted-foreground flex items-center gap-2 text-sm mt-2">
-          <Badge className="bg-sovereign-gold/10 text-sovereign-gold border-0">VIP</Badge>
-          الهوية السيادية: {isSovereign ? "مفعلة (متميز)" : "قيد البناء"}
+          {isElite && <Badge className="bg-sovereign-gold/10 text-sovereign-gold border-0">VIP</Badge>}
+          الهوية السيادية: {isElite ? "مفعلة (متميز)" : isSovereign ? "نشطة" : "قيد البناء"}
         </p>
       </div>
 
@@ -187,13 +196,20 @@ export default function DashboardPage() {
                         <div className="space-y-2">
                             <div className="flex justify-between text-xs font-bold uppercase tracking-widest">
                                 <span className="text-muted-foreground">نسبة الالتزام بالمواعيد</span>
-                                <span className="text-emerald-500">98%</span>
+                                <span className={cn("font-mono", complianceRate !== null ? (complianceRate >= 80 ? "text-emerald-500" : complianceRate >= 50 ? "text-yellow-500" : "text-red-400") : "text-muted-foreground/40")}>
+                                    {complianceRate !== null ? `${complianceRate}%` : '—'}
+                                </span>
                             </div>
                             <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
                                 <motion.div 
                                     initial={{ width: 0 }} 
-                                    animate={{ width: '98%' }} 
-                                    className="h-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.3)]"
+                                    animate={{ width: complianceRate !== null ? `${complianceRate}%` : '0%' }}
+                                    className={cn(
+                                        "h-full",
+                                        complianceRate !== null && complianceRate >= 80 ? "bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.3)]" :
+                                        complianceRate !== null && complianceRate >= 50 ? "bg-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.3)]" :
+                                        complianceRate !== null ? "bg-red-400 shadow-[0_0_10px_rgba(248,113,113,0.3)]" : ""
+                                    )}
                                 />
                             </div>
                         </div>
@@ -201,12 +217,12 @@ export default function DashboardPage() {
                         <div className="space-y-2">
                             <div className="flex justify-between text-xs font-bold uppercase tracking-widest">
                                 <span className="text-muted-foreground">معدل سلامة الأصول</span>
-                                <span className="text-sovereign-gold">4.9/5.0</span>
+                                <span className="text-sovereign-gold font-mono">{safetyRating ? `${safetyRating}/5.0` : '—'}</span>
                             </div>
                             <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
                                 <motion.div 
                                     initial={{ width: 0 }} 
-                                    animate={{ width: '94%' }} 
+                                    animate={{ width: safetyRating ? `${(parseFloat(safetyRating) / 5) * 100}%` : '0%' }}
                                     className="h-full bg-sovereign-gold shadow-[0_0_10px_rgba(184,159,103,0.3)]"
                                 />
                             </div>
@@ -214,11 +230,11 @@ export default function DashboardPage() {
 
                         <div className="pt-4 flex gap-4">
                             <div className="p-3 bg-white/5 rounded-xl border border-white/10 flex-1 text-center">
-                                <p className="text-[8px] font-black text-muted-foreground uppercase mb-1">حل النزاعات</p>
-                                <p className="text-lg font-black font-mono">100%</p>
+                                <p className="text-[8px] font-black text-muted-foreground uppercase mb-1">عقود منتهية</p>
+                                <p className="text-lg font-black font-mono">{completedBookings.length}</p>
                             </div>
                             <div className="p-3 bg-white/5 rounded-xl border border-white/10 flex-1 text-center">
-                                <p className="text-[8px] font-black text-muted-foreground uppercase mb-1">عقود منتهية</p>
+                                <p className="text-[8px] font-black text-muted-foreground uppercase mb-1">إجمالي العقود</p>
                                 <p className="text-lg font-black font-mono">{bookings.length}</p>
                             </div>
                         </div>

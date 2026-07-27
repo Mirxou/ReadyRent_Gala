@@ -72,20 +72,27 @@ export async function POST(
       );
     }
 
-    // Calculate refund based on 48h rule
-    let refundAmount = booking.totalPrice;
-    let refundPercent = 100;
+    // Calculate refund based on policy: ≥48h=100%, 24-48h=50%, <24h=0%
+    let refundAmount = 0;
+    let refundPercent = 0;
 
     if (booking.startDate) {
       const startMs = new Date(booking.startDate).getTime();
       const nowMs = Date.now();
       const hoursUntilStart = (startMs - nowMs) / (1000 * 60 * 60);
 
-      if (hoursUntilStart < 48) {
-        // Less than 48 hours before start: 50% refund
+      if (hoursUntilStart >= 48) {
+        refundAmount = booking.totalPrice;
+        refundPercent = 100;
+      } else if (hoursUntilStart >= 24) {
         refundAmount = Math.floor(booking.totalPrice / 2);
         refundPercent = 50;
       }
+      // else: 0% refund (< 24h)
+    } else {
+      // No start date — full refund
+      refundAmount = booking.totalPrice;
+      refundPercent = 100;
     }
 
     const productName = booking.productName || booking.product?.nameAr || booking.product?.name || 'حجز';
@@ -137,7 +144,9 @@ export async function POST(
         message:
           refundPercent === 100
             ? 'تم إلغاء الحجز واسترداد المبلغ كاملاً'
-            : 'تم إلغاء الحجز واسترداد 50% من المبلغ',
+            : refundPercent === 50
+              ? 'تم إلغاء الحجز واسترداد 50% من المبلغ'
+              : 'تم إلغاء الحجز. لا يوجد مبلغ لاسترداده (أقل من 24 ساعة)',
       },
     });
   } catch (error) {

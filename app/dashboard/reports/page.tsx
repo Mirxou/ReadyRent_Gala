@@ -68,14 +68,7 @@ export default function ReportsPage() {
     });
 
     const handleDownload = (format: string) => {
-        toast.promise(
-            new Promise((resolve) => setTimeout(resolve, 2000)),
-            {
-                loading: `جاري توليد التقرير الاستراتيجي بصيغة ${format}...`,
-                success: `تم تجهيز التقرير! السيادة الرقمية بانتظارك.`,
-                error: 'عذراً، حدث خطأ في بروتوكول التوليد.',
-            }
-        );
+        toast.info(`تصدير التقارير بصيغة ${format} سيكون متاحاً قريباً`);
     };
 
     return (
@@ -129,24 +122,20 @@ export default function ReportsPage() {
 
                     <GlassPanel className="p-10 space-y-8 rounded-[40px]" variant="obsidian">
                         <div className="space-y-3">
-                            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20">دقة التحليل الجهازي</span>
+                            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20">ملخص البيانات المتاحة</span>
                             <div className="flex items-baseline gap-2">
-                                <div className="text-5xl font-black italic tracking-tighter text-white">99.2</div>
-                                <div className="text-lg font-black text-sovereign-gold">%</div>
+                                <div className="text-5xl font-black italic tracking-tighter text-white">
+                                    {Array.isArray(report?.data) ? report.data.length : Array.isArray(regionalData) ? regionalData.length : 0}
+                                </div>
+                                <div className="text-lg font-black text-sovereign-gold">
+                                    سجل
+                                </div>
                             </div>
-                        </div>
-                        <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
-                            <motion.div 
-                                initial={{ width: 0 }}
-                                animate={{ width: '99.2%' }}
-                                transition={{ duration: 2, delay: 0.5 }}
-                                className="h-full bg-sovereign-gold shadow-[0_0_15px_rgba(197,160,89,0.5)]" 
-                            />
                         </div>
                         <div className="flex items-center gap-3 p-4 bg-white/[0.02] rounded-2xl border border-white/5">
                             <BrainCircuit className="w-5 h-5 text-sovereign-gold" />
                             <p className="text-[9px] text-white/30 leading-relaxed font-black uppercase tracking-widest italic">
-                                تم التحقق بواسطة المحرك الأساسي الإصدار ١٠
+                                بيانات حقيقية من قاعدة بيانات المنصة
                             </p>
                         </div>
                     </GlassPanel>

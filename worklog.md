@@ -2939,3 +2939,58 @@ Stage Summary:
 - Notifications page shows correct title
 - Audit report delivered: 294 issues in 5 phases
 - Remaining: P1-3 (apply unified responses), P1-4 (dashboard hardcoded numbers), P1-6 (products/create), P1-8 (PII), P1-9 (cancellation policy), P1-10 (console.* replacement)
+---
+Task ID: phase0-1-repair
+Agent: Main Orchestrator
+Task: Phase 0-2 repairs: product create page, dashboard fake data, cancellation policy, PII leaks
+
+Work Log:
+- Built real product creation page (app/products/create/page.tsx) replacing "coming soon" placeholder
+  - Uses adminApi.createProduct() for real API submission
+  - Fetches categories from products/categories API for dropdown
+  - Has role-based access control (admin/vendor/staff only)
+  - Form fields: name, description, daily rate, category, sizes list, colors list, availability toggle
+  - Toast notifications for success/error, redirects to product page on success
+- Fixed dashboard main page (app/dashboard/page.tsx) fake data:
+  - Replaced hardcoded 98% compliance with real calculation from bookings
+  - Replaced hardcoded 4.9/5.0 safety rating with trust_score-scaled value
+  - Replaced hardcoded 100% dispute resolution with completed contracts count
+  - Made VIP badge conditional on elite tier (trustScore >= 100)
+  - Removed unused imports (Car, Home, AlertTriangle, MapPin)
+- Fixed analytics page (app/dashboard/analytics/page.tsx) fake data:
+  - Replaced all hardcoded numbers with real data derived from user bookings
+  - Removed dead "generate report" button
+  - Used real category distribution for radar chart
+  - Used real monthly booking counts for trust trajectory
+  - Shows empty state when no booking data exists
+- Fixed reports page (app/dashboard/reports/page.tsx):
+  - Replaced hardcoded 99.2% accuracy with real data record count
+  - Changed fake download toast to honest "coming soon" message
+- Fixed artisans page (app/dashboard/artisans/page.tsx):
+  - Replaced [1,2,3,4,5,6] fake cards with empty state when no real artisans
+  - Added proper Artisan TypeScript interface
+  - Used real rating/trust_score from API data instead of static 5 stars
+- Fixed wallet page (app/wallet/page.tsx) fake data:
+  - Replaced fake card number **** **** **** 2026 with real phone suffix
+  - Replaced fake hash 8f2d...23e1 with real user ID prefix
+  - Replaced fake username مستخدم_سيادي_01 with real username from store
+- Fixed standardize page (app/dashboard/standardize/page.tsx):
+  - Replaced fake setTimeout 4s audit with real adminApi.createProduct() call
+  - Connected all form fields (name, description, category, daily price, deposit)
+  - Form validation enforces required fields before proceeding
+  - Redirects to created product page on success
+- Fixed cancellation policy conflict:
+  - bookins/[id]/cancel/route.ts now uses 3-tier policy matching the GET endpoint (>=48h=100%, 24-48h=50%, <24h=0%)
+  - Added 0% refund message variant
+- Fixed PII leaks:
+  - bookings/[id]/route.ts: removed email and phone from user select
+  - disputes/[id]/route.ts: removed email from user select
+  - Updated response mapping to not reference removed fields
+
+Stage Summary:
+- 12 files modified across Phase 0-2
+- 0 TypeScript errors in modified files
+- All fake dashboard data replaced with real computed values
+- Product creation flow is fully functional
+- Cancellation policy is consistent across both routes
+- PII no longer exposed through booking/dispute detail APIs

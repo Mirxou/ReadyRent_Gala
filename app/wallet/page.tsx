@@ -1,5 +1,6 @@
 "use client"
 import { formatNumber } from '@/lib/utils';
+import { useAuthStore } from '@/lib/store';
 
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -48,6 +49,7 @@ const TABS: { key: TabKey; label: string; icon: React.ReactNode }[] = [
 ];
 
 export default function SovereignWallet() {
+  const { user } = useAuthStore();
   const [balance, setBalance] = useState(0);
   const [escrowTotal, setEscrowTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -288,19 +290,19 @@ export default function SovereignWallet() {
                                 <div className="text-right">
                                   <Fingerprint className="w-12 h-12 text-white/10 group-hover:text-sovereign-gold/40 transition-colors inline-block" />
                                   <div className="text-[6px] font-mono text-white/10 group-hover:text-sovereign-gold/20 leading-none mt-1">
-                                    هاش_مصادقة: 8f2d...23e1
+                                    {user?.id ? `ID: ${user.id.slice(0, 4)}...${user.id.slice(-4)}` : 'STANDARD.Rent'}
                                   </div>
                                 </div>
                             </div>
 
                             <div className="space-y-6">
                                 <div className="text-2xl font-black font-mono tracking-[0.4em] text-white/90">
-                                    **** **** **** 2026
+                                    {user?.phone ? `•••• ${user.phone.slice(-4)}` : 'STANDARD • WALLET'}
                                 </div>
                                 <div className="flex justify-between items-end">
                                     <div>
                                         <span className="text-[8px] font-black uppercase text-white/40 block mb-1">مواطن مميز</span>
-                                        <span className="text-sm font-bold uppercase tracking-widest text-sovereign-gold">مستخدم_سيادي_01</span>
+                                        <span className="text-sm font-bold uppercase tracking-widest text-sovereign-gold">{user?.username || 'مواطن مميز'}</span>
                                     </div>
                                     <div className="text-right">
                                         <span className="text-[8px] font-black uppercase text-white/40 block mb-1">الحالة</span>
@@ -363,7 +365,7 @@ export default function SovereignWallet() {
                                                 <span className="font-black text-base md:text-lg tracking-tighter truncate">{tx.note || 'معاملة مالية'}</span>
                                                 <Badge variant="outline" className="text-[9px] uppercase border-white/10 opacity-60 shrink-0">#{tx.id?.slice(0, 8) || tx.id}</Badge>
                                             </div>
-                                            <div className="text-xs text-muted-foreground font-light">{new Date(tx.date || tx.created_at).toLocaleDateString('ar-DZ')}</div>
+                                            <div className="text-xs text-muted-foreground font-light">{new Date(tx.date || tx.created_at || Date.now()).toLocaleDateString('ar-DZ')}</div>
                                         </div>
                                     </div>
 

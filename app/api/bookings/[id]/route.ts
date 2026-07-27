@@ -24,7 +24,7 @@ export async function GET(
           select: { id: true, name: true, nameAr: true, primaryImage: true, slug: true, vendorId: true },
         },
         user: {
-          select: { id: true, email: true, username: true, firstName: true, lastName: true, phone: true, role: true },
+          select: { id: true, username: true, firstName: true, lastName: true, role: true },
         },
         reviews: {
           select: { id: true, rating: true, comment: true, status: true, createdAt: true },
@@ -112,11 +112,9 @@ export async function GET(
       user: booking.user
         ? {
             id: booking.user.id,
-            email: booking.user.email,
             username: booking.user.username,
             first_name: booking.user.firstName,
             last_name: booking.user.lastName,
-            phone: booking.user.phone,
             role: booking.user.role,
           }
         : null,
