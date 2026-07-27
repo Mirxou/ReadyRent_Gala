@@ -12,7 +12,7 @@ interface WhatsAppButtonProps {
 }
 
 export function WhatsAppButton({
-  phoneNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '+213XXXXXXXXX', // Default phone number from env or placeholder
+  phoneNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '',
   message = 'مرحباً، أريد الاستفسار عن الخدمات',
   className = '',
   variant = 'floating',
@@ -20,6 +20,10 @@ export function WhatsAppButton({
   const [isHovered, setIsHovered] = useState(false);
 
   const handleClick = () => {
+    if (!phoneNumber) {
+      // No WhatsApp number configured — do nothing silently
+      return;
+    }
     // Format phone number (remove + and spaces)
     const formattedPhone = phoneNumber.replace(/[+\s-]/g, '');
     // Encode message

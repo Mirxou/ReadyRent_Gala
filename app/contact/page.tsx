@@ -30,8 +30,8 @@ const contactInfo = [
   {
     icon: <Phone className="w-5 h-5 text-sovereign-gold" />,
     label: 'الهاتف',
-    value: '0555 123 456',
-    href: 'tel:0555123456',
+    value: process.env.NEXT_PUBLIC_PHONE_NUMBER || 'سيتم إضافتها قريباً',
+    href: process.env.NEXT_PUBLIC_PHONE_NUMBER ? `tel:${process.env.NEXT_PUBLIC_PHONE_NUMBER.replace(/\s/g, '')}` : null,
   },
   {
     icon: <MapPin className="w-5 h-5 text-sovereign-gold" />,
@@ -42,9 +42,9 @@ const contactInfo = [
 ];
 
 const socialLinks = [
-  { icon: <Instagram className="w-5 h-5" />, label: 'انستغرام', href: '#' },
-  { icon: <Facebook className="w-5 h-5" />, label: 'فيسبوك', href: '#' },
-  { icon: <MessageCircle className="w-5 h-5" />, label: 'واتساب', href: '#' },
+  { icon: <Instagram className="w-5 h-5" />, label: 'انستغرام', href: process.env.NEXT_PUBLIC_INSTAGRAM_URL || '#' },
+  { icon: <Facebook className="w-5 h-5" />, label: 'فيسبوك', href: process.env.NEXT_PUBLIC_FACEBOOK_URL || '#' },
+  { icon: <MessageCircle className="w-5 h-5" />, label: 'واتساب', href: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ? `https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER.replace(/[^0-9]/g, '')}` : '#' },
 ];
 
 export default function ContactPage() {

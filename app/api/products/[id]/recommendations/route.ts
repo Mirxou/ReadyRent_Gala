@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import ZAI from 'z-ai-web-dev-sdk';
 
 // ═══════════════════════════════════════════════════════════════════
-// AI Product Recommendations API
-// Uses z-ai-web-dev-sdk LLM to pick the 4 best recommendations
-// Falls back to category-based if LLM fails or times out (5s)
+// Product Recommendations API
+// Returns category-based recommendations for a given product
 // ═══════════════════════════════════════════════════════════════════
 
 function safeJsonParse<T>(str: string, fallback: T): T {
@@ -139,91 +137,10 @@ export async function GET(
       if (candidates.length === 0) {
         return NextResponse.json({ success: true, dignity_preserved: true, data: [] });
       }
-
-      // Not enough candidates to warrant AI — return directly
-      return NextResponse.json({
-        success: true,
-        dignity_preserved: true,
-        data: candidates.slice(0, 4).map(formatProduct),
-      });
     }
 
-    // 3. Try AI-powered recommendation with 5s timeout
-    let recommendedIds: string[] = [];
-
-    try {
-      const zai = await ZAI.create();
-
-      const candidatesList = candidates
-        .map((c) => `- ${c.nameAr} (فئة: ${c.category?.nameAr || 'غير محدد'}, سعر: ${c.pricePerDay} دج/يوم, معرف: ${c.id}, تقييم: ${c.rating})`)
-        .join('\n');
-
-      const prompt = `أنت مستشار أزياء في منصة STANDARD.Rent للكراء الفاخر في الجزائر.
-المنتج الحالي: ${product.nameAr} (${product.category?.nameAr || 'غير محدد'})
-المرشحون:
-${candidatesList}
-
-اختر أفضل 4 منتجات مكملة أو مشابهة لهذا المنتج. ضع في اعتبارك التنوع في الأسعار والأنماط.
-أجب فقط بقائمة معرفات المنتجات مفصولة بفواصل، بدون أي نص آخر.`;
-
-      const completion = await Promise.race([
-        zai.chat.completions.create({
-          messages: [
-            {
-              role: 'assistant',
-              content: 'أنت مساعد ذكي يختار المنتجات المناسبة. أجب بقائمة معرفات فقط.',
-            },
-            { role: 'user', content: prompt },
-          ],
-          thinking: { type: 'disabled' },
-        }),
-        new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error('LLM timeout')), 5000)
-        ),
-      ]);
-
-      const responseText = completion.choices?.[0]?.message?.content || '';
-      // Match CUID-like IDs (at least 20 chars alphanumeric)
-      const idMatches = responseText.match(/[a-z0-9]{20,}/g);
-      if (idMatches && idMatches.length > 0) {
-        recommendedIds = idMatches.slice(0, 4);
-      }
-    } catch (llmError) {
-      // LLM failed — fall back to category-based recommendations
-      console.warn('[Recommendations API] LLM failed, using fallback:', llmError);
-    }
-
-    // 4. Build final recommendations list
-    let recommendations: ReturnType<typeof formatProduct>[] = [];
-
-    if (recommendedIds.length > 0) {
-      // Get full product data for AI-recommended IDs
-      const aiRecommended = await db.product.findMany({
-        where: { id: { in: recommendedIds } },
-        include: {
-          category: { select: { id: true, nameAr: true, nameEn: true, slug: true, icon: true } },
-          vendor: { select: { id: true, name: true, nameAr: true, avatar: true, rating: true, trustScore: true, isVerified: true } },
-        },
-      });
-
-      // Preserve AI ordering
-      const idOrderMap = new Map(recommendedIds.map((id, i) => [id, i]));
-      recommendations = aiRecommended
-        .sort((a, b) => (idOrderMap.get(a.id) ?? 99) - (idOrderMap.get(b.id) ?? 99))
-        .map(formatProduct);
-
-      // Fill remaining slots with top candidates from same category
-      if (recommendations.length < 4) {
-        const remaining = candidates
-          .filter((c) => !recommendations.find((r) => r.id === c.id))
-          .slice(0, 4 - recommendations.length)
-          .map(formatProduct);
-        recommendations.push(...remaining);
-      }
-    } else {
-      // Pure fallback: top candidates from same category
-      recommendations = candidates.slice(0, 4).map(formatProduct);
-    }
+    // 3. Return top 4 category-based recommendations
+    const recommendations = candidates.slice(0, 4).map(formatProduct);
 
     return NextResponse.json({
       success: true,

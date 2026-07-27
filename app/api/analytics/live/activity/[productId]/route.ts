@@ -1,27 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { db } from '@/lib/db';
 
 // ═══════════════════════════════════════════════════════════════════
-// Live Activity — Viewer count for a product (simulated)
+// Live Activity — Real booking-based interest count for a product
 // ═══════════════════════════════════════════════════════════════════
-
-// Simple seeded random so the same product gets a stable-ish number
-// within a short window
-function getViewers(productId: string): number {
-  // Hash the product ID to get a base number
-  let hash = 0;
-  for (let i = 0; i < productId.length; i++) {
-    hash = (hash << 5) - hash + productId.charCodeAt(i);
-    hash |= 0; // Convert to 32-bit int
-  }
-
-  // Add time-based jitter (changes every ~30 seconds)
-  const timeSlot = Math.floor(Date.now() / 30000);
-  hash ^= timeSlot;
-
-  // Map to 1-15 range
-  const base = Math.abs(hash % 15) + 1;
-  return base;
-}
 
 export async function GET(
   _request: NextRequest,
@@ -43,13 +25,20 @@ export async function GET(
       );
     }
 
-    const viewers = getViewers(productId);
+    // Count active bookings as a proxy for live interest
+    const activeBookings = await db.booking.count({
+      where: {
+        productId,
+        status: { in: ['pending', 'confirmed', 'active'] },
+      },
+    });
 
     return NextResponse.json({
       success: true,
       dignity_preserved: true,
       data: {
-        viewers,
+        viewers: activeBookings,
+        isLive: false,
       },
     });
   } catch {

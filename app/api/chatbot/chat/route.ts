@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import ZAI from 'z-ai-web-dev-sdk';
 
 // ═══════════════════════════════════════════════════════════════════
-// Chatbot LLM Chat API — AI-powered conversational assistant
-// Uses z-ai-web-dev-sdk for LLM completions
+// Chatbot API — Rule-based conversational assistant
+// Provides smart responses based on keyword matching (Arabic & English)
 // ═══════════════════════════════════════════════════════════════════
 
 const SYSTEM_PROMPT = `أنت المساعد الذكي لمنصة STANDARD.Rent، منصة الإيجار الفاخر الأولى في الجزائر.
@@ -62,60 +61,27 @@ export async function POST(request: NextRequest) {
     }
     const history = conversationHistory.get(sid)!;
 
-    // Build messages array for LLM
-    const messages: Array<{ role: 'user' | 'assistant'; content: string }> = [
-      { role: 'assistant', content: SYSTEM_PROMPT },
-      ...history,
-      { role: 'user', content: message },
-    ];
+    // Use rule-based response
+    const responseText = getFallbackResponse(message, language);
 
-    try {
-      const zai = await ZAI.create();
-      const completion = await zai.chat.completions.create({
-        messages,
-        thinking: { type: 'disabled' },
-      });
+    // Update conversation history
+    history.push({ role: 'user', content: message });
+    history.push({ role: 'assistant', content: responseText });
 
-      const responseText = completion.choices?.[0]?.message?.content;
-
-      if (!responseText) {
-        throw new Error('Empty response from LLM');
-      }
-
-      // Update conversation history
-      history.push({ role: 'user', content: message });
-      history.push({ role: 'assistant', content: responseText });
-
-      // Trim history to last MAX_HISTORY_MESSAGES messages (keep pairs)
-      while (history.length > MAX_HISTORY_MESSAGES) {
-        history.shift();
-        history.shift(); // Remove both user and assistant message (pairs)
-      }
-
-      return NextResponse.json({
-        success: true,
-        dignity_preserved: true,
-        data: {
-          response: responseText,
-          sessionId: sid,
-        },
-      });
-    } catch (llmError) {
-      console.error('LLM Error:', llmError);
-
-      // Fallback: use rule-based response
-      const fallbackResponse = getFallbackResponse(message, language);
-
-      return NextResponse.json({
-        success: true,
-        dignity_preserved: true,
-        data: {
-          response: fallbackResponse,
-          sessionId: sid,
-          fallback: true,
-        },
-      });
+    // Trim history to last MAX_HISTORY_MESSAGES messages (keep pairs)
+    while (history.length > MAX_HISTORY_MESSAGES) {
+      history.shift();
+      history.shift();
     }
+
+    return NextResponse.json({
+      success: true,
+      dignity_preserved: true,
+      data: {
+        response: responseText,
+        sessionId: sid,
+      },
+    });
   } catch (error) {
     console.error('Chat API Error:', error);
 

@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
-import ZAI from 'z-ai-web-dev-sdk';
 
 // ═══════════════════════════════════════════════════════════════
-// POST /api/verification/submit — Submit face photo for AI verification
+// POST /api/verification/submit — Submit face photo for verification
+// VLM analysis is unavailable; stores null and flags for manual review
 // ═══════════════════════════════════════════════════════════════
 export async function POST(request: Request) {
   try {
@@ -63,59 +63,10 @@ export async function POST(request: Request) {
       await db.identityVerification.delete({ where: { id: existing.id } });
     }
 
-    // Analyze face photo with VLM
-    const zai = await ZAI.create();
-
-    const vlmPrompt = `You are a face verification AI for STANDARD.Rent platform (Algeria). Analyze this photo and respond ONLY with valid JSON: { "is_real_face": boolean, "face_quality": "high"|"medium"|"low", "face_visible": boolean, "has_multiple_faces": boolean, "confidence_score": 0-100, "issues": string[], "recommendation": "approve"|"reject" }`;
-
-    const vlmResponse = await zai.chat.completions.createVision({
-      model: 'default',
-      messages: [
-        {
-          role: 'user',
-          content: [
-            { type: 'text', text: vlmPrompt },
-            { type: 'image_url', image_url: { url: face_photo } },
-          ],
-        },
-      ],
-      thinking: { type: 'disabled' },
-    });
-
-    const rawContent = vlmResponse.choices?.[0]?.message?.content || '{}';
-
-    // Parse AI response — handle potential markdown wrapping
-    let aiResult: {
-      is_real_face?: boolean;
-      face_quality?: string;
-      face_visible?: boolean;
-      has_multiple_faces?: boolean;
-      confidence_score?: number;
-      issues?: string[];
-      recommendation?: string;
-    };
-
-    try {
-      const jsonStr = rawContent.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-      aiResult = JSON.parse(jsonStr);
-    } catch {
-      aiResult = {
-        is_real_face: false,
-        face_quality: 'low',
-        face_visible: false,
-        has_multiple_faces: false,
-        confidence_score: 0,
-        issues: ['فشل تحليل الصورة بالذكاء الاصطناعي'],
-        recommendation: 'reject',
-      };
-    }
-
-    const confidence = typeof aiResult.confidence_score === 'number' ? aiResult.confidence_score : 0;
-    const recommendation = aiResult.recommendation || 'reject';
-
-    // Determine status
-    const status =
-      recommendation === 'approve' && confidence >= 60 ? 'ai_approved' : 'ai_rejected';
+    // VLM analysis is not available — store null and set status to 'pending' for manual review
+    const aiAnalysis = null;
+    const aiScore = 0;
+    const status = 'pending';
 
     // Create IdentityVerification record
     const verification = await db.identityVerification.create({
@@ -123,31 +74,20 @@ export async function POST(request: Request) {
         userId: session.userId,
         facePhoto: face_photo,
         status,
-        aiAnalysis: JSON.stringify(aiResult),
-        aiScore: confidence,
+        aiAnalysis,
+        aiScore,
       },
     });
 
-    // If AI approved, create notification for the user
-    if (status === 'ai_approved') {
-      await db.notification.create({
-        data: {
-          userId: session.userId,
-          type: 'trust',
-          title: 'تم تمرير التحقق بالذكاء الاصطناعي',
-          message: `تهانينا! اجتازت صورتك فحص الذكاء الاصطناعي (${confidence}%). الآن في انتظار مراجعة المجتمع (5 موافقات مطلوبة).`,
-        },
-      });
-    } else {
-      await db.notification.create({
-        data: {
-          userId: session.userId,
-          type: 'trust',
-          title: 'لم يجتز التحقق بالذكاء الاصطناعي',
-          message: `لم تتم الموافقة على صورتك (${confidence}%). يمكنك إعادة المحاولة. الأسباب: ${(aiResult.issues || []).join(', ')}`,
-        },
-      });
-    }
+    // Notify the user that their request is under manual review
+    await db.notification.create({
+      data: {
+        userId: session.userId,
+        type: 'trust',
+        title: 'تم استلام طلب التحقق',
+        message: 'تم استلام صورتك بنجاح وسيتم مراجعتها يدوياً من قبل فريقنا.',
+      },
+    });
 
     return NextResponse.json({
       success: true,
@@ -156,7 +96,7 @@ export async function POST(request: Request) {
         id: verification.id,
         status: verification.status,
         ai_score: verification.aiScore,
-        ai_analysis: aiResult,
+        ai_analysis: null,
         required_approvals: verification.requiredApprovals,
         created_at: verification.createdAt.toISOString(),
       },

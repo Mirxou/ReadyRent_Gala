@@ -60,15 +60,28 @@ export function BookingWizard() {
         extra_services: formData.extraServices,
       });
 
-      // 2. Extract booking data with fallback — mock returns { success, data: { id, ... } }
-      const booking = bookingRes.data || { id: 'BK-' + Date.now() };
-      const bookingId = booking.id;
+      // 2. Extract booking ID from API response
+      if (!bookingRes.data?.id) {
+        throw new Error('فشل إنشاء الحجز — لم يتم استلام معرف الحجز');
+      }
+      const bookingId = bookingRes.data.id;
 
-      // 3. Process Payment & Signature
-      const paymentMethodId = formData.paymentMethod ?? 'visa';
-      await paymentsApi.create({ booking_id: Number(bookingId) || bookingId, payment_method: paymentMethodId });
+      // 3. Process Payment
+      const paymentMethodId = formData.paymentMethod ?? 'wallet';
+      const paymentRes = await paymentsApi.create({ booking_id: bookingId, payment_method: paymentMethodId });
 
-      // 4. Clear the cart after successful booking
+      // 4. Sign the contract if signature was provided
+      if (formData.signature) {
+        try {
+          await api.post(`contracts/${paymentRes.data?.contract_id || bookingId}/sign`, {
+            signature: formData.signature,
+          });
+        } catch {
+          // Contract signing is non-blocking — contract can be signed later from orders page
+        }
+      }
+
+      // 5. Clear the cart after successful booking
       try {
         await api.delete('bookings/cart/');
       } catch {

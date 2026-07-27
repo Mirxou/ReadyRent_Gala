@@ -106,16 +106,20 @@ export default function NotificationsPage() {
       <header className="flex flex-col md:flex-row justify-between items-end gap-10">
         <div className="space-y-4">
           <Badge variant="outline" className="border-sovereign-gold/30 text-sovereign-gold px-6 py-2 text-[10px] font-black uppercase tracking-[0.3em] bg-sovereign-gold/5 italic">
-             Sovereign Heritage Registry V.1
+             Notification Center
           </Badge>
-          <h1 className="text-6xl font-black italic tracking-tighter text-foreground">سجل التراث <span className="text-sovereign-gold">السيادي</span>.</h1>
+          <h1 className="text-6xl font-black italic tracking-tighter text-foreground">مركز <span className="text-sovereign-gold">الإشعارات</span>.</h1>
           <p className="text-muted-foreground font-light text-xl italic opacity-80 max-w-2xl border-r-2 border-sovereign-gold/10 pr-10">
-             تاريخ التفاعلات الجوهرية، تحولات الثقة، وحركات الخزانة الرقمية المسجلة في سجل النبض الرقمي.
+             جميع التنبيهات والتحديثات المتعلقة بحسابك وحجوزاتك ومعاملاتك.
           </p>
         </div>
         <div className="flex gap-4">
-           <SovereignButton variant="secondary" className="h-14 px-8 rounded-xl border-white/5 opacity-40">
-              تصفية السجل <Filter className="w-4 h-4 ml-3" />
+           <SovereignButton
+              variant="secondary"
+              className="h-14 px-8 rounded-xl border-white/5"
+              onClick={() => toast.info('ستتوفر ميزة التصفية قريباً')}
+           >
+              تصفية حسب النوع <Filter className="w-4 h-4 ml-3" />
            </SovereignButton>
            <SovereignButton
              variant="secondary"
@@ -203,8 +207,10 @@ export default function NotificationsPage() {
 
                           {/* Hover Tactical Layer */}
                           <div className="mt-8 flex gap-6 opacity-0 group-hover:opacity-100 transition-opacity">
-                             <button className="text-[10px] font-black uppercase tracking-widest text-sovereign-gold hover:underline">تحقق من السجل الرقمي</button>
-                             <button className="text-[10px] font-black uppercase tracking-widest text-sovereign-gold hover:underline">تحميل الميثاق</button>
+                             <button
+                               className="text-[10px] font-black uppercase tracking-widest text-sovereign-gold hover:underline"
+                               onClick={(e) => { e.stopPropagation(); if (!n.is_read) handleMarkRead(n.id); }}
+                             >تعليم كمقروء</button>
                           </div>
                        </GlassPanel>
                      </motion.div>

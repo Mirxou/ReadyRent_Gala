@@ -217,7 +217,14 @@ export default function InsurancePage() {
   };
 
   const handleContactSupport = () => {
-    window.open('https://wa.me/213000000000', '_blank');
+    const waNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER;
+    if (waNumber) {
+      const formatted = waNumber.replace(/[^0-9]/g, '');
+      window.open(`https://wa.me/${formatted}?text=${encodeURIComponent('مرحباً، أريد الاستفسار عن التأمين')}`, '_blank');
+    } else {
+      // Fallback to contact page
+      window.location.href = '/contact';
+    }
   };
 
   return (

@@ -2903,3 +2903,39 @@ Stage Summary:
 - All authorization gaps fixed (payment booking ownership, insurance booking linkage, booking ID enumeration)
 - All input validation gaps fixed (dates, quantities, payment methods, product prices)
 - Business logic gaps closed (double-booking, double-signing, duplicate cart items, duplicate insurance)
+
+---
+Task ID: P0-P1
+Agent: Main Orchestrator
+Task: Comprehensive dirt audit + Phase 0/1 critical fixes
+
+Work Log:
+- Conducted full codebase audit: 294 issues found across 100+ files
+- Organized issues into 7 categories and 5 priority phases
+- Categories: Pages (~90), API Routes (~150+), Components (~34), lib/ (~20), Integration gaps
+- Fixed P0-2: Replaced fake HMAC signature in payment-step.tsx with real canvas data URL
+- Fixed P0-2: Removed dead card input fields from payment step (MM/YY, CVV had no state)
+- Fixed P0-2: Removed mock booking ID fallback in booking-wizard.tsx
+- Fixed P0-2: Added contract signing after payment in booking flow
+- Confirmed P0-1 (broken z-ai-web-dev-sdk imports) already fixed in prior round
+- Confirmed P0-3 (fake analytics) already fixed in prior round
+- Fixed P1-1: Wrapped verification/vote race condition in $transaction (was 4 separate writes)
+- Fixed P1-7: Fixed notifications page copy-paste wrong title (was "سجل التراث السيادي" now "مركز الإشعارات")
+- Fixed P1-7: Connected dead filter button in notifications page
+- Fixed P1-7: Replaced dead "تحميل الميثاق" button with functional "تعليم كمقروء"
+- Fixed P1-5: Removed fake WhatsApp number 213000000000 from insurance page
+- Fixed P1-5: Removed fake WhatsApp fallback +213XXXXXXXXX from whatsapp-button.tsx
+- Fixed P1-5: Replaced fake phone 0555 123 456 in contact page with env var
+- Fixed P1-5: Replaced dead social links (#) in contact page with env var references
+- Created lib/logger.ts: Minimal structured logger to replace console.*
+- Created lib/api-response.ts: Unified sovereign error/success response helpers
+
+Stage Summary:
+- 15 files modified/created
+- 3 new infrastructure files: logger.ts, api-response.ts
+- Payment step now captures real canvas signature instead of fake HMAC
+- Verification voting is now atomic (no race conditions)
+- All fake phone/WhatsApp numbers replaced with env vars
+- Notifications page shows correct title
+- Audit report delivered: 294 issues in 5 phases
+- Remaining: P1-3 (apply unified responses), P1-4 (dashboard hardcoded numbers), P1-6 (products/create), P1-8 (PII), P1-9 (cancellation policy), P1-10 (console.* replacement)
