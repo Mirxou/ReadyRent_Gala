@@ -27,7 +27,7 @@ export function Footer() {
               {[
                 { name: 'انستغرام', url: 'https://instagram.com/standardrent' },
                 { name: 'تيك توك', url: 'https://tiktok.com/@standardrent' },
-                { name: 'واتساب', url: 'https://wa.me/213000000000' },
+                { name: 'واتساب', url: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ? `https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER.replace(/[^0-9]/g, '')}` : '#' },
               ].map((social) => (
                 <a key={social.name} href={social.url} className="text-sm font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground dark:hover:text-white transition-colors border-b border-gray-200 dark:border-white/10 pb-1">
                   {social.name}

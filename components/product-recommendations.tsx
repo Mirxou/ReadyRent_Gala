@@ -14,7 +14,7 @@ interface ProductRecommendationsProps {
   productId: string;
 }
 
-const PLACEHOLDER = 'https://picsum.photos/seed/standard-placeholder/600/800';
+const PLACEHOLDER = '/placeholder-product.jpg';
 
 interface RecommendationProduct {
   id: string;

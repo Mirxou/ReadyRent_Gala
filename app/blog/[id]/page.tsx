@@ -23,8 +23,8 @@ const DOMPURIFY_CONFIG = {
 function isValidImageUrl(url: string): boolean {
   if (!url || typeof url !== 'string') return false;
   try {
-    const parsed = new URL(url, 'https://picsum.photos');
-    const allowedHosts = ['picsum.photos', 'images.unsplash.com', 'res.cloudinary.com', 'amazonaws.com', 'localhost'];
+    const parsed = new URL(url, 'https://example.com');
+    const allowedHosts = ['res.cloudinary.com', 'amazonaws.com', 'localhost'];
     return allowedHosts.some(h => parsed.hostname === h || parsed.hostname.endsWith('.' + h));
   } catch {
     return false;

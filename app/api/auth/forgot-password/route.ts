@@ -46,8 +46,7 @@ export async function POST(request: Request) {
         },
       });
 
-      // In production, send email with reset link here:
-      // await sendResetEmail(email, token);
+      // Token stored in ActivityLog; email delivery requires an email service integration
     }
 
     // Always return success to prevent email enumeration

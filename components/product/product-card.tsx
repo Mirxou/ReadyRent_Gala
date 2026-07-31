@@ -17,7 +17,7 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, priority = false }: ProductCardProps) {
-  const PLACEHOLDER = 'https://picsum.photos/seed/standard-placeholder/600/800';
+  const PLACEHOLDER = '/placeholder-product.jpg';
   const isElite = product.is_premium || (product.trust_score && product.trust_score > 90);
   const primaryImage = product.primary_image || product.images?.[0]?.image || product.images?.[0]?.url || product.image || PLACEHOLDER;
 

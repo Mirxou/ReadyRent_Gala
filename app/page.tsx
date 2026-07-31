@@ -179,12 +179,10 @@ function HeroEcosystem() {
                     <p className="text-sm text-muted-foreground leading-relaxed flex-1">{eco.desc}</p>
 
                     <div className="pt-4">
-                      <div onClick={() => window.location.href = eco.href}>
                         <SovereignButton variant="secondary" size="sm" className="w-full">
                           <span>استكشفي</span>
                           <ArrowLeft className="w-4 h-4" />
                         </SovereignButton>
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -267,7 +265,7 @@ function ArtisansSpotlight() {
                       {/* Avatar */}
                       <div className="w-20 h-20 mx-auto rounded-full overflow-hidden border-2 border-sovereign-gold/20 group-hover:border-sovereign-gold/50 transition-colors">
                         <img
-                          src={artisan.avatar || artisan.image || `https://picsum.photos/seed/artisan${i}/200/200`}
+                          src={artisan.avatar || artisan.image || '/placeholder-avatar.jpg'}
                           alt={artisan.name_ar || artisan.name || 'حرفية'}
                           className="w-full h-full object-cover"
                         />

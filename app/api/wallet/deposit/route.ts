@@ -4,11 +4,7 @@ import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
 
 // ═══════════════════════════════════════════════════════════════
 // POST /api/wallet/deposit — Deposit to wallet
-//
-// SECURITY NOTE: This is a demo/sandbox application. In production,
-// deposits must be verified against a real payment gateway (e.g.,
-// Stripe, PayPal) before crediting the wallet. This route
-// currently accepts self-reported amounts without payment proof.
+// Amounts are self-reported; production requires payment gateway verification
 // ═══════════════════════════════════════════════════════════════
 
 const MAX_DEPOSIT_PER_TRANSACTION = 100000;

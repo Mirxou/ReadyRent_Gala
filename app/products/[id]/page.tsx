@@ -132,7 +132,7 @@ export default function ProductDetailsPage() {
   const trustScore = depositData?.trust_score ?? user?.trust_score ?? 0;
   const isSovereign = depositData ? !depositData.deposit_required : (trustScore >= 80);
   const isVerified = depositData?.is_verified ?? user?.is_verified ?? false;
-  const PLACEHOLDER = 'https://picsum.photos/seed/standard-placeholder/600/800';
+  const PLACEHOLDER = '/placeholder-product.jpg';
   const primaryImage = product.images?.find((img: any) => img.is_primary || img.is_main)?.image
     || product.images?.find((img: any) => img.is_primary || img.is_main)?.url
     || product.images?.[0]?.image

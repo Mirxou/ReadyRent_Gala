@@ -47,7 +47,7 @@ export const useAuthStore = create<AuthState>()(
         });
         if (typeof window !== 'undefined') {
           localStorage.removeItem('session-token');
-          window.location.href = '/login';
+          window.location.href = '/';
         }
       },
       checkAuth: async () => {

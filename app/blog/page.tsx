@@ -37,7 +37,7 @@ export default function BlogPage() {
           date: p.created_at,
           category: p.category || '',
           readTime: `${p.read_time || Math.max(1, Math.ceil(((p.content as string) || '').length / 500))} دقائق`,
-          image: p.featured_image || `https://picsum.photos/seed/${p.id}/600/400`,
+          image: p.featured_image || '/placeholder-blog.jpg',
         }));
         setBlogPosts(posts);
         setLoading(false);

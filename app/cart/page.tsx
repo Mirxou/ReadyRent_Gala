@@ -200,7 +200,7 @@ export default function CartPage() {
                 const itemTotal = item.product.price_per_day * days * item.quantity;
                 const primaryImage = item.product.primary_image ||
                   item.product.images?.[0]?.image ||
-                  'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=800&q=80&auto=format&fit=crop';
+                  '/placeholder-product.jpg';
 
                 return (
                   <motion.div

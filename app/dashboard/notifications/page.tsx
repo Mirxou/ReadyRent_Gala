@@ -117,7 +117,7 @@ export default function NotificationsPage() {
            <SovereignButton
               variant="secondary"
               className="h-14 px-8 rounded-xl border-white/5"
-              onClick={() => toast.info('ستتوفر ميزة التصفية قريباً')}
+              disabled
            >
               تصفية حسب النوع <Filter className="w-4 h-4 ml-3" />
            </SovereignButton>

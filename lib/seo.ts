@@ -105,7 +105,7 @@ export function generateOrganizationSchema(baseUrl: string = 'https://www.standa
  * Generate LocalBusiness structured data
  */
 export function generateLocalBusinessSchema(baseUrl: string = 'https://www.standard.rent') {
-  const phoneNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || process.env.NEXT_PUBLIC_PHONE_NUMBER || '+213XXXXXXXXX';
+  const phoneNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || process.env.NEXT_PUBLIC_PHONE_NUMBER || '';
   return {
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
@@ -113,7 +113,7 @@ export function generateLocalBusinessSchema(baseUrl: string = 'https://www.stand
     image: `${baseUrl}/icons/icon-512x512.png`,
     '@id': baseUrl,
     url: baseUrl,
-    telephone: phoneNumber,
+    ...(phoneNumber ? { telephone: phoneNumber } : {}),
     priceRange: '$$',
     address: {
       '@type': 'PostalAddress',
