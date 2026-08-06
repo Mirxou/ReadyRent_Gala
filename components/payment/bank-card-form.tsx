@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { CreditCard, Lock, Shield } from 'lucide-react';
+import { CreditCard, Shield } from 'lucide-react';
 import { toast } from 'sonner';
 import { paymentsApi } from '@/lib/api';
 
@@ -115,8 +115,8 @@ export function BankCardForm({
       setCardExpiry('');
       setCardCvv('');
       setCardholderName('');
-    } catch (error: any) {
-      toast.error(error.response?.data?.error || 'حدث خطأ أثناء معالجة الدفع');
+    } catch (error: unknown) {
+      toast.error((error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'حدث خطأ أثناء معالجة الدفع');
     } finally {
       setIsLoading(false);
     }

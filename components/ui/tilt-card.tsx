@@ -1,6 +1,5 @@
 'use client';
 
-import { useRef } from 'react';
 import Tilt from 'react-parallax-tilt';
 
 interface TiltCardProps {

@@ -12,10 +12,6 @@ import {
   ArrowRight,
   CheckCircle2,
   BrainCircuit,
-  Sparkles,
-  Lock,
-  ArrowLeft,
-  Loader2
 } from 'lucide-react';
 import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
 import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';

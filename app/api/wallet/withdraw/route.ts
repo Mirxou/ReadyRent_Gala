@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
+import { logger } from '@/lib/logger';
 
 // ═══════════════════════════════════════════════════════════════
 // POST /api/wallet/withdraw — Withdraw from wallet
@@ -80,7 +81,7 @@ export async function POST(request: Request) {
 
   return NextResponse.json({ success: true, dignity_preserved: true, data }, { status: 201 });
   } catch (error) {
-    console.error('[Wallet Withdraw API] Error:', error);
+    logger.error('Wallet Withdraw API', 'Error', error);
     return NextResponse.json(
       { success: false, dignity_preserved: true, message: 'Internal error' },
       { status: 500 }

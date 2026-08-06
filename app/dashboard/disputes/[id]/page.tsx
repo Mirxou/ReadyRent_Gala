@@ -55,14 +55,14 @@ const STAGE_FLOW = [
   { status: 'resolved', labelAr: 'الحكم النهائي (Final Verdict)', icon: ShieldCheck },
 ];
 
-function buildTimelineFromHistory(history: any[], disputeStatus: string): any[] {
+function buildTimelineFromHistory(history: Record<string, unknown>[], disputeStatus: string): Record<string, unknown>[] {
   // Build the timeline based on status flow
   const statusOrder = ['filed', 'under_review', 'mediation', 'appealed', 'resolved', 'closed'];
   const currentIndex = statusOrder.indexOf(disputeStatus);
 
   // Find status change events from history
   const statusChanges: Record<string, string> = {};
-  history.forEach((entry: any) => {
+  history.forEach((entry: Record<string, unknown>) => {
     if (entry.is_status_change || entry.type === 'system') {
       const match = entry.message?.match(/(?:تم إنشاء النزاع بحالة|تم تغيير حالة النزاع من) "(\w+)"/);
       if (match) {
@@ -79,7 +79,7 @@ function buildTimelineFromHistory(history: any[], disputeStatus: string): any[] 
   }
 
   // Determine which stages to show
-  const stages = STAGE_FLOW.map((stage, idx) => {
+  const stages = STAGE_FLOW.map((stage, _idx) => {
     const stageIndex = statusOrder.indexOf(stage.status);
     const isComplete = stageIndex < currentIndex;
     const isActive = stage.status === disputeStatus || 
@@ -155,7 +155,7 @@ export default function DisputeDetailPage() {
       setChatText('');
       toast.success('تم إرسال الرسالة بنجاح');
     },
-    onError: (err: any) => {
+    onError: (err: unknown) => {
       toast.error(err?.data?.error || 'فشل إرسال الرسالة');
     },
   });
@@ -236,7 +236,7 @@ export default function DisputeDetailPage() {
                  {/* The Timeline Line */}
                  <div className="absolute top-2 right-6 bottom-2 w-px bg-white/10" />
                  
-                 {timeline.map((item: any, i: number) => (
+                 {timeline.map((item: Record<string, unknown>, i: number) => (
                    <motion.div 
                      key={i}
                      initial={{ opacity: 0, x: 20 }}
@@ -368,7 +368,7 @@ export default function DisputeDetailPage() {
                           لم يتم تبادل رسائل بعد. ابدأ المحادثة...
                         </div>
                       )}
-                      {messages.map((msg: any) => {
+                      {messages.map((msg: Record<string, unknown>) => {
                         const isSystem = msg.type === 'system';
                         const isAppeal = msg.type === 'appeal';
                         const isOwn = msg.sender_id === dispute.user_id;
@@ -430,7 +430,7 @@ export default function DisputeDetailPage() {
                                 <><Bot className="w-3 h-3" /> المحكم السيادي (Arbitrator)</>
                               )}
                             </p>
-                            <p className="text-sm leading-relaxed italic opacity-90">"{msg.message}"</p>
+                            <p className="text-sm leading-relaxed italic opacity-90">{`"${msg.message}"`}</p>
                             <p className="text-[10px] text-muted-foreground/50 mt-2">{formatMessageTime(msg.created_at)}</p>
                           </motion.div>
                         );

@@ -88,7 +88,7 @@ export default function WalletPage() {
   const balance = walletData?.balance ?? userProfile?.wallet_balance ?? 0;
   const transactions = walletData?.transactions || [];
 
-  const escrowAmount = (activeBookings || []).reduce((acc: number, b: any) => {
+  const escrowAmount = (activeBookings || []).reduce((acc: number, b: Record<string, unknown>) => {
     if (['confirmed', 'active', 'pending'].includes(b.status)) {
        return acc + (Number(b.deposit_amount) || Number(b.total_price) || 0);
     }
@@ -99,12 +99,12 @@ export default function WalletPage() {
 
   // ──── Real financial stats from transactions ────
   const totalExpenses = transactions
-    .filter((tx: any) => tx.type === 'EXPENDITURE' || tx.type === 'escrow_lock')
-    .reduce((sum: number, tx: any) => sum + (Number(tx.amount) || 0), 0);
+    .filter((tx: Record<string, unknown>) => (tx.type as string) === 'EXPENDITURE' || tx.type === 'escrow_lock')
+    .reduce((sum: number, tx: Record<string, unknown>) => sum + (Number(tx.amount as number) || 0), 0);
 
   const totalReleased = transactions
-    .filter((tx: any) => tx.type === 'escrow_release' || tx.type === 'INCOME')
-    .reduce((sum: number, tx: any) => sum + (Number(tx.amount) || 0), 0);
+    .filter((tx: Record<string, unknown>) => (tx.type as string) === 'escrow_release' || (tx.type as string) === 'INCOME')
+    .reduce((sum: number, tx: Record<string, unknown>) => sum + (Number(tx.amount) || 0), 0);
 
   // Mini bar chart from actual weekly transaction data
   const now = new Date();
@@ -115,16 +115,16 @@ export default function WalletPage() {
   });
   const expenseByDay = weekKeys.map(day =>
     transactions
-      .filter((tx: any) => tx.date?.startsWith(day) && (tx.type === 'EXPENDITURE' || tx.type === 'escrow_lock'))
-      .reduce((s: number, tx: any) => s + (Number(tx.amount) || 0), 0)
+      .filter((tx: Record<string, unknown>) => (tx.date as string)?.startsWith(day) && ((tx.type as string) === 'EXPENDITURE' || (tx.type as string) === 'escrow_lock'))
+      .reduce((s: number, tx: Record<string, unknown>) => s + (Number(tx.amount) || 0), 0)
   );
   const maxExpense = Math.max(...expenseByDay, 1);
   const expenseBars = expenseByDay.map(v => v / maxExpense);
 
   const releaseByDay = weekKeys.map(day =>
     transactions
-      .filter((tx: any) => tx.date?.startsWith(day) && (tx.type === 'escrow_release' || tx.type === 'INCOME'))
-      .reduce((s: number, tx: any) => s + (Number(tx.amount) || 0), 0)
+      .filter((tx: Record<string, unknown>) => (tx.date as string)?.startsWith(day) && ((tx.type as string) === 'escrow_release' || (tx.type as string) === 'INCOME'))
+      .reduce((s: number, tx: Record<string, unknown>) => s + (Number(tx.amount) || 0), 0)
   );
   const maxRelease = Math.max(...releaseByDay, 1);
   const releaseBars = releaseByDay.map(v => v / maxRelease);
@@ -296,7 +296,7 @@ export default function WalletPage() {
             </SovereignGlow>
 
             {/* Active Escrow Breakdown */}
-            {activeBookings && activeBookings.filter((b: any) => ['confirmed', 'active', 'pending'].includes(b.status)).length > 0 && (
+            {activeBookings && activeBookings.filter((b: Record<string, unknown>) => ['confirmed', 'active', 'pending'].includes(b.status as string)).length > 0 && (
             <div className="space-y-6">
                <div className="flex items-center justify-between">
                   <h3 className="text-xl font-black flex items-center gap-3">
@@ -307,7 +307,7 @@ export default function WalletPage() {
                </div>
                
                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {activeBookings.filter((b: any) => ['confirmed', 'active', 'pending'].includes(b.status)).map((b: any) => (
+                  {activeBookings.filter((b: Record<string, unknown>) => ['confirmed', 'active', 'pending'].includes(b.status as string)).map((b: Record<string, unknown>) => (
                     <GlassPanel key={b.id} className="p-6 border-white/5 hover:border-sovereign-gold/20 transition-all">
                        <div className="flex justify-between items-start mb-4">
                           <div className="space-y-1">
@@ -340,7 +340,7 @@ export default function WalletPage() {
                
                <div className="space-y-3">
                   {transactions.length > 0 ? (
-                    transactions.map((tx: any) => (
+                    transactions.map((tx: Record<string, unknown>) => (
                       <motion.div key={tx.id} whileHover={{ x: -4 }}>
                         <GlassPanel className="p-5 flex items-center justify-between hover:border-white/10 transition-all border-white/5 group">
                            <div className="flex items-center gap-5">
@@ -495,7 +495,7 @@ export default function WalletPage() {
             </div>
           ) : payments && payments.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {payments.map((p: any) => (
+              {payments.map((p: Record<string, unknown>) => (
                 <GlassPanel key={p.id} className="p-5 border-white/5 hover:border-sovereign-gold/20 transition-all">
                   <div className="flex items-center justify-between mb-3">
                     <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Search, Filter, X, LayoutGrid, List as ListIcon, Sparkles, Activity, ShieldCheck, Heart } from 'lucide-react';
+import { Search, Filter, X, LayoutGrid, List as ListIcon, Activity } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDebounce } from '@/lib/hooks/use-debounce';
 import { productsApi } from '@/lib/api';
@@ -20,12 +20,12 @@ import {
   SheetTitle, 
   SheetTrigger 
 } from '@/components/ui/sheet';
-import { SovereignGlow, SovereignSparkle } from '@/shared/components/sovereign/sovereign-sparkle';
+
 
 export function ProductSearch() {
   const [query, setQuery] = useState('');
   const [view, setView] = useState<'grid' | 'list'>('grid');
-  const [filters, setFilters] = useState<any>({
+  const [filters, setFilters] = useState<Record<string, unknown>>({
     category: '',
     priceMin: 0,
     priceMax: 200000,
@@ -48,10 +48,10 @@ export function ProductSearch() {
 
   const products = Array.isArray(productsData)
     ? productsData
-    : (productsData as any)?.results || [];
+    : (productsData as Record<string, unknown>)?.results || [];
 
-  const handleFilterChange = (key: string, value: any) => {
-    setFilters((prev: any) => ({ ...prev, [key]: value }));
+  const handleFilterChange = (key: string, value: string) => {
+    setFilters((prev: Record<string, unknown>) => ({ ...prev, [key]: value }));
   };
 
   const clearFilters = () => {
@@ -101,7 +101,7 @@ export function ProductSearch() {
                          <div className="space-y-6">
                             <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground opacity-40">أصناف الأصول</h4>
                             <div className="flex flex-wrap gap-3">
-                               {categories?.map((cat: any) => (
+                               {categories?.map((cat: Record<string, unknown>) => (
                                  <Badge
                                    key={cat.id}
                                    variant="outline"
@@ -195,7 +195,7 @@ export function ProductSearch() {
               </GlassPanel>
             ))
           ) : products.length > 0 ? (
-            products.map((product: any) => (
+            products.map((product: Record<string, unknown>) => (
               <ProductCard key={product.id} product={product} />
             ))
           ) : (

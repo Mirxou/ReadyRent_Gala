@@ -10,18 +10,6 @@ import Link from 'next/link';
 import { ParticleField } from '@/components/ui/particle-field';
 import { motion } from 'framer-motion';
 
-interface Vendor {
-  id: number;
-  business_name_ar: string;
-  description_ar: string;
-  logo: string;
-  rating: number;
-  total_products: number;
-  total_sales: number;
-  city: string;
-  is_verified: boolean;
-}
-
 export default function VendorsPage() {
   const [search, setSearch] = useState('');
 
@@ -30,7 +18,7 @@ export default function VendorsPage() {
     queryFn: () => fetch('/api/vendors/vendors').then(r => r.json()).then(d => d.data || d),
   });
 
-  const filteredVendors = vendors?.results?.filter((vendor: any) => {
+  const filteredVendors = vendors?.results?.filter((vendor: Record<string, unknown>) => {
     if (search) {
       const searchLower = search.toLowerCase();
       return (
@@ -103,7 +91,7 @@ export default function VendorsPage() {
           </div>
         ) : filteredVendors.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredVendors.map((vendor: any, index: number) => (
+            {filteredVendors.map((vendor: Record<string, unknown>, index: number) => (
               <motion.div
                 key={vendor.id}
                 initial={{ opacity: 0, y: 20 }}

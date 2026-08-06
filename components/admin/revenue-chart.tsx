@@ -2,7 +2,7 @@
 
 import { formatNumber } from '@/lib/utils';
 
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface DailyRevenue {
@@ -73,7 +73,7 @@ export function RevenueChart({ data, period }: RevenueChartProps) {
                 backdropFilter: 'blur(10px)',
                 boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)'
               }}
-              formatter={(value: any) => [`${formatNumber(Number(value) || 0)} دج`, 'الإيرادات']}
+              formatter={(value: string | number) => [`${formatNumber(Number(value) || 0)} دج`, 'الإيرادات']}
             />
             <Line
               type="monotone"

@@ -29,7 +29,7 @@ import React from 'react';
 
 
 
-const typeIconMap: Record<string, any> = {
+const typeIconMap: Record<string, React.ReactNode> = {
   trust: UserCheck,
   financial: CreditCard,
   asset: Package,
@@ -74,8 +74,8 @@ export default function NotificationsPage() {
     try {
       const res = await notificationsApi.markRead(id);
       if (res.status === 0 || res.data?.error) throw new Error();
-      queryClient.setQueryData(['notifications'], (old: any[]) =>
-        old?.map((n: any) => (n.id === id ? { ...n, is_read: true } : n))
+      queryClient.setQueryData(['notifications'], (old: Record<string, unknown>[]) =>
+        old?.map((n: Record<string, unknown>) => (n.id === id ? { ...n, is_read: true } : n))
       );
     } catch {
       toast.error('فشل في تحديث الإشعار');
@@ -84,11 +84,11 @@ export default function NotificationsPage() {
 
   // Real stats calculated from notifications data
   const total = notifications?.length || 0;
-  const unreadCount = notifications?.filter((n: any) => !n.is_read).length || 0;
+  const unreadCount = notifications?.filter((n: Record<string, unknown>) => !(n.is_read as boolean)).length || 0;
   const readCount = total - unreadCount;
   const readPct = total > 0 ? Math.round((readCount / total) * 100) : 0;
   const unreadPct = total > 0 ? Math.round((unreadCount / total) * 100) : 0;
-  const systemCount = notifications?.filter((n: any) => n.type === 'system').length || 0;
+  const systemCount = notifications?.filter((n: Record<string, unknown>) => (n.type as string) === 'system').length || 0;
   const systemPct = total > 0 ? Math.round((systemCount / total) * 100) : 0;
 
   const formatTime = (dateStr: string) => {
@@ -163,7 +163,7 @@ export default function NotificationsPage() {
            
            <div className="space-y-10 relative z-10 pr-24">
               <AnimatePresence mode="popLayout">
-                 {notifications.map((n: any, i: number) => {
+                 {notifications.map((n: Record<string, unknown>, i: number) => {
                    const Icon = typeIconMap[n.type] || Bell;
                    const color = typeColorMap[n.type] || 'gold';
                    return (

@@ -200,7 +200,7 @@ export default function BookingDetailPage() {
                             <div className="space-y-2">
                                 <h4 className="font-black italic tracking-tight">بروتوكول النزاهة</h4>
                                 <p className="text-xs text-white/40 leading-relaxed italic">
-                                    الحجز مسجل في السجل المشفر (Ledger). في حال وجود نزاع، يمكنك تفعيل "وضعية السيادة" للحصول على استشارة فورية من الأوراكل.
+                                    {`الحجز مسجل في السجل المشفر (Ledger). في حال وجود نزاع، يمكنك تفعيل "وضعية السيادة" للحصول على استشارة فورية من الأوراكل.`}
                                 </p>
                             </div>
                         </div>

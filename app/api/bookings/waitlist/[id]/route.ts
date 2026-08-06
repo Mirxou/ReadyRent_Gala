@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
+import { logger } from '@/lib/logger';
 
 // ═══════════════════════════════════════════════════════════════════
 // Waitlist Item — Delete (owner only)
@@ -61,7 +62,7 @@ export async function DELETE(
       },
     });
   } catch (error) {
-    console.error('[Waitlist Item API] DELETE error:', error);
+    logger.error('Waitlist Item API', 'DELETE error', error);
     return errorResponse(
       'حدث خطأ أثناء حذف عنصر قائمة الانتظار',
       'An error occurred while deleting the waitlist item',

@@ -6,7 +6,6 @@ import { useAuthStore } from '@/lib/store';
 import { isUserAuthenticated } from '@/lib/auth-helpers';
 import { DashboardSidebar } from '@/components/dashboard/sidebar';
 import { Loader2, ShieldCheck, Sparkles } from 'lucide-react';
-import { Navbar } from '@/components/navbar';
 import { SovereignOracle } from '@/shared/components/sovereign/sovereign-oracle';
 import { cn } from '@/lib/utils';
 
@@ -25,7 +24,7 @@ export default function DashboardLayout({
 }: {
     children: React.ReactNode;
 }) {
-    const { isAuthenticated, user } = useAuthStore();
+    const { isAuthenticated } = useAuthStore();
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(true);
 

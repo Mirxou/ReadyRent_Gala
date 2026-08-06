@@ -16,7 +16,7 @@ export interface MagneticButtonProps extends React.ButtonHTMLAttributes<HTMLButt
 export const MagneticButton = forwardRef<HTMLButtonElement, MagneticButtonProps>(
     ({ className, asChild = false, withConfetti = false, variant = 'primary', size = 'default', onClick, children, ...props }, ref) => {
         const buttonRef = useRef<HTMLButtonElement>(null);
-        const [isHovered, setIsHovered] = useState(false);
+        const [_isHovered, setIsHovered] = useState(false);
 
         const [{ x, y, scale }, springApi] = useSpring(() => ({
             x: 0,

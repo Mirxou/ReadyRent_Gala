@@ -27,8 +27,8 @@ interface Contract {
   contract_hash: string;
   renter_signature?: string;
   signed_at?: string;
-  snapshot: any;
-  parties?: any[];
+  snapshot: Record<string, unknown>;
+  parties?: Record<string, unknown>[];
   terms?: string;
 }
 

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
+import { logger } from '@/lib/logger';
 
 // ═══════════════════════════════════════════════════════════════════
 // Waitlist API — List (auth) + Create (auth)
@@ -66,7 +67,7 @@ export async function GET(request: NextRequest) {
       })),
     });
   } catch (error) {
-    console.error('[Waitlist API] GET error:', error);
+    logger.error('Waitlist API', 'GET error', error);
     return errorResponse(
       'حدث خطأ أثناء جلب قائمة الانتظار',
       'An error occurred while fetching waitlist',
@@ -155,7 +156,7 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    console.error('[Waitlist API] POST error:', error);
+    logger.error('Waitlist API', 'POST error', error);
     return errorResponse(
       'حدث خطأ أثناء الإضافة لقائمة الانتظار',
       'An error occurred while adding to waitlist',

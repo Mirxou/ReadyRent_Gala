@@ -9,13 +9,11 @@ import { SovereignGlow, SovereignSparkle } from '@/shared/components/sovereign/s
 import { DignifiedLoader } from '@/shared/components/sovereign/dignified-loader';
 import { productsApi } from '@/lib/api';
 import { ProductCard } from '@/components/product/product-card';
-import { Input } from '@/components/ui/input';
 import {
   Search,
   Calendar,
   Package,
   ArrowLeft,
-  Shirt,
 } from 'lucide-react';
 
 /* ────────────────────────────────────────────
@@ -92,13 +90,13 @@ function HeroSection() {
 function CategoriesGrid() {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
-  const [categories, setCategories] = useState<any[]>([]);
+  const [categories, setCategories] = useState<Record<string, unknown>[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     productsApi
       .getCategories()
-      .then((res: any) => {
+      .then((res: Record<string, unknown>) => {
         const data = Array.isArray(res.data?.results) ? res.data.results : Array.isArray(res.data) ? res.data : [];
         setCategories(data);
       })
@@ -176,13 +174,13 @@ function CategoriesGrid() {
 function FeaturedProducts() {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
-  const [products, setProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<Record<string, unknown>[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     productsApi
       .getAll()
-      .then((res: any) => {
+      .then((res: Record<string, unknown>) => {
         const data = Array.isArray(res.data?.results) ? res.data.results : Array.isArray(res.data) ? res.data : [];
         setProducts(data);
       })
@@ -230,7 +228,7 @@ function FeaturedProducts() {
           </motion.div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-            {featured.map((product: any, i: number) => (
+            {featured.map((product: Record<string, unknown>, i: number) => (
               <motion.div
                 key={product.id}
                 initial={{ opacity: 0, y: 30 }}

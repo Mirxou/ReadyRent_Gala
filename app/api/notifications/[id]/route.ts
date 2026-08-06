@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
+import { logger } from '@/lib/logger';
 
 // ═══════════════════════════════════════════════════════════════
 // PATCH /api/notifications/[id] — Mark as read
@@ -46,7 +47,7 @@ export async function PATCH(
 
   return NextResponse.json({ success: true, dignity_preserved: true, data });
   } catch (error) {
-    console.error('[Notification PATCH] Error:', error);
+    logger.error('Notification PATCH', 'Error', error);
     return NextResponse.json(
       { success: false, dignity_preserved: true, message_en: 'Error marking notification as read', code: 'INTERNAL_ERROR' },
       { status: 500 }
@@ -85,7 +86,7 @@ export async function DELETE(
     data: { id },
   });
   } catch (error) {
-    console.error('[Notification DELETE] Error:', error);
+    logger.error('Notification DELETE', 'Error', error);
     return NextResponse.json(
       { success: false, dignity_preserved: true, message_en: 'Error deleting notification', code: 'INTERNAL_ERROR' },
       { status: 500 }

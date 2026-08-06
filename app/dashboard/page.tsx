@@ -29,7 +29,7 @@ import Link from 'next/link';
 import { cn, formatNumber } from '@/lib/utils';
 
 import { useQuery } from '@tanstack/react-query';
-import { bookingsApi, authApi, disputesApi } from '@/lib/api';
+import { bookingsApi, authApi } from '@/lib/api';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 
@@ -83,7 +83,7 @@ export default function DashboardPage() {
   const trustScore = trustScoreValue;
   const isElite = trustScore >= 100; // Phase 10 Obsidian Tier
   const isSovereign = trustScore >= 1; 
-  const is2FAEnabled = (user as any)?.is_2fa_enabled;
+  const is2FAEnabled = (user as Record<string, unknown>)?.is_2fa_enabled;
 
   if (!isAuthenticated) {
     return (
@@ -332,7 +332,7 @@ export default function DashboardPage() {
                             <h3 className="text-2xl font-black italic">حوّل مقتنياتك إلى أصول سيادية</h3>
                          </div>
                          <p className="text-sm text-muted-foreground italic opacity-80 max-w-xl">
-                            بروتوكول "المعيرة" يسمح لك بإدراج أصولك (فساتين، سيارات، أدوات) ضمن سجل النخبة وتوليد قيمة حقيقية منها. ابدأ رحلتك كمزود سيادي اليوم.
+                            {`بروتوكول "المعيرة" يسمح لك بإدراج أصولك (فساتين، سيارات، أدوات) ضمن سجل النخبة وتوليد قيمة حقيقية منها. ابدأ رحلتك كمزود سيادي اليوم.`}
                          </p>
                      </div>
                      <SovereignButton size="xl" variant="secondary" className="h-16 px-12 rounded-2xl group border-white/10">
@@ -376,7 +376,7 @@ export default function DashboardPage() {
                         <span className="text-xs font-black uppercase tracking-[0.2em] opacity-40">جاري تحميل السجل الرقمي...</span>
                     </div>
                 ) : activeBookings.length > 0 ? (
-                    activeBookings.map((booking: any) => (
+                    activeBookings.map((booking: Record<string, unknown>) => (
                     <GlassPanel key={booking.id} className="p-8 relative group hover:border-sovereign-gold/30 transition-all duration-500 shadow-2xl" gradientBorder>
                         
                         {/* Status Identifier */}

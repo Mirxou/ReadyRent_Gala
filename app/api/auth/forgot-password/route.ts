@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import crypto from 'crypto';
+import { logger } from '@/lib/logger';
 
 // ═══════════════════════════════════════════════════════════════
 // POST /api/auth/forgot-password — Request a password reset
@@ -58,7 +59,7 @@ export async function POST(request: Request) {
       message_en: 'If the email is registered, a reset link will be sent',
     });
   } catch (error) {
-    console.error('[Forgot Password API] Error:', error);
+    logger.error('Forgot Password API', 'Error', error);
 
     // Still return generic success to prevent info leakage
     return NextResponse.json({

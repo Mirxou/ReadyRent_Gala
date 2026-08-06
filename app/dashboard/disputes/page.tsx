@@ -4,11 +4,8 @@ import { useQuery } from '@tanstack/react-query';
 import { disputesApi } from '@/lib/api';
 import { 
   Scale, 
-  MessageSquare, 
   Clock, 
   CheckCircle2, 
-  AlertTriangle,
-  History,
   ShieldCheck,
   ChevronRight,
   Loader2,
@@ -57,7 +54,7 @@ export default function DisputesPage() {
         {/* Main List (Span 8) */}
         <div className="lg:col-span-8 space-y-6">
             {disputes.length > 0 ? (
-                disputes.map((dispute: any) => (
+                disputes.map((dispute: Record<string, unknown>) => (
                     <GlassPanel key={dispute.id} className="p-8 group hover:border-sovereign-gold/20 transition-all duration-500 overflow-hidden relative" gradientBorder>
                          <div className="flex flex-col md:flex-row gap-8 relative z-10">
                             
@@ -129,13 +126,13 @@ export default function DisputesPage() {
                 <div className="space-y-4">
                     <div className="p-4 bg-white/5 rounded-xl border border-white/5">
                         <p className="text-xs font-black uppercase text-sovereign-gold mb-1">النزاعات النشطة</p>
-                        <p className="text-lg font-black">{disputes.filter((d: any) => d.status === 'open').length} حالة مفتوحة</p>
+                        <p className="text-lg font-black">{disputes.filter((d: Record<string, unknown>) => (d.status as string) === 'open').length} حالة مفتوحة</p>
                     </div>
                     <div className="p-4 bg-white/5 rounded-xl border border-white/5">
                         <p className="text-xs font-black uppercase text-emerald-500 mb-1">نسبة التسوية</p>
                         <p className="text-lg font-black">
                           {disputes.length > 0
-                            ? `${Math.round((disputes.filter((d: any) => d.status === 'resolved').length / disputes.length) * 100)}% تسوية`
+                            ? `${Math.round((disputes.filter((d: Record<string, unknown>) => (d.status as string) === 'resolved').length / disputes.length) * 100)}% تسوية`
                             : 'لا توجد بيانات بعد'}
                         </p>
                     </div>

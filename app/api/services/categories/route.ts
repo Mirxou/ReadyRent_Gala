@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { logger } from '@/lib/logger';
 
 // Service Categories API - Public listing from DB only
 
@@ -22,7 +23,7 @@ export async function GET() {
       })),
     });
   } catch (error) {
-    console.error('[Service Categories API] Error:', error);
+    logger.error('Service Categories API', 'Error', error);
     return NextResponse.json(
       { success: false, dignity_preserved: true, message_ar: 'خطأ في جلب الفئات', message_en: 'Error fetching categories' },
       { status: 500 }

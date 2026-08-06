@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { logger } from '@/lib/logger';
 
 // ═══════════════════════════════════════════════════════════════
 // GET /api/bookings/calculate-deposit — Calculate required deposit
@@ -58,7 +59,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('[Deposit Calc API] Error:', error);
+    logger.error('Deposit Calc API', 'Error', error);
     return NextResponse.json({ success: false, message_en: 'Error calculating deposit', code: 'INTERNAL_ERROR' }, { status: 500 });
   }
 }

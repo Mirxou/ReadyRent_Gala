@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { logger } from '@/lib/logger';
 
 // ═══════════════════════════════════════════════════════════════════
 // Insurance Plans API — Full database integration
@@ -27,7 +28,7 @@ export async function GET() {
       data,
     });
   } catch (error) {
-    console.error('[Insurance API] Error:', error);
+    logger.error('Insurance API', 'Error', error);
     return NextResponse.json(
       {
         success: false,

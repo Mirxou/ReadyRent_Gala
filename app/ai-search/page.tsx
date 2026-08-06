@@ -34,10 +34,10 @@ const QUICK_SUGGESTIONS = [
 ];
 
 // ── Product card (compact) ────────────────────────────────────────────────────
-type Product = { id: string; name: string; name_ar?: string; primary_image?: string; daily_rate: number; images?: any[]; category?: any; };
+type Product = { id: string; name: string; name_ar?: string; primary_image?: string; daily_rate: number; slug?: string; is_available?: boolean; location_name?: string; price_per_day?: number; images?: Record<string, unknown>[]; category?: Record<string, unknown>; };
 
 function ProductCard({ product }: { product: Product }) {
-  const mainImage = product.images?.find((i) => i.is_main)?.url ?? product.images?.[0]?.url;
+  const mainImage = (product.images?.find((i) => i.is_main)?.url ?? product.images?.[0]?.url) as string | undefined;
 
   return (
     <motion.div
@@ -79,7 +79,7 @@ function ProductCard({ product }: { product: Product }) {
             </div>
           )}
           <p className="text-base font-black text-blue-600">
-            {formatNumber(product.price_per_day)} دج<span className="text-xs font-normal text-slate-400">/يوم</span>
+            {formatNumber(product.price_per_day ?? product.daily_rate)} دج<span className="text-xs font-normal text-slate-400">/يوم</span>
           </p>
         </div>
       </Link>

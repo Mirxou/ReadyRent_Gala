@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { logger } from '@/lib/logger';
 
 // ═══════════════════════════════════════════════════════════════════
 // Reviews API — List reviews for a product
@@ -60,7 +61,7 @@ export async function GET(request: NextRequest) {
       })),
     });
   } catch (error) {
-    console.error('[Reviews API] Error:', error);
+    logger.error('Reviews API', 'Error', error);
     return NextResponse.json(
       {
         success: false,

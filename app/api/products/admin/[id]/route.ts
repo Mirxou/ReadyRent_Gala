@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
+import { logger } from '@/lib/logger';
 
 // ═══════════════════════════════════════════════════════════════
 // GET /api/products/admin/[id] — Get single product for edit
@@ -57,7 +58,7 @@ export async function GET(
 
     return NextResponse.json({ success: true, dignity_preserved: true, data });
   } catch (error) {
-    console.error('[Admin Product GET API] Error:', error);
+    logger.error('Admin Product GET API', 'Error', error);
     return NextResponse.json({ success: false, dignity_preserved: true, message_en: 'Error fetching product', code: 'INTERNAL_ERROR' }, { status: 500 });
   }
 }
@@ -111,7 +112,7 @@ export async function PUT(
       data: { id: updated.id, name: updated.name, name_ar: updated.nameAr },
     });
   } catch (error) {
-    console.error('[Admin Product Update API] Error:', error);
+    logger.error('Admin Product Update API', 'Error', error);
     return NextResponse.json({ success: false, dignity_preserved: true, message_en: 'Error updating product', code: 'INTERNAL_ERROR' }, { status: 500 });
   }
 }
@@ -159,7 +160,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true, dignity_preserved: true, message_en: 'Product deleted' });
   } catch (error) {
-    console.error('[Admin Product Delete API] Error:', error);
+    logger.error('Admin Product Delete API', 'Error', error);
     return NextResponse.json({ success: false, dignity_preserved: true, message_en: 'Error deleting product', code: 'INTERNAL_ERROR' }, { status: 500 });
   }
 }

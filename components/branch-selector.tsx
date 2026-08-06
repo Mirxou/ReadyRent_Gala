@@ -2,10 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { api } from '@/lib/api';
-import { MapPin, Phone, Mail, Clock } from 'lucide-react';
+import { MapPin, Phone, Mail } from 'lucide-react';
 
 interface Branch {
   id: number;
@@ -49,7 +48,7 @@ export function BranchSelector({ onSelect, selectedBranchId }: BranchSelectorPro
     try {
       const response = await api.get('/branches/');
       setBranches(response.data.results || response.data);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error loading branches:', error);
     } finally {
       setLoading(false);

@@ -69,9 +69,8 @@ export function ParticleField() {
         const particles: Particle[] = Array.from({ length: 40 }, () => new Particle(width, height));
 
         let animationId: number;
-        const lastTime = 0;
 
-        const animate = (time: number) => {
+        const animate = (_time: number) => {
             // Throttle or handle delta time if needed, but requestAnimationFrame is usually enough
             ctx.clearRect(0, 0, width, height);
 

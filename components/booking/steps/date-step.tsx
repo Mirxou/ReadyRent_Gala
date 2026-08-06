@@ -4,15 +4,14 @@ import { useBookingStore } from '@/lib/hooks/use-booking-store';
 import { Calendar } from '@/components/ui/calendar';
 import { Label } from '@/components/ui/label';
 import { motion } from 'framer-motion';
-import { AlertCircle, CalendarIcon, Info } from 'lucide-react';
+import { CalendarIcon, Info } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
-import { cn } from '@/lib/utils';
 
 export function DateStep() {
   const { formData, updateFormData } = useBookingStore();
 
-  const handleSelect = (range: any) => {
+  const handleSelect = (range: Record<string, unknown>) => {
     updateFormData({
       startDate: range?.from || null,
       endDate: range?.to || null,

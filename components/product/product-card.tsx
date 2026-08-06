@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { Star, Shield, Zap, Heart, MapPin, Sparkles } from 'lucide-react';
+import { Star, Heart, MapPin } from 'lucide-react';
 import { cn, formatNumber } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
@@ -12,7 +12,7 @@ import { SovereignGlow, SovereignSparkle } from '@/shared/components/sovereign/s
 import { IdentityShield } from '@/shared/components/sovereign/identity-shield';
 
 interface ProductCardProps {
-  product: any;
+  product: Record<string, unknown>;
   priority?: boolean;
 }
 

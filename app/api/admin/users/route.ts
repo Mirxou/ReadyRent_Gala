@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
+import { logger } from '@/lib/logger';
 
 // ═══════════════════════════════════════════════════════════════
 // GET /api/admin/users — List all users (admin/staff only)
@@ -72,7 +73,7 @@ export async function GET(request: NextRequest) {
       pagination: { page, limit, total, pages: Math.ceil(total / limit) },
     });
   } catch (error) {
-    console.error('[Admin Users API] Error:', error);
+    logger.error('Admin Users API', 'Error', error);
     return NextResponse.json({ success: false, message_en: 'Error fetching users', code: 'INTERNAL_ERROR' }, { status: 500 });
   }
 }

@@ -72,7 +72,7 @@ function BookingDialog({
   open,
   onOpenChange,
 }: {
-  service: any;
+  service: Record<string, unknown>;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
@@ -346,11 +346,11 @@ function FeaturedServices({
   onBookService,
 }: {
   selectedCategory: string | null;
-  onBookService: (service: any) => void;
+  onBookService: (service: Record<string, unknown>) => void;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
-  const [services, setServices] = useState<any[]>([]);
+  const [services, setServices] = useState<Record<string, unknown>[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -365,7 +365,7 @@ function FeaturedServices({
 
   // Filter services based on selected category
   const filteredServices = selectedCategory
-    ? services.filter((s: any) => {
+    ? services.filter((s: Record<string, unknown>) => {
         const cat = serviceCategories.find((c) => c.slug === selectedCategory);
         return cat && cat.categoryMatch.includes(s.category_ar);
       })
@@ -426,7 +426,7 @@ function FeaturedServices({
           </motion.div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
-            {filteredServices.map((service: any, i: number) => (
+            {filteredServices.map((service: Record<string, unknown>, i: number) => (
               <motion.div
                 key={service.id}
                 initial={{ opacity: 0, y: 30 }}
@@ -550,7 +550,7 @@ function CTASection() {
    ════════════════════════════════════════════ */
 export default function ServicesPage() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [bookingService, setBookingService] = useState<any>(null);
+  const [bookingService, setBookingService] = useState<Record<string, unknown> | null>(null);
   const [bookingOpen, setBookingOpen] = useState(false);
 
   const handleSelectCategory = useCallback((slug: string | null) => {
@@ -563,7 +563,7 @@ export default function ServicesPage() {
     }
   }, []);
 
-  const handleBookService = useCallback((service: any) => {
+  const handleBookService = useCallback((service: Record<string, unknown>) => {
     setBookingService(service);
     setBookingOpen(true);
   }, []);

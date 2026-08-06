@@ -8,7 +8,6 @@ import { Badge } from '@/components/ui/badge';
 import { bundlesApi } from '@/lib/api';
 import { ShoppingCart, Tag, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
-import { ar } from 'date-fns/locale';
 
 interface BundleSelectorProps {
   productId?: number;
@@ -34,8 +33,8 @@ export function BundleSelector({
       const bundlesList = Array.isArray(data) ? data : (data?.results || []);
       // Filter bundles that contain the product if productId provided
       if (productId) {
-        return bundlesList.filter((bundle: any) =>
-          bundle.items?.some((item: any) => item.product === productId)
+        return bundlesList.filter((bundle: Record<string, unknown>) =>
+          bundle.items?.some((item: Record<string, unknown>) => item.product === productId)
         );
       }
       return bundlesList;
@@ -80,7 +79,7 @@ export function BundleSelector({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {bundlesList.map((bundle: any) => {
+        {bundlesList.map((bundle: Record<string, unknown>) => {
           const isSelected = selectedBundle === bundle.id;
           const calculation = isSelected ? priceCalculation : null;
 
@@ -117,7 +116,7 @@ export function BundleSelector({
                   <div className="mb-3 space-y-1">
                     <p className="text-xs font-semibold text-muted-foreground mb-2">محتويات الباقة:</p>
                     <div className="space-y-1">
-                      {bundle.items.slice(0, 3).map((item: any, idx: number) => (
+                      {bundle.items.slice(0, 3).map((item: Record<string, unknown>, idx: number) => (
                         <div key={idx} className="text-xs text-muted-foreground">
                           • {item.item_name} {item.quantity > 1 && `(×${item.quantity})`}
                         </div>

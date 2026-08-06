@@ -201,7 +201,7 @@ function HeroEcosystem() {
 function ArtisansSpotlight() {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
-  const [artisans, setArtisans] = useState<any[]>([]);
+  const [artisans, setArtisans] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -249,7 +249,7 @@ function ArtisansSpotlight() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {artisans.map((artisan: any, i: number) => (
+            {artisans.map((artisan: Record<string, unknown>, i: number) => (
               <motion.div
                 key={artisan.id || i}
                 initial={{ opacity: 0, y: 30 }}
@@ -315,7 +315,7 @@ function ArtisansSpotlight() {
 function CustomerReviewsSection() {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
-  const [reviews, setReviews] = useState<any[]>([]);
+  const [reviews, setReviews] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -365,7 +365,7 @@ function CustomerReviewsSection() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {reviews.map((review: any, i: number) => (
+            {reviews.map((review: Record<string, unknown>, i: number) => (
               <motion.div
                 key={review.id || i}
                 initial={{ opacity: 0, y: 30 }}

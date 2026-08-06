@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
+import { logger } from '@/lib/logger';
 
 // ═══════════════════════════════════════════════════════════════
 // GET /api/admin/branches — List all branches (admin/staff only)
@@ -47,7 +48,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ success: true, dignity_preserved: true, data, results: data });
   } catch (error) {
-    console.error('[Admin Branches API] Error:', error);
+    logger.error('Admin Branches API', 'Error', error);
     return NextResponse.json({ success: false, message_en: 'Internal error' }, { status: 500 });
   }
 }
@@ -93,7 +94,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, dignity_preserved: true, data }, { status: 201 });
   } catch (error) {
-    console.error('[Admin Branches API] Create Error:', error);
+    logger.error('Admin Branches API', 'Create Error', error);
     return NextResponse.json({ success: false, message_en: 'Failed to create branch' }, { status: 500 });
   }
 }

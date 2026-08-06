@@ -4,6 +4,7 @@
 // ═══════════════════════════════════════════════════════════════
 
 import { NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 
 export async function GET() {
   try {
@@ -44,7 +45,7 @@ export async function GET() {
       data: methods,
     });
   } catch (error) {
-    console.error('[Payment Methods] Error:', error);
+    logger.error('Payment Methods', 'Error', error);
     return NextResponse.json(
       {
         success: false,

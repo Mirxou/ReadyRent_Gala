@@ -46,7 +46,7 @@ export default function ReturnsPage() {
       .then((r) => r.json())
       .then((d) => {
         const list = Array.isArray(d) ? d : (d?.data || d?.results || []);
-        setReturns(list.map((r: any) => ({
+        setReturns(list.map((r: Record<string, unknown>) => ({
           id: r.id || `RET-${String(r.bookingRef || '').padStart(4, '0')}`,
           bookingRef: r.bookingRef || r.booking_ref || '',
           reason: r.reason || '',

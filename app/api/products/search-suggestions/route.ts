@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { logger } from '@/lib/logger';
 
 // ═══════════════════════════════════════════════════════════════════
 // Search Suggestions API — Quick product name suggestions
@@ -51,7 +52,7 @@ export async function GET(request: NextRequest) {
       data: suggestions,
     });
   } catch (error) {
-    console.error('[Search Suggestions API] Error:', error);
+    logger.error('Search Suggestions API', 'Error', error);
     return NextResponse.json(
       {
         success: false,

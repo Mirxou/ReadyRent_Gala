@@ -50,13 +50,13 @@ export default function AdminProductsPage() {
     return null;
   }
 
-  const filteredProducts = products?.filter((product: any) => {
+  const filteredProducts = products?.filter((product: Record<string, unknown>) => {
     if (search) {
       const searchLower = search.toLowerCase();
       return (
-        product.name_ar?.toLowerCase().includes(searchLower) ||
-        product.name?.toLowerCase().includes(searchLower) ||
-        product.description_ar?.toLowerCase().includes(searchLower)
+        (product.name_ar as string)?.toLowerCase().includes(searchLower) ||
+        (product.name as string)?.toLowerCase().includes(searchLower) ||
+        (product.description_ar as string)?.toLowerCase().includes(searchLower)
       );
     }
     return true;
@@ -97,12 +97,12 @@ export default function AdminProductsPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredProducts.map((product: any) => (
-            <Card key={product.id}>
+          {filteredProducts.map((product: Record<string, unknown>) => (
+            <Card key={product.id as string}>
               <CardHeader>
                 <div className="flex items-start justify-between">
-                  <CardTitle className="text-lg">{product.name_ar || product.name}</CardTitle>
-                  <Badge variant={product.is_available ? 'default' : 'secondary'}>
+                  <CardTitle className="text-lg">{(product.name_ar as string) || (product.name as string)}</CardTitle>
+                  <Badge variant={(product.is_available as boolean) ? 'default' : 'secondary'}>
                     {product.is_available ? 'متاح' : 'غير متاح'}
                   </Badge>
                 </div>
@@ -110,12 +110,12 @@ export default function AdminProductsPage() {
               <CardContent>
                 <div className="space-y-2 mb-4">
                   <p className="text-sm text-muted-foreground">
-                    الفئة: {product.category?.name_ar || '-'}
+                    الفئة: {((product.category as Record<string, unknown>)?.name_ar as string) || '-'}
                   </p>
                   <p className="text-lg font-bold">
-                    {Number(product.daily_rate || product.price_per_day).toFixed(0)} دج/يوم
+                    {Number((product.daily_rate as number) || (product.price_per_day as number)).toFixed(0)} دج/يوم
                   </p>
-                  {product.is_featured && (
+                  {(product.is_featured as boolean) && (
                     <Badge variant="outline">مميز</Badge>
                   )}
                 </div>
@@ -131,7 +131,7 @@ export default function AdminProductsPage() {
                     size="sm"
                     onClick={() => {
                       if (confirm('هل أنت متأكد من حذف هذا المنتج؟')) {
-                        deleteMutation.mutate(product.id);
+                        deleteMutation.mutate(product.id as string);
                       }
                     }}
                     disabled={deleteMutation.isPending}

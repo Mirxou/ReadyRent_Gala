@@ -116,7 +116,7 @@ export default function HighCourtPresentation() {
               transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
               className="flex-1 flex flex-col justify-center items-center text-center space-y-12"
             >
-              <SovereignGlow color={activeSlide.color as any}>
+              <SovereignGlow color={activeSlide.color as string}>
                 <div className="w-24 h-24 rounded-full bg-white/5 flex items-center justify-center text-sovereign-gold shadow-2xl mb-4">
                   <activeSlide.icon className="w-12 h-12" />
                 </div>

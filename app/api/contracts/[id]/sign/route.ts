@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
+import { logger } from '@/lib/logger';
 
 // ═══════════════════════════════════════════════════════════════
 // POST /api/contracts/[id]/sign — Sign a contract
@@ -67,7 +68,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
   return NextResponse.json({ success: true, dignity_preserved: true, data: updated });
   } catch (error) {
-    console.error('[Contract Sign API] Error:', error);
+    logger.error('Contract Sign API', 'Error', error);
     return NextResponse.json(
       { success: false, dignity_preserved: true, message: 'Internal error', code: 'INTERNAL_ERROR' },
       { status: 500 }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getSessionFromRequest } from '@/lib/auth-server';
+import { logger } from '@/lib/logger';
 
 // ═══════════════════════════════════════════════════════════════════
 // Create Review API — Submit a new review (status: pending)
@@ -121,7 +122,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('[Create Review API] Error:', error);
+    logger.error('Create Review API', 'Error', error);
     return errorResponse(
       'حدث خطأ أثناء إنشاء التقييم',
       'An error occurred while creating the review',

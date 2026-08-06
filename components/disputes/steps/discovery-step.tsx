@@ -2,7 +2,6 @@
 
 import * as React from 'react';
 import { useDisputeStore } from '@/lib/hooks/use-dispute-store';
-import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { AlertCircle, Package, Receipt, Truck } from 'lucide-react';

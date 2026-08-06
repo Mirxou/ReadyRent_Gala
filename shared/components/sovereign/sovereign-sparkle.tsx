@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable react-hooks/set-state-in-effect */
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
@@ -27,6 +28,7 @@ export function SovereignSparkle({ children, active = true }: { children?: React
   // Use useState + useEffect to avoid hydration mismatch (Math.random is non-deterministic)
   const [particles, setParticles] = useState<Particle[]>([]);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     if (!active) {
       setParticles([]);

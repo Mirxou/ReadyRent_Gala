@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { hashPassword } from '@/lib/auth-server';
+import { logger } from '@/lib/logger';
 
 // ═══════════════════════════════════════════════════════════════
 // POST /api/auth/reset-password — Reset password using a token
@@ -133,7 +134,7 @@ export async function POST(request: Request) {
       message_en: 'Password has been reset successfully',
     });
   } catch (error) {
-    console.error('[Reset Password API] Error:', error);
+    logger.error('Reset Password API', 'Error', error);
     return NextResponse.json(
       {
         success: false,

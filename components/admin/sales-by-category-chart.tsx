@@ -42,7 +42,7 @@ export function SalesByCategoryChart({ data }: SalesByCategoryChartProps) {
               style={{ fontSize: '12px' }}
             />
             <Tooltip
-              formatter={(value: any, name: any) => {
+              formatter={(value: string | number, name: string) => {
                 const numValue = value || 0;
                 const nameStr = name || '';
                 if (nameStr === 'revenue') return [`${formatNumber(numValue)} دج`, 'الإيرادات'];

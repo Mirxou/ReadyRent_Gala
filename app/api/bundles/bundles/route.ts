@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { logger } from '@/lib/logger';
 
 // ═══════════════════════════════════════════════════════════════════
 // Bundles API — Full database integration
@@ -77,7 +78,7 @@ export async function GET(request: NextRequest) {
       data,
     });
   } catch (error) {
-    console.error('[Bundles API] Error:', error);
+    logger.error('Bundles API', 'Error', error);
     return NextResponse.json(
       {
         success: false,

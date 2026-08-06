@@ -1,10 +1,9 @@
 'use client';
 
 import { useMemo, useState, useCallback } from 'react';
-import { GoogleMap, LoadScript, Marker, Autocomplete, useJsApiLoader } from '@react-google-maps/api';
+import { GoogleMap, Marker, Autocomplete, useJsApiLoader } from '@react-google-maps/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { MapPin } from 'lucide-react';
 
 const libraries: ("places")[] = ["places"];

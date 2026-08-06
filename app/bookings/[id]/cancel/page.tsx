@@ -17,7 +17,7 @@ export default function CancelBookingPage() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [policyLoading, setPolicyLoading] = useState(true);
-  const [policy, setPolicy] = useState<any>(null);
+  const [policy, setPolicy] = useState<Record<string, unknown> | null>(null);
   const [reason, setReason] = useState('');
 
   useEffect(() => {
@@ -28,10 +28,10 @@ export default function CancelBookingPage() {
     try {
       const response = await api.get(`/bookings/${params.id}/cancellation-policy/`);
       setPolicy(response.data);
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: 'خطأ',
-        description: error.response?.data?.error || 'فشل تحميل سياسة الإلغاء',
+        description: (error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'فشل تحميل سياسة الإلغاء',
         variant: 'destructive',
       });
     } finally {
@@ -57,10 +57,10 @@ export default function CancelBookingPage() {
         description: 'تم إلغاء الحجز بنجاح. سيتم استرجاع المبلغ خلال 3 أيام',
       });
       router.push('/dashboard/bookings');
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: 'خطأ',
-        description: error.response?.data?.error || 'فشل إلغاء الحجز',
+        description: (error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'فشل إلغاء الحجز',
         variant: 'destructive',
       });
     } finally {

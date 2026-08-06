@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
+import { logger } from '@/lib/logger';
 
 // ═══════════════════════════════════════════════════════════════
 // GET /api/verification/pending — Get pending verifications queue (verified users only)
@@ -59,7 +60,6 @@ export async function GET(request: Request) {
         first_name: v.user.firstName,
         last_name: v.user.lastName,
       },
-      face_photo: v.facePhoto,
       ai_score: v.aiScore,
       approval_count: v.approvalCount,
       rejection_count: v.rejectionCount,
@@ -73,7 +73,7 @@ export async function GET(request: Request) {
       data,
     });
   } catch (error) {
-    console.error('[GET /api/verification/pending] Error:', error);
+    logger.error('GET /api/verification/pending', 'Error', error);
     return NextResponse.json(
       {
         success: false,

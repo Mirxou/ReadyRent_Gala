@@ -10,8 +10,8 @@ interface Contract {
   contract_hash: string;
   renter_signature?: string;
   signed_at?: string;
-  snapshot: any;
-  parties?: any[];
+  snapshot: Record<string, unknown>;
+  parties?: Record<string, unknown>[];
   terms?: string;
 }
 
@@ -119,7 +119,7 @@ const BRANCH_PHASES: Record<string, Phase> = {
 };
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-function deriveActivePhaseIndex(contract: Contract & { [k: string]: any }): number {
+function deriveActivePhaseIndex(contract: Contract & { [k: string]: unknown }): number {
   const status = contract.status as string;
   const snap = contract.snapshot || {};
 
@@ -265,13 +265,13 @@ function TimelineNode({
 
 // ── Main component ────────────────────────────────────────────────────────────
 interface ContractTimelineProps {
-  contract: Contract & { [k: string]: any };
+  contract: Contract & { [k: string]: unknown };
   className?: string;
 }
 
 export function ContractTimeline({ contract, className }: ContractTimelineProps) {
   const activeIndex = useMemo(() => deriveActivePhaseIndex(contract), [contract]);
-  const snap = (contract.snapshot || {}) as Record<string, any>;
+  const snap = (contract.snapshot || {}) as Record<string, unknown>;
 
   const isVoid = contract.status === 'void';
   const isDisputed = snap.has_dispute;

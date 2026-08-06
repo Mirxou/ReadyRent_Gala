@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { logger } from '@/lib/logger';
 
 // ═══════════════════════════════════════════════════════════════════
 // Product Categories API — List all categories with product count
@@ -24,7 +25,7 @@ export async function GET() {
       })),
     });
   } catch (error) {
-    console.error('[Categories API] Error:', error);
+    logger.error('Categories API', 'Error', error);
     return NextResponse.json(
       {
         success: false,

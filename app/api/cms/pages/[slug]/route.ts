@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
+import { logger } from '@/lib/logger';
 
 // ═══════════════════════════════════════════════════════════════════
 // CMS Page Single — GET by slug/id, PUT/DELETE by id (admin/staff)
@@ -60,7 +61,7 @@ export async function GET(
       data: formatPage(page),
     });
   } catch (error) {
-    console.error('[CMS Page API] Error:', error);
+    logger.error('CMS Page API', 'Error', error);
     return errorResponse(
       'حدث خطأ أثناء جلب الصفحة',
       'An error occurred while fetching the page',
@@ -132,7 +133,7 @@ export async function PUT(
       data: formatPage(page),
     });
   } catch (error) {
-    console.error('[CMS Page API] PUT Error:', error);
+    logger.error('CMS Page API', 'PUT Error', error);
     return errorResponse(
       'حدث خطأ أثناء تحديث الصفحة',
       'An error occurred while updating the page',
@@ -181,7 +182,7 @@ export async function DELETE(
       data: { deleted: true },
     });
   } catch (error) {
-    console.error('[CMS Page API] DELETE Error:', error);
+    logger.error('CMS Page API', 'DELETE Error', error);
     return errorResponse(
       'حدث خطأ أثناء حذف الصفحة',
       'An error occurred while deleting the page',

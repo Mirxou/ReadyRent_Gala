@@ -94,8 +94,8 @@ export default function CMSPagesPage() {
       }
       setEditing(false);
       fetchPages();
-    } catch (err: any) {
-      const msg = err?.data?.message_en || 'حدث خطأ أثناء الحفظ';
+    } catch (err: unknown) {
+      const msg = (err as Record<string, Record<string, string>> | undefined)?.data?.message_en || 'حدث خطأ أثناء الحفظ';
       toast.error(msg);
     } finally {
       setSaving(false);

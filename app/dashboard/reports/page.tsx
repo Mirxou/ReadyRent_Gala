@@ -2,33 +2,29 @@
 
 import { motion } from 'framer-motion';
 import { 
-  FileText, 
   Download, 
   Share2, 
   Sparkles, 
   BrainCircuit, 
-  TrendingUp, 
   ShieldCheck,
   Quote,
-  Layers,
   Search,
   BookOpen,
   ChevronRight,
-  PieChart as PieIcon,
   BarChart3,
   Globe2,
   Info
 } from 'lucide-react';
 import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
 import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
-import { SovereignGlow } from '@/shared/components/sovereign/sovereign-sparkle';
+
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { SovereignPredictivePulse } from '@/features/analytics/components/predictive-pulse';
 
 import { useQuery } from '@tanstack/react-query';
-import { adminApi, analyticsApi } from '@/lib/api';
+import { adminApi } from '@/lib/api';
 import { 
   BarChart, 
   Bar, 
@@ -52,17 +48,14 @@ import {
  */
 
 export default function ReportsPage() {
-    const { data: regionalData, isLoading: isLoadingRegional } = useQuery({
+    const { data: regionalData, isLoading: _isLoadingRegional } = useQuery({
         queryKey: ['regional-liquidity'],
         queryFn: () => adminApi.getRevenue({ days: 30 }).then(res => res.data),
     });
 
-    const { data: intelligencePulse, isLoading: isLoadingPulse } = useQuery({
-        queryKey: ['intelligence-pulse'],
-        queryFn: () => analyticsApi.getEvents().then(res => res.data),
-    });
 
-    const { data: report, isLoading: isLoadingReport } = useQuery({
+
+    const { data: report, isLoading: _isLoadingReport } = useQuery({
         queryKey: ['market-report'],
         queryFn: () => adminApi.getSalesReport({ days: 30 }).then(res => res.data),
     });
@@ -191,7 +184,7 @@ export default function ReportsPage() {
                                     <div className="p-8 bg-white/[0.02] border-r-[6px] border-sovereign-gold rounded-[32px] relative overflow-hidden group/quote">
                                         <Quote className="absolute -top-4 -right-4 w-16 h-16 text-sovereign-gold/5 fill-current group-hover/quote:scale-110 transition-transform duration-700" />
                                         <p className="text-2xl font-black italic leading-tight text-white/90 relative z-10">
-                                            "نشهد تعميد فئة جديدة من 'الأصول المنتجة' في الجزائر، حيث يتم تحويل الملكية الخاصة إلى قوة اقتصادية سيادية."
+                                            {`"نشهد تعميد فئة جديدة من 'الأصول المنتجة' في الجزائر، حيث يتم تحويل الملكية الخاصة إلى قوة اقتصادية سيادية."`}
                                         </p>
                                     </div>
                                 </div>
@@ -244,7 +237,7 @@ export default function ReportsPage() {
                                                     cursor={{ fill: 'rgba(255,255,255,0.02)' }}
                                                 />
                                                 <Bar dataKey="value" radius={[12, 12, 0, 0]} barSize={60}>
-                                                    {regionalData?.map((entry: any, index: number) => (
+                                                    {regionalData?.map((entry: Record<string, unknown>, index: number) => (
                                                         <Cell key={`cell-${index}`} fill={entry.color} fillOpacity={0.8} />
                                                     ))}
                                                 </Bar>
@@ -258,7 +251,7 @@ export default function ReportsPage() {
                                                 <span className="text-[10px] font-black uppercase tracking-widest italic">رؤية استراتيجية</span>
                                             </div>
                                             <p className="text-base font-black italic leading-relaxed text-white/70">
-                                                تتصدر العاصمة مؤشرات السيولة، لكننا نلاحظ قفزة نوعية في "وهران" نتيجة لتوسع الاستثمارات اللوجستية في المنطقة الغربية.
+                                                {`تتصدر العاصمة مؤشرات السيولة، لكننا نلاحظ قفزة نوعية في "وهران" نتيجة لتوسع الاستثمارات اللوجستية في المنطقة الغربية.`}
                                             </p>
                                         </div>
                                         <div className="space-y-3">
@@ -288,7 +281,7 @@ export default function ReportsPage() {
                                     <div className="space-y-2">
                                         <h4 className="text-xl font-black italic tracking-tighter text-sovereign-gold leading-none">توصية الأوراكل السيادي</h4>
                                         <p className="text-sm font-bold text-white/60 leading-relaxed italic">
-                                            "ننصح المستثمرين وأصحاب الأصول بتركيز العرض في فئة 'الأزياء التقليدية الفاخرة' و 'الإلكترونيات المرموقة' خلال موسم الربيع القادم لتغطية الفجوة المتوقعة في الطلب الجهوي."
+                                            {`"ننصح المستثمرين وأصحاب الأصول بتركيز العرض في فئة 'الأزياء التقليدية الفاخرة' و 'الإلكترونيات المرموقة' خلال موسم الربيع القادم لتغطية الفجوة المتوقعة في الطلب الجهوي."`}
                                         </p>
                                     </div>
                                 </div>

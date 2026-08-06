@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { Prisma } from '@prisma/client';
+import { logger } from '@/lib/logger';
 
 // ═══════════════════════════════════════════════════════════════════
 // Products API — List with search, filters, pagination & ordering
@@ -157,7 +158,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('[Products API] Error:', error);
+    logger.error('Products API', 'Error', error);
     return errorResponse(
       'حدث خطأ أثناء جلب المنتجات',
       'An error occurred while fetching products',

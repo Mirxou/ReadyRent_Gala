@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
+import { logger } from '@/lib/logger';
 
 // ═══════════════════════════════════════════════════════════════
 // GET /api/payments/payments — List user's payments
@@ -31,7 +32,7 @@ export async function GET(request: Request) {
 
   return NextResponse.json({ success: true, dignity_preserved: true, data });
   } catch (error) {
-    console.error('[Payments API] Error:', error);
+    logger.error('Payments API', 'Error', error);
     return NextResponse.json(
       { success: false, dignity_preserved: true, message: 'Internal error' },
       { status: 500 }

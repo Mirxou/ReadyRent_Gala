@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
+import { logger } from '@/lib/logger';
 
 export async function POST(
   request: NextRequest,
@@ -111,7 +112,7 @@ export async function POST(
       },
     });
   } catch (error) {
-    console.error('[Social Vouch] Error:', error);
+    logger.error('Social Vouch', 'Error', error);
     return NextResponse.json(
       {
         success: false,

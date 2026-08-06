@@ -14,8 +14,8 @@ interface Contract {
   contract_hash: string;
   renter_signature?: string;
   signed_at?: string;
-  snapshot: any;
-  parties?: any[];
+  snapshot: Record<string, unknown>;
+  parties?: Record<string, unknown>[];
   terms?: string;
 }
 import { Button } from '@/components/ui/button';
@@ -172,7 +172,7 @@ export default function ContractPage() {
 
         {/* Sidebar: Interactive Timeline — takes 1/3 */}
         <div className="xl:col-span-1 xl:sticky xl:top-24">
-          <ContractTimeline contract={contract as any} />
+          <ContractTimeline contract={contract as unknown as Record<string, unknown>} />
         </div>
       </div>
     </main>

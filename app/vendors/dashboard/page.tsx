@@ -42,7 +42,7 @@ export default function VendorDashboardPage() {
     try {
       const response = await api.get('/vendors/dashboard/');
       setDashboard(response.data);
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: 'خطأ',
         description: error?.data?.error || 'فشل تحميل لوحة التحكم',

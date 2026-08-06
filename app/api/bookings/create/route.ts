@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
 import { createBookingSchema, validateBody } from '@/lib/validators';
+import { logger } from '@/lib/logger';
 
 // ═══════════════════════════════════════════════════════════════
 // POST /api/bookings/create — Create a new booking
@@ -157,7 +158,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, dignity_preserved: true, data }, { status: 201 });
   } catch (error) {
-    console.error('[Booking Create API] Error:', error);
+    logger.error('Booking Create API', 'Error', error);
     return NextResponse.json(
       { success: false, dignity_preserved: true, message_en: 'Internal server error', code: 'INTERNAL_ERROR' },
       { status: 500 }

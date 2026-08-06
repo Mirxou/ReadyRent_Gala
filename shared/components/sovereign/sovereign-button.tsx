@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable react-hooks/static-components */
 
 import * as React from "react";
 import Link from "next/link";
@@ -45,38 +46,44 @@ const SovereignButton = React.forwardRef<HTMLButtonElement, SovereignButtonProps
             xl: "h-24 px-16 text-lg font-black uppercase tracking-[0.4em] rounded-full",
         };
 
-        const Component = React.useMemo(() => href ? motion(Link) : motion.button, [href]);
+        // eslint-disable-next-line react-hooks/static-components
+        const MotionLink = React.useMemo(() => motion(Link), []);
+
+        const sharedProps = {
+            ref,
+            disabled: isLoading || (props as Record<string, unknown>).disabled,
+            className: cn(
+                "relative inline-flex items-center justify-center border-2 transition-all duration-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-sovereign-gold disabled:pointer-events-none disabled:opacity-50 overflow-hidden",
+                variants[variant],
+                sizes[size],
+                className
+            ),
+            whileHover: !isLoading && !(props as Record<string, unknown>).disabled ? { scale: 1.02, y: -2 } : {},
+            whileTap: !isLoading && !(props as Record<string, unknown>).disabled ? { scale: 0.98 } : {},
+            transition: { duration: 0.5, ease: [0.32, 0.72, 0, 1] },
+            ...props,
+        };
+
+        if (href) {
+            return (
+                <MotionLink href={href} {...sharedProps}>
+                    {variant === "primary" && withShimmer && !isLoading && (
+                        <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent z-10" />
+                    )}
+                    {isLoading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : null}
+                    <span className="relative z-20 flex items-center gap-3">{children}</span>
+                </MotionLink>
+            );
+        }
 
         return (
-            <Component
-                ref={ref}
-                href={href}
-                disabled={isLoading || (props as any).disabled}
-                className={cn(
-                    "relative inline-flex items-center justify-center border-2 transition-all duration-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-sovereign-gold disabled:pointer-events-none disabled:opacity-50 overflow-hidden",
-                    variants[variant],
-                    sizes[size],
-                    className
-                )}
-                // "Ethical Motion" - No bounce, just smooth deliberate scale
-                whileHover={!isLoading && !(props as any).disabled ? { scale: 1.02, y: -2 } : {}}
-                whileTap={!isLoading && !(props as any).disabled ? { scale: 0.98 } : {}}
-                transition={{ duration: 0.5, ease: [0.32, 0.72, 0, 1] }} // Slow ease-out
-                {...props}
-            >
-                {/* Shimmer Effect for Primary Actions */}
+            <motion.button {...sharedProps}>
                 {variant === "primary" && withShimmer && !isLoading && (
                     <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent z-10" />
                 )}
-
-                {isLoading ? (
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                ) : null}
-
-                <span className="relative z-20 flex items-center gap-3">
-                    {children}
-                </span>
-            </Component>
+                {isLoading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : null}
+                <span className="relative z-20 flex items-center gap-3">{children}</span>
+            </motion.button>
         );
     }
 );

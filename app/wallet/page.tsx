@@ -28,6 +28,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 type TabKey = 'balance' | 'deposit' | 'transfer';
 type DepositMode = 'deposit' | 'withdraw';
@@ -85,8 +86,8 @@ export default function SovereignWallet() {
         }
         // Calculate escrow total from transactions
         const escrow = (d?.data?.transactions || [])
-          .filter((t: any) => t.type === 'ESCROW_HELD' || t.type === 'escrow_lock')
-          .reduce((sum: number, t: any) => sum + (Number(t.amount) || 0), 0);
+          .filter((t: Record<string, unknown>) => (t.type as string) === 'ESCROW_HELD' || t.type === 'escrow_lock')
+          .reduce((sum: number, t: Record<string, unknown>) => sum + (Number(t.amount as number) || 0), 0);
         setEscrowTotal(escrow);
       })
       .catch(() => {})
@@ -400,7 +401,16 @@ export default function SovereignWallet() {
                             <p className="text-sm text-white/40 leading-relaxed font-light">&ldquo;بناءً على عمليات الشهر الحالي، ارتفعت درجة النزاهة المالية لديك بنسبة 1.2%. أنت الآن مؤهل للحصول على سقف سحب أعلى في بروتوكول الفخامة.&rdquo;</p>
                         </div>
                         <div className="w-full md:w-auto">
-                            <SovereignButton variant="secondary" onClick={() => toast.info('جارٍ تحميل الكشف...')}>تحميل كشف الحساب السيادي</SovereignButton>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span className="inline-block">
+                                    <SovereignButton variant="secondary" className="opacity-60 cursor-not-allowed" disabled>تحميل كشف الحساب السيادي</SovereignButton>
+                                  </span>
+                                </TooltipTrigger>
+                                <TooltipContent><p>قريباً — توليد كشف حساب PDF تلقائي</p></TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
                         </div>
                     </div>
                 </div>

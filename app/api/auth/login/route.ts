@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { authenticateUser, createSession, formatUserResponse } from '@/lib/auth-server';
+import { logger } from '@/lib/logger';
 
 const SEVEN_DAYS = 7 * 24 * 60 * 60;
 
@@ -68,7 +69,7 @@ export async function POST(request: NextRequest) {
 
     return response;
   } catch (error) {
-    console.error('Login error:', error);
+    logger.error('Auth/Login', 'Login error', error);
     return NextResponse.json(
       {
         success: false,

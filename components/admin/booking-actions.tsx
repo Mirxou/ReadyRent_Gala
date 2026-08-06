@@ -5,8 +5,8 @@ import { Check, X } from 'lucide-react';
 
 interface Booking {
   id: string;
-  user: any;
-  product: any;
+  user: Record<string, unknown>;
+  product: Record<string, unknown>;
   start_date: string;
   end_date: string;
   total_price: number;

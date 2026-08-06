@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
+import { logger } from '@/lib/logger';
 
 // ═══════════════════════════════════════════════════════════════
 // POST /api/verification/submit — Submit face photo for verification
@@ -102,7 +103,7 @@ export async function POST(request: Request) {
       },
     });
   } catch (error) {
-    console.error('[POST /api/verification/submit] Error:', error);
+    logger.error('POST /api/verification/submit', 'Error', error);
     return NextResponse.json(
       {
         success: false,

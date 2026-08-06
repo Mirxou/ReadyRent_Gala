@@ -2,9 +2,7 @@
 
 import { useBookingStore } from '@/lib/hooks/use-booking-store';
 import { motion } from 'framer-motion';
-import { Receipt, CreditCard, Calendar, Package, ArrowRightLeft } from 'lucide-react';
-import { format } from 'date-fns';
-import { ar } from 'date-fns/locale';
+import { Receipt, Calendar, Package, ArrowRightLeft } from 'lucide-react';
 
 export function SummaryStep() {
   const { formData } = useBookingStore();

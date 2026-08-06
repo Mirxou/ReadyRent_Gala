@@ -15,6 +15,16 @@ const eslintConfig = defineConfig([
     // behavior_layer is an experimental “sandbox” area; exclude from CI lint gate.
     "behavior_layer/**",
   ]),
+  // Allow underscore-prefixed unused variables (conventional pattern)
+  {
+    rules: {
+      '@typescript-eslint/no-unused-vars': ['error', {
+        varsIgnorePattern: '^_',
+        argsIgnorePattern: '^_',
+        caughtErrorsIgnorePattern: '^_',
+      }],
+    },
+  },
 ]);
 
 export default eslintConfig;

@@ -70,8 +70,8 @@ export default function ResetPasswordPage() {
       setTimeout(() => {
         router.push('/login');
       }, 2000);
-    } catch (error: any) {
-      toast.error(error.response?.data?.error || 'فشل إعادة تعيين كلمة المرور');
+    } catch (error: unknown) {
+      toast.error((error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'فشل إعادة تعيين كلمة المرور');
     } finally {
       setIsLoading(false);
     }

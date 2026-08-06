@@ -12,7 +12,6 @@ import {
   Star,
   MapPin,
   ArrowLeft,
-  Store,
   BadgeCheck,
   Package,
 } from 'lucide-react';
@@ -78,13 +77,13 @@ function HeroSection() {
 function FeaturedVendors() {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
-  const [vendors, setVendors] = useState<any[]>([]);
+  const [vendors, setVendors] = useState<Record<string, unknown>[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     api
       .get('vendors/vendors/')
-      .then((res: any) => {
+      .then((res: Record<string, unknown>) => {
         const data = Array.isArray(res.data?.results) ? res.data.results : Array.isArray(res.data) ? res.data : [];
         setVendors(data);
       })
@@ -130,7 +129,7 @@ function FeaturedVendors() {
           </motion.div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
-            {vendors.map((vendor: any, i: number) => (
+            {vendors.map((vendor: Record<string, unknown>, i: number) => (
               <motion.div
                 key={vendor.id}
                 initial={{ opacity: 0, y: 30 }}
@@ -207,13 +206,13 @@ function FeaturedVendors() {
 function FeaturedArtisans() {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
-  const [artisans, setArtisans] = useState<any[]>([]);
+  const [artisans, setArtisans] = useState<Record<string, unknown>[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     api
       .get('artisans/artisans/')
-      .then((res: any) => {
+      .then((res: Record<string, unknown>) => {
         const data = Array.isArray(res.data?.results) ? res.data.results : Array.isArray(res.data) ? res.data : [];
         setArtisans(data);
       })
@@ -261,7 +260,7 @@ function FeaturedArtisans() {
           </motion.div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 md:gap-6">
-            {featured.map((artisan: any, i: number) => (
+            {featured.map((artisan: Record<string, unknown>, i: number) => (
               <motion.div
                 key={artisan.id}
                 initial={{ opacity: 0, y: 30 }}

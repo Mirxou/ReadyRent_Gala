@@ -5,6 +5,7 @@
 
 import { NextResponse } from 'next/server';
 import { getSessionFromRequest, destroySession } from '@/lib/auth-server';
+import { logger } from '@/lib/logger';
 
 export async function POST(request: Request) {
   try {
@@ -35,7 +36,7 @@ export async function POST(request: Request) {
 
     return response;
   } catch (error) {
-    console.error('Logout error:', error);
+    logger.error('Auth/Logout', 'Logout error', error);
     return NextResponse.json(
       {
         success: false,

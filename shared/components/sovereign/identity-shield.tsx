@@ -3,7 +3,7 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-import { ShieldCheck, ShieldAlert, BadgeCheck, Loader2 } from "lucide-react";
+import { ShieldAlert, BadgeCheck, Loader2 } from "lucide-react";
 
 /**
  * IdentityShield - The Badge of Honor.

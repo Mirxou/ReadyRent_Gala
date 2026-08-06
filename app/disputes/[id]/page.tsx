@@ -34,7 +34,7 @@ const STATUS_LABELS: Record<string, string> = {
   'closed': 'القضية مغلقة',
 };
 
-function buildFallbackStages(dispute: any): DisputeHistoryStage[] {
+function buildFallbackStages(dispute: Record<string, unknown>): DisputeHistoryStage[] {
   return [
     {
       label_ar: 'إنشاء النزاع',
@@ -58,7 +58,7 @@ export default function DisputeDetailPage() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [dispute, setDispute] = useState<any | null>(null);
+  const [dispute, setDispute] = useState<Record<string, unknown> | null>(null);
   const [receiptStages, setReceiptStages] = useState<DisputeHistoryStage[]>([]);
 
   const isResolved = dispute?.status === 'resolved' || dispute?.status === 'closed';

@@ -4,26 +4,21 @@ import { useQuery } from '@tanstack/react-query';
 import { productsApi } from '@/lib/api';
 import { 
   Heart, 
-  Sparkles, 
   ShieldCheck, 
-  Clock, 
   MapPin, 
-  ChevronRight, 
   ArrowRight,
   Gem,
   History,
-  Activity,
   Zap,
-  ShoppingBag,
   Loader2
 } from 'lucide-react';
 import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
 import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
 import { Badge } from '@/components/ui/badge';
-import { cn, formatNumber } from '@/lib/utils';
+import { formatNumber } from '@/lib/utils';
 import { toast } from 'sonner';
-import { motion, AnimatePresence } from 'framer-motion';
-import { SovereignGlow, SovereignSparkle } from '@/shared/components/sovereign/sovereign-sparkle';
+
+import { SovereignGlow } from '@/shared/components/sovereign/sovereign-sparkle';
 import { useRouter } from 'next/navigation';
 
 export default function WishlistPage() {
@@ -69,7 +64,7 @@ export default function WishlistPage() {
         <div className="lg:col-span-8">
            {wishlist.length > 0 ? (
              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                {wishlist.map((item: any, i) => (
+                {wishlist.map((item: Record<string, unknown>, i) => (
                   <SovereignGlow key={item.id} color={i % 2 === 0 ? "gold" : "blue"}>
                      <GlassPanel className="p-4 group relative h-full flex flex-col justify-between overflow-hidden" gradientBorder>
                          
@@ -146,7 +141,7 @@ export default function WishlistPage() {
                     <p className="text-xs font-black uppercase text-sovereign-gold opacity-80 tracking-widest">فرص متاحة (Hot Registry)</p>
                     <p className="text-sm italic text-muted-foreground">
                       {wishlist.length > 0
-                        ? `يوجد ${wishlist.filter((w: any) => w.is_available).length} قطع من أمنياتك متاحة حالياً للإيجار.`
+                        ? `يوجد ${wishlist.filter((w: Record<string, unknown>) => (w.is_available as boolean)).length} قطع من أمنياتك متاحة حالياً للإيجار.`
                         : 'أضف منتجات لقائمة أمنياتك لتتبع توافرها.'}
                     </p>
                  </div>

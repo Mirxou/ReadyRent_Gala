@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { logger } from '@/lib/logger';
 
 // ═══════════════════════════════════════════════════════════════
 // GET /api/bundles/[id]/calculate-price — Calculate bundle price
@@ -81,7 +82,7 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error('[Bundle Price Calc API] Error:', error);
+    logger.error('Bundle Price Calc API', 'Error', error);
     return NextResponse.json({ success: false, message_en: 'Error calculating bundle price', code: 'INTERNAL_ERROR' }, { status: 500 });
   }
 }

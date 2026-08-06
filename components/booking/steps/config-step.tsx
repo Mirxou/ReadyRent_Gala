@@ -2,7 +2,6 @@
 
 import { useBookingStore } from '@/lib/hooks/use-booking-store';
 import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
 import { motion } from 'framer-motion';
 import { ShieldCheck, Zap, Truck, Sparkles } from 'lucide-react';

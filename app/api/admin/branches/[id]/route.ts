@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
+import { logger } from '@/lib/logger';
 
 // ═══════════════════════════════════════════════════════════════
 // PATCH /api/admin/branches/[id] — Update a branch (admin/staff only)
@@ -66,7 +67,7 @@ export async function PATCH(
 
     return NextResponse.json({ success: true, dignity_preserved: true, data });
   } catch (error) {
-    console.error('[Admin Branch API] Update Error:', error);
+    logger.error('Admin Branch API', 'Update Error', error);
     return NextResponse.json({ success: false, message_en: 'Failed to update branch' }, { status: 500 });
   }
 }
@@ -84,7 +85,7 @@ export async function DELETE(
     await db.branch.delete({ where: { id } });
     return NextResponse.json({ success: true, dignity_preserved: true, data: { id } });
   } catch (error) {
-    console.error('[Admin Branch API] Delete Error:', error);
+    logger.error('Admin Branch API', 'Delete Error', error);
     return NextResponse.json({ success: false, message_en: 'Failed to delete branch' }, { status: 500 });
   }
 }

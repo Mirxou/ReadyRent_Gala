@@ -42,7 +42,7 @@ export default function ProductsPage() {
           </div>
 
           <p className="text-2xl text-muted-foreground max-w-3xl mx-auto italic font-light opacity-80 leading-relaxed">
-             "اكتشف نخبة الأصول المختارة بعناية لتناسب أرقى المناسبات في الجزائر. كل قطعة هنا هي ميثاق ثقة بحد ذاتها."
+             {`"اكتشف نخبة الأصول المختارة بعناية لتناسب أرقى المناسبات في الجزائر. كل قطعة هنا هي ميثاق ثقة بحد ذاتها."`}
           </p>
 
           <div className="flex justify-center gap-4 text-[10px] font-black uppercase tracking-[0.5em] text-muted-foreground opacity-40">

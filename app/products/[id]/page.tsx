@@ -1,17 +1,14 @@
 "use client";
 
 import React, { useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { productsApi, bookingsApi, depositApi, authApi, reviewsApi } from '@/lib/api';
+import { productsApi, bookingsApi, depositApi, reviewsApi } from '@/lib/api';
 import { useAuthStore } from '@/lib/store';
 import { 
   ShieldCheck, 
   Star, 
-  MapPin, 
   Sparkles, 
-  LockKeyhole, 
-  CheckCircle2, 
   Info,
   Clock,
   Palette,
@@ -19,7 +16,7 @@ import {
   Ruler,
   ChevronLeft
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
 import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
 import { Badge } from '@/components/ui/badge';
@@ -76,12 +73,12 @@ export default function ProductDetailsPage() {
   });
 
   const createBookingMutation = useMutation({
-    mutationFn: (data: any) => bookingsApi.create(data),
+    mutationFn: (data: Record<string, unknown>) => bookingsApi.create(data),
     onSuccess: () => {
       toast.success('تم إبرام العقد السيادي بنجاح (Contract Sealed)');
       setIsCheckoutOpen(false);
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast.error(error.response?.data?.error || 'فشل في توثيق العقد');
     },
   });
@@ -133,15 +130,15 @@ export default function ProductDetailsPage() {
   const isSovereign = depositData ? !depositData.deposit_required : (trustScore >= 80);
   const isVerified = depositData?.is_verified ?? user?.is_verified ?? false;
   const PLACEHOLDER = '/placeholder-product.jpg';
-  const primaryImage = product.images?.find((img: any) => img.is_primary || img.is_main)?.image
-    || product.images?.find((img: any) => img.is_primary || img.is_main)?.url
+  const primaryImage = product.images?.find((img: Record<string, unknown>) => img.is_primary || img.is_main)?.image
+    || product.images?.find((img: Record<string, unknown>) => img.is_primary || img.is_main)?.url
     || product.images?.[0]?.image
     || product.images?.[0]?.url
     || product.image
     || product.primary_image
     || PLACEHOLDER;
   const safeImage = primaryImage || PLACEHOLDER;
-  const lightboxImages = product.images?.map((img: any) => ({ src: img.image || img.url || PLACEHOLDER })) || [{ src: safeImage }];
+  const lightboxImages = product.images?.map((img: Record<string, unknown>) => ({ src: (img.image as string) || (img.url as string) || PLACEHOLDER })) || [{ src: safeImage }];
 
   return (
     <div className="relative min-h-screen pb-20 bg-background overflow-hidden text-right" dir="rtl">
@@ -190,7 +187,7 @@ export default function ProductDetailsPage() {
             {/* Gallery Fluid Scroller */}
             {product.images?.length > 1 && (
               <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar">
-                {product.images.map((img: any, idx: number) => (
+                {product.images.map((img: Record<string, unknown>, idx: number) => (
                   <motion.div 
                     key={img.id} 
                     whileHover={{ y: -8 }}

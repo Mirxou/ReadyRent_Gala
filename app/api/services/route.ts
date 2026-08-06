@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { logger } from '@/lib/logger';
 
 // ═══════════════════════════════════════════════════════════════════
 // Services API — Public browsing of LocalGuideService
@@ -63,7 +64,7 @@ export async function GET(request: NextRequest) {
       data,
     });
   } catch (error) {
-    console.error('[Services API] Error:', error);
+    logger.error('Services API', 'Error', error);
     return NextResponse.json(
       {
         success: false,

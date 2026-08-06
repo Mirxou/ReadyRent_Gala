@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
+import { logger } from '@/lib/logger';
 
 // ═══════════════════════════════════════════════════════════════
 // DELETE /api/products/wishlist/[id] — Remove from wishlist
@@ -36,7 +37,7 @@ export async function DELETE(
     data: { id },
   });
   } catch (error) {
-    console.error('[Wishlist API] Error:', error);
+    logger.error('Wishlist API', 'Error', error);
     return NextResponse.json(
       { success: false, dignity_preserved: true, message: 'Internal error' },
       { status: 500 }

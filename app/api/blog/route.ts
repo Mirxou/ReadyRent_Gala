@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
+import { logger } from '@/lib/logger';
 
 // ═══════════════════════════════════════════════════════════════════
 // Blog API — Public list + Admin create
@@ -68,7 +69,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('[Blog API] Error:', error);
+    logger.error('Blog API', 'Error', error);
     return errorResponse(
       'حدث خطأ أثناء جلب المقالات',
       'An error occurred while fetching blog posts',
@@ -143,7 +144,7 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    console.error('[Blog API] Create error:', error);
+    logger.error('Blog API', 'Create error', error);
     return errorResponse(
       'حدث خطأ أثناء إنشاء المقال',
       'An error occurred while creating the blog post',

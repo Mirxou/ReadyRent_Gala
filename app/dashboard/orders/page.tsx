@@ -22,7 +22,6 @@ import { SovereignButton } from '@/shared/components/sovereign/sovereign-button'
 import Link from 'next/link';
 import { cn, formatNumber } from '@/lib/utils';
 import { bookingsApi } from '@/lib/api';
-import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 
@@ -44,9 +43,9 @@ export default function OrdersPage() {
       queryFn: () => bookingsApi.getAll().then(res => res.data),
     });
 
-    const filteredBookings = (bookings || []).filter((b: any) => {
+    const filteredBookings = (bookings || []).filter((b: Record<string, unknown>) => {
       // Tab filter
-      if (activeTab !== 'all' && b.status !== activeTab) return false;
+      if (activeTab !== 'all' && (b.status as string) !== activeTab) return false;
       // Search filter
       if (searchQuery.trim()) {
         const q = searchQuery.trim().toLowerCase();
@@ -135,7 +134,7 @@ export default function OrdersPage() {
             {/* Bookings List */}
             {!isLoading && filteredBookings.length > 0 && (
             <div className="grid gap-8">
-                {filteredBookings.map((order: any) => {
+                {filteredBookings.map((order: Record<string, unknown>) => {
                   const cfg = statusConfig[order.status] || statusConfig.pending;
                   return (
                     <GlassPanel key={order.id} className="p-8 group hover:border-sovereign-gold/20 transition-all duration-500 overflow-hidden relative" gradientBorder>
@@ -207,11 +206,11 @@ export default function OrdersPage() {
                                         </SovereignButton>
                                         
                                         {order.status === 'pending' ? (
-                                            <SovereignButton variant="primary" size="sm" className="flex-1 sm:flex-none gap-2 px-10 shadow-lg shadow-sovereign-gold/10" withShimmer onClick={() => toast.info('جارٍ إبرام العقد...')}>
+                                            <SovereignButton variant="primary" size="sm" className="flex-1 sm:flex-none gap-2 px-10 shadow-lg shadow-sovereign-gold/10" withShimmer onClick={() => router.push(`/dashboard/orders/${order.id}`)}>
                                                 إبرام العقد
                                             </SovereignButton>
                                         ) : (
-                                            <SovereignButton variant="secondary" size="sm" className="flex-1 sm:flex-none gap-2 px-6" onClick={() => toast.info('جارٍ التنفيذ...')}>
+                                            <SovereignButton variant="secondary" size="sm" className="flex-1 sm:flex-none gap-2 px-6" onClick={() => router.push(`/dashboard/orders/${order.id}`)}>
                                                 <Scale className="w-4 h-4 text-sovereign-gold" />
                                                 إجراء تحميلي
                                             </SovereignButton>

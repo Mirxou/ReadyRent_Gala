@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
+import { logger } from '@/lib/logger';
 
 // ═══════════════════════════════════════════════════════════════
 // GET /api/admin/bookings/stats — Booking statistics (admin/staff)
@@ -53,7 +54,7 @@ export async function GET(request: Request) {
       },
     });
   } catch (error) {
-    console.error('[Admin Booking Stats API] Error:', error);
+    logger.error('Admin Booking Stats API', 'Error', error);
     return NextResponse.json({ success: false, message_en: 'Error fetching booking stats', code: 'INTERNAL_ERROR' }, { status: 500 });
   }
 }

@@ -2,21 +2,16 @@
 import { formatNumber } from '@/lib/utils';
 
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ShieldAlert, 
   ShieldCheck, 
   Database, 
   Activity, 
   Lock, 
-  Search, 
-  ExternalLink,
-  ChevronRight,
   TrendingUp,
-  Fingerprint
 } from 'lucide-react';
 import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
-import { SovereignGlow, SovereignSparkle } from '@/shared/components/sovereign/sovereign-sparkle';
+import { SovereignSparkle } from '@/shared/components/sovereign/sovereign-sparkle';
 import { SovereignHeartbeat } from '@/shared/components/sovereign/sovereign-heartbeat';
 import { SovereignAuditTrail } from '@/shared/components/sovereign/sovereign-audit-trail';
 import { DignifiedLoader } from '@/shared/components/sovereign/dignified-loader';
@@ -36,14 +31,14 @@ interface EvidenceEntry {
   action: string;
   actor_email: string;
   timestamp: string;
-  metadata: any;
+  metadata: Record<string, unknown>;
   hash: string;
   previous_hash: string;
 }
 
 export default function SovereignDashboard() {
   const [stats, setStats] = useState<EyeStats | null>(null);
-  const [ticker, setTicker] = useState<EvidenceEntry[]>([]);
+  const [, setTicker] = useState<EvidenceEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -124,7 +119,7 @@ export default function SovereignDashboard() {
                     </div>
                 </div>
                 <h1 className="text-6xl font-black italic tracking-tighter">توازن <span className="text-sovereign-gold">السيادة.</span></h1>
-                <p className="text-muted-foreground text-xl font-light italic">"مرصد الحقيقة الفوري لنظام STANDARD.Rent — حيث تلتقي الشفافية بالسيادة."</p>
+                <p className="text-muted-foreground text-xl font-light italic">{`"مرصد الحقيقة الفوري لنظام STANDARD.Rent — حيث تلتقي الشفافية بالسيادة."`}</p>
             </div>
 
             <GlassPanel className="p-8 flex items-center gap-6 rounded-3xl" gradientBorder>
@@ -187,7 +182,7 @@ export default function SovereignDashboard() {
                                 <span className="text-red-500 text-[10px] font-black uppercase tracking-widest">مرتفع المخاطر</span>
                                 <ShieldAlert className="w-4 h-4 text-red-500" aria-hidden="true" />
                             </div>
-                            <p className="text-sm font-light italic leading-relaxed text-red-100">"تم قفل معاملة مشبوهة بمحفظة #WALT-029: خرق السلوكية المالية."</p>
+                            <p className="text-sm font-light italic leading-relaxed text-red-100">{`"تم قفل معاملة مشبوهة بمحفظة #WALT-029: خرق السلوكية المالية."`}</p>
                         </div>
                     </div>
                 </GlassPanel>

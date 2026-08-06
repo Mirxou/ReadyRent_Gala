@@ -18,13 +18,13 @@ export function WaitlistButton({ productId }: WaitlistButtonProps) {
   const [added, setAdded] = useState(false);
 
   const addToWaitlistMutation = useMutation({
-    mutationFn: (data: any) => bookingsApi.addToWaitlist(data),
+    mutationFn: (data: Record<string, unknown>) => bookingsApi.addToWaitlist(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['waitlist'] });
       toast.success('تم إضافة المنتج إلى لائحة الانتظار');
       setAdded(true);
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast.error(error.response?.data?.error || 'حدث خطأ');
     },
   });

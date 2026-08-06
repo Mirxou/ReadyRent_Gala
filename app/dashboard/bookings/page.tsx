@@ -2,10 +2,10 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { bookingsApi } from '@/lib/api';
-import { Calendar, Clock, Package, CheckCircle, XCircle } from 'lucide-react';
+import { Calendar, Clock, Package } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
@@ -131,7 +131,7 @@ export default function BookingsPage() {
         </motion.div>
 
         <div className="grid grid-cols-1 gap-6">
-        {bookings.map((booking: any) => {
+        {bookings.map((booking: Record<string, unknown>) => {
           const primaryImage = booking.product?.primary_image || 
                                booking.product_image || 
                                booking.product?.images?.[0]?.image || 

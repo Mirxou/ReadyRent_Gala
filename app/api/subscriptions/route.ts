@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { logger } from '@/lib/logger';
 
 // ═══════════════════════════════════════════════════════════════════
 // Subscription Plans API — Full database integration
@@ -28,7 +29,7 @@ export async function GET() {
       data,
     });
   } catch (error) {
-    console.error('[Subscriptions API] Error:', error);
+    logger.error('Subscriptions API', 'Error', error);
     return NextResponse.json(
       {
         success: false,

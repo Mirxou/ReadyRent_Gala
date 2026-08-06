@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { disputesApi } from '@/lib/api';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -31,7 +31,6 @@ const APPEAL_REASONS = [
 
 export default function AppealFilingPage() {
   const params = useParams();
-  const router = useRouter();
   const rawId = params?.id;
   const disputeId = Array.isArray(rawId) ? rawId[0] : rawId;
 
@@ -67,7 +66,7 @@ export default function AppealFilingPage() {
       setStep('success');
       toast.success('تم تقديم الاستئناف بنجاح');
     },
-    onError: (err: any) => {
+    onError: (err: unknown) => {
       toast.error(err?.message || 'فشل تقديم الاستئناف');
     },
   });

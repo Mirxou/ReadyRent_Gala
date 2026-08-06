@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { api } from '@/lib/api';
-import { CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 
 interface ProductVariant {
   id: number;
@@ -53,7 +53,7 @@ export function VariantSelector({ productId, onSelect, selectedVariantId }: Vari
     try {
       const response = await api.get(`/products/${productId}/variants/`);
       setVariants(response.data.results || response.data);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error loading variants:', error);
     } finally {
       setLoading(false);

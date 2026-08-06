@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Share2, Facebook, Twitter, MessageCircle, Instagram } from 'lucide-react';
 import { toast } from 'sonner';
-import { cn } from '@/lib/utils';
+
 
 interface ShareButtonProps {
   url?: string;
@@ -20,7 +20,6 @@ export function ShareButton({
   url,
   title = 'STANDARD.Rent',
   description = 'اكتشفي أجمل فساتين المناسبات',
-  image,
   className,
   variant = 'outline',
   size = 'default',
@@ -65,7 +64,7 @@ export function ShareButton({
           url: shareUrl,
         });
         toast.success('تمت المشاركة بنجاح');
-      } catch (error) {
+      } catch {
         // User cancelled
       }
     } else {

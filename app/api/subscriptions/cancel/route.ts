@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
+import { logger } from '@/lib/logger';
 
 // ═══════════════════════════════════════════════════════════════
 // POST /api/subscriptions/cancel — Cancel an active subscription
@@ -74,7 +75,7 @@ export async function POST(request: Request) {
       },
     });
   } catch (error) {
-    console.error('[Subscription Cancel API] Error:', error);
+    logger.error('Subscription Cancel API', 'Error', error);
     return NextResponse.json(
       {
         success: false,

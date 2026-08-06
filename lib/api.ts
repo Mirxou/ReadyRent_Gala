@@ -121,7 +121,7 @@ export const authApi = {
     apiFetch('auth/profile'),
   passwordResetRequest: (email: string) =>
     apiFetch('auth/forgot-password', { method: 'POST', body: { email } }),
-  passwordResetConfirm: (token: string, password: string, passwordConfirm: string) =>
+  passwordResetConfirm: (token: string, password: string, confirmPassword: string) =>
     apiFetch('auth/reset-password', { method: 'POST', body: { token, password, confirmPassword } }),
 };
 
@@ -271,7 +271,7 @@ export const servicesApi = {
 export const contractsApi = {
   getById: (id: string) => apiFetch(`contracts/${id}`),
   getByBookingId: (bookingId: string) => apiFetch(`contracts?booking=${bookingId}`),
-  sign: (contractId: string, ipAddress?: string) =>
+  sign: (contractId: string) =>
     apiFetch(`contracts/${contractId}/sign`, { method: 'POST' }),
 };
 

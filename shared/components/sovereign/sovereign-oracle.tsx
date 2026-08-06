@@ -1,5 +1,5 @@
 'use client';
 
-export function SovereignOracle({ className = '' }: { className?: string }) {
+export function SovereignOracle(_props: { className?: string }) {
   return null;
 }

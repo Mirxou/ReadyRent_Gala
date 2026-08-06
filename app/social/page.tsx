@@ -78,7 +78,7 @@ export default function SocialPage() {
             <DignifiedLoader />
           ) : Array.isArray(feed) && feed.length > 0 ? (
             <div className="space-y-4">
-              {feed.map((item: any, i: number) => (
+              {feed.map((item: Record<string, unknown>, i: number) => (
                 <div key={item.id || i} className="flex items-center gap-4 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors">
                   <div className="w-10 h-10 rounded-full bg-sovereign-gold/20 flex items-center justify-center text-sovereign-gold font-bold">
                     {(item.userName || '?')[0]}

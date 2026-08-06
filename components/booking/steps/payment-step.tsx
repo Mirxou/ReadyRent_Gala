@@ -5,14 +5,13 @@ import React, { useRef, useState } from 'react';
 import { useBookingStore } from '@/lib/hooks/use-booking-store';
 import { Button } from '@/components/ui/button';
 import { PenTool, ShieldCheck, CheckCircle2, Wallet, Smartphone } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 export function PaymentStep() {
   const { formData, updateFormData } = useBookingStore();
   const [isSigned, setIsSigned] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
-  const [signatureData, setSignatureData] = useState<string | null>(null);
+  const [_signatureData, setSignatureData] = useState<string | null>(null);
 
   // Digital Signature Logic — canvas-based
   const getPos = (e: React.MouseEvent | React.TouchEvent) => {

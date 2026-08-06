@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
+import { logger } from '@/lib/logger';
 
 // ═══════════════════════════════════════════════════════════════
 // GET /api/products/admin — List products for admin management
@@ -79,7 +80,7 @@ export async function GET(request: NextRequest) {
       pagination: { page, limit, total, pages: Math.ceil(total / limit) },
     });
   } catch (error) {
-    console.error('[Admin Products API] Error:', error);
+    logger.error('Admin Products API', 'Error', error);
     return NextResponse.json({ success: false, message_en: 'Error fetching products', code: 'INTERNAL_ERROR' }, { status: 500 });
   }
 }
@@ -136,7 +137,7 @@ export async function POST(request: NextRequest) {
       data: { id: product.id, name: product.name, name_ar: product.nameAr, slug: product.slug },
     }, { status: 201 });
   } catch (error) {
-    console.error('[Admin Product Create API] Error:', error);
+    logger.error('Admin Product Create API', 'Error', error);
     return NextResponse.json({ success: false, message_en: 'Error creating product', code: 'INTERNAL_ERROR' }, { status: 500 });
   }
 }

@@ -1,7 +1,5 @@
 'use client';
 
-import { useState } from 'react';
-
 interface SovereignCalendarProps {
   onDateSelect?: (date: string) => void;
   selectedDate?: string;

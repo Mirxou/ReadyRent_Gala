@@ -31,13 +31,13 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import Link from 'next/link';
 import { format } from 'date-fns';
-import { ar } from 'date-fns/locale';
 import { cn, formatNumber } from '@/lib/utils';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 export default function BookingDetailsPage() {
   const { id } = useParams();
@@ -59,20 +59,20 @@ export default function BookingDetailsPage() {
       toast.success('تم تحديث حالة الحجز بنجاح');
       queryClient.invalidateQueries({ queryKey: ['booking', id] });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast.error(error?.data?.error || 'فشل في تحديث حالة الحجز');
     },
   });
 
   const createDisputeMutation = useMutation({
-    mutationFn: (data: any) => disputesApi.createDispute(data),
+    mutationFn: (data: Record<string, unknown>) => disputesApi.createDispute(data),
     onSuccess: () => {
       toast.success('تم رفع النزاع للتحكيم السيادي (Dispute Lodged)');
       setIsDisputeModalOpen(false);
       router.push('/dashboard/disputes');
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.error || 'فشل في رفع النزاع');
+    onError: (error: unknown) => {
+      toast.error((error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'فشل في رفع النزاع');
     }
   });
 
@@ -141,9 +141,18 @@ export default function BookingDetailsPage() {
             </h1>
         </div>
         <div className="flex gap-4 flex-wrap">
-            <SovereignButton variant="secondary" size="sm" className="gap-2" onClick={() => toast.info('جارٍ تحميل نسخة PDF...')}>
-                <Download className="w-4 h-4" /> تحميل نسخة PDF
-            </SovereignButton>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="inline-block">
+                    <SovereignButton variant="secondary" size="sm" className="gap-2 opacity-60 cursor-not-allowed" disabled>
+                      <Download className="w-4 h-4" /> تحميل نسخة PDF
+                    </SovereignButton>
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent><p>قريباً — توليد PDF تلقائي للعقود</p></TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             {isOwner && transition && (
               <SovereignButton
                 variant="secondary"
@@ -327,9 +336,18 @@ export default function BookingDetailsPage() {
                             <p className="text-sm font-black">إشعار الاسترجاع المالي (Automatic Refund)</p>
                             <p className="text-xs text-muted-foreground">تمت إعادة مبلغ {formatNumber(booking.total_price * 0.2)} DA إلى محفظتكم السيادية.</p>
                         </div>
-                        <SovereignButton variant="secondary" size="sm" className="mt-4 md:mt-0 gap-2 border-emerald-500/20 text-emerald-500" onClick={() => toast.info('جارٍ تحميل الفاتورة...')}>
-                             تحميل الفاتورة النهائية
-                        </SovereignButton>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="inline-block">
+                                <SovereignButton variant="secondary" size="sm" className="mt-4 md:mt-0 gap-2 border-emerald-500/20 text-emerald-500 opacity-60 cursor-not-allowed" disabled>
+                                  تحميل الفاتورة النهائية
+                                </SovereignButton>
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent><p>قريباً — توليد فواتير PDF تلقائية</p></TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                     </div>
                 </GlassPanel>
             )}

@@ -57,8 +57,8 @@ export function BaridiMobForm({
       } else {
         toast.error(response.data.error || 'فشل بدء عملية الدفع');
       }
-    } catch (error: any) {
-      toast.error(error.response?.data?.error || 'حدث خطأ أثناء بدء عملية الدفع');
+    } catch (error: unknown) {
+      toast.error((error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'حدث خطأ أثناء بدء عملية الدفع');
     } finally {
       setIsLoading(false);
     }
@@ -87,8 +87,8 @@ export function BaridiMobForm({
       } else {
         toast.error(response.data.error || 'فشل التحقق من رمز OTP');
       }
-    } catch (error: any) {
-      toast.error(error.response?.data?.error || 'حدث خطأ أثناء التحقق من رمز OTP');
+    } catch (error: unknown) {
+      toast.error((error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'حدث خطأ أثناء التحقق من رمز OTP');
     } finally {
       setIsLoading(false);
     }

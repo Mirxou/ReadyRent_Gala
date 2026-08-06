@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+
 import {
   Table,
   TableBody,
@@ -10,14 +10,12 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Check, X, Edit, MoreHorizontal } from 'lucide-react';
 import { BookingActions } from './booking-actions';
 
 interface Booking {
   id: string;
-  user: any;
-  product: any;
+  user: Record<string, unknown>;
+  product: Record<string, unknown>;
   start_date: string;
   end_date: string;
   total_price: number;

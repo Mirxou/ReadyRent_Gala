@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
+import { logger } from '@/lib/logger';
 
 // ═══════════════════════════════════════════════════════════════
 // PATCH /api/notifications/read-all — Mark all notifications as read
@@ -21,7 +22,7 @@ export async function PATCH(request: NextRequest) {
     data: { updated: true },
   });
   } catch (error) {
-    console.error('[Notifications Read All] Error:', error);
+    logger.error('Notifications Read All', 'Error', error);
     return NextResponse.json(
       { success: false, dignity_preserved: true, message_en: 'Error marking all notifications as read', code: 'INTERNAL_ERROR' },
       { status: 500 }

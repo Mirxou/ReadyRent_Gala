@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
+import { logger } from '@/lib/logger';
 
 // ═══════════════════════════════════════════════════════════════
 // GET /api/verification/status — Get current user's verification status
@@ -77,7 +78,7 @@ export async function GET(request: Request) {
       },
     });
   } catch (error) {
-    console.error('[GET /api/verification/status] Error:', error);
+    logger.error('GET /api/verification/status', 'Error', error);
     return NextResponse.json(
       {
         success: false,

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
+import { logger } from '@/lib/logger';
 
 // ═══════════════════════════════════════════════════════════════
 // GET /api/notifications — List user notifications (newest first)
@@ -31,7 +32,7 @@ export async function GET(request: Request) {
 
   return NextResponse.json({ success: true, dignity_preserved: true, data });
   } catch (error) {
-    console.error('[Notifications GET] Error:', error);
+    logger.error('Notifications GET', 'Error', error);
     return NextResponse.json(
       { success: false, dignity_preserved: true, message_en: 'Error fetching notifications', code: 'INTERNAL_ERROR' },
       { status: 500 }

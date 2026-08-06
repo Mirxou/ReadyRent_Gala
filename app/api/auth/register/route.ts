@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { hashPassword, createSession, formatUserResponse } from '@/lib/auth-server';
 import { registerSchema, validateBody } from '@/lib/validators';
+import { logger } from '@/lib/logger';
 
 const SEVEN_DAYS = 7 * 24 * 60 * 60;
 
@@ -23,7 +24,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { email, password, confirmPassword, username, first_name, last_name, phone, role } = vResult.data;
+    const { email, password, username, first_name, last_name, phone, role } = vResult.data;
 
     // Check if email already exists
     const existingUser = await db.user.findUnique({ where: { email } });
@@ -99,7 +100,7 @@ export async function POST(request: NextRequest) {
 
     return response;
   } catch (error) {
-    console.error('Registration error:', error);
+    logger.error('Auth/Register', 'Registration error', error);
     return NextResponse.json(
       {
         success: false,

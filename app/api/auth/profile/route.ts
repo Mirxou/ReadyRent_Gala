@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getSessionFromRequest, formatUserResponse } from '@/lib/auth-server';
+import { logger } from '@/lib/logger';
 
 export async function GET(request: Request) {
   try {
@@ -53,7 +54,7 @@ export async function GET(request: Request) {
       { status: 200 }
     );
   } catch (error) {
-    console.error('Profile error:', error);
+    logger.error('Auth/Profile', 'Profile error', error);
     return NextResponse.json(
       {
         success: false,
@@ -126,7 +127,7 @@ export async function PUT(request: NextRequest) {
       data: formatUserResponse(updatedUser),
     });
   } catch (error) {
-    console.error('[Profile Update] Error:', error);
+    logger.error('Profile Update', 'Error', error);
     return NextResponse.json(
       {
         success: false,

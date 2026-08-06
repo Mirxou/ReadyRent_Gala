@@ -19,7 +19,7 @@ export default function RegisterPage() {
 
   const { register, handleSubmit } = useForm();
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: Record<string, string>) => {
     setIsLoading(true);
     try {
       // Map form fields to API field names
@@ -43,7 +43,7 @@ export default function RegisterPage() {
       } else {
         router.push('/login');
       }
-    } catch (error: any) {
+    } catch (_error) {
       toast.error('فشل إنشاء الهوية. تحقق من المدخلات.');
     } finally {
       setIsLoading(false);

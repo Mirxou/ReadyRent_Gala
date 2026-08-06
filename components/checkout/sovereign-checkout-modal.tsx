@@ -1,11 +1,10 @@
 "use client";
 
 import * as React from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { ShieldCheck, Calendar, Wallet, PenTool, CheckCircle2, AlertTriangle, ArrowRight, Loader2, Sparkles, Lock } from 'lucide-react';
-import { cn, formatNumber } from '@/lib/utils';
-import { toast } from 'sonner';
+import { ShieldCheck, PenTool, CheckCircle2, ArrowRight, Lock } from 'lucide-react';
+import { formatNumber } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
 import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
@@ -15,7 +14,7 @@ import { BaridiMobForm } from '@/components/payment/baridimob-form';
 interface SovereignCheckoutModalProps {
     isOpen: boolean;
     onClose: () => void;
-    product: any;
+    product: Record<string, unknown>;
     startDate: Date | null;
     endDate: Date | null;
     totalPrice: number;
@@ -34,12 +33,11 @@ export function SovereignCheckoutModal({
     isProcessing
 }: SovereignCheckoutModalProps) {
     const [step, setStep] = React.useState<'review' | 'sign' | 'sealing' | 'sealed'>('review');
-    const [signature, setSignature] = React.useState<string | null>(null);
     const canvasRef = React.useRef<HTMLCanvasElement>(null);
     const [isDrawing, setIsDrawing] = React.useState(false);
 
     // Canvas Logic (Minimal for Masterpiece)
-    const startDrawing = (e: any) => {
+    const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
         const canvas = canvasRef.current;
         if (!canvas) return;
         const ctx = canvas.getContext('2d');
@@ -56,7 +54,7 @@ export function SovereignCheckoutModal({
         setIsDrawing(true);
     };
 
-    const draw = (e: any) => {
+    const draw = (e: React.MouseEvent<HTMLCanvasElement>) => {
         if (!isDrawing) return;
         const canvas = canvasRef.current;
         if (!canvas) return;
@@ -84,7 +82,7 @@ export function SovereignCheckoutModal({
     };
 
     return (
-        <Dialog open={isOpen} onOpenChange={(open) => !isProcessing && onClose()}>
+        <Dialog open={isOpen} onOpenChange={(_open) => !isProcessing && onClose()}>
             <DialogContent className="max-w-4xl bg-background border-none p-0 overflow-hidden rounded-[3rem] shadow-[0_0_100px_rgba(184,159,103,0.1)]" dir="rtl">
                 
                 {/* Header Context */}
@@ -136,7 +134,7 @@ export function SovereignCheckoutModal({
                                             <Lock className="w-4 h-4 text-sovereign-gold" /> بروتوكول الحماية
                                         </h4>
                                         <p className="text-xs text-muted-foreground leading-relaxed italic">
-                                            "بإبرام هذا العقد، تلتزم ReadyRent بحماية الأصل خلال فترة الحجز، وتجميد مبلغ الضمان في حساب الضمان السيادي (Escrow) لضمان حقوق كافة الأطراف."
+                                            {`"بإبرام هذا العقد، تلتزم ReadyRent بحماية الأصل خلال فترة الحجز، وتجميد مبلغ الضمان في حساب الضمان السيادي (Escrow) لضمان حقوق كافة الأطراف."`}
                                         </p>
                                         <GlassPanel className="p-6 bg-emerald-500/5 border-emerald-500/10">
                                             <div className="flex items-center gap-4">

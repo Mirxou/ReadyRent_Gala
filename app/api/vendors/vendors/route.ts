@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { logger } from '@/lib/logger';
 
 // ═══════════════════════════════════════════════════════════════════
 // Vendors API — Full database integration
@@ -69,7 +70,7 @@ export async function GET(request: NextRequest) {
       data,
     });
   } catch (error) {
-    console.error('[Vendors API] Error:', error);
+    logger.error('Vendors API', 'Error', error);
     return NextResponse.json(
       {
         success: false,

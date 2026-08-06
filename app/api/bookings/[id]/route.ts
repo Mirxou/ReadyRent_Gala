@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
+import { logger } from '@/lib/logger';
 
 // ═══════════════════════════════════════════════════════════════
 // GET /api/bookings/[id] — Get a single booking with full details
@@ -149,7 +150,7 @@ export async function GET(
 
     return NextResponse.json({ success: true, dignity_preserved: true, data });
   } catch (error) {
-    console.error('[Booking Detail API] Error:', error);
+    logger.error('Booking Detail API', 'Error', error);
     return NextResponse.json(
       {
         success: false,
@@ -245,7 +246,7 @@ export async function PATCH(
 
     return NextResponse.json({ success: true, dignity_preserved: true, data });
   } catch (error) {
-    console.error('[Booking Update API] Error:', error);
+    logger.error('Booking Update API', 'Error', error);
     return NextResponse.json(
       {
         success: false,

@@ -1,4 +1,5 @@
 'use client';
+/* eslint-disable react-hooks/set-state-in-effect */
 
 import Link from 'next/link';
 import { useAuthStore } from '@/lib/store';
@@ -79,6 +80,7 @@ export function Navbar() {
   const { scrollYProgress } = useScroll();
 
   // setMounted: standard Next.js hydration pattern — React compiler warning is a false positive
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     setMounted(true);
     const handleScroll = () => {

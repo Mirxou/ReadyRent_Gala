@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
+import { logger } from '@/lib/logger';
 
 // ═══════════════════════════════════════════════════════════════
 // GET /api/disputes/[id]/history — Get dispute timeline (messages)
@@ -93,7 +94,7 @@ export async function GET(
 
     return NextResponse.json({ success: true, dignity_preserved: true, data: timeline });
   } catch (error) {
-    console.error('[Dispute History API] Error:', error);
+    logger.error('Dispute History API', 'Error', error);
     return NextResponse.json(
       {
         success: false,

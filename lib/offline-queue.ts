@@ -4,7 +4,7 @@ interface OfflineAction {
     id?: number;
     url: string;
     method: string;
-    body: any;
+    body: Record<string, unknown>;
     timestamp: number;
     status: 'PENDING' | 'SYNCING' | 'FAILED';
 }
@@ -32,7 +32,7 @@ export class OfflineQueue {
         }
     }
 
-    async enqueueAction(url: string, method: string, body: any) {
+    async enqueueAction(url: string, method: string, body: Record<string, unknown>) {
         if (!this.dbPromise) return;
         const db = await this.dbPromise;
         return db.add(STORE_NAME, {

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
+import { logger } from '@/lib/logger';
 
 // ═══════════════════════════════════════════════════════════════
 // GET /api/bookings/[id]/cancellation-policy — Cancellation policy
@@ -70,7 +71,7 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error('[Cancellation Policy API] Error:', error);
+    logger.error('Cancellation Policy API', 'Error', error);
     return NextResponse.json({ success: false, message_en: 'Error fetching cancellation policy', code: 'INTERNAL_ERROR' }, { status: 500 });
   }
 }

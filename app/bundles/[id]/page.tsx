@@ -56,7 +56,7 @@ export default function BundleDetailPage() {
       toast.success('تم حجز الباقة بنجاح!');
       router.push('/dashboard/orders');
     },
-    onError: (err: any) => {
+    onError: (err: unknown) => {
       toast.error(err?.message || 'حدث خطأ أثناء الحجز');
     },
   });
@@ -293,7 +293,7 @@ export default function BundleDetailPage() {
                 منتجات الباقة ({items.length})
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {items.map((item: any, idx: number) => {
+                {items.map((item: Record<string, unknown>, idx: number) => {
                   const product = item.product || {};
                   return (
                     <Link key={item.id} href={`/products/${item.productId || product.id}`}>

@@ -29,7 +29,6 @@ export function BookingWizard() {
     nextStep, 
     prevStep, 
     formData, 
-    resetWizard 
   } = useBookingStore();
   
   const [isSubmitting, setIsSubmitting] = React.useState(false);
@@ -93,7 +92,7 @@ export function BookingWizard() {
       toast.success('تمت العملية بنجاح!', {
         description: 'تم توثيق عقدك وتحصين الدفع في الضمان.',
       });
-    } catch (error) {
+    } catch {
       toast.error('حدث خطأ أثناء إتمام العملية', {
         description: 'يرجى التحقق من تفاصيل الدفع والمحاولة مرة أخرى.',
       });

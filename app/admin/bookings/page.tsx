@@ -76,7 +76,7 @@ export default function AdminBookingsPage() {
               <CardTitle className="text-sm font-medium">قيد الانتظار</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{bookings?.filter((b: any) => b.status === 'pending').length || 0}</div>
+              <div className="text-2xl font-bold">{bookings?.filter((b: Record<string, unknown>) => (b.status as string) === 'pending').length || 0}</div>
             </CardContent>
           </Card>
           <Card>
@@ -84,7 +84,7 @@ export default function AdminBookingsPage() {
               <CardTitle className="text-sm font-medium">مؤكد</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{bookings?.filter((b: any) => b.status === 'confirmed').length || 0}</div>
+              <div className="text-2xl font-bold">{bookings?.filter((b: Record<string, unknown>) => (b.status as string) === 'confirmed').length || 0}</div>
             </CardContent>
           </Card>
           <Card>

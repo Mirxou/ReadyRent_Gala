@@ -20,7 +20,7 @@ export default function LoginPage() {
 
   const { register, handleSubmit } = useForm();
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: Record<string, string>) => {
     setIsLoading(true);
     try {
       const response = await authApi.login(data.email, data.password);
@@ -32,7 +32,7 @@ export default function LoginPage() {
       setAuth(response.data.user);
       toast.success('تم الدخول بنجاح');
       router.push('/');
-    } catch (error: any) {
+    } catch (_error) {
       toast.error('بيانات الدخول غير صحيحة');
     } finally {
       setIsLoading(false);

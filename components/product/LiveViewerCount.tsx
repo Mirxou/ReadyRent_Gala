@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
-import { Users, Flame } from 'lucide-react';
+import { Flame } from 'lucide-react';
 
 interface LiveViewerCountProps {
     productId: number;
@@ -17,7 +17,7 @@ export const LiveViewerCount = ({ productId }: LiveViewerCountProps) => {
         const sendHeartbeat = async () => {
             try {
                 await api.post(`/analytics/live/activity/${productId}/`);
-            } catch (err) {
+            } catch (_err) {
                 // Silent fail
             }
         };
@@ -29,7 +29,7 @@ export const LiveViewerCount = ({ productId }: LiveViewerCountProps) => {
                 if (isMounted && res.data.active_viewers) {
                     setViewerCount(res.data.active_viewers);
                 }
-            } catch (err) {
+            } catch (_err) {
                 console.error("Failed to fetch live count");
             }
         };

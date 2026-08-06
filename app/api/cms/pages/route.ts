@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
+import { logger } from '@/lib/logger';
 
 // ═══════════════════════════════════════════════════════════════════
 // CMS Pages API — Public list + Admin create
@@ -52,7 +53,7 @@ export async function GET(request: NextRequest) {
       })),
     });
   } catch (error) {
-    console.error('[CMS Pages API] Error:', error);
+    logger.error('CMS Pages API', 'Error', error);
     return errorResponse(
       'حدث خطأ أثناء جلب الصفحات',
       'An error occurred while fetching CMS pages',
@@ -129,7 +130,7 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    console.error('[CMS Pages API] POST Error:', error);
+    logger.error('CMS Pages API', 'POST Error', error);
     return errorResponse(
       'حدث خطأ أثناء إنشاء الصفحة',
       'An error occurred while creating the page',

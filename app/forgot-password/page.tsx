@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -14,7 +13,6 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 
 export default function ForgotPasswordPage() {
-  const router = useRouter();
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
@@ -32,7 +30,7 @@ export default function ForgotPasswordPage() {
       await authApi.passwordResetRequest(email);
       setEmailSent(true);
       toast.success('تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني');
-    } catch (error: any) {
+    } catch {
       // Don't show error - API returns success even if email doesn't exist for security
       setEmailSent(true);
     } finally {

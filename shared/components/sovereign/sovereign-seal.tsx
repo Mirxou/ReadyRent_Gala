@@ -11,7 +11,7 @@ interface SovereignSealProps {
   className?: string;
 }
 
-export function SovereignSeal({ verified = true, type = 'vendor', refId, animate = false, size = 'sm', className = '' }: SovereignSealProps) {
+export function SovereignSeal({ verified = true, type = 'vendor', animate = false, size = 'sm', className = '' }: SovereignSealProps) {
   if (!verified) return null;
 
   const sizeMap = { sm: 'h-4 w-4', md: 'h-5 w-5', lg: 'h-6 w-6' };

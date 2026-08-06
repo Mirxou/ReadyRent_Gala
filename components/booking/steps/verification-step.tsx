@@ -1,13 +1,9 @@
 'use client';
 
-import { useBookingStore } from '@/lib/hooks/use-booking-store';
 import { motion } from 'framer-motion';
-import { Landmark, Fingerprint, CheckCircle2, AlertCircle, ShieldCheck } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Landmark, Fingerprint, CheckCircle2, ShieldCheck } from 'lucide-react';
 
 export function VerificationStep() {
-  const { formData } = useBookingStore();
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -69,7 +65,7 @@ export function VerificationStep() {
             <span>الضمان القضائي الجزائري</span>
           </div>
           <p className="text-indigo-800/70 text-sm leading-relaxed">
-            هذا الحجز محمي بموجب العقد الرقمي الموحد. في حال نشوب خلاف، يتم الفصل فيه آلياً عبر نظام "الفصل السريع" (Fast-Track Dispute) المدمج في المنصة.
+            {`هذا الحجز محمي بموجب العقد الرقمي الموحد. في حال نشوب خلاف، يتم الفصل فيه آلياً عبر نظام "الفصل السريع" (Fast-Track Dispute) المدمج في المنصة.`}
           </p>
         </div>
       </div>

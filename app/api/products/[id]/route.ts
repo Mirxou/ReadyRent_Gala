@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { logger } from '@/lib/logger';
 // ═══════════════════════════════════════════════════════════════════
 // Product Detail API — Get product by id or slug
 // ═══════════════════════════════════════════════════════════════════
@@ -147,7 +148,7 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error('[Product Detail API] Error:', error);
+    logger.error('Product Detail API', 'Error', error);
     return errorResponse(
       'حدث خطأ أثناء جلب تفاصيل المنتج',
       'An error occurred while fetching product details',

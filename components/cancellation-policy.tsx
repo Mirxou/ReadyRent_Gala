@@ -1,7 +1,7 @@
 'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+
 import { AlertCircle, Clock, DollarSign } from 'lucide-react';
 
 interface CancellationPolicyProps {

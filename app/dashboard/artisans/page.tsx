@@ -21,8 +21,7 @@ import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
 import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { motion } from 'framer-motion';
-import { SovereignGlow, SovereignSparkle } from '@/shared/components/sovereign/sovereign-sparkle';
+import { SovereignGlow } from '@/shared/components/sovereign/sovereign-sparkle';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -162,7 +161,7 @@ export default function ArtisansPage() {
 
                       {artisan.bio && (
                         <div className="p-4 bg-white/5 rounded-2xl border border-white/5 italic text-xs leading-relaxed opacity-80 min-h-[64px]">
-                          "{artisan.bio}"
+                          {`"${artisan.bio}"`}
                         </div>
                       )}
 

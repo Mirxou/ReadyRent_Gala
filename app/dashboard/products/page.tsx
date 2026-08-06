@@ -68,7 +68,7 @@ export default function ProductsPage() {
     // Show first products from API
     const myProducts = (products || []).slice(0, 5);
 
-    const filteredProducts = myProducts.filter((product: any) =>
+    const filteredProducts = myProducts.filter((product: Record<string, unknown>) =>
         (product.name_ar || product.name || '').includes(searchTerm)
     );
 
@@ -143,7 +143,7 @@ export default function ProductsPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {filteredProducts.map((product: any) => (
+                            {filteredProducts.map((product: Record<string, unknown>) => (
                                 <TableRow key={product.id} className="group hover:bg-white/5 transition-colors">
                                     <TableCell className="font-medium">
                                         <div className="flex items-center gap-3">

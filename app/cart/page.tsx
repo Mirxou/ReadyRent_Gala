@@ -63,9 +63,9 @@ export default function CartPage() {
 
       // Optimistically update to the new value
       if (previousCart) {
-        queryClient.setQueryData(['cart'], (old: any) => ({
+        queryClient.setQueryData(['cart'], (old: Record<string, unknown>) => ({
           ...old,
-          items: old.items.filter((item: any) => item.id !== itemId),
+          items: (old.items as Record<string, unknown>[]).filter((item: Record<string, unknown>) => item.id !== itemId),
         }));
       }
 
@@ -107,7 +107,7 @@ export default function CartPage() {
         router.push('/checkout');
       }
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast.error(error?.message || 'حدث خطأ أثناء إنشاء الحجز');
     },
   });
@@ -124,12 +124,12 @@ export default function CartPage() {
   }
 
   const items = cart?.items || [];
-  const totalPrice = items.reduce((sum: number, item: any) => {
+  const totalPrice = items.reduce((sum: number, item: Record<string, unknown>) => {
     const days = Math.ceil(
       (new Date(item.end_date).getTime() - new Date(item.start_date).getTime()) /
       (1000 * 60 * 60 * 24)
     ) + 1;
-    return sum + (item.product.price_per_day * days * item.quantity);
+    return sum + (item.product.price_per_day * days * (item.quantity as number));
   }, 0);
 
   // Get first item for packaging display
@@ -192,7 +192,7 @@ export default function CartPage() {
             <SafeWrapper><BundleSelector startDate={null} endDate={null} /></SafeWrapper>
 
             <AnimatePresence mode="popLayout">
-              {items.map((item: any, index: number) => {
+              {items.map((item: Record<string, unknown>, index: number) => {
                 const days = Math.ceil(
                   (new Date(item.end_date).getTime() - new Date(item.start_date).getTime()) /
                   (1000 * 60 * 60 * 24)
@@ -286,7 +286,7 @@ export default function CartPage() {
                 <h2 className="text-3xl font-bold bg-gradient-to-r from-sovereign-gold to-sovereign-gold bg-clip-text text-transparent">ملخص الجمال</h2>
 
                 <div className="space-y-4">
-                  {items.map((item: any) => {
+                  {items.map((item: Record<string, unknown>) => {
                     const days = Math.ceil(
                       (new Date(item.end_date).getTime() - new Date(item.start_date).getTime()) /
                       (1000 * 60 * 60 * 24)

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
+import { logger } from '@/lib/logger';
 
 // ═══════════════════════════════════════════════════════════════
 // PATCH /api/admin/users/[id] — Update user (admin/staff only)
@@ -71,7 +72,7 @@ export async function PATCH(
       },
     });
   } catch (error) {
-    console.error('[Admin User Update API] Error:', error);
+    logger.error('Admin User Update API', 'Error', error);
     return NextResponse.json({ success: false, message_en: 'Error updating user', code: 'INTERNAL_ERROR' }, { status: 500 });
   }
 }

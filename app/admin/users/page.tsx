@@ -71,12 +71,12 @@ export default function AdminUsersPage() {
     return null;
   }
 
-  const filteredUsers = users?.filter((u: any) => {
+  const filteredUsers = users?.filter((u: Record<string, unknown>) => {
     if (search) {
       const searchLower = search.toLowerCase();
       return (
-        u.email?.toLowerCase().includes(searchLower) ||
-        u.username?.toLowerCase().includes(searchLower)
+        (u.email as string)?.toLowerCase().includes(searchLower) ||
+        (u.username as string)?.toLowerCase().includes(searchLower)
       );
     }
     return true;
@@ -146,19 +146,19 @@ export default function AdminUsersPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredUsers.map((u: any) => (
-                <TableRow key={u.id}>
-                  <TableCell className="font-medium text-xs font-mono">{u.id.slice(0, 8)}</TableCell>
-                  <TableCell>{u.email}</TableCell>
-                  <TableCell>{u.username}</TableCell>
+              {filteredUsers.map((u: Record<string, unknown>) => (
+                <TableRow key={u.id as string}>
+                  <TableCell className="font-medium text-xs font-mono">{(u.id as string).slice(0, 8)}</TableCell>
+                  <TableCell>{u.email as string}</TableCell>
+                  <TableCell>{u.username as string}</TableCell>
                   <TableCell>
                     <Select
-                      value={u.role}
-                      onValueChange={(value) => handleRoleChange(u.id, value)}
-                      disabled={isUpdating(u.id) || u.id === user?.id}
+                      value={u.role as string}
+                      onValueChange={(value) => handleRoleChange(u.id as string, value)}
+                      disabled={isUpdating(u.id as string) || (u.id as string) === user?.id}
                     >
                       <SelectTrigger size="sm" className="w-24">
-                        {isUpdating(u.id) ? (
+                        {isUpdating(u.id as string) ? (
                           <Loader2 className="size-3.5 animate-spin" />
                         ) : (
                           <SelectValue />
@@ -177,7 +177,7 @@ export default function AdminUsersPage() {
                       <Badge variant={u.is_active !== false ? 'default' : 'destructive'}>
                         {u.is_active !== false ? 'نشط' : 'محظور'}
                       </Badge>
-                      {u.is_verified && (
+                      {(u.is_verified as boolean) && (
                         <Badge variant="outline" className="text-emerald-600 border-emerald-300">
                           مؤكد
                         </Badge>
@@ -185,17 +185,17 @@ export default function AdminUsersPage() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    {new Date(u.created_at).toLocaleDateString('ar-EG')}
+                    {new Date(u.created_at as string).toLocaleDateString('ar-EG')}
                   </TableCell>
                   <TableCell>
                     <Button
                       variant={u.is_active !== false ? 'outline' : 'default'}
                       size="sm"
-                      disabled={isUpdating(u.id) || u.id === user?.id}
-                      onClick={() => handleToggleBan(u.id, u.is_active !== false)}
+                      disabled={isUpdating(u.id as string) || (u.id as string) === user?.id}
+                      onClick={() => handleToggleBan(u.id as string, u.is_active !== false)}
                       className="gap-1.5"
                     >
-                      {isUpdating(u.id) ? (
+                      {isUpdating(u.id as string) ? (
                         <Loader2 className="size-3.5 animate-spin" />
                       ) : u.is_active !== false ? (
                         <Ban className="size-3.5" />

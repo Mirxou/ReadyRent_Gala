@@ -182,7 +182,6 @@ export default function VerificationPage() {
 
   // Auth store
   const { user, isAuthenticated } = useAuthStore();
-  const is_verified = user?.is_verified || false;
 
   // ──── Camera Functions ────
   const startCamera = useCallback(async () => {

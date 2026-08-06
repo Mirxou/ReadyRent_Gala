@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { logger } from '@/lib/logger';
 
 // ═══════════════════════════════════════════════════════════════
 // POST /api/contact — Submit a contact message (no auth required)
@@ -52,7 +53,7 @@ export async function POST(request: Request) {
       },
     });
   } catch (error) {
-    console.error('[Contact API] Error:', error);
+    logger.error('Contact API', 'Error', error);
     return NextResponse.json(
       {
         success: false,

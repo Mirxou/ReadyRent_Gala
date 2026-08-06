@@ -11,7 +11,6 @@ import {
   Scale,
   Loader2,
   Sparkles,
-  MessageSquare,
   RefreshCw,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -243,7 +242,6 @@ export function AIDisputeAssistant({
           sendMessage={sendMessage}
           isLoading={isLoading}
           isInitializing={isInitializing}
-          resetChat={resetChat}
           bottomRef={bottomRef}
           inputRef={inputRef}
         />
@@ -328,7 +326,6 @@ export function AIDisputeAssistant({
               sendMessage={sendMessage}
               isLoading={isLoading}
               isInitializing={isInitializing}
-              resetChat={resetChat}
               bottomRef={bottomRef}
               inputRef={inputRef}
             />
@@ -347,7 +344,6 @@ function ChatBody({
   sendMessage,
   isLoading,
   isInitializing,
-  resetChat,
   bottomRef,
   inputRef,
 }: {
@@ -357,7 +353,6 @@ function ChatBody({
   sendMessage: (text: string) => void;
   isLoading: boolean;
   isInitializing: boolean;
-  resetChat: () => void;
   bottomRef: React.RefObject<HTMLDivElement | null>;
   inputRef: React.RefObject<HTMLInputElement | null>;
 }) {

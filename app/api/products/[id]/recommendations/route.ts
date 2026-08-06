@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { logger } from '@/lib/logger';
 
 // ═══════════════════════════════════════════════════════════════════
 // Product Recommendations API
@@ -148,7 +149,7 @@ export async function GET(
       data: recommendations,
     });
   } catch (error) {
-    console.error('[Recommendations API] Error:', error);
+    logger.error('Recommendations API', 'Error', error);
     return NextResponse.json(
       { success: false, error: 'حدث خطأ أثناء جلب التوصيات' },
       { status: 500 }

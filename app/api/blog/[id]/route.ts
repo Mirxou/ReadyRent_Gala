@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { logger } from '@/lib/logger';
 
 // ═══════════════════════════════════════════════════════════════════
 // Blog Single Post API — Public read by id or slug
@@ -60,7 +61,7 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error('[Blog Post API] Error:', error);
+    logger.error('Blog Post API', 'Error', error);
     return errorResponse(
       'حدث خطأ أثناء جلب المقال',
       'An error occurred while fetching the blog post',

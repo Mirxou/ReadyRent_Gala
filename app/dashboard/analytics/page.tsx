@@ -8,8 +8,6 @@ import {
   Zap,
   Compass,
   Activity,
-  BrainCircuit,
-  PieChart,
   Fingerprint,
   Users,
   History,

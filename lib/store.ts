@@ -54,7 +54,7 @@ export const useAuthStore = create<AuthState>()(
         try {
           const { data } = await authApi.me();
           set({ user: data, isAuthenticated: true });
-        } catch (error) {
+        } catch {
           set({ user: null, isAuthenticated: false });
         }
       }

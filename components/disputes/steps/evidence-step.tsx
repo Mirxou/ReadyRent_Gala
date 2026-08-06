@@ -4,7 +4,7 @@ import * as React from 'react';
 import { useDisputeStore } from '@/lib/hooks/use-dispute-store';
 import { disputesApi } from '@/lib/api';
 import { Button } from '@/components/ui/button';
-import { Upload, X, FileText, Image as ImageIcon, Video, ShieldCheck } from 'lucide-react';
+import { Upload, X, Image as ImageIcon, Video, ShieldCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
@@ -41,7 +41,7 @@ export function EvidenceStep({ disputeId }: { disputeId?: number }) {
       };
       setFormData({ evidence: [...formData.evidence, evidence] });
       toast.success(`تم رفع ${file.name} بنجاح.`);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Evidence upload failed:', err);
       toast.error(err?.message ?? 'فشل رفع الدليل. تحقق من اتصالك.');
     } finally {

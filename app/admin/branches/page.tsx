@@ -54,10 +54,10 @@ export default function BranchesPage() {
     try {
       const response = await api.get('/admin/branches/');
       setBranches(response.data.results || response.data);
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: 'خطأ',
-        description: error.response?.data?.error || 'فشل تحميل الفروع',
+        description: (error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'فشل تحميل الفروع',
         variant: 'destructive',
       });
     } finally {
@@ -111,10 +111,10 @@ export default function BranchesPage() {
         is_active: true,
       });
       loadBranches();
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: 'خطأ',
-        description: error.response?.data?.error || 'فشل حفظ الفرع',
+        description: (error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'فشل حفظ الفرع',
         variant: 'destructive',
       });
     }
@@ -148,10 +148,10 @@ export default function BranchesPage() {
         description: 'تم حذف الفرع بنجاح',
       });
       loadBranches();
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: 'خطأ',
-        description: error.response?.data?.error || 'فشل حذف الفرع',
+        description: (error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'فشل حذف الفرع',
         variant: 'destructive',
       });
     }

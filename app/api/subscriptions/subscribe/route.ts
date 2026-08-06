@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
+import { logger } from '@/lib/logger';
 
 // ═══════════════════════════════════════════════════════════════
 // POST /api/subscriptions/subscribe — Subscribe to a plan
@@ -161,7 +162,7 @@ export async function POST(request: Request) {
       },
     });
   } catch (error) {
-    console.error('[Subscription Subscribe API] Error:', error);
+    logger.error('Subscription Subscribe API', 'Error', error);
     return NextResponse.json(
       {
         success: false,

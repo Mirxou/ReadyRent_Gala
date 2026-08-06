@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
+import { logger } from '@/lib/logger';
 
 // ═══════════════════════════════════════════════════════════════
 // POST /api/disputes/[id]/messages — Add a message to a dispute
@@ -154,7 +155,7 @@ export async function POST(
 
     return NextResponse.json({ success: true, dignity_preserved: true, data }, { status: 201 });
   } catch (error) {
-    console.error('[Dispute Message API] Error:', error);
+    logger.error('Dispute Message API', 'Error', error);
     return NextResponse.json(
       {
         success: false,

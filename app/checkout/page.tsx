@@ -6,12 +6,12 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+
 import { BaridiMobForm } from '@/components/payment/baridimob-form';
 import { BankCardForm } from '@/components/payment/bank-card-form';
 import { paymentsApi, bookingsApi } from '@/lib/api';
 import { useAuthStore } from '@/lib/store';
-import { toast } from 'sonner';
+
 import { ArrowLeft, CreditCard, Smartphone, Loader2, MapPin } from 'lucide-react';
 import { ParticleField } from '@/components/ui/particle-field';
 import { motion } from 'framer-motion';
@@ -170,7 +170,7 @@ export default function CheckoutPage() {
                   </CardHeader>
                   <CardContent>
                     <div className="grid gap-4">
-                      {paymentMethods?.map((method: any) => (
+                      {paymentMethods?.map((method: Record<string, unknown>) => (
                         <Button
                           key={method.id}
                           variant="outline"

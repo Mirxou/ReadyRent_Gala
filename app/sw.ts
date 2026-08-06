@@ -23,7 +23,7 @@ const serwist = new Serwist({
         ...defaultCache,
         {
             // Custom API Caching with Background Sync for Mutations
-            urlPattern: ({ url }: any) => url.pathname.startsWith("/api/"),
+            urlPattern: ({ url }: { url: { pathname: string } }) => url.pathname.startsWith("/api/"),
             handler: "NetworkFirst",
             options: {
                 cacheName: "api-cache",
@@ -37,8 +37,8 @@ const serwist = new Serwist({
                     }),
                 ],
             },
-        } as any,
-    ] as any,
+        } as never,
+    ] as never,
 });
 
 serwist.addEventListeners();

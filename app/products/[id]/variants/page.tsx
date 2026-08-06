@@ -6,7 +6,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { VariantSelector } from '@/components/variant-selector';
 import { api } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Edit, Trash2 } from 'lucide-react';
@@ -51,10 +50,10 @@ export default function ProductVariantsPage() {
     try {
       const response = await api.get(`/products/${params.id}/variants/`);
       setVariants(response.data.results || response.data);
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: 'خطأ',
-        description: error.response?.data?.error || 'فشل تحميل المتغيرات',
+        description: (error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'فشل تحميل المتغيرات',
         variant: 'destructive',
       });
     } finally {
@@ -106,10 +105,10 @@ export default function ProductVariantsPage() {
         is_active: true,
       });
       loadVariants();
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: 'خطأ',
-        description: error.response?.data?.error || 'فشل حفظ المتغير',
+        description: (error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'فشل حفظ المتغير',
         variant: 'destructive',
       });
     }
@@ -139,10 +138,10 @@ export default function ProductVariantsPage() {
         description: 'تم حذف المتغير بنجاح',
       });
       loadVariants();
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: 'خطأ',
-        description: error.response?.data?.error || 'فشل حذف المتغير',
+        description: (error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'فشل حذف المتغير',
         variant: 'destructive',
       });
     }

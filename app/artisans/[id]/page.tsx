@@ -23,12 +23,12 @@ export default function ArtisanDetailPage() {
 
   const { data: artisan, isLoading } = useQuery({
     queryKey: ['artisan', artisanId],
-    queryFn: () => fetch('/api/artisans/artisans?id=' + artisanId).then(r => r.json()).then(d => { const arr = Array.isArray(d) ? d : (d.results || d.data || []); return arr.find((a: any) => String(a.id) === artisanId) || null; }),
+    queryFn: () => fetch('/api/artisans/artisans?id=' + artisanId).then(r => r.json()).then(d => { const arr = Array.isArray(d) ? d : (d.results || d.data || []); return arr.find((a: Record<string, unknown>) => String(a.id) === artisanId) || null; }),
   });
 
   const { data: reviews } = useQuery({
     queryKey: ['artisan-reviews', artisanId],
-    queryFn: () => fetch('/api/artisans/artisans?id=' + artisanId).then(r => r.json()).then(d => { const arr = Array.isArray(d) ? d : (d.results || d.data || []); return arr.find((a: any) => String(a.id) === artisanId) || null; }).then(a => a?.reviews || []),
+    queryFn: () => fetch('/api/artisans/artisans?id=' + artisanId).then(r => r.json()).then(d => { const arr = Array.isArray(d) ? d : (d.results || d.data || []); return arr.find((a: Record<string, unknown>) => String(a.id) === artisanId) || null; }).then(a => a?.reviews || []),
     enabled: !!artisanId,
   });
 
@@ -65,9 +65,9 @@ export default function ArtisanDetailPage() {
     other: 'أخرى',
   };
 
-  const lightboxImages = portfolioItems.map((item: any) => ({
-    src: item.image,
-    alt: item.title_ar || item.title,
+  const lightboxImages = portfolioItems.map((item: Record<string, unknown>) => ({
+    src: (item.image as string),
+    alt: (item.title_ar as string) || (item.title as string) || '',
   }));
 
   return (
@@ -141,9 +141,9 @@ export default function ArtisanDetailPage() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {portfolioItems.map((item: any, index: number) => (
+                  {portfolioItems.map((item: Record<string, unknown>, index: number) => (
                     <div
-                      key={item.id}
+                      key={item.id as string}
                       className="relative aspect-square overflow-hidden rounded-lg cursor-pointer hover:opacity-90 transition-opacity group"
                       onClick={() => {
                         setLightboxIndex(index);
@@ -151,12 +151,12 @@ export default function ArtisanDetailPage() {
                       }}
                     >
                       <Image
-                        src={item.image}
-                        alt={item.title_ar || item.title || 'معرض أعمال'}
+                        src={item.image as string}
+                        alt={(item.title_ar as string) || (item.title as string) || 'معرض أعمال'}
                         fill
                         className="object-cover group-hover:scale-105 transition-transform"
                       />
-                      {item.is_featured && (
+                      {(item.is_featured as boolean) && (
                         <Badge className="absolute top-2 left-2">مميز</Badge>
                       )}
                     </div>
@@ -186,19 +186,19 @@ export default function ArtisanDetailPage() {
             <CardContent>
               {reviewsList.length > 0 ? (
                 <div className="space-y-4">
-                  {reviewsList.map((review: any) => (
-                    <div key={review.id} className="border-b pb-4 last:border-0">
+                  {reviewsList.map((review: Record<string, unknown>) => (
+                    <div key={review.id as string} className="border-b pb-4 last:border-0">
                       <div className="flex items-start justify-between mb-2">
                         <div>
-                          <p className="font-semibold">{review.user?.username || review.reviewer_name}</p>
+                          <p className="font-semibold">{(review.user as Record<string, Record<string, string>>)?.username || (review.reviewer_name as string)}</p>
                           <div className="flex items-center gap-2 mt-1">
-                            <RatingStars rating={review.rating} size="sm" />
+                            <RatingStars rating={review.rating as number} size="sm" />
                             <span className="text-xs text-muted-foreground">
-                              {new Date(review.created_at).toLocaleDateString('ar-EG')}
+                              {new Date(review.created_at as string).toLocaleDateString('ar-EG')}
                             </span>
                           </div>
                         </div>
-                        {review.is_verified && (
+                        {(review.is_verified as boolean) && (
                           <Badge variant="outline" className="text-xs">
                             ✓ موثق
                           </Badge>
@@ -206,7 +206,7 @@ export default function ArtisanDetailPage() {
                       </div>
                       {review.comment && (
                         <p className="text-sm text-muted-foreground mt-2">
-                          {review.comment}
+                          {review.comment as string}
                         </p>
                       )}
                     </div>
