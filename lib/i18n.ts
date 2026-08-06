@@ -1,5 +1,5 @@
 /**
- * Simple i18n implementation for STANDARD.Rent
+ * i18n implementation for STANDARD.Rent
  * Supports Arabic (ar), French (fr), and English (en)
  */
 
@@ -11,10 +11,10 @@ export const languages: { code: Language; name: string; nativeName: string; dir:
   { code: 'en', name: 'English', nativeName: 'English', dir: 'ltr' },
 ];
 
-// Simple translations object
+// Complete translations object for STANDARD.Rent
 export const translations: Record<Language, Record<string, string>> = {
   ar: {
-    // Navigation
+    // ==================== Navigation ====================
     'nav.home': 'الرئيسية',
     'nav.products': 'المنتجات',
     'nav.about': 'من نحن',
@@ -23,8 +23,15 @@ export const translations: Record<Language, Record<string, string>> = {
     'nav.register': 'إنشاء حساب',
     'nav.dashboard': 'لوحة التحكم',
     'nav.logout': 'تسجيل الخروج',
-    
-    // Common
+    'nav.rentals': 'الإيجارات',
+    'nav.vendors': 'البائعون',
+    'nav.services': 'الخدمات',
+    'nav.bundles': 'الباقات',
+    'nav.wallet': 'المحفظة',
+    'nav.disputes': 'النزاعات',
+    'nav.verification': 'التوثيق',
+
+    // ==================== Common ====================
     'common.loading': 'جاري التحميل...',
     'common.error': 'حدث خطأ',
     'common.success': 'تم بنجاح',
@@ -36,8 +43,16 @@ export const translations: Record<Language, Record<string, string>> = {
     'common.search': 'بحث',
     'common.filter': 'تصفية',
     'common.sort': 'ترتيب',
-    
-    // Products
+    'common.confirm': 'تأكيد',
+    'common.back': 'رجوع',
+    'common.next': 'التالي',
+    'common.submit': 'إرسال',
+    'common.close': 'إغلاق',
+    'common.noData': 'لا توجد بيانات',
+    'common.retry': 'إعادة المحاولة',
+    'common.viewAll': 'عرض الكل',
+
+    // ==================== Products ====================
     'products.title': 'المنتجات',
     'products.addToCart': 'إضافة إلى السلة',
     'products.viewDetails': 'عرض التفاصيل',
@@ -46,21 +61,111 @@ export const translations: Record<Language, Record<string, string>> = {
     'products.rating': 'التقييم',
     'products.available': 'متوفر',
     'products.unavailable': 'غير متوفر',
-    
-    // Cart
+    'products.rentNow': 'استأجر الآن',
+    'products.deposit': 'الوديعة',
+    'products.size': 'المقاس',
+    'products.color': 'اللون',
+    'products.category': 'الفئة',
+    'products.search': 'البحث عن منتجات',
+    'products.noResults': 'لا توجد نتائج',
+    'products.create': 'إضافة منتج',
+    'products.editProduct': 'تعديل المنتج',
+
+    // ==================== Cart ====================
     'cart.title': 'السلة',
     'cart.empty': 'السلة فارغة',
     'cart.checkout': 'الدفع',
     'cart.total': 'المجموع',
-    
-    // Booking
+
+    // ==================== Booking ====================
     'booking.title': 'الحجوزات',
     'booking.status': 'الحالة',
     'booking.startDate': 'تاريخ البداية',
     'booking.endDate': 'تاريخ النهاية',
+    'booking.totalPrice': 'السعر الإجمالي',
+    'booking.create': 'إنشاء حجز',
+    'booking.cancel': 'إلغاء الحجز',
+    'booking.active': 'نشط',
+    'booking.completed': 'مكتمل',
+    'booking.pending': 'قيد الانتظار',
+    'booking.confirmed': 'مؤكد',
+    'booking.cancelled': 'ملغي',
+    'booking.selectDates': 'اختر التواريخ',
+    'booking.selectSize': 'اختر المقاس',
+    'booking.selectColor': 'اختر اللون',
+    'booking.quantity': 'الكمية',
+    'booking.notes': 'ملاحظات',
+    'booking.signature': 'التوقيع',
+    'booking.contract': 'العقد',
+
+    // ==================== Wallet ====================
+    'wallet.title': 'المحفظة',
+    'wallet.balance': 'الرصيد',
+    'wallet.deposit': 'إيداع',
+    'wallet.withdraw': 'سحب',
+    'wallet.transactions': 'المعاملات',
+    'wallet.noTransactions': 'لا توجد معاملات',
+    'wallet.escrow': 'الحساب الأماني',
+    'wallet.insufficientBalance': 'الرصيد غير كافي',
+    'wallet.depositSuccess': 'تم الإيداع بنجاح',
+    'wallet.withdrawSuccess': 'تم السحب بنجاح',
+
+    // ==================== Disputes ====================
+    'disputes.title': 'النزاعات',
+    'disputes.open': 'مفتوح',
+    'disputes.resolved': 'تم الحل',
+    'disputes.fileDispute': 'فتح نزاع',
+    'disputes.reason': 'السبب',
+    'disputes.evidence': 'الأدلة',
+    'disputes.noDisputes': 'لا توجد نزاعات',
+    'disputes.arbitration': 'التحكيم',
+
+    // ==================== Trust & Verification ====================
+    'trust.score': 'نقاط الثقة',
+    'trust.verified': 'موثق',
+    'trust.unverified': 'غير موثق',
+    'trust.verify': 'توثيق',
+    'trust.level': 'مستوى الثقة',
+    'verification.title': 'التوثيق',
+    'verification.submit': 'تقديم طلب التوثيق',
+    'verification.pending': 'قيد المراجعة',
+    'verification.approved': 'تمت الموافقة',
+    'verification.rejected': 'مرفوض',
+
+    // ==================== Auth ====================
+    'auth.login': 'تسجيل الدخول',
+    'auth.register': 'إنشاء حساب',
+    'auth.email': 'البريد الإلكتروني',
+    'auth.password': 'كلمة المرور',
+    'auth.confirmPassword': 'تأكيد كلمة المرور',
+    'auth.username': 'اسم المستخدم',
+    'auth.phone': 'رقم الهاتف',
+    'auth.forgotPassword': 'نسيت كلمة المرور؟',
+    'auth.resetPassword': 'إعادة تعيين كلمة المرور',
+
+    // ==================== Dashboard ====================
+    'dashboard.welcome': 'مرحباً بك',
+    'dashboard.bookings': 'الحجوزات',
+    'dashboard.orders': 'الطلبات',
+    'dashboard.analytics': 'التحليلات',
+    'dashboard.settings': 'الإعدادات',
+    'dashboard.notifications': 'الإشعارات',
+    'dashboard.wishlist': 'المفضلة',
+    'dashboard.products': 'منتجاتي',
+    'dashboard.wallet': 'المحفظة',
+    'dashboard.social': 'التواصل الاجتماعي',
+    'dashboard.reports': 'التقارير',
+
+    // ==================== Footer ====================
+    'footer.rights': 'جميع الحقوق محفوظة',
+    'footer.terms': 'الشروط والأحكام',
+    'footer.privacy': 'سياسة الخصوصية',
+    'footer.faq': 'الأسئلة الشائعة',
+    'footer.contact': 'اتصل بنا',
+    'footer.about': 'من نحن',
   },
   fr: {
-    // Navigation
+    // ==================== Navigation ====================
     'nav.home': 'Accueil',
     'nav.products': 'Produits',
     'nav.about': 'À propos',
@@ -69,8 +174,15 @@ export const translations: Record<Language, Record<string, string>> = {
     'nav.register': 'Créer un compte',
     'nav.dashboard': 'Tableau de bord',
     'nav.logout': 'Déconnexion',
-    
-    // Common
+    'nav.rentals': 'Locations',
+    'nav.vendors': 'Vendeurs',
+    'nav.services': 'Services',
+    'nav.bundles': 'Forfaits',
+    'nav.wallet': 'Portefeuille',
+    'nav.disputes': 'Litiges',
+    'nav.verification': 'Vérification',
+
+    // ==================== Common ====================
     'common.loading': 'Chargement...',
     'common.error': 'Une erreur est survenue',
     'common.success': 'Succès',
@@ -82,8 +194,16 @@ export const translations: Record<Language, Record<string, string>> = {
     'common.search': 'Rechercher',
     'common.filter': 'Filtrer',
     'common.sort': 'Trier',
-    
-    // Products
+    'common.confirm': 'Confirmer',
+    'common.back': 'Retour',
+    'common.next': 'Suivant',
+    'common.submit': 'Soumettre',
+    'common.close': 'Fermer',
+    'common.noData': 'Aucune donnée',
+    'common.retry': 'Réessayer',
+    'common.viewAll': 'Voir tout',
+
+    // ==================== Products ====================
     'products.title': 'Produits',
     'products.addToCart': 'Ajouter au panier',
     'products.viewDetails': 'Voir les détails',
@@ -92,21 +212,111 @@ export const translations: Record<Language, Record<string, string>> = {
     'products.rating': 'Note',
     'products.available': 'Disponible',
     'products.unavailable': 'Indisponible',
-    
-    // Cart
+    'products.rentNow': 'Louer maintenant',
+    'products.deposit': 'Caution',
+    'products.size': 'Taille',
+    'products.color': 'Couleur',
+    'products.category': 'Catégorie',
+    'products.search': 'Rechercher des produits',
+    'products.noResults': 'Aucun résultat',
+    'products.create': 'Ajouter un produit',
+    'products.editProduct': 'Modifier le produit',
+
+    // ==================== Cart ====================
     'cart.title': 'Panier',
     'cart.empty': 'Le panier est vide',
     'cart.checkout': 'Paiement',
     'cart.total': 'Total',
-    
-    // Booking
+
+    // ==================== Booking ====================
     'booking.title': 'Réservations',
     'booking.status': 'Statut',
     'booking.startDate': 'Date de début',
     'booking.endDate': 'Date de fin',
+    'booking.totalPrice': 'Prix total',
+    'booking.create': 'Créer une réservation',
+    'booking.cancel': 'Annuler la réservation',
+    'booking.active': 'Active',
+    'booking.completed': 'Terminée',
+    'booking.pending': 'En attente',
+    'booking.confirmed': 'Confirmée',
+    'booking.cancelled': 'Annulée',
+    'booking.selectDates': 'Sélectionner les dates',
+    'booking.selectSize': 'Sélectionner la taille',
+    'booking.selectColor': 'Sélectionner la couleur',
+    'booking.quantity': 'Quantité',
+    'booking.notes': 'Notes',
+    'booking.signature': 'Signature',
+    'booking.contract': 'Contrat',
+
+    // ==================== Wallet ====================
+    'wallet.title': 'Portefeuille',
+    'wallet.balance': 'Solde',
+    'wallet.deposit': 'Dépôt',
+    'wallet.withdraw': 'Retrait',
+    'wallet.transactions': 'Transactions',
+    'wallet.noTransactions': 'Aucune transaction',
+    'wallet.escrow': 'Compte de garantie',
+    'wallet.insufficientBalance': 'Solde insuffisant',
+    'wallet.depositSuccess': 'Dépôt effectué avec succès',
+    'wallet.withdrawSuccess': 'Retrait effectué avec succès',
+
+    // ==================== Disputes ====================
+    'disputes.title': 'Litiges',
+    'disputes.open': 'Ouvert',
+    'disputes.resolved': 'Résolu',
+    'disputes.fileDispute': 'Ouvrir un litige',
+    'disputes.reason': 'Raison',
+    'disputes.evidence': 'Preuves',
+    'disputes.noDisputes': 'Aucun litige',
+    'disputes.arbitration': 'Arbitrage',
+
+    // ==================== Trust & Verification ====================
+    'trust.score': 'Score de confiance',
+    'trust.verified': 'Vérifié',
+    'trust.unverified': 'Non vérifié',
+    'trust.verify': 'Vérifier',
+    'trust.level': 'Niveau de confiance',
+    'verification.title': 'Vérification',
+    'verification.submit': 'Soumettre la demande de vérification',
+    'verification.pending': 'En cours de vérification',
+    'verification.approved': 'Approuvé',
+    'verification.rejected': 'Rejeté',
+
+    // ==================== Auth ====================
+    'auth.login': 'Connexion',
+    'auth.register': 'Créer un compte',
+    'auth.email': 'Adresse e-mail',
+    'auth.password': 'Mot de passe',
+    'auth.confirmPassword': 'Confirmer le mot de passe',
+    'auth.username': "Nom d'utilisateur",
+    'auth.phone': 'Numéro de téléphone',
+    'auth.forgotPassword': 'Mot de passe oublié ?',
+    'auth.resetPassword': 'Réinitialiser le mot de passe',
+
+    // ==================== Dashboard ====================
+    'dashboard.welcome': 'Bienvenue',
+    'dashboard.bookings': 'Réservations',
+    'dashboard.orders': 'Commandes',
+    'dashboard.analytics': 'Analytique',
+    'dashboard.settings': 'Paramètres',
+    'dashboard.notifications': 'Notifications',
+    'dashboard.wishlist': 'Favoris',
+    'dashboard.products': 'Mes produits',
+    'dashboard.wallet': 'Portefeuille',
+    'dashboard.social': 'Réseaux sociaux',
+    'dashboard.reports': 'Rapports',
+
+    // ==================== Footer ====================
+    'footer.rights': 'Tous droits réservés',
+    'footer.terms': "Conditions générales d'utilisation",
+    'footer.privacy': 'Politique de confidentialité',
+    'footer.faq': 'Questions fréquentes',
+    'footer.contact': 'Contact',
+    'footer.about': 'À propos',
   },
   en: {
-    // Navigation
+    // ==================== Navigation ====================
     'nav.home': 'Home',
     'nav.products': 'Products',
     'nav.about': 'About',
@@ -115,8 +325,15 @@ export const translations: Record<Language, Record<string, string>> = {
     'nav.register': 'Register',
     'nav.dashboard': 'Dashboard',
     'nav.logout': 'Logout',
-    
-    // Common
+    'nav.rentals': 'Rentals',
+    'nav.vendors': 'Vendors',
+    'nav.services': 'Services',
+    'nav.bundles': 'Bundles',
+    'nav.wallet': 'Wallet',
+    'nav.disputes': 'Disputes',
+    'nav.verification': 'Verification',
+
+    // ==================== Common ====================
     'common.loading': 'Loading...',
     'common.error': 'An error occurred',
     'common.success': 'Success',
@@ -128,8 +345,16 @@ export const translations: Record<Language, Record<string, string>> = {
     'common.search': 'Search',
     'common.filter': 'Filter',
     'common.sort': 'Sort',
-    
-    // Products
+    'common.confirm': 'Confirm',
+    'common.back': 'Back',
+    'common.next': 'Next',
+    'common.submit': 'Submit',
+    'common.close': 'Close',
+    'common.noData': 'No data available',
+    'common.retry': 'Retry',
+    'common.viewAll': 'View All',
+
+    // ==================== Products ====================
     'products.title': 'Products',
     'products.addToCart': 'Add to Cart',
     'products.viewDetails': 'View Details',
@@ -138,18 +363,108 @@ export const translations: Record<Language, Record<string, string>> = {
     'products.rating': 'Rating',
     'products.available': 'Available',
     'products.unavailable': 'Unavailable',
-    
-    // Cart
+    'products.rentNow': 'Rent Now',
+    'products.deposit': 'Deposit',
+    'products.size': 'Size',
+    'products.color': 'Color',
+    'products.category': 'Category',
+    'products.search': 'Search products',
+    'products.noResults': 'No results found',
+    'products.create': 'Add Product',
+    'products.editProduct': 'Edit Product',
+
+    // ==================== Cart ====================
     'cart.title': 'Cart',
     'cart.empty': 'Cart is empty',
     'cart.checkout': 'Checkout',
     'cart.total': 'Total',
-    
-    // Booking
+
+    // ==================== Booking ====================
     'booking.title': 'Bookings',
     'booking.status': 'Status',
     'booking.startDate': 'Start Date',
     'booking.endDate': 'End Date',
+    'booking.totalPrice': 'Total Price',
+    'booking.create': 'Create Booking',
+    'booking.cancel': 'Cancel Booking',
+    'booking.active': 'Active',
+    'booking.completed': 'Completed',
+    'booking.pending': 'Pending',
+    'booking.confirmed': 'Confirmed',
+    'booking.cancelled': 'Cancelled',
+    'booking.selectDates': 'Select Dates',
+    'booking.selectSize': 'Select Size',
+    'booking.selectColor': 'Select Color',
+    'booking.quantity': 'Quantity',
+    'booking.notes': 'Notes',
+    'booking.signature': 'Signature',
+    'booking.contract': 'Contract',
+
+    // ==================== Wallet ====================
+    'wallet.title': 'Wallet',
+    'wallet.balance': 'Balance',
+    'wallet.deposit': 'Deposit',
+    'wallet.withdraw': 'Withdraw',
+    'wallet.transactions': 'Transactions',
+    'wallet.noTransactions': 'No transactions',
+    'wallet.escrow': 'Escrow',
+    'wallet.insufficientBalance': 'Insufficient balance',
+    'wallet.depositSuccess': 'Deposit successful',
+    'wallet.withdrawSuccess': 'Withdrawal successful',
+
+    // ==================== Disputes ====================
+    'disputes.title': 'Disputes',
+    'disputes.open': 'Open',
+    'disputes.resolved': 'Resolved',
+    'disputes.fileDispute': 'File a Dispute',
+    'disputes.reason': 'Reason',
+    'disputes.evidence': 'Evidence',
+    'disputes.noDisputes': 'No disputes',
+    'disputes.arbitration': 'Arbitration',
+
+    // ==================== Trust & Verification ====================
+    'trust.score': 'Trust Score',
+    'trust.verified': 'Verified',
+    'trust.unverified': 'Unverified',
+    'trust.verify': 'Verify',
+    'trust.level': 'Trust Level',
+    'verification.title': 'Verification',
+    'verification.submit': 'Submit Verification Request',
+    'verification.pending': 'Under Review',
+    'verification.approved': 'Approved',
+    'verification.rejected': 'Rejected',
+
+    // ==================== Auth ====================
+    'auth.login': 'Login',
+    'auth.register': 'Register',
+    'auth.email': 'Email',
+    'auth.password': 'Password',
+    'auth.confirmPassword': 'Confirm Password',
+    'auth.username': 'Username',
+    'auth.phone': 'Phone Number',
+    'auth.forgotPassword': 'Forgot Password?',
+    'auth.resetPassword': 'Reset Password',
+
+    // ==================== Dashboard ====================
+    'dashboard.welcome': 'Welcome',
+    'dashboard.bookings': 'Bookings',
+    'dashboard.orders': 'Orders',
+    'dashboard.analytics': 'Analytics',
+    'dashboard.settings': 'Settings',
+    'dashboard.notifications': 'Notifications',
+    'dashboard.wishlist': 'Wishlist',
+    'dashboard.products': 'My Products',
+    'dashboard.wallet': 'Wallet',
+    'dashboard.social': 'Social',
+    'dashboard.reports': 'Reports',
+
+    // ==================== Footer ====================
+    'footer.rights': 'All rights reserved',
+    'footer.terms': 'Terms & Conditions',
+    'footer.privacy': 'Privacy Policy',
+    'footer.faq': 'FAQ',
+    'footer.contact': 'Contact',
+    'footer.about': 'About',
   },
 };
 
@@ -160,4 +475,3 @@ export function getTranslation(key: string, lang: Language = 'ar'): string {
 export function t(key: string, lang: Language = 'ar'): string {
   return getTranslation(key, lang);
 }
-

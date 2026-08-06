@@ -24,3 +24,33 @@ Stage Summary:
 - All catastrophic, security, and UX issues from the audit have been addressed
 - Phase 4 (code quality: any types, console.error→logger, JSON-in-TEXT columns) remains as low priority
 - The app has 485 lint issues but 95%+ are in the skills/ directory (not part of the Next.js app)
+
+---
+Task ID: 2
+Agent: Main Repair Agent
+Task: Phase 0-3 Deep Repairs — Fake Data, Zod, Dead Buttons, i18n
+
+Work Log:
+- Verified Phase 0.1: All 3 broken z-ai-web-dev-sdk imports were already fixed in prior sessions
+- Verified Phase 0.2: Product creation page (app/products/create/page.tsx) is fully built with real form
+- Verified Phase 0.3: Payment signature is real Canvas-based (no more fake HMAC)
+- Verified Phase 1.2: verification/vote/route.ts uses $transaction (race condition fixed)
+- Fixed dashboard/wallet/page.tsx: Replaced hardcoded 42,500 DA / 15,000 DA with real transaction-based calculations
+- Fixed dashboard/wallet/page.tsx: Replaced fake -25% discount with dynamic trust-based discount
+- Fixed dashboard/wallet/page.tsx: Added real mini bar charts from weekly transaction data
+- Fixed dashboard/disputes/page.tsx: Replaced fake "4 ساعات عمل" and "98.4%" with computed real stats
+- Fixed dashboard/wishlist/page.tsx: Replaced fake "3 قطع متاحة" and "92%" with real wishlist data
+- Created lib/validators.ts: 7 Zod schemas (register, login, createBooking, createPayment, createDispute, createReview, verificationVote)
+- Updated app/api/auth/register/route.ts: Replaced manual validation with Zod
+- Updated app/api/payments/create/route.ts: Replaced manual validation with Zod
+- Updated app/api/bookings/create/route.ts: Replaced manual validation with Zod
+- Fixed dashboard/wallet/page.tsx: Wired deposit/withdraw buttons to real wallet APIs with Dialog UI
+- Fixed dashboard/disputes/page.tsx: Wired dead document buttons to /terms and /faq
+- Expanded lib/i18n.ts: From 24 keys to 128+ keys across ar/fr/en
+
+Stage Summary:
+- All Phase 0-3 critical/medium items verified and fixed
+- 7 dashboard/API files modified with real data and Zod validation
+- Wallet deposit/withdraw now fully functional
+- i18n expanded 5x (24 → 128 keys)
+- Dev server compiles cleanly: GET / 200, zero errors

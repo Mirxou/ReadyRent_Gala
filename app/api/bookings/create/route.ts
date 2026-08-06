@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
+import { createBookingSchema, validateBody } from '@/lib/validators';
 
 // ═══════════════════════════════════════════════════════════════
 // POST /api/bookings/create — Create a new booking
@@ -12,60 +13,21 @@ export async function POST(request: Request) {
 
     const body = await request.json();
 
-    // ── Date validation ──
-    if (!body.start_date || !body.end_date) {
+    // ── Zod validation ──
+    const vResult = validateBody(createBookingSchema, body);
+    if (!vResult.success) {
       return NextResponse.json(
-        { success: false, dignity_preserved: true, message_en: 'start_date and end_date are required', code: 'VALIDATION_ERROR' },
+        { success: false, dignity_preserved: true, message_ar: vResult.message, message_en: vResult.message, code: 'VALIDATION_ERROR' },
         { status: 400 }
       );
     }
 
-    const startDate = new Date(body.start_date);
-    const endDate = new Date(body.end_date);
-
-    // Validate dates are valid Date objects
-    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-      return NextResponse.json(
-        { success: false, dignity_preserved: true, message_en: 'Invalid date format for start_date or end_date', code: 'VALIDATION_ERROR' },
-        { status: 400 }
-      );
-    }
-
-    const now = new Date();
-
-    if (startDate >= endDate) {
-      return NextResponse.json(
-        { success: false, dignity_preserved: true, message_en: 'start_date must be before end_date', code: 'VALIDATION_ERROR' },
-        { status: 400 }
-      );
-    }
-
-    if (startDate < now) {
-      return NextResponse.json(
-        { success: false, dignity_preserved: true, message_en: 'start_date cannot be in the past', code: 'VALIDATION_ERROR' },
-        { status: 400 }
-      );
-    }
-
-    // ── Quantity validation ──
-    const quantity = body.quantity ?? 1;
-    if (!Number.isInteger(quantity) || quantity < 1) {
-      return NextResponse.json(
-        { success: false, dignity_preserved: true, message_en: 'quantity must be a positive integer', code: 'VALIDATION_ERROR' },
-        { status: 400 }
-      );
-    }
-
-    // ── Product validation: must exist and be available ──
-    if (!body.product_id) {
-      return NextResponse.json(
-        { success: false, dignity_preserved: true, message_en: 'product_id is required', code: 'VALIDATION_ERROR' },
-        { status: 400 }
-      );
-    }
+    const { product_id, start_date, end_date, quantity } = vResult.data;
+    const startDate = new Date(start_date);
+    const endDate = new Date(end_date);
 
     const product = await db.product.findUnique({
-      where: { id: body.product_id },
+      where: { id: product_id },
       select: { name: true, nameAr: true, primaryImage: true, isAvailable: true, pricePerDay: true, vendorId: true },
     });
 
@@ -86,7 +48,7 @@ export async function POST(request: Request) {
     // ── Double-booking check ──
     const conflictingBookings = await db.booking.count({
       where: {
-        productId: body.product_id,
+        productId: product_id,
         status: { in: ['pending', 'confirmed', 'active'] },
         startDate: { lt: endDate },
         endDate: { gt: startDate },
@@ -111,8 +73,8 @@ export async function POST(request: Request) {
     const numberOfDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
     const calculatedTotalPrice = product.pricePerDay * numberOfDays * quantity;
 
-    const productName = body.product_name ?? product.nameAr ?? product.name;
-    const productImage = body.product_image ?? product.primaryImage;
+    const productName = vResult.data.product_name ?? product.nameAr ?? product.name;
+    const productImage = vResult.data.product_image ?? product.primaryImage;
 
     // Fetch renter and vendor info for contract parties
     const [renter, vendor] = await Promise.all([
@@ -145,20 +107,20 @@ export async function POST(request: Request) {
     const booking = await db.booking.create({
       data: {
         userId: session.userId,
-        productId: body.product_id,
+        productId: product_id,
         productName,
         productImage,
-        startDate: body.start_date,
-        endDate: body.end_date,
+        startDate: start_date,
+        endDate: end_date,
         totalPrice: calculatedTotalPrice,
         status: 'pending',
-        escrowStatus: body.escrow_status ?? 'none',
-        hasInsurance: body.has_insurance ?? false,
-        extraServices: body.extra_services ? JSON.stringify(body.extra_services) : '[]',
+        escrowStatus: vResult.data.escrow_status ?? 'none',
+        hasInsurance: vResult.data.has_insurance ?? false,
+        extraServices: vResult.data.extra_services ? JSON.stringify(vResult.data.extra_services) : '[]',
         quantity,
-        size: body.size ?? null,
-        color: body.color ?? null,
-        notes: body.notes ?? null,
+        size: vResult.data.size ?? null,
+        color: vResult.data.color ?? null,
+        notes: vResult.data.notes ?? null,
       },
     });
 
@@ -168,7 +130,7 @@ export async function POST(request: Request) {
         bookingId: booking.id,
         status: 'draft',
         parties,
-        terms: `عقد إيجار ${productName} — من ${body.start_date} إلى ${body.end_date}`,
+        terms: `عقد إيجار ${productName} — من ${start_date} إلى ${end_date}`,
       },
     });
 

@@ -144,16 +144,20 @@ export default function WishlistPage() {
               <div className="space-y-8">
                  <div className="p-6 bg-white/5 rounded-3xl border border-white/5 space-y-4">
                     <p className="text-xs font-black uppercase text-sovereign-gold opacity-80 tracking-widest">فرص متاحة (Hot Registry)</p>
-                    <p className="text-sm italic text-muted-foreground">"هناك 3 قطع في قائمة أمنياتك متاحة حالياً بخصم حصري للنخبة."</p>
+                    <p className="text-sm italic text-muted-foreground">
+                      {wishlist.length > 0
+                        ? `يوجد ${wishlist.filter((w: any) => w.is_available).length} قطع من أمنياتك متاحة حالياً للإيجار.`
+                        : 'أضف منتجات لقائمة أمنياتك لتتبع توافرها.'}
+                    </p>
                  </div>
 
                  <div className="pt-6 border-t border-white/5 space-y-6">
                     <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest opacity-60">
-                       <span>كفاءة الاختيار</span>
-                       <span>92%</span>
+                       <span>محتوى السجل</span>
+                       <span>{wishlist.length} قطع</span>
                     </div>
                     <div className="h-1 bg-white/10 rounded-full">
-                       <div className="h-full w-[92%] bg-sovereign-gold shadow-[0_0_10px_rgba(184,159,103,0.5)]" />
+                       <div className="h-full bg-sovereign-gold shadow-[0_0_10px_rgba(184,159,103,0.5)] transition-all" style={{ width: `${Math.min(100, wishlist.length * 10)}%` }} />
                     </div>
                  </div>
               </div>

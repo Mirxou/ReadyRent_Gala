@@ -6,75 +6,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { hashPassword, createSession, formatUserResponse } from '@/lib/auth-server';
+import { registerSchema, validateBody } from '@/lib/validators';
 
 const SEVEN_DAYS = 7 * 24 * 60 * 60;
-
-const VALID_ROLES = ['customer', 'vendor'];
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { email, password, confirmPassword, username, first_name, last_name, phone, role } = body;
 
-    // Validate required fields
-    if (!email || !password) {
+    // ── Zod validation ──
+    const vResult = validateBody(registerSchema, body);
+    if (!vResult.success) {
       return NextResponse.json(
-        {
-          success: false,
-          dignity_preserved: true,
-          message_ar: 'البريد الإلكتروني وكلمة المرور مطلوبان',
-          message_en: 'Email and password are required',
-          code: 'MISSING_FIELDS',
-        },
+        { success: false, dignity_preserved: true, message_ar: vResult.message, message_en: vResult.message, code: 'VALIDATION_ERROR' },
         { status: 400 }
       );
     }
 
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return NextResponse.json(
-        {
-          success: false,
-          dignity_preserved: true,
-          message_ar: 'صيغة البريد الإلكتروني غير صحيحة',
-          message_en: 'Invalid email format',
-          code: 'INVALID_EMAIL',
-        },
-        { status: 400 }
-      );
-    }
-
-    // Validate password confirmation
-    if (password !== confirmPassword) {
-      return NextResponse.json(
-        {
-          success: false,
-          dignity_preserved: true,
-          message_ar: 'كلمة المرور وتأكيدها غير متطابقتين',
-          message_en: 'Password and confirmation do not match',
-          code: 'PASSWORD_MISMATCH',
-        },
-        { status: 400 }
-      );
-    }
-
-    // Validate password strength (min 8 chars)
-    if (password.length < 8) {
-      return NextResponse.json(
-        {
-          success: false,
-          dignity_preserved: true,
-          message_ar: 'كلمة المرور يجب أن تكون 8 أحرف على الأقل',
-          message_en: 'Password must be at least 8 characters',
-          code: 'WEAK_PASSWORD',
-        },
-        { status: 400 }
-      );
-    }
-
-    // Validate role if provided
-    const userRole = role && VALID_ROLES.includes(role) ? role : 'customer';
+    const { email, password, confirmPassword, username, first_name, last_name, phone, role } = vResult.data;
 
     // Check if email already exists
     const existingUser = await db.user.findUnique({ where: { email } });
@@ -120,7 +69,7 @@ export async function POST(request: NextRequest) {
         firstName: first_name || null,
         lastName: last_name || null,
         phone: phone || null,
-        role: userRole,
+        role: role ?? 'customer',
       },
     });
 

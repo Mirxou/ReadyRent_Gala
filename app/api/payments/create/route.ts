@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
-
-const VALID_PAYMENT_METHODS = ['baridimob', 'ccp', 'bank_card', 'wallet', 'card'];
+import { createPaymentSchema, validateBody } from '@/lib/validators';
 
 // ═══════════════════════════════════════════════════════════════
 // POST /api/payments/create — Create a payment record
@@ -14,36 +13,21 @@ export async function POST(request: Request) {
 
   const body = await request.json();
 
-  if (!body.amount || typeof body.amount !== 'number' || body.amount <= 0) {
+  // ── Zod validation ──
+  const vResult = validateBody(createPaymentSchema, body);
+  if (!vResult.success) {
     return NextResponse.json(
-      {
-        success: false,
-        dignity_preserved: true,
-        message_en: 'A valid positive amount is required',
-        code: 'VALIDATION_ERROR',
-      },
+      { success: false, dignity_preserved: true, message_ar: vResult.message, message_en: vResult.message, code: 'VALIDATION_ERROR' },
       { status: 400 }
     );
   }
 
-  // Resolve and validate payment method
-  const resolvedMethod = body.method ?? 'card';
-  if (!VALID_PAYMENT_METHODS.includes(resolvedMethod)) {
-    return NextResponse.json(
-      {
-        success: false,
-        dignity_preserved: true,
-        message_en: `Invalid payment method. Allowed: ${VALID_PAYMENT_METHODS.join(', ')}`,
-        code: 'VALIDATION_ERROR',
-      },
-      { status: 400 }
-    );
-  }
+  const resolvedMethod = vResult.data.method;
 
   // If booking_id is provided, verify ownership
-  if (body.booking_id) {
+  if (vResult.data.booking_id) {
     const booking = await db.booking.findUnique({
-      where: { id: body.booking_id },
+      where: { id: vResult.data.booking_id },
       select: { userId: true },
     });
 
@@ -75,13 +59,13 @@ export async function POST(request: Request) {
   const payment = await db.payment.create({
     data: {
       userId: session.userId,
-      bookingId: body.booking_id ?? null,
-      amount: body.amount,
+      bookingId: vResult.data.booking_id ?? null,
+      amount: vResult.data.amount,
       method: resolvedMethod,
       status: 'pending',
-      escrowStatus: body.escrow_status ?? null,
+      escrowStatus: vResult.data.escrow_status ?? null,
       requires3DSecure: resolvedMethod === 'card' || resolvedMethod === 'bank_card',
-      redirectUrl: body.redirect_url ?? null,
+      redirectUrl: vResult.data.redirect_url ?? null,
     },
   });
 

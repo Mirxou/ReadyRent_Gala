@@ -128,12 +128,16 @@ export default function DisputesPage() {
                 </h3>
                 <div className="space-y-4">
                     <div className="p-4 bg-white/5 rounded-xl border border-white/5">
-                        <p className="text-xs font-black uppercase text-sovereign-gold mb-1">متوسط وقت الحل</p>
-                        <p className="text-lg font-black">4 ساعات عمل</p>
+                        <p className="text-xs font-black uppercase text-sovereign-gold mb-1">النزاعات النشطة</p>
+                        <p className="text-lg font-black">{disputes.filter((d: any) => d.status === 'open').length} حالة مفتوحة</p>
                     </div>
                     <div className="p-4 bg-white/5 rounded-xl border border-white/5">
-                        <p className="text-xs font-black uppercase text-emerald-500 mb-1">نسبة النجاح</p>
-                        <p className="text-lg font-black">98.4% تسوية ودية</p>
+                        <p className="text-xs font-black uppercase text-emerald-500 mb-1">نسبة التسوية</p>
+                        <p className="text-lg font-black">
+                          {disputes.length > 0
+                            ? `${Math.round((disputes.filter((d: any) => d.status === 'resolved').length / disputes.length) * 100)}% تسوية`
+                            : 'لا توجد بيانات بعد'}
+                        </p>
                     </div>
                 </div>
                 <Separator className="bg-white/5" />
@@ -145,12 +149,16 @@ export default function DisputesPage() {
             <GlassPanel className="p-8 space-y-4">
                 <h4 className="text-xs font-black uppercase tracking-widest text-muted-foreground">وثائق هامة</h4>
                 <div className="space-y-2">
-                    <SovereignButton variant="secondary" className="w-full justify-start gap-3 h-12 text-xs">
-                        <FileText className="w-4 h-4" /> ميثاق التحكيم السيادي
-                    </SovereignButton>
-                    <SovereignButton variant="secondary" className="w-full justify-start gap-3 h-12 text-xs">
-                        <Scale className="w-4 h-4" /> شروط حل النزاعات
-                    </SovereignButton>
+                    <Link href="/terms">
+                      <SovereignButton variant="secondary" className="w-full justify-start gap-3 h-12 text-xs">
+                          <FileText className="w-4 h-4" /> ميثاق التحكيم السيادي
+                      </SovereignButton>
+                    </Link>
+                    <Link href="/faq">
+                      <SovereignButton variant="secondary" className="w-full justify-start gap-3 h-12 text-xs">
+                          <Scale className="w-4 h-4" /> شروط حل النزاعات
+                      </SovereignButton>
+                    </Link>
                 </div>
             </GlassPanel>
         </div>

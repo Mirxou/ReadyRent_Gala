@@ -24,6 +24,16 @@ import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { paymentsApi } from '@/lib/api';
+import { useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 async function fetchProfile() {
   const res = await fetch('/api/auth/profile');
@@ -46,6 +56,12 @@ async function fetchBookings() {
 
 
 export default function WalletPage() {
+  const queryClient = useQueryClient();
+  const [depositOpen, setDepositOpen] = useState(false);
+  const [withdrawOpen, setWithdrawOpen] = useState(false);
+  const [amount, setAmount] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
+
   const { data: userProfile, isLoading: userLoading } = useQuery({
     queryKey: ['profile'],
     queryFn: fetchProfile,
@@ -81,6 +97,43 @@ export default function WalletPage() {
 
   const isLoading = userLoading || walletLoading || bookingsLoading;
 
+  // ──── Real financial stats from transactions ────
+  const totalExpenses = transactions
+    .filter((tx: any) => tx.type === 'EXPENDITURE' || tx.type === 'escrow_lock')
+    .reduce((sum: number, tx: any) => sum + (Number(tx.amount) || 0), 0);
+
+  const totalReleased = transactions
+    .filter((tx: any) => tx.type === 'escrow_release' || tx.type === 'INCOME')
+    .reduce((sum: number, tx: any) => sum + (Number(tx.amount) || 0), 0);
+
+  // Mini bar chart from actual weekly transaction data
+  const now = new Date();
+  const weekKeys = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(now);
+    d.setDate(d.getDate() - (6 - i));
+    return d.toISOString().slice(0, 10);
+  });
+  const expenseByDay = weekKeys.map(day =>
+    transactions
+      .filter((tx: any) => tx.date?.startsWith(day) && (tx.type === 'EXPENDITURE' || tx.type === 'escrow_lock'))
+      .reduce((s: number, tx: any) => s + (Number(tx.amount) || 0), 0)
+  );
+  const maxExpense = Math.max(...expenseByDay, 1);
+  const expenseBars = expenseByDay.map(v => v / maxExpense);
+
+  const releaseByDay = weekKeys.map(day =>
+    transactions
+      .filter((tx: any) => tx.date?.startsWith(day) && (tx.type === 'escrow_release' || tx.type === 'INCOME'))
+      .reduce((s: number, tx: any) => s + (Number(tx.amount) || 0), 0)
+  );
+  const maxRelease = Math.max(...releaseByDay, 1);
+  const releaseBars = releaseByDay.map(v => v / maxRelease);
+
+  // Real trust discount based on trust score
+  const trustScoreVal = userProfile?.trust_score || 0;
+  const trustDiscount = trustScoreVal >= 100 ? 25 : trustScoreVal >= 50 ? 15 : trustScoreVal >= 20 ? 5 : 0;
+
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-4">
@@ -98,11 +151,69 @@ export default function WalletPage() {
   }
 
   const handleDeposit = () => {
-    toast.info('ميزة قيد التطوير');
+    setAmount('');
+    setDepositOpen(true);
   };
 
   const handleWithdraw = () => {
-    toast.info('ميزة قيد التطوير');
+    setAmount('');
+    setWithdrawOpen(true);
+  };
+
+  const processDeposit = async () => {
+    const val = Number(amount);
+    if (!val || val <= 0) { toast.error('أدخل مبلغاً صحيحاً'); return; }
+    if (val > 100000) { toast.error('الحد الأقصى للعملية الواحدة: 100,000 دج'); return; }
+    setIsProcessing(true);
+    try {
+      const res = await fetch('/api/wallet/deposit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: val }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        toast.success(`تم شحن ${formatNumber(val)} دج بنجاح`);
+        setDepositOpen(false);
+        queryClient.invalidateQueries({ queryKey: ['wallet'] });
+        queryClient.invalidateQueries({ queryKey: ['profile'] });
+        queryClient.invalidateQueries({ queryKey: ['payments-history'] });
+      } else {
+        toast.error(json.message_en || 'فشلت العملية');
+      }
+    } catch {
+      toast.error('حدث خطأ في الاتصال');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const processWithdraw = async () => {
+    const val = Number(amount);
+    if (!val || val <= 0) { toast.error('أدخل مبلغاً صحيحاً'); return; }
+    if (val > (balance || 0)) { toast.error('رصيد غير كافٍ'); return; }
+    setIsProcessing(true);
+    try {
+      const res = await fetch('/api/wallet/withdraw', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: val }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        toast.success(`تم سحب ${formatNumber(val)} دج بنجاح`);
+        setWithdrawOpen(false);
+        queryClient.invalidateQueries({ queryKey: ['wallet'] });
+        queryClient.invalidateQueries({ queryKey: ['profile'] });
+        queryClient.invalidateQueries({ queryKey: ['payments-history'] });
+      } else {
+        toast.error(json.message_en === 'Insufficient wallet balance' ? 'رصيد غير كافٍ' : (json.message_en || 'فشلت العملية'));
+      }
+    } catch {
+      toast.error('حدث خطأ في الاتصال');
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (
@@ -301,9 +412,10 @@ export default function WalletPage() {
                     <div className="w-full p-6 bg-emerald-500/5 rounded-[2rem] border border-emerald-500/10 group hover:bg-emerald-500/10 transition-all">
                        <p className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.4em] mb-2">Active Sovereign Discount</p>
                        <div className="flex items-baseline justify-center gap-2">
-                           <p className="text-5xl font-black text-emerald-500 tracking-tighter">-25%</p>
+                           <p className="text-5xl font-black text-emerald-500 tracking-tighter">-{trustDiscount}%</p>
                            <span className="text-[10px] font-bold text-emerald-600/60 uppercase">Deduction</span>
                        </div>
+                       {trustDiscount === 0 && <p className="text-[10px] text-muted-foreground/40 mt-2">ارفع رصيد الثقة للحصول على خصومات</p>}
                     </div>
                 </div>
              </GlassPanel>
@@ -321,34 +433,34 @@ export default function WalletPage() {
                    <div className="flex justify-between items-end">
                       <div className="flex flex-col">
                          <span className="text-[10px] text-muted-foreground font-bold">إجمالي المصاريف</span>
-                         <span className="text-xl font-black">42,500 <span className="text-xs">DA</span></span>
+                         <span className="text-xl font-black">{formatNumber(totalExpenses)} <span className="text-xs">DA</span></span>
                       </div>
                       <div className="w-1/2 h-8 flex items-end gap-1">
-                         {[0.4, 0.7, 0.5, 0.9, 0.6, 0.8, 1].map((val, i) => (
+                         {expenseBars.length > 0 ? expenseBars.map((val, i) => (
                            <motion.div 
                              key={i} 
                              initial={{ height: 0 }}
                              animate={{ height: `${val * 100}%` }}
                              className="flex-1 bg-sovereign-gold/20 rounded-t-sm" 
                            />
-                         ))}
+                         )) : <span className="text-[10px] text-muted-foreground/30">—</span>}
                       </div>
                    </div>
 
                    <div className="flex justify-between items-end">
                       <div className="flex flex-col">
                          <span className="text-[10px] text-muted-foreground font-bold">الضمانات المستردة</span>
-                         <span className="text-xl font-black">15,000 <span className="text-xs">DA</span></span>
+                         <span className="text-xl font-black">{formatNumber(totalReleased)} <span className="text-xs">DA</span></span>
                       </div>
                       <div className="w-1/2 h-8 flex items-end gap-1">
-                         {[0.3, 0.5, 0.8, 0.4, 0.9, 0.6, 0.7].map((val, i) => (
+                         {releaseBars.length > 0 ? releaseBars.map((val, i) => (
                            <motion.div 
                              key={i} 
                              initial={{ height: 0 }}
                              animate={{ height: `${val * 100}%` }}
                              className="flex-1 bg-emerald-500/20 rounded-t-sm" 
                            />
-                         ))}
+                         )) : <span className="text-[10px] text-muted-foreground/30">—</span>}
                       </div>
                    </div>
                 </div>
@@ -429,6 +541,68 @@ export default function WalletPage() {
           )}
         </div>
       </div>
+
+      {/* Deposit Dialog */}
+      <Dialog open={depositOpen} onOpenChange={setDepositOpen}>
+        <DialogContent className="bg-background border-white/10 max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="text-foreground text-right">شحن المحفظة</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-2">
+            <div className="space-y-2">
+              <Label className="text-muted-foreground">المبلغ (د.ج)</Label>
+              <Input
+                type="number"
+                min="1"
+                max="100000"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                placeholder="5000"
+                className="text-2xl font-black h-14"
+                dir="ltr"
+              />
+              <p className="text-[10px] text-muted-foreground/60">الحد الأقصى للعملية: 100,000 دج</p>
+            </div>
+            <div className="flex gap-3">
+              {[1000, 5000, 10000].map(v => (
+                <button key={v} onClick={() => setAmount(String(v))} className="flex-1 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-bold transition-colors">
+                  {formatNumber(v)}
+                </button>
+              ))}
+            </div>
+            <SovereignButton variant="primary" className="w-full h-12" onClick={processDeposit} disabled={isProcessing} withShimmer>
+              {isProcessing ? <Loader2 className="w-4 h-4 animate-spin" /> : `شحن ${amount ? formatNumber(Number(amount)) : '...'} دج`}
+            </SovereignButton>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Withdraw Dialog */}
+      <Dialog open={withdrawOpen} onOpenChange={setWithdrawOpen}>
+        <DialogContent className="bg-background border-white/10 max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="text-foreground text-right">سحب من المحفظة</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-2">
+            <div className="space-y-2">
+              <Label className="text-muted-foreground">المبلغ (د.ج) — الرصيد: {formatNumber(balance)} دج</Label>
+              <Input
+                type="number"
+                min="1"
+                max={balance}
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                placeholder="5000"
+                className="text-2xl font-black h-14"
+                dir="ltr"
+              />
+            </div>
+            <SovereignButton variant="primary" className="w-full h-12" onClick={processWithdraw} disabled={isProcessing} withShimmer>
+              {isProcessing ? <Loader2 className="w-4 h-4 animate-spin" /> : `سحب ${amount ? formatNumber(Number(amount)) : '...'} دج`}
+            </SovereignButton>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
