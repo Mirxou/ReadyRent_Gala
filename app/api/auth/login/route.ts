@@ -6,11 +6,29 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authenticateUser, createSession, formatUserResponse } from '@/lib/auth-server';
 import { logger } from '@/lib/logger';
+import { checkLoginRateLimit, getClientIp } from '@/lib/rate-limiter';
 
 const SEVEN_DAYS = 7 * 24 * 60 * 60;
 
 export async function POST(request: NextRequest) {
   try {
+    // ── Rate limiting: 5 attempts per 15 min per IP ──
+    const clientIp = getClientIp(request);
+    const rateCheck = checkLoginRateLimit(clientIp);
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          dignity_preserved: true,
+          message_ar: 'محاولات تسجيل دخول كثيرة جداً. حاول بعد قليل.',
+          message_en: 'Too many login attempts. Please try again later.',
+          code: 'RATE_LIMITED',
+          retry_after_ms: rateCheck.retryAfterMs,
+        },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
     const { email, password } = body;
 

@@ -59,8 +59,30 @@ export const createPaymentSchema = z.object({
 // ──── Disputes ────
 export const createDisputeSchema = z.object({
   booking_id: z.string().min(1, 'معرف الحجز مطلوب'),
-  reason: z.string().min(10, 'السبب يجب أن يكون 10 أحرف على الأقل').max(2000),
   title: z.string().min(5, 'العنوان يجب أن يكون 5 أحرف على الأقل').max(255),
+  reason: z.string().min(10, 'السبب يجب أن يكون 10 أحرف على الأقل').max(2000),
+  description: z.string().max(2000).optional(),
+  claim_type: z.enum(['damage', 'non_delivery', 'quality', 'wrong_item', 'late_return', 'general']).default('general'),
+  claimed_amount: z.number().min(0).max(1000000, 'المبلغ المطلوب يتجاوز الحد الأقصى (1,000,000 د.ج)').optional(),
+  evidence_urls: z.array(z.string().url('رابط الأدلة غير صالح').max(500)).max(10, 'الحد الأقصى 10 أدلة').optional(),
+});
+
+// ──── Wallet ────
+export const walletDepositSchema = z.object({
+  amount: z.number().int().positive('المبلغ يجب أن يكون رقماً موجباً').max(100000, 'الحد الأقصى للإيداع 100,000 د.ج للمعاملة الواحدة'),
+  method: z.enum(['baridimob', 'ccp', 'bank_card', 'admin_topup']).optional(),
+  reference: z.string().min(6, 'رقم المرجع يجب أن يكون 6 أحرف على الأقل').max(100).optional(),
+});
+
+export const walletWithdrawSchema = z.object({
+  amount: z.number().int().positive('المبلغ يجب أن يكون رقماً موجباً').max(50000, 'الحد الأقصى للسحب 50,000 د.ج للمعاملة الواحدة'),
+  method: z.enum(['baridimob', 'ccp', 'bank_card'], { message: 'طريقة السحب غير صالحة' }),
+});
+
+export const walletTransferSchema = z.object({
+  recipient_id: z.string().min(1, 'معرف المستلم مطلوب'),
+  amount: z.number().int().positive('المبلغ يجب أن يكون رقماً موجباً').max(10000, 'الحد الأقصى للتحويل 10,000 د.ج للمعاملة الواحدة'),
+  note: z.string().max(200).optional(),
 });
 
 // ──── Reviews ────

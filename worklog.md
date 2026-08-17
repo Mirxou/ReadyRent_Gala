@@ -290,3 +290,37 @@ Stage Summary:
 - Errors after: 3 (all react-hooks — not in scope for this task)
 - All targeted errors eliminated
 
+---
+Task ID: SEC-2
+Agent: Main Orchestrator
+Task: Security Layer — Payment HMAC, Rate Limiting, Wallet Protection, Dispute Fairness
+
+Work Log:
+- Created lib/payment-security.ts: HMAC signing with sha256 + constant-time comparison, 15-min intent expiry
+- Created lib/payment-security.ts: Escrow state machine (none→held→released/refunded/partial_refund) with role-based authorization
+- Created lib/payment-security.ts: Payment fingerprint (sha256 of bookingId:amount:currency + secret)
+- Created lib/rate-limiter.ts: Sliding window rate limiter with auto-cleanup every 5 min
+- Pre-configured: login 5/15min, register 3/60min, payment 10/min, wallet 20/min, general 60/min per IP
+- Updated app/api/auth/login/route.ts: Added rate limiting (5 attempts / 15 min per IP)
+- Updated app/api/auth/register/route.ts: Added rate limiting (3 attempts / 60 min per IP)
+- REWROTE app/api/wallet/deposit/route.ts:
+  - Added Zod validation (walletDepositSchema)
+  - CRITICAL FIX: Non-admin deposits REQUIRE payment reference number (prevents self-reported free money)
+  - admin_topup method restricted to admin/staff role only
+  - Added rate limiting (20/min)
+  - Added transaction hash for audit trail
+- REWROTE app/api/wallet/withdraw/route.ts: Zod + rate limiting + method-aware notes
+- REWROTE app/api/wallet/transfer/route.ts: Zod + rate limiting + recipient_id validation
+- REWROTE app/api/disputes/create/route.ts:
+  - Added Zod validation (createDisputeSchema with claimed_amount cap 1M DZD, evidence URL validation)
+  - VENDOR PROTECTION: Vendor can now create counter-disputes (was renter-only)
+  - DUPLICATE PREVENTION: Only one active dispute per booking per user
+  - Counter-notification to the other party on dispute creation
+- Updated lib/validators.ts: Added walletDepositSchema, walletWithdrawSchema, walletTransferSchema; enhanced createDisputeSchema
+
+Stage Summary:
+- 2 new security libraries created (payment-security.ts, rate-limiter.ts)
+- 6 API routes hardened with Zod + rate limiting
+- CRITICAL: wallet/deposit no longer accepts self-reported amounts without payment proof
+- Vendors can now create counter-disputes for fairness
+- All files pass ESLint with 0 errors

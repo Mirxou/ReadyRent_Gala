@@ -8,11 +8,29 @@ import { db } from '@/lib/db';
 import { hashPassword, createSession, formatUserResponse } from '@/lib/auth-server';
 import { registerSchema, validateBody } from '@/lib/validators';
 import { logger } from '@/lib/logger';
+import { checkRegisterRateLimit, getClientIp } from '@/lib/rate-limiter';
 
 const SEVEN_DAYS = 7 * 24 * 60 * 60;
 
 export async function POST(request: NextRequest) {
   try {
+    // ── Rate limiting: 3 attempts per 60 min per IP ──
+    const clientIp = getClientIp(request);
+    const rateCheck = checkRegisterRateLimit(clientIp);
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          dignity_preserved: true,
+          message_ar: 'محاولات تسجيل كثيرة. حاول بعد ساعة.',
+          message_en: 'Too many registration attempts. Please try again in an hour.',
+          code: 'RATE_LIMITED',
+          retry_after_ms: rateCheck.retryAfterMs,
+        },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
 
     // ── Zod validation ──
