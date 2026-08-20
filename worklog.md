@@ -323,4 +323,232 @@ Stage Summary:
 - 6 API routes hardened with Zod + rate limiting
 - CRITICAL: wallet/deposit no longer accepts self-reported amounts without payment proof
 - Vendors can now create counter-disputes for fairness
-- All files pass ESLint with 0 errors
+---
+Task ID: 2-a
+Agent: Comprehensive API Route Auditor
+Task: Full audit of ALL 82 API route files under app/api/
+
+Work Log:
+- Read every single route file (82 total) in app/api/ for comprehensive security audit
+- Read lib/auth-server.ts, lib/validators.ts, lib/rate-limiter.ts for context
+- Categorized all routes by domain and HTTP method
+- Checked each route for: auth, Zod validation, authorization (IDOR), rate limiting, error handling, PII exposure, financial operations, SQL injection
+
+## AUDIT SUMMARY
+
+**Total Route Files: 82**
+**HTTP Methods: GET(38), POST(32), PATCH(7), PUT(2), DELETE(4), 1 file has multiple methods**
+
+### Route Categories & Count:
+- Auth: 6 routes
+- Wallet (CRITICAL): 4 routes
+- Payments (CRITICAL): 3 routes
+- Bookings (CRITICAL - cancel has refunds): 12 routes (inc. cart, waitlist, deposit-calc)
+- Disputes (CRITICAL - claimed_amount): 5 routes
+- Contracts: 3 routes
+- Admin: 6 routes
+- Products: 8 routes
+- Reviews: 3 routes
+- Notifications: 3 routes
+- Verification: 4 routes
+- Services: 3 routes
+- Bundles (CRITICAL - creates bookings+transactions): 4 routes
+- Subscriptions (CRITICAL - wallet deduction): 3 routes
+- Insurance (CRITICAL - wallet deduction): 2 routes
+- Returns: 2 routes
+- Social: 3 routes
+- Analytics: 7 routes
+- Chatbot: 2 routes
+- Blog: 2 routes
+- CMS: 2 routes
+- Contact: 1 route
+- Health: 1 route
+- Vendors: 2 routes
+- Artisans: 1 route
+
+### Auth Coverage:
+- 58 routes require auth (getSessionFromRequest check)
+- 24 routes are fully public (products, categories, blog, cms, services, vendors, artisans, health, chatbot, contact, payment-methods, social-feed, social-score, analytics/live, bundles)
+- All admin routes check admin/staff role
+- No SQL injection risk (all use Prisma ORM, zero raw queries)
+
+### Zod Validation Coverage:
+- 6 routes use Zod: auth/register, bookings/create, payments/create, disputes/create, wallet/deposit, wallet/withdraw, wallet/transfer
+- 76 routes use manual validation or no validation (GET routes, admin routes)
+
+### Rate Limiting Coverage:
+- 6 routes have rate limiting: auth/login (5/15min), auth/register (3/60min), wallet/deposit (20/min), wallet/withdraw (20/min), wallet/transfer (20/min), payments/create (10/min)
+- 76 routes have NO rate limiting
+
+### Financial Operations (CRITICAL):
+- wallet/deposit — Creates money, Zod+rate-limited, admin_topup restricted
+- wallet/withdraw — Moves money, Zod+rate-limited, atomic balance check
+- wallet/transfer — Moves money between users, Zod+rate-limited, atomic
+- bookings/[id]/cancel — Issues refunds to wallet, transactional, NO rate limiting
+- subscriptions/subscribe — Deducts from wallet, atomic, NO rate limiting
+- insurance/purchase — Deducts from wallet, atomic, NO rate limiting
+- bundles/[id]/book — Creates bookings+transaction, NO Zod, NO rate limiting, NOT wrapped in single transaction
+- payments/create — Creates payment record, Zod+rate-limited
+
+### Error Handling:
+- All 82 routes have try/catch with proper error responses
+- 1 route still has console.log (analytics/events/route.ts:26) — missed by the console.error migration
+
+## ALL ISSUES FOUND
+
+### CRITICAL (6):
+
+C1. bundles/[id]/book — NOT wrapped in transaction (line 51-79)
+   File: app/api/bundles/[id]/book/route.ts:51
+   Creates multiple bookings via Promise.all (non-atomic). If any booking fails, partial state is left.
+   Also creates a separate ESCROW_HELD transaction outside the bookings.
+   No Zod validation, no rate limiting, no double-booking check.
+
+C2. bookings/[id]/cancel — No rate limiting on cancellation/refund
+   File: app/api/bookings/[id]/cancel/route.ts:9
+   A user could spam cancel requests. While the status check prevents double-cancels,
+   each attempt still triggers DB queries and notification creation.
+
+C3. subscriptions/subscribe — No rate limiting on subscription purchase (wallet deduction)
+   File: app/api/subscriptions/subscribe/route.ts:9
+   User could spam subscribe/cancel cycles, creating excessive transaction records.
+
+C4. insurance/purchase — No rate limiting on insurance purchase (wallet deduction)
+   File: app/api/insurance/purchase/route.ts:11
+   User could spam insurance purchases if hasInsurance check has a TOCTOU race.
+
+C5. analytics/products/top_products — Auth but NO admin role check
+   File: app/api/analytics/products/top_products/route.ts:10
+   Any authenticated user (including customer) can see ALL products' total revenue,
+   total bookings, and ratings. This is sensitive financial data.
+
+C6. analytics/events — Still has console.log (missed by logger migration)
+   File: app/api/analytics/events/route.ts:26
+   `console.log(...)` should be `logger.error('Analytics Events', 'Event tracked', { target_id, metadata })`
+
+### HIGH (12):
+
+H1. auth/forgot-password — No rate limiting
+   File: app/api/auth/forgot-password/route.ts:12
+   Allows unlimited password reset token generation, filling ActivityLog table.
+
+H2. auth/reset-password — No rate limiting
+   File: app/api/auth/reset-password/route.ts:11
+   Token is 256-bit hex (practically un-bruteforceable), but rate limiting is still best practice.
+
+H3. auth/login — Manual validation (no Zod)
+   File: app/api/auth/login/route.ts:33
+   loginSchema exists in validators.ts but is not imported/used. Inconsistent with register route.
+
+H4. auth/profile (PUT) — No Zod validation
+   File: app/api/auth/profile/route.ts:87-94
+   Any body field is accepted and applied to the user update. The `Record<string, string | null>`
+   pattern is loose. Also, `city` creates an address with deterministic ID.
+
+H5. social/feed — No auth required, exposes user activity
+   File: app/api/social/feed/route.ts:10
+   Exposes vouch activity with sender/receiver real names and user IDs publicly.
+
+H6. social/score/[userId] — No auth required, exposes trust score breakdown
+   File: app/api/social/score/[userId]/route.ts:10
+   Exposes booking counts, dispute counts, and trust score breakdown for any user.
+   Could be used for user enumeration.
+
+H7. reviews/create — No duplicate review prevention
+   File: app/api/reviews/create/route.ts:28
+   A user can submit infinite reviews for the same product. No booking_id required.
+
+H8. services/book — Creates booking with minimal validation
+   File: app/api/services/book/route.ts:11
+   No Zod, no double-booking check, no date validation. Stores user-provided phone
+   in extraServices JSON without sanitization.
+
+H9. payments/create — No rate limiting on payment record creation
+   File: app/api/payments/create/route.ts:10
+   Despite the rate-limiter having a checkPaymentRateLimit, it's not imported or used.
+
+H10. contact — No rate limiting (spam vector)
+    File: app/api/contact/route.ts:8
+    Could be used to flood admin notifications.
+
+H11. bundles/[id] — Returns raw Prisma object (no field selection)
+   File: app/api/bundles/[id]/route.ts:27
+   `return NextResponse.json({ success: true, data: bundle })` — returns full Prisma model
+   with all fields, not a sanitized response object.
+
+H12. cms/pages (GET) — `?all=true` bypasses published filter without auth
+   File: app/api/cms/pages/route.ts:36
+   `const includeAll = searchParams.get('all') === 'true'` — any visitor can list draft CMS pages.
+
+### MEDIUM (10):
+
+M1. admin/users/[id] (PATCH) — No Zod validation
+   File: app/api/admin/users/[id]/route.ts:23
+   Any field from the body can be set. `email` can be changed without verification.
+
+M2. admin/branches/[id] (DELETE) — No dependent record check
+   File: app/api/admin/branches/[id]/route.ts:85
+   Deleting a branch might orphan related records.
+
+M3. contracts/[id] — Vendor cannot view contract
+   File: app/api/contracts/[id]/route.ts:39
+   Only checks `booking.userId === session.userId`. Product vendor has no access.
+
+M4. disputes/[id]/messages — Vendor cannot post messages
+   File: app/api/disputes/[id]/messages/route.ts:55
+   Only dispute owner and admin/staff can post. Vendor has no voice in disputes.
+
+M5. verification/submit — No payload size limit on face photo
+   File: app/api/verification/submit/route.ts:19
+   Base64 data URLs can be very large. No size validation.
+
+M6. chatbot/chat — In-memory conversation history, unbounded sessions
+   File: app/api/chatbot/chat/route.ts:10
+   Map grows indefinitely (no session cleanup). Memory leak risk.
+
+M7. vendors/dashboard — Fragile name-based vendor matching
+   File: app/api/vendors/dashboard/route.ts:31
+   Uses name comparison instead of vendorId. Could match wrong vendor.
+
+M8. bookings/create — Parties JSON stores self-PII
+   File: app/api/bookings/create/route.ts:94-106
+   Stores renter's email and phone in contract parties JSON. Acceptable since it's
+   the user's own data in their own contract, but stored as unencrypted JSON.
+
+M9. bookings/calculate-deposit — No auth, no rate limiting
+   File: app/api/bookings/calculate-deposit/route.ts:8
+   Public endpoint allows price enumeration for any product.
+
+M10. contracts/[id]/sign — IP address stored in contract signature
+   File: app/api/contracts/[id]/sign/route.ts:47-50
+   x-forwarded-for header is stored in the renter signature JSON. Could be spoofed.
+
+### LOW (4):
+
+L1. Inconsistent error response format across routes
+   Some use `message_ar`/`message_en`, some use `message`, some use `error`.
+
+L2. analytics/events (GET) — limit parsing has swapped min/max
+   File: app/api/analytics/events/route.ts:43
+   `Math.min(Math.max(parseInt(..., 10) || 50, 1), 200)` — the `1` acts as min (correct),
+   but the expression is confusing and hard to verify.
+
+L3. No Prisma raw queries found anywhere — zero SQL injection risk.
+
+L4. In-memory session store (lib/auth-server.ts:11) — sessions lost on server restart.
+   Acceptable for dev, must be replaced with Redis/DB for production.
+
+Stage Summary:
+- 82 route files audited (every single one)
+- 6 CRITICAL issues found
+- 12 HIGH issues found
+- 10 MEDIUM issues found
+- 4 LOW issues found
+- Zero SQL injection risk (all Prisma ORM)
+- Zero raw queries found
+- Auth coverage is good (58/82 routes require auth)
+- Zod validation needs expansion (only 6/82 routes)
+- Rate limiting needs expansion (only 6/82 routes)
+- Financial operations are mostly well-protected with atomic transactions
+- The bundles/[id]/book route is the most dangerous — non-atomic multi-booking creation
+
