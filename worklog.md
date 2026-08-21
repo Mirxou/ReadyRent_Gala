@@ -661,3 +661,43 @@ Stage Summary:
 - 4 duplicate scripts merged into 1
 - 3 build scripts use relative paths
 - 1 duplicate seed file deleted
+
+---
+Task ID: fix-login-auth
+Agent: Main Orchestrator
+Task: Fix login page XSS, forgot-password, validation, localStorage token elimination
+
+Work Log:
+- **login/page.tsx**:
+  - Removed `localStorage.setItem('session-token', ...)` — was XSS double surface with HttpOnly cookie
+  - Added email validation (regex pattern) and password validation (minLength 6)
+  - Added forgot-password link pointing to /forgot-password
+  - Added 429 rate limit handling with countdown timer
+  - Added error message display from server (message_ar)
+  - Added callbackUrl support from searchParams (redirects back after login)
+  - Added autoComplete attributes for password managers
+  - Added aria-label for show/hide password button
+  - Typed form data with LoginForm interface
+- **register/page.tsx**:
+  - Removed `localStorage.setItem('session-token', ...)` — same XSS issue
+  - Added server error message handling
+- **lib/auth-helpers.ts**:
+  - Removed `getAuthToken()` (read from localStorage — now dead)
+  - Removed `getAuthHeaders()` (added Bearer from localStorage — now dead)
+  - Updated comments: stored user metadata is NON-SENSITIVE UI-only data
+  - Kept `getStoredUser()` (used by WebSocket for userId)
+- **lib/store.ts**:
+  - Removed `localStorage.removeItem('session-token')` from logout (dead reference)
+  - Changed `console.error` to `console.warn` (eslint rule)
+  - Updated comment: token cleared by server via cookie
+- **lib/api.ts**:
+  - Updated header comment: cookie-only auth, no localStorage tokens
+  - Updated CSRF comment explaining Double Submit pattern
+  - Removed `console.warn` on fetch failure (callers handle errors)
+
+Stage Summary:
+- ZERO `localStorage.setItem('session-token', ...)` calls remaining in app code
+- Auth flow: HttpOnly cookie only. XSS can no longer steal session tokens.
+- Login: validates email format + password length, shows server errors, handles rate limiting
+- Register: shows server errors instead of generic message
+- All auth helpers documented as UI-only (not for authorization decisions)

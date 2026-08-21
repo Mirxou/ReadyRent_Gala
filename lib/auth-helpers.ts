@@ -1,30 +1,19 @@
 // ═══════════════════════════════════════════════════════════════
-// STANDARD.Rent — Centralized Auth Helpers
-// Client-side token retrieval for API Authorization headers
+// STANDARD.Rent — Centralized Auth Helpers (Client-Side)
+// ═══════════════════════════════════════════════════════════════
+//
+// الأمان: التوكن في HttpOnly cookie فقط — لا localStorage.
+// هذه الدوال تقرأ فقط البيانات الوصفية (metadata) من Zustand persist
+// لإدارة واجهة المستخدم (UI state). المصادقة الحقيقية عبر cookie.
 // ═══════════════════════════════════════════════════════════════
 
 /**
- * Get auth token from localStorage.
- * The real session is managed via HttpOnly cookie (set by /api/auth/login),
- * but we also store the token in localStorage for explicit Bearer header
- * usage in scenarios where cookies aren't sent (e.g., cross-origin).
- */
-export function getAuthToken(): string | null {
-  if (typeof window === 'undefined') return null;
-
-  try {
-    // Primary: read session token from localStorage (set by login flow)
-    const token = localStorage.getItem('session-token');
-    if (token) return token;
-  } catch {
-    // Storage unavailable
-  }
-
-  return null;
-}
-
-/**
- * Get current user info from Zustand persist storage
+ * Get current user info from Zustand persist storage.
+ * This is NON-SENSITIVE metadata (id, role, username) used only for:
+ * - UI rendering (show/hide elements based on role)
+ * - WebSocket room joining (userId passed to notifications service)
+ *
+ * NEVER use this for authorization decisions — server validates the cookie.
  */
 export function getStoredUser(): { id: string; role: string; username: string } | null {
   if (typeof window === 'undefined') return null;
@@ -42,37 +31,25 @@ export function getStoredUser(): { id: string; role: string; username: string } 
       }
     }
   } catch {
-    // Storage corrupted
+    // Storage corrupted or unavailable
   }
 
   return null;
 }
 
 /**
- * Check if user is authenticated
+ * Check if user appears authenticated (UI-only check).
+ * Server-side cookie validation is the real auth gate.
  */
 export function isUserAuthenticated(): boolean {
   return !!getStoredUser();
 }
 
 /**
- * Check if user has admin role
+ * Check if user appears to have admin role (UI-only check).
+ * Server-side role validation happens in API routes.
  */
 export function isAdminUser(): boolean {
   const user = getStoredUser();
   return user?.role === 'admin';
-}
-
-/**
- * Get authorization headers for fetch calls.
- * Includes Bearer token if available in localStorage.
- * Cookies (HttpOnly) are sent automatically by the browser.
- */
-export function getAuthHeaders(): Record<string, string> {
-  const token = getAuthToken();
-  const headers: Record<string, string> = {};
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
-  return headers;
 }

@@ -39,14 +39,15 @@ export const useAuthStore = create<AuthState>()(
         try {
           await authApi.logout();
         } catch (error) {
-          console.error('Logout failed', error);
+          console.warn('Logout failed', error);
         }
         set({
           user: null,
           isAuthenticated: false,
         });
+        // Token is HttpOnly cookie — cleared by server on logout.
+        // No localStorage cleanup needed.
         if (typeof window !== 'undefined') {
-          localStorage.removeItem('session-token');
           window.location.href = '/';
         }
       },

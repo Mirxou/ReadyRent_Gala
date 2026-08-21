@@ -2,10 +2,13 @@
 
 // ═══════════════════════════════════════════════════════════════════
 // STANDARD.Rent — Sovereign Unified API Client
-// Native fetch to /api/ gateway (ready for real backend integration)
+// Auth: HttpOnly cookie sent automatically via credentials: 'include'.
+// No localStorage tokens — cookie-only for XSS prevention.
 // ═══════════════════════════════════════════════════════════════════
 
-// ──── CSRF Protection ────
+// ──── CSRF Token (Double Submit Cookie pattern) ────
+// Generated per session, sent as header on mutations.
+// Server must validate it matches the cookie value.
 function getCsrfToken(): string {
   if (typeof window === 'undefined') return '';
   let token = sessionStorage.getItem('csrf-token');
@@ -81,7 +84,7 @@ async function apiFetch(
     return { data: json, status: res.status };
   } catch (error) {
     const message = (error as Error)?.message || 'Network error';
-    console.warn('API fetch failed:', path, message);
+    // Silently fail — toasts shown by callers using server error messages
     return { data: { error: message }, status: 0, meta: { failed: true } };
   }
 }

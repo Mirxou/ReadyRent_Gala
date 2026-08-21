@@ -31,12 +31,13 @@ export default function RegisterPage() {
         username: data.first_name ? data.first_name.replace(/\s+/g, '_') : undefined,
       };
       const response = await authApi.register(registerData);
+      if (response.status >= 400) {
+        const msg = (response.data as { message_ar?: string })?.message_ar || 'فشل إنشاء الهوية. تحقق من المدخلات.';
+        toast.error(msg);
+        return;
+      }
       if (response.data?.user) {
-        // 🛡️ Security: Primary auth is HttpOnly cookie (set by server).
-        // Token is also stored in localStorage for explicit Bearer header usage.
-        if (response.data.token) {
-          localStorage.setItem('session-token', response.data.token);
-        }
+        // Auth stored in HttpOnly cookie by server — NO localStorage token.
         setAuth(response.data.user);
         toast.success('تم إنشاء الهوية السيادية بنجاح');
         router.push('/');
@@ -44,7 +45,7 @@ export default function RegisterPage() {
         router.push('/login');
       }
     } catch (_error) {
-      toast.error('فشل إنشاء الهوية. تحقق من المدخلات.');
+      toast.error('خطأ في الاتصال بالخادم');
     } finally {
       setIsLoading(false);
     }
