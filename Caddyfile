@@ -1,10 +1,36 @@
+# ═══════════════════════════════════════════════════════════════
+# STANDARD.Rent — Caddy Reverse Proxy Gateway
+# ═══════════════════════════════════════════════════════════════
+# 
+# الأمان: XTransformPort محصور بالمنافذ المسموحة فقط.
+# أي طلب بمنفذ غير مسموح → 403 Forbidden.
+# هذا يمنع SSRF الداخلي (الوصول لمنافذ مثل 22, 5432, 6379...)
+# ═══════════════════════════════════════════════════════════════
+
+# ──── المنافذ المسموحة ────
+# 3000 = Next.js (التطبيق الرئيسي)
+# 3004 = خدمة الإشعارات WebSocket (notifications-service)
+# لإضافة منفذ جديد: أضف matcher + handle مع reverse_proxy
+
 :81 {
-	@transform_port_query {
-		query XTransformPort=*
+
+	# ──── 1. الأمان: رؤوس HTTP حماية ────
+	header {
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		X-XSS-Protection "1; mode=block"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		-Server
 	}
 
-	handle @transform_port_query {
-		reverse_proxy localhost:{query.XTransformPort} {
+	# ──── 2. البروكسي: خدمة الإشعارات (WebSocket على 3004) ────
+	@port_notifications {
+		query XTransformPort=3004
+	}
+
+	handle @port_notifications {
+		reverse_proxy localhost:3004 {
 			header_up Host {host}
 			header_up X-Forwarded-For {remote_host}
 			header_up X-Forwarded-Proto {scheme}
@@ -12,7 +38,16 @@
 		}
 	}
 
+	# ──── 3. حماية: رفض أي منفذ غير مسموح ────
+	# يصل هنا فقط إذا كان XTransformPort موجوداً لكن ليس 3004
+	# (لأن handle blocks متبادلة الحصر — الأول يلتقط 3004)
 	handle {
+		@unauthorized_port {
+			query XTransformPort=*
+		}
+		respond @unauthorized_port 403 "{\"success\":false,\"code\":\"PORT_FORBIDDEN\",\"message\":\"Port not allowed\"}"
+
+		# ──── 4. الافتراضي: Next.js على 3000 ────
 		reverse_proxy localhost:3000 {
 			header_up Host {host}
 			header_up X-Forwarded-For {remote_host}

@@ -576,3 +576,24 @@ Stage Summary:
 - lib/auth-server.ts: complete rewrite — session tokens now HMAC-signed with NEXTAUTH_SECRET, cannot be forged
 - Login/Logout routes verified compatible with new signed token format
 - Zero lint errors in modified files
+
+---
+Task ID: fix-1.3
+Agent: Main Orchestrator
+Task: Fix Caddyfile — port allowlist for XTransformPort
+
+Work Log:
+- Analyzed original Caddyfile: open SSRF via `reverse_proxy localhost:{query.XTransformPort}` — any port accessible
+- Scanned codebase for all XTransformPort usage: only 3004 (notifications) and 3003 (examples/ only)
+- Scanned all mini-service ports: only 3004 (notifications-service)
+- Rewrote Caddyfile with explicit port allowlist pattern
+- Added security headers: X-Content-Type-Options, X-Frame-Options, X-XSS-Protection, Referrer-Policy, Permissions-Policy, Server removal
+- Added `@port_notifications` matcher for 3004, `@unauthorized_port` catch-all returning 403
+- Default handler proxies to Next.js on 3000 (no XTransformPort needed)
+
+Stage Summary:
+- Caddyfile now allows ONLY port 3004 via XTransformPort, everything else → 403
+- SSRF via XTransformPort=22/5432/6379/etc. is blocked
+- Security headers added globally
+- Server header hidden (-Server)
+- Adding a new service port requires adding one @matcher + one handle block (documented in comments)
