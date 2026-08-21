@@ -256,7 +256,7 @@ function ArtisansSpotlight() {
                 animate={inView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.6, delay: i * 0.1, ease: [0.32, 0.72, 0, 1] }}
               >
-                <Link href="/artisans" className="block group">
+                <Link href={`/artisans/${artisan.id}`} className="block group">
                   <GlassPanel
                     variant="obsidian"
                     className="p-6 hover:border-sovereign-gold/30 transition-all duration-500 rounded-[2rem] text-center"
@@ -392,14 +392,35 @@ function CustomerReviewsSection() {
 /* ════════════════════════════════════════════
    STATISTICS BAR
    ════════════════════════════════════════════ */
-const stats = [
-  { value: 500, suffix: '+', label: 'منتج', icon: Package },
-  { value: 50, suffix: '+', label: 'حرفية', icon: Users },
-  { value: 120, suffix: '+', label: 'خدمة', icon: Briefcase },
-  { value: 2000, suffix: '+', label: 'عميل سعيد', icon: Smile },
+const STATS_API = '/api/analytics/admin/dashboard';
+const DEFAULT_STATS = [
+  { value: 0, suffix: '', label: 'منتج', icon: Package, key: 'total_products' },
+  { value: 0, suffix: '', label: 'حرفية', icon: Users, key: 'total_artisans' },
+  { value: 0, suffix: '', label: 'خدمة', icon: Briefcase, key: 'total_services' },
+  { value: 0, suffix: '', label: 'عميل سعيد', icon: Smile, key: 'total_users' },
 ];
 
 function StatisticsBar() {
+  const [stats, setStats] = useState(DEFAULT_STATS);
+
+  useEffect(() => {
+    fetch(STATS_API)
+      .then(r => r.json())
+      .then(json => {
+        if (json.success && json.data) {
+          const d = json.data;
+          setStats(prev => prev.map(s => ({
+            ...s,
+            value: (d[s.key] as number) || 0,
+            suffix: (d[s.key] as number) > 0 ? '+' : '',
+          })));
+        }
+      })
+      .catch(() => {
+        // Silently fall back to zeros — no fake numbers
+      });
+  }, []);
+
   return (
     <section className="py-16 md:py-20 px-4">
       <div className="max-w-7xl mx-auto">

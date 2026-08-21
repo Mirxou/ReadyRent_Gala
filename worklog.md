@@ -701,3 +701,26 @@ Stage Summary:
 - Login: validates email format + password length, shows server errors, handles rate limiting
 - Register: shows server errors instead of generic message
 - All auth helpers documented as UI-only (not for authorization decisions)
+---
+Task ID: 4-pages-audit
+Agent: Main Orchestrator
+Task: Systematic page-by-page audit fixes (74 items)
+
+Work Log:
+- #3 (auth)/layout.tsx: Removed unnecessary 'use client' directive
+- middleware.ts: Added /vendors/dashboard and /products/create to PROTECTED_ROUTES; added PROTECTED_OVERRIDES to prevent /products prefix from exposing /products/create
+- #5 about/page.tsx: Replaced all purple-500/pink-500 with sovereign-gold palette (icons, gradients, hover, CTA button)
+- #69 admin/branches: Added role guard (admin/staff), replaced confirm() with AlertDialog, removed hardcoded 'Constantine' default city, fixed loadBranches declaration order
+- #70 admin/cms: Added role guard (admin/staff), replaced confirm() with AlertDialog, replaced hardcoded emerald-100/amber-100/gray-200 with theme-aware colors (bg-green-500/15, bg-amber-500/10, border-border)
+- #72 admin/products/new: Added RoleGuard wrapper component for admin/staff check
+- #41 vendors/dashboard: Added auth guard (isAuthenticated check), fixed loadDashboard declaration order
+- #4 page.tsx (main): Fixed artisan card links from /artisans to /artisans/${id}; replaced hardcoded stats (500+, 50+, 120+, 2000+) with dynamic API fetch from /api/analytics/admin/dashboard with zero fallback
+- Added shadcn alert-dialog component (was missing)
+
+Stage Summary:
+- 8 files modified, 1 new component added (alert-dialog.tsx)
+- Security: 4 admin pages now have client-side role guards; 2 pages added to middleware protection
+- UX: confirm() replaced with non-blocking AlertDialog in 2 pages
+- Visual: about/page.tsx now uses consistent gold palette; admin/cms uses theme-aware colors
+- Data integrity: main page stats are now dynamic, not fake hardcoded numbers
+- Lint: 50 problems (16 errors, 34 warnings) — unchanged from before (0 new issues)

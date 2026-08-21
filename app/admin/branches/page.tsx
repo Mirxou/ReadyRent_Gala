@@ -8,7 +8,18 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { api } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
-import { MapPin, Plus, Edit, Trash2, Users, Package } from 'lucide-react';
+import { MapPin, Plus, Edit, Trash2, Users, Package, ShieldAlert } from 'lucide-react';
+import { useAuthStore } from '@/lib/store';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface Branch {
   id: string;
@@ -28,16 +39,18 @@ interface Branch {
 
 export default function BranchesPage() {
   const { toast } = useToast();
+  const { user, isAuthenticated } = useAuthStore();
   const [branches, setBranches] = useState<Branch[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingBranch, setEditingBranch] = useState<Branch | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Branch | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     name_ar: '',
     code: '',
     address: '',
-    city: 'Constantine',
+    city: '',
     postal_code: '',
     latitude: '',
     longitude: '',
@@ -45,10 +58,6 @@ export default function BranchesPage() {
     email: '',
     is_active: true,
   });
-
-  useEffect(() => {
-    loadBranches();
-  }, []);
 
   const loadBranches = async () => {
     try {
@@ -64,6 +73,10 @@ export default function BranchesPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadBranches();
+  }, []);
 
   const handleSubmit = async () => {
     if (!formData.name_ar || !formData.code || !formData.address) {
@@ -102,7 +115,7 @@ export default function BranchesPage() {
         name_ar: '',
         code: '',
         address: '',
-        city: 'Constantine',
+        city: '',
         postal_code: '',
         latitude: '',
         longitude: '',
@@ -138,9 +151,10 @@ export default function BranchesPage() {
     setShowForm(true);
   };
 
-  const handleDelete = async (branchId: string) => {
-    if (!confirm('هل أنت متأكد من حذف هذا الفرع؟')) return;
-
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    const branchId = deleteTarget.id;
+    setDeleteTarget(null);
     try {
       await api.delete(`/admin/branches/${branchId}`);
       toast({
@@ -156,6 +170,19 @@ export default function BranchesPage() {
       });
     }
   };
+
+  // ── Role guard ──
+  if (!isAuthenticated || (user?.role !== 'admin' && user?.role !== 'staff')) {
+    return (
+      <div className="p-6 flex items-center justify-center min-h-[60vh]">
+        <div className="text-center space-y-4">
+          <ShieldAlert className="w-16 h-16 text-red-500 mx-auto" />
+          <h2 className="text-2xl font-bold">الوصول مقيّد</h2>
+          <p className="text-muted-foreground">هذه الصفحة متاحة للمسؤولين فقط.</p>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return <div className="p-6">جاري التحميل...</div>;
@@ -284,7 +311,7 @@ export default function BranchesPage() {
                   <Button variant="outline" size="sm" onClick={() => handleEdit(branch)}>
                     <Edit className="w-4 h-4" />
                   </Button>
-                  <Button variant="outline" size="sm" onClick={() => handleDelete(branch.id)}>
+                  <Button variant="outline" size="sm" onClick={() => setDeleteTarget(branch)}>
                     <Trash2 className="w-4 h-4" />
                   </Button>
                 </div>
@@ -328,8 +355,23 @@ export default function BranchesPage() {
           </CardContent>
         </Card>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>حذف الفرع</AlertDialogTitle>
+            <AlertDialogDescription>
+              هل أنت متأكد من حذف فرع &quot;{deleteTarget?.name_ar}&quot;; لا يمكن التراجع عن هذا الإجراء.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>إلغاء</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">حذف</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
-
 

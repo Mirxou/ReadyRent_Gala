@@ -3,7 +3,9 @@
 // ═══════════════════════════════════════════════════════════════
 //
 // المسارات المحمية: /dashboard, /wallet, /bookings, /returns,
-//                   /verification, /cart, /checkout, /disputes
+//                   /verification, /cart, /checkout, /disputes,
+//                   /social, /trust-score, /bundles, /contracts,
+//                   /vendors/dashboard, /products/create
 // المسارات الإدارية:  /admin
 //
 // آلية العمل:
@@ -20,6 +22,7 @@ const PROTECTED_ROUTES = [
   '/dashboard', '/wallet', '/bookings', '/returns',
   '/verification', '/cart', '/checkout', '/disputes',
   '/social', '/trust-score', '/bundles', '/contracts',
+  '/vendors/dashboard', '/products/create',
 ];
 
 const ADMIN_ROUTES = ['/admin'];
@@ -28,9 +31,16 @@ const ADMIN_ROUTES = ['/admin'];
 const API_ROUTE_PREFIX = '/api/';
 
 // Static/auth routes that should never be gated
+// NOTE: /products is public BUT /products/create is in PROTECTED_ROUTES
+// The protected check runs AFTER public check, so we must exclude
+// /products/create from the public blanket match.
 const PUBLIC_ROUTES = ['/', '/login', '/register', '/forgot-password',
   '/products', '/services', '/artisans', '/blog', '/about',
   '/privacy', '/insurance', '/contact'];
+
+// Routes that must NOT be treated as public even if they
+// share a prefix with a PUBLIC_ROUTES entry.
+const PROTECTED_OVERRIDES = ['/products/create'];
 
 function extractToken(request: NextRequest): string | null {
   // 1. Authorization: Bearer <token>
@@ -44,6 +54,10 @@ function extractToken(request: NextRequest): string | null {
 }
 
 function isPublicPath(pathname: string): boolean {
+  // Protected overrides take precedence over public prefixes
+  if (PROTECTED_OVERRIDES.some(r => pathname.startsWith(r))) {
+    return false;
+  }
   // Exact matches for known public pages
   if (PUBLIC_ROUTES.some(r => pathname === r || pathname.startsWith(r + '/'))) {
     return true;

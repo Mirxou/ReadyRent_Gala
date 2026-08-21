@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { api } from '@/lib/api';
+import { useAuthStore } from '@/lib/store';
 import { formatNumber } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { Package, TrendingUp, DollarSign, Clock } from 'lucide-react';
@@ -30,13 +31,10 @@ interface VendorDashboard {
 }
 
 export default function VendorDashboardPage() {
+  const { isAuthenticated } = useAuthStore();
   const { toast } = useToast();
   const [dashboard, setDashboard] = useState<VendorDashboard | null>(null);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    loadDashboard();
-  }, []);
 
   const loadDashboard = async () => {
     try {
@@ -52,6 +50,10 @@ export default function VendorDashboardPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadDashboard();
+  }, []);
 
   if (loading) {
     return (
@@ -98,6 +100,18 @@ export default function VendorDashboardPage() {
             ))}
           </CardContent>
         </Card>
+      </div>
+    );
+  }
+
+  // ── Auth guard ──
+  if (!isAuthenticated) {
+    return (
+      <div className="p-6 flex items-center justify-center min-h-[60vh]" dir="rtl">
+        <div className="text-center space-y-4">
+          <h2 className="text-2xl font-bold">سجّل الدخول أولاً</h2>
+          <p className="text-muted-foreground">تحتاج إلى حساب للوصول إلى لوحة التحكم.</p>
+        </div>
       </div>
     );
   }

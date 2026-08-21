@@ -9,7 +9,18 @@ import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
 import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
 import { cmsApi } from '@/lib/api';
 import { toast } from 'sonner';
-import { Plus, Pencil, Trash2, Loader2, FileText, ArrowLeft } from 'lucide-react';
+import { Plus, Pencil, Trash2, Loader2, FileText, ArrowLeft, ShieldAlert } from 'lucide-react';
+import { useAuthStore } from '@/lib/store';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 // ──── Types matching actual CMSPage model ────
 interface CMSPage {
   id: string;
@@ -31,6 +42,7 @@ function slugify(text: string): string {
 }
 
 export default function CMSPagesPage() {
+  const { user, isAuthenticated } = useAuthStore();
   const [pages, setPages] = useState<CMSPage[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -43,6 +55,7 @@ export default function CMSPagesPage() {
     status: 'draft' as 'draft' | 'published',
   });
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<CMSPage | null>(null);
 
   const fetchPages = useCallback(async () => {
     setLoading(true);
@@ -102,9 +115,10 @@ export default function CMSPagesPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('هل أنت متأكد من حذف هذه الصفحة؟')) return;
-
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    const id = deleteTarget.id;
+    setDeleteTarget(null);
     setDeletingId(id);
     try {
       await cmsApi.delete(id);
@@ -116,6 +130,19 @@ export default function CMSPagesPage() {
       setDeletingId(null);
     }
   };
+
+  // ── Role guard ──
+  if (!isAuthenticated || (user?.role !== 'admin' && user?.role !== 'staff')) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center space-y-4">
+          <ShieldAlert className="w-16 h-16 text-red-500 mx-auto" />
+          <h2 className="text-2xl font-bold">الوصول مقيّد</h2>
+          <p className="text-muted-foreground">هذه الصفحة متاحة للمسؤولين فقط.</p>
+        </div>
+      </div>
+    );
+  }
 
   // ──── Form View ────
   if (editing) {
@@ -189,8 +216,8 @@ export default function CMSPagesPage() {
                   onClick={() => setForm({ ...form, status: 'draft' })}
                   className={`px-4 py-2 rounded-lg border-2 text-sm font-medium transition-all ${
                     form.status === 'draft'
-                      ? 'border-amber-500 bg-amber-50 text-amber-700'
-                      : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                      ? 'border-amber-500 bg-amber-500/10 text-amber-600 dark:text-amber-400'
+                      : 'border-border text-muted-foreground hover:border-muted-foreground'
                   }`}
                 >
                   مسودة
@@ -200,8 +227,8 @@ export default function CMSPagesPage() {
                   onClick={() => setForm({ ...form, status: 'published' })}
                   className={`px-4 py-2 rounded-lg border-2 text-sm font-medium transition-all ${
                     form.status === 'published'
-                      ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
-                      : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                      ? 'border-green-500 bg-green-500/10 text-green-600 dark:text-green-400'
+                      : 'border-border text-muted-foreground hover:border-muted-foreground'
                   }`}
                 >
                   منشور
@@ -276,8 +303,8 @@ export default function CMSPagesPage() {
                       variant={page.status === 'published' ? 'default' : 'secondary'}
                       className={
                         page.status === 'published'
-                          ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-100'
-                          : 'bg-amber-100 text-amber-700 hover:bg-amber-100'
+                          ? 'bg-green-500/15 text-green-600 dark:text-green-400'
+                          : 'bg-amber-500/15 text-amber-600 dark:text-amber-400'
                       }
                     >
                       {page.status === 'published' ? 'منشور' : 'مسودة'}
@@ -301,15 +328,15 @@ export default function CMSPagesPage() {
                 <div className="flex items-center gap-2 shrink-0">
                   <button
                     onClick={() => openEdit(page)}
-                    className="p-2 rounded-lg border border-gray-200 hover:border-sovereign-gold hover:text-sovereign-gold transition-colors"
+                    className="p-2 rounded-lg border border-border hover:border-sovereign-gold hover:text-sovereign-gold transition-colors"
                     title="تعديل"
                   >
                     <Pencil className="h-4 w-4" />
                   </button>
                   <button
-                    onClick={() => handleDelete(page.id)}
+                    onClick={() => setDeleteTarget(page)}
                     disabled={deletingId === page.id}
-                    className="p-2 rounded-lg border border-gray-200 hover:border-red-500 hover:text-red-500 transition-colors disabled:opacity-50"
+                    className="p-2 rounded-lg border border-border hover:border-red-500 hover:text-red-500 transition-colors disabled:opacity-50"
                     title="حذف"
                   >
                     {deletingId === page.id ? (
@@ -324,6 +351,22 @@ export default function CMSPagesPage() {
           ))}
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>حذف الصفحة</AlertDialogTitle>
+            <AlertDialogDescription>
+              هل أنت متأكد من حذف صفحة &quot;{deleteTarget?.title}&quot;; لا يمكن التراجع عن هذا الإجراء.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>إلغاء</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">حذف</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

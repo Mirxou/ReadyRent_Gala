@@ -4,7 +4,8 @@ import { useEffect, useState, useCallback, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import Link from 'next/link';
-import { ArrowLeft, Loader2, Save, ImageIcon, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Loader2, Save, ImageIcon, CheckCircle, ShieldAlert } from 'lucide-react';
+import { useAuthStore } from '@/lib/store';
 import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
 import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
 import { Input } from '@/components/ui/input';
@@ -520,6 +521,22 @@ function ProductForm() {
    Page Export (wrapped in Suspense for useSearchParams)
    ──────────────────────────────────────────────── */
 
+function RoleGuard({ children }: { children: React.ReactNode }) {
+  const { user, isAuthenticated } = useAuthStore();
+  if (!isAuthenticated || (user?.role !== 'admin' && user?.role !== 'staff')) {
+    return (
+      <div className="min-h-screen bg-sovereign-obsidian pt-24 pb-16 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <ShieldAlert className="w-16 h-16 text-red-500 mx-auto" />
+          <h2 className="text-2xl font-bold text-white">الوصول مقيّد</h2>
+          <p className="text-white/60">هذه الصفحة متاحة للمسؤولين فقط.</p>
+        </div>
+      </div>
+    );
+  }
+  return <>{children}</>;
+}
+
 export default function NewProductPage() {
   return (
     <Suspense
@@ -531,7 +548,9 @@ export default function NewProductPage() {
         </div>
       }
     >
-      <ProductForm />
+      <RoleGuard>
+        <ProductForm />
+      </RoleGuard>
     </Suspense>
   );
 }

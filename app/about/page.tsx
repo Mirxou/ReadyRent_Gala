@@ -17,12 +17,12 @@ const features = [
         description: "قصتنا بدأت من الرغبة في جعل كل امرأة تشعر وكأنها ملكة في ليلتها."
     },
     {
-        icon: <Zap className="w-8 h-8 text-purple-500" />,
+        icon: <Zap className="w-8 h-8 text-sovereign-gold" />,
         title: "خدمة سريعة",
         description: "التوصيل والتجهيز في وقت قياسي لضمان راحتكم التامة."
     },
     {
-        icon: <ShieldCheck className="w-8 h-8 text-cyan-500" />,
+        icon: <ShieldCheck className="w-8 h-8 text-sovereign-gold" />,
         title: "جودة مضمونة",
         description: "نضمن نظافة وسلامة كل فستان بأعلى معايير العناية المهنية."
     }
@@ -77,7 +77,7 @@ export default function AboutPage() {
                         viewport={{ once: true }}
                         className="relative h-[500px] rounded-3xl overflow-hidden shadow-2xl glow-gold"
                     >
-                        <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-pink-500/20 mix-blend-overlay" />
+                        <div className="absolute inset-0 bg-gradient-to-br from-sovereign-gold/20 to-sovereign-gold/5 mix-blend-overlay" />
                         <div className="absolute inset-0 flex items-center justify-center">
                             <div className="text-9xl font-black text-white/10 italic select-none">STANDARD</div>
                         </div>
@@ -104,7 +104,7 @@ export default function AboutPage() {
                             <div className="mb-6 p-4 rounded-2xl bg-white/5 w-fit group-hover:bg-white/10 transition-colors">
                                 {feature.icon}
                             </div>
-                            <h3 className="text-2xl font-bold mb-4 group-hover:text-purple-500 transition-colors">
+                            <h3 className="text-2xl font-bold mb-4 group-hover:text-sovereign-gold transition-colors">
                                 {feature.title}
                             </h3>
                             <p className="text-muted-foreground leading-relaxed">
@@ -118,14 +118,14 @@ export default function AboutPage() {
                 <motion.div
                     initial={{ opacity: 0 }}
                     whileInView={{ opacity: 1 }}
-                    className="mt-32 p-12 rounded-[3rem] bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-sovereign-gold/20 border border-white/10 text-center"
+                    className="mt-32 p-12 rounded-[3rem] bg-gradient-to-r from-sovereign-gold/20 via-sovereign-gold/10 to-sovereign-gold/20 border border-sovereign-gold/20 text-center"
                 >
                     <h2 className="text-4xl md:text-5xl font-black mb-8">هل أنتِ مستعدة للتألق؟</h2>
                     <Link href="/products">
                         <motion.div
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
-                            className="inline-block px-12 py-6 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full text-2xl font-bold shadow-2xl glow-gold cursor-pointer"
+                            className="inline-block px-12 py-6 bg-gradient-to-r from-sovereign-gold to-yellow-500 rounded-full text-2xl font-bold shadow-2xl glow-gold text-black cursor-pointer"
                         >
                             تصفحي المجموعة الآن
                         </motion.div>
