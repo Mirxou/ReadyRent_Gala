@@ -1,5 +1,3 @@
-'use client';
-
 import { ParticleField } from '@/components/ui/particle-field';
 import { motion } from 'framer-motion';
 
