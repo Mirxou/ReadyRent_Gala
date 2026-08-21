@@ -1,12 +1,11 @@
 {
   "compilerOptions": {
-    "target": "ES2017",
+    "target": "ES2022",
     "lib": [
       "dom",
       "dom.iterable",
       "esnext"
     ],
-    "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
@@ -15,8 +14,7 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "noImplicitAny": false,
-    "jsx": "react-jsx",
+    "jsx": "preserve",
     "incremental": true,
     "forceConsistentCasingInFileNames": true,
     "plugins": [
@@ -24,7 +22,7 @@
         "name": "next"
       }
     ],
-    
+
     "baseUrl": ".",
     "paths": {
       "@/*": [
@@ -46,6 +44,7 @@
     "examples/**",
     "skills/**",
     "download/**",
-    "upload/**"
+    "upload/**",
+    "mini-services/**"
   ]
 }

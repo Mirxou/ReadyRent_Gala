@@ -597,3 +597,37 @@ Stage Summary:
 - Security headers added globally
 - Server header hidden (-Server)
 - Adding a new service port requires adding one @matcher + one handle block (documented in comments)
+
+---
+Task ID: fix-1.4-1.7
+Agent: Main Orchestrator
+Task: Fix package.json, package-lock.json, bun.lock, tsconfig.json
+
+Work Log:
+- **package.json**:
+  - name: "frontend" → "standard-rent" + description in Arabic
+  - Moved `prisma` from dependencies → devDependencies (CLI-only, not needed at runtime)
+  - Removed `socket.io` (server) from dependencies — only used in mini-services which has own package.json
+  - Removed 7 fake test scripts (jest/playwright/lhci) — no configs exist for any of them
+  - Added db:push, db:seed, db:studio, db:generate scripts + prisma.seed config
+- **package-lock.json**: Deleted (16,101 lines) — bun is the runtime, npm lockfile is dead weight
+- **bun.lock**: Deleted old lockfile (workspace name: nextjs_tailwind_shadcn_ts), regenerated with `bun install` → new name: standard-rent. 2 packages removed (socket.io server).
+- **tsconfig.json**:
+  - jsx: "react-jsx" → "preserve" (required for Next.js 16 RSC — SWC handles transform)
+  - noImplicitAny: false → removed (strict:true now works correctly, was being overridden)
+  - target: ES2017 → ES2022 (modern features: Array.at, Object.hasOwn, structuredClone)
+  - allowJs: true → removed (0 .js files in source, only .mjs config files at root)
+  - Added mini-services/ to exclude
+  - next-env.d.ts: kept in include — this is CORRECT Next.js behavior (auto-generated on first dev, gitignored, TypeScript skips if missing)
+- Fixed 4 new implicit any errors from noImplicitAny change:
+  - app/dashboard/wishlist/page.tsx: added `i: number` type to map callback
+  - app/social/page.tsx: cast unknown to String before charAt(0)
+  - components/product/product-card.tsx: typed images array before indexing
+
+Stage Summary:
+- Workspace name consistent: standard-rent everywhere
+- Only 1 lockfile: bun.lock (2,757 lines vs 16,101 deleted)
+- TypeScript stricter: noImplicitAny now enforced, JSX handled by SWC
+- Prisma CLI not shipped to production
+- socket.io server removed from main deps (was dead weight)
+- Zero implicit any errors, zero lint regressions in modified files

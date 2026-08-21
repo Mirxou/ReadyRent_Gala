@@ -19,7 +19,8 @@ interface ProductCardProps {
 export function ProductCard({ product, priority = false }: ProductCardProps) {
   const PLACEHOLDER = '/placeholder-product.jpg';
   const isElite = product.is_premium || (product.trust_score && product.trust_score > 90);
-  const primaryImage = product.primary_image || product.images?.[0]?.image || product.images?.[0]?.url || product.image || PLACEHOLDER;
+  const images = product.images as Array<{ image?: string; url?: string }> | undefined;
+  const primaryImage = product.primary_image || images?.[0]?.image || images?.[0]?.url || product.image || PLACEHOLDER;
 
   return (
     <SovereignGlow color={isElite ? 'gold' : 'blue'}>

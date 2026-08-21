@@ -64,7 +64,7 @@ export default function WishlistPage() {
         <div className="lg:col-span-8">
            {wishlist.length > 0 ? (
              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                {wishlist.map((item: Record<string, unknown>, i) => (
+                {wishlist.map((item: Record<string, unknown>, i: number) => (
                   <SovereignGlow key={item.id} color={i % 2 === 0 ? "gold" : "blue"}>
                      <GlassPanel className="p-4 group relative h-full flex flex-col justify-between overflow-hidden" gradientBorder>
                          
