@@ -12,10 +12,14 @@ node_modules
 
 # testing
 /coverage
+*.lcov
+.nyc_output
 
 # next.js
 /.next/
 /out/
+.next
+dist
 
 # production
 /build
@@ -32,10 +36,10 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
 # vercel
 .vercel
-
 
 # typescript
 *.tsbuildinfo
@@ -61,3 +65,24 @@ tool-results/
 *.sqlite
 *.sqlite3
 db/*.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+*~
+.sublime-project
+.sublime-workspace
+
+# OS
+Thumbs.db
+
+# Jest coverage
+/coverage/
+*.lcov
+
+# Upload/Download directories
+/upload/
+/download/
