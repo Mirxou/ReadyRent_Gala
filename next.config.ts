@@ -1,8 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-    allowedDevOrigins: ['*'],
-    transpilePackages: [],
+    // Development: restrict to known origins (not '*')
+    allowedDevOrigins: process.env.NODE_ENV === 'development'
+        ? ['http://localhost:3000', 'http://localhost:81']
+        : [],
+
     images: {
         formats: ['image/avif', 'image/webp'],
         minimumCacheTTL: 3600,
@@ -21,47 +24,10 @@ const nextConfig: NextConfig = {
                 protocol: 'https',
                 hostname: '**.cloudinary.com',
             },
-            {
-                protocol: 'https',
-                hostname: 'images.unsplash.com',
-            },
-            {
-                protocol: 'https',
-                hostname: 'picsum.photos',
-            },
         ],
     },
     turbopack: {
         root: '.',
-    },
-    async headers() {
-        return [
-            {
-                source: '/(.*)',
-                headers: [
-                    {
-                        key: 'X-DNS-Prefetch-Control',
-                        value: 'on',
-                    },
-                    {
-                        key: 'Strict-Transport-Security',
-                        value: 'max-age=63072000; includeSubDomains; preload',
-                    },
-                    {
-                        key: 'X-Content-Type-Options',
-                        value: 'nosniff',
-                    },
-                    {
-                        key: 'X-XSS-Protection',
-                        value: '1; mode=block',
-                    },
-                    {
-                        key: 'Referrer-Policy',
-                        value: 'strict-origin-when-cross-origin',
-                    },
-                ],
-            },
-        ];
     },
 };
 

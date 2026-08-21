@@ -61,3 +61,16 @@ tool-results/
 *.sqlite
 *.sqlite3
 db/*.db
+
+# temp/review artifacts
+*.pid
+review-results.txt
+review.sh
+COMPREHENSIVE-REPORT.md
+keepalive.log
+*.png
+!public/**/*.png
+!public/**/*.jpg
+!public/**/*.svg
+!public/**/*.webp
+!public/**/*.ico

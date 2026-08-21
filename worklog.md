@@ -631,3 +631,33 @@ Stage Summary:
 - Prisma CLI not shipped to production
 - socket.io server removed from main deps (was dead weight)
 - Zero implicit any errors, zero lint regressions in modified files
+
+---
+Task ID: fix-1.8-1.25
+Agent: Main Orchestrator
+Task: Batch cleanup 1.8→1.25: eslint, next.config, tailwind, middleware, components.json, seed, temp files, scripts
+
+Work Log:
+- **1.8 eslint.config.mjs**: Added globalIgnores for skills/, mini-services/, examples/, .zscripts/. Added no-console rule (warn). Lint dropped 119→50 problems.
+- **1.9 next.config.ts**: Removed allowedDevOrigins: ['*'] → restricted to localhost:3000/81 in dev. Removed duplicate security headers (now in Caddy). Removed picsum.photos + images.unsplash.com from remotePatterns.
+- **1.10 tailwind.config.ts**: DELETED — dead code. Tailwind v4 via @tailwindcss/postcss ignores this file. All custom colors defined in globals.css via @theme inline.
+- **1.11 postcss.config.mjs**: No change needed — correctly uses @tailwindcss/postcss (v4).
+- **1.12 middleware.ts**: Complete rewrite. Removed demo mode. Protected routes (/dashboard, /bookings, etc.) now redirect to /login if no session_token. Admin routes (/admin) now redirect to /login if no session_token. API routes excluded (handle own auth). Security headers removed (now in Caddy).
+- **1.13 components.json**: Confirmed correct for Tailwind v4 (config empty = no config file needed).
+- **1.16 seed-content.ts**: DELETED — duplicate of prisma/seed.ts which already seeds CMS pages + blog posts.
+- **1.17-1.18**: Deleted review-results.txt (2,942 lines) + review.sh. Added to .gitignore.
+- **1.19-1.22**: Merged 4 identical keep-alive scripts into 1 (keep-alive.sh using bun). Deleted start-server.sh, run-server.sh, server-keepalive.sh.
+- **1.23**: Deleted all 24 root PNG screenshots (review-*, check-*, verify-*, final-*, home-check*, preview-check*). Added *.png to .gitignore (with !public/** exceptions).
+- **1.24**: Deleted server.pid + COMPREHENSIVE-REPORT.md. Added *.pid to .gitignore.
+- **1.25 .zscripts/**: Replaced 3 hardcoded /home/z/my-project paths with $(cd "$(dirname "$0")/.." && pwd) in build.sh, mini-services-install.sh, mini-services-build.sh.
+- .gitignore: Added *.pid, review-results.txt, review.sh, COMPREHENSIVE-REPORT.md, keepalive.log, *.png (with public exceptions).
+
+Stage Summary:
+- Lint: 119→50 problems (69 eliminated by excluding skills/mini-services/examples)
+- No new lint errors in any modified file
+- Middleware: /admin and protected routes now enforce authentication (redirect to /login)
+- Tailwind: v3 config removed, v4 is the sole config (globals.css + postcss)
+- 26 temporary/review files deleted
+- 4 duplicate scripts merged into 1
+- 3 build scripts use relative paths
+- 1 duplicate seed file deleted

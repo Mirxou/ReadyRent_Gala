@@ -1,67 +1,97 @@
+// ═══════════════════════════════════════════════════════════════
+// STANDARD.Rent — Middleware (Auth Gate + Security Headers)
+// ═══════════════════════════════════════════════════════════════
+//
+// المسارات المحمية: /dashboard, /wallet, /bookings, /returns,
+//                   /verification, /cart, /checkout, /disputes
+// المسارات الإدارية:  /admin
+//
+// آلية العمل:
+// 1. التحقق من وجود session_token (cookie أو Authorization header)
+// 2. إذا غائب → إعادة توجيه لصفحة الدخول
+// 3. التحقق الكامل (HMAC + دور المستخدم) يتم في كل API route
+//    عبر getSessionFromRequest() من auth-server.ts
+// ═══════════════════════════════════════════════════════════════
+
 import { NextRequest, NextResponse } from 'next/server';
 
-/**
- * IMPORTANT — Demo / Mock Mode:
- * Protected and admin routes do NOT enforce authentication in this build.
- * They allow all requests through (setting warning headers for observability).
- * This is intentional for demo/development purposes. Before production deployment,
- * replace the `NextResponse.next()` blocks with proper session verification
- * and redirect unauthenticated users to /login.
- */
+// ──── Route Definitions ────
+const PROTECTED_ROUTES = [
+  '/dashboard', '/wallet', '/bookings', '/returns',
+  '/verification', '/cart', '/checkout', '/disputes',
+  '/social', '/trust-score', '/bundles', '/contracts',
+];
 
-// Routes that require authentication
-const PROTECTED_ROUTES = ['/dashboard', '/wallet', '/bookings', '/returns', '/verification', '/cart', '/checkout'];
 const ADMIN_ROUTES = ['/admin'];
 
-// Routes that should redirect to / if already authenticated (used for future auth redirect logic)
-// const AUTH_ROUTES = ['/login', '/register'];
+// API routes that skip the middleware gate (they do their own auth)
+const API_ROUTE_PREFIX = '/api/';
+
+// Static/auth routes that should never be gated
+const PUBLIC_ROUTES = ['/', '/login', '/register', '/forgot-password',
+  '/products', '/services', '/artisans', '/blog', '/about',
+  '/privacy', '/insurance', '/contact'];
+
+function extractToken(request: NextRequest): string | null {
+  // 1. Authorization: Bearer <token>
+  const authHeader = request.headers.get('authorization');
+  if (authHeader?.startsWith('Bearer ')) {
+    return authHeader.slice(7);
+  }
+  // 2. Cookie: session_token=<token>
+  const cookie = request.cookies.get('session_token');
+  return cookie?.value || null;
+}
+
+function isPublicPath(pathname: string): boolean {
+  // Exact matches for known public pages
+  if (PUBLIC_ROUTES.some(r => pathname === r || pathname.startsWith(r + '/'))) {
+    return true;
+  }
+  // All API routes handle their own auth
+  if (pathname.startsWith(API_ROUTE_PREFIX)) {
+    return true;
+  }
+  // Static assets
+  if (pathname.startsWith('/_next') || pathname.startsWith('/icons') || pathname === '/favicon.ico') {
+    return true;
+  }
+  return false;
+}
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const token = request.cookies.get('session_token')?.value ||
-                request.headers.get('authorization')?.replace('Bearer ', '');
 
-  // Check if requesting admin routes
-  if (ADMIN_ROUTES.some(route => pathname.startsWith(route))) {
-    // In mock mode, we allow access but log it
-    // In production, verify admin role from token
-    const response = NextResponse.next();
-    response.headers.set('X-Admin-Access', 'verified');
-    return response;
+  // Skip public routes and API routes (API handles own auth)
+  if (isPublicPath(pathname)) {
+    return NextResponse.next();
   }
 
-  // Check if requesting protected routes
+  const token = extractToken(request);
+
+  // ──── Admin Routes: require session ────
+  if (ADMIN_ROUTES.some(route => pathname.startsWith(route))) {
+    if (!token) {
+      const loginUrl = new URL('/login', request.url);
+      loginUrl.searchParams.set('callbackUrl', pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+    // Token exists — let the admin API routes verify role
+    return NextResponse.next();
+  }
+
+  // ──── Protected Routes: require session ────
   if (PROTECTED_ROUTES.some(route => pathname.startsWith(route))) {
     if (!token) {
-      // In mock mode, allow but set a warning header
-      const response = NextResponse.next();
-      response.headers.set('X-Auth-Warning', 'unauthenticated');
-      return response;
+      const loginUrl = new URL('/login', request.url);
+      loginUrl.searchParams.set('callbackUrl', pathname);
+      return NextResponse.redirect(loginUrl);
     }
+    return NextResponse.next();
   }
 
-  // Security headers for all responses
-  const response = NextResponse.next();
-
-  // Prevent MIME type sniffing
-  response.headers.set('X-Content-Type-Options', 'nosniff');
-
-  // XSS Protection (legacy browsers)
-  response.headers.set('X-XSS-Protection', '1; mode=block');
-
-  // Referrer Policy
-  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-
-  // Permissions Policy - restrict browser features (allow camera for verification)
-  const allowCamera = pathname === '/verification';
-  response.headers.set('Permissions-Policy', `camera=(${allowCamera ? 'self' : ''}), microphone=(), geolocation=(self), payment=()`);
-
-  // HSTS (only in production-like environments)
-  if (request.headers.get('x-forwarded-proto') === 'https') {
-    response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
-  }
-
-  return response;
+  // Default: allow
+  return NextResponse.next();
 }
 
 export const config = {

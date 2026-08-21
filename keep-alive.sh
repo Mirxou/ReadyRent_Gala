@@ -1,7 +1,16 @@
 #!/bin/bash
-cd /home/z/my-project
+# STANDARD.Rent — Development Keep-Alive
+# Automatically restarts the dev server on crash.
+# Usage: ./keep-alive.sh
+
+PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
+cd "$PROJECT_DIR"
+
+LOG_FILE="$PROJECT_DIR/dev.log"
+echo "[$(date)] Keep-alive starting..." >> "$LOG_FILE"
+
 while true; do
-  node node_modules/.bin/next dev -p 3000 2>&1
-  echo "Server crashed, restarting in 2s..."
-  sleep 2
+  bun run dev >> "$LOG_FILE" 2>&1
+  echo "[$(date)] Server died, restarting in 3s..." >> "$LOG_FILE"
+  sleep 3
 done
