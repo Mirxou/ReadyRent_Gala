@@ -5,7 +5,15 @@
 
 import crypto from 'crypto';
 
-const HMAC_SECRET = process.env.PAYMENT_HMAC_SECRET || `std_rent_prod_${process.env.NODE_ENV || 'dev'}`;
+const _raw = process.env.PAYMENT_HMAC_SECRET || '';
+if (!_raw) {
+  throw new Error(
+    '[PAYMENT-SECURITY] PAYMENT_HMAC_SECRET غير معرّف في .env. ' +
+    'الدفعات معطّلة حتى يتم إضافته. ' +
+    'ولّد واحداً بـ: python3 -c "import secrets; print(secrets.token_urlsafe(48))"'
+  );
+}
+const HMAC_SECRET = _raw;
 const HMAC_ALGORITHM = 'sha256';
 const INTENT_EXPIRY_MS = 15 * 60 * 1000; // 15 minutes
 
@@ -145,5 +153,12 @@ export function verifyPaymentFingerprint(
   currency: string = 'DZD'
 ): boolean {
   const expected = generatePaymentFingerprint(bookingId, amount, currency);
-  return fingerprint === expected;
+  try {
+    return crypto.timingSafeEqual(
+      Buffer.from(fingerprint, 'utf8'),
+      Buffer.from(expected, 'utf8')
+    );
+  } catch {
+    return false;
+  }
 }

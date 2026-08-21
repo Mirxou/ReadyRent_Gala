@@ -552,3 +552,27 @@ Stage Summary:
 - Financial operations are mostly well-protected with atomic transactions
 - The bundles/[id]/book route is the most dangerous — non-atomic multi-booking creation
 
+
+---
+Task ID: fix-1.1
+Agent: Main Orchestrator
+Task: Fix .env — add missing secrets, fix permissions, create .env.example
+
+Work Log:
+- Listed all process.env.* references across 20 source files
+- Found 8 environment variables referenced but missing from .env
+- Generated two cryptographically secure 384-bit secrets (NEXTAUTH_SECRET, PAYMENT_HMAC_SECRET)
+- Wrote new .env with all required variables, documented sections in Arabic
+- Fixed file permissions from 755 (-rwxr-xr-x) to 600 (-rw-------)
+- Created .env.example template for developers (no secrets included)
+- Verified .env* is in .gitignore (already present)
+
+Stage Summary:
+- .env now has: DATABASE_URL, NEXTAUTH_SECRET, PAYMENT_HMAC_SECRET, NEXT_PUBLIC_BASE_URL, NEXT_PUBLIC_PHONE_NUMBER, NEXT_PUBLIC_WHATSAPP_NUMBER, NEXT_PUBLIC_FACEBOOK_URL, NEXT_PUBLIC_INSTAGRAM_URL, NEXT_PUBLIC_GOOGLE_MAPS_API_KEY, NEXT_PUBLIC_GA_ID
+- File permissions: 600 ✓
+- .env.example created for onboarding
+- lib/payment-security.ts: removed insecure fallback (std_rent_prod_), now throws if PAYMENT_HMAC_SECRET is missing
+- lib/payment-security.ts: verifyPaymentFingerprint now uses timingSafeEqual instead of ===
+- lib/auth-server.ts: complete rewrite — session tokens now HMAC-signed with NEXTAUTH_SECRET, cannot be forged
+- Login/Logout routes verified compatible with new signed token format
+- Zero lint errors in modified files

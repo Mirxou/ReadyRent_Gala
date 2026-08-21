@@ -1,57 +1,114 @@
 // ═══════════════════════════════════════════════════════════════
 // STANDARD.Rent — Server-Side Auth Utilities
-// In-memory session store with cookie-based authentication
+// Signed session tokens using NEXTAUTH_SECRET (HMAC-SHA256)
+// Sessions stored in-memory (production: migrate to DB/Redis)
 // ═══════════════════════════════════════════════════════════════
 
+import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import { NextResponse } from 'next/server';
 import { db } from './db';
 
+// ──── Session Signing Secret ────
+const _authSecret = process.env.NEXTAUTH_SECRET || '';
+if (!_authSecret) {
+  throw new Error(
+    '[AUTH] NEXTAUTH_SECRET غير معرّف في .env. ' +
+    'المصادقة معطّلة حتى يتم إضافته. ' +
+    'ولّد واحداً بـ: python3 -c "import secrets; print(secrets.token_urlsafe(48))"'
+  );
+}
+const AUTH_SECRET = _authSecret;
+
 // ──── In-Memory Session Store ────
+// CRITICAL: Production should use database-backed sessions.
+// This Map is lost on restart and not shared across instances.
 const sessions = new Map<string, { userId: string; expiresAt: number }>();
 
 const SESSION_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days
 
+// ──── Token Signing ────
+// Tokens are HMAC-signed so they cannot be forged even if the session
+// store is compromised. Format: <rawUuid>.<hmacHex>
+
+function signToken(rawToken: string): string {
+  const hmac = crypto
+    .createHmac('sha256', AUTH_SECRET)
+    .update(rawToken)
+    .digest('hex');
+  return `${rawToken}.${hmac}`;
+}
+
+function verifyToken(signedToken: string): string | null {
+  const dotIndex = signedToken.lastIndexOf('.');
+  if (dotIndex === -1) return null;
+
+  const rawToken = signedToken.slice(0, dotIndex);
+  const providedHmac = signedToken.slice(dotIndex + 1);
+
+  const expectedHmac = crypto
+    .createHmac('sha256', AUTH_SECRET)
+    .update(rawToken)
+    .digest('hex');
+
+  try {
+    if (!crypto.timingSafeEqual(Buffer.from(providedHmac, 'hex'), Buffer.from(expectedHmac, 'hex'))) {
+      return null;
+    }
+  } catch {
+    return null;
+  }
+
+  return rawToken;
+}
+
 export function generateSessionToken(): string {
-  return `sess_${crypto.randomUUID().replace(/-/g, '')}`;
+  const raw = `sess_${crypto.randomUUID().replace(/-/g, '')}`;
+  return signToken(raw);
 }
 
 export async function createSession(userId: string): Promise<string> {
-  const token = generateSessionToken();
-  sessions.set(token, { userId, expiresAt: Date.now() + SESSION_DURATION });
-  return token;
+  const signedToken = generateSessionToken();
+  // Extract raw token for the store key
+  const rawToken = verifyToken(signedToken)!;
+  sessions.set(rawToken, { userId, expiresAt: Date.now() + SESSION_DURATION });
+  return signedToken;
 }
 
-export function validateSession(token: string): { userId: string } | null {
-  const session = sessions.get(token);
+export function validateSession(signedToken: string): { userId: string } | null {
+  const rawToken = verifyToken(signedToken);
+  if (!rawToken) return null;
+
+  const session = sessions.get(rawToken);
   if (!session) return null;
   if (Date.now() > session.expiresAt) {
-    sessions.delete(token);
+    sessions.delete(rawToken);
     return null;
   }
   return { userId: session.userId };
 }
 
-export function destroySession(token: string): void {
-  sessions.delete(token);
+export function destroySession(signedToken: string): void {
+  const rawToken = verifyToken(signedToken);
+  if (rawToken) sessions.delete(rawToken);
 }
 
 export function getSessionFromRequest(request: Request): { userId: string; token: string } | null {
   // Check Authorization header first
   const authHeader = request.headers.get('authorization');
   if (authHeader?.startsWith('Bearer ')) {
-    const token = authHeader.slice(7);
-    const session = validateSession(token);
-    if (session) return { ...session, token };
+    const signedToken = authHeader.slice(7);
+    const session = validateSession(signedToken);
+    if (session) return { ...session, token: signedToken };
   }
 
   // Check cookie
   const cookieHeader = request.headers.get('cookie') || '';
   const match = cookieHeader.match(/session_token=([^;]+)/);
   if (match) {
-    const token = match[1];
-    const session = validateSession(token);
-    if (session) return { ...session, token };
+    const signedToken = match[1];
+    const session = validateSession(signedToken);
+    if (session) return { ...session, token: signedToken };
   }
 
   return null;
