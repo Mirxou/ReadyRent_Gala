@@ -6,9 +6,21 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 import { api } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Edit, Trash2 } from 'lucide-react';
+import { useAuthStore } from '@/lib/store';
+import { Plus, Edit, Trash2, ShieldAlert, Construction } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface ProductVariant {
   id: number;
@@ -21,17 +33,26 @@ interface ProductVariant {
   price_per_day?: number;
   price: number;
   is_active: boolean;
-  availability_status: "in_stock" | "low_stock" | "out_of_stock" | "unknown";
+  availability_status: 'in_stock' | 'low_stock' | 'out_of_stock' | 'unknown';
   is_available: boolean;
 }
+
+const AVAILABILITY_MAP: Record<string, string> = {
+  in_stock: 'متوفر',
+  low_stock: 'مخزون منخفض',
+  out_of_stock: 'غير متوفر',
+  unknown: 'غير معروف',
+};
 
 export default function ProductVariantsPage() {
   const params = useParams();
   const { toast } = useToast();
+  const { user, isAuthenticated } = useAuthStore();
   const [variants, setVariants] = useState<ProductVariant[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingVariant, setEditingVariant] = useState<ProductVariant | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<ProductVariant | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     size: '',
@@ -41,10 +62,6 @@ export default function ProductVariantsPage() {
     price_per_day: '',
     is_active: true,
   });
-
-  useEffect(() => {
-    loadVariants();
-  }, [params.id]);
 
   const loadVariants = async () => {
     try {
@@ -60,6 +77,23 @@ export default function ProductVariantsPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadVariants();
+  }, [params.id]);
+
+  // ── Role guard ──
+  if (!isAuthenticated || (user?.role !== 'admin' && user?.role !== 'staff' && user?.role !== 'vendor')) {
+    return (
+      <div className="p-6 flex items-center justify-center min-h-[60vh]">
+        <div className="text-center space-y-4">
+          <ShieldAlert className="w-16 h-16 text-red-500 mx-auto" />
+          <h2 className="text-2xl font-bold">الوصول مقيّد</h2>
+          <p className="text-muted-foreground">هذه الصفحة متاحة للمسؤولين والمزوّدين فقط.</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleSubmit = async () => {
     if (!formData.name || !formData.size || !formData.color) {
@@ -78,32 +112,18 @@ export default function ProductVariantsPage() {
           product: params.id,
           price_per_day: formData.price_per_day ? parseFloat(formData.price_per_day) : null,
         });
-        toast({
-          title: 'تم التحديث',
-          description: 'تم تحديث المتغير بنجاح',
-        });
+        toast({ title: 'تم التحديث', description: 'تم تحديث المتغير بنجاح' });
       } else {
         await api.post('/products/admin/variants/', {
           ...formData,
           product: params.id,
           price_per_day: formData.price_per_day ? parseFloat(formData.price_per_day) : null,
         });
-        toast({
-          title: 'تم الإضافة',
-          description: 'تم إضافة المتغير بنجاح',
-        });
+        toast({ title: 'تم الإضافة', description: 'تم إضافة المتغير بنجاح' });
       }
       setShowForm(false);
       setEditingVariant(null);
-      setFormData({
-        name: '',
-        size: '',
-        color: '',
-        color_hex: '',
-        style: '',
-        price_per_day: '',
-        is_active: true,
-      });
+      setFormData({ name: '', size: '', color: '', color_hex: '', style: '', price_per_day: '', is_active: true });
       loadVariants();
     } catch (error: unknown) {
       toast({
@@ -128,15 +148,13 @@ export default function ProductVariantsPage() {
     setShowForm(true);
   };
 
-  const handleDelete = async (variantId: number) => {
-    if (!confirm('هل أنت متأكد من حذف هذا المتغير؟')) return;
-
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    const variantId = deleteTarget.id;
+    setDeleteTarget(null);
     try {
       await api.delete(`/products/admin/variants/${variantId}/`);
-      toast({
-        title: 'تم الحذف',
-        description: 'تم حذف المتغير بنجاح',
-      });
+      toast({ title: 'تم الحذف', description: 'تم حذف المتغير بنجاح' });
       loadVariants();
     } catch (error: unknown) {
       toast({
@@ -145,6 +163,12 @@ export default function ProductVariantsPage() {
         variant: 'destructive',
       });
     }
+  };
+
+  const resetForm = () => {
+    setEditingVariant(null);
+    setFormData({ name: '', size: '', color: '', color_hex: '', style: '', price_per_day: '', is_active: true });
+    setShowForm(false);
   };
 
   if (loading) {
@@ -186,7 +210,7 @@ export default function ProductVariantsPage() {
                   id="size"
                   value={formData.size}
                   onChange={(e) => setFormData({ ...formData, size: e.target.value })}
-                  className="w-full px-4 py-2 border rounded-md"
+                  className="w-full px-4 py-2 border rounded-md bg-background"
                 >
                   <option value="">اختر الحجم</option>
                   <option value="XS">XS</option>
@@ -245,12 +269,8 @@ export default function ProductVariantsPage() {
               <Label htmlFor="is_active">نشط</Label>
             </div>
             <div className="flex gap-2">
-              <Button onClick={handleSubmit}>
-                {editingVariant ? 'تحديث' : 'إضافة'}
-              </Button>
-              <Button variant="outline" onClick={() => { setShowForm(false); setEditingVariant(null); }}>
-                إلغاء
-              </Button>
+              <Button onClick={handleSubmit}>{editingVariant ? 'تحديث' : 'إضافة'}</Button>
+              <Button variant="outline" onClick={resetForm}>إلغاء</Button>
             </div>
           </CardContent>
         </Card>
@@ -263,15 +283,16 @@ export default function ProductVariantsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle>{variant.name}</CardTitle>
-                  <CardDescription>
-                    SKU: {variant.sku} | {variant.size} - {variant.color}
-                  </CardDescription>
+                  <CardDescription>SKU: {variant.sku} | {variant.size} - {variant.color}</CardDescription>
                 </div>
                 <div className="flex gap-2">
+                  <Badge variant={variant.is_active ? 'default' : 'secondary'}>
+                    {variant.is_active ? 'نشط' : 'غير نشط'}
+                  </Badge>
                   <Button variant="outline" size="sm" onClick={() => handleEdit(variant)}>
                     <Edit className="w-4 h-4" />
                   </Button>
-                  <Button variant="outline" size="sm" onClick={() => handleDelete(variant.id)}>
+                  <Button variant="outline" size="sm" onClick={() => setDeleteTarget(variant)}>
                     <Trash2 className="w-4 h-4" />
                   </Button>
                 </div>
@@ -284,25 +305,13 @@ export default function ProductVariantsPage() {
                   <p className="font-medium">{variant.price.toFixed(2)} دج/يوم</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">الحالة</p>
-                  <p className="font-medium">{variant.is_active ? 'نشط' : 'غير نشط'}</p>
-                </div>
-                <div>
                   <p className="text-sm text-muted-foreground">التوفر</p>
-                  <p className="font-medium">
-                    {variant.availability_status === 'in_stock' && 'متوفر'}
-                    {variant.availability_status === 'low_stock' && 'مخزون منخفض'}
-                    {variant.availability_status === 'out_of_stock' && 'غير متوفر'}
-                    {variant.availability_status === 'unknown' && 'غير معروف'}
-                  </p>
+                  <p className="font-medium">{AVAILABILITY_MAP[variant.availability_status] || variant.availability_status}</p>
                 </div>
                 {variant.color_hex && (
                   <div>
                     <p className="text-sm text-muted-foreground">اللون</p>
-                    <div
-                      className="w-8 h-8 rounded border"
-                      style={{ backgroundColor: variant.color_hex }}
-                    />
+                    <div className="w-8 h-8 rounded border" style={{ backgroundColor: variant.color_hex }} />
                   </div>
                 )}
               </div>
@@ -314,12 +323,28 @@ export default function ProductVariantsPage() {
       {variants.length === 0 && (
         <Card>
           <CardContent className="py-12 text-center">
-            <p className="text-muted-foreground">لا توجد متغيرات</p>
+            <Construction className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+            <p className="text-muted-foreground mb-2">لا توجد متغيرات</p>
+            <p className="text-xs text-muted-foreground/60">المتغيرات (أحجام، ألوان) تُدار من هنا عند تفعيل API المتغيرات.</p>
           </CardContent>
         </Card>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>حذف المتغير</AlertDialogTitle>
+            <AlertDialogDescription>
+              هل أنت متأكد من حذف متغير &quot;{deleteTarget?.name}&quot;; لا يمكن التراجع عن هذا الإجراء.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>إلغاء</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">حذف</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
-
-

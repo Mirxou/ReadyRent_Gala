@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatNumber } from '@/lib/utils';
+import { useAuthStore } from '@/lib/store';
 
 import { ParticleField } from '@/components/ui/particle-field';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -44,8 +45,16 @@ class SafeWrapper extends React.Component<{ children: React.ReactNode }, { hasEr
 export default function CartPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { isAuthenticated } = useAuthStore();
   const [sameDayDelivery, setSameDayDelivery] = useState(false);
   const [deliveryAddress, setDeliveryAddress] = useState('');
+
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push('/login?redirect=/cart');
+    }
+  }, [isAuthenticated, router]);
 
   const { data: cart, isLoading } = useQuery({
     queryKey: ['cart'],

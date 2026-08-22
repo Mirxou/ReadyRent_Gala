@@ -724,3 +724,21 @@ Stage Summary:
 - Visual: about/page.tsx now uses consistent gold palette; admin/cms uses theme-aware colors
 - Data integrity: main page stats are now dynamic, not fake hardcoded numbers
 - Lint: 50 problems (16 errors, 34 warnings) — unchanged from before (0 new issues)
+---
+Task ID: 4-pages-audit-round2
+Agent: Main Orchestrator
+Task: Continue page audit — remaining security items + variants fix
+
+Work Log:
+- #13 cart/page.tsx: Added client-side auth guard (useAuthStore + useEffect redirect) matching checkout pattern
+- #14 checkout: Already has auth guard + middleware protection — confirmed OK
+- #26 products/[id]/variants: Complete rewrite — added role guard (admin/staff/vendor), replaced confirm() with AlertDialog, fixed loadVariants before-declaration, added availability map, added Construction icon for empty state
+- #19, #24, #62 thin wrappers: Reviewed — these are valid page-wrapper patterns, not bugs
+- Large files (#31, #36, #42, #43, #61, #65): Identified for future refactoring — not security issues
+
+Stage Summary:
+- 2 files modified (cart, variants)
+- Cart now has dual protection: middleware + client-side auth redirect
+- Variants page: added role guard, AlertDialog, fixed declaration order, removed unused import
+- Lint: 50 problems (16 errors, 34 warnings) — unchanged, 0 new issues
+- ALL security items from the 74-item list are now addressed
