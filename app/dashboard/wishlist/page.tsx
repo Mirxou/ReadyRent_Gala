@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from '@tanstack/react-query';
+import { useAuthStore } from '@/lib/store';
 import { productsApi } from '@/lib/api';
 import { 
   Heart, 
@@ -23,10 +24,12 @@ import { useRouter } from 'next/navigation';
 
 export default function WishlistPage() {
   const router = useRouter();
+  const { isAuthenticated } = useAuthStore();
 
   const { data: wishlist = [], isLoading } = useQuery({
     queryKey: ['wishlist'],
     queryFn: () => productsApi.getWishlist().then(res => res.data),
+    enabled: isAuthenticated,
   });
 
   if (isLoading) {

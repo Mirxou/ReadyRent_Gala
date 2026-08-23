@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useAuthStore } from '@/lib/store';
 import { 
   Bell, 
   CreditCard, 
@@ -46,6 +47,7 @@ const typeColorMap: Record<string, string> = {
 export default function NotificationsPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { isAuthenticated } = useAuthStore();
   const [isMarkingAllRead, setIsMarkingAllRead] = React.useState(false);
 
   const handleMarkAllRead = async () => {
@@ -68,6 +70,7 @@ export default function NotificationsPage() {
       const res = await notificationsApi.getAll();
       return res.data || [];
     },
+    enabled: isAuthenticated,
   });
 
   const handleMarkRead = async (id: string) => {

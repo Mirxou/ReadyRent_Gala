@@ -29,17 +29,13 @@ export default function DashboardLayout({
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        const checkAuth = setTimeout(() => {
-            const hasStoredAuth = isUserAuthenticated();
+        const hasStoredAuth = isUserAuthenticated();
 
-            if (!isAuthenticated && !hasStoredAuth) {
-                router.push('/login');
-            } else {
-                setIsLoading(false);
-            }
-        }, 100);
-
-        return () => clearTimeout(checkAuth);
+        if (!isAuthenticated && !hasStoredAuth) {
+            router.push('/login');
+        } else {
+            setIsLoading(false);
+        }
     }, [isAuthenticated, router]);
 
     if (isLoading) {
@@ -51,8 +47,8 @@ export default function DashboardLayout({
                         <ShieldCheck className="absolute inset-0 m-auto w-6 h-6 text-sovereign-gold animate-pulse" />
                     </div>
                     <div className="space-y-1 text-center">
-                        <p className="text-white/40 font-black uppercase tracking-[0.4em] text-[10px] italic">جاري التحقق من الهوية</p>
-                        <p className="text-[8px] font-black text-white/10 uppercase tracking-widest leading-none">بروتوكول المصادقة</p>
+                        <p className="text-muted-foreground font-black uppercase tracking-[0.4em] text-[10px] italic">جاري التحقق من الهوية</p>
+                        <p className="text-[8px] font-black text-muted-foreground/30 uppercase tracking-widest leading-none">بروتوكول المصادقة</p>
                     </div>
                 </div>
             </div>

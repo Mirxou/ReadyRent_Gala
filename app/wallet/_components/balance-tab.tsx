@@ -46,7 +46,7 @@ function txSign(type: string) {
   return (type === 'INCOME' || type === 'deposit' || type === 'ESCROW_RELEASED' || type === 'escrow_release') ? '+' : '-';
 }
 
-export function BalanceTab({ balance, escrowTotal, transactions, onSwitchTab }: BalanceTabProps) {
+export function BalanceTab({ balance, escrowTotal, transactions, onSwitchTab: _onSwitchTab }: BalanceTabProps) {
   const { user } = useAuthStore();
 
   return (

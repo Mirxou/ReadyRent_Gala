@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useAuthStore } from '@/lib/store';
 import { useRouter } from 'next/navigation';
 import {
     Calendar,
@@ -38,9 +39,11 @@ export default function OrdersPage() {
     const router = useRouter();
     const [activeTab, setActiveTab] = useState('all');
     const [searchQuery, setSearchQuery] = useState('');
+    const { isAuthenticated } = useAuthStore();
     const { data: bookings, isLoading } = useQuery({
       queryKey: ['bookings'],
       queryFn: () => bookingsApi.getAll().then(res => res.data),
+      enabled: isAuthenticated,
     });
 
     const filteredBookings = (bookings || []).filter((b: Record<string, unknown>) => {

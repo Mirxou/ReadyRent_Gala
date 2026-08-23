@@ -45,11 +45,12 @@ export default function BookingDetailsPage() {
   const queryClient = useQueryClient();
   const [isDisputeModalOpen, setIsDisputeModalOpen] = React.useState(false);
   const [disputeReason, setDisputeReason] = React.useState('');
-  const { user } = useAuthStore();
+  const { user, isAuthenticated } = useAuthStore();
 
   const { data: booking, isLoading } = useQuery({
     queryKey: ['booking', id],
     queryFn: () => bookingsApi.getById(id as string).then(res => res.data),
+    enabled: isAuthenticated,
   });
 
   const updateStatusMutation = useMutation({

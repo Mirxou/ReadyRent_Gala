@@ -67,8 +67,8 @@ export default function ForgotPasswordPage() {
             <CardContent>
               {emailSent ? (
                 <div className="space-y-4 text-center">
-                  <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Mail className="h-8 w-8 text-white" />
+                  <div className="w-16 h-16 bg-sovereign-gold rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Mail className="h-8 w-8 text-background" />
                   </div>
                   <p className="text-muted-foreground">
                     تم إرسال رابط إعادة تعيين كلمة المرور إلى <strong>{email}</strong>

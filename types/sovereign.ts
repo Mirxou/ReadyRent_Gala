@@ -31,7 +31,7 @@ export interface SovereignResponse<T> {
   message_en?: string;
   data: T;
   visual_assets?: VisualAssets;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface VisualAssets {

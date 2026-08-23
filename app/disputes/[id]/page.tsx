@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { disputesApi } from '@/lib/api';
 
 type DisputeHistoryStage = {
@@ -23,6 +24,7 @@ import { useSovereign } from '@/contexts/SovereignContext';
 import { AIDisputeAssistant } from '@/components/disputes/AIDisputeAssistant';
 import { AlertCircle, Scale } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useAuthStore } from '@/lib/store';
 
 // Map backend status names to Arabic labels
 const STATUS_LABELS: Record<string, string> = {
@@ -53,6 +55,8 @@ export default function DisputeDetailPage() {
   const params = useParams();
   const idFromParams = params?.id;
   const id = Array.isArray(idFromParams) ? idFromParams[0] : idFromParams;
+  const router = useRouter();
+  const { isAuthenticated } = useAuthStore();
 
   const { setMode, setVisualAssets } = useSovereign();
 
@@ -64,6 +68,11 @@ export default function DisputeDetailPage() {
   const isResolved = dispute?.status === 'resolved' || dispute?.status === 'closed';
 
   useEffect(() => {
+    if (!isAuthenticated) {
+      router.replace(`/login?redirect=/disputes/${id}`);
+      return;
+    }
+
     async function fetchDisputeData() {
       if (!id) return;
 
@@ -106,7 +115,7 @@ export default function DisputeDetailPage() {
     }
 
     fetchDisputeData();
-  }, [id, setMode, setVisualAssets]);
+  }, [id, setMode, setVisualAssets, isAuthenticated, router]);
 
   if (loading) {
     return (
@@ -123,7 +132,7 @@ export default function DisputeDetailPage() {
         <p className="text-lg font-serif">{error}</p>
         <button 
           onClick={() => window.location.reload()} 
-          className="px-4 py-2 border border-slate-300 rounded hover:bg-slate-100"
+          className="px-4 py-2 border border-slate-300 rounded hover:bg-muted"
         >
           إعادة المحاولة
         </button>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { disputesApi } from '@/lib/api';
@@ -19,6 +19,8 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { useAuthStore } from '@/lib/store';
+import { useRouter } from 'next/navigation';
 import { trackAppealFiled } from '@/lib/analytics';
 
 const APPEAL_REASONS = [
@@ -33,6 +35,14 @@ export default function AppealFilingPage() {
   const params = useParams();
   const rawId = params?.id;
   const disputeId = Array.isArray(rawId) ? rawId[0] : rawId;
+  const router = useRouter();
+  const { isAuthenticated } = useAuthStore();
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.replace(`/login?redirect=/disputes/${disputeId}/appeal`);
+    }
+  }, [isAuthenticated, router, disputeId]);
 
   const [selectedReason, setSelectedReason] = useState('');
   const [customText, setCustomText] = useState('');
@@ -42,7 +52,7 @@ export default function AppealFilingPage() {
   const { data: dispute, isLoading } = useQuery({
     queryKey: ['dispute', disputeId],
     queryFn: () => disputesApi.getDispute(String(disputeId)).then(res => res.data),
-    enabled: !!disputeId,
+    enabled: !!disputeId && isAuthenticated,
   });
 
   const canAppeal = dispute?.status === 'resolved' || dispute?.status === 'closed';

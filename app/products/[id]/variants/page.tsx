@@ -78,12 +78,16 @@ export default function ProductVariantsPage() {
     }
   };
 
-  useEffect(() => {
-    loadVariants();
-  }, [params.id]);
+  // ── Role guard (before any API calls) ──
+  const hasRole = isAuthenticated && (user?.role === 'admin' || user?.role === 'staff' || user?.role === 'vendor');
 
-  // ── Role guard ──
-  if (!isAuthenticated || (user?.role !== 'admin' && user?.role !== 'staff' && user?.role !== 'vendor')) {
+  useEffect(() => {
+    if (hasRole) {
+      loadVariants();
+    }
+  }, [params.id, hasRole]);
+
+  if (!hasRole) {
     return (
       <div className="p-6 flex items-center justify-center min-h-[60vh]">
         <div className="text-center space-y-4">

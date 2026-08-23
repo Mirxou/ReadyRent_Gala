@@ -80,7 +80,7 @@ export function BranchSelector({ onSelect, selectedBranchId }: BranchSelectorPro
               className={`border rounded-lg p-4 cursor-pointer transition-colors ${
                 selectedBranch?.id === branch.id
                   ? 'border-primary bg-primary/5'
-                  : 'border-gray-200 hover:border-gray-300'
+                  : 'border-border hover:border-foreground/30'
               }`}
               onClick={() => handleBranchSelect(branch)}
             >
@@ -88,7 +88,7 @@ export function BranchSelector({ onSelect, selectedBranchId }: BranchSelectorPro
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
                     <h3 className="font-medium">{branch.name_ar}</h3>
-                    {branch.is_active && <Badge className="bg-green-500">نشط</Badge>}
+                    {branch.is_active && <Badge className="bg-emerald-500">نشط</Badge>}
                   </div>
                   
                   <div className="space-y-1 text-sm text-muted-foreground">

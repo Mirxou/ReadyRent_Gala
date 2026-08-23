@@ -1,6 +1,7 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useAuthStore } from '@/lib/store';
 import { bookingsApi } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -11,10 +12,12 @@ import Link from 'next/link';
 
 export default function WaitlistPage() {
   const queryClient = useQueryClient();
+  const { isAuthenticated } = useAuthStore();
 
   const { data: waitlist, isLoading } = useQuery({
     queryKey: ['waitlist'],
     queryFn: () => bookingsApi.getWaitlist().then((res) => res.data),
+    enabled: isAuthenticated,
   });
 
   const removeFromWaitlistMutation = useMutation({

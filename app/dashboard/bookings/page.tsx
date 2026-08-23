@@ -1,6 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
+import { useAuthStore } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -12,9 +13,12 @@ import { motion } from 'framer-motion';
 import { ParticleField } from '@/components/ui/particle-field';
 
 export default function BookingsPage() {
+  const { isAuthenticated } = useAuthStore();
+
   const { data: bookings, isLoading } = useQuery({
     queryKey: ['bookings'],
     queryFn: () => bookingsApi.getAll().then((res) => res.data),
+    enabled: isAuthenticated,
   });
 
   if (isLoading) {

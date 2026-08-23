@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from '@tanstack/react-query';
+import { useAuthStore } from '@/lib/store';
 import { authApi, bookingsApi } from '@/lib/api';
 import {
   TrendingUp,
@@ -33,14 +34,18 @@ interface Booking {
 }
 
 export default function AnalyticsPage() {
+  const { isAuthenticated } = useAuthStore();
+
   const { data: userProfile } = useQuery({
     queryKey: ['profile'],
     queryFn: () => authApi.me().then(res => res.data),
+    enabled: isAuthenticated,
   });
 
   const { data: bookings = [], isLoading: isBookingsLoading } = useQuery({
     queryKey: ['analytics-bookings'],
     queryFn: () => bookingsApi.getAll().then(res => res.data || []),
+    enabled: isAuthenticated,
   });
 
   // ──── Derived stats from real bookings ────

@@ -2,6 +2,7 @@
 
 import { useParams } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useAuthStore } from '@/lib/store';
 import { disputesApi } from '@/lib/api';
 import { 
   Scale, 
@@ -130,6 +131,7 @@ export default function DisputeDetailPage() {
   const { id } = useParams();
   const disputeId = Array.isArray(id) ? id[0] : (id ?? '');
   const queryClient = useQueryClient();
+  const { isAuthenticated } = useAuthStore();
   const [chatText, setChatText] = useState('');
   const chatEndRef = useRef<HTMLDivElement>(null);
 
@@ -137,12 +139,14 @@ export default function DisputeDetailPage() {
   const { data: dispute, isLoading } = useQuery({
     queryKey: ['dispute', disputeId],
     queryFn: () => disputesApi.getDispute(disputeId).then(res => res.data),
+    enabled: isAuthenticated,
   });
 
   // Fetch dispute history for timeline
   const { data: historyData } = useQuery({
     queryKey: ['dispute-history', disputeId],
     queryFn: () => disputesApi.getDisputeHistory(String(disputeId)).then(res => res.data),
+    enabled: isAuthenticated,
   });
 
   // Send message mutation

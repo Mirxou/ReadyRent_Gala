@@ -1,9 +1,11 @@
 "use client"
 import { useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useRouter } from 'next/navigation';
+import { AnimatePresence } from 'framer-motion';
 import { Wallet, ArrowLeftRight, Send, ShieldCheck, Database } from 'lucide-react';
 import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
 import { Badge } from '@/components/ui/badge';
+import { useAuthStore } from '@/lib/store';
 import { type TabKey, type Transaction } from './_components/types';
 import { BalanceTab } from './_components/balance-tab';
 import { DepositTab } from './_components/deposit-tab';
@@ -16,18 +18,28 @@ const TABS: { key: TabKey; label: string; icon: React.ElementType }[] = [
 ];
 
 export default function SovereignWallet() {
+  const router = useRouter();
+  const { isAuthenticated } = useAuthStore();
   const [balance, setBalance] = useState(0);
   const [escrowTotal, setEscrowTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TabKey>('balance');
   const [transactions, setTransactions] = useState<Transaction[]>([]);
 
+  // Auth guard
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push('/login?redirect=/wallet');
+    }
+  }, [isAuthenticated, router]);
+
   const updateBalance = useCallback((updater: (prev: number) => number) => {
     setBalance(updater);
   }, []);
 
   useEffect(() => {
-    fetch('/api/wallet')
+    if (!isAuthenticated) return;
+    fetch('/api/wallet', { credentials: 'include' })
       .then((r) => r.json())
       .then((d) => {
         if (d?.data?.balance !== undefined) setBalance(d.data.balance);
@@ -39,7 +51,7 @@ export default function SovereignWallet() {
       })
       .catch(() => {})
       .finally(() => setIsLoading(false));
-  }, []);
+  }, [isAuthenticated]);
 
   const switchToTab = useCallback((tab: TabKey) => {
     setActiveTab(tab);

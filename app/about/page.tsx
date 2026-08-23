@@ -60,7 +60,7 @@ export default function AboutPage() {
                         viewport={{ once: true }}
                         className="space-y-8"
                     >
-                        <h2 className="text-4xl md:text-5xl font-black bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">
+                        <h2 className="text-4xl md:text-5xl font-black bg-gradient-to-r from-foreground to-foreground/60 bg-clip-text text-transparent">
                             رؤيتنا لعام 2026 وما بعده
                         </h2>
                         <p className="text-xl text-muted-foreground leading-loose">
@@ -79,7 +79,7 @@ export default function AboutPage() {
                     >
                         <div className="absolute inset-0 bg-gradient-to-br from-sovereign-gold/20 to-sovereign-gold/5 mix-blend-overlay" />
                         <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="text-9xl font-black text-white/10 italic select-none">STANDARD</div>
+                            <div className="text-9xl font-black text-foreground/10 italic select-none">STANDARD</div>
                         </div>
                         {/* Overlay for glass effect */}
                         <div className="absolute inset-0 card-glass flex flex-col items-center justify-center p-12 text-center">

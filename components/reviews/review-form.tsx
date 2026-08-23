@@ -34,7 +34,7 @@ export function ReviewForm({ productId, bookingId, onSuccess }: ReviewFormProps)
       onSuccess?.();
     },
     onError: (error: unknown) => {
-      toast.error(error.response?.data?.error || 'حدث خطأ أثناء إضافة التقييم');
+      toast.error((error as { data?: { error?: string } })?.data?.error || 'حدث خطأ أثناء إضافة التقييم');
     },
   });
 

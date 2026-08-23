@@ -68,6 +68,7 @@ review-results.txt
 review.sh
 COMPREHENSIVE-REPORT.md
 keepalive.log
+upload/
 *.png
 !public/**/*.png
 !public/**/*.jpg

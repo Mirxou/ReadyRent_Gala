@@ -2,6 +2,7 @@
 import { formatNumber } from '@/lib/utils';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { 
   ShieldAlert, 
   ShieldCheck, 
@@ -16,6 +17,7 @@ import { SovereignHeartbeat } from '@/shared/components/sovereign/sovereign-hear
 import { SovereignAuditTrail } from '@/shared/components/sovereign/sovereign-audit-trail';
 import { DignifiedLoader } from '@/shared/components/sovereign/dignified-loader';
 import { Badge } from '@/components/ui/badge';
+import { useAuthStore } from '@/lib/store';
 
 
 // Types for Dashboard
@@ -37,17 +39,25 @@ interface EvidenceEntry {
 }
 
 export default function SovereignDashboard() {
+  const router = useRouter();
+  const { isAuthenticated, user } = useAuthStore();
+  const isAdmin = isAuthenticated && (user?.role === 'admin' || user?.role === 'staff');
   const [stats, setStats] = useState<EyeStats | null>(null);
   const [, setTicker] = useState<EvidenceEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!isAdmin) {
+      router.push('/login');
+      return;
+    }
+
     const fetchData = async () => {
       try {
         const [statsRes, tickerRes] = await Promise.all([
-          fetch('/api/disputes/admin/disputes/stats/'),
-          fetch('/api/disputes/admin/vault/integrity/'),
+          fetch('/api/disputes/admin/disputes/stats/', { credentials: 'include' }),
+          fetch('/api/disputes/admin/vault/integrity/', { credentials: 'include' }),
         ]);
 
         if (statsRes.status === 501 || tickerRes.status === 501) {
@@ -79,7 +89,7 @@ export default function SovereignDashboard() {
     fetchData();
     const interval = setInterval(fetchData, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [isAdmin, router]);
 
   return (
     <div className="min-h-screen bg-sovereign-obsidian text-sovereign-white font-arabic p-6 md:p-12 relative overflow-hidden" dir="rtl">

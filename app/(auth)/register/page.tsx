@@ -4,6 +4,14 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
+
+interface RegisterForm {
+  first_name: string;
+  email: string;
+  phone_number: string;
+  password: string;
+  password_confirm: string;
+}
 import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
 import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
 import { authApi } from '@/lib/api';
@@ -17,12 +25,12 @@ export default function RegisterPage() {
   const { setAuth } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
 
-  const { register, handleSubmit } = useForm();
+  const { register, handleSubmit, watch } = useForm<RegisterForm>();
+  const passwordValue = watch('password');
 
-  const onSubmit = async (data: Record<string, string>) => {
+  const onSubmit = async (data: RegisterForm) => {
     setIsLoading(true);
     try {
-      // Map form fields to API field names
       const registerData = {
         email: data.email,
         password: data.password,
@@ -137,10 +145,9 @@ export default function RegisterPage() {
               <LockKeyhole className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-sovereign-gold transition-colors" />
               <input
                 {...register('password_confirm', { 
-                  required: true,
+                  required: 'تأكيد كلمة المرور مطلوب',
                   validate: (val: string) => {
-                    const pwd = document.querySelector('input[name="password"]') as HTMLInputElement;
-                    return val === pwd?.value || 'كلمات المرور غير متطابقة';
+                    return val === passwordValue || 'كلمات المرور غير متطابقة';
                   }
                 })}
                 type="password"

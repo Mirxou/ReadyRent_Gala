@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Shield, Plus, Sparkles, ChevronLeft, ChevronRight, Check, Send, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -14,8 +14,19 @@ import { useDisputeStore } from '@/lib/hooks/use-dispute-store';
 import { disputesApi } from '@/lib/api';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { useAuthStore } from '@/lib/store';
+import { useRouter } from 'next/navigation';
 
 export default function DisputesPage() {
+  const { isAuthenticated } = useAuthStore();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.replace('/login?redirect=/disputes');
+    }
+  }, [isAuthenticated, router]);
+
   const [showForm, setShowForm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);

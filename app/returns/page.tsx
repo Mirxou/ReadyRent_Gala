@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Package, Plus, ChevronDown, ChevronUp, Clock, Eye } from 'lucide-react';
+import { useAuthStore } from '@/lib/store';
 import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
 import { SovereignGlow } from '@/shared/components/sovereign/sovereign-sparkle';
 import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
@@ -30,6 +32,8 @@ const reasons = [
 ];
 
 export default function ReturnsPage() {
+  const router = useRouter();
+  const { isAuthenticated } = useAuthStore();
   const [showForm, setShowForm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [expandedReturn, setExpandedReturn] = useState<string | null>(null);
@@ -41,8 +45,16 @@ export default function ReturnsPage() {
   const [description, setDescription] = useState('');
   const [fileName, setFileName] = useState<string | null>(null);
 
+  // Auth guard
   useEffect(() => {
-    fetch('/api/returns')
+    if (!isAuthenticated) {
+      router.push('/login?redirect=/returns');
+    }
+  }, [isAuthenticated, router]);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    fetch('/api/returns', { credentials: 'include' })
       .then((r) => r.json())
       .then((d) => {
         const list = Array.isArray(d) ? d : (d?.data || d?.results || []);
@@ -80,7 +92,7 @@ export default function ReturnsPage() {
 
     setIsSubmitting(true);
     try {
-      const res = await fetch('/api/returns/create', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ booking_id: bookingRef, reason, description }) });
+      const res = await fetch('/api/returns/create', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ booking_id: bookingRef, reason, description }) });
       const json = await res.json();
       if (res.ok) {
         const newReturn: ReturnRequest = {
@@ -121,10 +133,10 @@ export default function ReturnsPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-slate-950 to-slate-900 text-white" dir="rtl">
+    <main className="min-h-screen bg-gradient-to-b from-background to-background text-foreground" dir="rtl">
       {/* Ambient glow */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <SovereignGlow color="purple" intensity="high" className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] opacity-20">
+        <SovereignGlow color="gold" intensity="high" className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] opacity-20">
           <div />
         </SovereignGlow>
       </div>

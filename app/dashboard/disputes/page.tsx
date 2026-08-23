@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from '@tanstack/react-query';
+import { useAuthStore } from '@/lib/store';
 import { disputesApi } from '@/lib/api';
 import { 
   Scale, 
@@ -19,9 +20,12 @@ import { cn } from '@/lib/utils';
 import Link from 'next/link';
 
 export default function DisputesPage() {
+  const { isAuthenticated } = useAuthStore();
+
   const { data: disputes = [], isLoading } = useQuery({
     queryKey: ['disputes'],
     queryFn: () => disputesApi.getDisputes().then(res => res.data),
+    enabled: isAuthenticated,
   });
 
   if (isLoading) {

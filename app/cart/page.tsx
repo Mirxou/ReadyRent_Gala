@@ -58,11 +58,12 @@ export default function CartPage() {
 
   const { data: cart, isLoading } = useQuery({
     queryKey: ['cart'],
-    queryFn: () => fetch('/api/bookings/cart').then(r => r.json()).then(d => d.data || d),
+    queryFn: () => fetch('/api/bookings/cart', { credentials: 'include' }).then(r => r.json()).then(d => d.data || d),
+    enabled: isAuthenticated,
   });
 
   const removeFromCartMutation = useMutation({
-    mutationFn: (itemId: number) => fetch('/api/bookings/cart/items/' + itemId, { method: 'DELETE' }).then(r => r.json()),
+    mutationFn: (itemId: number) => fetch('/api/bookings/cart/items/' + itemId, { method: 'DELETE', credentials: 'include' }).then(r => r.json()),
     onMutate: async (itemId) => {
       // Cancel any outgoing refetchs (so they don't overwrite our optimistic update)
       await queryClient.cancelQueries({ queryKey: ['cart'] });
@@ -101,6 +102,7 @@ export default function CartPage() {
     mutationFn: () => fetch('/api/bookings/create/', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify({ same_day_delivery: sameDayDelivery }),
     }).then(r => r.json()),
     onSuccess: (data) => {
@@ -246,7 +248,7 @@ export default function CartPage() {
                               <MagneticButton
                                 variant="ghost"
                                 size="icon"
-                                className="text-muted-foreground hover:text-red-500 hover:bg-red-50"
+                                className="text-muted-foreground hover:text-red-500 hover:bg-red-500/10"
                                 onClick={() => removeFromCartMutation.mutate(item.id)}
                               >
                                 <Trash2 className="h-5 w-5" />
@@ -304,7 +306,7 @@ export default function CartPage() {
                     return (
                       <div key={item.id} className="flex justify-between items-center text-sm font-medium">
                         <span className="text-muted-foreground">{item.product.name_ar}</span>
-                        <span className="text-white">{formatNumber(itemTotal)} دج</span>
+                        <span className="text-foreground">{formatNumber(itemTotal)} دج</span>
                       </div>
                     );
                   })}
@@ -341,21 +343,21 @@ export default function CartPage() {
                 </div>
 
                 {/* Same-day Delivery Option */}
-                <div className="p-4 bg-cyan-500/5 border border-cyan-500/20 rounded-2xl">
+                <div className="p-4 bg-sovereign-gold/5 border border-sovereign-gold/20 rounded-2xl">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <Switch
                         id="same-day-delivery"
                         checked={sameDayDelivery}
                         onCheckedChange={setSameDayDelivery}
-                        className="data-[state=checked]:bg-cyan-500"
+                        className="data-[state=checked]:bg-sovereign-gold"
                       />
-                      <Label htmlFor="same-day-delivery" className="cursor-pointer font-bold text-cyan-500 flex items-center gap-2">
+                      <Label htmlFor="same-day-delivery" className="cursor-pointer font-bold text-sovereign-gold flex items-center gap-2">
                         <Zap className="h-4 w-4" />
                         تسليم سريع اليوم
                       </Label>
                     </div>
-                    <span className="text-sm font-black text-cyan-500">
+                    <span className="text-sm font-black text-sovereign-gold">
                       +500 دج
                     </span>
                   </div>
@@ -365,7 +367,7 @@ export default function CartPage() {
                   {sameDayDelivery && (
                     <div className="flex justify-between text-sm font-medium">
                       <span className="text-muted-foreground font-bold">رسوم السرعة القصوى</span>
-                      <span className="text-cyan-500">500 دج</span>
+                      <span className="text-sovereign-gold">500 دج</span>
                     </div>
                   )}
                   <div className="flex justify-between items-end">

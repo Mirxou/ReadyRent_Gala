@@ -178,7 +178,7 @@ export default function AdminUsersPage() {
                         {u.is_active !== false ? 'نشط' : 'محظور'}
                       </Badge>
                       {(u.is_verified as boolean) && (
-                        <Badge variant="outline" className="text-emerald-600 border-emerald-300">
+                        <Badge variant="outline" className="text-emerald-500 border-emerald-500/50">
                           مؤكد
                         </Badge>
                       )}

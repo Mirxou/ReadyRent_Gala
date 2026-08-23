@@ -2,6 +2,8 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
+import { useAuthStore } from '@/lib/store';
 
 import { 
   ShieldCheck, 
@@ -42,10 +44,17 @@ interface BookingDetail {
 export default function BookingDetailPage() {
     const params = useParams();
     const id = params?.id;
+    const router = useRouter();
+    const { isAuthenticated } = useAuthStore();
     const [booking, setBooking] = useState<BookingDetail | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        if (!isAuthenticated) {
+            router.replace(`/login?redirect=/bookings/${id}`);
+            return;
+        }
+
         if (!id) return;
         api.get(`/bookings/${id}/`).then(response => {
             setBooking(response.data);
@@ -54,7 +63,7 @@ export default function BookingDetailPage() {
             if (process.env.NODE_ENV === 'development') console.error(err);
             setLoading(false);
         });
-    }, [id]);
+    }, [id, isAuthenticated, router]);
 
     if (loading) return (
         <div className="min-h-screen flex items-center justify-center bg-sovereign-obsidian">

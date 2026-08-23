@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { useAuthStore } from '@/lib/store';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -15,29 +16,35 @@ export default function CancelBookingPage() {
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
+  const { isAuthenticated } = useAuthStore();
   const [loading, setLoading] = useState(false);
   const [policyLoading, setPolicyLoading] = useState(true);
   const [policy, setPolicy] = useState<Record<string, unknown> | null>(null);
   const [reason, setReason] = useState('');
 
   useEffect(() => {
-    loadPolicy();
-  }, [params.id]);
-
-  const loadPolicy = async () => {
-    try {
-      const response = await api.get(`/bookings/${params.id}/cancellation-policy/`);
-      setPolicy(response.data);
-    } catch (error: unknown) {
-      toast({
-        title: 'خطأ',
-        description: (error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'فشل تحميل سياسة الإلغاء',
-        variant: 'destructive',
-      });
-    } finally {
-      setPolicyLoading(false);
+    if (!isAuthenticated) {
+      router.replace(`/login?redirect=/bookings/${params.id}/cancel`);
+      return;
     }
-  };
+
+    const loadPolicy = async () => {
+      try {
+        const response = await api.get(`/bookings/${params.id}/cancellation-policy/`);
+        setPolicy(response.data);
+      } catch (error: unknown) {
+        toast({
+          title: 'خطأ',
+          description: (error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'فشل تحميل سياسة الإلغاء',
+          variant: 'destructive',
+        });
+      } finally {
+        setPolicyLoading(false);
+      }
+    };
+
+    loadPolicy();
+  }, [params.id, isAuthenticated, router]);
 
   const handleCancel = async () => {
     if (!policy?.can_cancel) {

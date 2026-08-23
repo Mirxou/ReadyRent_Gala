@@ -57,15 +57,10 @@ export default function CheckoutPage() {
     setPaymentCompleted(true);
     queryClient.invalidateQueries({ queryKey: ['bookings', 'cart'] });
 
-    // Update booking status to 'confirmed' after successful payment
-    if (bookingId) {
-      fetch(`/api/bookings/${bookingId}/status`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'confirmed' }),
-        credentials: 'include',
-      }).catch(() => {});
-    }
+    // NOTE: Booking status is confirmed server-side by the payment provider's
+    // webhook/callback — NEVER by a client-initiated request.
+    // The payment form component (BaridiMobForm/BankCardForm) triggers the
+    // server-side confirmation via its own API call.
 
     // Redirect to bookings page after 2 seconds
     setTimeout(() => {
@@ -95,8 +90,8 @@ export default function CheckoutPage() {
           className="text-center z-10"
         >
           <div className="mb-4">
-            <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-16 h-16 bg-sovereign-gold rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-background" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
@@ -122,15 +117,7 @@ export default function CheckoutPage() {
           animate={{ opacity: 1, y: 0 }}
           className="max-w-4xl mx-auto"
         >
-          <h1 className="text-4xl md:text-5xl font-bold mb-8 text-center" style={{
-            background: 'linear-gradient(to right, rgb(139, 92, 246), rgb(236, 72, 153), rgb(245, 158, 11))',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
-            display: 'inline-block',
-            lineHeight: '1.2',
-            padding: '0.5rem 0',
-          }}>
+          <h1 className="text-4xl md:text-5xl font-bold mb-8 text-center bg-gradient-to-r from-sovereign-gold via-yellow-400 to-sovereign-gold bg-clip-text text-transparent inline-block leading-tight py-2">
             إتمام الدفع
           </h1>
 

@@ -3,6 +3,9 @@
 import { useQuery } from '@tanstack/react-query';
 import { bookingsApi } from '@/lib/api';
 import { useParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
+import { useAuthStore } from '@/lib/store';
+import { useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Package, CheckCircle, Clock, Truck } from 'lucide-react';
@@ -10,10 +13,19 @@ import { MapPin, Package, CheckCircle, Clock, Truck } from 'lucide-react';
 export default function TrackingPage() {
   const params = useParams();
   const bookingId = params.id as string;
+  const router = useRouter();
+  const { isAuthenticated } = useAuthStore();
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.replace(`/login?redirect=/bookings/${bookingId}/tracking`);
+    }
+  }, [isAuthenticated, router, bookingId]);
 
   const { data: booking, isLoading } = useQuery({
     queryKey: ['booking', bookingId],
     queryFn: () => bookingsApi.getById(bookingId).then(res => res.data),
+    enabled: isAuthenticated,
   });
 
   if (isLoading) {

@@ -71,8 +71,8 @@ export function VariantSelector({ productId, onSelect, selectedVariantId }: Vari
 
   const getAvailabilityBadge = (status: ProductVariant['availability_status']) => {
     const badges = {
-      in_stock: <Badge className="bg-green-500">متوفر</Badge>,
-      low_stock: <Badge className="bg-yellow-500">مخزون منخفض</Badge>,
+      in_stock: <Badge className="bg-emerald-500">متوفر</Badge>,
+      low_stock: <Badge className="bg-amber-500">مخزون منخفض</Badge>,
       out_of_stock: <Badge className="bg-red-500">غير متوفر</Badge>,
       unknown: <Badge variant="outline">غير معروف</Badge>,
     };
@@ -161,7 +161,7 @@ export function VariantSelector({ productId, onSelect, selectedVariantId }: Vari
                 className={`border rounded-lg p-3 cursor-pointer transition-colors ${
                   selectedVariant?.id === variant.id
                     ? 'border-primary bg-primary/5'
-                    : 'border-gray-200 hover:border-gray-300'
+                    : 'border-border hover:border-foreground/30'
                 } ${!variant.is_available ? 'opacity-50' : ''}`}
                 onClick={() => variant.is_available && handleVariantSelect(variant)}
               >

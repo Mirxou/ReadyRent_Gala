@@ -21,20 +21,17 @@ export default function ResetPasswordPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [token, setToken] = useState<string | null>(null);
-  const [uid, setUid] = useState<string | null>(null);
 
   useEffect(() => {
     const tokenParam = searchParams.get('token');
-    const uidParam = searchParams.get('uid');
     
-    if (!tokenParam || !uidParam) {
+    if (!tokenParam) {
       toast.error('رابط إعادة تعيين كلمة المرور غير صحيح');
       router.push('/forgot-password');
       return;
     }
     
     setToken(tokenParam);
-    setUid(uidParam);
   }, [searchParams, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -55,7 +52,7 @@ export default function ResetPasswordPage() {
       return;
     }
 
-    if (!token || !uid) {
+    if (!token) {
       toast.error('رابط إعادة تعيين كلمة المرور غير صحيح');
       return;
     }
@@ -87,8 +84,8 @@ export default function ResetPasswordPage() {
           className="text-center z-10"
         >
           <div className="mb-4">
-            <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
-              <CheckCircle2 className="h-8 w-8 text-white" />
+            <div className="w-16 h-16 bg-sovereign-gold rounded-full flex items-center justify-center mx-auto mb-4">
+              <CheckCircle2 className="h-8 w-8 text-background" />
             </div>
             <h2 className="text-2xl font-bold mb-2">تم إعادة تعيين كلمة المرور بنجاح!</h2>
             <p className="text-muted-foreground">سيتم تحويلك إلى صفحة تسجيل الدخول...</p>
@@ -146,7 +143,7 @@ export default function ResetPasswordPage() {
                     minLength={8}
                   />
                 </div>
-                <Button type="submit" className="w-full" disabled={isLoading || !token || !uid}>
+                <Button type="submit" className="w-full" disabled={isLoading || !token}>
                   {isLoading ? 'جاري المعالجة...' : 'إعادة تعيين كلمة المرور'}
                 </Button>
                 <div className="text-center">

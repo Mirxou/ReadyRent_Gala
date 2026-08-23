@@ -6,7 +6,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { adminApi } from '@/lib/api';
+import { adminApi, productsApi } from '@/lib/api';
 import {
     Plus,
     Search,
@@ -40,9 +40,8 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 
 async function fetchProducts() {
-  const res = await fetch('/api/products');
-  const json = await res.json();
-  return json.data || [];
+  const res = await productsApi.getAll();
+  return res.data || [];
 }
 
 export default function ProductsPage() {
@@ -184,9 +183,7 @@ export default function ProductsPage() {
                                                 </DropdownMenuItem>
                                                 <DropdownMenuSeparator />
                                                 <DropdownMenuItem className="text-red-600 focus:text-red-600" onClick={() => {
-                                                  if (confirm('هل أنت متأكد من حذف هذا المنتج؟')) {
-                                                    deleteMutation.mutate(product.id);
-                                                  }
+                                                  deleteMutation.mutate(product.id);
                                                 }}>
                                                     <Trash2 className="ml-2 h-4 w-4" /> حذف
                                                 </DropdownMenuItem>
