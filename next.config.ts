@@ -1,10 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-    // Development: restrict to known origins (not '*')
-    allowedDevOrigins: process.env.NODE_ENV === 'development'
-        ? ['http://localhost:3000', 'http://localhost:81']
-        : [],
+    allowedDevOrigins: ['*.space-z.ai', 'localhost', '127.0.0.1'],
 
     images: {
         formats: ['image/avif', 'image/webp'],
