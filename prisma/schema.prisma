@@ -2,6 +2,17 @@
 // STANDARD.Rent — Full Database Schema
 // SQLite + Prisma ORM
 // =============================================================================
+//
+// HOW TO SWITCH TO POSTGRESQL (for production):
+// 1. Change the datasource provider below from "sqlite" to "postgresql".
+// 2. Set DATABASE_URL in your .env to a PostgreSQL connection string, e.g.:
+//    DATABASE_URL="postgresql://user:password@localhost:5432/standard_rent?schema=public"
+// 3. Run `bunx prisma db push` (or `bunx prisma migrate dev` for migration files).
+// 4. Run `bunx prisma generate` to regenerate the Prisma Client.
+//
+// No schema changes are required — Prisma abstracts the SQL dialect.
+// SQLite is recommended for local development; PostgreSQL for production.
+// =============================================================================
 
 generator client {
   provider = "prisma-client-js"
@@ -48,6 +59,7 @@ model User {
   receivedVouches SocialVouch[] @relation("VouchReceiver")
   identityVerification IdentityVerification?
   verificationVotes VerificationVote[] @relation("VerificationVoter")
+  sessions         Session[]
 
   @@map("users")
 }
@@ -644,4 +656,17 @@ model VerificationVote {
 
   @@unique([verificationId, voterId]) // one vote per verified user per verification
   @@map("verification_votes")
+}
+
+// ──── Session (database-backed, replaces in-memory Map) ────
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@map("sessions")
 }

@@ -5,7 +5,7 @@ import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
 // Analytics Events - Track & retrieve events from ActivityLog table
 
 export async function POST(request: NextRequest) {
-  const session = getSessionFromRequest(request);
+  const session = await getSessionFromRequest(request);
   if (!session) return authRequiredResponse();
 
   try {
@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
-  const session = getSessionFromRequest(request);
+  const session = await getSessionFromRequest(request);
   if (!session) return authRequiredResponse();
 
   try {

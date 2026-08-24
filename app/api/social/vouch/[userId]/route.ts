@@ -13,7 +13,7 @@ export async function POST(
   { params }: { params: Promise<{ userId: string }> }
 ) {
   try {
-    const session = getSessionFromRequest(request);
+    const session = await getSessionFromRequest(request);
     if (!session) return authRequiredResponse();
 
     const { userId: receiverId } = await params;

@@ -13,7 +13,7 @@ import { walletTransferSchema, validateBody } from '@/lib/validators';
 
 export async function POST(request: NextRequest) {
   try {
-    const session = getSessionFromRequest(request);
+    const session = await getSessionFromRequest(request);
     if (!session) return authRequiredResponse();
 
     // ── Rate limiting ──

@@ -8,7 +8,7 @@ import { logger } from '@/lib/logger';
 // POST /api/products/admin — Create a new product (admin/vendor)
 // ═══════════════════════════════════════════════════════════════
 export async function GET(request: NextRequest) {
-  const session = getSessionFromRequest(request);
+  const session = await getSessionFromRequest(request);
   if (!session) return authRequiredResponse();
 
   const user = await db.user.findUnique({ where: { id: session.userId }, select: { role: true } });
@@ -86,7 +86,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const session = getSessionFromRequest(request);
+  const session = await getSessionFromRequest(request);
   if (!session) return authRequiredResponse();
 
   const user = await db.user.findUnique({ where: { id: session.userId }, select: { role: true } });

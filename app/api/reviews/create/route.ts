@@ -28,7 +28,7 @@ function errorResponse(
 export async function POST(request: NextRequest) {
   try {
     // Check auth
-    const session = getSessionFromRequest(request);
+    const session = await getSessionFromRequest(request);
     if (!session) {
       return errorResponse(
         'يجب تسجيل الدخول لإضافة تقييم',

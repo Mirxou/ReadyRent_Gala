@@ -8,7 +8,7 @@ import { logger } from '@/lib/logger';
 // ═══════════════════════════════════════════════════════════════
 export async function GET(request: Request) {
   try {
-    const session = getSessionFromRequest(request);
+    const session = await getSessionFromRequest(request);
     if (!session) return authRequiredResponse();
 
     // Check that the requesting user is verified

@@ -10,7 +10,7 @@ import { logger } from '@/lib/logger';
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
   const { id } = await params;
-  const session = getSessionFromRequest(request);
+  const session = await getSessionFromRequest(request);
   if (!session) return authRequiredResponse();
 
   const contract = await db.contract.findUnique({

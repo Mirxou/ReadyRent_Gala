@@ -23,7 +23,7 @@ function errorResponse(messageAr: string, messageEn: string, code: string, statu
 // ──── GET: List user's waitlist items ────
 export async function GET(request: NextRequest) {
   try {
-    const session = getSessionFromRequest(request);
+    const session = await getSessionFromRequest(request);
     if (!session) return authRequiredResponse();
 
     const items = await db.waitlistItem.findMany({
@@ -80,7 +80,7 @@ export async function GET(request: NextRequest) {
 // ──── POST: Add item to waitlist ────
 export async function POST(request: NextRequest) {
   try {
-    const session = getSessionFromRequest(request);
+    const session = await getSessionFromRequest(request);
     if (!session) return authRequiredResponse();
 
     const body = await request.json();

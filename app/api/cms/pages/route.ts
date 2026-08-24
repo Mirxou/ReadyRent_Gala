@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     // Auth check — admin/staff only
-    const session = getSessionFromRequest(request);
+    const session = await getSessionFromRequest(request);
     if (!session) return authRequiredResponse();
 
     const user = await db.user.findUnique({ where: { id: session.userId } });

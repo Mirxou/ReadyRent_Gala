@@ -10,7 +10,7 @@ import { createDisputeSchema, validateBody } from '@/lib/validators';
 // ═══════════════════════════════════════════════════════════════
 export async function POST(request: Request) {
   try {
-    const session = getSessionFromRequest(request);
+    const session = await getSessionFromRequest(request);
     if (!session) return authRequiredResponse();
 
     const body = await request.json();

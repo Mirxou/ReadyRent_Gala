@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // STANDARD.Rent — Server-Side Auth Utilities
 // Signed session tokens using NEXTAUTH_SECRET (HMAC-SHA256)
-// Sessions stored in-memory (production: migrate to DB/Redis)
+// Sessions stored in database (survives restarts, shared across instances)
 // ═══════════════════════════════════════════════════════════════
 
 import crypto from 'crypto';
@@ -16,12 +16,27 @@ if (!_authSecret) {
 }
 const AUTH_SECRET = _authSecret;
 
-// ──── In-Memory Session Store ────
-// CRITICAL: Production should use database-backed sessions.
-// This Map is lost on restart and not shared across instances.
-const sessions = new Map<string, { userId: string; expiresAt: number }>();
+const SESSION_DURATION_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
-const SESSION_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days
+// ──── Expired Session Cleanup ────
+// Runs once on module load to purge stale sessions from the database.
+let cleanupRan = false;
+async function cleanupExpiredSessions() {
+  if (cleanupRan) return;
+  cleanupRan = true;
+  try {
+    const result = await db.session.deleteMany({
+      where: { expiresAt: { lt: new Date() } },
+    });
+    if (result.count > 0) {
+      console.warn(`[AUTH] Cleaned up ${result.count} expired session(s)`);
+    }
+  } catch (error) {
+    console.error('[AUTH] Failed to cleanup expired sessions:', error);
+  }
+}
+// Fire-and-forget cleanup on startup
+cleanupExpiredSessions();
 
 // ──── Token Signing ────
 // Tokens are HMAC-signed so they cannot be forged even if the session
@@ -35,7 +50,7 @@ function signToken(rawToken: string): string {
   return `${rawToken}.${hmac}`;
 }
 
-function verifyToken(signedToken: string): string | null {
+function verifyTokenSignature(signedToken: string): string | null {
   const dotIndex = signedToken.lastIndexOf('.');
   if (dotIndex === -1) return null;
 
@@ -65,36 +80,53 @@ export function generateSessionToken(): string {
 
 export async function createSession(userId: string): Promise<string> {
   const signedToken = generateSessionToken();
-  // Extract raw token for the store key
-  const rawToken = verifyToken(signedToken)!;
-  sessions.set(rawToken, { userId, expiresAt: Date.now() + SESSION_DURATION });
+  const rawToken = verifyTokenSignature(signedToken)!;
+  const expiresAt = new Date(Date.now() + SESSION_DURATION_MS);
+
+  await db.session.create({
+    data: {
+      userId,
+      token: rawToken,
+      expiresAt,
+    },
+  });
+
   return signedToken;
 }
 
-export function validateSession(signedToken: string): { userId: string } | null {
-  const rawToken = verifyToken(signedToken);
+export async function validateSession(signedToken: string): Promise<{ userId: string } | null> {
+  const rawToken = verifyTokenSignature(signedToken);
   if (!rawToken) return null;
 
-  const session = sessions.get(rawToken);
+  const session = await db.session.findUnique({ where: { token: rawToken } });
   if (!session) return null;
-  if (Date.now() > session.expiresAt) {
-    sessions.delete(rawToken);
+
+  // Check expiry — delete if expired
+  if (session.expiresAt < new Date()) {
+    await db.session.delete({ where: { id: session.id } });
     return null;
   }
+
   return { userId: session.userId };
 }
 
-export function destroySession(signedToken: string): void {
-  const rawToken = verifyToken(signedToken);
-  if (rawToken) sessions.delete(rawToken);
+export async function destroySession(signedToken: string): Promise<void> {
+  const rawToken = verifyTokenSignature(signedToken);
+  if (!rawToken) return;
+
+  try {
+    await db.session.deleteMany({ where: { token: rawToken } });
+  } catch {
+    // Silently ignore — session may already be deleted
+  }
 }
 
-export function getSessionFromRequest(request: Request): { userId: string; token: string } | null {
+export async function getSessionFromRequest(request: Request): Promise<{ userId: string; token: string } | null> {
   // Check Authorization header first
   const authHeader = request.headers.get('authorization');
   if (authHeader?.startsWith('Bearer ')) {
     const signedToken = authHeader.slice(7);
-    const session = validateSession(signedToken);
+    const session = await validateSession(signedToken);
     if (session) return { ...session, token: signedToken };
   }
 
@@ -103,7 +135,7 @@ export function getSessionFromRequest(request: Request): { userId: string; token
   const match = cookieHeader.match(/session_token=([^;]+)/);
   if (match) {
     const signedToken = match[1];
-    const session = validateSession(signedToken);
+    const session = await validateSession(signedToken);
     if (session) return { ...session, token: signedToken };
   }
 

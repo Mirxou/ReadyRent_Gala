@@ -8,7 +8,7 @@ import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
 // ═══════════════════════════════════════════════════════════════════
 export async function POST(request: Request) {
   try {
-    const session = getSessionFromRequest(request);
+    const session = await getSessionFromRequest(request);
     if (!session) return authRequiredResponse();
 
     // Check that the requesting user is verified

@@ -8,7 +8,7 @@ import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
 // ═══════════════════════════════════════════════════════════════
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const session = getSessionFromRequest(request);
+  const session = await getSessionFromRequest(request);
   if (!session) return authRequiredResponse();
 
   const body = await request.json();

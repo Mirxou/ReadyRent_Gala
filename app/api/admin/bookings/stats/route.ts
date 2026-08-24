@@ -7,7 +7,7 @@ import { logger } from '@/lib/logger';
 // GET /api/admin/bookings/stats — Booking statistics (admin/staff)
 // ═══════════════════════════════════════════════════════════════
 export async function GET(request: Request) {
-  const session = getSessionFromRequest(request);
+  const session = await getSessionFromRequest(request);
   if (!session) return authRequiredResponse();
 
   const user = await db.user.findUnique({ where: { id: session.userId }, select: { role: true } });

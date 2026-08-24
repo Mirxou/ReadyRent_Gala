@@ -15,7 +15,7 @@ const MAX_DEPOSIT_PER_DAY = 500000;
 
 export async function POST(request: Request) {
   try {
-    const session = getSessionFromRequest(request);
+    const session = await getSessionFromRequest(request);
     if (!session) return authRequiredResponse();
 
     // ── Rate limiting: 20 deposits per minute per user ──

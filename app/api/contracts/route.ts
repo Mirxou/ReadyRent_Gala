@@ -17,7 +17,7 @@ function safeJsonParse<T>(str: string | null, fallback: T): T {
 // ═══════════════════════════════════════════════════════════════
 export async function GET(request: Request) {
   try {
-  const session = getSessionFromRequest(request);
+  const session = await getSessionFromRequest(request);
   if (!session) return authRequiredResponse();
 
   // Find contracts through the user's bookings

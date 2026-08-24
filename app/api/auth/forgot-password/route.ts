@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import crypto from 'crypto';
 import { logger } from '@/lib/logger';
+import { sendEmail } from '@/lib/email';
+import { passwordResetEmail } from '@/lib/email-templates';
 
 // ═══════════════════════════════════════════════════════════════
 // POST /api/auth/forgot-password — Request a password reset
@@ -30,11 +32,10 @@ export async function POST(request: Request) {
     // Find user by email
     const user = await db.user.findUnique({
       where: { email: email.trim().toLowerCase() },
-      select: { id: true, isActive: true },
+      select: { id: true, isActive: true, firstName: true, username: true, email: true },
     });
 
-    // Generate a token and store it in ActivityLog with action "reset_token"
-    // This approach is simple for dev; in production use a proper token store or email service
+    // Generate a token, store it, and send reset email
     if (user && user.isActive) {
       const token = crypto.randomBytes(32).toString('hex');
       const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
@@ -47,7 +48,14 @@ export async function POST(request: Request) {
         },
       });
 
-      // Token stored in ActivityLog; email delivery requires an email service integration
+      // Send password reset email (fire-and-forget)
+      const resetLink = `${process.env.NEXT_PUBLIC_APP_URL || ''}/reset-password?token=${token}`;
+      const displayName = user.firstName || user.username || user.email;
+      sendEmail({
+        to: user.email,
+        subject: 'إعادة تعيين كلمة المرور — STANDARD.Rent 🔐',
+        html: passwordResetEmail(displayName, resetLink),
+      }).catch(() => {/* already logged inside sendEmail */});
     }
 
     // Always return success to prevent email enumeration

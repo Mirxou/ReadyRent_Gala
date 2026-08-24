@@ -9,6 +9,8 @@ import { hashPassword, createSession, formatUserResponse } from '@/lib/auth-serv
 import { registerSchema, validateBody } from '@/lib/validators';
 import { logger } from '@/lib/logger';
 import { checkRegisterRateLimit, getClientIp } from '@/lib/rate-limiter';
+import { sendEmail } from '@/lib/email';
+import { welcomeEmail } from '@/lib/email-templates';
 
 const SEVEN_DAYS = 7 * 24 * 60 * 60;
 
@@ -115,6 +117,14 @@ export async function POST(request: NextRequest) {
       sameSite: 'lax',
       maxAge: SEVEN_DAYS,
     });
+
+    // Send welcome email (fire-and-forget — don't block response)
+    const displayName = user.firstName || user.username || user.email;
+    sendEmail({
+      to: user.email,
+      subject: 'مرحباً بك في STANDARD.Rent 🚗',
+      html: welcomeEmail(displayName),
+    }).catch(() => {/* already logged inside sendEmail */});
 
     return response;
   } catch (error) {

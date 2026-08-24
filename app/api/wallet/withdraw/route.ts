@@ -10,7 +10,7 @@ import { checkWalletRateLimit } from '@/lib/rate-limiter';
 // ═══════════════════════════════════════════════════════════════
 export async function POST(request: Request) {
   try {
-    const session = getSessionFromRequest(request);
+    const session = await getSessionFromRequest(request);
     if (!session) return authRequiredResponse();
 
     // ── Rate limiting ──

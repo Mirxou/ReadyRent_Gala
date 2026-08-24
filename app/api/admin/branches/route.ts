@@ -9,7 +9,7 @@ import { logger } from '@/lib/logger';
 // ═══════════════════════════════════════════════════════════════
 
 async function requireAdmin(request: Request) {
-  const session = getSessionFromRequest(request);
+  const session = await getSessionFromRequest(request);
   if (!session) return { error: authRequiredResponse() };
 
   const user = await db.user.findUnique({ where: { id: session.userId }, select: { role: true } });

@@ -1,3 +1,8 @@
+// NOTE: Next.js 16 recommends migrating to proxy.ts
+// See: https://nextjs.org/docs/messages/middleware-to-proxy
+// The middleware file still works but is deprecated.
+// TODO: Migrate to proxy.ts when the API stabilizes.
+//
 // ═══════════════════════════════════════════════════════════════
 // STANDARD.Rent — Middleware (Auth Gate + Security Headers)
 // ═══════════════════════════════════════════════════════════════

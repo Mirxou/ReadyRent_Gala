@@ -51,4 +51,20 @@ export const logger = {
       console.log(formatMessage('debug', context, message, meta));
     }
   },
+
+  /**
+   * Audit log — persists an action to the ActivityLog table if available,
+   * otherwise falls back to console.log.
+   */
+  async auditLog(action: string, userId: string, details?: Record<string, unknown>) {
+    try {
+      const { db } = await import('@/lib/db');
+      await db.activityLog.create({
+        data: { action, userId, details: details ? JSON.stringify(details) : null },
+      });
+    } catch {
+      // ActivityLog table may not exist yet — fallback to console
+      console.log(formatMessage('info', 'audit', `${action} by ${userId}`, details));
+    }
+  },
 };

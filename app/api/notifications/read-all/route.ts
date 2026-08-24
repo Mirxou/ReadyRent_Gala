@@ -8,7 +8,7 @@ import { logger } from '@/lib/logger';
 // ═══════════════════════════════════════════════════════════════
 export async function PATCH(request: NextRequest) {
   try {
-  const session = getSessionFromRequest(request);
+  const session = await getSessionFromRequest(request);
   if (!session) return authRequiredResponse();
 
   await db.notification.updateMany({

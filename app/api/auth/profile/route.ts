@@ -12,7 +12,7 @@ import { logger } from '@/lib/logger';
 export async function GET(request: Request) {
   try {
     // Get session from cookie or Authorization header
-    const session = getSessionFromRequest(request);
+    const session = await getSessionFromRequest(request);
 
     if (!session) {
       return NextResponse.json(
@@ -71,7 +71,7 @@ export async function GET(request: Request) {
 // ──── PUT: Update Profile ────
 export async function PUT(request: NextRequest) {
   try {
-    const session = getSessionFromRequest(request);
+    const session = await getSessionFromRequest(request);
     if (!session) {
       return NextResponse.json(
         {

@@ -7,7 +7,7 @@ import { logger } from '@/lib/logger';
 // POST /api/subscriptions/subscribe — Subscribe to a plan
 // ═══════════════════════════════════════════════════════════════
 export async function POST(request: Request) {
-  const session = getSessionFromRequest(request);
+  const session = await getSessionFromRequest(request);
   if (!session) return authRequiredResponse();
 
   try {

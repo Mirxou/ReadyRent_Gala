@@ -12,7 +12,7 @@ export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = getSessionFromRequest(_request);
+  const session = await getSessionFromRequest(_request);
   if (!session) return authRequiredResponse();
 
   const user = await db.user.findUnique({ where: { id: session.userId }, select: { role: true } });
@@ -67,7 +67,7 @@ export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = getSessionFromRequest(request);
+  const session = await getSessionFromRequest(request);
   if (!session) return authRequiredResponse();
 
   const user = await db.user.findUnique({ where: { id: session.userId }, select: { role: true } });
@@ -121,7 +121,7 @@ export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = getSessionFromRequest(request);
+  const session = await getSessionFromRequest(request);
   if (!session) return authRequiredResponse();
 
   const user = await db.user.findUnique({ where: { id: session.userId }, select: { role: true } });
