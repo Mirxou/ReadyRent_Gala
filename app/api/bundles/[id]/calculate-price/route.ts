@@ -46,13 +46,13 @@ export async function GET(
     let individualTotal = 0;
     const itemBreakdown = bundle.items.map(item => {
       const dailyRate = item.product?.pricePerDay ?? 0;
-      const itemTotal = dailyRate * numberOfDays * (item.quantity || 1);
+      const itemTotal = dailyRate * numberOfDays * 1;
       individualTotal += itemTotal;
       return {
         product_id: item.productId,
         product_name: item.product?.nameAr || item.product?.name || 'Unknown',
         daily_rate: dailyRate,
-        quantity: item.quantity || 1,
+        quantity: 1,
         days: numberOfDays,
         item_total: itemTotal,
         is_available: item.product?.isAvailable ?? false,

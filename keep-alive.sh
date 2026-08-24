@@ -1,16 +1,7 @@
 #!/bin/bash
-# STANDARD.Rent — Development Keep-Alive
-# Automatically restarts the dev server on crash.
-# Usage: ./keep-alive.sh
-
-PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
-cd "$PROJECT_DIR"
-
-LOG_FILE="$PROJECT_DIR/dev.log"
-echo "[$(date)] Keep-alive starting..." >> "$LOG_FILE"
-
+cd /home/z/my-project
 while true; do
-  bun run dev >> "$LOG_FILE" 2>&1
-  echo "[$(date)] Server died, restarting in 3s..." >> "$LOG_FILE"
+  NODE_OPTIONS='--max-old-space-size=1024' npx next start -p 3000 >> dev.log 2>&1
+  echo "[$(date)] Server died, restarting in 3s..." >> dev.log
   sleep 3
 done

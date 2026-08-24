@@ -51,8 +51,8 @@ export async function POST(request: Request) {
       where: {
         productId: product_id,
         status: { in: ['pending', 'confirmed', 'active'] },
-        startDate: { lt: endDate },
-        endDate: { gt: startDate },
+        startDate: { lt: end_date },
+        endDate: { gt: start_date },
       },
     });
 

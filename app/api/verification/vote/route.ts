@@ -172,7 +172,7 @@ export async function POST(request: Request) {
         WRONG_STAGE: { ar: 'هذا الطلب ليس في مرحلة مراجعة المجتمع', en: 'This request is not in community review stage', status: 409 },
         ALREADY_VOTED: { ar: 'لقد صوتت بالفعل على هذا الطلب', en: 'You have already voted on this request', status: 409 },
       };
-      const err = errorMap[result.error];
+      const err = errorMap[result.error as string];
       return NextResponse.json(
         { success: false, dignity_preserved: true, message_ar: err.ar, message_en: err.en },
         { status: err.status }

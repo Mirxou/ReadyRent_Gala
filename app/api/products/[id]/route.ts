@@ -54,7 +54,7 @@ const productIncludes = {
   reviews: {
     where: { status: 'approved' },
     take: 5,
-    orderBy: { createdAt: 'desc' },
+    orderBy: { createdAt: 'desc' as const },
     include: {
       user: {
         select: { id: true, username: true },

@@ -83,6 +83,7 @@ export async function PATCH(
     const updated = await db.review.update({
       where: { id },
       data: { status },
+      select: { id: true, status: true },
     });
 
     // Create notification for the review author
@@ -101,7 +102,7 @@ export async function PATCH(
     const data = {
       id: updated.id,
       status: updated.status,
-      updated_at: updated.updatedAt.toISOString(),
+      updated_at: new Date().toISOString(),
     };
 
     return NextResponse.json({ success: true, dignity_preserved: true, data });

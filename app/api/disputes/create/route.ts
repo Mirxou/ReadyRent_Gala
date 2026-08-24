@@ -39,6 +39,13 @@ export async function POST(request: Request) {
       );
     }
 
+    if (!booking.productId) {
+      return NextResponse.json(
+        { success: false, dignity_preserved: true, message_en: 'Booking has no product', code: 'INVALID_BOOKING' },
+        { status: 400 }
+      );
+    }
+
     // Vendor protection: check if user is the vendor (product owner) → counter-claim allowed
     const product = await db.product.findUnique({
       where: { id: booking.productId },

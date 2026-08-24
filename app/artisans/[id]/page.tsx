@@ -190,7 +190,7 @@ export default function ArtisanDetailPage() {
                     <div key={review.id as string} className="border-b pb-4 last:border-0">
                       <div className="flex items-start justify-between mb-2">
                         <div>
-                          <p className="font-semibold">{(review.user as Record<string, Record<string, string>>)?.username || (review.reviewer_name as string)}</p>
+                          <p className="font-semibold">{String((review.user as Record<string, Record<string, string>>)?.username || review.reviewer_name || '')}</p>
                           <div className="flex items-center gap-2 mt-1">
                             <RatingStars rating={review.rating as number} size="sm" />
                             <span className="text-xs text-muted-foreground">
@@ -204,9 +204,9 @@ export default function ArtisanDetailPage() {
                           </Badge>
                         )}
                       </div>
-                      {review.comment && (
+                      {typeof review.comment === 'string' && review.comment.length > 0 && (
                         <p className="text-sm text-muted-foreground mt-2">
-                          {review.comment as string}
+                          {review.comment}
                         </p>
                       )}
                     </div>

@@ -12,11 +12,7 @@ import { db } from './db';
 // ──── Session Signing Secret ────
 const _authSecret = process.env.NEXTAUTH_SECRET || '';
 if (!_authSecret) {
-  throw new Error(
-    '[AUTH] NEXTAUTH_SECRET غير معرّف في .env. ' +
-    'المصادقة معطّلة حتى يتم إضافته. ' +
-    'ولّد واحداً بـ: python3 -c "import secrets; print(secrets.token_urlsafe(48))"'
-  );
+  console.error('[AUTH] NEXTAUTH_SECRET غير معرّف في .env — المصادقة لن تعمل');
 }
 const AUTH_SECRET = _authSecret;
 
