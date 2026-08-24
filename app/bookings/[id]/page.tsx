@@ -19,7 +19,6 @@ import { SovereignSeal } from '@/shared/components/sovereign/sovereign-seal';
 import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
 import { Badge } from '@/components/ui/badge';
 import { EscrowTracker } from '@/features/finance/components/escrow-tracker';
-import type { EscrowState } from '@/features/finance/components/escrow-tracker';
 
 interface BookingDetail {
     id: number;
@@ -79,7 +78,7 @@ export default function BookingDetailPage() {
         </div>
     );
 
-    const escrowStateMap: Record<string, EscrowState> = {
+    const escrowStateMap: Record<string, string> = {
         INITIATED: 'pending',
         HELD: 'held',
         RELEASED: 'released',
@@ -122,7 +121,7 @@ export default function BookingDetailPage() {
                             </span>
                         </div>
                         <div className="w-px h-12 bg-white/10" />
-                        <SovereignSeal type="BALANCE_GOLD" refId={`BK-${booking.id}`} size="sm" />
+                        <SovereignSeal type="contract" refId={`BK-${booking.id}`} size="sm" />
                     </div>
                 </header>
 
@@ -198,7 +197,7 @@ export default function BookingDetailPage() {
                         </h2>
 
                         <EscrowTracker
-                            bookingId={booking.id}
+                            bookingId={String(booking.id)}
                             amount={booking.total_price}
                             status={escrowStateMap[booking.escrow_status] || 'pending'}
                         />

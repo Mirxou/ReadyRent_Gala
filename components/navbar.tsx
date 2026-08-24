@@ -80,7 +80,7 @@ export function Navbar() {
   const { scrollYProgress } = useScroll();
 
   // setMounted: standard Next.js hydration pattern — React compiler warning is a false positive
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
   useEffect(() => {
     setMounted(true);
     const handleScroll = () => {

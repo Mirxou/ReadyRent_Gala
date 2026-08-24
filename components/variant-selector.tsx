@@ -34,21 +34,6 @@ export function VariantSelector({ productId, onSelect, selectedVariantId }: Vari
   const [selectedSize, setSelectedSize] = useState<string>('');
   const [selectedColor, setSelectedColor] = useState<string>('');
 
-  useEffect(() => {
-    loadVariants();
-  }, [productId]);
-
-  useEffect(() => {
-    if (selectedVariantId && variants.length > 0) {
-      const variant = variants.find(v => v.id === selectedVariantId);
-      if (variant) {
-        setSelectedVariant(variant);
-        setSelectedSize(variant.size);
-        setSelectedColor(variant.color);
-      }
-    }
-  }, [selectedVariantId, variants]);
-
   const loadVariants = async () => {
     try {
       const response = await api.get(`/products/${productId}/variants/`);
@@ -59,6 +44,23 @@ export function VariantSelector({ productId, onSelect, selectedVariantId }: Vari
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    requestAnimationFrame(() => { loadVariants(); });
+  }, [productId]);
+
+  useEffect(() => {
+    if (selectedVariantId && variants.length > 0) {
+      const variant = variants.find(v => v.id === selectedVariantId);
+      if (variant) {
+        requestAnimationFrame(() => {
+          setSelectedVariant(variant);
+          setSelectedSize(variant.size);
+          setSelectedColor(variant.color);
+        });
+      }
+    }
+  }, [selectedVariantId, variants]);
 
   const handleVariantSelect = (variant: ProductVariant) => {
     setSelectedVariant(variant);

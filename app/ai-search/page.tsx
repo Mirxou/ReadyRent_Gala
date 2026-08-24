@@ -134,8 +134,7 @@ function AIExplainer({ query, onDismiss }: { query: string; onDismiss: () => voi
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
-    setReply('');
+    requestAnimationFrame(() => { setLoading(true); setReply(''); });
 
     const fetchExplainer = async () => {
       try {

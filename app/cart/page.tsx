@@ -119,7 +119,7 @@ export default function CartPage() {
       }
     },
     onError: (error: unknown) => {
-      toast.error(error?.message || 'حدث خطأ أثناء إنشاء الحجز');
+      toast.error((error instanceof Error ? error.message : String(error)) || 'حدث خطأ أثناء إنشاء الحجز');
     },
   });
 

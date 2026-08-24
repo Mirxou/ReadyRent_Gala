@@ -55,7 +55,7 @@ export function useSettingsForm() {
     const userName = apiUser.first_name && apiUser.last_name
       ? `${apiUser.first_name} ${apiUser.last_name}`
       : apiUser.username || defaultProfileData.name;
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+     
     setFormState({
       profile: {
         name: userName,

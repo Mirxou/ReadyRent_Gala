@@ -1,5 +1,5 @@
 "use client";
-/* eslint-disable react-hooks/static-components */
+ 
 
 import * as React from "react";
 import Link from "next/link";
@@ -46,7 +46,7 @@ const SovereignButton = React.forwardRef<HTMLButtonElement, SovereignButtonProps
             xl: "h-24 px-16 text-lg font-black uppercase tracking-[0.4em] rounded-full",
         };
 
-        // eslint-disable-next-line react-hooks/static-components
+         
         const MotionLink = React.useMemo(() => motion(Link), []);
 
         const sharedProps = {

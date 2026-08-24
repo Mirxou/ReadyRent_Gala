@@ -52,7 +52,7 @@ export default function VendorDashboardPage() {
   };
 
   useEffect(() => {
-    loadDashboard();
+    requestAnimationFrame(() => { loadDashboard(); });
   }, []);
 
   if (loading) {

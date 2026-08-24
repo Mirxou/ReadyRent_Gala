@@ -57,7 +57,7 @@ export default function BundleDetailPage() {
       router.push('/dashboard/orders');
     },
     onError: (err: unknown) => {
-      toast.error(err?.message || 'حدث خطأ أثناء الحجز');
+      toast.error((err as Error)?.message || 'حدث خطأ أثناء الحجز');
     },
   });
 
@@ -294,15 +294,15 @@ export default function BundleDetailPage() {
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {items.map((item: Record<string, unknown>, idx: number) => {
-                  const product = item.product || {};
+                  const product = (item.product || {}) as Record<string, unknown>;
                   return (
-                    <Link key={item.id} href={`/products/${item.productId || product.id}`}>
+                    <Link key={String(item.id)} href={`/products/${String(item.productId || (product as Record<string, unknown>).id)}`}>
                       <Card className="card-glass border-0 rounded-2xl overflow-hidden hover:border-sovereign-gold/30 transition-colors group cursor-pointer">
                         <div className="aspect-square bg-muted/30 relative overflow-hidden">
-                          {product.primaryImage ? (
+                          {String(product.primaryImage) ? (
                             <img
-                              src={product.primaryImage}
-                              alt={product.nameAr || product.name || 'منتج'}
+                              src={String(product.primaryImage)}
+                              alt={String(product.nameAr || product.name || 'منتج')}
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                             />
                           ) : (
@@ -316,10 +316,10 @@ export default function BundleDetailPage() {
                         </div>
                         <CardContent className="pt-4 pb-4">
                           <h3 className="font-bold text-sm mb-1 line-clamp-1">
-                            {product.nameAr || product.name || 'منتج'}
+                            {String(product.nameAr || product.name || 'منتج')}
                           </h3>
                           <p className="text-sovereign-gold font-bold text-sm">
-                            {(product.pricePerDay || 0).toLocaleString()} دج
+                            {Number(product.pricePerDay || 0).toLocaleString()} دج
                             <span className="text-muted-foreground font-normal mr-1">/يوم</span>
                           </p>
                         </CardContent>

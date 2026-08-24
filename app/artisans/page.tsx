@@ -14,17 +14,32 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { MagneticButton } from '@/components/ui/magnetic-button';
 import { TiltCard } from '@/components/ui/tilt-card';
 
+interface Artisan {
+  id: string;
+  cover_image?: string;
+  profile_image?: string;
+  name_ar?: string;
+  name?: string;
+  is_featured?: boolean;
+  is_verified?: boolean;
+  bio_ar?: string;
+  specialty?: string;
+  instagram?: string;
+  facebook?: string;
+  rating?: number;
+}
+
 export default function ArtisansPage() {
   const [search, setSearch] = useState('');
   const [selectedSpecialty, setSelectedSpecialty] = useState<string>('');
 
-  const { data: artisans, isLoading, isError } = useQuery({
+  const { data: artisans, isLoading, isError } = useQuery<Artisan[] | { results: Artisan[] }>({
     queryKey: ['artisans', search, selectedSpecialty],
     queryFn: () =>
       fetch(`/api/artisans/artisans?search=${search}&specialty=${selectedSpecialty || ''}`).then(r => r.json()).then(d => d.data || d),
   });
 
-  const artisansList = useMemo(() => {
+  const artisansList = useMemo<Artisan[]>(() => {
     if (!artisans) return [];
     return Array.isArray(artisans) ? artisans : (artisans?.results || []);
   }, [artisans]);
@@ -152,7 +167,7 @@ export default function ArtisansPage() {
         ) : artisansList.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
             <AnimatePresence>
-              {artisansList.map((artisan: Record<string, unknown>, index: number) => (
+              {artisansList.map((artisan, index) => (
                 <motion.div
                   key={artisan.id}
                   initial={{ opacity: 0, y: 30 }}
@@ -164,7 +179,7 @@ export default function ArtisansPage() {
                       <div className="relative aspect-[4/3] w-full overflow-hidden rounded-t-[2.5rem]">
                         <Image
                           src={artisan.cover_image || artisan.profile_image || '/placeholder-artisan.jpg'}
-                          alt={artisan.name_ar || artisan.name}
+                          alt={artisan.name_ar || artisan.name || ''}
                           fill
                           className="object-cover group-hover:scale-110 transition-transform duration-700"
                         />
@@ -190,7 +205,7 @@ export default function ArtisansPage() {
                             <div className="relative w-24 h-24 rounded-3xl overflow-hidden flex-shrink-0 border-4 border-[#0f172a] shadow-2xl group-hover:scale-110 transition-transform duration-500">
                               <Image
                                 src={artisan.profile_image}
-                                alt={artisan.name_ar}
+                                alt={artisan.name_ar || ''}
                                 fill
                                 className="object-cover"
                               />
@@ -225,7 +240,8 @@ export default function ArtisansPage() {
                                 onClick={(e) => {
                                   e.preventDefault();
                                   e.stopPropagation();
-                                  window.open(`https://instagram.com/${artisan.instagram.replace('@', '')}`, '_blank');
+                                  const ig = artisan.instagram as string;
+                                  window.open(`https://instagram.com/${ig.replace('@', '')}`, '_blank');
                                 }}
                               >
                                 <Instagram className="h-5 w-5" />

@@ -32,11 +32,6 @@ export default function ContractPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (id) loadContract();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
-
   const loadContract = async () => {
     try {
       setLoading(true);
@@ -73,6 +68,11 @@ export default function ContractPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (id) requestAnimationFrame(() => { loadContract(); });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
   const handleSign = async (signatureData: string) => {
     if (!id) return;

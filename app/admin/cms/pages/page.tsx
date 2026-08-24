@@ -70,7 +70,7 @@ export default function CMSPagesPage() {
   }, []);
 
   useEffect(() => {
-    fetchPages();
+    requestAnimationFrame(() => { fetchPages(); });
   }, [fetchPages]);
 
   const openCreate = () => {

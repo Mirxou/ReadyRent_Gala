@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
     allowedDevOrigins: ['*.space-z.ai', 'localhost', '127.0.0.1'],
     typescript: {
-        ignoreBuildErrors: true,
+        ignoreBuildErrors: true, // TODO: fix remaining unknown→string JSX casts in cart, bundles, artisans pages
     },
 
     images: {

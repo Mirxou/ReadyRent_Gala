@@ -20,19 +20,14 @@ export default function ResetPasswordPage() {
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [token, setToken] = useState<string | null>(null);
+  const token = searchParams.get('token');
 
   useEffect(() => {
-    const tokenParam = searchParams.get('token');
-    
-    if (!tokenParam) {
+    if (!token) {
       toast.error('رابط إعادة تعيين كلمة المرور غير صحيح');
       router.push('/forgot-password');
-      return;
     }
-    
-    setToken(tokenParam);
-  }, [searchParams, router]);
+  }, [token, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

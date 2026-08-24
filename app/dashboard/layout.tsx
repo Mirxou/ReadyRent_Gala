@@ -34,7 +34,7 @@ export default function DashboardLayout({
         if (!isAuthenticated && !hasStoredAuth) {
             router.push('/login');
         } else {
-            setIsLoading(false);
+            requestAnimationFrame(() => { setIsLoading(false); });
         }
     }, [isAuthenticated, router]);
 

@@ -31,19 +31,6 @@ export function BranchSelector({ onSelect, selectedBranchId }: BranchSelectorPro
   const [loading, setLoading] = useState(true);
   const [selectedBranch, setSelectedBranch] = useState<Branch | null>(null);
 
-  useEffect(() => {
-    loadBranches();
-  }, []);
-
-  useEffect(() => {
-    if (selectedBranchId && branches.length > 0) {
-      const branch = branches.find(b => b.id === selectedBranchId);
-      if (branch) {
-        setSelectedBranch(branch);
-      }
-    }
-  }, [selectedBranchId, branches]);
-
   const loadBranches = async () => {
     try {
       const response = await api.get('/branches/');
@@ -54,6 +41,19 @@ export function BranchSelector({ onSelect, selectedBranchId }: BranchSelectorPro
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    requestAnimationFrame(() => { loadBranches(); });
+  }, []);
+
+  useEffect(() => {
+    if (selectedBranchId && branches.length > 0) {
+      const branch = branches.find(b => b.id === selectedBranchId);
+      if (branch) {
+        requestAnimationFrame(() => { setSelectedBranch(branch); });
+      }
+    }
+  }, [selectedBranchId, branches]);
 
   const handleBranchSelect = (branch: Branch) => {
     setSelectedBranch(branch);

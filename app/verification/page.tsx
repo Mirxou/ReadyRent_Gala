@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { formatNumber } from '@/lib/utils';
 import {
   Shield, ShieldCheck, ShieldX, Lock, Eye, CheckCircle2, XCircle, ImageIcon,
-  ThumbsUp, ThumbsDown, MessageSquare, Users, Star, RefreshCw, RotateCcw, Loader2, ArrowLeft, AlertTriangle, Clock,
+  ThumbsUp, ThumbsDown, MessageSquare, Users, Star, RefreshCw, RotateCcw, Loader2, ArrowLeft, AlertTriangle,
 } from 'lucide-react';
 import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
 import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';

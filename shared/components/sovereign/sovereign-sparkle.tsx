@@ -28,7 +28,7 @@ export function SovereignSparkle({ children, active = true }: { children?: React
   // Use useState + useEffect to avoid hydration mismatch (Math.random is non-deterministic)
   const [particles, setParticles] = useState<Particle[]>([]);
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
   useEffect(() => {
     if (!active) {
       setParticles([]);
@@ -51,7 +51,7 @@ export function SovereignSparkle({ children, active = true }: { children?: React
       color: pseudoRandom(i + 60) > 0.4 ? '#C5A059' : '#FFFFFF'
     }));
     setParticles(newParticles);
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
   }, [active]);
 
   return (

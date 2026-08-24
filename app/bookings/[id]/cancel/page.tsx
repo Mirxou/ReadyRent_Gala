@@ -19,7 +19,18 @@ export default function CancelBookingPage() {
   const { isAuthenticated } = useAuthStore();
   const [loading, setLoading] = useState(false);
   const [policyLoading, setPolicyLoading] = useState(true);
-  const [policy, setPolicy] = useState<Record<string, unknown> | null>(null);
+  interface CancellationPolicyData {
+    fee_info: {
+      fee_percentage: number;
+      fee_amount: number;
+      refund_amount: number;
+      hours_until_start: number;
+    };
+    can_cancel: boolean;
+    message: string;
+  }
+
+  const [policy, setPolicy] = useState<CancellationPolicyData | null>(null);
   const [reason, setReason] = useState('');
 
   useEffect(() => {

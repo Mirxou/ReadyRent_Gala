@@ -83,7 +83,7 @@ export default function ProductVariantsPage() {
 
   useEffect(() => {
     if (hasRole) {
-      loadVariants();
+      requestAnimationFrame(() => { loadVariants(); });
     }
   }, [params.id, hasRole]);
 

@@ -75,7 +75,7 @@ export default function BranchesPage() {
   };
 
   useEffect(() => {
-    loadBranches();
+    requestAnimationFrame(() => { loadBranches(); });
   }, []);
 
   const handleSubmit = async () => {

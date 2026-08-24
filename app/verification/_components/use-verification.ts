@@ -102,9 +102,9 @@ export function useVerification() {
   }, [capturedPhoto, fetchStatus]);
 
   // Auto-refresh status for pending states (intentional one-shot set on mount to hydrate status)
-  // eslint-disable-next-line react-hooks/set-state-in-effect, react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { if (!isAuthenticated) { setVerificationStatus('not_submitted'); return; } fetchStatus(); }, [isAuthenticated, fetchStatus]);
-  // eslint-disable-next-line react-hooks/set-state-in-effect, react-hooks/exhaustive-deps
+   
   useEffect(() => {
     const needs = verificationStatus === 'pending' || verificationStatus === 'ai_approved' || verificationStatus === 'community_review';
     if (!needs) return;
@@ -124,7 +124,7 @@ export function useVerification() {
     finally { setLoadingQueue(false); }
   }, [user?.is_verified]);
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect, react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { if (user?.is_verified) fetchPendingQueue(); }, [user?.is_verified, fetchPendingQueue]);
 
   const handleVote = useCallback(async (verificationId: string, vote: 'approve' | 'reject', comment?: string) => {
