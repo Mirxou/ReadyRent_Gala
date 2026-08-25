@@ -11,16 +11,38 @@ type Product = {
   name: string;
   name_ar?: string;
   primary_image?: string;
-  daily_rate: number;
-  category?: { name: string; name_ar?: string };
+  price_per_day: number;
+  category?: { name_ar?: string } | null;
   is_available?: boolean;
+  images?: Array<{ image?: string; url?: string }>;
+  slug?: string;
+  rating?: number;
+  trust_score?: number;
+  is_premium?: boolean;
+  is_verified?: boolean;
+  location?: string;
+  listing_type?: string;
+  deposit_amount?: number;
+  description?: string | null;
+  created_at?: string;
 };
 
-export function FeaturedProducts() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+interface FeaturedProductsProps {
+  /**
+   * When provided (from SSR), skip client-side fetching.
+   * Falls back to client fetch when undefined.
+   */
+  products?: Product[];
+}
+
+export function FeaturedProducts({ products: ssrProducts }: FeaturedProductsProps) {
+  const [products, setProducts] = useState<Product[]>(ssrProducts ?? []);
+  const [loading, setLoading] = useState(!ssrProducts);
 
   useEffect(() => {
+    // Skip fetch if SSR data was provided
+    if (ssrProducts) return;
+
     async function fetchFeatured() {
       try {
         const res = await productsApi.getAll({ limit: 3, sort: 'newest' });
@@ -34,7 +56,7 @@ export function FeaturedProducts() {
       }
     }
     fetchFeatured();
-  }, []);
+  }, [ssrProducts]);
 
   if (loading) {
     return (
@@ -66,7 +88,7 @@ export function FeaturedProducts() {
               viewport={{ once: true }}
               transition={{ delay: i * 0.1, duration: 0.6 }}
             >
-              <ProductCard product={p} />
+              <ProductCard product={p as Record<string, unknown>} />
             </motion.div>
           ))}
         </div>

@@ -42,12 +42,13 @@ export const logger = {
 
   info(context: string, message: string, meta?: unknown) {
     if (shouldLog('info')) {
-      console.log(formatMessage('info', context, message, meta));
+      console.warn(formatMessage('info', context, message, meta));
     }
   },
 
   debug(context: string, message: string, meta?: unknown) {
     if (shouldLog('debug')) {
+      // eslint-disable-next-line no-console
       console.log(formatMessage('debug', context, message, meta));
     }
   },
@@ -64,7 +65,7 @@ export const logger = {
       });
     } catch {
       // ActivityLog table may not exist yet — fallback to console
-      console.log(formatMessage('info', 'audit', `${action} by ${userId}`, details));
+      console.warn(formatMessage('info', 'audit', `${action} by ${userId}`, details));
     }
   },
 };

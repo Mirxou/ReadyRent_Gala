@@ -17,6 +17,9 @@ export const metadata: Metadata = {
   keywords: ["سيادة", "فخامة", "تداول أصول", "الجزائر", "ثقة رقمية", "مبني على الحقائق"],
   authors: [{ name: "STANDARD Sovereign Team" }],
   manifest: "/manifest.json",
+  icons: {
+    apple: "/icons/icon-192x192.png",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",

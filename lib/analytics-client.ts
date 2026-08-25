@@ -12,7 +12,8 @@ export function trackEvent(eventName: string, properties?: Record<string, unknow
     // Google Analytics 4
     window.gtag?.('event', eventName, properties);
   }
-  console.debug('[ANALYTICS]', eventName, properties);
+  // Debug-only: uncomment below for analytics debugging
+  // console.warn('[ANALYTICS]', eventName, properties);
 }
 
 export function pageView(url: string) {

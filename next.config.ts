@@ -1,4 +1,12 @@
 import type { NextConfig } from "next";
+import withSerwistInit from "@serwist/next";
+
+const withSerwist = withSerwistInit({
+  swSrc: "app/sw.ts",
+  swDest: "public/sw.js",
+  cacheOnNavigation: true,
+  disablePrecacheWarmup: true,
+});
 
 const nextConfig: NextConfig = {
     allowedDevOrigins: ['*.space-z.ai', 'localhost', '127.0.0.1'],
@@ -31,4 +39,4 @@ const nextConfig: NextConfig = {
     },
 };
 
-export default nextConfig;
+export default withSerwist(nextConfig);

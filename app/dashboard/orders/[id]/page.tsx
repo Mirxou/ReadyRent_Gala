@@ -228,7 +228,7 @@ export default function BookingDetailsPage() {
             <GlassPanel className="p-8 relative overflow-hidden" gradientBorder>
                 <div className="flex flex-col md:flex-row gap-10">
                     <div className="w-full md:w-64 h-80 rounded-3xl overflow-hidden shadow-2xl border border-white/5">
-                        <img src={booking.product_image || booking.product?.images?.[0]?.image} className="w-full h-full object-cover" />
+                        <img src={booking.product_image || booking.product?.images?.[0]?.image} className="w-full h-full object-cover" alt={booking.product_name || 'صورة المنتج'} />
                     </div>
                     <div className="flex-1 space-y-6">
                         <div className="flex justify-between items-start">

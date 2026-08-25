@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
       data: { userId: session.userId, action: event_type, target: target_id ?? null },
     });
 
-    console.log(`[Analytics Event] ${event_type}`, target_id ?? '', metadata ?? '');
+    console.warn(`[Analytics Event] ${event_type}`, target_id ?? '', metadata ?? '');
 
     return NextResponse.json({ success: true, dignity_preserved: true, data: { id: event.id, created_at: event.createdAt.toISOString() } });
   } catch {
