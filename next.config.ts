@@ -6,6 +6,8 @@ const withSerwist = withSerwistInit({
   swDest: "public/sw.js",
   cacheOnNavigation: true,
   disablePrecacheWarmup: true,
+  // Disable in dev when using Turbopack (not supported yet)
+  disable: process.env.NODE_ENV !== 'production',
 });
 
 const nextConfig: NextConfig = {
@@ -31,6 +33,10 @@ const nextConfig: NextConfig = {
             {
                 protocol: 'https',
                 hostname: '**.cloudinary.com',
+            },
+            {
+                protocol: 'https',
+                hostname: 'picsum.photos',
             },
         ],
     },
