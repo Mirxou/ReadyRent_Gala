@@ -1,0 +1,28 @@
+{
+  "analysis": {
+    "subject": "الخاتم الذهبي السيادي (The Sovereign Gold Crest): خاتم ذهبي عتيق محفور عليه شعار 'S' بطريقة هندسية معقدة، يتلألأ بلمعة معدنية فاخرة مع انعكاسات ضوئية دافئة.",
+    "scene": "بيئات معمارية فاخرة: قاعات من الرخام الأسود (Obsidian)، غرف اجتماعات زجاجية فوق السحاب، ومناظر طبيعية صخرية مهيبة.",
+    "style": "Realistic Luxury: نمط سينمائي واقعي (8K)، بأسلوب تصوير إعلانات النخبة، مع إضاءة درامية ذهبية وظلال عميقة.",
+    "image_roles": ["Segment 1: Subject+Style", "Segment 2: Scene+Action", "Segment 3: Subject+Action", "Segment 4: Conclusion"]
+  },
+  "story_script": [
+    {
+      "segment_id": 1,
+      "visual_desc": "Cinematic close-up (8K). لقطة قريبة جداً للخاتم الذهبي السيادي (Sovereign Gold Crest) وهو يطفو ببطء في فضاء مظلم من الرخام الأسود (Obsidian). الضوء الذهبي ينزلق على حوافه المحفورة بدقة. الإضاءة مركزة ودرامية. Realistic Style."
+    },
+    {
+      "segment_id": 2,
+      "visual_desc": "Cinematic Wide Shot (8K). قاعة اجتماعات 'سيادية' زجاجية تطل على مدينة مستقبلية في وقت الغروب. الرخام الأرضي يعكس السماء البرتقالية. الخاتم الذهبي يظهر في منتصف الطاولة الرخامية كرمز للسلطة والثقة. Realistic Luxury."
+    },
+    {
+      "segment_id": 3,
+      "visual_desc": "Cinematic Medium Shot (8K). يد ترتدي قفازاً مخملياً أسود تمسك بالخاتم الذهبي السيادي وتضعه فوق وثيقة رقمية 'عقد ذكي' تتوهج باللون الذهبي البلاتيني. شرارات ضوئية ذهبية تتصاعد عند التلامس. Sovereign Ethics V.2."
+    },
+    {
+      "segment_id": 4,
+      "visual_desc": "Cinematic Eye-level Shot (8K). شعار STANDARD الضخم يظهر في وسط الشاشة مع الخاتم الذهبي السيادي وهو يدور بوقار. الخلفية سوداء تماماً مع هالة ذهبية نباضة. النص العربي يظهر: 'السيادة المطلقة'. Realistic Luxury."
+    }
+  ],
+  "input_mode": "text",
+  "style_used": "Realistic"
+}
