@@ -24,9 +24,9 @@ const GlassPanel = React.forwardRef<HTMLDivElement, GlassPanelProps>(
     ({ className, children, gradientBorder = false, variant = "default", ...props }, ref) => {
 
         const variants = {
-            default: "bg-white/60 dark:bg-sovereign-obsidian/40 border-gray-200 dark:border-white/10 shadow-xl dark:shadow-2xl",
-            obsidian: "bg-sovereign-black/80 border-sovereign-gold/20 shadow-[0_0_50px_rgba(0,0,0,0.5)] backdrop-blur-3xl",
-            gold: "bg-sovereign-gold/5 border-sovereign-gold/30 shadow-gold-pulse",
+            default: "bg-card border-border shadow-xl",
+            obsidian: "bg-card border-sovereign-gold/20 shadow-lg backdrop-blur-2xl dark:shadow-[0_0_50px_rgba(0,0,0,0.5)]",
+            gold: "bg-sovereign-gold/5 border-sovereign-gold/30",
         };
 
         return (

@@ -170,7 +170,7 @@ export function HeroEcosystem() {
             {/* Card 1: الكراء (tall — spans 2 rows on desktop) */}
             <motion.div custom={0} variants={fadeUp} className="md:row-span-2">
               <Link href={features[0].href} className="block group h-full">
-                <div className="relative h-full rounded-2xl p-6 sm:p-8 md:p-10 border border-white/[0.06] bg-white/[0.03] transition-all duration-300 hover:border-white/[0.1] hover:bg-white/[0.04]">
+                <div className="relative h-full rounded-2xl p-6 sm:p-8 md:p-10 border border-border bg-muted/50 transition-all duration-300 hover:border-foreground/10 hover:bg-muted">
                   <div className="flex flex-col h-full">
                     <div className="w-11 h-11 rounded-xl bg-sovereign-gold/10 flex items-center justify-center mb-5 sm:mb-6 group-hover:scale-105 transition-transform duration-300">
                       <Repeat className="w-5 h-5 text-sovereign-gold" />
@@ -178,7 +178,7 @@ export function HeroEcosystem() {
                     <h3 className="text-xl sm:text-2xl font-black tracking-tight mb-3 not-italic">
                       {features[0].title}
                     </h3>
-                    <p className="text-sm text-foreground/60 leading-relaxed not-italic">
+                    <p className="text-sm text-muted-foreground leading-relaxed not-italic">
                       {features[0].desc}
                     </p>
                     <div className="mt-auto pt-6 sm:pt-8 flex items-center gap-2 text-sovereign-gold/50 group-hover:text-sovereign-gold/80 transition-colors duration-300">
@@ -193,7 +193,7 @@ export function HeroEcosystem() {
             {/* Card 2: الخدمات */}
             <motion.div custom={1} variants={fadeUp}>
               <Link href={features[1].href} className="block group h-full">
-                <div className="relative h-full rounded-2xl p-6 sm:p-8 border border-white/[0.06] bg-white/[0.03] transition-all duration-300 hover:border-white/[0.1] hover:bg-white/[0.04]">
+                <div className="relative h-full rounded-2xl p-6 sm:p-8 border border-border bg-muted/50 transition-all duration-300 hover:border-foreground/10 hover:bg-muted">
                   <div className="flex flex-col h-full">
                     <div className="w-11 h-11 rounded-xl bg-sovereign-gold/10 flex items-center justify-center mb-4 sm:mb-5 group-hover:scale-105 transition-transform duration-300">
                       <Wrench className="w-5 h-5 text-sovereign-gold" />
@@ -201,7 +201,7 @@ export function HeroEcosystem() {
                     <h3 className="text-lg sm:text-xl font-black tracking-tight mb-2 not-italic">
                       {features[1].title}
                     </h3>
-                    <p className="text-sm text-foreground/60 leading-relaxed not-italic">
+                    <p className="text-sm text-muted-foreground leading-relaxed not-italic">
                       {features[1].desc}
                     </p>
                     <div className="mt-auto pt-4 sm:pt-5 flex items-center gap-2 text-sovereign-gold/50 group-hover:text-sovereign-gold/80 transition-colors duration-300">
@@ -216,7 +216,7 @@ export function HeroEcosystem() {
             {/* Card 3: السوق المفتوح */}
             <motion.div custom={2} variants={fadeUp}>
               <Link href={features[2].href} className="block group h-full">
-                <div className="relative h-full rounded-2xl p-6 sm:p-8 border border-white/[0.06] bg-white/[0.03] transition-all duration-300 hover:border-white/[0.1] hover:bg-white/[0.04]">
+                <div className="relative h-full rounded-2xl p-6 sm:p-8 border border-border bg-muted/50 transition-all duration-300 hover:border-foreground/10 hover:bg-muted">
                   <div className="flex flex-col h-full">
                     <div className="w-11 h-11 rounded-xl bg-sovereign-gold/10 flex items-center justify-center mb-4 sm:mb-5 group-hover:scale-105 transition-transform duration-300">
                       <Store className="w-5 h-5 text-sovereign-gold" />
@@ -224,7 +224,7 @@ export function HeroEcosystem() {
                     <h3 className="text-lg sm:text-xl font-black tracking-tight mb-2 not-italic">
                       {features[2].title}
                     </h3>
-                    <p className="text-sm text-foreground/60 leading-relaxed not-italic">
+                    <p className="text-sm text-muted-foreground leading-relaxed not-italic">
                       {features[2].desc}
                     </p>
                     <div className="mt-auto pt-4 sm:pt-5 flex items-center gap-2 text-sovereign-gold/50 group-hover:text-sovereign-gold/80 transition-colors duration-300">
@@ -257,11 +257,11 @@ export function HeroEcosystem() {
                 <span className="text-sm sm:text-base font-black text-sovereign-gold/90 tracking-tight">
                   {stat.value}
                 </span>
-                <span className="text-xs sm:text-sm text-foreground/40 not-italic">
+                <span className="text-xs sm:text-sm text-muted-foreground not-italic">
                   {stat.label}
                 </span>
                 {i < stats.length - 1 && (
-                  <span className="hidden sm:block w-px h-4 bg-white/[0.08] mr-6 sm:mr-8" />
+                  <span className="hidden sm:block w-px h-4 bg-border mr-6 sm:mr-8" />
                 )}
               </motion.div>
             ))}

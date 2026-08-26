@@ -1,5 +1,4 @@
 'use client';
-/* eslint-disable react-hooks/set-state-in-effect */
 
 import Link from 'next/link';
 import { useAuthStore } from '@/lib/store';
@@ -25,7 +24,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
-/* ═══ Navigation Links ═══ */
+/* Navigation Links */
 
 const navSections = [
   {
@@ -64,7 +63,7 @@ const quickLinks = [
   { label: 'نقاط الثقة', href: '/trust-score' },
 ];
 
-/* ═══ Component ═══ */
+/* Component */
 
 export function Navbar() {
   const { isAuthenticated, logout } = useAuthStore();
@@ -97,8 +96,8 @@ export function Navbar() {
         <div className={cn(
           'mx-auto h-14 flex items-center justify-between px-4 sm:px-6 transition-all duration-200',
           isScrolled
-            ? 'max-w-6xl mt-3 mx-4 sm:mx-auto bg-black/60 backdrop-blur-xl border border-white/[0.06] rounded-full px-6 shadow-lg shadow-black/20'
-            : 'border-b border-white/[0.04]'
+            ? 'max-w-6xl mt-3 mx-4 sm:mx-auto bg-background/80 backdrop-blur-xl border border-border rounded-full px-6 shadow-lg shadow-black/5 dark:shadow-black/20'
+            : 'border-b border-border'
         )}>
           {/* Logo */}
           <Link href="/" className="shrink-0" onClick={() => setMobileMenuOpen(false)}>
@@ -113,18 +112,18 @@ export function Navbar() {
               <div key={section.label} className="relative" onClick={(e) => e.stopPropagation()}>
                 <button
                   onClick={() => setOpenDropdown(openDropdown === section.label ? null : section.label)}
-                  className="flex items-center gap-1 text-sm text-white/70 hover:text-sovereign-gold transition-colors px-3 py-1.5 rounded-lg hover:bg-white/[0.04]"
+                  className="flex items-center gap-1 text-sm text-muted-foreground hover:text-sovereign-gold transition-colors px-3 py-1.5 rounded-lg hover:bg-muted"
                 >
                   {section.label}
                   <ChevronDown className={cn('w-3 h-3 transition-transform duration-200', openDropdown === section.label && 'rotate-180')} />
                 </button>
                 {openDropdown === section.label && (
-                  <div className="absolute top-full right-0 mt-1.5 w-48 bg-black/90 backdrop-blur-xl border border-white/[0.08] rounded-xl p-1.5 shadow-xl">
+                  <div className="absolute top-full right-0 mt-1.5 w-48 bg-popover backdrop-blur-xl border border-border rounded-xl p-1.5 shadow-xl">
                     {section.children.map((child) => (
                       <Link
                         key={child.href}
                         href={child.href}
-                        className="block px-3 py-2 text-sm text-white/70 hover:text-sovereign-gold hover:bg-white/[0.04] rounded-lg transition-colors"
+                        className="block px-3 py-2 text-sm text-muted-foreground hover:text-sovereign-gold hover:bg-muted rounded-lg transition-colors"
                       >
                         {child.label}
                       </Link>
@@ -134,20 +133,20 @@ export function Navbar() {
               </div>
             ))}
 
-            <span className="w-px h-4 bg-white/10 mx-1" />
+            <span className="w-px h-4 bg-border mx-1" />
 
             {quickLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-sm text-white/40 hover:text-white/70 transition-colors px-2.5 py-1.5 rounded-lg hover:bg-white/[0.03]"
+                className="text-sm text-muted-foreground/60 hover:text-muted-foreground transition-colors px-2.5 py-1.5 rounded-lg hover:bg-muted"
               >
                 {link.label}
               </Link>
             ))}
 
             {isAuthenticated && (
-              <Link href="/dashboard" className="text-sm text-white/70 hover:text-sovereign-gold transition-colors px-3 py-1.5 rounded-lg hover:bg-white/[0.04]">
+              <Link href="/dashboard" className="text-sm text-muted-foreground hover:text-sovereign-gold transition-colors px-3 py-1.5 rounded-lg hover:bg-muted">
                 لوحة التحكم
               </Link>
             )}
@@ -159,7 +158,7 @@ export function Navbar() {
               <button
                 onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
                 aria-label="تبديل المظهر"
-                className="w-8 h-8 flex items-center justify-center rounded-full text-white/50 hover:text-sovereign-gold hover:bg-white/[0.04] transition-colors"
+                className="w-8 h-8 flex items-center justify-center rounded-full text-muted-foreground hover:text-sovereign-gold hover:bg-muted transition-colors"
               >
                 {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
               </button>
@@ -167,10 +166,10 @@ export function Navbar() {
 
             {isAuthenticated ? (
               <>
-                <Link href="/cart" className="w-8 h-8 flex items-center justify-center rounded-full text-white/50 hover:text-sovereign-gold hover:bg-white/[0.04] transition-colors">
+                <Link href="/cart" className="w-8 h-8 flex items-center justify-center rounded-full text-muted-foreground hover:text-sovereign-gold hover:bg-muted transition-colors">
                   <ShoppingCart className="w-4 h-4" />
                 </Link>
-                <Link href="/dashboard" className="w-8 h-8 flex items-center justify-center rounded-full text-white/50 hover:text-sovereign-gold hover:bg-white/[0.04] transition-colors">
+                <Link href="/dashboard" className="w-8 h-8 flex items-center justify-center rounded-full text-muted-foreground hover:text-sovereign-gold hover:bg-muted transition-colors">
                   <User className="w-4 h-4" />
                 </Link>
                 <button
@@ -182,13 +181,13 @@ export function Navbar() {
               </>
             ) : (
               <>
-                <Link href="/login" className="hidden lg:block text-sm text-white/60 hover:text-white transition-colors px-3 py-1.5">
+                <Link href="/login" className="hidden lg:block text-sm text-muted-foreground hover:text-foreground transition-colors px-3 py-1.5">
                   دخول
                 </Link>
                 <Link href="/register" className="hidden lg:flex h-8 px-5 items-center rounded-full text-xs font-semibold bg-sovereign-gold text-sovereign-black hover:bg-sovereign-gold-light transition-colors">
                   التسجيل
                 </Link>
-                <Link href="/login" className="lg:hidden w-8 h-8 flex items-center justify-center rounded-full text-white/50 hover:text-sovereign-gold hover:bg-white/[0.04] transition-colors">
+                <Link href="/login" className="lg:hidden w-8 h-8 flex items-center justify-center rounded-full text-muted-foreground hover:text-sovereign-gold hover:bg-muted transition-colors">
                   <User className="w-4 h-4" />
                 </Link>
               </>
@@ -197,7 +196,7 @@ export function Navbar() {
             {/* Mobile Menu Toggle */}
             <button
               onClick={() => setMobileMenuOpen(true)}
-              className="lg:hidden w-8 h-8 flex items-center justify-center rounded-full text-white/60 hover:text-white hover:bg-white/[0.06] transition-colors"
+              className="lg:hidden w-8 h-8 flex items-center justify-center rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
               aria-label="القائمة"
             >
               <Menu className="w-4.5 h-4.5" />
@@ -208,17 +207,17 @@ export function Navbar() {
 
       {/* Mobile Sheet */}
       <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-        <SheetContent side="right" className="w-[85vw] max-w-[360px] bg-sovereign-obsidian border-l border-white/[0.06] overflow-y-auto">
+        <SheetContent side="right" className="w-[85vw] max-w-[360px] bg-background border-l border-border overflow-y-auto">
           <SheetHeader className="pb-0">
             <SheetTitle className="text-xl font-black text-sovereign-gold not-italic tracking-tight">STANDARD</SheetTitle>
-            <SheetDescription className="text-white/40 text-sm">كراء · خدمات · سوق محلي</SheetDescription>
+            <SheetDescription className="text-muted-foreground text-sm">كراء · خدمات · سوق محلي</SheetDescription>
           </SheetHeader>
           <div className="flex flex-col mt-8 text-right pb-8">
             {navSections.map((section) => (
               <div key={section.label} className="mb-1">
                 <Link
                   href={section.href}
-                  className="block text-base font-bold text-white/90 hover:text-sovereign-gold transition-colors py-2.5 px-2"
+                  className="block text-base font-bold text-foreground hover:text-sovereign-gold transition-colors py-2.5 px-2"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   {section.label}
@@ -227,7 +226,7 @@ export function Navbar() {
                   <Link
                     key={child.href}
                     href={child.href}
-                    className="block text-sm text-white/40 hover:text-white/70 transition-colors py-1.5 pr-4"
+                    className="block text-sm text-muted-foreground hover:text-foreground transition-colors py-1.5 pr-4"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     {child.label}
@@ -236,13 +235,13 @@ export function Navbar() {
               </div>
             ))}
 
-            <div className="border-t border-white/[0.06] my-4" />
+            <div className="border-t border-border my-4" />
 
             {quickLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className="block text-sm text-white/40 hover:text-white/70 transition-colors py-2 px-2"
+                className="block text-sm text-muted-foreground hover:text-foreground transition-colors py-2 px-2"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 {link.label}
@@ -251,16 +250,16 @@ export function Navbar() {
 
             {isAuthenticated ? (
               <>
-                <div className="border-t border-white/[0.06] my-4" />
-                <Link href="/dashboard" className="block text-base font-bold text-white/90 hover:text-sovereign-gold transition-colors py-2.5 px-2" onClick={() => setMobileMenuOpen(false)}>لوحة التحكم</Link>
-                <Link href="/cart" className="block text-sm text-white/40 hover:text-white/70 transition-colors py-2 px-2" onClick={() => setMobileMenuOpen(false)}>السلة</Link>
-                <button onClick={() => { setMobileMenuOpen(false); setLogoutDialogOpen(true); }} className="w-full mt-6 py-3 rounded-xl bg-red-500/10 text-red-400 text-sm font-semibold hover:bg-red-500/20 transition-colors">
+                <div className="border-t border-border my-4" />
+                <Link href="/dashboard" className="block text-base font-bold text-foreground hover:text-sovereign-gold transition-colors py-2.5 px-2" onClick={() => setMobileMenuOpen(false)}>لوحة التحكم</Link>
+                <Link href="/cart" className="block text-sm text-muted-foreground hover:text-foreground transition-colors py-2 px-2" onClick={() => setMobileMenuOpen(false)}>السلة</Link>
+                <button onClick={() => { setMobileMenuOpen(false); setLogoutDialogOpen(true); }} className="w-full mt-6 py-3 rounded-xl bg-red-500/10 text-red-500 text-sm font-semibold hover:bg-red-500/20 transition-colors">
                   تسجيل الخروج
                 </button>
               </>
             ) : (
               <div className="flex flex-col gap-2.5 mt-6">
-                <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="py-2.5 text-center rounded-xl border border-white/10 text-sm text-white/70 hover:bg-white/[0.04] transition-colors">
+                <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="py-2.5 text-center rounded-xl border border-border text-sm text-muted-foreground hover:bg-muted transition-colors">
                   تسجيل الدخول
                 </Link>
                 <Link href="/register" onClick={() => setMobileMenuOpen(false)} className="py-2.5 text-center rounded-xl bg-sovereign-gold text-sovereign-black text-sm font-semibold hover:bg-sovereign-gold-light transition-colors">
@@ -274,14 +273,14 @@ export function Navbar() {
 
       {/* Logout Dialog */}
       <Dialog open={logoutDialogOpen} onOpenChange={setLogoutDialogOpen}>
-        <DialogContent className="sm:max-w-md bg-sovereign-obsidian border border-white/[0.08] rounded-2xl shadow-2xl">
+        <DialogContent className="sm:max-w-md bg-background border border-border rounded-2xl shadow-2xl">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold text-sovereign-gold not-italic">تسجيل الخروج</DialogTitle>
-            <DialogDescription className="text-white/50">هل أنت متأكد أنك تريد تسجيل الخروج؟</DialogDescription>
+            <DialogDescription className="text-muted-foreground">هل أنت متأكد أنك تريد تسجيل الخروج؟</DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-3 sm:justify-center">
-            <button onClick={() => setLogoutDialogOpen(false)} className="flex-1 py-2.5 rounded-xl border border-white/10 text-sm text-white/60 hover:bg-white/[0.04] transition-colors">إلغاء</button>
-            <button onClick={handleLogout} className="flex-1 py-2.5 rounded-xl bg-red-500/10 text-red-400 text-sm font-semibold hover:bg-red-500/20 transition-colors">تأكيد الخروج</button>
+            <button onClick={() => setLogoutDialogOpen(false)} className="flex-1 py-2.5 rounded-xl border border-border text-sm text-muted-foreground hover:bg-muted transition-colors">إلغاء</button>
+            <button onClick={handleLogout} className="flex-1 py-2.5 rounded-xl bg-red-500/10 text-red-500 text-sm font-semibold hover:bg-red-500/20 transition-colors">تأكيد الخروج</button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

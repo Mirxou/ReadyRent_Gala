@@ -4,7 +4,7 @@ import Link from 'next/link';
 
 export function Footer() {
   return (
-    <footer className="relative mt-32 border-t border-gray-200 dark:border-white/5 py-24 overflow-hidden bg-background dark:bg-[#020617]">
+    <footer className="relative mt-32 border-t border-border py-24 overflow-hidden bg-background">
       {/* Background Glow */}
       <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-gradient-to-t from-sovereign-gold/10 to-transparent pointer-events-none" />
 
@@ -15,7 +15,7 @@ export function Footer() {
             <Link href="/" className="inline-block mb-8 group">
               <div className="relative">
                 <div className="absolute -inset-1 bg-gradient-to-r from-sovereign-gold to-sovereign-gold rounded-full blur opacity-20 group-hover:opacity-40 transition duration-1000" />
-                <span className="relative text-5xl font-black tracking-tighter bg-gradient-to-r from-sovereign-gold via-sovereign-gold to-sovereign-gold dark:from-white dark:via-white dark:to-white/40 bg-clip-text text-transparent italic">
+                <span className="relative text-5xl font-black tracking-tighter bg-gradient-to-r from-sovereign-gold via-sovereign-gold to-sovereign-gold bg-clip-text text-transparent italic">
                   STANDARD.
                 </span>
               </div>
@@ -29,7 +29,7 @@ export function Footer() {
                 { name: 'تيك توك', url: 'https://tiktok.com/@standardrent' },
                 { name: 'واتساب', url: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ? `https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER.replace(/[^0-9]/g, '')}` : '#' },
               ].map((social) => (
-                <a key={social.name} href={social.url} className="text-sm font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground dark:hover:text-white transition-colors border-b border-gray-200 dark:border-white/10 pb-1">
+                <a key={social.name} href={social.url} className="text-sm font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors border-b border-border pb-1">
                   {social.name}
                 </a>
               ))}
@@ -47,7 +47,7 @@ export function Footer() {
                 { label: 'السلة', href: '/cart' },
               ].map((item) => (
                 <li key={item.href}>
-                  <Link href={item.href} className="text-lg font-medium text-muted-foreground/60 hover:text-foreground dark:hover:text-white transition-colors">
+                  <Link href={item.href} className="text-lg font-medium text-muted-foreground/60 hover:text-foreground transition-colors">
                     {item.label}
                   </Link>
                 </li>
@@ -66,7 +66,7 @@ export function Footer() {
                 { label: 'التأمين', href: '/insurance' },
               ].map((item) => (
                 <li key={item.href}>
-                  <Link href={item.href} className="text-lg font-medium text-muted-foreground/60 hover:text-foreground dark:hover:text-white transition-colors">
+                  <Link href={item.href} className="text-lg font-medium text-muted-foreground/60 hover:text-foreground transition-colors">
                     {item.label}
                   </Link>
                 </li>
@@ -87,7 +87,7 @@ export function Footer() {
                 { label: 'السجل القضائي', href: '/judicial' },
               ].map((item) => (
                 <li key={item.href}>
-                  <Link href={item.href} className="text-lg font-medium text-muted-foreground/60 hover:text-foreground dark:hover:text-white transition-colors">
+                  <Link href={item.href} className="text-lg font-medium text-muted-foreground/60 hover:text-foreground transition-colors">
                     {item.label}
                   </Link>
                 </li>
@@ -110,7 +110,7 @@ export function Footer() {
                 { label: 'اتصل بنا', href: '/contact' },
               ].map((item) => (
                 <li key={item.href}>
-                  <Link href={item.href} className="text-lg font-medium text-muted-foreground/60 hover:text-foreground dark:hover:text-white transition-colors">
+                  <Link href={item.href} className="text-lg font-medium text-muted-foreground/60 hover:text-foreground transition-colors">
                     {item.label}
                   </Link>
                 </li>
@@ -120,7 +120,7 @@ export function Footer() {
         </div>
 
         {/* Bottom Signature */}
-        <div className="flex flex-col md:flex-row justify-between items-center pt-12 border-t border-gray-200 dark:border-white/5 gap-8">
+        <div className="flex flex-col md:flex-row justify-between items-center pt-12 border-t border-border gap-8">
           <p className="text-xs uppercase tracking-widest text-muted-foreground/40 font-bold">© 2026 STANDARD.Rent — الجزائر</p>
           <div className="flex gap-4 items-center">
             <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />

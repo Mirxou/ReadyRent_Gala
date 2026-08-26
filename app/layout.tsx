@@ -64,16 +64,16 @@ export default function RootLayout({
     <html lang="ar" dir="rtl" suppressHydrationWarning>
       <body
         suppressHydrationWarning
-        className="antialiased relative overflow-x-hidden bg-sovereign-obsidian text-sovereign-white"
+        className="antialiased relative overflow-x-hidden bg-background text-foreground"
       >
-        {/* Ambient Masterpiece Background (No Purple/Blue) */}
-        <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden bg-sovereign-obsidian">
-          <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-sovereign-gold/5 blur-[160px] animate-pulse opacity-40"></div>
-          <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-sovereign-gold/3 blur-[140px] animate-pulse [animation-delay:2s] opacity-30"></div>
+        {/* Ambient Background — subtle in light, rich in dark */}
+        <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden bg-background">
+          <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-sovereign-gold/5 blur-[160px] animate-pulse opacity-40 dark:opacity-30"></div>
+          <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-sovereign-gold/3 blur-[140px] animate-pulse [animation-delay:2s] opacity-20 dark:opacity-20"></div>
         </div>
 
-        {/* Cinematic Grain Overlay */}
-        <GrainOverlay />
+        {/* Grain Overlay — dark mode only */}
+        <div className="hidden dark:block"><GrainOverlay /></div>
 
         <Analytics />
         <SovereignProvider>

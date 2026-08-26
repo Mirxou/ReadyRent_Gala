@@ -20,7 +20,7 @@ export default async function HomePage() {
   const data = await getHomepageData();
 
   return (
-    <div className="flex flex-col min-h-screen relative overflow-hidden bg-sovereign-obsidian text-sovereign-white font-arabic" dir="rtl">
+    <div className="flex flex-col min-h-screen relative overflow-hidden bg-background text-foreground font-arabic" dir="rtl">
       <HeroEcosystem />
 
       {data.products.length > 0 && (

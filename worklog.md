@@ -519,3 +519,29 @@ Stage Summary:
 - 0 lint errors, 25 warnings (all intentional)
 - Homepage now SSR with real DB data
 - PWA fully functional with Serwist
+---
+Task ID: 1
+Agent: main
+Task: Fix dark/light mode theming across the entire application
+
+Work Log:
+- Analyzed all homepage components for hardcoded dark-mode colors
+- Identified 7 critical files with theming violations
+- Fixed layout.tsx: replaced bg-sovereign-obsidian/text-sovereign-white with bg-background/text-foreground on body and page wrapper
+- Fixed layout.tsx: made ambient background use bg-background, grain overlay dark-only
+- Fixed page.tsx: replaced bg-sovereign-obsidian/text-sovereign-white with bg-background/text-foreground
+- Rewrote navbar.tsx: replaced ALL text-white/X, bg-black/X, border-white/X with theme-aware equivalents (text-muted-foreground, bg-background, bg-muted, border-border, bg-popover)
+- Fixed hero-ecosystem.tsx: replaced bento card border-white/[0.06], bg-white/[0.03], hover:border-white/[0.1] with border-border, bg-muted/50, hover:border-foreground/10
+- Fixed glass-panel.tsx: replaced obsidian variant bg-sovereign-black/80 with bg-card (theme-aware)
+- Fixed globals.css: replaced card-glass utility hardcoded rgba(255,255,255,0.05) with color-mix using var(--card)
+- Fixed footer.tsx: replaced border-gray-200/dark:border-white/5 with border-border, cleaned up dark: prefix usage
+- Fixed product-card.tsx: replaced border-white/5 with border-border, bg-white/5 with bg-muted, bg-background with bg-card
+- Verified via curl: 0 hardcoded dark classes in rendered HTML, 3 bg-background, 3 text-foreground, 2 border-border confirmed
+
+Stage Summary:
+- Complete dark/light mode support implemented across all homepage-visible components
+- Theme toggle (Sun/Moon in navbar) now actually works
+- Light mode: clean white/near-white backgrounds with dark text
+- Dark mode: deep black backgrounds with light text
+- Gold accent (sovereign-gold) maintained consistently in both modes
+- Intentional dark-only components preserved: concierge chat widget (floating overlay pattern), image overlays on product cards

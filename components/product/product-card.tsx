@@ -30,7 +30,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
             viewport={{ once: true }}
             whileHover={{ y: -10 }}
             transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
-            className="group relative flex flex-col bg-background rounded-[2.5rem] border border-white/5 overflow-hidden shadow-2xl transition-all duration-500 hover:border-sovereign-gold/20"
+            className="group relative flex flex-col bg-card rounded-[2.5rem] border border-border overflow-hidden shadow-2xl transition-all duration-500 hover:border-sovereign-gold/20"
         >
             {/* Image AUTHORITY */}
             <Link href={`/products/${product.id || product.slug}`} className="block relative aspect-[3/4] overflow-hidden">
@@ -77,7 +77,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
                             {product.name_ar}
                         </h3>
                     </div>
-                    <div className="flex items-center gap-2 px-3 py-1 bg-white/5 rounded-full border border-white/5">
+                    <div className="flex items-center gap-2 px-3 py-1 bg-muted rounded-full border border-border">
                         <Star className="w-3 h-3 fill-sovereign-gold text-sovereign-gold" />
                         <span className="text-xs font-bold font-mono tracking-tighter">{Number(product.rating || 5).toFixed(1)}</span>
                     </div>
@@ -88,14 +88,14 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
                     <span className="text-[10px] font-black uppercase tracking-widest">{product.location || 'الجزائر العاصمة'}</span>
                 </div>
 
-                <div className="pt-6 border-t border-white/5 flex items-end justify-between mt-auto">
+                <div className="pt-6 border-t border-border flex items-end justify-between mt-auto">
                     <div className="space-y-0.5">
                         <p className="text-[9px] font-black text-muted-foreground uppercase opacity-40">السعر لليوم</p>
                         <p className="text-2xl font-black tracking-tighter">
                             {formatNumber(product.price_per_day)} <span className="text-xs font-normal opacity-40">دج</span>
                         </p>
                     </div>
-                    <button className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-all">
+                    <button className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-all">
                         <Heart className="w-5 h-5" />
                     </button>
                 </div>

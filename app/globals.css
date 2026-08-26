@@ -216,9 +216,9 @@ body.mode-verdict {
 
 /* Card Glass */
 @utility card-glass {
-  background: rgba(255, 255, 255, 0.05);
+  background: color-mix(in srgb, var(--card) 70%, transparent);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border);
 }
 
 /* Glow Purple */
