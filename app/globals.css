@@ -244,6 +244,16 @@ body.mode-verdict {
   50% { opacity: 0.7; transform: scale(1.05); }
 }
 
+/* Hero Marquee Ticker */
+@utility animate-marquee {
+  animation: marquee-scroll 20s linear infinite;
+}
+
+@keyframes marquee-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
 /* Airy Spacing Overrides for Dashboard (Phase 10) */
 .airy-dashboard {
   --section-spacing: 12rem;

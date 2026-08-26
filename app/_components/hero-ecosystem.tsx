@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { motion, type Variants } from 'framer-motion';
-import { Shirt, Sparkles, Store, ArrowLeft } from 'lucide-react';
+import { Repeat, Wrench, Store, ArrowLeft } from 'lucide-react';
 import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
 import { SovereignGlow, SovereignSparkle } from '@/shared/components/sovereign/sovereign-sparkle';
 
@@ -22,35 +22,35 @@ const staggerContainer = {
 
 const ecosystems = [
   {
-    icon: Shirt,
-    title: 'الكراء الفاخر',
-    desc: 'اكتشفي مجموعة واسعة من الفساتين والبدلات والقفطانات الفاخرة. استأجري بأفضل الأسعار مع ضمان الجودة والنظافة لكل مناسبة.',
+    icon: Repeat,
+    title: 'الكراء',
+    desc: 'استأجر أي شيء تحتاجه — فساتين، قفطانات، أجهزة إلكترونية، سيارات، أو أي منتج آخر. بسعر يومي مرن مع ضمان الجودة والتوصيل.',
     href: '/rentals',
     gradient: 'from-sovereign-gold/15 via-sovereign-obsidian/90 to-sovereign-gold/5',
     accent: 'sovereign-gold',
   },
   {
-    icon: Sparkles,
-    title: 'خدمات المناسبات',
-    desc: 'اعثري على أفضل المصورين ومجمّلي الأزياء ومقدمي الدي جي وقاعات الأفراح. كل ما تحتاجينه لمناسبتك المثالية في مكان واحد.',
+    icon: Wrench,
+    title: 'الخدمات',
+    desc: 'اعثر على أي خدمة تحتاجها — رقمية كانت كتصميم المواقع والتسويق، أو حقيقية كالتصوير والصيانة والتجميل. كل الخدمات في مكان واحد.',
     href: '/services',
-    gradient: 'from-purple-500/12 via-sovereign-obsidian/90 to-purple-500/5',
-    accent: 'purple-400',
+    gradient: 'from-emerald-500/12 via-sovereign-obsidian/90 to-emerald-500/5',
+    accent: 'emerald-400',
   },
   {
     icon: Store,
     title: 'السوق المفتوح',
-    desc: 'تسوقي من بائعين وحرفيات محليين. اكتشفي منتجات فريدة مصنوعة يدوياً وادعمي الأعمال المحلية في الجزائر.',
+    desc: 'تسوّق من بائعين وحرفيات محليين في كل أنحاء الجزائر. اكتشف منتجات فريدة مصنوعة يدوياً وادعم الاقتصاد المحلي.',
     href: '/marketplace',
-    gradient: 'from-emerald-500/12 via-sovereign-obsidian/90 to-emerald-500/5',
-    accent: 'emerald-400',
+    gradient: 'from-amber-500/12 via-sovereign-obsidian/90 to-amber-500/5',
+    accent: 'amber-400',
   },
 ];
 
 const accentStyles: Record<string, string> = {
   'sovereign-gold': 'bg-sovereign-gold/10 text-sovereign-gold',
-  'purple-400': 'bg-purple-400/10 text-purple-400',
   'emerald-400': 'bg-emerald-400/10 text-emerald-400',
+  'amber-400': 'bg-amber-400/10 text-amber-400',
 };
 
 export function HeroEcosystem() {
@@ -65,26 +65,56 @@ export function HeroEcosystem() {
           variants={staggerContainer}
           className="text-center mb-16 md:mb-24"
         >
-          <motion.div custom={0} variants={fadeUp} className="mb-6">
+          {/* Animated Ticker Badge */}
+          <motion.div custom={0} variants={fadeUp} className="mb-8">
             <SovereignSparkle active={true}>
-              <span className="inline-block px-6 py-2 rounded-full border border-sovereign-gold/20 bg-sovereign-gold/5 text-sovereign-gold text-[10px] font-black tracking-[0.4em] uppercase backdrop-blur-md">
-                المنصة الأولى في الجزائر
-              </span>
+              <div className="relative overflow-hidden rounded-full border border-sovereign-gold/25 bg-sovereign-gold/8 backdrop-blur-md py-3 px-8 max-w-xl mx-auto">
+                <div className="flex animate-marquee whitespace-nowrap">
+                  <span className="mx-8 text-sm sm:text-base font-black tracking-[0.15em] text-sovereign-gold">
+                    المنصة الأولى في الجزائر
+                  </span>
+                  <span className="mx-8 text-sm sm:text-base font-black tracking-[0.15em] text-sovereign-gold/40">
+                    ✦
+                  </span>
+                  <span className="mx-8 text-sm sm:text-base font-black tracking-[0.15em] text-sovereign-gold">
+                    كراء · خدمات · سوق محلي
+                  </span>
+                  <span className="mx-8 text-sm sm:text-base font-black tracking-[0.15em] text-sovereign-gold/40">
+                    ✦
+                  </span>
+                  <span className="mx-8 text-sm sm:text-base font-black tracking-[0.15em] text-sovereign-gold">
+                    المنصة الأولى في الجزائر
+                  </span>
+                  <span className="mx-8 text-sm sm:text-base font-black tracking-[0.15em] text-sovereign-gold/40">
+                    ✦
+                  </span>
+                  <span className="mx-8 text-sm sm:text-base font-black tracking-[0.15em] text-sovereign-gold">
+                    كراء · خدمات · سوق محلي
+                  </span>
+                </div>
+              </div>
             </SovereignSparkle>
           </motion.div>
 
+          {/* Logo — no trailing dot */}
           <motion.h1 custom={1} variants={fadeUp} className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-tighter leading-none">
             <SovereignGlow color="gold" intensity="high">
-              STAND<span className="text-sovereign-gold">ARD.</span>
+              <span className="text-sovereign-gold">STANDARD</span>
             </SovereignGlow>
           </motion.h1>
 
-          <motion.p custom={2} variants={fadeUp} className="mt-4 md:mt-6 text-[10px] font-black uppercase tracking-[0.4em] text-sovereign-gold/60">
-            النظام البيئي الثلاثي
+          {/* Main Description — the core value prop */}
+          <motion.p custom={2} variants={fadeUp} className="mt-6 md:mt-8 text-lg sm:text-xl md:text-2xl text-foreground/90 font-semibold leading-relaxed max-w-3xl mx-auto">
+            منصة واحدة تُتيح لك{' '}
+            <span className="text-sovereign-gold">استئجار أي شيء</span>{' '}
+            وطلب{' '}
+            <span className="text-sovereign-gold">أي خدمة</span>{' '}
+            — رقمية أو حقيقية — وتسوّق من{' '}
+            <span className="text-sovereign-gold">السوق المحلي</span>
           </motion.p>
 
-          <motion.p custom={3} variants={fadeUp} className="mt-4 text-base sm:text-lg md:text-xl text-muted-foreground font-light leading-relaxed max-w-2xl mx-auto">
-            منصة الكراء الفاخر وخدمات المناسبات والسوق المحلي في الجزائر
+          <motion.p custom={3} variants={fadeUp} className="mt-3 text-sm sm:text-base text-muted-foreground font-light max-w-2xl mx-auto">
+            كل ما تحتاجه في مكان واحد — في كل أنحاء الجزائر
           </motion.p>
         </motion.div>
 
