@@ -254,14 +254,15 @@ body.mode-verdict {
   100% { transform: translateX(-50%); }
 }
 
-/* Slow continuous spin for circular badge */
-@utility animate-spin-slow {
-  animation: spin-slow 25s linear infinite;
+/* Rectangular badge 3D continuous spin around X-axis */
+@utility animate-flip-x {
+  animation: flip-x 3s linear infinite;
+  transform-style: preserve-3d;
 }
 
-@keyframes spin-slow {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+@keyframes flip-x {
+  from { transform: rotateX(0deg); }
+  to { transform: rotateX(360deg); }
 }
 
 /* Airy Spacing Overrides for Dashboard (Phase 10) */

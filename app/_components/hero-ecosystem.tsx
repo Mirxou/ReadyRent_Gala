@@ -53,41 +53,18 @@ const accentStyles: Record<string, string> = {
   'amber-400': 'bg-amber-400/10 text-amber-400',
 };
 
-const CIRCLE_TEXT = 'المنصة الأولى في الجزائر ✦ كراء · خدمات · سوق محلي ✦ ';
-const CIRCLE_RADIUS = 80;
-const circlePathD = `M 100,100 m -${CIRCLE_RADIUS},0 a ${CIRCLE_RADIUS},${CIRCLE_RADIUS} 0 1,1 ${CIRCLE_RADIUS * 2},0 a ${CIRCLE_RADIUS},${CIRCLE_RADIUS} 0 1,1 -${CIRCLE_RADIUS * 2},0`;
-const circleTextContent = (CIRCLE_TEXT + CIRCLE_TEXT + CIRCLE_TEXT + CIRCLE_TEXT).trim();
-
-function CircularBadge() {
+function SpinningBadge() {
   return (
     <SovereignSparkle active={true}>
       <div className="flex justify-center mb-8 md:mb-12">
-        <div className="relative w-[200px] h-[200px] sm:w-[240px] sm:h-[240px]">
-          <svg
-            viewBox="0 0 200 200"
-            className="w-full h-full animate-spin-slow"
-            style={{ animationDuration: '25s' }}
-          >
-            <defs>
-              <path id="circlePath" d={circlePathD} fill="none" />
-            </defs>
-            <text
-              fill="#C5A059"
-              fontSize="11"
-              fontWeight="900"
-              letterSpacing="0.12em"
-              fontFamily="var(--font-ibm-plex), sans-serif"
-            >
-              <textPath href="#circlePath">{circleTextContent}</textPath>
-            </text>
-          </svg>
-
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="w-3 h-3 rounded-full bg-sovereign-gold/60 blur-[2px] animate-pulse" />
+        <div className="[perspective:600px]">
+          <div className="animate-flip-x">
+            <div className="rounded-full border border-sovereign-gold/20 bg-sovereign-gold/5 backdrop-blur-sm px-6 py-2.5 sm:px-8 sm:py-3">
+              <span className="text-sm sm:text-base font-black tracking-[0.15em] text-sovereign-gold whitespace-nowrap">
+                المنصة الأولى في الجزائر ✦ كراء · خدمات · سوق محلي
+              </span>
+            </div>
           </div>
-
-          <div className="absolute inset-0 rounded-full border border-sovereign-gold/15" />
-          <div className="absolute inset-[2px] rounded-full border border-sovereign-gold/8" />
         </div>
       </div>
     </SovereignSparkle>
@@ -106,9 +83,9 @@ export function HeroEcosystem() {
           variants={staggerContainer}
           className="text-center mb-16 md:mb-24"
         >
-          {/* Circular rotating badge */}
+          {/* Spinning rectangular badge */}
           <motion.div custom={0} variants={fadeUp}>
-            <CircularBadge />
+            <SpinningBadge />
           </motion.div>
 
           {/* STANDARD — sovereign glow */}
