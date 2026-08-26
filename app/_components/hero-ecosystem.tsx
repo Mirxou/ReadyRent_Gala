@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { motion, type Variants } from 'framer-motion';
 import { Repeat, Wrench, Store, ArrowLeft } from 'lucide-react';
 import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
-import { SovereignGlow, SovereignSparkle } from '@/shared/components/sovereign/sovereign-sparkle';
+import { SovereignSparkle } from '@/shared/components/sovereign/sovereign-sparkle';
 
 const fadeUp: Variants = {
   hidden: { opacity: 0, y: 40 },
@@ -53,6 +53,47 @@ const accentStyles: Record<string, string> = {
   'amber-400': 'bg-amber-400/10 text-amber-400',
 };
 
+const CIRCLE_TEXT = 'المنصة الأولى في الجزائر ✦ كراء · خدمات · سوق محلي ✦ ';
+const CIRCLE_RADIUS = 80;
+const circlePathD = `M 100,100 m -${CIRCLE_RADIUS},0 a ${CIRCLE_RADIUS},${CIRCLE_RADIUS} 0 1,1 ${CIRCLE_RADIUS * 2},0 a ${CIRCLE_RADIUS},${CIRCLE_RADIUS} 0 1,1 -${CIRCLE_RADIUS * 2},0`;
+const circleTextContent = (CIRCLE_TEXT + CIRCLE_TEXT + CIRCLE_TEXT + CIRCLE_TEXT).trim();
+
+function CircularBadge() {
+  return (
+    <SovereignSparkle active={true}>
+      <div className="flex justify-center mb-8 md:mb-12">
+        <div className="relative w-[200px] h-[200px] sm:w-[240px] sm:h-[240px]">
+          <svg
+            viewBox="0 0 200 200"
+            className="w-full h-full animate-spin-slow"
+            style={{ animationDuration: '25s' }}
+          >
+            <defs>
+              <path id="circlePath" d={circlePathD} fill="none" />
+            </defs>
+            <text
+              fill="#C5A059"
+              fontSize="11"
+              fontWeight="900"
+              letterSpacing="0.12em"
+              fontFamily="var(--font-ibm-plex), sans-serif"
+            >
+              <textPath href="#circlePath">{circleTextContent}</textPath>
+            </text>
+          </svg>
+
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="w-3 h-3 rounded-full bg-sovereign-gold/60 blur-[2px] animate-pulse" />
+          </div>
+
+          <div className="absolute inset-0 rounded-full border border-sovereign-gold/15" />
+          <div className="absolute inset-[2px] rounded-full border border-sovereign-gold/8" />
+        </div>
+      </div>
+    </SovereignSparkle>
+  );
+}
+
 export function HeroEcosystem() {
   return (
     <section className="relative pt-24 pb-20 md:pt-40 md:pb-32 px-4 overflow-hidden">
@@ -65,57 +106,54 @@ export function HeroEcosystem() {
           variants={staggerContainer}
           className="text-center mb-16 md:mb-24"
         >
-          {/* Animated Ticker Badge */}
-          <motion.div custom={0} variants={fadeUp} className="mb-8">
-            <SovereignSparkle active={true}>
-              <div className="relative overflow-hidden rounded-full border border-sovereign-gold/25 bg-sovereign-gold/8 backdrop-blur-md py-3 px-8 max-w-xl mx-auto">
-                <div className="flex animate-marquee whitespace-nowrap">
-                  <span className="mx-8 text-sm sm:text-base font-black tracking-[0.15em] text-sovereign-gold">
-                    المنصة الأولى في الجزائر
-                  </span>
-                  <span className="mx-8 text-sm sm:text-base font-black tracking-[0.15em] text-sovereign-gold/40">
-                    ✦
-                  </span>
-                  <span className="mx-8 text-sm sm:text-base font-black tracking-[0.15em] text-sovereign-gold">
-                    كراء · خدمات · سوق محلي
-                  </span>
-                  <span className="mx-8 text-sm sm:text-base font-black tracking-[0.15em] text-sovereign-gold/40">
-                    ✦
-                  </span>
-                  <span className="mx-8 text-sm sm:text-base font-black tracking-[0.15em] text-sovereign-gold">
-                    المنصة الأولى في الجزائر
-                  </span>
-                  <span className="mx-8 text-sm sm:text-base font-black tracking-[0.15em] text-sovereign-gold/40">
-                    ✦
-                  </span>
-                  <span className="mx-8 text-sm sm:text-base font-black tracking-[0.15em] text-sovereign-gold">
-                    كراء · خدمات · سوق محلي
-                  </span>
-                </div>
-              </div>
-            </SovereignSparkle>
+          {/* Circular rotating badge */}
+          <motion.div custom={0} variants={fadeUp}>
+            <CircularBadge />
           </motion.div>
 
-          {/* Logo — no trailing dot */}
-          <motion.h1 custom={1} variants={fadeUp} className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-tighter leading-none">
-            <SovereignGlow color="gold" intensity="high">
-              <span className="text-sovereign-gold">STANDARD</span>
-            </SovereignGlow>
+          {/* STANDARD — sovereign glow */}
+          <motion.h1
+            custom={1}
+            variants={fadeUp}
+            className="relative text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-tighter leading-none"
+          >
+            <span className="absolute inset-0 blur-[40px] bg-sovereign-gold/30 animate-pulse pointer-events-none" aria-hidden="true" />
+            <span className="absolute inset-0 blur-[80px] bg-sovereign-gold/15 animate-[pulse_4s_ease-in-out_infinite] pointer-events-none" aria-hidden="true" />
+            <span
+              className="relative inline-block text-transparent bg-clip-text bg-gradient-to-b from-sovereign-gold-light via-sovereign-gold to-sovereign-gold/70"
+              style={{
+                textShadow: '0 0 40px rgba(197,160,89,0.4), 0 0 80px rgba(197,160,89,0.15), 0 0 120px rgba(197,160,89,0.05)',
+              }}
+            >
+              STANDARD
+            </span>
           </motion.h1>
 
-          {/* Main Description — the core value prop */}
-          <motion.p custom={2} variants={fadeUp} className="mt-6 md:mt-8 text-lg sm:text-xl md:text-2xl text-foreground/90 font-semibold leading-relaxed max-w-3xl mx-auto">
-            منصة واحدة تُتيح لك{' '}
-            <span className="text-sovereign-gold">استئجار أي شيء</span>{' '}
-            وطلب{' '}
-            <span className="text-sovereign-gold">أي خدمة</span>{' '}
-            — رقمية أو حقيقية — وتسوّق من{' '}
-            <span className="text-sovereign-gold">السوق المحلي</span>
+          {/* Subtitle below logo */}
+          <motion.p
+            custom={2}
+            variants={fadeUp}
+            className="mt-4 md:mt-6 text-sm sm:text-base md:text-lg font-black tracking-[0.2em] uppercase text-sovereign-gold/70"
+          >
+            حيث تبدأ الجزائر المستقبل.
           </motion.p>
 
-          <motion.p custom={3} variants={fadeUp} className="mt-3 text-sm sm:text-base text-muted-foreground font-light max-w-2xl mx-auto">
-            كل ما تحتاجه في مكان واحد — في كل أنحاء الجزائر
-          </motion.p>
+          {/* New description — the manifesto */}
+          <motion.div custom={3} variants={fadeUp} className="mt-8 md:mt-10 max-w-3xl mx-auto space-y-3">
+            <p className="text-base sm:text-lg md:text-xl text-foreground/90 font-semibold leading-relaxed">
+              STANDARD ليست مجرد منصة، بل{' '}
+              <span className="text-sovereign-gold">نظام حياة رقمي شامل</span>.
+            </p>
+            <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+              تجمع الكراء، الخدمات، والتجارة المحلية في تجربة واحدة فائقة الذكاء والأمان.
+            </p>
+            <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+              من الفخامة إلى البساطة، من التقنية إلى الثقة — كل ما تحتاجه في مكان واحد، في كل أنحاء الجزائر.
+            </p>
+            <p className="text-sm sm:text-base text-sovereign-gold/60 font-semibold leading-relaxed">
+              STANDARD هو المعيار الجديد للسيادة والابتكار في الجزائر.
+            </p>
+          </motion.div>
         </motion.div>
 
         <motion.div

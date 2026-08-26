@@ -254,6 +254,16 @@ body.mode-verdict {
   100% { transform: translateX(-50%); }
 }
 
+/* Slow continuous spin for circular badge */
+@utility animate-spin-slow {
+  animation: spin-slow 25s linear infinite;
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 /* Airy Spacing Overrides for Dashboard (Phase 10) */
 .airy-dashboard {
   --section-spacing: 12rem;
