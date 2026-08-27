@@ -57,7 +57,8 @@ export function InsuranceSelector({ productId, productValue, onSelect, selectedP
   const loadPlans = async () => {
     try {
       const response = await api.get(`/warranties/insurance/plans/?product_id=${productId}`);
-      setPlans(response.data.results || response.data);
+      const data = response.data?.results ?? response.data ?? [];
+      setPlans(data as InsurancePlan[]);
     } catch (error: any) {
       console.error('Error loading insurance plans:', error);
     } finally {

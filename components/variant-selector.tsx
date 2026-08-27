@@ -37,7 +37,8 @@ export function VariantSelector({ productId, onSelect, selectedVariantId }: Vari
   const loadVariants = async () => {
     try {
       const response = await api.get(`/products/${productId}/variants/`);
-      setVariants(response.data.results || response.data);
+      const data = response.data?.results ?? response.data ?? [];
+      setVariants(data as ProductVariant[]);
     } catch (error: unknown) {
       console.error('Error loading variants:', error);
     } finally {

@@ -172,12 +172,12 @@ export function BundleSelector({
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-semibold">بدءاً من:</span>
                         <span className="text-lg font-bold text-primary">
-                          {bundle.bundle_price.toFixed(0)} دج/يوم
+                          {(bundle.bundle_price ?? 0).toFixed(0)} دج/يوم
                         </span>
                       </div>
                       {bundle.discount_percentage && (
                         <Badge variant="secondary" className="bg-green-100 text-green-800">
-                          خصم {bundle.discount_percentage.toFixed(0)}%
+                          خصم {(bundle.discount_percentage ?? 0).toFixed(0)}%
                         </Badge>
                       )}
                       <Button

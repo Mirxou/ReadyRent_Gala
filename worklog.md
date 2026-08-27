@@ -926,3 +926,50 @@ Stage Summary:
 - 0 new lint errors introduced
 - Dev server running healthy
 - Remaining: Category D (15 dead error handlers)
+---
+Task ID: Category-C-deep
+Agent: Main Agent
+Task: Deep re-scan and fix 15 additional Category C runtime crash patterns
+
+Work Log:
+
+**Re-scan methodology:**
+- Investigated both `api` (core.ts) and `sovereignClient` — confirmed BOTH resolve `.then()` with `data: null` on error
+- Searched all .tsx/.ts files in app/ and components/ for 8 pattern categories (P1-P8)
+- Found 15 additional crash patterns missed in first pass
+
+**15 issues fixed across 13 files:**
+
+**Sub-group A: `response.data.results || response.data` null-deref (8 files, 9 instances)**
+When `response.data` is null, `null.results` throws BEFORE `||` short-circuits.
+
+1. `components/variant-selector.tsx:40` → `response.data?.results ?? response.data ?? []`
+2. `components/branch-selector.tsx:37` → same fix
+3. `components/insurance-selector.tsx:60` → same fix
+4. `components/damage-inspection.tsx:79` → same fix
+5. `app/admin/damage-assessment/page.tsx:51` → same fix
+6. `app/admin/branches/page.tsx:65` → same fix
+7. `app/admin/forecasting/page.tsx:48,103` → same fix (2 instances)
+8. `app/products/[id]/variants/page.tsx:69` → same fix
+
+**Sub-group B: `.data.filter()` without null guard (1 file)**
+9. `components/booking-calendar.tsx:39` → `(response.data ?? []).filter(...)`
+
+**Sub-group C: Property access on potentially null `response.data` (4 files)**
+10. `components/product-filters.tsx:102` → `res.data?.suggestions ?? []`
+11. `components/product/LiveViewerCount.tsx:19` → `res.data?.viewers != null`
+12. `components/payment/bank-card-form.tsx:84-110` → `response.data?.success` + `response.data?.error` (with `!` non-null assertion inside truthy branch for `.payment.id`)
+13. `components/payment/baridimob-form.tsx:52-89` → same pattern as #12
+
+**Sub-group D: `.toFixed()` on potentially undefined (1 file, 2 instances)**
+14. `components/bundle-selector.tsx:175` → `(bundle.bundle_price ?? 0).toFixed(0)`
+15. `components/bundle-selector.tsx:180` → `(bundle.discount_percentage ?? 0).toFixed(0)`
+
+Stage Summary:
+- 13 files modified, 15 crash patterns fixed
+- Root cause analysis: Both `api` (core.ts) and `sovereignClient` resolve with `data: null` on server errors, but TypeScript types lie (say `data: T`)
+- Key insight: `a.b || a` crashes when `a` is null — JS evaluates `null.b` BEFORE `||`
+- 0 new lint errors introduced (237 problems = all pre-existing)
+- Dev server healthy
+- Category C total: 5 (first pass) + 15 (deep pass) = 20 crash patterns fixed
+- Remaining: Category D (15 dead error handlers)

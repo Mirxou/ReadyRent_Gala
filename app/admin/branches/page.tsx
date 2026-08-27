@@ -62,7 +62,8 @@ export default function BranchesPage() {
   const loadBranches = async () => {
     try {
       const response = await api.get('/admin/branches/');
-      setBranches(response.data.results || response.data);
+      const data = response.data?.results ?? response.data ?? [];
+      setBranches(data as Branch[]);
     } catch (error: unknown) {
       toast({
         title: 'خطأ',

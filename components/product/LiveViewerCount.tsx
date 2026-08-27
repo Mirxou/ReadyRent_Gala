@@ -16,7 +16,7 @@ export const LiveViewerCount = ({ productId }: LiveViewerCountProps) => {
         const fetchCount = async () => {
             try {
                 const res = await api.get(`/analytics/live/activity/${productId}/`);
-                if (isMounted && res.data.viewers != null) {
+                if (isMounted && res.data?.viewers != null) {
                     setViewerCount(res.data.viewers as number);
                 }
             } catch (_err) {

@@ -76,7 +76,8 @@ export function DamageInspection({ bookingId, onComplete }: DamageInspectionProp
   const loadAssessment = async () => {
     try {
       const response = await api.get(`/bookings/damage-assessment/`);
-      const assessments = response.data.results || response.data;
+      const rawData = response.data?.results ?? response.data ?? [];
+      const assessments = rawData as DamageAssessment[];
       const bookingAssessment = assessments.find((a: DamageAssessment) => a.booking === bookingId);
       if (bookingAssessment) {
         setAssessment(bookingAssessment);

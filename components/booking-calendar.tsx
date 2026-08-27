@@ -36,7 +36,7 @@ export function BookingCalendar({
     queryKey: ['product-bookings', productId],
     queryFn: async () => {
       const response = await bookingsApi.getAll();
-      return response.data.filter((b: { product?: number | { id: number } }) => b.product === productId || (typeof b.product === 'object' && b.product?.id === productId));
+      return (response.data ?? []).filter((b: { product?: number | { id: number } }) => b.product === productId || (typeof b.product === 'object' && b.product?.id === productId));
     },
     enabled: !!productId,
   });

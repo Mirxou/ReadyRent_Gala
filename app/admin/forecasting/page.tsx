@@ -45,7 +45,7 @@ export default function ForecastingPage() {
   const loadForecasts = async () => {
     try {
       const response = await api.get('/analytics/forecasts/');
-      setForecasts(response.data.results || response.data);
+      setForecasts((response.data?.results ?? response.data ?? []) as Forecast[]);
     } catch (error: any) {
       toast({
         title: 'خطأ',
@@ -100,7 +100,7 @@ export default function ForecastingPage() {
       const response = await api.get(
         `/analytics/forecasts/high-demand/?forecast_start=${formData.forecast_start}&forecast_end=${formData.forecast_end}&limit=10`
       );
-      setForecasts(response.data.results || response.data);
+      setForecasts((response.data?.results ?? response.data ?? []) as Forecast[]);
     } catch (error: any) {
       toast({
         title: 'خطأ',

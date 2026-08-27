@@ -66,7 +66,8 @@ export default function ProductVariantsPage() {
   const loadVariants = async () => {
     try {
       const response = await api.get(`/products/${params.id}/variants/`);
-      setVariants(response.data.results || response.data);
+      const data = response.data?.results ?? response.data ?? [];
+      setVariants(data as ProductVariant[]);
     } catch (error: unknown) {
       toast({
         title: 'خطأ',

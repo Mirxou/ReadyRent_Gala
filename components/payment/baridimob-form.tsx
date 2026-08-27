@@ -49,13 +49,13 @@ export function BaridiMobForm({
         phone_number: phoneNumber,
       });
 
-      if (response.data.success) {
-        setPaymentId(response.data.payment.id);
+      if (response.data?.success) {
+        setPaymentId(response.data!.payment.id);
         setStep('otp');
         toast.success('تم إرسال رمز التحقق إلى هاتفك');
-        onPaymentInitiated?.(response.data.payment.id, true);
+        onPaymentInitiated?.(response.data!.payment.id, true);
       } else {
-        toast.error(response.data.error || 'فشل بدء عملية الدفع');
+        toast.error(response.data?.error || 'فشل بدء عملية الدفع');
       }
     } catch (error: unknown) {
       const msg = (error as { data?: { error?: string } })?.data?.error || 'حدث خطأ أثناء بدء عملية الدفع';
@@ -82,11 +82,11 @@ export function BaridiMobForm({
     try {
       const response = await paymentsApi.verifyOtp({ paymentId: String(paymentId), otp: otpCode });
 
-      if (response.data.success) {
+      if (response.data?.success) {
         toast.success('تم الدفع بنجاح!');
         onPaymentCompleted?.();
       } else {
-        toast.error(response.data.error || 'فشل التحقق من رمز OTP');
+        toast.error(response.data?.error || 'فشل التحقق من رمز OTP');
       }
     } catch (error: unknown) {
       const msg = (error as { data?: { error?: string } })?.data?.error || 'حدث خطأ أثناء التحقق من رمز OTP';

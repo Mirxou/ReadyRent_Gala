@@ -34,7 +34,8 @@ export function BranchSelector({ onSelect, selectedBranchId }: BranchSelectorPro
   const loadBranches = async () => {
     try {
       const response = await api.get('/branches/');
-      setBranches(response.data.results || response.data);
+      const data = response.data?.results ?? response.data ?? [];
+      setBranches(data as Branch[]);
     } catch (error: unknown) {
       console.error('Error loading branches:', error);
     } finally {

@@ -48,7 +48,8 @@ export default function DamageAssessmentPage() {
     try {
       setLoading(true);
       const response = await api.get('/bookings/damage-assessment/');
-      setAssessments(response.data.results || response.data);
+      const data = response.data?.results ?? response.data ?? [];
+      setAssessments(data as DamageAssessment[]);
     } catch (error: any) {
       toast({
         title: 'خطأ',

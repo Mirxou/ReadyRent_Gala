@@ -99,7 +99,7 @@ export function ProductFilters({
     if (searchInput.length >= 2) {
       const timeoutId = setTimeout(() => {
         productsApi.getSearchSuggestions(searchInput).then((res) => {
-          setSearchSuggestions(res.data.suggestions || []);
+          setSearchSuggestions(res.data?.suggestions ?? []);
           setShowSuggestions(true);
         }).catch(() => {
           setSearchSuggestions([]);

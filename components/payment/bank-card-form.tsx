@@ -81,11 +81,11 @@ export function BankCardForm({
         cardholder_name: cardholderName,
       });
 
-      if (response.data.success) {
+      if (response.data?.success) {
         if (response.data.requires_3d_secure && response.data.redirect_url) {
           // Redirect to 3D Secure page
           toast.info('جاري التحويل إلى صفحة التحقق الآمن...');
-          onPaymentInitiated?.(response.data.payment.id, true, response.data.redirect_url);
+          onPaymentInitiated?.(response.data!.payment.id, true, response.data.redirect_url);
           // Validate redirect URL before following
           const redirectUrl = response.data.redirect_url;
           if (redirectUrl) {
@@ -103,11 +103,11 @@ export function BankCardForm({
           }
         } else {
           toast.success('تم الدفع بنجاح!');
-          onPaymentInitiated?.(response.data.payment.id, false);
+          onPaymentInitiated?.(response.data!.payment.id, false);
           onPaymentCompleted?.();
         }
       } else {
-        toast.error(response.data.error || 'فشل معالجة الدفع');
+        toast.error(response.data?.error || 'فشل معالجة الدفع');
       }
 
       // Clear sensitive card data after submission
