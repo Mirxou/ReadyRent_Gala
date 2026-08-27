@@ -93,11 +93,23 @@ export async function GET(
   try {
     const { id } = await params;
 
-    // 1. Fetch current product
-    const product = await db.product.findUnique({
-      where: { id },
-      include: { category: true },
-    });
+    // 1. Fetch current product (try id first, fall back to slug)
+    let product;
+    try {
+      product = await db.product.findUnique({
+        where: { id },
+        include: { category: true },
+      });
+    } catch {
+      // Not a valid id format — fall through to slug lookup
+    }
+
+    if (!product) {
+      product = await db.product.findUnique({
+        where: { slug: id },
+        include: { category: true },
+      });
+    }
 
     if (!product) {
       return NextResponse.json(

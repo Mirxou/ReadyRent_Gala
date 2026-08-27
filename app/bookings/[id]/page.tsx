@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useAuthStore } from '@/lib/store';
 
 import { 
@@ -10,7 +11,9 @@ import {
   Calendar, 
   ChevronLeft,
   Lock,
-  ArrowUpRight
+  ArrowUpRight,
+  XCircle,
+  AlertTriangle
 } from 'lucide-react';
 import { api } from '@/lib/api';
 import { formatNumber } from '@/lib/utils';
@@ -19,6 +22,7 @@ import { SovereignSeal } from '@/shared/components/sovereign/sovereign-seal';
 import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
 import { Badge } from '@/components/ui/badge';
 import { EscrowTracker } from '@/features/finance/components/escrow-tracker';
+import { ContractTimeline } from '@/components/contract/contract-timeline';
 
 interface BookingDetail {
     id: number;
@@ -33,9 +37,21 @@ interface BookingDetail {
     product: {
         id: number;
         name: string;
+        name_ar?: string;
+        primary_image?: string;
+        slug?: string;
+        vendor_id?: string;
+    } | null;
+    items?: {
         price_per_day: number;
-        images?: { photo: string }[];
-    };
+    }[];
+    contracts?: {
+        id: string;
+        status: string;
+        contract_hash: string;
+        signed_at?: string;
+        created_at: string;
+    }[];
     created_at: string;
     updated_at: string;
 }
@@ -78,6 +94,44 @@ export default function BookingDetailPage() {
         </div>
     );
 
+    const statusColorMap: Record<string, string> = {
+        pending: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20',
+        confirmed: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
+        active: 'bg-green-500/10 text-green-500 border-green-500/20',
+        completed: 'bg-green-500/10 text-green-500 border-green-500/20',
+        cancelled: 'bg-red-500/10 text-red-500 border-red-500/20',
+        disputed: 'bg-red-500/10 text-red-500 border-red-500/20',
+    };
+
+    const statusLabelMap: Record<string, string> = {
+        pending: 'قيد الانتظار',
+        confirmed: 'مؤكد',
+        active: 'نشط',
+        completed: 'مكتمل',
+        cancelled: 'ملغي',
+        disputed: 'نزاع',
+    };
+
+    const pricePerDay = booking.items?.[0]?.price_per_day;
+
+    const contractData = booking.contracts?.[0] || null;
+    const timelineContract = contractData ? {
+        id: contractData.id,
+        booking_id: String(booking.id),
+        status: booking.status === 'cancelled' ? 'void' as const : (contractData.status === 'finalized' ? 'finalized' as const : 'signed' as const),
+        is_finalized: contractData.status === 'finalized',
+        contract_hash: contractData.contract_hash || '',
+        renter_signature: contractData.signed_at ? 'signed' : undefined,
+        signed_at: contractData.signed_at,
+        snapshot: {
+            escrow_status: booking.escrow_status,
+            escrow_locked: booking.escrow_status === 'HELD',
+            active_since: booking.status === 'active' ? booking.start_date : undefined,
+            completed_at: booking.status === 'completed' ? booking.end_date : undefined,
+        },
+        created_at: contractData.created_at,
+    } : null;
+
     const escrowStateMap: Record<string, string> = {
         INITIATED: 'pending',
         HELD: 'held',
@@ -104,13 +158,28 @@ export default function BookingDetailPage() {
                             <h1 className="text-5xl font-black italic tracking-tighter">
                                 بروتوكول <span className="text-sovereign-gold">الحجز.</span>
                             </h1>
+                            <Badge className={statusColorMap[booking.status] || 'bg-white/5 border-white/10 text-white/40 px-3 py-1 text-[10px] tracking-widest'}>
+                                {statusLabelMap[booking.status] || booking.status}
+                            </Badge>
                             <Badge className="bg-white/5 border-white/10 text-white/40 px-3 py-1 font-mono text-[10px] tracking-widest">
                                 ID #{booking.id.toString().padStart(6, '0')}
                             </Badge>
                         </div>
                         <p className="text-muted-foreground text-lg font-light italic">
-                            سيادة التعاقد: {booking.product?.name || booking.product_name || 'منتج'}
+                            سيادة التعاقد: {booking.product?.name_ar || booking.product?.name || booking.product_name || 'منتج'}
                         </p>
+                        <div className="flex gap-3">
+                            {(booking.status === 'pending' || booking.status === 'confirmed') && (
+                                <Link href={`/bookings/${id}/cancel`} className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-black uppercase tracking-widest hover:bg-red-500/20 transition-colors">
+                                    <XCircle className="w-4 h-4" /> إلغاء الحجز
+                                </Link>
+                            )}
+                            {(booking.status === 'active' || booking.status === 'completed') && (
+                                <Link href={`/disputes/new?booking_id=${id}`} className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-400 text-xs font-black uppercase tracking-widest hover:bg-orange-500/20 transition-colors">
+                                    <AlertTriangle className="w-4 h-4" /> فتح نزاع
+                                </Link>
+                            )}
+                        </div>
                     </div>
 
                     <div className="flex items-center gap-6">
@@ -154,17 +223,17 @@ export default function BookingDetailPage() {
 
                                 <div className="space-y-6 flex-1">
                                     <div className="flex items-center gap-4">
-                                        {booking.product?.images?.[0] && (
+                                        {(booking.product_image || booking.product?.primary_image) && (
                                             <img 
-                                                src={booking.product.images[0].photo || booking.product_image || '/placeholder.svg'} 
-                                                alt={booking.product?.name || 'منتج'}
+                                                src={booking.product_image || booking.product?.primary_image || '/placeholder.svg'} 
+                                                alt={booking.product?.name_ar || booking.product?.name || 'منتج'}
                                                 className="w-20 h-20 object-cover rounded-2xl border border-white/10"
                                             />
                                         )}
                                         <div className="space-y-1">
                                             <span className="text-[10px] font-black uppercase text-sovereign-gold">التفاصيل الفنية</span>
-                                            <h3 className="text-xl font-black italic">{booking.product?.name || booking.product_name || 'منتج'}</h3>
-                                            <p className="text-xs text-white/40">{booking.product?.price_per_day || '—'} DA / يوم</p>
+                                            <h3 className="text-xl font-black italic">{booking.product?.name_ar || booking.product?.name || booking.product_name || 'منتج'}</h3>
+                                            <p className="text-xs text-white/40">{pricePerDay ? `${formatNumber(pricePerDay)} DA / يوم` : '—'}</p>
                                         </div>
                                     </div>
                                     <SovereignButton variant="secondary" size="sm" className="w-full">
@@ -174,20 +243,20 @@ export default function BookingDetailPage() {
                             </div>
                         </GlassPanel>
 
-                        {/* 2. Agreement Recorder Section */}
-                        <div className="space-y-6">
-                            <div className="flex items-center justify-between border-b border-white/5 pb-4">
-                                <h2 className="text-3xl font-black italic tracking-tighter flex items-center gap-4">
-                                    ميثاق <span className="text-sovereign-gold">الاتفاق.</span>
-                                </h2>
-                                <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 text-[9px] uppercase font-black uppercase tracking-widest">
-                                    التسجيل الثابت نشط
-                                </Badge>
+                        {/* 2. Contract Timeline */}
+                        {timelineContract && (
+                            <div className="space-y-6">
+                                <div className="flex items-center justify-between border-b border-white/5 pb-4">
+                                    <h2 className="text-3xl font-black italic tracking-tighter flex items-center gap-4">
+                                        مسار <span className="text-sovereign-gold">العقد.</span>
+                                    </h2>
+                                    <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 text-[9px] uppercase font-black uppercase tracking-widest">
+                                        التسجيل الثابت نشط
+                                    </Badge>
+                                </div>
+                                <ContractTimeline contract={timelineContract} />
                             </div>
-                            <GlassPanel className="p-10 rounded-[3rem]" variant="obsidian" gradientBorder>
-                                {/* AgreementRecorder removed — component deleted */}
-                            </GlassPanel>
-                        </div>
+                        )}
                     </div>
 
                     {/* 🔒 Sidebar: Financial Vault & Status */}

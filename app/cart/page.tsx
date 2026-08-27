@@ -16,11 +16,13 @@ import {
   Zap,
   Package,
   ArrowRight,
-  MapPin
+  MapPin,
+  Loader2
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatNumber } from '@/lib/utils';
 import { useAuthStore } from '@/lib/store';
+import { bookingsApi } from '@/lib/api';
 
 import { ParticleField } from '@/components/ui/particle-field';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -99,27 +101,50 @@ export default function CartPage() {
   });
 
   const createBookingMutation = useMutation({
-    mutationFn: () => fetch('/api/bookings/create/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ same_day_delivery: sameDayDelivery }),
-    }).then(r => r.json()),
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['cart'] });
-      
-      // Get the first booking ID to redirect to checkout
-      if (data?.data && Array.isArray(data.data) && data.data.length > 0) {
-        const booking = data.data[0];
-        // Redirect to checkout with booking ID
-        router.push(`/checkout?booking_id=${booking.id}`);
-      } else {
-        // If no booking ID, redirect to checkout without booking
-        router.push('/checkout');
+    mutationFn: async () => {
+      if (!items || items.length === 0) throw new Error('السلة فارغة');
+
+      const bookings: { id: number }[] = [];
+
+      // Create a booking for each cart item
+      for (const item of items as Record<string, unknown>[]) {
+        const res = await bookingsApi.create({
+          product_id: item.product_id as number,
+          start_date: item.start_date as string,
+          end_date: item.end_date as string,
+          has_insurance: false,
+          extra_services: [],
+        });
+        if (res.data && 'id' in (res.data as Record<string, unknown>)) {
+          bookings.push(res.data as { id: number });
+        }
       }
+
+      // Clear the cart by deleting each item
+      for (const item of items as Record<string, unknown>[]) {
+        await fetch('/api/bookings/cart/items/' + item.id, {
+          method: 'DELETE',
+          credentials: 'include',
+        });
+      }
+
+      return bookings;
+    },
+    onSuccess: (bookings) => {
+      queryClient.invalidateQueries({ queryKey: ['cart'] });
+
+      const firstBookingId = bookings.length > 0 ? bookings[0].id : null;
+      router.push(
+        firstBookingId
+          ? `/checkout?booking_id=${firstBookingId}`
+          : '/checkout'
+      );
     },
     onError: (error: unknown) => {
-      toast.error((error instanceof Error ? error.message : String(error)) || 'حدث خطأ أثناء إنشاء الحجز');
+      toast.error(
+        (error instanceof Error ? error.message : String(error)) ||
+          'حدث خطأ أثناء إنشاء الحجز'
+      );
     },
   });
 
@@ -140,7 +165,7 @@ export default function CartPage() {
       (new Date(item.end_date).getTime() - new Date(item.start_date).getTime()) /
       (1000 * 60 * 60 * 24)
     ) + 1;
-    return sum + (item.product.price_per_day * days * (item.quantity as number));
+    return sum + (item.product.price_per_day * days);
   }, 0);
 
   // Get first item for packaging display
@@ -208,7 +233,7 @@ export default function CartPage() {
                   (new Date(item.end_date).getTime() - new Date(item.start_date).getTime()) /
                   (1000 * 60 * 60 * 24)
                 ) + 1;
-                const itemTotal = item.product.price_per_day * days * item.quantity;
+                const itemTotal = item.product.price_per_day * days;
                 const primaryImage = item.product.primary_image ||
                   item.product.images?.[0]?.image ||
                   '/placeholder-product.jpg';
@@ -272,10 +297,7 @@ export default function CartPage() {
                               </div>
                             </div>
 
-                            <div className="flex items-center justify-between pt-2">
-                              <div className="text-sm font-bold opacity-60">
-                                {item.quantity} {item.quantity === 1 ? 'قطعة فريدة' : 'قطع'}
-                              </div>
+                            <div className="flex items-center justify-end pt-2">
                               <div className="text-2xl font-black bg-gradient-to-r from-sovereign-gold to-sovereign-gold bg-clip-text text-transparent">
                                 {formatNumber(itemTotal)} دج
                               </div>
@@ -302,7 +324,7 @@ export default function CartPage() {
                       (new Date(item.end_date).getTime() - new Date(item.start_date).getTime()) /
                       (1000 * 60 * 60 * 24)
                     ) + 1;
-                    const itemTotal = item.product.price_per_day * days * item.quantity;
+                    const itemTotal = item.product.price_per_day * days;
                     return (
                       <div key={item.id} className="flex justify-between items-center text-sm font-medium">
                         <span className="text-muted-foreground">{item.product.name_ar}</span>
@@ -389,7 +411,7 @@ export default function CartPage() {
                     withConfetti
                   >
                     {createBookingMutation.isPending ? (
-                      'جاري التألق...'
+                      <><Loader2 className="h-5 w-5 animate-spin mr-3" />جاري التألق...</>
                     ) : (
                       <>
                         تأكيد الحجز الملكي

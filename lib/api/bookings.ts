@@ -52,6 +52,17 @@ export const bookingsApi = {
   removeFromCart: (itemId: number) => 
     sovereignClient.delete<void>(`/bookings/cart/items/${itemId}/`),
 
+  // Waitlist
+  getWaitlist: () => sovereignClient.get<any>('/bookings/waitlist/'),
+  addToWaitlist: (data: { product_id: number | string; start_date?: string; end_date?: string }) =>
+    sovereignClient.post<any>('/bookings/waitlist/', data),
+  removeFromWaitlist: (id: number) =>
+    sovereignClient.delete<void>(`/bookings/waitlist/${id}/`),
+
+  // Aliases used by pages
+  getById: (id: string | number) => 
+    sovereignClient.get<Booking>(`/bookings/${id}/`),
+
   // Agreements
   generateAgreement: (bookingId: number) => 
     sovereignClient.post<any>(`/bookings/${bookingId}/agreement/create/`),

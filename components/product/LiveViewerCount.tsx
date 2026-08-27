@@ -13,40 +13,23 @@ export const LiveViewerCount = ({ productId }: LiveViewerCountProps) => {
     useEffect(() => {
         let isMounted = true;
 
-        // 1. Heartbeat Function (Tell server "I'm here")
-        const sendHeartbeat = async () => {
-            try {
-                await api.post(`/analytics/live/activity/${productId}/`);
-            } catch (_err) {
-                // Silent fail
-            }
-        };
-
-        // 2. Fetch Count Function
         const fetchCount = async () => {
             try {
                 const res = await api.get(`/analytics/live/activity/${productId}/`);
-                if (isMounted && res.data.active_viewers) {
-                    setViewerCount(res.data.active_viewers);
+                if (isMounted && res.data.viewers != null) {
+                    setViewerCount(res.data.viewers as number);
                 }
             } catch (_err) {
                 console.error("Failed to fetch live count");
             }
         };
 
-        // Initial calls
-        sendHeartbeat();
         fetchCount();
 
-        // Schedule Heartbeat (Every 30s)
-        const heartbeatInterval = setInterval(sendHeartbeat, 30000);
-
-        // Schedule Poll (Every 5s)
         const pollInterval = setInterval(fetchCount, 5000);
 
         return () => {
             isMounted = false;
-            clearInterval(heartbeatInterval);
             clearInterval(pollInterval);
         };
     }, [productId]);

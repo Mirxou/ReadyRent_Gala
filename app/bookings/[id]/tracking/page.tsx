@@ -81,7 +81,7 @@ export default function TrackingPage() {
       <div className="max-w-2xl mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">تتبع الطلب</h1>
-          <p className="text-muted-foreground">حجز #{booking.id?.slice(0, 8)}</p>
+          <p className="text-muted-foreground">حجز #{String(booking.id)?.slice(0, 8) || booking.id}</p>
         </div>
 
         <Card className="mb-6">

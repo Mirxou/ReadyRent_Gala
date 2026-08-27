@@ -705,3 +705,72 @@ Stage Summary:
 - 7 files saved from incorrect deletion (were marked dead but are alive)
 - Project size reduced ~15-20%
 - Zero breaking changes
+---
+Task ID: 1.2-b
+Agent: Page Bug Fix Agent
+
+Task: Fix 4 bugs across /products and /products/[id] pages
+
+Work Log:
+
+- **components/product/product-search.tsx** — 2 fixes:
+  1. Response handling: sovereignClient returns raw JSON (may or may not have `.data` envelope). Changed `.then(res => res.data)` to defensive `(res as Record<string,unknown>)?.data ?? res` with array/results fallback. Same fix for getCategories.
+  2. Missing `location` filter: `filters.location` was collected in state but never sent to `productsApi.getAll()`. Added `location: filters.location` to the call.
+
+- **app/products/[id]/page.tsx** — 2 fixes:
+  1. SovereignCalendar interface mismatch: component accepts `onDateSelect(date: string)` but page passed `(start: Date|null, end: Date|null)`. Wrapped to convert string→Date via `new Date(dateStr)`. Removed unused `productId` and `pricePerDay` props.
+  2. Unused `setSelectedEndDate` (caused by removing it from onDateSelect callback): prefixed with underscore `_setSelectedEndDate`.
+
+- **components/product/LiveViewerCount.tsx** — 2 fixes:
+  1. Field mismatch: API returns `viewers` but component read `res.data.active_viewers`. Changed to `res.data.viewers`.
+  2. Removed POST heartbeat call (no POST handler exists on that endpoint, was silently failing every 30s).
+
+- **app/api/products/[id]/recommendations/route.ts** — 1 fix:
+  1. Slug crash: `where: { id }` with a string slug throws Prisma error. Added try/catch around id lookup, with slug fallback — same pattern as the main product detail route.
+
+Stage Summary:
+- 4 files modified, 0 new files created
+- Lint: 229 problems (180 errors, 49 warnings) — was 230 (181 errors, 49 warnings). Net -1 error (fixed the unused var introduced by calendar fix). Zero new errors introduced.
+- All pre-existing errors untouched
+---
+Task ID: 1.2-c
+Agent: Page Bug Fix Agent
+
+Task: Fix cart and checkout page bugs (2 pages, 5 bugs)
+
+
+Work Log:
+
+### Page 1: app/cart/page.tsx — 2 bugs fixed
+
+- **Bug 1: "Proceed to Checkout" sends wrong data.**
+  - Old: `fetch('/api/bookings/create/', POST, { same_day_delivery })` — wrong endpoint contract.
+  - Fix: Replaced `createBookingMutation` to iterate each cart item and call `bookingsApi.create({ product_id, start_date, end_date, has_insurance: false, extra_services: [] })`. After all bookings created, navigates to `/checkout?booking_id=FIRST_BOOKING_ID`. Then clears the cart by DELETE-ing each cart item.
+  - Added `import { bookingsApi } from '@/lib/api'` and `Loader2` icon.
+
+- **Bug 2: No quantity update / remove quantity UI.**
+  - Removed `* item.quantity` from 3 price calculations (totalPrice, item card total, summary total).
+  - Removed quantity display text (`{item.quantity} قطعة فريدة/قطع`).
+  - Added `Loader2` spinner to checkout button during booking creation.
+
+### Page 2: app/checkout/page.tsx — 2 bugs fixed
+
+- **Bug 1: Payment methods data shape mismatch.**
+  - Page reads `method.type`, `method.display_name`, `method.description`, `method.icon`.
+  - Old API returned `{id, name, icon, fee, enabled}`.
+  - Fix: Updated `app/api/payments/methods/route.ts` to return `{type: 'baridimob'|'card', display_name, description, icon}`. Reduced from 4 methods to 2 (baridimob + card) for MVP.
+  - Fixed `key={method.id}` → `key={method.type}` since `id` no longer exists.
+
+- **Bug 2: BankCardForm removed from checkout flow.**
+  - Removed `import { BankCardForm }`.
+  - Replaced `<BankCardForm>` render with a Card containing the message "سيتم توجيهك لبوابة الدفع الآمنة (Chargily) قريباً" and a disabled button. File `bank-card-form.tsx` preserved for future replacement.
+
+### Bug 3: BaridiMobForm verifyOtp — verified compatible ✓
+  - Component calls `paymentsApi.verifyOtp({ paymentId: String(paymentId), otp: otpCode })`.
+  - `paymentsApi.verifyOtp` now accepts both `(string, string?)` and `({ paymentId, otp })` forms.
+  - Confirmed compatible — no changes needed.
+
+Stage Summary:
+- 3 files modified (cart/page.tsx, checkout/page.tsx, api/payments/methods/route.ts), 0 new files
+- Lint: 229 problems (180 errors, 49 warnings) — unchanged. Zero new errors introduced.
+- All pre-existing errors untouched

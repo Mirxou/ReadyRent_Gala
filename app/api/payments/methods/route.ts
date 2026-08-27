@@ -10,32 +10,16 @@ export async function GET() {
   try {
     const methods = [
       {
-        id: 'baridimob',
-        name: 'بريدي موب',
+        type: 'baridimob',
+        display_name: 'بريدي موب',
+        description: 'الدفع عبر تطبيق بريدي موب',
         icon: 'phone',
-        fee: 0,
-        enabled: true,
       },
       {
-        id: 'ccp',
-        name: 'حساب بريدي CCP',
-        icon: 'building',
-        fee: 0,
-        enabled: true,
-      },
-      {
-        id: 'bank_card',
-        name: 'بطاقة بنكية',
+        type: 'card',
+        display_name: 'بطاقة بنكية',
+        description: 'بطاقة بنكية عبر Chargily',
         icon: 'credit-card',
-        fee: 2.5,
-        enabled: true,
-      },
-      {
-        id: 'wallet',
-        name: 'المحفظة الرقمية',
-        icon: 'wallet',
-        fee: 0,
-        enabled: true,
       },
     ];
 

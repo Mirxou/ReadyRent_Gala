@@ -49,7 +49,7 @@ export default function ProductDetailsPage() {
   const { user, isAuthenticated } = useAuthStore();
   const { setIsOpen: setBookingOpen, updateFormData } = useBookingStore();
   const [selectedStartDate, setSelectedStartDate] = useState<Date | null>(null);
-  const [selectedEndDate, setSelectedEndDate] = useState<Date | null>(null);
+  const [selectedEndDate, _setSelectedEndDate] = useState<Date | null>(null);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
@@ -367,11 +367,10 @@ export default function ProductDetailsPage() {
                 </div>
 
                 <SovereignCalendar
-                  productId={product.id}
-                  pricePerDay={Number(product.price_per_day)}
-                  onDateSelect={(start: Date | null, end: Date | null) => {
-                    setSelectedStartDate(start);
-                    setSelectedEndDate(end);
+                  onDateSelect={(dateStr: string) => {
+                    if (dateStr) {
+                      setSelectedStartDate(new Date(dateStr));
+                    }
                   }}
                 />
                 

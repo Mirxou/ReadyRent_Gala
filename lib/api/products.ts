@@ -36,6 +36,23 @@ export interface Product {
 
 export const productsApi = {
   /**
+   * Get all products with optional filters (used by /products page)
+   */
+  getAll: (params?: Record<string, any>) => {
+    const q = new URLSearchParams();
+    if (params?.search) q.append('search', params.search);
+    if (params?.category) q.append('category', params.category);
+    if (params?.price_min != null) q.append('min_price', String(params.price_min));
+    if (params?.price_max != null) q.append('max_price', String(params.price_max));
+    if (params?.location) q.append('location', params.location);
+    if (params?.availability) q.append('availability', params.availability);
+    if (params?.sort) q.append('ordering', params.sort);
+    if (params?.page) q.append('page', String(params.page));
+    const qs = q.toString();
+    return sovereignClient.get<Product[]>(`/products/${qs ? `?${qs}` : ''}`);
+  },
+
+  /**
    * Search and filter products with advanced parameters
    */
   search: (query: string, filters: SearchFilters, page = 1) => {

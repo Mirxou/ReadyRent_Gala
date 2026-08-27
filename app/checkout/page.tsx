@@ -8,7 +8,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
 import { BaridiMobForm } from '@/components/payment/baridimob-form';
-import { BankCardForm } from '@/components/payment/bank-card-form';
 import { paymentsApi, bookingsApi } from '@/lib/api';
 import { useAuthStore } from '@/lib/store';
 
@@ -159,7 +158,7 @@ export default function CheckoutPage() {
                     <div className="grid gap-4">
                       {paymentMethods?.map((method: Record<string, unknown>) => (
                         <Button
-                          key={method.id}
+                          key={method.type}
                           variant="outline"
                           className="h-auto p-4 justify-start"
                           onClick={() => setSelectedMethod(method.type)}
@@ -223,11 +222,17 @@ export default function CheckoutPage() {
                     onPaymentCompleted={handlePaymentCompleted}
                   />
                 ) : selectedMethod === 'card' ? (
-                  <BankCardForm
-                    amount={totalAmount}
-                    bookingId={bookingId || undefined}
-                    onPaymentCompleted={handlePaymentCompleted}
-                  />
+                  <Card>
+                    <CardContent className="p-6 text-center space-y-4">
+                      <CreditCard className="h-10 w-10 mx-auto text-muted-foreground" />
+                      <p className="text-muted-foreground">
+                        سيتم توجيهك لبوابة الدفع الآمنة (Chargily) قريباً
+                      </p>
+                      <Button disabled className="w-full">
+                        الدفع ببطاقة بنكية — قريباً
+                      </Button>
+                    </CardContent>
+                  </Card>
                 ) : null}
               </div>
             )}

@@ -37,18 +37,22 @@ export function ProductSearch() {
 
   const { data: categoriesRaw } = useQuery({
     queryKey: ['categories'],
-    queryFn: () => productsApi.getCategories().then(res => res.data),
+    queryFn: () => productsApi.getCategories().then(res => {
+      const d = (res as Record<string, unknown>)?.data ?? res;
+      return Array.isArray(d) ? d : [];
+    }),
   });
-  const categories = Array.isArray(categoriesRaw) ? categoriesRaw : [];
+  const categories = categoriesRaw;
 
   const { data: productsData, isLoading } = useQuery({
     queryKey: ['products-search', debouncedQuery, filters],
-    queryFn: () => productsApi.getAll({ search: debouncedQuery, category: filters.category, price_min: filters.priceMin, price_max: filters.priceMax, sort: filters.sortBy }).then(res => res.data),
+    queryFn: () => productsApi.getAll({ search: debouncedQuery, category: filters.category, price_min: filters.priceMin, price_max: filters.priceMax, location: filters.location, sort: filters.sortBy }).then(res => {
+      const d = (res as Record<string, unknown>)?.data ?? res;
+      return Array.isArray(d) ? d : (d as Record<string, unknown>)?.results ?? [];
+    }),
   });
 
-  const products = Array.isArray(productsData)
-    ? productsData
-    : (productsData as Record<string, unknown>)?.results || [];
+  const products = productsData ?? [];
 
   const handleFilterChange = (key: string, value: string) => {
     setFilters((prev: Record<string, unknown>) => ({ ...prev, [key]: value }));

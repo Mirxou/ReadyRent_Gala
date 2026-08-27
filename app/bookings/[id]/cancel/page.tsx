@@ -40,22 +40,37 @@ export default function CancelBookingPage() {
     }
 
     const loadPolicy = async () => {
-      try {
-        const response = await api.get(`/bookings/${params.id}/cancellation-policy/`);
-        setPolicy(response.data);
-      } catch (error: unknown) {
+      const response = await api.get(`/bookings/${params.id}/cancellation-policy/`);
+
+      // apiFetch never throws — check for error pattern
+      if (response.status === 0 || response.data?.error) {
         toast({
           title: 'خطأ',
-          description: (error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'فشل تحميل سياسة الإلغاء',
+          description: response.data?.error || 'فشل تحميل سياسة الإلغاء',
           variant: 'destructive',
         });
-      } finally {
         setPolicyLoading(false);
+        return;
       }
+
+      const data = response.data;
+      // Normalize API shape to match CancellationPolicy component expectations
+      const normalized: CancellationPolicyData = {
+        fee_info: {
+          fee_percentage: 100 - (data.refund_percentage || 100),
+          fee_amount: (data.total_price || 0) - (data.refund_amount || 0),
+          refund_amount: data.refund_amount || 0,
+          hours_until_start: data.hours_until_start || 0,
+        },
+        can_cancel: data.can_cancel,
+        message: data.policy || '',
+      };
+      setPolicy(normalized);
+      setPolicyLoading(false);
     };
 
     loadPolicy();
-  }, [params.id, isAuthenticated, router]);
+  }, [params.id, isAuthenticated, router, toast]);
 
   const handleCancel = async () => {
     if (!policy?.can_cancel) {
@@ -68,22 +83,24 @@ export default function CancelBookingPage() {
     }
 
     setLoading(true);
-    try {
-      await api.post(`/bookings/${params.id}/cancel/`, { reason });
-      toast({
-        title: 'تم الإلغاء',
-        description: 'تم إلغاء الحجز بنجاح. سيتم استرجاع المبلغ خلال 3 أيام',
-      });
-      router.push('/dashboard/bookings');
-    } catch (error: unknown) {
+    const response = await api.post(`/bookings/${params.id}/cancel/`, { reason });
+
+    if (response.status === 0 || response.data?.error) {
       toast({
         title: 'خطأ',
-        description: (error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'فشل إلغاء الحجز',
+        description: response.data?.error || 'فشل إلغاء الحجز',
         variant: 'destructive',
       });
-    } finally {
       setLoading(false);
+      return;
     }
+
+    toast({
+      title: 'تم الإلغاء',
+      description: 'تم إلغاء الحجز بنجاح. سيتم استرجاع المبلغ خلال 3 أيام',
+    });
+    router.push('/dashboard/bookings');
+    setLoading(false);
   };
 
   if (policyLoading) {
