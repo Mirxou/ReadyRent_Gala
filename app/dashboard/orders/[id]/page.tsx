@@ -55,7 +55,7 @@ export default function BookingDetailsPage() {
 
   const updateStatusMutation = useMutation({
     mutationFn: ({ bookingId, status }: { bookingId: string; status: string }) =>
-      bookingsApi.updateStatus(bookingId, status),
+      bookingsApi.updateStatus(Number(bookingId), status),
     onSuccess: () => {
       toast.success('تم تحديث حالة الحجز بنجاح');
       queryClient.invalidateQueries({ queryKey: ['booking', id] });
@@ -66,7 +66,7 @@ export default function BookingDetailsPage() {
   });
 
   const createDisputeMutation = useMutation({
-    mutationFn: (data: Record<string, unknown>) => disputesApi.createDispute(data),
+    mutationFn: (data: Record<string, unknown>) => disputesApi.initiateDispute(data as Parameters<typeof disputesApi.initiateDispute>[0]),
     onSuccess: () => {
       toast.success('تم رفع النزاع للتحكيم السيادي (Dispute Lodged)');
       setIsDisputeModalOpen(false);

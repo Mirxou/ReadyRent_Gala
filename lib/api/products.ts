@@ -95,6 +95,10 @@ export const productsApi = {
   getSuggestions: (query: string) => 
     sovereignClient.get<string[]>(`/products/search-suggestions/?q=${encodeURIComponent(query)}`),
 
+  /** Alias used by product-filters.tsx */
+  getSearchSuggestions: (query: string) => 
+    sovereignClient.get<string[]>(`/products/search-suggestions/?q=${encodeURIComponent(query)}`),
+
   /**
    * Get product recommendations
    */
@@ -111,4 +115,20 @@ export const productsApi = {
   
   removeFromWishlist: (id: number) => 
     sovereignClient.delete<void>(`/products/wishlist/${id}/`),
+
+  /** Check if a product is in the user's wishlist (used by product-card.tsx) */
+  checkWishlist: (productId: number) => 
+    sovereignClient.get<{ in_wishlist: boolean }>(`/products/wishlist/check/?product_id=${productId}`),
+
+  /** Toggle wishlist status — add if not in, remove if in (used by product-card.tsx) */
+  toggleWishlist: (productId: number) => 
+    sovereignClient.post<{ in_wishlist: boolean }>('/products/wishlist/toggle/', { product_id: productId }),
+
+  /** Get accessories that match a product (used by accessory-suggestions.tsx) */
+  getMatchingAccessories: (productId: number, limit = 4) => 
+    sovereignClient.get<Product[]>(`/products/${productId}/accessories/?limit=${limit}`),
+
+  /** Get product metadata — categories, price ranges, locations (used by product-filters.tsx) */
+  getMetadata: () => 
+    sovereignClient.get<{ categories: any[]; price_range: { min: number; max: number }; locations: string[] }>('/products/metadata/'),
 };

@@ -47,7 +47,7 @@ export default function DisputesPage() {
   const handleSubmit = async () => {
     setIsSubmitting(true);
     try {
-      await disputesApi.createDispute({
+      await disputesApi.initiateDispute({
         booking_id: formData.bookingId || 0,
         claim_type: formData.disputeType,
         description: formData.description + '\n\n' + formData.subject,

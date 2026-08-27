@@ -5,6 +5,10 @@ export const locationsApi = {
   createAddress: (data: any) => sovereignClient.post<any>('/locations/addresses/', data),
   getDeliveryZones: (params?: any) => sovereignClient.get<any[]>('/locations/delivery-zones/', { params }),
   getDeliveryTracking: (id: number) => sovereignClient.get<any>(`/locations/delivery-requests/${id}/`),
+
+  /** Check if same-day delivery is available for a zone (used by booking-calendar.tsx) */
+  checkSameDayDelivery: (zoneId: number | string) =>
+    sovereignClient.get<{ available: boolean; fee: number }>(`/locations/delivery-zones/${zoneId}/same-day/`),
 };
 
 export const logisticsApi = { // Unified Packaging + Returns

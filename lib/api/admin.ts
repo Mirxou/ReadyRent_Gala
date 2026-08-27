@@ -35,6 +35,18 @@ export const adminApi = {
   // Users Admin
   getAllUsers: (params?: any) =>
     sovereignClient.get<any[]>(`/auth/admin/users/${buildQuery(params)}`),
+
+  updateUser: (id: number, data: any) =>
+    sovereignClient.patch<any>(`/auth/admin/users/${id}/`, data),
+
+  deleteProduct: (id: number) =>
+    sovereignClient.delete<void>(`/products/admin/products/${id}/`),
+
+  getBookingStats: () =>
+    sovereignClient.get<any>('/bookings/admin/stats/'),
+
+  getSalesReport: (params?: { days?: number; export?: boolean }) =>
+    sovereignClient.get<any>(`/analytics/admin/sales-report/${buildQuery(params)}`),
 };
 
 

@@ -800,3 +800,61 @@ Stage Summary:
 - Step 1.2-d (bookings pages): 1 minor fix (img wrapper), no functional bugs
 - Total: 2 files changed, 2 bugs fixed
 - Most investigation findings were already resolved or were false positives
+---
+Task ID: field-investigation-2 + Category-A-fixes
+Agent: Main Agent
+Task: Redo field investigation then fix all 25 missing/wrong API method calls
+
+Work Log:
+
+**Field Investigation (3 parallel scans):**
+- Scan 1: All 92 page files — 555 imports checked. Found 4 broken `getAuthHeaders` imports (Category B).
+- Scan 2: All 97 component/feature files — 0 broken file imports. Found 1 more `getAuthHeaders` (role-selector.tsx).
+- Scan 3: All API calls vs method signatures — 25 mismatches found.
+- Scan 4: Runtime crash patterns — 15 HIGH crashes + 15 dead error handlers.
+
+**Category A Fixes (25 API call mismatches):**
+
+1. `lib/api/products.ts` — Added 5 methods:
+   - `getSearchSuggestions()` alias → delegates to `getSuggestions()`
+   - `checkWishlist(productId)` → GET /products/wishlist/check/
+   - `toggleWishlist(productId)` → POST /products/wishlist/toggle/
+   - `getMatchingAccessories(productId, limit)` → GET /products/{id}/accessories/
+   - `getMetadata()` → GET /products/metadata/
+
+2. `lib/api/bookings.ts` — Added 1 alias:
+   - `updateStatus(id, status)` → PATCH /bookings/{id}/ { status }
+
+3. `lib/api/auth.ts` — Added 1 alias + 4 verification methods:
+   - `me()` alias → delegates to `getProfile()`
+   - `verificationApi.getStatus()` → GET /users/verification/status/
+   - `verificationApi.submit(photo)` → POST /users/verification/submit/
+   - `verificationApi.getPending()` → GET /users/verification/pending/
+   - `verificationApi.vote(id, vote, comment?)` → POST /users/verification/{id}/vote/
+
+4. `lib/api/notifications.ts` — Added 1 alias:
+   - `getAll()` → delegates to `list()`
+
+5. `lib/api/admin.ts` — Added 4 methods:
+   - `updateUser(id, data)` → PATCH /auth/admin/users/{id}/
+   - `deleteProduct(id)` → DELETE /products/admin/products/{id}/
+   - `getBookingStats()` → GET /bookings/admin/stats/
+   - `getSalesReport(params)` → GET /analytics/admin/sales-report/
+
+6. `lib/api/logistics.ts` — Added 1 method:
+   - `locationsApi.checkSameDayDelivery(zoneId)` → GET /locations/delivery-zones/{id}/same-day/
+
+7. Fixed 5 consumer files (disputes API):
+   - `app/disputes/page.tsx`: `createDispute()` → `initiateDispute()`
+   - `app/dashboard/disputes/page.tsx`: `getDisputes()` → `listDisputes()`
+   - `app/dashboard/disputes/[id]/page.tsx`: `createDisputeMessage(id, {content})` → `createMessage(id, text)`, `String(id)` → `Number(id)` for getDispute/getDisputeHistory
+   - `app/disputes/[id]/appeal/page.tsx`: `appeal(id, {reason, description})` → `fileAppeal(id, reason)`, `String(id)` → `Number(id)`
+   - `app/dashboard/orders/[id]/page.tsx`: `createDispute()` → `initiateDispute()`, `updateStatus(string, ...)` → `updateStatus(Number(...), ...)`
+
+Stage Summary:
+- 6 API module files modified (products, bookings, auth, notifications, admin, logistics)
+- 5 consumer page files modified (disputes x3, orders, appeal)
+- 25 API call mismatches resolved → 0 remaining
+- 0 new lint errors introduced
+- Dev server running healthy on PID 1057
+- Remaining: Category B (5 getAuthHeaders), Category C (15 crash patterns), Category D (15 dead error handlers)

@@ -23,6 +23,16 @@ export const notificationsApi = {
     );
   },
 
+  /** Alias used by dashboard/notifications */
+  getAll: (params?: { page?: number; unread_only?: boolean }) => {
+    const q = new URLSearchParams();
+    if (params?.page) q.append('page', params.page.toString());
+    if (params?.unread_only) q.append('unread_only', 'true');
+    return sovereignClient.get<Notification[]>(
+      `/notifications/notifications/?${q.toString()}`
+    );
+  },
+
   /** Get a single notification */
   get: (id: number) =>
     sovereignClient.get<Notification>(`/notifications/notifications/${id}/`),

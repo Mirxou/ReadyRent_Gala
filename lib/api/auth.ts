@@ -54,6 +54,10 @@ export const authApi = {
 
   getProfile: () => 
     sovereignClient.get<User>('/users/profile/'),
+
+  /** Alias used by store.ts, dashboard/page, dashboard/analytics */
+  me: () => 
+    sovereignClient.get<User>('/users/profile/'),
   
   passwordResetRequest: (data: PasswordResetRequest) => 
     sovereignClient.post<void>('/users/password-reset/', data),
@@ -83,4 +87,20 @@ export const verificationApi = {
   
   verifyAddress: (data: any) => 
     sovereignClient.post<void>('/users/verify-address/', data),
+
+  /** Get current verification status (used by use-verification.ts) */
+  getStatus: () =>
+    sovereignClient.get<any>('/users/verification/status/'),
+
+  /** Submit verification with captured photo (used by use-verification.ts) */
+  submit: (photo: string) =>
+    sovereignClient.post<any>('/users/verification/submit/', { photo }),
+
+  /** Get pending verification requests for community voting (used by use-verification.ts) */
+  getPending: () =>
+    sovereignClient.get<any[]>('/users/verification/pending/'),
+
+  /** Vote on a community verification request (used by use-verification.ts) */
+  vote: (verificationId: number, vote: string, comment?: string) =>
+    sovereignClient.post<any>(`/users/verification/${verificationId}/vote/`, { vote, comment }),
 };

@@ -35,6 +35,10 @@ export const bookingsApi = {
   update: (id: number, data: any) => 
     sovereignClient.patch<Booking>(`/bookings/${id}`, data),
 
+  /** Alias used by dashboard/orders — updates a single status field */
+  updateStatus: (id: number, status: string) => 
+    sovereignClient.patch<Booking>(`/bookings/${id}/`, { status }),
+
   cancel: (id: number) => 
     sovereignClient.post<void>(`/bookings/${id}/cancel`),
 

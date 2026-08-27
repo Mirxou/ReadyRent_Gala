@@ -138,21 +138,21 @@ export default function DisputeDetailPage() {
   // Fetch single dispute with messages
   const { data: dispute, isLoading } = useQuery({
     queryKey: ['dispute', disputeId],
-    queryFn: () => disputesApi.getDispute(disputeId).then(res => res.data),
+    queryFn: () => disputesApi.getDispute(Number(disputeId)).then(res => res.data),
     enabled: isAuthenticated,
   });
 
   // Fetch dispute history for timeline
   const { data: historyData } = useQuery({
     queryKey: ['dispute-history', disputeId],
-    queryFn: () => disputesApi.getDisputeHistory(String(disputeId)).then(res => res.data),
+    queryFn: () => disputesApi.getDisputeHistory(Number(disputeId)).then(res => res.data),
     enabled: isAuthenticated,
   });
 
   // Send message mutation
   const sendMessageMutation = useMutation({
     mutationFn: (text: string) =>
-      disputesApi.createDisputeMessage(String(disputeId), { content: text }),
+      disputesApi.createMessage(Number(disputeId), text),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dispute', disputeId] });
       queryClient.invalidateQueries({ queryKey: ['dispute-history', disputeId] });
