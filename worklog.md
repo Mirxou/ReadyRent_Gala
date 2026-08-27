@@ -545,3 +545,28 @@ Stage Summary:
 - Dark mode: deep black backgrounds with light text
 - Gold accent (sovereign-gold) maintained consistently in both modes
 - Intentional dark-only components preserved: concierge chat widget (floating overlay pattern), image overlays on product cards
+---
+Task ID: production-plan
+Agent: Main Orchestrator
+Task: Create comprehensive production readiness plan (11 documents) in docs/production-plan/
+
+Work Log:
+- Created docs/production-plan/ directory
+- Created 00-MASTER-PLAN.md — master document with 6 phases, KPIs, 73-page distribution across phases
+- Created 01-LEGAL-COMPLIANCE.md — Algerian company registration, e-commerce law 18-05, domain registration, IP protection, tax requirements (TVA 19%), insurance requirements, 8-week action plan
+- Created 02-INFRASTRUCTURE-DEPLOYMENT.md — server selection (Hetzner recommended), PostgreSQL migration, Redis cache, Nginx + SSL setup, Cloudflare CDN, CI/CD pipeline, backup strategy, 6 broken API path fixes (MASTERPLAN 1.1-1.6), architecture diagram
+- Created 03-TRUST-SAFETY-SYSTEM.md — trust score algorithm (7 components with weights), 5 trust levels, KYC/VLM integration, escrow flow (hold→release→refund), digital contracts auto-generation, dispute resolution flow (6 states), AI dispute analysis, return management, insurance plans (3 tiers), social vouch rules (6 rules), WebSocket security fix (authentication), 13 notification events
+- Created 04-PAYMENT-LEGAL-ALGERIA.md — CIB/Edahabia integration with SATIM, PCI-DSS fix (remove bank-card-form from payment flow), Edahabia differences, Baridimob via ChargaTech/Paymee, Stripe Checkout Sessions for international, HMAC webhook verification, wallet system flow, TVA calculation (lib/tax.ts), escrow accounting structure, 4 bank account types required
+- Created 05-TESTING-QA-PLAN.md — Vitest + Playwright + MSW setup, 30+ unit tests for lib/, 40+ integration tests for API routes (3 priority tiers), 10 critical E2E paths, OWASP Top 10 security checklist (10 items), Lighthouse targets (90+), load testing with k6, browser/device compatibility matrix, 4-week testing schedule
+- Created 06-GO-LIVE-CHECKLIST.md — 200-point checklist across 12 categories: infrastructure (17), database (9), security (16), auth (10), pages (61), features (20), payments (9), monitoring (9), content (10), SEO (15), pre-launch (10), post-launch (14)
+- Created 07-POST-LAUNCH-MONITORING.md — 8 operational metrics, 8 business metrics, 4-severity incident management plan, server down/data breach/mass dispute playbooks, performance optimization roadmap, 3-phase growth plan (0-3mo, 4-12mo, 2yr+), monthly KPI targets, documentation requirements (runbooks)
+- Created 08-FEATURES-AUDIT.md — audited all ~80 pages: 8 working (10%), 52 partial (63%), 4 broken (5%), 15 structural (18%). Identified 4 critical fixes, 5 important fixes, 5 post-launch improvements
+- Created 09-SECURITY-HARDENING.md — 3 critical vulnerabilities (PCI-DSS, webhook HMAC, WebSocket auth), 5 high vulnerabilities (IDOR, rate limiting, CORS, CSP, dead security code), 7 medium vulnerabilities. Detailed fix code for each. OWASP ZAP testing plan
+- Created 10-TECHNICAL-DEBT.md — identified ~55 files of debt: 6 duplicated feature components, ~10 duplicated public assets, 6 duplicated UI components, 2 duplicated lib files, 8 dead lib files, 20+ dead component files, 2 dead hooks. Categorized into pre-launch (5 items), month-1 (5 items), future (4 items)
+
+Stage Summary:
+- 11 comprehensive documents created in docs/production-plan/
+- Total coverage: legal, infrastructure, trust system, payments, testing, security, go-live, monitoring, features audit, technical debt
+- Every document references actual project files, models, and APIs
+- All recommendations are specific to the Algerian market context (CIB, Edahabia, TVA 19%, law 18-05, NIC.DZ)
+- Plan spans 6 phases from legal registration through post-launch growth
