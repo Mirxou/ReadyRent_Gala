@@ -858,3 +858,21 @@ Stage Summary:
 - 0 new lint errors introduced
 - Dev server running healthy on PID 1057
 - Remaining: Category B (5 getAuthHeaders), Category C (15 crash patterns), Category D (15 dead error handlers)
+---
+Task ID: Category-B
+Agent: Main Agent
+Task: Fix 5 broken getAuthHeaders imports
+
+Work Log:
+- Read all 5 consumer files to understand exact usage pattern
+- All 5 use `headers: { ...getAuthHeaders() }` in raw fetch() calls
+- Auth is HttpOnly cookie (auto-sent for same-origin), but raw fetch() lacks CSRF token
+- Added `getCsrfToken()` private helper (matches core.ts pattern exactly)
+- Added `getAuthHeaders()` export that returns `{ 'X-CSRF-Token': token }`
+- 0 consumer files needed changes — they already import correctly
+
+Stage Summary:
+- 1 file modified: lib/auth-helpers.ts (+26 lines)
+- 5 consumers now resolved: admin/activity-logs, admin/staff, admin/shifts, admin/performance-reviews, components/role-selector
+- 0 new lint errors
+- Dev server healthy

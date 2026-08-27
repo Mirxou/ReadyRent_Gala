@@ -46,6 +46,34 @@ export function isUserAuthenticated(): boolean {
 }
 
 /**
+ * Get CSRF token from sessionStorage.
+ * Generated per session, matches the Double Submit Cookie pattern
+ * used by apiFetch in lib/api/core.ts.
+ */
+function getCsrfToken(): string {
+  if (typeof window === 'undefined') return '';
+  let token = sessionStorage.getItem('csrf-token');
+  if (!token) {
+    token = crypto.randomUUID();
+    sessionStorage.setItem('csrf-token', token);
+  }
+  return token;
+}
+
+/**
+ * Get auth headers for raw fetch() calls.
+ *
+ * Auth is via HttpOnly cookie (sent automatically for same-origin requests).
+ * This returns the CSRF token header needed for mutation requests (POST/PUT/PATCH/DELETE)
+ * to prevent Cross-Site Request Forgery. Safe to spread into any fetch headers.
+ *
+ * Used by admin pages and components that use raw fetch() instead of sovereignClient/api.
+ */
+export function getAuthHeaders(): Record<string, string> {
+  return { 'X-CSRF-Token': getCsrfToken() };
+}
+
+/**
  * Check if user appears to have admin role (UI-only check).
  * Server-side role validation happens in API routes.
  */
