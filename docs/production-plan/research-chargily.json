@@ -1,0 +1,38 @@
+[
+  {
+    "url": "https://dev.chargily.com",
+    "name": "API keys | Chargily Pay API - Edahabia API - Satim CIB",
+    "snippet": "To find your API keys, navigate to the Developers Corner page in the Chargily Pay Dashboard, you will find the API keys for the current application and ... Read more",
+    "host_name": "dev.chargily.com",
+    "rank": 0,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://github.com",
+    "name": "Chargily/chargily-pay-javascript: JS Package",
+    "snippet": "JS Package of Chargily Pay ™, the easiest and free way to integrate e- payment API through widespread payment methods in Algeria such as EDAHABIA (Algerie ...",
+    "host_name": "github.com",
+    "rank": 1,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://devcloud.dz",
+    "name": "Chargily Partnership — Payment Integration Services",
+    "snippet": "Chargily Pay is an electronic payment gateway that enables your business to accept CIB and EDAHABIA card payments or simple payment links.",
+    "host_name": "devcloud.dz",
+    "rank": 2,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://chargily.com",
+    "name": "Global Online Payment Gateway for Payment Acceptance",
+    "snippet": "We provide a free API and ready-to-use plugins to make integration effortless. EDAHABIA cards, Pricing : No Subscription, No Hidden Fees Free API Access Free & ...",
+    "host_name": "chargily.com",
+    "rank": 3,
+    "date": "",
+    "favicon": ""
+  }
+]

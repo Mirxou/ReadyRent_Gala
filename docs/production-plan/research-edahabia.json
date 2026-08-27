@@ -1,0 +1,47 @@
+[
+  {
+    "url": "https://dzbuild.com/blog/accept-online-payment-algeria",
+    "name": "CIB, Dahabia, and BaridiMob Guide for Merchants 2026",
+    "snippet": "May 30, 2026 — Generate a payment link per order or integrate via Algérie Poste's API for developers. Limitation: Still requires manual link generation per ... Read more",
+    "host_name": "dzbuild.com",
+    "rank": 0,
+    "date": "May 30, 2026",
+    "favicon": ""
+  },
+  {
+    "url": "https://guiddini.com.dz/e-paiement-en-algerie",
+    "name": "Intégration paiement par carte CIB et edahabia, API E-paiement",
+    "snippet": "Vous voulez intégrer le paiement en ligne sur votre site-web ou Application mobile ? · Service clé en main · Donnez vie à vos idées · CIB / Edahabia · Site / ... Read more",
+    "host_name": "guiddini.com.dz",
+    "rank": 1,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://github.com/topics/baridimob?o=asc&s=updated",
+    "name": "baridimob · GitHub Topics",
+    "snippet": "The easiest and free way to integrate e-payment API through EDAHABIA of Algerie Poste and CIB of SATIM into your Swift/iOS project.",
+    "host_name": "github.com",
+    "rank": 2,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.reddit.com/r/algeria/comments/1310bo8/is_there_a_baridimob_api_application_programming/?tl=fr",
+    "name": "Y a-t-il une API Baridimob (Interface de Programmation d'",
+    "snippet": "Salut, je travaille actuellement sur un projet et j'ai besoin d'intégrer les services Baridimob dans mon code. Cependant, j'ai du mal à trouver ...",
+    "host_name": "www.reddit.com",
+    "rank": 3,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.facebook.com/100078732443038/posts/alg%C3%A9rie-poste-annonce-l%C3%A9largissement-de-ses-services-num%C3%A9riques-%C3%A0-travers-le-lan/848723397762067",
+    "name": "Algérie Poste annonce l'élargissement de ses services",
+    "snippet": "Algérie Poste annonce l'élargissement de ses services numériques à travers le lancement du service Barid Pay dédié au paiement électronique ...",
+    "host_name": "www.facebook.com",
+    "rank": 4,
+    "date": "",
+    "favicon": ""
+  }
+]

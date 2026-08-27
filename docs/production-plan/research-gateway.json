@@ -1,0 +1,47 @@
+[
+  {
+    "url": "https://github.com/Chargily/chargily-pay-go",
+    "name": "Chargily Pay™ Gateway - V2.",
+    "snippet": "Go Library for Chargily Pay ™ Gateway - V2. The easiest way to integrate e- payment API through EDAHABIA of Algerie Poste and CIB of SATIM into your Go/Gin ...",
+    "host_name": "github.com",
+    "rank": 0,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://dzbuild.com/blog/accept-online-payment-algeria",
+    "name": "CIB, Dahabia, and BaridiMob Guide for Merchants 2026",
+    "snippet": "May 30, 2026 — A practical guide for Algerian online merchants on accepting CIB cards, Dahabia, and BaridiMob payments . Setup steps, SATIM gateways , ...",
+    "host_name": "dzbuild.com",
+    "rank": 1,
+    "date": "May 30, 2026",
+    "favicon": ""
+  },
+  {
+    "url": "https://devcloud.dz/chargily-partnership",
+    "name": "Chargily Partnership — Payment Integration Services",
+    "snippet": "DevCloud is an official Chargily integration partner. We build and integrate Chargily Pay and Chargily Pro payment solutions for businesses across Algeria .",
+    "host_name": "devcloud.dz",
+    "rank": 2,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://dev.chargily.com/pay-v2/introduction",
+    "name": "Introduction | Chargily Pay API - Edahabia API - Satim CIB",
+    "snippet": "Chargily Pay , a gateway that allows you to accept online payments with many payment methods in Algeria such as EDAHABIA and CIB cards.",
+    "host_name": "dev.chargily.com",
+    "rank": 3,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.reddit.com/r/algeriatech/comments/1tn89sf/api_for_recurring_payments_cib_edahabia_baridimob",
+    "name": "API FOR recurring payments (CIB / Edahabia / BaridiMob)",
+    "snippet": "I'm currently building a SaaS (POS software) and I'm looking for a payment solution that supports automatic monthly subscriptions in Algeria . Is ... Read more",
+    "host_name": "www.reddit.com",
+    "rank": 4,
+    "date": "",
+    "favicon": ""
+  }
+]
