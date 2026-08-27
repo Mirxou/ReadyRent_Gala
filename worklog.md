@@ -774,3 +774,29 @@ Stage Summary:
 - 3 files modified (cart/page.tsx, checkout/page.tsx, api/payments/methods/route.ts), 0 new files
 - Lint: 229 problems (180 errors, 49 warnings) — unchanged. Zero new errors introduced.
 - All pre-existing errors untouched
+---
+Task ID: 1.2
+Agent: Main Agent
+Task: Step 1.2 — Fix 4 critical pages (products, cart, checkout, bookings)
+
+Work Log:
+- Read all 4 API sub-modules (products.ts, reviews.ts, bookings.ts, payments.ts) — all method name aliases already exist from Step 1.1
+- Read all 7 page files in detail:
+  - app/products/page.tsx → delegates to ProductSearch component, no bugs found
+  - app/products/[id]/page.tsx → optional fields have fallbacks, SovereignCalendar interface matches
+  - app/cart/page.tsx → data shape matches BookingCreateData, cart cleared after booking
+  - app/checkout/page.tsx → **FOUND BUG**: reads `method.display_name`/`method.description` but PaymentMethod type has `name`/`icon`
+  - app/bookings/[id]/page.tsx → status displayed, cancel button exists, ContractTimeline imported correctly
+  - app/bookings/[id]/cancel/page.tsx → refund_percentage correctly normalized, apiFetch error pattern correct
+  - app/bookings/[id]/tracking/page.tsx → String(booking.id).slice(0,8) is safe, getById() exists
+- Verified all 32 imports across critical pages — 0 missing files
+- Fixed checkout page: `method.display_name` → `method.name || method.display_name`, `method.description` → `method.icon`
+- Fixed bookings/[id] page: added proper wrapper div around `<img>` for sizing
+
+Stage Summary:
+- Step 1.2-a (API method aliases): Already complete from Step 1.1 — 0 changes needed
+- Step 1.2-b (products pages): No functional bugs found — 0 changes needed  
+- Step 1.2-c (cart + checkout): 1 bug fixed in checkout (payment method field names)
+- Step 1.2-d (bookings pages): 1 minor fix (img wrapper), no functional bugs
+- Total: 2 files changed, 2 bugs fixed
+- Most investigation findings were already resolved or were false positives

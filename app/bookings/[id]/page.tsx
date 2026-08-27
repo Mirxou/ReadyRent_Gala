@@ -224,11 +224,13 @@ export default function BookingDetailPage() {
                                 <div className="space-y-6 flex-1">
                                     <div className="flex items-center gap-4">
                                         {(booking.product_image || booking.product?.primary_image) && (
-                                            <img 
-                                                src={booking.product_image || booking.product?.primary_image || '/placeholder.svg'} 
-                                                alt={booking.product?.name_ar || booking.product?.name || 'منتج'}
-                                                className="w-20 h-20 object-cover rounded-2xl border border-white/10"
-                                            />
+                                            <div className="relative w-20 h-20 rounded-2xl border border-white/10 overflow-hidden flex-shrink-0">
+                                                <img 
+                                                    src={booking.product_image || booking.product?.primary_image || '/placeholder.svg'} 
+                                                    alt={booking.product?.name_ar || booking.product?.name || 'منتج'}
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            </div>
                                         )}
                                         <div className="space-y-1">
                                             <span className="text-[10px] font-black uppercase text-sovereign-gold">التفاصيل الفنية</span>

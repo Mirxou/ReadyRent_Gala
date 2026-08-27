@@ -170,9 +170,9 @@ export default function CheckoutPage() {
                               <CreditCard className="h-6 w-6" />
                             )}
                             <div className="flex-1 text-right">
-                              <div className="font-semibold">{method.display_name}</div>
-                              {method.description && (
-                                <div className="text-sm text-muted-foreground">{method.description}</div>
+                              <div className="font-semibold">{method.name || method.display_name}</div>
+                              {method.icon && (
+                                <div className="text-sm text-muted-foreground">{method.icon}</div>
                               )}
                             </div>
                           </div>
