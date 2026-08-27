@@ -1,3 +1,5 @@
+export { api } from './core';
+export * from './clients';
 export * from './sovereign-client';
 export * from './auth';
 export * from './products';
