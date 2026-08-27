@@ -61,7 +61,7 @@ export default function DashboardPage() {
 
   const { data: bookings = [], isLoading: isBookingsLoading } = useQuery({
     queryKey: ['bookings'],
-    queryFn: () => bookingsApi.getAll().then(res => res.data),
+    queryFn: () => bookingsApi.getAll().then(res => res.data ?? []),
     enabled: isAuthenticated
   });
 

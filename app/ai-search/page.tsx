@@ -218,7 +218,7 @@ export default function AISearchPage() {
     staleTime: 2 * 60 * 1000,
   });
 
-  const products: Product[] = data?.data ?? [];
+  const products: Product[] = (data ?? []) as Product[];
 
   const handleSearch = useCallback(() => {
     const q = input.trim();

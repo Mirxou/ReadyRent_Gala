@@ -28,7 +28,7 @@ export default function WishlistPage() {
 
   const { data: wishlist = [], isLoading } = useQuery({
     queryKey: ['wishlist'],
-    queryFn: () => productsApi.getWishlist().then(res => res.data),
+    queryFn: () => productsApi.getWishlist().then(res => res.data ?? []),
     enabled: isAuthenticated,
   });
 

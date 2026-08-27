@@ -24,7 +24,7 @@ export default function DisputesPage() {
 
   const { data: disputes = [], isLoading } = useQuery({
     queryKey: ['disputes'],
-    queryFn: () => disputesApi.listDisputes().then(res => res.data),
+    queryFn: () => disputesApi.listDisputes().then(res => res.data ?? []),
     enabled: isAuthenticated,
   });
 

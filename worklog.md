@@ -876,3 +876,53 @@ Stage Summary:
 - 5 consumers now resolved: admin/activity-logs, admin/staff, admin/shifts, admin/performance-reviews, components/role-selector
 - 0 new lint errors
 - Dev server healthy
+
+---
+Task ID: Category-C
+Agent: Main Agent
+
+Task: Fix Category C — runtime crash patterns (null data from sovereignClient + 1 functional bug)
+
+Work Log:
+
+**Re-scan methodology:**
+- Searched all 15 files using `.then(res => res.data)` pattern
+- Verified each by checking: (a) does sovereignClient return null data? (b) does the consumer have a null guard?
+- Checked `.toFixed()`, `.toLowerCase()`, array `[0]` patterns across 200+ files
+- Distinguished between `api` (core.ts, data never null) and sovereignClient (data can be null)
+
+**5 issues found and fixed:**
+
+1. **C1: `app/dashboard/page.tsx:64`** — `bookingsApi.getAll().then(res => res.data)` → data null → `bookings.filter()` crashes
+   - Fix: `res.data ?? []`
+
+2. **C2: `app/dashboard/disputes/page.tsx:27`** — `disputesApi.listDisputes().then(res => res.data)` → data null → `disputes.length` / `disputes.filter()` crashes
+   - Fix: `res.data ?? []`
+
+3. **C3: `app/dashboard/wishlist/page.tsx:31`** — `productsApi.getWishlist().then(res => res.data)` → data null → `wishlist.length` / `wishlist.filter()` crashes
+   - Fix: `res.data ?? []`
+
+4. **C4: `app/dashboard/artisans/page.tsx:46`** — `artisansApi.getAll().then(res => res.data)` → data null → `artisans.length` crashes
+   - Fix: `res.data ?? []`
+
+5. **C5 (functional bug): `app/ai-search/page.tsx:221`** — `data?.data ?? []` double-unwrap. The `.then(res => res.data)` already unwraps the SovereignResponse, so `data` IS the array. `data?.data` was always `undefined`, meaning search results NEVER displayed.
+   - Fix: `(data ?? []) as Product[]`
+
+**Files verified SAFE (no fix needed):**
+- dashboard/analytics/page.tsx — already uses `res.data || []`
+- dashboard/orders/page.tsx — already uses `(bookings || [])`
+- dashboard/bookings/page.tsx — already uses `!bookings` guard
+- dashboard/reports/page.tsx — uses `?.` throughout
+- bookings/[id]/tracking/page.tsx — uses `!booking` guard
+- disputes/[id]/page.tsx — uses `?.` + `!dispute` guard
+- disputes/[id]/appeal/page.tsx — uses `!dispute` guard
+- components/booking/artisan-integration.tsx — uses `artisans?.results || artisans || []`
+- components/product/hygiene-badge.tsx — uses `!hygiene` guard
+
+Stage Summary:
+- 5 files modified (4 crash fixes + 1 functional bug fix)
+- Root cause: sovereignClient returns `data: null` on errors, but TypeScript type says `data: T`. The destructuring default `= []` in useQuery only applies to `undefined`, not `null`.
+- Fix pattern: `res.data ?? []` in every `.then()` that feeds a useQuery expecting an array
+- 0 new lint errors introduced
+- Dev server running healthy
+- Remaining: Category D (15 dead error handlers)

@@ -43,7 +43,7 @@ export default function ArtisansPage() {
 
   const { data: artisans = [], isLoading } = useQuery({
     queryKey: ['artisans'],
-    queryFn: () => artisansApi.getAll().then(res => res.data),
+    queryFn: () => artisansApi.getAll().then(res => res.data ?? []),
   });
 
   const categories = [
