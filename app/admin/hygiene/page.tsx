@@ -50,33 +50,42 @@ export default function AdminHygienePage() {
 
   const createMutation = useMutation({
     mutationFn: (data: any) => hygieneApi.createRecord(data),
-    onSuccess: () => {
+    onSuccess: (res: any) => {
+      if (res?.dignity_preserved || res?.error) {
+        toast.error(res?.message_ar || res?.error || 'حدث خطأ أثناء الإضافة');
+        return;
+      }
       queryClient.invalidateQueries({ queryKey: ['hygiene-records'] });
       toast.success('تم إضافة السجل بنجاح');
       setIsCreateDialogOpen(false);
       setFormData({ product: '', cleaning_type: '', status: 'pending', cleaning_notes: '' });
     },
-    onError: () => toast.error('حدث خطأ أثناء الإضافة'),
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: any }) => hygieneApi.updateRecord(id, data),
-    onSuccess: () => {
+    onSuccess: (res: any) => {
+      if (res?.dignity_preserved || res?.error) {
+        toast.error(res?.message_ar || res?.error || 'حدث خطأ أثناء التحديث');
+        return;
+      }
       queryClient.invalidateQueries({ queryKey: ['hygiene-records'] });
       toast.success('تم التحديث بنجاح');
       setIsEditDialogOpen(false);
       setEditingRecord(null);
     },
-    onError: () => toast.error('حدث خطأ أثناء التحديث'),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => hygieneApi.deleteRecord(id),
-    onSuccess: () => {
+    onSuccess: (res: any) => {
+      if (res?.dignity_preserved || res?.error) {
+        toast.error(res?.message_ar || res?.error || 'حدث خطأ أثناء الحذف');
+        return;
+      }
       queryClient.invalidateQueries({ queryKey: ['hygiene-records'] });
       toast.success('تم الحذف بنجاح');
     },
-    onError: () => toast.error('حدث خطأ أثناء الحذف'),
   });
 
   const handleCreate = () => {

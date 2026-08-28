@@ -79,95 +79,95 @@ export default function AdminPackagingPage() {
 
   const createTypeMutation = useMutation({
     mutationFn: (data: Record<string, unknown>) => packagingApi.createType(data),
-    onSuccess: () => {
+    onSuccess: (res: any) => {
+      if (res?.dignity_preserved || res?.error) { toast.error(res?.message_ar || res?.error || 'نوع التغليف'); return; }
       queryClient.invalidateQueries({ queryKey: ['packaging-types'] });
       toast.success('تم إضافة النوع بنجاح');
       setIsCreateDialogOpen(false);
       setFormData({});
     },
-    onError: () => toast.error('حدث خطأ أثناء الإضافة'),
   });
 
   const updateTypeMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: Record<string, unknown> }) => packagingApi.updateType(id, data),
-    onSuccess: () => {
+    onSuccess: (res: any) => {
+      if (res?.dignity_preserved || res?.error) { toast.error(res?.message_ar || res?.error || 'نوع التغليف'); return; }
       queryClient.invalidateQueries({ queryKey: ['packaging-types'] });
       toast.success('تم التحديث بنجاح');
       setIsEditDialogOpen(false);
       setEditingItem(null);
     },
-    onError: () => toast.error('حدث خطأ أثناء التحديث'),
   });
 
   const deleteTypeMutation = useMutation({
     mutationFn: (id: number) => packagingApi.deleteType(id),
-    onSuccess: () => {
+    onSuccess: (res: any) => {
+      if (res?.dignity_preserved || res?.error) { toast.error(res?.message_ar || res?.error || 'نوع التغليف'); return; }
       queryClient.invalidateQueries({ queryKey: ['packaging-types'] });
       toast.success('تم الحذف بنجاح');
     },
-    onError: () => toast.error('حدث خطأ أثناء الحذف'),
   });
 
   const createMaterialMutation = useMutation({
     mutationFn: (data: Record<string, unknown>) => packagingApi.createMaterial(data),
-    onSuccess: () => {
+    onSuccess: (res: any) => {
+      if (res?.dignity_preserved || res?.error) { toast.error(res?.message_ar || res?.error || 'مادة التغليف'); return; }
       queryClient.invalidateQueries({ queryKey: ['packaging-materials'] });
       toast.success('تم إضافة المادة بنجاح');
       setIsCreateDialogOpen(false);
       setFormData({});
     },
-    onError: () => toast.error('حدث خطأ أثناء الإضافة'),
   });
 
   const updateMaterialMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: Record<string, unknown> }) => packagingApi.updateMaterial(id, data),
-    onSuccess: () => {
+    onSuccess: (res: any) => {
+      if (res?.dignity_preserved || res?.error) { toast.error(res?.message_ar || res?.error || 'مادة التغليف'); return; }
       queryClient.invalidateQueries({ queryKey: ['packaging-materials'] });
       toast.success('تم التحديث بنجاح');
       setIsEditDialogOpen(false);
       setEditingItem(null);
     },
-    onError: () => toast.error('حدث خطأ أثناء التحديث'),
   });
 
   const deleteMaterialMutation = useMutation({
     mutationFn: (id: number) => packagingApi.deleteMaterial(id),
-    onSuccess: () => {
+    onSuccess: (res: any) => {
+      if (res?.dignity_preserved || res?.error) { toast.error(res?.message_ar || res?.error || 'مادة التغليف'); return; }
       queryClient.invalidateQueries({ queryKey: ['packaging-materials'] });
       toast.success('تم الحذف بنجاح');
     },
-    onError: () => toast.error('حدث خطأ أثناء الحذف'),
   });
 
   const createRuleMutation = useMutation({
     mutationFn: (data: Record<string, unknown>) => packagingApi.createRule(data),
-    onSuccess: () => {
+    onSuccess: (res: any) => {
+      if (res?.dignity_preserved || res?.error) { toast.error(res?.message_ar || res?.error || 'قاعدة التغليف'); return; }
       queryClient.invalidateQueries({ queryKey: ['packaging-rules'] });
       toast.success('تم إضافة القاعدة بنجاح');
       setIsCreateDialogOpen(false);
       setFormData({});
     },
-    onError: () => toast.error('حدث خطأ أثناء الإضافة'),
   });
 
   const updateRuleMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: Record<string, unknown> }) => packagingApi.updateRule(id, data),
-    onSuccess: () => {
+    onSuccess: (res: any) => {
+      if (res?.dignity_preserved || res?.error) { toast.error(res?.message_ar || res?.error || 'قاعدة التغليف'); return; }
       queryClient.invalidateQueries({ queryKey: ['packaging-rules'] });
       toast.success('تم التحديث بنجاح');
       setIsEditDialogOpen(false);
       setEditingItem(null);
     },
-    onError: () => toast.error('حدث خطأ أثناء التحديث'),
   });
 
   const deleteRuleMutation = useMutation({
     mutationFn: (id: number) => packagingApi.deleteRule(id),
-    onSuccess: () => {
+    onSuccess: (res: any) => {
+      if (res?.dignity_preserved || res?.error) { toast.error(res?.message_ar || res?.error || 'قاعدة التغليف'); return; }
       queryClient.invalidateQueries({ queryKey: ['packaging-rules'] });
       toast.success('تم الحذف بنجاح');
     },
-    onError: () => toast.error('حدث خطأ أثناء الحذف'),
   });
 
   const handleCreate = () => {

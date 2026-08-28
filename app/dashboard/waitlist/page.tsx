@@ -22,12 +22,13 @@ export default function WaitlistPage() {
 
   const removeFromWaitlistMutation = useMutation({
     mutationFn: (id: string) => bookingsApi.removeFromWaitlist(id),
-    onSuccess: () => {
+    onSuccess: (res: any) => {
+      if (res?.dignity_preserved || res?.error) {
+        toast.error(res?.message_ar || res?.error || 'حدث خطأ');
+        return;
+      }
       queryClient.invalidateQueries({ queryKey: ['waitlist'] });
       toast.success('تم إزالة المنتج من لائحة الانتظار');
-    },
-    onError: (error: unknown) => {
-      toast.error(error.response?.data?.error || 'حدث خطأ');
     },
   });
 

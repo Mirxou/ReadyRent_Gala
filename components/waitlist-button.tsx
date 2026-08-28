@@ -19,13 +19,14 @@ export function WaitlistButton({ productId }: WaitlistButtonProps) {
 
   const addToWaitlistMutation = useMutation({
     mutationFn: (data: Record<string, unknown>) => bookingsApi.addToWaitlist(data),
-    onSuccess: () => {
+    onSuccess: (res: any) => {
+      if (res?.dignity_preserved || res?.error) {
+        toast.error(res?.message_ar || res?.error || 'حدث خطأ');
+        return;
+      }
       queryClient.invalidateQueries({ queryKey: ['waitlist'] });
       toast.success('تم إضافة المنتج إلى لائحة الانتظار');
       setAdded(true);
-    },
-    onError: (error: unknown) => {
-      toast.error(error.response?.data?.error || 'حدث خطأ');
     },
   });
 

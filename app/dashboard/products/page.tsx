@@ -55,12 +55,13 @@ export default function ProductsPage() {
 
     const deleteMutation = useMutation({
       mutationFn: (id: string) => adminApi.deleteProduct(id),
-      onSuccess: () => {
+      onSuccess: (res: any) => {
+        if (res?.dignity_preserved || res?.error) {
+          toast.error(res?.message_ar || res?.error || 'حدث خطأ أثناء حذف المنتج');
+          return;
+        }
         queryClient.invalidateQueries({ queryKey: ['my-products'] });
         toast.success('تم حذف المنتج بنجاح');
-      },
-      onError: () => {
-        toast.error('حدث خطأ أثناء حذف المنتج');
       },
     });
 

@@ -72,38 +72,32 @@ export default function AdminInventoryPage() {
 
   const createMutation = useMutation({
     mutationFn: (data: any) => inventoryApi.createItem(data),
-    onSuccess: () => {
+    onSuccess: (res: any) => {
+      if (res?.dignity_preserved || res?.error) { toast.error(res?.message_ar || res?.error || 'عنصر المخزون'); return; }
       queryClient.invalidateQueries({ queryKey: ['inventory-items'] });
       toast.success('تم إضافة العنصر بنجاح');
       setIsCreateDialogOpen(false);
       setFormData({ product: '', sku: '', quantity: 0, low_stock_threshold: 0, location: '' });
     },
-    onError: () => {
-      toast.error('حدث خطأ أثناء إضافة العنصر');
-    },
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: any }) => inventoryApi.updateItem(id, data),
-    onSuccess: () => {
+    onSuccess: (res: any) => {
+      if (res?.dignity_preserved || res?.error) { toast.error(res?.message_ar || res?.error || 'عنصر المخزون'); return; }
       queryClient.invalidateQueries({ queryKey: ['inventory-items'] });
       toast.success('تم تحديث العنصر بنجاح');
       setIsEditDialogOpen(false);
       setEditingItem(null);
     },
-    onError: () => {
-      toast.error('حدث خطأ أثناء تحديث العنصر');
-    },
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => inventoryApi.deleteItem(id),
-    onSuccess: () => {
+    onSuccess: (res: any) => {
+      if (res?.dignity_preserved || res?.error) { toast.error(res?.message_ar || res?.error || 'عنصر المخزون'); return; }
       queryClient.invalidateQueries({ queryKey: ['inventory-items'] });
       toast.success('تم حذف العنصر بنجاح');
-    },
-    onError: () => {
-      toast.error('حدث خطأ أثناء حذف العنصر');
     },
   });
 

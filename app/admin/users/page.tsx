@@ -56,13 +56,14 @@ export default function AdminUsersPage() {
   const updateUserMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: { role?: string; is_active?: boolean } }) =>
       adminApi.updateUser(id, data),
-    onSuccess: () => {
+    onSuccess: (res: any) => {
+      if (res?.dignity_preserved || res?.error) {
+        toast.error(res?.message_ar || res?.error || 'حدث خطأ أثناء التحديث');
+        setUpdatingUserId(null);
+        return;
+      }
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
       toast.success('تم التحديث بنجاح');
-      setUpdatingUserId(null);
-    },
-    onError: (err: { data?: { message_en?: string } }) => {
-      toast.error(err?.data?.message_en || 'حدث خطأ أثناء التحديث');
       setUpdatingUserId(null);
     },
   });

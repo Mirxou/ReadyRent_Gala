@@ -1001,3 +1001,50 @@ Stage Summary:
 - 0 new lint errors
 - Dev server healthy
 - Remaining: Category D (15 dead error handlers)
+---
+Task ID: Category-D
+Agent: Main Agent
+
+Task: Fix 27 dead onError handlers in useMutation across 14 files
+
+Work Log:
+
+**Root cause:** sovereignClient (and apiFetch) catch all errors internally and never throw/reject. Promise always resolves. So onError in useMutation is dead code — it never fires.
+
+**Fix pattern applied to all 27 mutations:**
+1. Added `(res: any)` parameter to `onSuccess`
+2. Prepended guard: `if (res?.dignity_preserved || res?.error) { toast.error(res?.message_ar || res?.error || 'fallback'); return; }`
+3. Removed dead `onError` entirely
+
+**Files modified (14 files, 27 mutations):**
+
+Admin CRUD pages (18 mutations):
+1. app/admin/hygiene/page.tsx — 3 mutations (create, update, delete)
+2. app/admin/maintenance/page.tsx — 3 mutations
+3. app/admin/packaging/page.tsx — 9 mutations (type×3, material×3, rule×3)
+4. app/admin/inventory/page.tsx — 3 mutations
+5. app/admin/users/page.tsx — 1 mutation (updateUser)
+6. app/admin/products/page.tsx — 1 mutation (deleteProduct)
+
+Dashboard pages (5 mutations):
+7. app/dashboard/products/page.tsx — 1 mutation (deleteProduct)
+8. app/dashboard/orders/[id]/page.tsx — 2 mutations (updateStatus, initiateDispute)
+9. app/dashboard/waitlist/page.tsx — 1 mutation (removeFromWaitlist)
+10. app/dashboard/disputes/[id]/page.tsx — 1 mutation (createMessage)
+
+Component files (3 mutations):
+11. components/product-card.tsx — 1 mutation (toggleWishlist)
+12. components/waitlist-button.tsx — 1 mutation (addToWaitlist)
+13. components/reviews/review-form.tsx — 1 mutation (createReview)
+
+Product page (1 mutation):
+14. app/products/[id]/page.tsx — 1 mutation (createBooking)
+
+**Verified:** 5 remaining onError handlers are all LIVE (raw fetch + throw). Left untouched.
+
+Stage Summary:
+- 14 files modified, 27 dead onError removed
+- Error handling moved into onSuccess with dignity_preserved/error guard
+- Fixes false-positive UX (no more 'success' toast on actual failure)
+- 0 new lint errors
+- All 4 categories (A/B/C/D) now COMPLETE

@@ -24,7 +24,11 @@ export function ReviewForm({ productId, bookingId, onSuccess }: ReviewFormProps)
 
   const createReviewMutation = useMutation({
     mutationFn: () => reviewsApi.create({ product_id: productId, booking_id: bookingId || 0, rating, title, comment }),
-    onSuccess: () => {
+    onSuccess: (res: any) => {
+      if (res?.dignity_preserved || res?.error) {
+        toast.error(res?.message_ar || res?.error || 'حدث خطأ أثناء إضافة التقييم');
+        return;
+      }
       queryClient.invalidateQueries({ queryKey: ['reviews', productId] });
       queryClient.invalidateQueries({ queryKey: ['product', productId] });
       toast.success('تم إضافة التقييم بنجاح');
@@ -32,9 +36,6 @@ export function ReviewForm({ productId, bookingId, onSuccess }: ReviewFormProps)
       setTitle('');
       setComment('');
       onSuccess?.();
-    },
-    onError: (error: unknown) => {
-      toast.error((error as { data?: { error?: string } })?.data?.error || 'حدث خطأ أثناء إضافة التقييم');
     },
   });
 

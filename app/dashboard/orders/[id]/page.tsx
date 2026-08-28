@@ -56,25 +56,27 @@ export default function BookingDetailsPage() {
   const updateStatusMutation = useMutation({
     mutationFn: ({ bookingId, status }: { bookingId: string; status: string }) =>
       bookingsApi.updateStatus(Number(bookingId), status),
-    onSuccess: () => {
+    onSuccess: (res: any) => {
+      if (res?.dignity_preserved || res?.error) {
+        toast.error(res?.message_ar || res?.error || 'فشل في تحديث حالة الحجز');
+        return;
+      }
       toast.success('تم تحديث حالة الحجز بنجاح');
       queryClient.invalidateQueries({ queryKey: ['booking', id] });
-    },
-    onError: (error: unknown) => {
-      toast.error(error?.data?.error || 'فشل في تحديث حالة الحجز');
     },
   });
 
   const createDisputeMutation = useMutation({
     mutationFn: (data: Record<string, unknown>) => disputesApi.initiateDispute(data as Parameters<typeof disputesApi.initiateDispute>[0]),
-    onSuccess: () => {
+    onSuccess: (res: any) => {
+      if (res?.dignity_preserved || res?.error) {
+        toast.error(res?.message_ar || res?.error || 'فشل في رفع النزاع');
+        return;
+      }
       toast.success('تم رفع النزاع للتحكيم السيادي (Dispute Lodged)');
       setIsDisputeModalOpen(false);
       router.push('/dashboard/disputes');
     },
-    onError: (error: unknown) => {
-      toast.error((error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'فشل في رفع النزاع');
-    }
   });
 
   const handleRaiseDispute = () => {

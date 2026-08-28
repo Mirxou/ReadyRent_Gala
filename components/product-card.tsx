@@ -50,7 +50,11 @@ function ProductCardComponent({ product, priority = false }: ProductCardProps) {
   // Toggle wishlist mutation
   const toggleWishlistMutation = useMutation({
     mutationFn: () => productsApi.toggleWishlist(product.id),
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
+      if (data?.dignity_preserved || data?.error) {
+        toast.error(data?.message_ar || data?.error || 'حدث خطأ أثناء تحديث قائمة المفضلة');
+        return;
+      }
       queryClient.invalidateQueries({ queryKey: ['wishlist-status', product.id] });
       queryClient.invalidateQueries({ queryKey: ['wishlist'] });
       if (data.data?.in_wishlist) {
@@ -58,9 +62,6 @@ function ProductCardComponent({ product, priority = false }: ProductCardProps) {
       } else {
         toast.success('تم إزالة المنتج من قائمة المفضلة');
       }
-    },
-    onError: () => {
-      toast.error('حدث خطأ أثناء تحديث قائمة المفضلة');
     },
   });
   

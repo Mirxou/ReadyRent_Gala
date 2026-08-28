@@ -153,14 +153,15 @@ export default function DisputeDetailPage() {
   const sendMessageMutation = useMutation({
     mutationFn: (text: string) =>
       disputesApi.createMessage(Number(disputeId), text),
-    onSuccess: () => {
+    onSuccess: (res: any) => {
+      if (res?.dignity_preserved || res?.error) {
+        toast.error(res?.message_ar || res?.error || 'فشل إرسال الرسالة');
+        return;
+      }
       queryClient.invalidateQueries({ queryKey: ['dispute', disputeId] });
       queryClient.invalidateQueries({ queryKey: ['dispute-history', disputeId] });
       setChatText('');
       toast.success('تم إرسال الرسالة بنجاح');
-    },
-    onError: (err: unknown) => {
-      toast.error(err?.data?.error || 'فشل إرسال الرسالة');
     },
   });
 
