@@ -43,15 +43,24 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'INVALID_JSON' }, { status: 400 });
     }
 
-    const eventType = (event.entity as string) || 'unknown';
+    // Webhook payload structure (verified against Chargily PHP/Laravel SDK):
+    //   { id, type: "checkout.paid", data: <full Checkout object>, created_at, updated_at }
+    const eventType = (event.type as string) || 'unknown';
     const eventData = event.data as Record<string, unknown> | undefined;
     const checkoutId = (eventData?.id as string) || '';
+    const checkoutStatus = (eventData?.status as string) || '';
     const paymentId = (eventData?.metadata as Record<string, string>)?.payment_id || '';
     const bookingId = (eventData?.metadata as Record<string, string>)?.booking_id || '';
 
-    logger.info('Webhook', `Received event: ${eventType}`, { checkoutId, paymentId, bookingId });
+    logger.info('Webhook', `Received event: ${eventType}`, { checkoutId, checkoutStatus, paymentId, bookingId });
 
-    // 4. Find our Payment record by providerPaymentId
+    // 4. Only process checkout events
+    if (!eventType.startsWith('checkout')) {
+      logger.info('Webhook', 'Ignoring non-checkout event', { eventType });
+      return NextResponse.json({ received: true });
+    }
+
+    // 5. Find our Payment record
     const payment = paymentId
       ? await db.payment.findUnique({ where: { id: paymentId } })
       : await db.payment.findFirst({ where: { providerPaymentId: checkoutId } });
@@ -61,33 +70,18 @@ export async function POST(request: Request) {
       return NextResponse.json({ received: true }); // Acknowledge to prevent retries
     }
 
-    // 5. Process based on event type
-    if (eventType === 'checkout' || eventType === 'invoice') {
-      // Chargily sends entity: 'checkout' for checkout events
-      // The status is in event.data.status or the entity name tells us
-      // For Chargily v2, a successful payment webhook comes with entity type
-      // that indicates the payment was completed.
-
-      // Check if this is a paid event (Chargily sends webhooks on status changes)
-      const entityAction = (event.entity as string) || '';
-      const isPaid = entityAction.includes('paid') || entityAction.includes('completed') || entityAction.includes('checkout');
-
-      // Also check status field if available
-      const status = (eventData?.status as string) || '';
-      const isFailed = status === 'failed' || status === 'expired' || entityAction.includes('failed');
-
-      if (isPaid && !isFailed) {
-        // ── PAYMENT SUCCESS ──
-        await handlePaymentSuccess(payment.id, payment.bookingId);
-        logger.info('Webhook', 'Payment confirmed', { paymentId: payment.id, bookingId: payment.bookingId });
-      } else if (isFailed) {
-        // ── PAYMENT FAILED ──
-        await db.payment.update({
-          where: { id: payment.id },
-          data: { status: 'failed' },
-        });
-        logger.info('Webhook', 'Payment failed', { paymentId: payment.id });
-      }
+    // 6. Process based on checkout status (verified: data.status === 'paid' | 'failed' | 'canceled')
+    if (checkoutStatus === 'paid' && payment.status !== 'completed') {
+      // ── PAYMENT SUCCESS ──
+      await handlePaymentSuccess(payment.id, payment.bookingId);
+      logger.info('Webhook', 'Payment confirmed', { paymentId: payment.id, bookingId: payment.bookingId });
+    } else if ((checkoutStatus === 'failed' || checkoutStatus === 'canceled') && payment.status !== 'failed') {
+      // ── PAYMENT FAILED ──
+      await db.payment.update({
+        where: { id: payment.id },
+        data: { status: 'failed' },
+      });
+      logger.info('Webhook', 'Payment failed', { paymentId: payment.id, status: checkoutStatus });
     }
 
     return NextResponse.json({ received: true });

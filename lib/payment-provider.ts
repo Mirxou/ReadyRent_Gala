@@ -22,17 +22,31 @@ export interface WebhookVerifyResult {
   error?: string;
 }
 
+/**
+ * Chargily webhook payload structure.
+ * Verified against PHP SDK (WebhookElement) and Laravel integration example.
+ * Top-level fields: id, type, data, created_at, updated_at.
+ * `type` = event type (e.g. "checkout.paid", "checkout.failed").
+ * `data` = the full Checkout object (with status, metadata, etc.).
+ */
 export interface ChargilyWebhookEvent {
   id: string;
   type: string;
-  entity: string;
   data: {
     id: string;
-    payment_method?: string;
-    status?: string;
-    amount?: number;
+    entity: string;
+    status: 'pending' | 'processing' | 'paid' | 'failed' | 'canceled';
+    amount: number;
+    currency: string;
+    payment_method: string | null;
+    metadata: Record<string, unknown>;
+    success_url: string;
+    failure_url: string;
+    created_at: number;
+    updated_at: number;
   } & Record<string, unknown>;
-  created_at: string;
+  created_at: number;
+  updated_at: number;
 }
 
 // ──── Singleton client ────
@@ -59,14 +73,15 @@ export class ChargilyPaymentProvider {
   /**
    * Create a Chargily checkout session.
    *
-   * Flow:
-   * 1. Create a Product in Chargily (generic "rental service")
-   * 2. Create a Price for that product
-   * 3. Create a Checkout session → returns checkout_url
-   * 4. Return the checkout_url to redirect the user
+   * Simplified flow (1 API call): uses amount + currency directly.
+   * Verified: CreateCheckoutParams supports `amount` + `currency` as
+   * alternative to `items` (confirmed by Chargily Laravel integration example).
+   *
+   * No payment_method set → user can choose between CIB and Edahabia
+   * on the hosted checkout page.
    */
   async createCheckout(params: {
-    amount: number;          // in DZD (cents not needed — Chargily uses DZD directly)
+    amount: number;          // in DZD (not cents)
     paymentId: string;       // our internal Payment.id
     bookingId: string;       // our Booking.id
     description: string;
@@ -79,35 +94,13 @@ export class ChargilyPaymentProvider {
     const client = getChargilyClient();
 
     try {
-      // 1. Create a generic product for this payment
-      const product = await client.createProduct({
-        name: params.description.slice(0, 100),
-        description: params.description,
-      });
-
-      if (!product?.id) {
-        logger.error('Chargily', 'createProduct returned no ID', product);
-        return { success: false, error: 'FAILED_TO_CREATE_PRODUCT' };
-      }
-
-      // 2. Create a price for the product
-      const price = await client.createPrice({
+      // Single API call: amount + currency directly (no Product/Price needed)
+      const checkout = await client.createCheckout({
         amount: params.amount,
         currency: 'dzd',
-        product_id: product.id,
-      });
-
-      if (!price?.id) {
-        logger.error('Chargily', 'createPrice returned no ID', price);
-        return { success: false, error: 'FAILED_TO_CREATE_PRICE' };
-      }
-
-      // 3. Create checkout session
-      const checkout = await client.createCheckout({
-        items: [{ price: price.id, quantity: 1 }],
+        description: params.description,
         success_url: params.successUrl,
         failure_url: params.failureUrl,
-        payment_method: 'edahabia', // Edahabia is default; Chargily shows CIB as option too
         locale: 'ar',
         pass_fees_to_customer: false,
         metadata: {
