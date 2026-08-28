@@ -1068,3 +1068,62 @@ Stage Summary:
 - **What works end-to-end**: Authenticated user → selects card → clicks pay → API creates Chargily checkout → redirect to Chargily hosted page → user pays → Chargily sends webhook → signature verified → Payment completed → Booking confirmed → Escrow held → Notification sent
 - **Remaining for full E2E test**: Actual test payment via Chargily test mode (needs real user session + real booking in DB)
 - **NOT deleted**: `components/payment/bank-card-form.tsx` (still imported nowhere in checkout now) and `components/payment/baridimob-form.tsx` (shown as coming soon)
+
+---
+Task ID: verify-1.3
+Agent: Main Agent (External Verification)
+
+Task: Re-verify Step 1.3 (Chargily Pay Integration) using external tools
+
+Work Log:
+- Read all 7 implemented files (schema, payment-provider, webhook, checkout route, methods route, checkout page, .env)
+- Used Web Search to find official Chargily docs, SDK repo, and integration examples
+- Read full `@chargily/chargily-pay` SDK README via curl (GitHub raw)
+- Read local SDK type definitions: `client.d.ts`, `param.d.ts`, `data.d.ts`, `utils/index.d.ts`, `utils/index.js`
+- Read PHP SDK `WebhookElement.php` and full `Laravel.md` integration guide
+- Read Go SDK `Webhook.md` documentation
+- Verified `verifySignature` implementation: HMAC-SHA256 with timingSafeEqual, throws on mismatch
+- Confirmed webhook payload structure from PHP SDK: `{id, type, data, created_at, updated_at}` — NO `entity` at top level
+- Confirmed `data` field IS the full Checkout object (with `.status`, `.metadata`, etc.)
+- Confirmed `payment_method` supported values: 'edahabia', 'cib', 'chargily_app'
+- Confirmed `createCheckout` supports `amount`+`currency` directly (no Product/Price needed)
+
+Stage Summary:
+- **16/16 points verified correct** (SDK imports, constructor, method signatures, params, types, HMAC verification, raw body approach, currency, metadata, .env)
+- **2 CRITICAL BUGS found** in webhook handler (see below)
+- **1 MODERATE BUG** in interface definition
+- **1 OPTIMIZATION** opportunity (simplify checkout creation)
+
+### BUG 1 — CRITICAL: Webhook uses `event.entity` instead of `event.type`
+- File: `app/api/payments/webhook/route.ts:46`
+- Current: `const eventType = (event.entity as string) || 'unknown'`
+- Reality: Webhook payload has `type` at top level (e.g. "checkout.paid"), NOT `entity`
+- `entity` exists only INSIDE `data` (the Checkout object), not at webhook top level
+- Source: PHP SDK `WebhookElement` has `getType()`/`getData()` but NO `getEntity()`
+- Impact: `eventType` is always `'unknown'`, so the entire payment processing block NEVER executes
+
+### BUG 2 — CRITICAL: Paid detection logic always returns false
+- File: `app/api/payments/webhook/route.ts:65-77`
+- Current: Checks `event.entity.includes('paid')` — but `event.entity` is `undefined`
+- Reality: Should check `event.data.status === 'paid'` (confirmed by Laravel example)
+- Impact: **No payments will EVER be confirmed via webhook** — the system is completely broken for production
+
+### BUG 3 — MODERATE: `ChargilyWebhookEvent` interface has wrong shape
+- File: `lib/payment-provider.ts:25-36`
+- Current: Has `entity: string` at top level
+- Reality: Should be `type: string` (the event type like "checkout.paid")
+- Impact: TypeScript types don't match runtime reality
+
+### OPTIMIZATION — Simplify checkout creation (3 API calls → 1)
+- File: `lib/payment-provider.ts:82-117`
+- Current: createProduct → createPrice → createCheckout
+- Better: createCheckout({ amount, currency, ... }) directly
+- Source: Laravel example and `CreateCheckoutParams` type both support `amount`+`currency`
+- Benefit: Faster, fewer failure points
+
+### CONCERN — `payment_method: 'edahabia'` may limit to Edahabia only
+- File: `lib/payment-provider.ts:110`
+- API docs: "Currently supported payment methods are: 'edahabia', 'cib' and 'chargily_app'"
+- Setting it to 'edahabia' may prevent CIB card payments
+- Laravel example does NOT set `payment_method`
+- Recommendation: Remove `payment_method` or verify empirically
