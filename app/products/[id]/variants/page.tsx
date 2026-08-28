@@ -307,7 +307,7 @@ export default function ProductVariantsPage() {
               <div className="grid grid-cols-4 gap-4">
                 <div>
                   <p className="text-sm text-muted-foreground">السعر</p>
-                  <p className="font-medium">{variant.price.toFixed(2)} دج/يوم</p>
+                  <p className="font-medium">{(variant.price ?? 0).toFixed(2)} دج/يوم</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">التوفر</p>

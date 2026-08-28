@@ -137,20 +137,20 @@ export function BundleSelector({
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-muted-foreground">السعر الأساسي:</span>
                         <span className="text-sm line-through text-muted-foreground">
-                          {calculation.base_price.toFixed(0)} دج
+                          {(calculation.base_price ?? 0).toFixed(0)} دج
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-semibold">سعر الباقة:</span>
                         <span className="text-lg font-bold text-primary">
-                          {calculation.bundle_price.toFixed(0)} دج
+                          {(calculation.bundle_price ?? 0).toFixed(0)} دج
                         </span>
                       </div>
                       {calculation.savings > 0 && (
                         <div className="flex items-center justify-between">
                           <span className="text-xs text-muted-foreground">التوفير:</span>
                           <Badge variant="secondary" className="bg-green-100 text-green-800">
-                            وفر {calculation.savings.toFixed(0)} دج ({calculation.discount_percentage.toFixed(0)}%)
+                            وفر {(calculation.savings ?? 0).toFixed(0)} دج ({(calculation.discount_percentage ?? 0).toFixed(0)}%)
                           </Badge>
                         </div>
                       )}

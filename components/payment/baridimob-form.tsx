@@ -50,10 +50,10 @@ export function BaridiMobForm({
       });
 
       if (response.data?.success) {
-        setPaymentId(response.data!.payment.id);
+        setPaymentId(response.data?.payment?.id ?? 0);
         setStep('otp');
         toast.success('تم إرسال رمز التحقق إلى هاتفك');
-        onPaymentInitiated?.(response.data!.payment.id, true);
+        onPaymentInitiated?.(response.data?.payment?.id ?? 0, true);
       } else {
         toast.error(response.data?.error || 'فشل بدء عملية الدفع');
       }

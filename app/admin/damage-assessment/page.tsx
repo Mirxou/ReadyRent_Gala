@@ -177,11 +177,11 @@ export default function DamageAssessmentPage() {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">تكلفة الإصلاح</p>
-                  <p className="font-medium">{assessment.repair_cost.toFixed(2)} دج</p>
+                  <p className="font-medium">{(assessment.repair_cost ?? 0).toFixed(2)} دج</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">تكلفة الاستبدال</p>
-                  <p className="font-medium">{assessment.replacement_cost.toFixed(2)} دج</p>
+                  <p className="font-medium">{(assessment.replacement_cost ?? 0).toFixed(2)} دج</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">عدد الصور</p>
@@ -218,7 +218,7 @@ export default function DamageAssessmentPage() {
                   <div className="grid grid-cols-3 gap-4">
                     <div>
                       <p className="text-sm text-muted-foreground">المبلغ المطالب</p>
-                      <p className="font-medium">{assessment.claim.claimed_amount.toFixed(2)} دج</p>
+                      <p className="font-medium">{(assessment.claim?.claimed_amount ?? 0).toFixed(2)} دج</p>
                     </div>
                     {assessment.claim.approved_amount && (
                       <div>
