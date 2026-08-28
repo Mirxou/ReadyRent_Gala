@@ -165,18 +165,146 @@
 
 ---
 
-### الخطوة 1.4: Escrow بسيط (يوم واحد)
+### الخطوة 1.4: Escrow بسيط (يوم واحد) ⚖️ — مُحدَّث بالتحقيق الميداني + القانون الجزائري
 
-**لا نُبني Escrow معقدًا من اليوم 1.** البحث يقول: "Escrow can be manual at MVP stage."
+**التحقيق الميداني أُنجز**: قراءة 20+ ملف في المشروع + بحث خارجي في القانون 18-05 و Chargily API.
+
+#### ⚠️ القانون الجزائري — المادة 17 من القانون 18-05 (إلزامية وصل الاستلام):
+
+> *"يجب على المورد الإلكتروني أن يطلب من المستهلك الإلكتروني توقيع وصل استلام عند التسليم الفعلي للمنتوج. لا يمكن المستهلك الإلكتروني أن يرفض توقيع وصل الاستلام. تسلم نسخة من وصل الاستلام وجوبا للمستهلك الإلكتروني."*
+
+> **المصدر**: oraconstantine.com (نص القانون 18-05)، arpce.dz (النص الرسمي)
+
+**الاستنتاج**: زر "تأكيد الاستلام" ليس ميزة اختيارية — هو **التزام قانوني**.
+
+#### ⚠️ القانون الجزائري — المادة 22-23 (حق الاسترداد):
+- تسليم متأخر ← المستهلك يُرجع في 4 أيام عمل ← المورد يُردّ المبلغ في 15 يوم
+- منتج معيب ← المستهلك يُرجع في 4 أيام عمل ← المورد يُبدّل أو يُردّ المبلغ في 15 يوم
+
+#### ⚠️ Chargily Pay لا يدعم الاسترداد البرمجي:
+- تم فحص SDK: `ChargilyPayClient` لديه `expireCheckout()` فقط (إلغاء قبل الدفع)
+- **لا يوجد `refund()`** — لا يمكن استرداد المبلغ برمجيًا بعد الدفع
+- الاسترداد = تحويل بنكي يدوي من حساب المنصة إلى حساب العميل
+- **المصدر**: `node_modules/@chargily/chargily-pay/lib/classes/client.d.ts` + dev.chargily.com
+
+#### 🔍 نتائج التحقيق الميداني — الوضع الراهن:
+
+| البند | الوضع | التفاصيل |
+|---|---|---|
+| Webhook يضع escrowStatus = 'held' | ✅ يعمل | `handlePaymentSuccess()` يُحدّث Booking + Payment |
+| Transaction ESCROW_HELD عند الدفع | ✅ يعمل | webhook يُنشئ EXPENDITURE + ESCROW_HELD |
+| زر "تأكيد الاستلام" | ❌ **غير موجود** | لا يوجد في صفحة الحجز ولا في لوحة التحكم |
+| API تحرير الضمان (release) | ❌ **غير موجود** | لا يوجد `/api/bookings/[id]/release-escrow` |
+| API استرداد الضمان (refund) | ❌ **غير موجود** | لا يوجد `/api/bookings/[id]/refund-escrow` |
+| Transaction ESCROW_RELEASED | ❌ **غير مُنشأ أبدًا** | النوع موجود في Schema لكن لا كود يُنشئه |
+| Transaction ESCROW_REFUNDED | ❌ **غير مُنشأ أبدًا** | نفس المشكلة |
+| إشعار عند التحرير/الاسترداد | ❌ **غير موجود** | لا notifications لهذه الحالات |
+| تحديث حالة الحجز عند التأكيد | ❌ **غير موجود** | لا transition: active→completed عند التأكيد |
+
+#### 🐛 مشاكل إضافية مُكتشفة (تُصلح ضمن 1.4):
+
+| # | الشدة | الملف | المشكلة |
+|---|---|---|---|
+| B1 | 🔴 حرج | `app/bookings/[id]/page.tsx:28-33` | `BookingDetail.id: number` لكن Prisma تستخدم `String (cuid())` — كل الحقول خاطئة |
+| B2 | 🔴 حرج | `app/bookings/[id]/page.tsx:33` | `escrow_status: 'HELD'` (uppercase) لكن DB تُستخدم `'held'` (lowercase) — الخريطة معكوسة |
+| B3 | 🔴 حرج | `app/bookings/[id]/route.ts:207` | PATCH يسمح بتعديل `escrow_status` مباشرة بدون منطق (ثغرة أمان) |
+| B4 | 🟡 متوسط | `app/api/bookings/[id]/cancel/route.ts` | الإلغاء لا يُحدّث `booking.escrowStatus` ولا `payment.escrowStatus` — يبقى 'held' بعد الإلغاء |
+| B5 | 🟡 متوسط | `app/api/bookings/[id]/cancel/route.ts:111-113` | الاسترداد يذهب لـ `walletBalance` لكن المال الفعلي في Chargily (لا يمكن استرداده برمجيًا) |
+| B6 | 🟡 متوسط | `components/wallet/wallet-dashboard.tsx` | يستخدم "SAR" و "ريال سعودي" بدل "DA" و "دج" — بيانات وهمية بالكامل |
+| B7 | 🟡 متوسط | `components/wallet/active-escrow-list.tsx:35` | يعرض `HELD` hardcoded بدل القيمة الحقيقية من DB |
+| B8 | 🟠 خفيف | `components/BookingStatusCard.tsx` | كود ميت — غير مستورد في أي مكان |
+| B9 | 🟠 خفيف | `lib/api/wallet.ts:25` | يستخدم `/payments/wallet/balance/` (غير موجود) بدل `/wallet` |
+| B10 | 🟠 خفيف | `lib/api/bookings.ts:12-13` | `Booking.id: number` يجب أن يكون `string` |
+
+#### 📋 خطة التنفيذ المُحدَّثة (مرتبة تنفيذيًا):
 
 ```
-الحد الأدنى لـ MVP:
-[ ] عند نجاح الدفع (webhook): Booking.escrowStatus = 'held'
-[ ] زر "تأكيد الاستلام" على صفحة الحجز
-[ ] عند التأكيد: EscrowStatus = 'released' + Transaction للمؤجر
-[ ] زر "إلغاء" يُرجع المبلغ (EscrowStatus = 'refunded')
-[ ] لا أتمتة بعد 48 ساعة (يدوي لاحقًا)
+المجموعة A: البنية التحتية (Backend — 4 ملفات)
+─────────────────────────────────────────────────────
+[A1] إنشاء API: POST /api/bookings/[id]/release-escrow
+     - التحقق: المستخدم مالك الحجز OR admin
+     - التحقق: booking.escrowStatus === 'held' && booking.status === 'confirmed' أو 'active'
+     - العمليات في transaction واحدة:
+       1. booking.escrowStatus → 'released'
+       2. booking.status → 'completed'
+       3. payment.escrowStatus → 'released'
+       4. transaction: ESCROW_RELEASED (للمستأجر — سجل)
+       5. contract.status → 'finalized', isFinalized → true, contractHash (SHA-256)
+       6. notification للمستأجر: "تم تحرير المبلغ للمؤجر"
+       7. notification للمؤجر (product.vendorId): "تم تحرير مبلغ حجز #X — يرجى التواصل مع الإدارة لاستلامه"
+     - ملاحظة: لا نُحوّل المال تلقائيًا (Chargily لا يدعم refund/transfer)
+       المال يبقى في حساب المنصة حتى التحويل البنكي اليدوي
+
+[A2] إنشاء API: POST /api/bookings/[id]/refund-escrow
+     - التحقق: admin فقط (الاسترداد قرار إداري)
+     - التحقق: booking.escrowStatus === 'held'
+     - العمليات في transaction واحدة:
+       1. booking.escrowStatus → 'refunded'
+       2. booking.status → 'cancelled'
+       3. payment.escrowStatus → 'refunded', payment.status → 'refunded'
+       4. transaction: ESCROW_REFUNDED (للمستأجر)
+       5. user.walletBalance += refundAmount (تسجيل في المحفظة الداخلية)
+       6. notification: "تم استرداد المبلغ — سيتم التحويل البنكي خلال 48 ساعة"
+     - ⚖️ القانون 18-05 مادة 22: الاسترداد خلال 15 يوم
+       سنُضيف حقل `refundRequestedAt` و cron يُنبّه Admin عند تجاوز 15 يوم
+
+[A3] إصلاح PATCH /api/bookings/[id] — حذف القدرة على تعديل escrow_status مباشرة
+     - السطر 207: حذف `if (body.escrow_status !== undefined)` تمامًا
+     - escrow يجب أن يتغير فقط عبر [A1] و [A2]
+
+[A4] إصلاح POST /api/bookings/[id]/cancel — تحديث escrow عند الإلغاء
+     - إضافة: booking.escrowStatus → 'refunded' (إذا كان 'held')
+     - إضافة: payment.escrowStatus → 'refunded', payment.status → 'refunded'
+     - إضافة: transaction: ESCROW_REFUNDED
+     - إضافة: log التحذير أن المال الفعلي يحتاج تحويل بنكي يدوي
+
+المجموعة B: الواجهة الأمامية (Frontend — 3 ملفات)
+─────────────────────────────────────────────────────
+[B1] إصلاح app/bookings/[id]/page.tsx:
+     - تغيير interface: id: string (not number), كل الحقول من snake_case مطابقة للـ API
+     - إزالة escrowStateMap المعكوسة (API يُرجع lowercase: 'held', 'released', 'refunded')
+     - إضافة زر "تأكيد الاستلام" (يظهر فقط عندما:
+       booking.status === 'confirmed' || booking.status === 'active'
+       && booking.escrow_status === 'held'
+       && isOwner)
+     - الزر يُنفذ POST /api/bookings/[id]/release-escrow
+     - إضافة حالة التحميل + تأكيد dialog
+     - إضافة عرض حالة الضمان الحقيقية (held/released/refunded) مع أيقونات
+     - استبدال `api.get` بـ `fetch('/api/bookings/${id}', {credentials:'include'})`
+
+[B2] إصلاح EscrowTracker (features/finance/components/escrow-tracker.tsx):
+     - عرض الحالة الحقيقية (held/released/refunded) بدل "محمي" دائمًا
+     - إضافة ألوان مختلفة لكل حالة
+     - إضافة زر الإجراء المناسب (تأكيد/لا شيء/تم التحرير)
+
+[B3] تحديث لوحة الحجوزات (dashboard/bookings/page.tsx):
+     - عرض حالة الضمان (Badge: محتجز/محرر/مسترد)
+     - إضافة عمود/حقل لـ escrow_status
+     - إصلاح `in_use` → `active` (القيمة الصحيحة في Prisma)
+
+المجموعة C: إصلاحات ثانوية (2 ملفات)
+─────────────────────────────────────────────────────
+[C1] حذف components/BookingStatusCard.tsx (كود ميت)
+[C2] إصلاح components/wallet/wallet-dashboard.tsx: SAR → DA, ريال سعودي → دينار جزائري
 ```
+
+#### ⚖️ التزامات قانونية إضافية للخطوة 1.4:
+
+| المادة | الالتزام | كيف نُلبيه |
+|---|---|---|
+| مادة 17 | وصل استلام إلزامي | زر "تأكيد الاستلام" = وصل استلام رقمي |
+| مادة 22 | استرداد خلال 15 يوم | حقل `refundRequestedAt` + تنبيه Admin |
+| مادة 20 | فاتورة لكل معاملة | webhook يُنشئ سجل Payment + Transaction (يُضاف إصدار فاتورة لاحقًا) |
+| مادة 27 | دفع عبر منصات مرخصة | Chargily معتمد من بنك الجزائر ✅ |
+
+#### معيار النجاح المُحدَّث:
+
+> 1. المستأجر يرى زر "تأكيد الاستلام" على صفحة الحجز (عندما escrow = 'held')
+> 2. النقر على الزر → Booking.escrowStatus = 'released' + Transaction ESCROW_RELEASED
+> 3. Admin يستطيع استرداد الضمان عبر API مخصص
+> 4. الإلغاء يُحدّث حالة الضمان بشكل صحيح
+> 5. كل حالة تغيير تُنشئ Transaction + Notification
+> 6. لا يمكن تعديل escrow_status مباشرة عبر PATCH
 
 ---
 

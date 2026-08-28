@@ -1127,3 +1127,26 @@ Stage Summary:
 - Setting it to 'edahabia' may prevent CIB card payments
 - Laravel example does NOT set `payment_method`
 - Recommendation: Remove `payment_method` or verify empirically
+
+---
+Task ID: investigate-1.4
+Agent: Main Agent
+
+Task: التحقيق الميداني الشامل للخطوة 1.4 (Escrow بسيط) — مع القانون الجزائري والتكاملات الخارجية
+
+Work Log:
+- قراءة 20+ ملف متعلق بالـ Escrow عبر المشروع كله
+- فحص: webhook (يعمل ✅)، صفحة الحجز (معطلة ❌)، API routes (لا وجود لـ release/refund ❌)
+- فحص: EscrowTracker (ستب دائم ❌)، WalletDashboard (SAR بدل DA ❌)، BookingStatusCard (كود ميت ❌)
+- فحص: bookings API client (id: number بدل string ❌)، wallet API client (URLs خاطئة ❌)
+- بحث خارجي: Law 18-05 المادة 17 (إلزامية وصل الاستلام)، المادة 22-23 (حق الاسترداد خلال 15 يوم)
+- فحص Chargily SDK: لا يوجد API للاسترداد (refund) — فقط expireCheckout (إلغاء قبل الدفع)
+- فحص Chargily docs: dev.chargily.com/pay-v2/api-reference/checkouts/expire
+- تحديث خطة الخطوة 1.4 في 11-EXECUTION-PRIORITY.md بكل النتائج
+
+Stage Summary:
+- **10 مشاكل مُكتشفة** (2 حرجة، 4 متوسطة، 4 خفيفة)
+- **4 أشياء تعمل** من أصل 9 مطلوبة
+- **القانون 18-05 مادة 17** تُلزم بـ"تأكيد الاستلام" كالتزام قانوني (ليس اختياري)
+- **Chargily لا يدعم استرداد برمجي** — الاسترداد = تحويل بنكي يدوي
+- **الخطة مُحدَّثة** بـ 3 مجموعات تنفيذية (A: Backend 4 ملفات، B: Frontend 3 ملفات، C: إصلاحات 2 ملفات)
