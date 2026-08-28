@@ -4,7 +4,10 @@ export interface PaymentMethod {
   id: string;
   name: string;
   type: 'card' | 'baridimob' | 'bank_transfer';
+  display_name?: string;
+  description?: string;
   icon?: string;
+  available?: boolean;
 }
 
 export const paymentsApi = {

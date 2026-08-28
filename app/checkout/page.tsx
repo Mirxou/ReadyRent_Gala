@@ -1,22 +1,22 @@
 'use client'
 import { formatNumber } from '@/lib/utils';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
-import { BaridiMobForm } from '@/components/payment/baridimob-form';
 import { paymentsApi, bookingsApi } from '@/lib/api';
 import { useAuthStore } from '@/lib/store';
 
-import { ArrowLeft, CreditCard, Smartphone, Loader2, MapPin } from 'lucide-react';
+import { ArrowLeft, CreditCard, Smartphone, Loader2, MapPin, ShieldCheck, ExternalLink } from 'lucide-react';
 import { ParticleField } from '@/components/ui/particle-field';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { WILAYAS } from '@/lib/dz-data';
+import { toast } from 'sonner';
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -24,10 +24,18 @@ export default function CheckoutPage() {
   const queryClient = useQueryClient();
   const { isAuthenticated } = useAuthStore();
 
-  const bookingId = searchParams.get('booking_id') ? parseInt(searchParams.get('booking_id')!) : null;
+  // Booking ID from URL (cart → checkout flow)
+  const bookingId = searchParams.get('booking_id');
+
+  // Webhook return status
+  const returnStatus = searchParams.get('status'); // 'success' | 'failed'
+  const returnPaymentId = searchParams.get('payment_id');
+
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
   const [selectedWilaya, setSelectedWilaya] = useState<string>('');
   const [paymentCompleted, setPaymentCompleted] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -35,6 +43,22 @@ export default function CheckoutPage() {
       router.push('/login?redirect=/checkout');
     }
   }, [isAuthenticated, router]);
+
+  // Handle webhook return
+  useEffect(() => {
+    if (returnStatus === 'success') {
+      setPaymentCompleted(true);
+      toast.success('تم الدفع بنجاح!');
+      const timer = setTimeout(() => {
+        router.push('/dashboard/bookings');
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+    if (returnStatus === 'failed') {
+      setPaymentError('فشلت عملية الدفع. يرجى المحاولة مرة أخرى.');
+      toast.error('فشلت عملية الدفع');
+    }
+  }, [returnStatus, returnPaymentId, router]);
 
   // Get payment methods
   const { data: paymentMethods, isLoading: methodsLoading } = useQuery({
@@ -52,20 +76,43 @@ export default function CheckoutPage() {
 
   const totalAmount = booking?.total_price || 0;
 
-  const handlePaymentCompleted = () => {
-    setPaymentCompleted(true);
-    queryClient.invalidateQueries({ queryKey: ['bookings', 'cart'] });
+  // ── Chargily Redirect Flow ──
+  const handleCardPayment = useCallback(async () => {
+    if (!bookingId) {
+      toast.error('لا يوجد حجز للدفع');
+      return;
+    }
 
-    // NOTE: Booking status is confirmed server-side by the payment provider's
-    // webhook/callback — NEVER by a client-initiated request.
-    // The payment form component (BaridiMobForm/BankCardForm) triggers the
-    // server-side confirmation via its own API call.
+    setIsRedirecting(true);
+    setPaymentError(null);
 
-    // Redirect to bookings page after 2 seconds
-    setTimeout(() => {
-      router.push('/dashboard/bookings');
-    }, 2000);
-  };
+    try {
+      const response = await fetch('/api/payments/chargily/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          booking_id: bookingId,
+          amount: totalAmount,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success && result.data?.checkout_url) {
+        // Redirect to Chargily hosted checkout (PCI-DSS compliant)
+        window.location.href = result.data.checkout_url;
+      } else {
+        const msg = result.message_ar || result.error || 'فشل إنشاء عملية الدفع';
+        toast.error(msg);
+        setPaymentError(msg);
+        setIsRedirecting(false);
+      }
+    } catch {
+      toast.error('خطأ في الاتصال بالخادم');
+      setPaymentError('خطأ في الاتصال بالخادم');
+      setIsRedirecting(false);
+    }
+  }, [bookingId, totalAmount]);
 
   if (!isAuthenticated) {
     return null;
@@ -79,6 +126,7 @@ export default function CheckoutPage() {
     );
   }
 
+  // ── Payment Success Screen ──
   if (paymentCompleted) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -89,8 +137,8 @@ export default function CheckoutPage() {
           className="text-center z-10"
         >
           <div className="mb-4">
-            <div className="w-16 h-16 bg-sovereign-gold rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-background" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
@@ -147,7 +195,7 @@ export default function CheckoutPage() {
               </Card>
             </div>
 
-          {/* Payment Methods Selection */}
+            {/* Payment Methods Selection */}
             {!selectedMethod && (
               <div className="md:col-span-2">
                 <Card>
@@ -161,19 +209,19 @@ export default function CheckoutPage() {
                           key={method.type}
                           variant="outline"
                           className="h-auto p-4 justify-start"
-                          onClick={() => setSelectedMethod(method.type)}
+                          onClick={() => setSelectedMethod(method.type as string)}
                         >
                           <div className="flex items-center gap-4 w-full">
-                            {method.type === 'baridimob' ? (
+                            {(method.type as string) === 'baridimob' ? (
                               <Smartphone className="h-6 w-6" />
                             ) : (
                               <CreditCard className="h-6 w-6" />
                             )}
                             <div className="flex-1 text-right">
-                              <div className="font-semibold">{method.name || method.display_name}</div>
-                              {method.icon && (
-                                <div className="text-sm text-muted-foreground">{method.icon}</div>
-                              )}
+                              <div className="font-semibold">{(method.display_name as string) || (method.name as string)}</div>
+                              <div className="text-sm text-muted-foreground">
+                                {(method.type as string) === 'card' ? 'CIB / Edahabia عبر Chargily' : (method.description as string)}
+                              </div>
                             </div>
                           </div>
                         </Button>
@@ -203,7 +251,7 @@ export default function CheckoutPage() {
                 {selectedMethod && (
                   <Button
                     variant="outline"
-                    onClick={() => setSelectedMethod(null)}
+                    onClick={() => { setSelectedMethod(null); setPaymentError(null); }}
                     className="w-full"
                   >
                     تغيير طريقة الدفع
@@ -212,29 +260,69 @@ export default function CheckoutPage() {
               </CardContent>
             </Card>
 
-            {/* Payment Form */}
-            {selectedMethod && (
-              <div>
-                {selectedMethod === 'baridimob' ? (
-                  <BaridiMobForm
-                    amount={totalAmount}
-                    bookingId={bookingId || undefined}
-                    onPaymentCompleted={handlePaymentCompleted}
-                  />
-                ) : selectedMethod === 'card' ? (
-                  <Card>
-                    <CardContent className="p-6 text-center space-y-4">
-                      <CreditCard className="h-10 w-10 mx-auto text-muted-foreground" />
-                      <p className="text-muted-foreground">
-                        سيتم توجيهك لبوابة الدفع الآمنة (Chargily) قريباً
-                      </p>
-                      <Button disabled className="w-full">
-                        الدفع ببطاقة بنكية — قريباً
-                      </Button>
-                    </CardContent>
-                  </Card>
-                ) : null}
-              </div>
+            {/* Payment Form Area */}
+            {selectedMethod === 'baridimob' && (
+              <Card>
+                <CardContent className="p-6 text-center space-y-4">
+                  <Smartphone className="h-10 w-10 mx-auto text-muted-foreground" />
+                  <p className="text-muted-foreground">
+                    الدفع عبر باريديموب — قريبًا
+                  </p>
+                  <Button disabled className="w-full">
+                    باريديموب — قريبًا
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+
+            {selectedMethod === 'card' && (
+              <Card>
+                <CardContent className="p-6 space-y-4">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center">
+                      <ShieldCheck className="h-5 w-5 text-emerald-500" />
+                    </div>
+                    <div>
+                      <p className="font-semibold">الدفع الآمن عبر Chargily Pay</p>
+                      <p className="text-xs text-muted-foreground">CIB و Edahabia — لا نلمس بيانات بطاقتك</p>
+                    </div>
+                  </div>
+
+                  <p className="text-sm text-muted-foreground">
+                    سيتم توجيهك لبوابة الدفع الآمنة لإدخال بيانات بطاقتك.
+                    بياناتك محمية بتشفير SSL وتوافق PCI-DSS.
+                  </p>
+
+                  {paymentError && (
+                    <p className="text-sm text-destructive bg-destructive/10 p-3 rounded-lg">{paymentError}</p>
+                  )}
+
+                  <Button
+                    className="w-full"
+                    onClick={handleCardPayment}
+                    disabled={isRedirecting || !bookingId}
+                  >
+                    {isRedirecting ? (
+                      <>
+                        <Loader2 className="h-4 w-4 ml-2 animate-spin" />
+                        جاري التحويل...
+                      </>
+                    ) : (
+                      <>
+                        <CreditCard className="h-4 w-4 ml-2" />
+                        الدفع ببطاقة بنكية (CIB/Edahabia)
+                        <ExternalLink className="h-4 w-4 mr-2" />
+                      </>
+                    )}
+                  </Button>
+
+                  {!bookingId && (
+                    <p className="text-xs text-destructive text-center">
+                      لا يوجد حجز مرتبط. يرجى إتمام الحجز أولاً من السلة.
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
             )}
           </div>
         </motion.div>

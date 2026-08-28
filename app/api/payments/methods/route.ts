@@ -8,18 +8,24 @@ import { logger } from '@/lib/logger';
 
 export async function GET() {
   try {
+    const hasChargily = !!process.env.CHARGILY_API_KEY;
+
     const methods = [
+      ...(hasChargily
+        ? [{
+            type: 'card',
+            display_name: 'بطاقة بنكية',
+            description: 'CIB / Edahabia عبر Chargily Pay',
+            icon: 'credit-card',
+            available: true,
+          }]
+        : []),
       {
         type: 'baridimob',
         display_name: 'بريدي موب',
-        description: 'الدفع عبر تطبيق بريدي موب',
+        description: 'الدفع عبر تطبيق بريدي موب — قريبًا',
         icon: 'phone',
-      },
-      {
-        type: 'card',
-        display_name: 'بطاقة بنكية',
-        description: 'بطاقة بنكية عبر Chargily',
-        icon: 'credit-card',
+        available: false,
       },
     ];
 
@@ -37,7 +43,7 @@ export async function GET() {
         message_ar: 'حدث خطأ أثناء جلب طرق الدفع',
         code: 'INTERNAL_ERROR',
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

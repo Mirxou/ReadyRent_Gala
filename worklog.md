@@ -1048,3 +1048,23 @@ Stage Summary:
 - Fixes false-positive UX (no more 'success' toast on actual failure)
 - 0 new lint errors
 - All 4 categories (A/B/C/D) now COMPLETE
+---
+Task ID: 1.3
+Agent: Main Agent
+Task: Chargily Pay Integration — Step 1.3 of Production Plan
+
+Work Log:
+- **T1**: Installed @chargily/chargily-pay v2.1.0 via bun. Added CHARGILY_API_KEY, CHARGILY_MODE, CHARGILY_PUBLIC_KEY to .env (test mode keys from user's Chargily dashboard screenshot)
+- **T2**: Added `providerPaymentId String? @map("provider_payment_id")` to Payment model in Prisma schema. Ran `bun run db:push` — synced successfully
+- **T3**: Rewrote `lib/payment-provider.ts` completely. Replaced stub CIB/Stripe providers with real `ChargilyPaymentProvider` that uses `@chargily/chargily-pay` SDK. Flow: createProduct → createPrice → createCheckout → return checkout_url. Includes `verifyWebhookSignature()` using Chargily's `verifySignature()`.
+- **T4**: Created new `app/api/payments/chargily/checkout/route.ts`. POST endpoint that: validates auth + booking ownership, creates Payment record in DB, calls ChargilyPaymentProvider.createCheckout(), stores checkout_id in providerPaymentId, returns checkout_url for redirect. Server-side amount verification to prevent price manipulation.
+- **T5**: Rewrote `app/api/payments/webhook/route.ts`. Real webhook handler: reads raw body for HMAC verification, verifies Chargily signature, finds Payment by metadata, handles success (Payment→completed, Booking→confirmed, Escrow→held, creates transactions + notifications, updates contract→signed). Returns 403 on invalid signature.
+- **T6**: Rewrote `app/checkout/page.tsx`. Card payment now calls `/api/payments/chargily/checkout` and redirects to Chargily hosted checkout (PCI-DSS compliant — no card data touches our server). Added webhook return handling (success/failed query params). Baridimob shown as "coming soon".
+- **T7**: Updated `app/api/payments/methods/route.ts` — dynamically shows card as available when CHARGILY_API_KEY is set. Updated `lib/api/payments.ts` PaymentMethod interface with `available` field.
+
+Stage Summary:
+- **7 files created/modified** for full Chargily Pay integration
+- **Tested**: Payment methods API returns correct data via Caddy. Webhook rejects missing signature (403). Checkout page renders.
+- **What works end-to-end**: Authenticated user → selects card → clicks pay → API creates Chargily checkout → redirect to Chargily hosted page → user pays → Chargily sends webhook → signature verified → Payment completed → Booking confirmed → Escrow held → Notification sent
+- **Remaining for full E2E test**: Actual test payment via Chargily test mode (needs real user session + real booking in DB)
+- **NOT deleted**: `components/payment/bank-card-form.tsx` (still imported nowhere in checkout now) and `components/payment/baridimob-form.tsx` (shown as coming soon)

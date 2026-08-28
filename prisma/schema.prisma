@@ -399,6 +399,7 @@ model Payment {
   escrowStatus    String?  @map("escrow_status")
   requires3DSecure Boolean @default(false) @map("requires_3d_secure")
   redirectUrl     String?  @map("redirect_url")
+  providerPaymentId String?  @map("provider_payment_id") // Chargily checkout ID
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
 
