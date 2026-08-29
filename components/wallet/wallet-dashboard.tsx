@@ -108,11 +108,11 @@ export const WalletDashboard = () => {
         <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
           <div className="space-y-2">
             <p className="text-slate-400 text-sm font-medium flex items-center gap-2">
-              <Wallet size={16} /> إجمالي الرصيد (ريال سعودي)
+              <Wallet size={16} /> إجمالي الرصيد (دينار جزائري)
             </p>
             <h2 className="text-5xl md:text-6xl font-black tracking-tight flex items-baseline gap-2">
               {formatNumber(balance.total)}
-              <span className="text-2xl font-normal text-slate-400">SAR</span>
+              <span className="text-2xl font-normal text-slate-400">د.ج</span>
             </h2>
           </div>
           
@@ -139,7 +139,7 @@ export const WalletDashboard = () => {
               </div>
               <span className="text-sm font-medium">متاح للسحب</span>
             </div>
-            <span className="text-lg font-bold">{formatNumber(balance.available)} SAR</span>
+            <span className="text-lg font-bold">{formatNumber(balance.available)} د.ج</span>
           </div>
           
           <div className="bg-slate-800/50 p-4 rounded-2xl border border-slate-700 flex justify-between items-center">
@@ -149,7 +149,7 @@ export const WalletDashboard = () => {
               </div>
               <span className="text-sm font-medium">محجوز في الضمان (Escrow)</span>
             </div>
-            <span className="text-lg font-bold text-amber-400">{formatNumber(balance.escrow)} SAR</span>
+            <span className="text-lg font-bold text-amber-400">{formatNumber(balance.escrow)} د.ج</span>
           </div>
         </div>
       </Card>
@@ -179,7 +179,7 @@ export const WalletDashboard = () => {
               الأهداف المالية
             </h3>
           </div>
-          <p className="text-sm text-slate-500" dir="rtl">ادخرت 12,000 ريال من هدف 20,000 ريال.</p>
+          <p className="text-sm text-slate-500" dir="rtl">إجمالي معاملاتك المنجزة.</p>
           <div className="relative h-2 bg-slate-100 rounded-full overflow-hidden">
              <div className="absolute inset-0 bg-indigo-500 w-[60%]" />
           </div>

@@ -412,6 +412,7 @@ model Transaction {
   userId      String   @map("user_id")
   type        String   // INCOME, EXPENDITURE, ESCROW_HELD, ESCROW_RELEASED, ESCROW_REFUNDED, DEPOSIT, WITHDRAWAL, TRANSFER
   amount      Int      @default(0)
+  referenceId String?  @map("reference_id") // bookingId or refundRecordId
   note        String?
   hash        String?
   createdAt   DateTime @default(now()) @map("created_at")
@@ -419,6 +420,50 @@ model Transaction {
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("transactions")
+}
+
+// ──── Financial Operations (Yassir-style manual payout model) ────
+// Chargily has NO refund/payout API. All money-out operations are manual.
+// These models track the REAL money movement outside our system.
+
+model RefundRecord {
+  id              String    @id @default(cuid())
+  bookingId       String    @map("booking_id")
+  paymentId       String    @map("payment_id")
+  userId          String    @map("user_id")
+  amount          Int       // المبلغ بالسنتات (DZD)
+  reason          String    // late_delivery, defective, cancelled, other
+  status          String    @default("pending_manual_transfer") // pending_manual_transfer, processing, completed, failed
+  requestedAt     DateTime  @default(now()) @map("requested_at")
+  refundDeadline  DateTime  // requestedAt + 15 يوم (القانون 18-05 مادة 22)
+ completedAt     DateTime? @map("completed_at")
+  transferMethod  String?   @map("transfer_method")  // ccp_transfer, bank_transfer, wallet_credit, baridimob
+  transferRef     String?   @map("transfer_ref")     // رقم التحويل البنكي
+  processedBy     String?   @map("processed_by")     // Admin who completed it
+  notes           String?
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  @@map("refund_records")
+}
+
+model PayoutRecord {
+  id              String    @id @default(cuid())
+  bookingId       String    @map("booking_id")
+  vendorId        String?   @map("vendor_id")
+  userId          String    @map("user_id")     // the renter who paid
+  amount          Int       // المبلغ بالسنتات (DZD)
+  status          String    @default("pending_payout") // pending_payout, processing, paid, failed
+  requestedAt     DateTime  @default(now()) @map("requested_at")
+  paidAt          DateTime? @map("paid_at")
+  transferMethod  String?   @map("transfer_method")  // ccp_transfer, bank_transfer, chargily_payout
+  transferRef     String?   @map("transfer_ref")
+  processedBy     String?   @map("processed_by")
+  notes           String?
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  @@map("payout_records")
 }
 
 // ──── Subscription Plan ────

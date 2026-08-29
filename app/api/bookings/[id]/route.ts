@@ -203,8 +203,22 @@ export async function PATCH(
       );
     }
 
+    // Security: escrow_status changes MUST go through dedicated endpoints:
+    //   /api/bookings/[id]/release-escrow  (renter confirms receipt)
+    //   /api/bookings/[id]/refund-escrow   (admin-initiated refund)
+    // Never allow direct escrow_status modification via PATCH.
+    if (body.escrow_status !== undefined) {
+      return NextResponse.json(
+        {
+          success: false,
+          dignity_preserved: true,
+          message_en: 'Use dedicated escrow endpoints to change escrow status',
+          code: 'USE_ESCROW_ENDPOINT',
+        },
+        { status: 400 }
+      );
+    }
     const updateData: Record<string, unknown> = {};
-    if (body.escrow_status !== undefined) updateData.escrowStatus = body.escrow_status;
     if (body.has_insurance !== undefined) updateData.hasInsurance = body.has_insurance;
     if (body.extra_services !== undefined) updateData.extraServices = JSON.stringify(body.extra_services);
     if (body.quantity !== undefined) updateData.quantity = body.quantity;

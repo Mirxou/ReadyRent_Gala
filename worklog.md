@@ -1150,3 +1150,98 @@ Stage Summary:
 - **القانون 18-05 مادة 17** تُلزم بـ"تأكيد الاستلام" كالتزام قانوني (ليس اختياري)
 - **Chargily لا يدعم استرداد برمجي** — الاسترداد = تحويل بنكي يدوي
 - **الخطة مُحدَّثة** بـ 3 مجموعات تنفيذية (A: Backend 4 ملفات، B: Frontend 3 ملفات، C: إصلاحات 2 ملفات)
+
+---
+Task ID: 3-A1
+Agent: Main
+
+Task: Create POST /api/bookings/[id]/release-escrow — escrow release on delivery receipt (Algerian Law 18-05 Article 17)
+
+Work Log:
+- Created `app/api/bookings/[id]/release-escrow/route.ts` (251 lines)
+- Auth via `getSessionFromRequest` from `@/lib/auth-server` — returns 401 if unauthenticated
+- Authorization: booking owner OR admin/staff — returns 403 if unauthorized
+- Validation: `escrowStatus` must be `'held'` AND `status` must be `'confirmed'` or `'active'` — returns 400 with specific error codes (`INVALID_ESCROW_STATUS`, `INVALID_BOOKING_STATUS`)
+- Pre-fetches Payment and Contract before entering transaction (validates payment exists — 404 `PAYMENT_NOT_FOUND`)
+- All DB mutations inside a single `db.$transaction(async (tx) => ...)`:
+  - (a) `booking.escrowStatus → 'released'`, `booking.status → 'completed'`
+  - (b) `payment.escrowStatus → 'released'`, `payment.status → 'released'`
+  - (c) `Transaction` type `ESCROW_RELEASED` with `referenceId = booking.id`, Arabic note referencing Article 17
+  - (d) `contract.status → 'finalized'`, `contract.isFinalized = true`, `contractHash = SHA-256(booking.id + Date.now())`
+  - (e) `Notification` for renter: "تم تحرير المبلغ للمؤجر — وصل الاستلام مسجل (مادة 17)"
+  - (f) Vendor notification skipped with comment: Vendor model has no `userId` field — PayoutRecord tracks the obligation
+  - (g) `PayoutRecord` with `status: 'pending_payout'`, `amount = booking.totalPrice`, `vendorId`, `userId`
+- SHA-256 via Node.js `crypto.createHash('sha256')`
+- Response: `{ success: true, dignity_preserved: true, data: { id, status, escrow_status, payout_record_id } }`
+- All errors use `{ success: false, dignity_preserved: true, code: '...' }` format
+- Logger used for info (on success) and error (on catch)
+- Follows existing cancel/route.ts patterns exactly
+- Zero lint errors in new file (verified via `bun run lint`)
+
+Stage Summary:
+- File created at `app/api/bookings/[id]/release-escrow/route.ts`
+- 0 new lint errors (all 220 pre-existing)
+- All 11 requirements implemented; vendor notification (req g) documented as schema-limited (Vendor model lacks userId) with PayoutRecord created as the tracking mechanism
+- Ready for frontend integration (POST `/api/bookings/{id}/release-escrow`)
+---
+Task ID: 3-A2
+Agent: Main Agent
+
+Task: Create POST /api/bookings/[id]/refund-escrow — admin-only escrow refund endpoint
+
+Work Log:
+
+- Read worklog.md, auth-server.ts, logger.ts, prisma/schema.prisma, and release-escrow/route.ts for context and coding patterns
+- Created directory app/api/bookings/[id]/refund-escrow/
+- Implemented POST handler with Next.js 16 params pattern (Promise<{ id: string }>)
+- Auth: getSessionFromRequest from @/lib/auth-server
+- Admin/staff ONLY gate — renters cannot self-refund
+- Validates booking.escrowStatus === "held"
+- Accepts JSON body: { reason, notes?, wallet_credit? } with reason enum validation
+- Single db.$transaction() with all 7 operations:
+  (a) booking.escrowStatus → "refunded", booking.status → "cancelled"
+  (b) payment.escrowStatus → "refunded", payment.status → "refunded"
+  (c) Transaction ESCROW_REFUNDED with referenceId = booking.id
+  (d) If wallet_credit: user.walletBalance incremented
+  (e) Notification with Arabic message (wallet credit vs 48h transfer)
+  (f) RefundRecord with 15-day deadline (Law 18-05 Article 22)
+- Error responses with bilingual messages (Arabic/English) and code field
+- Logger integration for audit trail
+- ESLint: zero lint errors in new file (verified via `rg refund-escrow` on lint output)
+- Verified file by reading it back
+
+Stage Summary:
+- File created: app/api/bookings/[id]/refund-escrow/route.ts (254 lines)
+- Fully compliant with all 10 requirements
+- Follows existing codebase patterns (release-escrow sibling route)
+- Zero new lint issues introduced
+
+---
+Task ID: 1.4
+Agent: Main Agent
+Task: Step 1.4 — Escrow بسيط (تحقيق ميداني + قانوني + تنفيذ كامل)
+
+Work Log:
+- تحقق من Chargily Pay API: قراءة llms.txt الكامل + SDK TypeScript + Go SDK → تأكيد عدم وجود refund/payout API
+- تحقق من القانون 18-05: قراءة النص الأصلي من oraconstantine.com → مادة 17 (وصل استلام إلزامي) + مادة 22 (استرداد خلال 15 يوم)
+- أضاف RefundRecord + PayoutRecord إلى Prisma Schema مع referenceId في Transaction
+- أنشأ POST /api/bookings/[id]/release-escrow (subagent) — transaction ذرية بـ 7 عمليات
+- أنشأ POST /api/bookings/[id]/refund-escrow (subagent) — admin only + 15 يوم deadline قانوني
+- أصلح PATCH /api/bookings/[id] — حذف تعديل escrow_status المباشر (ثغرة أمان B3)
+- أصلح POST /api/bookings/[id]/cancel — تحديث escrow_status + إنشاء RefundRecord + Transaction عند الإلغاء
+- أعد كتابة app/bookings/[id]/page.tsx بالكامل — interface صحيحة (string IDs, snake_case) + زر تأكيد الاستلام + AlertDialog قانوني
+- أعد كتابة EscrowTracker — 4 حالات حقيقية (none/held/released/refunded) مع ألوان وأيقونات
+- أصلح dashboard/bookings: in_use→active + رابط تفاصيل
+- حذف BookingStatusCard.tsx (كود ميت C1)
+- إصلاح SAR→DA في wallet-dashboard (B6)
+- إصلاح HELD hardcoded في active-escrow-list (B7)
+- إصلاح API path في lib/api/wallet.ts (B9)
+- إصلاح Booking.id: number→string في lib/api/bookings.ts (B10)
+- أضف escrow_status إلى WalletBooking type
+
+Stage Summary:
+- 10 ملفات جديدة/مُعدّلة في Backend + 4 ملفات Frontend + 2 أنواع + 1 schema update
+- Chargily لا يدعم الاسترداد → نموذج Yassir (تتبع يدوي عبر RefundRecord + PayoutRecord)
+- التزام القانون 18-05: مادة 17 (وصل استلام) + مادة 22 (15 يوم للاسترداد)
+- صفر أخطاء TypeScript جديدة في ملفات Step 1.4
+- Dev server يبدأ بنجاح (GET / 200)

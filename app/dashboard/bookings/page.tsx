@@ -35,7 +35,7 @@ export default function BookingsPage() {
     const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
       pending: { label: 'قيد الانتظار', variant: 'outline' },
       confirmed: { label: 'مؤكد', variant: 'default' },
-      in_use: { label: 'قيد الاستخدام', variant: 'default' },
+      active: { label: 'قيد الاستخدام', variant: 'default' },
       completed: { label: 'مكتمل', variant: 'secondary' },
       cancelled: { label: 'ملغي', variant: 'destructive' },
     };
@@ -206,14 +206,14 @@ export default function BookingsPage() {
                           عرض المنتج
                         </Link>
                       </Button>
-                      {(booking.status === 'confirmed' || booking.status === 'in_use') && (
+                      {(booking.status === 'confirmed' || booking.status === 'active') && (
                         <Button variant="default" asChild>
-                          <Link href={`/bookings/${booking.id}/tracking`}>
-                            تتبع التسليم
+                          <Link href={`/bookings/${booking.id}`}>
+                            تفاصيل الحجز
                           </Link>
                         </Button>
                       )}
-                      {booking.status === 'in_use' && (
+                      {booking.status === 'active' && (
                         <Button variant="default" asChild>
                           <Link href={`/returns/new?booking=${booking.id}`}>
                             طلب إرجاع

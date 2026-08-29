@@ -4,8 +4,13 @@ import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
 import { logger } from '@/lib/logger';
 
 // ═══════════════════════════════════════════════════════════════
-// POST /api/bookings/[id]/cancel — Cancel a booking with refund logic
+// POST /api/bookings/[id]/cancel — Cancel a booking with escrow awareness
 // ═══════════════════════════════════════════════════════════════
+// Chargily Pay has NO refund API. If escrow was 'held' (money received),
+// the real refund must be done manually via bank transfer.
+// We track this obligation in RefundRecord (Law 18-05 Art. 22: 15-day deadline).
+// ═══════════════════════════════════════════════════════════════
+
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -16,11 +21,11 @@ export async function POST(
   try {
     const { id } = await params;
 
-    // Get booking
+    // Get booking with payment info
     const booking = await db.booking.findUnique({
       where: { id },
       include: {
-        product: { select: { id: true, name: true, nameAr: true } },
+        product: { select: { id: true, name: true, nameAr: true, vendorId: true } },
         user: { select: { id: true, role: true } },
       },
     });
@@ -59,8 +64,8 @@ export async function POST(
       );
     }
 
-    // Only allow cancel if status is pending or confirmed
-    if (booking.status !== 'pending' && booking.status !== 'confirmed') {
+    // Only allow cancel if status is pending, confirmed, or active
+    if (!['pending', 'confirmed', 'active'].includes(booking.status)) {
       return NextResponse.json(
         {
           success: false,
@@ -89,50 +94,110 @@ export async function POST(
         refundAmount = Math.floor(booking.totalPrice / 2);
         refundPercent = 50;
       }
-      // else: 0% refund (< 24h)
     } else {
-      // No start date — full refund
       refundAmount = booking.totalPrice;
       refundPercent = 100;
     }
 
     const productName = booking.productName || booking.product?.nameAr || booking.product?.name || 'حجز';
+    const escrowWasHeld = booking.escrowStatus === 'held';
 
-    // Perform cancellation with refund in a transaction
-    await db.$transaction([
-      // Update booking status
+    // Find associated payment
+    const payment = booking.userId
+      ? await db.payment.findFirst({
+          where: { bookingId: id },
+          orderBy: { createdAt: 'desc' },
+        })
+      : null;
+
+    // Build transaction operations
+    const txOps: any[] = [
+      // Always update booking status
       db.booking.update({
         where: { id },
-        data: { status: 'cancelled' },
+        data: {
+          status: 'cancelled',
+          ...(escrowWasHeld ? { escrowStatus: 'refunded' } : {}),
+        },
       }),
-      // Refund to wallet (only if there's an amount to refund)
-      ...(refundAmount > 0
-        ? [
-            db.user.update({
-              where: { id: booking.userId! },
-              data: { walletBalance: { increment: refundAmount } },
-            }),
-            db.transaction.create({
-              data: {
-                userId: booking.userId!,
-                type: 'INCOME',
-                amount: refundAmount,
-                note: `استرداد إلغاء حجز "${productName}" — ${refundPercent}%`,
-              },
-            }),
-          ]
-        : []),
-    ]);
+    ];
+
+    // If escrow was held, update payment status too
+    if (escrowWasHeld && payment) {
+      txOps.push(
+        db.payment.update({
+          where: { id: payment.id },
+          data: { escrowStatus: 'refunded', status: 'refunded' },
+        }),
+        db.transaction.create({
+          data: {
+            userId: booking.userId!,
+            type: 'ESCROW_REFUNDED',
+            amount: booking.totalPrice,
+            referenceId: id,
+            note: `استرداد ضمان حجز "${productName}" — إلغاء تلقائي`,
+          },
+        })
+      );
+    }
+
+    // Wallet credit for refund amount (store credit)
+    if (refundAmount > 0 && booking.userId) {
+      txOps.push(
+        db.user.update({
+          where: { id: booking.userId },
+          data: { walletBalance: { increment: refundAmount } },
+        }),
+        db.transaction.create({
+          data: {
+            userId: booking.userId,
+            type: 'INCOME',
+            amount: refundAmount,
+            referenceId: id,
+            note: `استرداد إلغاء حجز "${productName}" — ${refundPercent}%`,
+          },
+        })
+      );
+    }
+
+    // Execute all operations atomically
+    await db.$transaction(txOps);
+
+    // Create RefundRecord for manual tracking (only if real money was in escrow)
+    let refundRecordId: string | null = null;
+    if (escrowWasHeld && payment) {
+      const refundRecord = await db.refundRecord.create({
+        data: {
+          bookingId: id,
+          paymentId: payment.id,
+          userId: booking.userId!,
+          amount: booking.totalPrice,
+          reason: 'cancelled',
+          status: 'pending_manual_transfer',
+          refundDeadline: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
+          processedBy: session.userId,
+          notes: `إلغاء تلقائي — سياسة استرداد ${refundPercent}%`,
+        },
+      });
+      refundRecordId = refundRecord.id;
+      logger.info('Booking Cancel', `RefundRecord created: ${refundRecord.id} for booking ${id}`);
+    }
 
     // Create notification for the user
-    await db.notification.create({
-      data: {
-        userId: booking.userId!,
-        type: 'booking',
-        title: 'تم إلغاء الحجز',
-        message: `تم إلغاء حجز "${productName}". مبلغ الاسترداد: ${refundAmount} د.ج (${refundPercent}%)`,
-      },
-    });
+    const notificationMsg = escrowWasHeld
+      ? `تم إلغاء حجز "${productName}". المبلغ محجوز في الضمان — سيتم التحويل خلال 48 ساعة (القانون 18-05 مادة 22).`
+      : `تم إلغاء حجز "${productName}". مبلغ الاسترداد: ${refundAmount} د.ج (${refundPercent}%)`;
+
+    if (booking.userId) {
+      await db.notification.create({
+        data: {
+          userId: booking.userId,
+          type: 'financial',
+          title: 'تم إلغاء الحجز',
+          message: notificationMsg,
+        },
+      });
+    }
 
     return NextResponse.json({
       success: true,
@@ -140,10 +205,14 @@ export async function POST(
       data: {
         id: booking.id,
         status: 'cancelled',
+        escrow_status: escrowWasHeld ? 'refunded' : booking.escrowStatus,
         refund_amount: refundAmount,
         refund_percent: refundPercent,
-        message:
-          refundPercent === 100
+        refund_record_id: refundRecordId,
+        escrow_was_held: escrowWasHeld,
+        message: escrowWasHeld
+          ? 'تم إلغاء الحجز — المبلغ محجوز وسيتم تحويله يدوياً خلال 48 ساعة'
+          : refundPercent === 100
             ? 'تم إلغاء الحجز واسترداد المبلغ كاملاً'
             : refundPercent === 50
               ? 'تم إلغاء الحجز واسترداد 50% من المبلغ'

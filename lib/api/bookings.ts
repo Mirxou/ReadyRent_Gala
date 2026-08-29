@@ -1,7 +1,7 @@
 import { sovereignClient } from './sovereign-client';
 
 export interface BookingCreateData {
-  product_id: number;
+  product_id: string;
   start_date: string;
   end_date: string;
   has_insurance: boolean;
@@ -9,14 +9,15 @@ export interface BookingCreateData {
 }
 
 export interface Booking {
-  id: number;
-  product_id: number;
-  product_name: string;
-  start_date: string;
-  end_date: string;
+  id: string;
+  product_id: string | null;
+  product_name: string | null;
+  start_date: string | null;
+  end_date: string | null;
   total_price: number;
   status: string;
   escrow_status: string;
+  created_at?: string;
 }
 
 export const bookingsApi = {
@@ -29,22 +30,22 @@ export const bookingsApi = {
   getAll: (params?: any) => 
     sovereignClient.get<Booking[]>('/bookings/', { params }),
 
-  getDetail: (id: number) => 
+  getDetail: (id: string) => 
     sovereignClient.get<Booking>(`/bookings/${id}/`),
 
-  update: (id: number, data: any) => 
+  update: (id: string, data: any) => 
     sovereignClient.patch<Booking>(`/bookings/${id}`, data),
 
   /** Alias used by dashboard/orders — updates a single status field */
-  updateStatus: (id: number, status: string) => 
+  updateStatus: (id: string, status: string) => 
     sovereignClient.patch<Booking>(`/bookings/${id}/`, { status }),
 
-  cancel: (id: number) => 
+  cancel: (id: string) => 
     sovereignClient.post<void>(`/bookings/${id}/cancel`),
 
-  calculateDeposit: (productId: number) => 
+  calculateDeposit: (productId: string) => 
     sovereignClient.get<{ deposit_amount: number }>('/bookings/calculate-deposit/', { 
-      params: new URLSearchParams({ product_id: productId.toString() }) 
+      params: new URLSearchParams({ product_id: productId }) 
     }),
 
   // Cart
@@ -53,14 +54,14 @@ export const bookingsApi = {
   addToCart: (data: { product_id: number; start_date: string; end_date: string }) => 
     sovereignClient.post<any>('/bookings/cart/items/', data),
   
-  removeFromCart: (itemId: number) => 
+  removeFromCart: (itemId: string) => 
     sovereignClient.delete<void>(`/bookings/cart/items/${itemId}/`),
 
   // Waitlist
   getWaitlist: () => sovereignClient.get<any>('/bookings/waitlist/'),
   addToWaitlist: (data: { product_id: number | string; start_date?: string; end_date?: string }) =>
     sovereignClient.post<any>('/bookings/waitlist/', data),
-  removeFromWaitlist: (id: number) =>
+  removeFromWaitlist: (id: string) =>
     sovereignClient.delete<void>(`/bookings/waitlist/${id}/`),
 
   // Aliases used by pages
@@ -68,6 +69,6 @@ export const bookingsApi = {
     sovereignClient.get<Booking>(`/bookings/${id}/`),
 
   // Agreements
-  generateAgreement: (bookingId: number) => 
+  generateAgreement: (bookingId: string) => 
     sovereignClient.post<any>(`/bookings/${bookingId}/agreement/create/`),
 };

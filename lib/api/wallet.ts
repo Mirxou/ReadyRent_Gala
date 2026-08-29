@@ -22,7 +22,7 @@ export const walletApi = {
   /**
    * Get current wallet balance (Available + Escrow)
    */
-  getBalance: () => sovereignClient.get<WalletBalance>('/payments/wallet/balance/'),
+  getBalance: () => sovereignClient.get<WalletBalance>('/wallet/'),
 
   /**
    * Get transaction history

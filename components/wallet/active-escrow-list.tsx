@@ -32,7 +32,15 @@ export function ActiveEscrowList({ bookings }: ActiveEscrowListProps) {
                 <p className="text-[10px] font-black uppercase text-muted-foreground">Contract #{b.id}</p>
                 <h4 className="font-bold text-sm tracking-tight">{b.product_name}</h4>
               </div>
-              <Badge className="bg-sovereign-gold/10 text-sovereign-gold border-0 text-[10px] font-black">HELD</Badge>
+              <Badge className={
+                b.escrow_status === 'released'
+                  ? 'bg-emerald-500/10 text-emerald-400 border-0 text-[10px] font-black'
+                  : b.escrow_status === 'refunded'
+                    ? 'bg-sky-500/10 text-sky-400 border-0 text-[10px] font-black'
+                    : 'bg-sovereign-gold/10 text-sovereign-gold border-0 text-[10px] font-black'
+              }>
+                {b.escrow_status === 'released' ? 'محرر' : b.escrow_status === 'refunded' ? 'مسترد' : 'محتجز'}
+              </Badge>
             </div>
             <div className="flex justify-between items-end">
               <div className="space-y-1">

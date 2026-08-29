@@ -10,6 +10,7 @@ export interface WalletTransaction {
 export interface WalletBooking {
   id: string | number;
   status: string;
+  escrow_status?: string;
   deposit_amount?: number;
   total_price?: number;
   product_name?: string;
