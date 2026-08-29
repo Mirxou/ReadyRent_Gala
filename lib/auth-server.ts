@@ -149,7 +149,7 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
 }
 
 export async function hashPassword(password: string): Promise<string> {
-  return bcrypt.hash(password, 10);
+  return bcrypt.hash(password, 12);
 }
 
 // ──── Authentication ────

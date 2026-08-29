@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
 import { logger } from '@/lib/logger';
+import { readValidatedBody } from '@/lib/rate-limiter';
 
 // ═══════════════════════════════════════════════════════════════
 // POST /api/verification/submit — Submit face photo for verification
@@ -12,8 +13,12 @@ export async function POST(request: Request) {
     const session = await getSessionFromRequest(request);
     if (!session) return authRequiredResponse();
 
-    // Parse body
-    const body = await request.json();
+    // Parse body with size limit (5MB max for base64 face photo)
+    const bodyResult = await readValidatedBody(request, 5 * 1024 * 1024);
+    if ('error' in bodyResult) {
+      return NextResponse.json(bodyResult, { status: bodyResult.status });
+    }
+    const body = JSON.parse(bodyResult.text);
     const { face_photo } = body as { face_photo?: string };
 
     if (!face_photo || typeof face_photo !== 'string') {
@@ -28,7 +33,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // Validate data URL format
+    // Validate data URL format (block SVG — stored XSS risk)
     if (!face_photo.startsWith('data:image/')) {
       return NextResponse.json(
         {
@@ -36,6 +41,20 @@ export async function POST(request: Request) {
           dignity_preserved: true,
           message_ar: 'صيغة الصورة غير صالحة',
           message_en: 'Invalid image format',
+        },
+        { status: 400 }
+      );
+    }
+
+    // Block SVG explicitly — SVG can contain embedded JavaScript (stored XSS)
+    const ALLOWED_MIME_PREFIXES = ['data:image/jpeg', 'data:image/png', 'data:image/webp', 'data:image/gif'];
+    if (!ALLOWED_MIME_PREFIXES.some(prefix => face_photo.startsWith(prefix))) {
+      return NextResponse.json(
+        {
+          success: false,
+          dignity_preserved: true,
+          message_ar: 'صيغة الصورة غير مدعومة. استخدم JPG أو PNG أو WebP أو GIF',
+          message_en: 'Unsupported image format. Use JPG, PNG, WebP, or GIF',
         },
         { status: 400 }
       );

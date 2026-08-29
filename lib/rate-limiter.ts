@@ -99,6 +99,34 @@ export function checkContactRateLimit(ip: string): RateLimitResult {
   return rateLimit(`contact:${ip}`, 3, 60 * 60 * 1000);
 }
 
+// ──── Request body size limit (DoS prevention) ────
+
+/**
+ * Read and validate request body size.
+ * Reads the full body as text and rejects if it exceeds maxBytes.
+ * Call BEFORE JSON.parse to prevent DoS via large payloads.
+ *
+ * @param request - The Request object
+ * @param maxBytes - Maximum allowed body size in bytes (default 100KB)
+ * @returns Object with `text` if valid, or `error` object if too large
+ */
+export async function readValidatedBody(
+  request: Request,
+  maxBytes = 100_000
+): Promise<{ text: string } | { error: true; status: 413; code: string; message_ar: string; message_en: string }> {
+  const text = await request.text();
+  if (text.length > maxBytes) {
+    return {
+      error: true,
+      status: 413,
+      code: 'PAYLOAD_TOO_LARGE',
+      message_ar: 'بيانات كبيرة جداً',
+      message_en: 'Request body too large',
+    };
+  }
+  return { text };
+}
+
 // ──── IP extraction helper ────
 export function getClientIp(request: Request): string {
   return (

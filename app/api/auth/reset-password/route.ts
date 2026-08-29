@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { hashPassword } from '@/lib/auth-server';
 import { logger } from '@/lib/logger';
+import { readValidatedBody } from '@/lib/rate-limiter';
 
 // ═══════════════════════════════════════════════════════════════
 // POST /api/auth/reset-password — Reset password using a token
@@ -10,7 +11,12 @@ import { logger } from '@/lib/logger';
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
+    // Body size limit (1KB is plenty for token + 2 passwords)
+    const bodyResult = await readValidatedBody(request, 1024);
+    if ('error' in bodyResult) {
+      return NextResponse.json(bodyResult, { status: bodyResult.status });
+    }
+    const body = JSON.parse(bodyResult.text);
     const { token, password, confirmPassword } = body;
 
     // Validate required fields

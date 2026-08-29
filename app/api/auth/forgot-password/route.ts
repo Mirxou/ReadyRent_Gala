@@ -4,7 +4,7 @@ import crypto from 'crypto';
 import { logger } from '@/lib/logger';
 import { sendEmail } from '@/lib/email';
 import { passwordResetEmail } from '@/lib/email-templates';
-import { checkSmsRateLimit, getClientIp } from '@/lib/rate-limiter';
+import { checkSmsRateLimit, getClientIp, readValidatedBody } from '@/lib/rate-limiter';
 
 // ═══════════════════════════════════════════════════════════════
 // POST /api/auth/forgot-password — Request a password reset
@@ -24,7 +24,11 @@ export async function POST(request: Request) {
       );
     }
 
-    const body = await request.json();
+    const bodyResult = await readValidatedBody(request, 1024);
+    if ('error' in bodyResult) {
+      return NextResponse.json(bodyResult, { status: bodyResult.status });
+    }
+    const body = JSON.parse(bodyResult.text);
     const { email } = body;
 
     if (!email || typeof email !== 'string') {

@@ -31,6 +31,12 @@ export async function uploadImage(
     throw new Error('CLOUDINARY_CLOUD_NAME not configured');
   }
 
+  // Block SVG uploads (stored XSS risk — SVG can contain embedded JavaScript)
+  const isSvg = buffer.toString('utf-8', 0, Math.min(256)).includes('<svg');
+  if (isSvg) {
+    throw new Error('SVG files are not allowed for security reasons');
+  }
+
   return new Promise((resolve, reject) => {
     cloudinary.uploader
       .upload_stream(

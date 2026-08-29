@@ -1749,3 +1749,43 @@ Stage Summary:
 - Login body size: 413 on oversized payload
 - WebSocket: cookie-based auth with HMAC verification + 10s timeout
 - Lint: 0 errors, 1 pre-existing warning
+---
+Task ID: 2-1
+Agent: Security Hardening Agent
+Task: المراجعة الميدانية + إصلاح ثغرات الأمان — الخطوة 2.1
+
+Work Log:
+- قراءة وثيقة 09-SECURITY-HARDENING.md (15 ثغرة مُوثقة)
+- فحص كل ملف مذكور في الوثيقة مقارنةً بالكود الفعلي:
+  - C1: bank-card-form.tsx — غير موجود (محذوف مسبقًا) ✅
+  - C2: webhook/route.ts — HMAC مُنفذ عبر Chargily SDK verifySignature() ✅
+  - C3: notifications-service/index.ts — مصادقة كاملة (cookie + explicit auth + 10s timeout) ✅
+  - H1: 9 API routes مفحوصة — كلها تتحقق من الملكية ✅
+  - H2: rate-limiter.ts — 8 أنواع rate limits + مستخدمة في 10+ routes ✅
+  - H3: CORS مقيّد في next.config.ts + notifications-service ✅
+  - H4: CSP شامل في next.config.ts + 5 security headers ✅
+  - H5: payment-security.ts — غير موجود (محذوف مسبقًا) ✅
+  - M1: bcrypt rounds = 10 (يحتاج 12) ❌ → مُصلح
+  - M2: crypto.randomUUID() + HMAC — مقبول ✅
+  - M3: Account lockout مُنفذ (10 محاولات ← قفل 30 دقيقة) ✅
+  - M4: Cookie SameSite=lax + httpOnly + secure(prod) ✅
+  - M5: SVG يمر في verification/submit ❌ → مُصلح + إضافة حظر SVG في upload.ts
+  - M6: كل رسائل الخطأ عامة (dignity_preserved: true) ✅
+  - M7: body size limit فقط في login/register ❌ → مُصلح (أضيف readValidatedBody + طبق على 4 routes)
+- النتيجة: 11/15 مُصلحة مسبقًا، 4 إصلاحات جديدة مطلوبة
+
+الإصلاحات المُنفذة:
+1. M1: auth-server.ts — bcrypt rounds 10 → 12 (سطر واحد)
+2. M5: verification/submit/route.ts — حظر SVG (allowlist MIME: jpeg/png/webp/gif)
+3. M5: lib/upload.ts — حظر SVG في Cloudinary upload (فحص <svg في أول 256 bytes)
+4. M7: lib/rate-limiter.ts — إضافة readValidatedBody() helper
+5. M7: auth/reset-password/route.ts — body limit 1KB
+6. M7: auth/forgot-password/route.ts — body limit 1KB
+7. M7: contact/route.ts — body limit 10KB
+8. M7: verification/submit/route.ts — body limit 5MB (base64 صورة)
+9. H4+: next.config.ts — إضافة Strict-Transport-Security header (HSTS)
+
+Stage Summary:
+- 15/15 ثغرة أمنية مُعالَجة (11 كانت مُصلحة مسبقًا + 4 إصلحت الآن)
+- lint: 0 errors, 1 warning (React Hook Form watch — معروف غير قابل للإصلاح)
+- Files changed: auth-server.ts, verification/submit/route.ts, upload.ts, rate-limiter.ts, reset-password/route.ts, forgot-password/route.ts, contact/route.ts, next.config.ts

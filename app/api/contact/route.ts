@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { logger } from '@/lib/logger';
-import { checkContactRateLimit, getClientIp } from '@/lib/rate-limiter';
+import { checkContactRateLimit, getClientIp, readValidatedBody } from '@/lib/rate-limiter';
 
 // ═══════════════════════════════════════════════════════════════
 // POST /api/contact — Submit a contact message (no auth required)
@@ -18,7 +18,12 @@ export async function POST(request: Request) {
       );
     }
 
-    const body = await request.json();
+    // Body size limit (10KB max for contact form)
+    const bodyResult = await readValidatedBody(request, 10_000);
+    if ('error' in bodyResult) {
+      return NextResponse.json(bodyResult, { status: bodyResult.status });
+    }
+    const body = JSON.parse(bodyResult.text);
     const { name, email, subject, message } = body;
 
     if (!name || !email || !message) {
