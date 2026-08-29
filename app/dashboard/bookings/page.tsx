@@ -164,7 +164,25 @@ export default function BookingsPage() {
                           </p>
                         )}
                       </div>
-                      {getStatusBadge(booking.status)}
+                      <div className="flex gap-2">
+                        {getStatusBadge(booking.status)}
+                        {booking.escrow_status && booking.escrow_status !== 'none' && (
+                          <Badge variant="outline" className={
+                            booking.escrow_status === 'held'
+                              ? 'bg-amber-100 text-amber-800 border-amber-200'
+                              : booking.escrow_status === 'released'
+                                ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
+                                : booking.escrow_status === 'refunded'
+                                  ? 'bg-sky-100 text-sky-800 border-sky-200'
+                                  : ''
+                          }>
+                            {booking.escrow_status === 'held' ? 'محتجز'
+                              : booking.escrow_status === 'released' ? 'محرر'
+                              : booking.escrow_status === 'refunded' ? 'مسترد'
+                              : booking.escrow_status}
+                          </Badge>
+                        )}
+                      </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

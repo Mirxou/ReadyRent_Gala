@@ -33,7 +33,7 @@ export const walletApi = {
     if (params?.limit) searchParams.append('limit', params.limit.toString());
     if (params?.type) searchParams.append('type', params.type);
     
-    return sovereignClient.get<Transaction[]>(`/payments/wallet/transactions/?${searchParams.toString()}`);
+    return sovereignClient.get<Transaction[]>(`/wallet/transactions/?${searchParams.toString()}`);
   },
 
   /**

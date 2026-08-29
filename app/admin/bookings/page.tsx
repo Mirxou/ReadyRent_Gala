@@ -118,7 +118,7 @@ export default function AdminBookingsPage() {
               <option value="">جميع الحالات</option>
               <option value="pending">قيد الانتظار</option>
               <option value="confirmed">مؤكد</option>
-              <option value="in_use">قيد الاستخدام</option>
+              <option value="active">نشط</option>
               <option value="completed">مكتمل</option>
               <option value="cancelled">ملغي</option>
             </select>

@@ -20,6 +20,7 @@ interface Booking {
   end_date: string;
   total_price: number;
   status: string;
+  escrow_status?: string;
   created_at: string;
 }
 
@@ -34,7 +35,7 @@ export function BookingTable({ bookings, onStatusUpdate, onRefresh }: BookingTab
     const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
       pending: { label: 'قيد الانتظار', variant: 'outline' },
       confirmed: { label: 'مؤكد', variant: 'default' },
-      in_use: { label: 'قيد الاستخدام', variant: 'default' },
+      active: { label: 'نشط', variant: 'default' },
       completed: { label: 'مكتمل', variant: 'secondary' },
       cancelled: { label: 'ملغي', variant: 'destructive' },
     };
@@ -49,6 +50,18 @@ export function BookingTable({ bookings, onStatusUpdate, onRefresh }: BookingTab
       month: 'short',
       day: 'numeric',
     });
+  };
+
+  const getEscrowBadge = (escrowStatus?: string) => {
+    if (!escrowStatus || escrowStatus === 'none') return null;
+    const escrowConfig: Record<string, { label: string; className: string }> = {
+      held: { label: 'محتجز', className: 'bg-amber-100 text-amber-800 border-amber-200' },
+      released: { label: 'محرر', className: 'bg-emerald-100 text-emerald-800 border-emerald-200' },
+      refunded: { label: 'مسترد', className: 'bg-sky-100 text-sky-800 border-sky-200' },
+    };
+    const cfg = escrowConfig[escrowStatus];
+    if (!cfg) return null;
+    return <Badge variant="outline" className={cfg.className}>{cfg.label}</Badge>;
   };
 
   const getTotalDays = (booking: Booking) => {
@@ -78,6 +91,7 @@ export function BookingTable({ bookings, onStatusUpdate, onRefresh }: BookingTab
             <TableHead>المدة</TableHead>
             <TableHead>السعر</TableHead>
             <TableHead>الحالة</TableHead>
+            <TableHead>الضمان</TableHead>
             <TableHead>التاريخ</TableHead>
             <TableHead className="text-left">الإجراءات</TableHead>
           </TableRow>
@@ -94,6 +108,7 @@ export function BookingTable({ bookings, onStatusUpdate, onRefresh }: BookingTab
               <TableCell>{getTotalDays(booking)} يوم</TableCell>
               <TableCell>{Number(booking.total_price).toFixed(0)} دج</TableCell>
               <TableCell>{getStatusBadge(booking.status)}</TableCell>
+              <TableCell>{getEscrowBadge(booking.escrow_status)}</TableCell>
               <TableCell>{formatDate(booking.created_at)}</TableCell>
               <TableCell>
                 <BookingActions

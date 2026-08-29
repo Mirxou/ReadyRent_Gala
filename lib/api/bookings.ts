@@ -51,7 +51,7 @@ export const bookingsApi = {
   // Cart
   getCart: () => sovereignClient.get<any>('/bookings/cart/'),
   
-  addToCart: (data: { product_id: number; start_date: string; end_date: string }) => 
+  addToCart: (data: { product_id: string; start_date: string; end_date: string }) => 
     sovereignClient.post<any>('/bookings/cart/items/', data),
   
   removeFromCart: (itemId: string) => 

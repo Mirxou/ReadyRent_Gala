@@ -4,7 +4,7 @@ import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
 import { logger } from '@/lib/logger';
 
 // ═══════════════════════════════════════════════════════════════
-// GET /api/wallet — Wallet balance & recent transactions
+// GET /api/wallet — Wallet balance (available + escrow split)
 // ═══════════════════════════════════════════════════════════════
 export async function GET(request: Request) {
   try {
@@ -23,25 +23,20 @@ export async function GET(request: Request) {
     );
   }
 
-  const balance = user.walletBalance ?? 0;
+  const totalWallet = user.walletBalance ?? 0;
 
-  const transactions = await db.transaction.findMany({
-    where: { userId: session.userId },
-    orderBy: { createdAt: 'desc' },
-    take: 50,
+  // Calculate escrow amount: sum of booking prices where escrow is 'held'
+  const heldBookings = await db.booking.findMany({
+    where: { userId: session.userId, escrowStatus: 'held' },
+    select: { totalPrice: true },
   });
+  const escrowHeld = heldBookings.reduce((sum, b) => sum + b.totalPrice, 0);
 
   const data = {
-    balance,
-    transactions: transactions.map((t) => ({
-      id: t.id,
-      user_id: t.userId,
-      type: t.type,
-      amount: t.amount,
-      note: t.note,
-      hash: t.hash,
-      created_at: t.createdAt.toISOString(),
-    })),
+    available: totalWallet,
+    escrow: escrowHeld,
+    total: totalWallet + escrowHeld,
+    currency: 'DZD',
   };
 
   return NextResponse.json({ success: true, dignity_preserved: true, data });

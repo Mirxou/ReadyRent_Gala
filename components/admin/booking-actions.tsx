@@ -57,7 +57,7 @@ export function BookingActions({ booking, onStatusUpdate, onRefresh }: BookingAc
           size="sm"
           variant="ghost"
           className="h-7 w-7 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-          onClick={() => handleUpdateStatus('in_use')}
+          onClick={() => handleUpdateStatus('active')}
           title="بدء الاستخدام"
         >
           <Check className="h-4 w-4" />
