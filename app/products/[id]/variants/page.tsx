@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -63,7 +63,7 @@ export default function ProductVariantsPage() {
     is_active: true,
   });
 
-  const loadVariants = async () => {
+  const loadVariants = useCallback(async () => {
     try {
       const response = await api.get(`/products/${params.id}/variants/`);
       const data = response.data?.results ?? response.data ?? [];
@@ -77,7 +77,7 @@ export default function ProductVariantsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [params.id, toast]);
 
   // ── Role guard (before any API calls) ──
   const hasRole = isAuthenticated && (user?.role === 'admin' || user?.role === 'staff' || user?.role === 'vendor');
@@ -86,7 +86,7 @@ export default function ProductVariantsPage() {
     if (hasRole) {
       requestAnimationFrame(() => { loadVariants(); });
     }
-  }, [params.id, hasRole]);
+  }, [params.id, hasRole, loadVariants]);
 
   if (!hasRole) {
     return (

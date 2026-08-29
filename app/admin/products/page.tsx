@@ -42,9 +42,9 @@ export default function AdminProductsPage() {
   const deleteMutation = useMutation({
     mutationFn: (id: string) => adminApi.deleteProduct(id),
     onMutate: () => { setDeleteTarget(null); },
-    onSuccess: (res: any) => {
+    onSuccess: (res: Record<string, unknown>) => {
       if (res?.dignity_preserved || res?.error) {
-        toast.error(res?.message_ar || res?.error || 'حدث خطأ أثناء حذف المنتج');
+        toast.error((res?.message_ar as string) || (res?.error as string) || 'حدث خطأ أثناء حذف المنتج');
         return;
       }
       queryClient.invalidateQueries({ queryKey: ['admin-products'] });

@@ -1,5 +1,4 @@
 import { sovereignClient } from './sovereign-client';
-import { SovereignResponse } from '@/types/sovereign';
 
 export interface User {
   id: number;
@@ -85,22 +84,22 @@ export const verificationApi = {
       headers: {}, 
     }),
   
-  verifyAddress: (data: any) => 
+  verifyAddress: (data: unknown) => 
     sovereignClient.post<void>('/users/verify-address/', data),
 
   /** Get current verification status (used by use-verification.ts) */
   getStatus: () =>
-    sovereignClient.get<any>('/users/verification/status/'),
+    sovereignClient.get<unknown>('/users/verification/status/'),
 
   /** Submit verification with captured photo (used by use-verification.ts) */
   submit: (photo: string) =>
-    sovereignClient.post<any>('/users/verification/submit/', { photo }),
+    sovereignClient.post<unknown>('/users/verification/submit/', { photo }),
 
   /** Get pending verification requests for community voting (used by use-verification.ts) */
   getPending: () =>
-    sovereignClient.get<any[]>('/users/verification/pending/'),
+    sovereignClient.get<unknown[]>('/users/verification/pending/'),
 
   /** Vote on a community verification request (used by use-verification.ts) */
   vote: (verificationId: number, vote: string, comment?: string) =>
-    sovereignClient.post<any>(`/users/verification/${verificationId}/vote/`, { vote, comment }),
+    sovereignClient.post<unknown>(`/users/verification/${verificationId}/vote/`, { vote, comment })
 };

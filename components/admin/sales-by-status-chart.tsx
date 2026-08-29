@@ -66,7 +66,7 @@ export function SalesByStatusChart({ data }: SalesByStatusChartProps) {
               })}
             </Pie>
             <Tooltip
-              formatter={(value: any, name: any, props: any) => {
+              formatter={(value: number, name: string, props: { payload?: { revenue?: number } }) => {
                 const numValue = value || 0;
                 const revenue = props.payload?.revenue || 0;
                 return [

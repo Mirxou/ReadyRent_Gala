@@ -4,6 +4,7 @@ import { useRef, useState, useEffect } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { Star, MapPin, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { servicesApi } from '@/lib/api';
 import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
 import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
@@ -105,10 +106,12 @@ export function FeaturedServices({ selectedCategory, onBookService }: FeaturedSe
                   className="overflow-hidden rounded-[2rem] hover:border-purple-400/20 transition-all duration-500 h-full flex flex-col"
                 >
                   <div className="relative h-48 overflow-hidden">
-                    <img
+                    <Image
                       src={service.image}
                       alt={service.name_ar}
                       className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
+                      fill
+                      unoptimized
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-sovereign-obsidian via-transparent to-transparent" />
                     {service.is_verified && (

@@ -24,7 +24,7 @@ export function ReviewForm({ productId, bookingId, onSuccess }: ReviewFormProps)
 
   const createReviewMutation = useMutation({
     mutationFn: () => reviewsApi.create({ product_id: productId, booking_id: bookingId || 0, rating, title, comment }),
-    onSuccess: (res: any) => {
+    onSuccess: (res: { dignity_preserved?: boolean; error?: string; message_ar?: string }) => {
       if (res?.dignity_preserved || res?.error) {
         toast.error(res?.message_ar || res?.error || 'حدث خطأ أثناء إضافة التقييم');
         return;

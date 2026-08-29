@@ -34,7 +34,7 @@ export const reviewsApi = {
   },
 
   /** List reviews — used by /products/[id] page */
-  getAll: (params?: Record<string, any>) => {
+  getAll: (params?: Record<string, unknown>) => {
     const q = new URLSearchParams();
     if (params?.product_id) q.append('product_id', String(params.product_id));
     if (params?.page) q.append('page', String(params.page));

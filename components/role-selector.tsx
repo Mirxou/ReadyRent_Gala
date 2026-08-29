@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -20,6 +20,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 interface RoleSelectorProps {
   userId: number;
@@ -53,38 +54,34 @@ export default function RoleSelector({ userId, onRoleAssigned }: RoleSelectorPro
   const [role, setRole] = useState<string>('');
   const [branchId, setBranchId] = useState<string>('');
   const [department, setDepartment] = useState('');
-  const [branches, setBranches] = useState<Branch[]>([]);
   const [loading, setLoading] = useState(false);
-  const [existingRoles, setExistingRoles] = useState<StaffRole[]>([]);
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    fetchBranches();
-    fetchExistingRoles();
-  }, [userId]);
-
-  const fetchBranches = async () => {
-    try {
+  const { data: branchesData } = useQuery({
+    queryKey: ['branches'],
+    queryFn: async () => {
       const response = await fetch('/api/branches/');
       if (response.ok) {
         const data = await response.json();
-        setBranches(data.results || data);
+        return (data.results || data) as Branch[];
       }
-    } catch (error) {
-      console.error('Error fetching branches:', error);
-    }
-  };
+      return [];
+    },
+  });
+  const branches = branchesData ?? [];
 
-  const fetchExistingRoles = async () => {
-    try {
+  const { data: existingRolesData } = useQuery({
+    queryKey: ['staff-roles', userId],
+    queryFn: async () => {
       const response = await fetch(`/api/users/staff/roles/?user=${userId}`);
       if (response.ok) {
         const data = await response.json();
-        setExistingRoles(data.results || data);
+        return (data.results || data) as StaffRole[];
       }
-    } catch (error) {
-      console.error('Error fetching existing roles:', error);
-    }
-  };
+      return [];
+    },
+  });
+  const existingRoles = existingRolesData ?? [];
 
   const handleAssignRole = async () => {
     if (!role) {
@@ -114,7 +111,7 @@ export default function RoleSelector({ userId, onRoleAssigned }: RoleSelectorPro
         setRole('');
         setBranchId('');
         setDepartment('');
-        fetchExistingRoles();
+        queryClient.invalidateQueries({ queryKey: ['staff-roles', userId] });
         onRoleAssigned?.();
       } else {
         const error = await response.json();
@@ -144,7 +141,7 @@ export default function RoleSelector({ userId, onRoleAssigned }: RoleSelectorPro
       });
 
       if (response.ok) {
-        fetchExistingRoles();
+        queryClient.invalidateQueries({ queryKey: ['staff-roles', userId] });
         onRoleAssigned?.();
       }
     } catch (error) {
@@ -263,5 +260,3 @@ export default function RoleSelector({ userId, onRoleAssigned }: RoleSelectorPro
     </div>
   );
 }
-
-

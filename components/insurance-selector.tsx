@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
-import { Shield, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Shield, CheckCircle2 } from 'lucide-react';
 
 interface InsurancePlan {
   id: number;
@@ -27,6 +27,13 @@ interface InsurancePlan {
   calculated_coverage?: number;
 }
 
+interface InsuranceCalculation {
+  insurance_price: number;
+  max_coverage: number;
+  deductible: number;
+  net_coverage: number;
+}
+
 interface InsuranceSelectorProps {
   productId: number;
   productValue: number;
@@ -35,49 +42,40 @@ interface InsuranceSelectorProps {
 }
 
 export function InsuranceSelector({ productId, productValue, onSelect, selectedPlanId }: InsuranceSelectorProps) {
-  const [plans, setPlans] = useState<InsurancePlan[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedPlan, setSelectedPlan] = useState<InsurancePlan | null>(null);
-  const [calculation, setCalculation] = useState<any>(null);
+  const [selectedPlanIdInternal, setSelectedPlanIdInternal] = useState<number | null>(null);
 
-  useEffect(() => {
-    loadPlans();
-  }, [productId]);
+  const activeSelectedPlanId = selectedPlanId ?? selectedPlanIdInternal;
 
-  useEffect(() => {
-    if (selectedPlanId && plans.length > 0) {
-      const plan = plans.find(p => p.id === selectedPlanId);
-      if (plan) {
-        setSelectedPlan(plan);
-        calculateInsurance(plan);
-      }
-    }
-  }, [selectedPlanId, plans]);
-
-  const loadPlans = async () => {
-    try {
+  const { data: plansData, isLoading: loading } = useQuery({
+    queryKey: ['insurance-plans', productId],
+    queryFn: async () => {
       const response = await api.get(`/warranties/insurance/plans/?product_id=${productId}`);
       const data = response.data?.results ?? response.data ?? [];
-      setPlans(data as InsurancePlan[]);
-    } catch (error: any) {
-      console.error('Error loading insurance plans:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+      return data as InsurancePlan[];
+    },
+  });
 
-  const calculateInsurance = async (plan: InsurancePlan) => {
-    try {
-      const response = await api.get(`/warranties/insurance/calculator/?plan_id=${plan.id}&product_value=${productValue}`);
-      setCalculation(response.data);
-    } catch (error: any) {
-      console.error('Error calculating insurance:', error);
-    }
-  };
+  const plans = useMemo(() => plansData ?? [], [plansData]);
+
+  const selectedPlan = useMemo(() => {
+    if (!activeSelectedPlanId || plans.length === 0) return null;
+    return plans.find(p => p.id === activeSelectedPlanId) || null;
+  }, [activeSelectedPlanId, plans]);
+
+  const { data: calcData } = useQuery({
+    queryKey: ['insurance-calculation', selectedPlan?.id, productValue],
+    queryFn: async () => {
+      if (!selectedPlan) return null;
+      const response = await api.get(`/warranties/insurance/calculator/?plan_id=${selectedPlan.id}&product_value=${productValue}`);
+      return response.data as InsuranceCalculation;
+    },
+    enabled: !!selectedPlan,
+  });
+
+  const activeCalculation = calcData;
 
   const handlePlanSelect = (plan: InsurancePlan) => {
-    setSelectedPlan(plan);
-    calculateInsurance(plan);
+    setSelectedPlanIdInternal(plan.id);
     if (onSelect) {
       onSelect(plan);
     }
@@ -180,25 +178,25 @@ export function InsuranceSelector({ productId, productValue, onSelect, selectedP
           ))}
         </div>
 
-        {calculation && selectedPlan && (
+        {activeCalculation && selectedPlan && (
           <div className="bg-primary/5 border border-primary rounded-lg p-4">
             <p className="font-medium mb-2">تفاصيل التأمين المحدد</p>
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <p className="text-muted-foreground">سعر التأمين</p>
-                <p className="font-bold text-lg">{calculation.insurance_price.toFixed(2)} دج</p>
+                <p className="font-bold text-lg">{activeCalculation.insurance_price.toFixed(2)} دج</p>
               </div>
               <div>
                 <p className="text-muted-foreground">الحد الأقصى للتغطية</p>
-                <p className="font-bold text-lg">{calculation.max_coverage.toFixed(2)} دج</p>
+                <p className="font-bold text-lg">{activeCalculation.max_coverage.toFixed(2)} دج</p>
               </div>
               <div>
                 <p className="text-muted-foreground">الخصم</p>
-                <p className="font-medium">{calculation.deductible.toFixed(2)} دج</p>
+                <p className="font-medium">{activeCalculation.deductible.toFixed(2)} دج</p>
               </div>
               <div>
                 <p className="text-muted-foreground">التغطية الصافية</p>
-                <p className="font-medium">{calculation.net_coverage.toFixed(2)} دج</p>
+                <p className="font-medium">{activeCalculation.net_coverage.toFixed(2)} دج</p>
               </div>
             </div>
           </div>
@@ -207,5 +205,3 @@ export function InsuranceSelector({ productId, productValue, onSelect, selectedP
     </Card>
   );
 }
-
-

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { contractsApi, Contract } from '@/lib/api/contracts';
 import { ContractViewer } from '@/components/contract/contract-viewer';
@@ -15,23 +15,22 @@ export default function ContractPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (id) {
-      loadContract();
-    }
-  }, [id]);
-
-  const loadContract = async () => {
+  const loadContract = useCallback(async () => {
     try {
-      setLoading(true);
       const res = await contractsApi.getContract(id as string);
       setContract(res.data);
-    } catch (err) {
+    } catch (_err) {
       setError('تعذر تحميل العقد. يرجى التأكد من الرابط أو المحاولة لاحقاً.');
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
+
+  useEffect(() => {
+    if (id) {
+      requestAnimationFrame(() => { loadContract(); });
+    }
+  }, [id, loadContract]);
 
   const handleSign = async (signatureData: string) => {
     if (!id) return;
@@ -42,7 +41,7 @@ export default function ContractPage() {
       setTimeout(() => {
         router.push('/wallet');
       }, 3000);
-    } catch (err) {
+    } catch (_err) {
       throw new Error('فشل توقيع العقد');
     }
   };

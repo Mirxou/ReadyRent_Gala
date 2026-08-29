@@ -1,6 +1,7 @@
 "use client";
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion, useInView } from 'framer-motion';
 import { useRef, useState, useEffect } from 'react';
 import { SovereignButton } from "@/shared/components/sovereign/sovereign-button";
@@ -144,11 +145,13 @@ function FeaturedVendors() {
                     <div className="relative z-10 space-y-5">
                       <div className="flex items-start gap-4">
                         {/* Avatar */}
-                        <div className="w-16 h-16 rounded-2xl overflow-hidden border border-white/10 group-hover:border-emerald-400/30 transition-colors flex-shrink-0">
-                          <img
+                        <div className="w-16 h-16 rounded-2xl overflow-hidden border border-white/10 group-hover:border-emerald-400/30 transition-colors flex-shrink-0 relative">
+                          <Image
                             src={vendor.avatar}
                             alt={vendor.name_ar}
                             className="w-full h-full object-cover"
+                            fill
+                            unoptimized
                           />
                         </div>
                         <div className="flex-1 min-w-0">
@@ -274,11 +277,13 @@ function FeaturedArtisans() {
                   >
                     <div className="relative z-10 space-y-4">
                       {/* Avatar */}
-                      <div className="w-20 h-20 mx-auto rounded-full overflow-hidden border-2 border-white/10 group-hover:border-emerald-400/50 transition-colors">
-                        <img
+                      <div className="w-20 h-20 mx-auto rounded-full overflow-hidden border-2 border-white/10 group-hover:border-emerald-400/50 transition-colors relative">
+                        <Image
                           src={artisan.avatar}
                           alt={artisan.name_ar}
                           className="w-full h-full object-cover"
+                          fill
+                          unoptimized
                         />
                       </div>
 

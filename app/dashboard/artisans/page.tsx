@@ -24,6 +24,7 @@ import { cn } from '@/lib/utils';
 import { SovereignGlow } from '@/shared/components/sovereign/sovereign-sparkle';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface Artisan {
   id?: string;
@@ -128,9 +129,9 @@ export default function ArtisansPage() {
 
                     <div className="relative z-10 space-y-6">
                       <div className="flex justify-between items-start">
-                        <div className="w-20 h-20 rounded-3xl bg-white/5 border border-white/5 overflow-hidden shadow-2xl transform group-hover:scale-110 transition-transform duration-700">
+                        <div className="w-20 h-20 rounded-3xl bg-white/5 border border-white/5 overflow-hidden shadow-2xl transform group-hover:scale-110 transition-transform duration-700 relative">
                           {artisan.avatar ? (
-                            <img src={artisan.avatar} alt="" className="w-full h-full object-cover" />
+                            <Image src={artisan.avatar} alt="" className="w-full h-full object-cover" fill unoptimized />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-muted-foreground opacity-30">
                               <Users className="w-10 h-10" />

@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { api } from '@/lib/api';
 import { CheckCircle2 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 
 interface ProductVariant {
   id: number;
@@ -28,40 +29,39 @@ interface VariantSelectorProps {
 }
 
 export function VariantSelector({ productId, onSelect, selectedVariantId }: VariantSelectorProps) {
-  const [variants, setVariants] = useState<ProductVariant[]>([]);
-  const [loading, setLoading] = useState(true);
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
   const [selectedSize, setSelectedSize] = useState<string>('');
   const [selectedColor, setSelectedColor] = useState<string>('');
 
-  const loadVariants = async () => {
-    try {
+  const { data: variantsData, isLoading: loading } = useQuery({
+    queryKey: ['product-variants', productId],
+    queryFn: async () => {
       const response = await api.get(`/products/${productId}/variants/`);
       const data = response.data?.results ?? response.data ?? [];
-      setVariants(data as ProductVariant[]);
-    } catch (error: unknown) {
-      console.error('Error loading variants:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+      return data as ProductVariant[];
+    },
+  });
 
-  useEffect(() => {
-    requestAnimationFrame(() => { loadVariants(); });
-  }, [productId]);
+  const variants = variantsData ?? [];
 
-  useEffect(() => {
-    if (selectedVariantId && variants.length > 0) {
+  // Sync selected variant from prop
+  const { data: syncedVariant } = useQuery({
+    queryKey: ['variant-sync', selectedVariantId, variants],
+    queryFn: async () => {
+      if (!selectedVariantId || variants.length === 0) return null;
       const variant = variants.find(v => v.id === selectedVariantId);
       if (variant) {
-        requestAnimationFrame(() => {
-          setSelectedVariant(variant);
-          setSelectedSize(variant.size);
-          setSelectedColor(variant.color);
-        });
+        setSelectedVariant(variant);
+        setSelectedSize(variant.size);
+        setSelectedColor(variant.color);
       }
-    }
-  }, [selectedVariantId, variants]);
+      return variant || null;
+    },
+    enabled: !!selectedVariantId && variants.length > 0,
+  });
+
+  // Use synced variant if available
+  const activeVariant = syncedVariant ?? selectedVariant;
 
   const handleVariantSelect = (variant: ProductVariant) => {
     setSelectedVariant(variant);
@@ -162,7 +162,7 @@ export function VariantSelector({ productId, onSelect, selectedVariantId }: Vari
               <div
                 key={variant.id}
                 className={`border rounded-lg p-3 cursor-pointer transition-colors ${
-                  selectedVariant?.id === variant.id
+                  activeVariant?.id === variant.id
                     ? 'border-primary bg-primary/5'
                     : 'border-border hover:border-foreground/30'
                 } ${!variant.is_available ? 'opacity-50' : ''}`}
@@ -178,7 +178,7 @@ export function VariantSelector({ productId, onSelect, selectedVariantId }: Vari
                   </div>
                   <div className="flex flex-col items-end gap-1">
                     {getAvailabilityBadge(variant.availability_status)}
-                    {selectedVariant?.id === variant.id && (
+                    {activeVariant?.id === variant.id && (
                       <CheckCircle2 className="w-5 h-5 text-primary" />
                     )}
                   </div>
@@ -188,19 +188,19 @@ export function VariantSelector({ productId, onSelect, selectedVariantId }: Vari
           </div>
         </div>
 
-        {selectedVariant && (
+        {activeVariant && (
           <div className="bg-primary/5 border border-primary rounded-lg p-4">
             <p className="font-medium mb-2">المتغير المحدد</p>
             <div className="flex items-center justify-between">
               <div>
-                <p>{selectedVariant.name}</p>
+                <p>{activeVariant.name}</p>
                 <p className="text-sm text-muted-foreground">
-                  SKU: {selectedVariant.sku}
+                  SKU: {activeVariant.sku}
                 </p>
               </div>
               <div className="text-right">
-                <p className="text-lg font-bold">{selectedVariant.price.toFixed(2)} دج/يوم</p>
-                {getAvailabilityBadge(selectedVariant.availability_status)}
+                <p className="text-lg font-bold">{activeVariant.price.toFixed(2)} دج/يوم</p>
+                {getAvailabilityBadge(activeVariant.availability_status)}
               </div>
             </div>
           </div>
@@ -209,5 +209,3 @@ export function VariantSelector({ productId, onSelect, selectedVariantId }: Vari
     </Card>
   );
 }
-
-

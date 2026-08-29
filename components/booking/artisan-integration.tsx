@@ -2,13 +2,11 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { artisansApi } from '@/lib/api';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Scissors, Star, Check, Plus, Loader2 } from 'lucide-react';
-import { GlassPanel } from '@/components/sovereign/glass-panel';
 import { Badge } from '@/components/ui/badge';
-import { SovereignButton } from '@/components/sovereign/sovereign-button';
 import Image from 'next/image';
-import { useState } from 'react';
+
 import { cn } from '@/lib/utils';
 
 interface ArtisanIntegrationProps {
@@ -17,7 +15,7 @@ interface ArtisanIntegrationProps {
   selectedId: number | null;
 }
 
-export function ArtisanIntegration({ productId, onSelect, selectedId }: ArtisanIntegrationProps) {
+export function ArtisanIntegration({ onSelect, selectedId }: ArtisanIntegrationProps) {
   const { data: artisans, isLoading } = useQuery({
     queryKey: ['artisans-selection'],
     queryFn: () => artisansApi.getAll({ specialty: 'tailor' }).then(res => res.data),
@@ -46,7 +44,7 @@ export function ArtisanIntegration({ productId, onSelect, selectedId }: ArtisanI
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-3">
-          {artisansList.slice(0, 3).map((artisan: any) => (
+          {artisansList.slice(0, 3).map((artisan: { id: number; profile_image?: string; name_ar: string; rating?: number; bio_ar?: string }) => (
             <motion.div
               key={artisan.id}
               whileHover={{ x: -4 }}

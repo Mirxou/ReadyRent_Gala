@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -59,7 +59,7 @@ export default function BranchesPage() {
     is_active: true,
   });
 
-  const loadBranches = async () => {
+  const loadBranches = useCallback(async () => {
     try {
       const response = await api.get('/admin/branches/');
       const data = response.data?.results ?? response.data ?? [];
@@ -73,11 +73,11 @@ export default function BranchesPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
   useEffect(() => {
     requestAnimationFrame(() => { loadBranches(); });
-  }, []);
+  }, [loadBranches]);
 
   const handleSubmit = async () => {
     if (!formData.name_ar || !formData.code || !formData.address) {

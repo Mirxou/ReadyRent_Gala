@@ -4,6 +4,7 @@ import { formatNumber } from '@/lib/utils';
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { adminApi, productsApi } from '@/lib/api';
@@ -55,9 +56,9 @@ export default function ProductsPage() {
 
     const deleteMutation = useMutation({
       mutationFn: (id: string) => adminApi.deleteProduct(id),
-      onSuccess: (res: any) => {
+      onSuccess: (res: Record<string, unknown>) => {
         if (res?.dignity_preserved || res?.error) {
-          toast.error(res?.message_ar || res?.error || 'حدث خطأ أثناء حذف المنتج');
+          toast.error((res?.message_ar as string) || (res?.error as string) || 'حدث خطأ أثناء حذف المنتج');
           return;
         }
         queryClient.invalidateQueries({ queryKey: ['my-products'] });
@@ -149,7 +150,7 @@ export default function ProductsPage() {
                                         <div className="flex items-center gap-3">
                                             <div className="w-12 h-16 rounded-lg overflow-hidden relative bg-white/5">
                                                 {product.primary_image && (
-                                                  <img src={product.primary_image} alt={product.name_ar} className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-500" />
+                                                  <Image src={product.primary_image} alt={product.name_ar} className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-500" fill unoptimized />
                                                 )}
                                             </div>
                                             <span className="font-semibold text-foreground/90">{product.name_ar}</span>

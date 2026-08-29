@@ -24,16 +24,16 @@ export const bookingsApi = {
   create: (data: BookingCreateData) => 
     sovereignClient.post<Booking>('/bookings/create/', data),
 
-  list: (params?: any) => 
+  list: (params?: Record<string, unknown>) => 
     sovereignClient.get<Booking[]>('/bookings/', { params }),
 
-  getAll: (params?: any) => 
+  getAll: (params?: Record<string, unknown>) => 
     sovereignClient.get<Booking[]>('/bookings/', { params }),
 
   getDetail: (id: string) => 
     sovereignClient.get<Booking>(`/bookings/${id}/`),
 
-  update: (id: string, data: any) => 
+  update: (id: string, data: Record<string, unknown>) => 
     sovereignClient.patch<Booking>(`/bookings/${id}`, data),
 
   /** Alias used by dashboard/orders — updates a single status field */
@@ -49,18 +49,18 @@ export const bookingsApi = {
     }),
 
   // Cart
-  getCart: () => sovereignClient.get<any>('/bookings/cart/'),
+  getCart: () => sovereignClient.get<unknown>('/bookings/cart/'),
   
   addToCart: (data: { product_id: string; start_date: string; end_date: string }) => 
-    sovereignClient.post<any>('/bookings/cart/items/', data),
+    sovereignClient.post<unknown>('/bookings/cart/items/', data),
   
   removeFromCart: (itemId: string) => 
     sovereignClient.delete<void>(`/bookings/cart/items/${itemId}/`),
 
   // Waitlist
-  getWaitlist: () => sovereignClient.get<any>('/bookings/waitlist/'),
+  getWaitlist: () => sovereignClient.get<unknown>('/bookings/waitlist/'),
   addToWaitlist: (data: { product_id: number | string; start_date?: string; end_date?: string }) =>
-    sovereignClient.post<any>('/bookings/waitlist/', data),
+    sovereignClient.post<unknown>('/bookings/waitlist/', data),
   removeFromWaitlist: (id: string) =>
     sovereignClient.delete<void>(`/bookings/waitlist/${id}/`),
 
@@ -70,5 +70,5 @@ export const bookingsApi = {
 
   // Agreements
   generateAgreement: (bookingId: string) => 
-    sovereignClient.post<any>(`/bookings/${bookingId}/agreement/create/`),
+    sovereignClient.post<unknown>(`/bookings/${bookingId}/agreement/create/`),
 };

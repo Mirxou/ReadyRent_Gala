@@ -1,13 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { api } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
-import { Search, Filter, Download } from 'lucide-react';
+import { Search } from 'lucide-react';
+import Image from 'next/image';
 
 interface DamageAssessment {
   id: number;
@@ -40,26 +41,26 @@ export default function DamageAssessmentPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
-  useEffect(() => {
-    loadAssessments();
-  }, []);
-
-  const loadAssessments = async () => {
+  const loadAssessments = useCallback(async () => {
     try {
       setLoading(true);
       const response = await api.get('/bookings/damage-assessment/');
       const data = response.data?.results ?? response.data ?? [];
       setAssessments(data as DamageAssessment[]);
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: 'خطأ',
-        description: error.response?.data?.error || 'فشل تحميل التقييمات',
+        description: (error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'فشل تحميل التقييمات',
         variant: 'destructive',
       });
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    requestAnimationFrame(() => { loadAssessments(); });
+  }, [loadAssessments]);
 
   const updateStatus = async (id: number, status: DamageAssessment['status']) => {
     try {
@@ -69,10 +70,10 @@ export default function DamageAssessmentPage() {
         description: 'تم تحديث حالة التقييم بنجاح',
       });
       loadAssessments();
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: 'خطأ',
-        description: error.response?.data?.error || 'فشل تحديث الحالة',
+        description: (error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'فشل تحديث الحالة',
         variant: 'destructive',
       });
     }
@@ -201,11 +202,14 @@ export default function DamageAssessmentPage() {
                   <p className="text-sm text-muted-foreground mb-2">الصور</p>
                   <div className="grid grid-cols-4 gap-2">
                     {assessment.photos.map((photo) => (
-                      <img
+                      <Image
                         key={photo.id}
                         src={photo.photo}
                         alt="Damage photo"
+                        width={96}
+                        height={96}
                         className="w-full h-24 object-cover rounded"
+                        unoptimized
                       />
                     ))}
                   </div>

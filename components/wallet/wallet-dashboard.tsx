@@ -1,15 +1,12 @@
 'use client'
 import { formatNumber } from '@/lib/utils';
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { 
   Wallet, 
-  ArrowUpRight, 
-  ArrowDownLeft, 
   Lock, 
   Unlock, 
-  History, 
   Plus, 
   CreditCard,
   Target,
@@ -21,35 +18,27 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { walletApi, WalletBalance, Transaction } from '@/lib/api/wallet';
+import { walletApi } from '@/lib/api/wallet';
 import { TransactionHistory } from '@/components/wallet/transaction-history';
-import { toast } from 'sonner';
-
+import { useQuery } from '@tanstack/react-query';
 
 export const WalletDashboard = () => {
-  const [balance, setBalance] = useState<WalletBalance | null>(null);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: balanceData, isLoading: balanceLoading } = useQuery({
+    queryKey: ['wallet-balance'],
+    queryFn: () => walletApi.getBalance().then(res => res.data),
+  });
 
-  useEffect(() => {
-    loadWalletData();
-  }, []);
+  const { data: transactionsData, isLoading: transactionsLoading } = useQuery({
+    queryKey: ['wallet-transactions'],
+    queryFn: () => walletApi.getTransactions({ limit: 5 }).then(res => {
+      const d = res.data;
+      return Array.isArray(d) ? d : [];
+    }),
+  });
 
-  const loadWalletData = async () => {
-    try {
-      setLoading(true);
-      const [balanceRes, transactionsRes] = await Promise.all([
-        walletApi.getBalance(),
-        walletApi.getTransactions({ limit: 5 })
-      ]);
-      if (balanceRes.data) setBalance(balanceRes.data);
-      if (transactionsRes.data) setTransactions(Array.isArray(transactionsRes.data) ? transactionsRes.data : []);
-    } catch (error) {
-      toast.error('تعذر تحميل بيانات المحفظة');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const balance = balanceData ?? null;
+  const transactions = transactionsData ?? [];
+  const loading = balanceLoading || transactionsLoading;
 
   const dashboardVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -63,10 +52,6 @@ export const WalletDashboard = () => {
     }
   };
 
-  const itemVariants = {
-    hidden: { opacity: 0, x: -20 },
-    visible: { opacity: 1, x: 0 }
-  };
 
   if (loading || !balance) {
     return (
@@ -81,7 +66,6 @@ export const WalletDashboard = () => {
     );
   }
 
-  // Calculate real stats from transaction data
   const escrowCount = transactions.filter(t => t.type === 'escrow_hold' && t.status === 'pending').length;
   const totalIncome = transactions.filter(t => t.type === 'deposit' || t.type === 'escrow_release').reduce((sum, t) => sum + t.amount, 0);
 

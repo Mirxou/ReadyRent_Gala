@@ -45,7 +45,7 @@ export function TopProductsChart({ data, limit = 10 }: TopProductsChartProps) {
               style={{ fontSize: '12px' }}
             />
             <Tooltip
-              formatter={(value: any, name: any) => {
+              formatter={(value: number, name: string) => {
                 const numValue = value || 0;
                 const nameStr = name || '';
                 if (nameStr === 'revenue') return [`${formatNumber(numValue)} دج`, 'الإيرادات'];

@@ -1,0 +1,950 @@
+$ eslint .
+
+/home/z/my-project/app/(auth)/register/page.tsx
+  29:25  warning  Compilation Skipped: Use of incompatible library
+
+This API returns functions which cannot be memoized without leading to stale UI. To prevent this, by default React Compiler will skip memoizing this component/hook. However, you may see issues if values from this API are passed to other components/hooks that are memoized.
+
+/home/z/my-project/app/(auth)/register/page.tsx:29:25
+  27 |
+  28 |   const { register, handleSubmit, watch } = useForm<RegisterForm>();
+> 29 |   const passwordValue = watch('password');
+     |                         ^^^^^ React Hook Form's `useForm()` API returns a `watch()` function which cannot be memoized safely.
+  30 |
+  31 |   const onSubmit = async (data: RegisterForm) => {
+  32 |     setIsLoading(true);  react-hooks/incompatible-library
+
+/home/z/my-project/app/_components/artisans-grid.tsx
+  104:23  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/home/z/my-project/app/admin/activity-logs/page.tsx
+  56:5  error    Error: Cannot access variable before it is declared
+
+`fetchLogs` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+/home/z/my-project/app/admin/activity-logs/page.tsx:56:5
+  54 |
+  55 |   useEffect(() => {
+> 56 |     fetchLogs();
+     |     ^^^^^^^^^ `fetchLogs` accessed before it is declared
+  57 |   }, [actionFilter, modelFilter]);
+  58 |
+  59 |   const fetchLogs = async () => {
+
+/home/z/my-project/app/admin/activity-logs/page.tsx:59:3
+  57 |   }, [actionFilter, modelFilter]);
+  58 |
+> 59 |   const fetchLogs = async () => {
+     |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 60 |     try {
+     | ^^^^^^^^^
+> 61 |       let url = '/api/users/staff/activity-logs/';
+     …
+     | ^^^^^^^^^
+> 89 |     }
+     | ^^^^^^^^^
+> 90 |   };
+     | ^^^^^ `fetchLogs` is declared here
+  91 |
+  92 |   const filteredLogs = logs.filter((log) => {
+  93 |     const matchesSearch =  react-hooks/immutability
+  57:6  warning  React Hook useEffect has a missing dependency: 'fetchLogs'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            react-hooks/exhaustive-deps
+
+/home/z/my-project/app/admin/branches/page.tsx
+  80:6  warning  React Hook useEffect has a missing dependency: 'loadBranches'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/home/z/my-project/app/admin/damage-assessment/page.tsx
+   10:18  error    'Filter' is defined but never used. Allowed unused vars must match /^_/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                @typescript-eslint/no-unused-vars
+   10:26  error    'Download' is defined but never used. Allowed unused vars must match /^_/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              @typescript-eslint/no-unused-vars
+   44:5   error    Error: Cannot access variable before it is declared
+
+`loadAssessments` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+/home/z/my-project/app/admin/damage-assessment/page.tsx:44:5
+  42 |
+  43 |   useEffect(() => {
+> 44 |     loadAssessments();
+     |     ^^^^^^^^^^^^^^^ `loadAssessments` accessed before it is declared
+  45 |   }, []);
+  46 |
+  47 |   const loadAssessments = async () => {
+
+/home/z/my-project/app/admin/damage-assessment/page.tsx:47:3
+  45 |   }, []);
+  46 |
+> 47 |   const loadAssessments = async () => {
+     |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 48 |     try {
+     | ^^^^^^^^^
+> 49 |       setLoading(true);
+     …
+     | ^^^^^^^^^
+> 61 |     }
+     | ^^^^^^^^^
+> 62 |   };
+     | ^^^^^ `loadAssessments` is declared here
+  63 |
+  64 |   const updateStatus = async (id: number, status: DamageAssessment['status']) => {
+  65 |     try {  react-hooks/immutability
+   45:6   warning  React Hook useEffect has a missing dependency: 'loadAssessments'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      react-hooks/exhaustive-deps
+   53:21  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                @typescript-eslint/no-explicit-any
+   72:21  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                @typescript-eslint/no-explicit-any
+  204:23  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 @next/next/no-img-element
+
+/home/z/my-project/app/admin/forecasting/page.tsx
+    8:10  error    'Select' is defined but never used. Allowed unused vars must match /^_/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-unused-vars
+    8:18  error    'SelectContent' is defined but never used. Allowed unused vars must match /^_/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            @typescript-eslint/no-unused-vars
+    8:33  error    'SelectItem' is defined but never used. Allowed unused vars must match /^_/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               @typescript-eslint/no-unused-vars
+    8:45  error    'SelectTrigger' is defined but never used. Allowed unused vars must match /^_/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            @typescript-eslint/no-unused-vars
+    8:60  error    'SelectValue' is defined but never used. Allowed unused vars must match /^_/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              @typescript-eslint/no-unused-vars
+   13:10  error    'TrendingUp' is defined but never used. Allowed unused vars must match /^_/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               @typescript-eslint/no-unused-vars
+   13:22  error    'AlertCircle' is defined but never used. Allowed unused vars must match /^_/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              @typescript-eslint/no-unused-vars
+   42:5   error    Error: Cannot access variable before it is declared
+
+`loadForecasts` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+/home/z/my-project/app/admin/forecasting/page.tsx:42:5
+  40 |
+  41 |   useEffect(() => {
+> 42 |     loadForecasts();
+     |     ^^^^^^^^^^^^^ `loadForecasts` accessed before it is declared
+  43 |   }, []);
+  44 |
+  45 |   const loadForecasts = async () => {
+
+/home/z/my-project/app/admin/forecasting/page.tsx:45:3
+  43 |   }, []);
+  44 |
+> 45 |   const loadForecasts = async () => {
+     |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 46 |     try {
+     | ^^^^^^^^^
+> 47 |       const response = await api.get('/analytics/forecasts/');
+     …
+     | ^^^^^^^^^
+> 57 |     }
+     | ^^^^^^^^^
+> 58 |   };
+     | ^^^^^ `loadForecasts` is declared here
+  59 |
+  60 |   const handleGenerate = async () => {
+  61 |     if (!formData.forecast_start || !formData.forecast_end) {  react-hooks/immutability
+   43:6   warning  React Hook useEffect has a missing dependency: 'loadForecasts'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           react-hooks/exhaustive-deps
+   49:21  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+   78:21  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+  104:21  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+
+/home/z/my-project/app/admin/hygiene/page.tsx
+   31:54  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   52:24  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   53:22  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   66:52  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   67:22  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   81:22  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   95:31  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  218:34  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/z/my-project/app/admin/inventory/page.tsx
+   12:48  error  'TrendingUp' is defined but never used. Allowed unused vars must match /^_/u              @typescript-eslint/no-unused-vars
+   56:41  error  'alertsLoading' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+   64:50  error  Unexpected any. Specify a different type                                                  @typescript-eslint/no-explicit-any
+   74:24  error  Unexpected any. Specify a different type                                                  @typescript-eslint/no-explicit-any
+   75:22  error  Unexpected any. Specify a different type                                                  @typescript-eslint/no-explicit-any
+   85:52  error  Unexpected any. Specify a different type                                                  @typescript-eslint/no-explicit-any
+   86:22  error  Unexpected any. Specify a different type                                                  @typescript-eslint/no-explicit-any
+   97:22  error  Unexpected any. Specify a different type                                                  @typescript-eslint/no-explicit-any
+  108:29  error  Unexpected any. Specify a different type                                                  @typescript-eslint/no-explicit-any
+  130:46  error  Unexpected any. Specify a different type                                                  @typescript-eslint/no-explicit-any
+  147:33  error  Unexpected any. Specify a different type                                                  @typescript-eslint/no-explicit-any
+  195:44  error  Unexpected any. Specify a different type                                                  @typescript-eslint/no-explicit-any
+  249:52  error  Unexpected any. Specify a different type                                                  @typescript-eslint/no-explicit-any
+  376:44  error  Unexpected any. Specify a different type                                                  @typescript-eslint/no-explicit-any
+
+/home/z/my-project/app/admin/maintenance/page.tsx
+   31:54  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   52:24  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   53:22  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   66:52  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   67:22  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   81:22  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   95:31  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  216:34  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/z/my-project/app/admin/packaging/page.tsx
+   82:22  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   93:22  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  104:22  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  113:22  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  124:22  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  135:22  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  144:22  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  155:22  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  166:22  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/z/my-project/app/admin/performance-reviews/page.tsx
+  92:5  error  Error: Cannot access variable before it is declared
+
+`fetchReviews` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+/home/z/my-project/app/admin/performance-reviews/page.tsx:92:5
+  90 |
+  91 |   useEffect(() => {
+> 92 |     fetchReviews();
+     |     ^^^^^^^^^^^^ `fetchReviews` accessed before it is declared
+  93 |     fetchStaff();
+  94 |   }, []);
+  95 |
+
+/home/z/my-project/app/admin/performance-reviews/page.tsx:96:3
+   94 |   }, []);
+   95 |
+>  96 |   const fetchReviews = async () => {
+      |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+>  97 |     try {
+      | ^^^^^^^^^
+>  98 |       const response = await fetch('/api/users/staff/performance-reviews/', {
+      …
+      | ^^^^^^^^^
+> 112 |     }
+      | ^^^^^^^^^
+> 113 |   };
+      | ^^^^^ `fetchReviews` is declared here
+  114 |
+  115 |   const fetchStaff = async () => {
+  116 |     try {                            react-hooks/immutability
+  93:5  error  Error: Cannot access variable before it is declared
+
+`fetchStaff` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+/home/z/my-project/app/admin/performance-reviews/page.tsx:93:5
+  91 |   useEffect(() => {
+  92 |     fetchReviews();
+> 93 |     fetchStaff();
+     |     ^^^^^^^^^^ `fetchStaff` accessed before it is declared
+  94 |   }, []);
+  95 |
+  96 |   const fetchReviews = async () => {
+
+/home/z/my-project/app/admin/performance-reviews/page.tsx:115:3
+  113 |   };
+  114 |
+> 115 |   const fetchStaff = async () => {
+      |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 116 |     try {
+      | ^^^^^^^^^
+> 117 |       const response = await fetch('/api/users/staff/list/');
+      …
+      | ^^^^^^^^^
+> 124 |     }
+      | ^^^^^^^^^
+> 125 |   };
+      | ^^^^^ `fetchStaff` is declared here
+  126 |
+  127 |   const handleCreateReview = () => {
+  128 |     setSelectedReview(null);  react-hooks/immutability
+
+/home/z/my-project/app/admin/products/page.tsx
+  45:22  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/z/my-project/app/admin/shifts/page.tsx
+  77:5  error  Error: Cannot access variable before it is declared
+
+`fetchShifts` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+/home/z/my-project/app/admin/shifts/page.tsx:77:5
+  75 |
+  76 |   useEffect(() => {
+> 77 |     fetchShifts();
+     |     ^^^^^^^^^^^ `fetchShifts` accessed before it is declared
+  78 |     fetchBranches();
+  79 |     fetchStaff();
+  80 |   }, []);
+
+/home/z/my-project/app/admin/shifts/page.tsx:82:3
+   80 |   }, []);
+   81 |
+>  82 |   const fetchShifts = async () => {
+      |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+>  83 |     try {
+      | ^^^^^^^^^
+>  84 |       // NOTE: /api/users/staff/shifts/ is handled by a mock API handler.
+      …
+      | ^^^^^^^^^
+> 100 |     }
+      | ^^^^^^^^^
+> 101 |   };
+      | ^^^^^ `fetchShifts` is declared here
+  102 |
+  103 |   const fetchBranches = async () => {
+  104 |     try {            react-hooks/immutability
+  78:5  error  Error: Cannot access variable before it is declared
+
+`fetchBranches` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+/home/z/my-project/app/admin/shifts/page.tsx:78:5
+  76 |   useEffect(() => {
+  77 |     fetchShifts();
+> 78 |     fetchBranches();
+     |     ^^^^^^^^^^^^^ `fetchBranches` accessed before it is declared
+  79 |     fetchStaff();
+  80 |   }, []);
+  81 |
+
+/home/z/my-project/app/admin/shifts/page.tsx:103:3
+  101 |   };
+  102 |
+> 103 |   const fetchBranches = async () => {
+      |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 104 |     try {
+      | ^^^^^^^^^
+> 105 |       const response = await fetch('/api/branches/');
+      …
+      | ^^^^^^^^^
+> 112 |     }
+      | ^^^^^^^^^
+> 113 |   };
+      | ^^^^^ `fetchBranches` is declared here
+  114 |
+  115 |   const fetchStaff = async () => {
+  116 |     try {                           react-hooks/immutability
+  79:5  error  Error: Cannot access variable before it is declared
+
+`fetchStaff` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+/home/z/my-project/app/admin/shifts/page.tsx:79:5
+  77 |     fetchShifts();
+  78 |     fetchBranches();
+> 79 |     fetchStaff();
+     |     ^^^^^^^^^^ `fetchStaff` accessed before it is declared
+  80 |   }, []);
+  81 |
+  82 |   const fetchShifts = async () => {
+
+/home/z/my-project/app/admin/shifts/page.tsx:115:3
+  113 |   };
+  114 |
+> 115 |   const fetchStaff = async () => {
+      |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 116 |     try {
+      | ^^^^^^^^^
+> 117 |       const response = await fetch('/api/users/staff/list/');
+      …
+      | ^^^^^^^^^
+> 124 |     }
+      | ^^^^^^^^^
+> 125 |   };
+      | ^^^^^ `fetchStaff` is declared here
+  126 |
+  127 |   const handleCreateShift = () => {
+  128 |     setSelectedShift(null);  react-hooks/immutability
+
+/home/z/my-project/app/admin/staff/page.tsx
+  61:5  error    Error: Cannot access variable before it is declared
+
+`fetchStaff` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+/home/z/my-project/app/admin/staff/page.tsx:61:5
+  59 |
+  60 |   useEffect(() => {
+> 61 |     fetchStaff();
+     |     ^^^^^^^^^^ `fetchStaff` accessed before it is declared
+  62 |   }, [roleFilter]);
+  63 |
+  64 |   const fetchStaff = async () => {
+
+/home/z/my-project/app/admin/staff/page.tsx:64:3
+  62 |   }, [roleFilter]);
+  63 |
+> 64 |   const fetchStaff = async () => {
+     |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 65 |     setLoading(true);
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 66 |     try {
+     …
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 86 |     }
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 87 |   };
+     | ^^^^^ `fetchStaff` is declared here
+  88 |
+  89 |   const filteredUsers = users.filter((user) => {
+  90 |     const matchesSearch =  react-hooks/immutability
+  62:6  warning  React Hook useEffect has a missing dependency: 'fetchStaff'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               react-hooks/exhaustive-deps
+
+/home/z/my-project/app/admin/users/page.tsx
+  59:22  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/z/my-project/app/api/[[...path]]/route.ts
+    3:1   warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
+  106:10  error    'getQueryParams' is defined but never used. Allowed unused vars must match /^_/u                       @typescript-eslint/no-unused-vars
+
+/home/z/my-project/app/api/bookings/[id]/cancel/route.ts
+  114:18  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/z/my-project/app/blog/[id]/page.tsx
+  93:15  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/home/z/my-project/app/blog/page.tsx
+  129:23  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/home/z/my-project/app/bookings/[id]/page.tsx
+  362:25  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/home/z/my-project/app/bundles/[id]/page.tsx
+  135:19  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  303:29  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/home/z/my-project/app/checkout/page.tsx
+  24:9  error  'queryClient' is assigned a value but never used. Allowed unused vars must match /^_/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                @typescript-eslint/no-unused-vars
+  50:7  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/home/z/my-project/app/checkout/page.tsx:50:7
+  48 |   useEffect(() => {
+  49 |     if (returnStatus === 'success') {
+> 50 |       setPaymentCompleted(true);
+     |       ^^^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  51 |       toast.success('تم الدفع بنجاح!');
+  52 |       const timer = setTimeout(() => {
+  53 |         router.push('/dashboard/bookings');  react-hooks/set-state-in-effect
+
+/home/z/my-project/app/contracts/_id_/page.tsx
+  20:7   error    Error: Cannot access variable before it is declared
+
+`loadContract` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+/home/z/my-project/app/contracts/_id_/page.tsx:20:7
+  18 |   useEffect(() => {
+  19 |     if (id) {
+> 20 |       loadContract();
+     |       ^^^^^^^^^^^^ `loadContract` accessed before it is declared
+  21 |     }
+  22 |   }, [id]);
+  23 |
+
+/home/z/my-project/app/contracts/_id_/page.tsx:24:3
+  22 |   }, [id]);
+  23 |
+> 24 |   const loadContract = async () => {
+     |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 25 |     try {
+     | ^^^^^^^^^
+> 26 |       setLoading(true);
+     …
+     | ^^^^^^^^^
+> 33 |     }
+     | ^^^^^^^^^
+> 34 |   };
+     | ^^^^^ `loadContract` is declared here
+  35 |
+  36 |   const handleSign = async (signatureData: string) => {
+  37 |     if (!id) return;  react-hooks/immutability
+  22:6   warning  React Hook useEffect has a missing dependency: 'loadContract'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      react-hooks/exhaustive-deps
+  29:14  error    'err' is defined but never used. Allowed unused caught errors must match /^_/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       @typescript-eslint/no-unused-vars
+  45:14  error    'err' is defined but never used. Allowed unused caught errors must match /^_/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       @typescript-eslint/no-unused-vars
+
+/home/z/my-project/app/dashboard/artisans/page.tsx
+  133:29  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/home/z/my-project/app/dashboard/disputes/[id]/page.tsx
+  156:22  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  290:23  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  327:27  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/home/z/my-project/app/dashboard/orders/[id]/page.tsx
+   59:22  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+   71:22  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  233:25  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/home/z/my-project/app/dashboard/products/page.tsx
+   58:24  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  152:51  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/home/z/my-project/app/dashboard/waitlist/page.tsx
+  25:22  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/z/my-project/app/marketplace/page.tsx
+  148:27  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  278:25  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/home/z/my-project/app/pages/[slug]/page.tsx
+  91:15  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/home/z/my-project/app/products/[id]/page.tsx
+  77:22  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/z/my-project/app/products/[id]/variants/page.tsx
+  89:6  warning  React Hook useEffect has a missing dependency: 'loadVariants'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/home/z/my-project/app/rentals/page.tsx
+  147:25  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/home/z/my-project/app/returns/page.tsx
+  72:6  warning  React Hook useEffect has a missing dependency: 'isAuthenticated'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/home/z/my-project/app/services/_components/featured-services.tsx
+  108:21  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/home/z/my-project/app/vendors/dashboard/page.tsx
+  56:6  warning  React Hook useEffect has a missing dependency: 'loadDashboard'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/home/z/my-project/components/accessory-suggestions.tsx
+   6:10  error    'Button' is defined but never used. Allowed unused vars must match /^_/u                                                                                                                                                                                                                 @typescript-eslint/no-unused-vars
+   7:10  error    'ProductCard' is defined but never used. Allowed unused vars must match /^_/u                                                                                                                                                                                                            @typescript-eslint/no-unused-vars
+   9:19  error    'ShoppingCart' is defined but never used. Allowed unused vars must match /^_/u                                                                                                                                                                                                           @typescript-eslint/no-unused-vars
+  59:45  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  68:27  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/home/z/my-project/components/admin/sales-by-status-chart.tsx
+  69:34  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  69:45  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  69:57  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/z/my-project/components/admin/top-products-chart.tsx
+  48:34  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  48:45  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/z/my-project/components/booking-calendar.tsx
+  12:19  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+
+/home/z/my-project/components/booking/artisan-integration.tsx
+   5:18  error  'AnimatePresence' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+   7:10  error  'GlassPanel' is defined but never used. Allowed unused vars must match /^_/u       @typescript-eslint/no-unused-vars
+   9:10  error  'SovereignButton' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  11:10  error  'useState' is defined but never used. Allowed unused vars must match /^_/u         @typescript-eslint/no-unused-vars
+  20:38  error  'productId' is defined but never used. Allowed unused args must match /^_/u        @typescript-eslint/no-unused-vars
+  49:51  error  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+
+/home/z/my-project/components/contracts/AgreementWidget.tsx
+  23:44  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  44:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/z/my-project/components/damage-inspection.tsx
+   10:18  error    'Camera' is defined but never used. Allowed unused vars must match /^_/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  @typescript-eslint/no-unused-vars
+   10:26  error    'CheckCircle2' is defined but never used. Allowed unused vars must match /^_/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            @typescript-eslint/no-unused-vars
+   10:40  error    'XCircle' is defined but never used. Allowed unused vars must match /^_/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 @typescript-eslint/no-unused-vars
+   10:49  error    'AlertCircle' is defined but never used. Allowed unused vars must match /^_/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             @typescript-eslint/no-unused-vars
+   73:5   error    Error: Cannot access variable before it is declared
+
+`loadAssessment` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+/home/z/my-project/components/damage-inspection.tsx:73:5
+  71 |
+  72 |   useEffect(() => {
+> 73 |     loadAssessment();
+     |     ^^^^^^^^^^^^^^ `loadAssessment` accessed before it is declared
+  74 |   }, [bookingId]);
+  75 |
+  76 |   const loadAssessment = async () => {
+
+/home/z/my-project/components/damage-inspection.tsx:76:3
+   74 |   }, [bookingId]);
+   75 |
+>  76 |   const loadAssessment = async () => {
+      |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+>  77 |     try {
+      | ^^^^^^^^^
+>  78 |       const response = await api.get(`/bookings/damage-assessment/`);
+      …
+      | ^^^^^^^^^
+>  96 |     }
+      | ^^^^^^^^^
+>  97 |   };
+      | ^^^^^ `loadAssessment` is declared here
+   98 |
+   99 |   const createAssessment = async () => {
+  100 |     setLoading(true);  react-hooks/immutability
+   74:6   warning  React Hook useEffect has a missing dependency: 'loadAssessment'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         react-hooks/exhaustive-deps
+   92:21  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  @typescript-eslint/no-explicit-any
+  111:21  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  @typescript-eslint/no-explicit-any
+  132:21  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  @typescript-eslint/no-explicit-any
+  164:21  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  @typescript-eslint/no-explicit-any
+  315:23  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @next/next/no-img-element
+
+/home/z/my-project/components/disputes/dispute-card.tsx
+   6:32  error  'CheckCircle' is defined but never used. Allowed unused vars must match /^_/u     @typescript-eslint/no-unused-vars
+  28:40  error  'onStatusChange' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+/home/z/my-project/components/id-upload.tsx
+    9:18  error    'CheckCircle2' is defined but never used. Allowed unused vars must match /^_/u                                                                                                                                                                                                           @typescript-eslint/no-unused-vars
+    9:32  error    'XCircle' is defined but never used. Allowed unused vars must match /^_/u                                                                                                                                                                                                                @typescript-eslint/no-unused-vars
+    9:41  error    'AlertCircle' is defined but never used. Allowed unused vars must match /^_/u                                                                                                                                                                                                            @typescript-eslint/no-unused-vars
+   71:21  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  137:19  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  167:19  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/home/z/my-project/components/insurance-selector.tsx
+   5:10  error    'Button' is defined but never used. Allowed unused vars must match /^_/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         @typescript-eslint/no-unused-vars
+   8:32  error    'AlertCircle' is defined but never used. Allowed unused vars must match /^_/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @typescript-eslint/no-unused-vars
+  41:50  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         @typescript-eslint/no-explicit-any
+  44:5   error    Error: Cannot access variable before it is declared
+
+`loadPlans` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+/home/z/my-project/components/insurance-selector.tsx:44:5
+  42 |
+  43 |   useEffect(() => {
+> 44 |     loadPlans();
+     |     ^^^^^^^^^ `loadPlans` accessed before it is declared
+  45 |   }, [productId]);
+  46 |
+  47 |   useEffect(() => {
+
+/home/z/my-project/components/insurance-selector.tsx:57:3
+  55 |   }, [selectedPlanId, plans]);
+  56 |
+> 57 |   const loadPlans = async () => {
+     |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 58 |     try {
+     | ^^^^^^^^^
+> 59 |       const response = await api.get(`/warranties/insurance/plans/?product_id=${productId}`);
+     …
+     | ^^^^^^^^^
+> 66 |     }
+     | ^^^^^^^^^
+> 67 |   };
+     | ^^^^^ `loadPlans` is declared here
+  68 |
+  69 |   const calculateInsurance = async (plan: InsurancePlan) => {
+  70 |     try {                                                                                                                                                                                                                                                                                                                                                                react-hooks/immutability
+  45:6   warning  React Hook useEffect has a missing dependency: 'loadPlans'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     react-hooks/exhaustive-deps
+  51:9   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/home/z/my-project/components/insurance-selector.tsx:51:9
+  49 |       const plan = plans.find(p => p.id === selectedPlanId);
+  50 |       if (plan) {
+> 51 |         setSelectedPlan(plan);
+     |         ^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  52 |         calculateInsurance(plan);
+  53 |       }
+  54 |     }                                                                                                                                                                                                                                                                           react-hooks/set-state-in-effect
+  52:9   error    Error: Cannot access variable before it is declared
+
+`calculateInsurance` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+/home/z/my-project/components/insurance-selector.tsx:52:9
+  50 |       if (plan) {
+  51 |         setSelectedPlan(plan);
+> 52 |         calculateInsurance(plan);
+     |         ^^^^^^^^^^^^^^^^^^ `calculateInsurance` accessed before it is declared
+  53 |       }
+  54 |     }
+  55 |   }, [selectedPlanId, plans]);
+
+/home/z/my-project/components/insurance-selector.tsx:69:3
+  67 |   };
+  68 |
+> 69 |   const calculateInsurance = async (plan: InsurancePlan) => {
+     |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 70 |     try {
+     | ^^^^^^^^^
+> 71 |       const response = await api.get(`/warranties/insurance/calculator/?plan_id=${plan.id}&product_value=${productValue}`);
+     | ^^^^^^^^^
+> 72 |       setCalculation(response.data);
+     | ^^^^^^^^^
+> 73 |     } catch (error: any) {
+     | ^^^^^^^^^
+> 74 |       console.error('Error calculating insurance:', error);
+     | ^^^^^^^^^
+> 75 |     }
+     | ^^^^^^^^^
+> 76 |   };
+     | ^^^^^ `calculateInsurance` is declared here
+  77 |
+  78 |   const handlePlanSelect = (plan: InsurancePlan) => {
+  79 |     setSelectedPlan(plan);  react-hooks/immutability
+  55:6   warning  React Hook useEffect has a missing dependency: 'calculateInsurance'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            react-hooks/exhaustive-deps
+  62:21  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         @typescript-eslint/no-explicit-any
+  73:21  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         @typescript-eslint/no-explicit-any
+
+/home/z/my-project/components/navbar.tsx
+   5:10  error  'Button' is defined but never used. Allowed unused vars must match /^_/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       @typescript-eslint/no-unused-vars
+  16:3   error  'SheetTrigger' is defined but never used. Allowed unused vars must match /^_/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 @typescript-eslint/no-unused-vars
+  78:5   error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/home/z/my-project/components/navbar.tsx:78:5
+  76 |
+  77 |   useEffect(() => {
+> 78 |     setMounted(true);
+     |     ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  79 |     const handleScroll = () => setIsScrolled(window.scrollY > 20);
+  80 |     window.addEventListener('scroll', handleScroll, { passive: true });
+  81 |     return () => window.removeEventListener('scroll', handleScroll);  react-hooks/set-state-in-effect
+
+/home/z/my-project/components/product-card.tsx
+  53:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/z/my-project/components/product-filters.tsx
+   60:11  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/home/z/my-project/components/product-filters.tsx:60:11
+  58 |       if (currentMin !== priceRange[0]) {
+  59 |         if (priceRange[0] === 0) {
+> 60 |           setPriceMinInput(null);
+     |           ^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  61 |         } else {
+  62 |           setPriceMinInput(priceRange[0].toString());
+  63 |         }  react-hooks/set-state-in-effect
+   82:6   warning  React Hook useEffect has missing dependencies: 'priceMaxInput' and 'priceMinInput'. Either include them or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     react-hooks/exhaustive-deps
+  250:61  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+  261:42  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+  460:40  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+  523:58  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+  526:57  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+
+/home/z/my-project/components/reviews/review-form.tsx
+  27:22  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/z/my-project/components/role-selector.tsx
+  61:5  error    Error: Cannot access variable before it is declared
+
+`fetchBranches` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+/home/z/my-project/components/role-selector.tsx:61:5
+  59 |
+  60 |   useEffect(() => {
+> 61 |     fetchBranches();
+     |     ^^^^^^^^^^^^^ `fetchBranches` accessed before it is declared
+  62 |     fetchExistingRoles();
+  63 |   }, [userId]);
+  64 |
+
+/home/z/my-project/components/role-selector.tsx:65:3
+  63 |   }, [userId]);
+  64 |
+> 65 |   const fetchBranches = async () => {
+     |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 66 |     try {
+     | ^^^^^^^^^
+> 67 |       const response = await fetch('/api/branches/');
+     …
+     | ^^^^^^^^^
+> 74 |     }
+     | ^^^^^^^^^
+> 75 |   };
+     | ^^^^^ `fetchBranches` is declared here
+  76 |
+  77 |   const fetchExistingRoles = async () => {
+  78 |     try {                                                                                        react-hooks/immutability
+  62:5  error    Error: Cannot access variable before it is declared
+
+`fetchExistingRoles` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+/home/z/my-project/components/role-selector.tsx:62:5
+  60 |   useEffect(() => {
+  61 |     fetchBranches();
+> 62 |     fetchExistingRoles();
+     |     ^^^^^^^^^^^^^^^^^^ `fetchExistingRoles` accessed before it is declared
+  63 |   }, [userId]);
+  64 |
+  65 |   const fetchBranches = async () => {
+
+/home/z/my-project/components/role-selector.tsx:77:3
+  75 |   };
+  76 |
+> 77 |   const fetchExistingRoles = async () => {
+     |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 78 |     try {
+     | ^^^^^^^^^
+> 79 |       const response = await fetch(`/api/users/staff/roles/?user=${userId}`);
+     …
+     | ^^^^^^^^^
+> 86 |     }
+     | ^^^^^^^^^
+> 87 |   };
+     | ^^^^^ `fetchExistingRoles` is declared here
+  88 |
+  89 |   const handleAssignRole = async () => {
+  90 |     if (!role) {  react-hooks/immutability
+  63:6  warning  React Hook useEffect has a missing dependency: 'fetchExistingRoles'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               react-hooks/exhaustive-deps
+
+/home/z/my-project/components/sovereign/sovereign-button.tsx
+  55:50  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  63:54  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  64:52  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/z/my-project/components/ui/interactive-product-card.tsx
+  47:36  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  48:36  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/z/my-project/components/ui/spotlight.tsx
+  3:35  error  'useEffect' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/home/z/my-project/components/variant-selector.tsx
+  51:6  warning  React Hook useEffect has a missing dependency: 'loadVariants'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/home/z/my-project/components/waitlist-button.tsx
+  22:22  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/z/my-project/components/wallet/wallet-dashboard.tsx
+   8:3   error  'ArrowUpRight' is defined but never used. Allowed unused vars must match /^_/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          @typescript-eslint/no-unused-vars
+   9:3   error  'ArrowDownLeft' is defined but never used. Allowed unused vars must match /^_/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         @typescript-eslint/no-unused-vars
+  12:3   error  'History' is defined but never used. Allowed unused vars must match /^_/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               @typescript-eslint/no-unused-vars
+  35:5   error  Error: Cannot access variable before it is declared
+
+`loadWalletData` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+/home/z/my-project/components/wallet/wallet-dashboard.tsx:35:5
+  33 |
+  34 |   useEffect(() => {
+> 35 |     loadWalletData();
+     |     ^^^^^^^^^^^^^^ `loadWalletData` accessed before it is declared
+  36 |   }, []);
+  37 |
+  38 |   const loadWalletData = async () => {
+
+/home/z/my-project/components/wallet/wallet-dashboard.tsx:38:3
+  36 |   }, []);
+  37 |
+> 38 |   const loadWalletData = async () => {
+     |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 39 |     try {
+     | ^^^^^^^^^
+> 40 |       setLoading(true);
+     …
+     | ^^^^^^^^^
+> 51 |     }
+     | ^^^^^^^^^
+> 52 |   };
+     | ^^^^^ `loadWalletData` is declared here
+  53 |
+  54 |   const dashboardVariants = {
+  55 |     hidden: { opacity: 0, y: 20 },  react-hooks/immutability
+  47:14  error  'error' is defined but never used. Allowed unused caught errors must match /^_/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+  66:9   error  'itemVariants' is assigned a value but never used. Allowed unused vars must match /^_/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 @typescript-eslint/no-unused-vars
+
+/home/z/my-project/lib/api/admin.ts
+   4:45  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  16:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  19:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  22:29  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  23:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  25:37  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  26:27  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  29:29  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  30:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  32:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  33:26  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  36:26  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  37:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  39:34  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  40:27  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  46:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  49:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/z/my-project/lib/api/auth.ts
+    2:10  error  'SovereignResponse' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+   88:25  error  Unexpected any. Specify a different type                                             @typescript-eslint/no-explicit-any
+   93:25  error  Unexpected any. Specify a different type                                             @typescript-eslint/no-explicit-any
+   97:26  error  Unexpected any. Specify a different type                                             @typescript-eslint/no-explicit-any
+  101:25  error  Unexpected any. Specify a different type                                             @typescript-eslint/no-explicit-any
+  105:26  error  Unexpected any. Specify a different type                                             @typescript-eslint/no-explicit-any
+
+/home/z/my-project/lib/api/bookings.ts
+  27:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  30:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  36:30  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  52:38  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  55:26  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  61:42  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  63:26  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  73:26  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/z/my-project/lib/api/disputes.ts
+    2:10  error  'SovereignResponse' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+   25:27  error  Unexpected any. Specify a different type                                             @typescript-eslint/no-explicit-any
+   43:25  error  Unexpected any. Specify a different type                                             @typescript-eslint/no-explicit-any
+   54:26  error  Unexpected any. Specify a different type                                             @typescript-eslint/no-explicit-any
+   57:25  error  Unexpected any. Specify a different type                                             @typescript-eslint/no-explicit-any
+   63:66  error  Unexpected any. Specify a different type                                             @typescript-eslint/no-explicit-any
+   86:26  error  Unexpected any. Specify a different type                                             @typescript-eslint/no-explicit-any
+   90:26  error  Unexpected any. Specify a different type                                             @typescript-eslint/no-explicit-any
+   94:25  error  Unexpected any. Specify a different type                                             @typescript-eslint/no-explicit-any
+   98:26  error  Unexpected any. Specify a different type                                             @typescript-eslint/no-explicit-any
+   99:25  error  Unexpected any. Specify a different type                                             @typescript-eslint/no-explicit-any
+  101:24  error  Unexpected any. Specify a different type                                             @typescript-eslint/no-explicit-any
+  102:26  error  Unexpected any. Specify a different type                                             @typescript-eslint/no-explicit-any
+  105:25  error  Unexpected any. Specify a different type                                             @typescript-eslint/no-explicit-any
+  108:26  error  Unexpected any. Specify a different type                                             @typescript-eslint/no-explicit-any
+
+/home/z/my-project/lib/api/logistics.ts
+   4:45  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   5:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   5:54  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   6:31  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   6:59  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   7:60  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  15:41  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  16:24  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  16:53  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  18:32  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  18:60  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  20:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  26:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  26:51  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  28:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  31:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  31:52  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/z/my-project/lib/api/payments.ts
+  18:107  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  19:26   error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  23:26   error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  38:33   error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  41:37   error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/z/my-project/lib/api/products.ts
+   41:36  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   90:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  133:39  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/z/my-project/lib/api/reviews.ts
+  37:36  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/z/my-project/lib/api/sovereign-client.ts
+    6:27  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   92:42  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  100:41  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  108:43  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/z/my-project/prisma/seed.ts
+   12:3  warning  Unexpected console statement. Only these console methods are allowed: warn, error  no-console
+  330:3  warning  Unexpected console statement. Only these console methods are allowed: warn, error  no-console
+
+/home/z/my-project/seed-content.ts
+   11:3  warning  Unexpected console statement. Only these console methods are allowed: warn, error  no-console
+  120:3  warning  Unexpected console statement. Only these console methods are allowed: warn, error  no-console
+  136:5  warning  Unexpected console statement. Only these console methods are allowed: warn, error  no-console
+  140:3  warning  Unexpected console statement. Only these console methods are allowed: warn, error  no-console
+  164:5  warning  Unexpected console statement. Only these console methods are allowed: warn, error  no-console
+  167:3  warning  Unexpected console statement. Only these console methods are allowed: warn, error  no-console
+  168:3  warning  Unexpected console statement. Only these console methods are allowed: warn, error  no-console
+  169:3  warning  Unexpected console statement. Only these console methods are allowed: warn, error  no-console
+
+✖ 268 problems (220 errors, 48 warnings)
+  0 errors and 1 warning potentially fixable with the `--fix` option.
+
+error: script "lint" exited with code 1

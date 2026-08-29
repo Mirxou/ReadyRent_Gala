@@ -15,12 +15,12 @@ export const paymentsApi = {
     sovereignClient.get<PaymentMethod[]>('/payments/methods/'),
 
   /** Create a payment — flexible params (used by bank-card-form, baridimob-form) */
-  create: (data: { booking_id?: number | string; payment_method?: string; amount?: number; [key: string]: any }) => 
-    sovereignClient.post<any>('/payments/create/', data),
+  create: (data: { booking_id?: number | string; payment_method?: string; amount?: number; [key: string]: unknown }) => 
+    sovereignClient.post<unknown>('/payments/create/', data),
 
   /** Create a payment — strict params (alias) */
   createPayment: (bookingId: number, methodId: string) => 
-    sovereignClient.post<any>('/payments/create/', { 
+    sovereignClient.post<unknown>('/payments/create/', { 
       booking_id: bookingId, 
       payment_method: methodId 
     }),
@@ -35,8 +35,8 @@ export const paymentsApi = {
     const otp = typeof paymentIdOrData === 'string' 
       ? otpCode! 
       : paymentIdOrData.otp;
-    return sovereignClient.post<any>(`/payments/${paymentId}/verify_otp/`, { otp_code: otp });
+    return sovereignClient.post<unknown>(`/payments/${paymentId}/verify_otp/`, { otp_code: otp });
   },
 
-  getAll: () => sovereignClient.get<any>('/payments/'),
+  getAll: () => sovereignClient.get<unknown>('/payments/'),
 };

@@ -7,6 +7,7 @@ import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 import { ParticleField } from '@/components/ui/particle-field';
 import DOMPurify from 'dompurify';
 
@@ -88,10 +89,12 @@ export default function DynamicPage() {
 
           {page.featured_image && (
             <div className="relative h-64 w-full overflow-hidden rounded-2xl mb-8">
-              <img
+              <Image
                 src={isValidImageUrl(page.featured_image) ? page.featured_image : '/placeholder.svg'}
                 alt={page.title}
                 className="w-full h-full object-cover"
+                fill
+                unoptimized
               />
             </div>
           )}

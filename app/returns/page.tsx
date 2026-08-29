@@ -69,7 +69,7 @@ export default function ReturnsPage() {
         })));
       })
       .catch(() => {});
-  }, []);
+  }, [isAuthenticated]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

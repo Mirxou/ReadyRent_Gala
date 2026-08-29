@@ -56,9 +56,9 @@ export default function AdminUsersPage() {
   const updateUserMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: { role?: string; is_active?: boolean } }) =>
       adminApi.updateUser(id, data),
-    onSuccess: (res: any) => {
+    onSuccess: (res: Record<string, unknown>) => {
       if (res?.dignity_preserved || res?.error) {
-        toast.error(res?.message_ar || res?.error || 'حدث خطأ أثناء التحديث');
+        toast.error((res?.message_ar as string) || (res?.error as string) || 'حدث خطأ أثناء التحديث');
         setUpdatingUserId(null);
         return;
       }

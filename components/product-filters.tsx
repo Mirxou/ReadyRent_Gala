@@ -24,6 +24,18 @@ interface ProductFiltersProps {
   maxPrice?: number;
 }
 
+interface Category {
+  id: number;
+  name_ar?: string;
+  name?: string;
+}
+
+interface ColorOption {
+  name: string;
+  value: string;
+  hex: string;
+}
+
 export function ProductFilters({
   search,
   onSearchChange,
@@ -40,53 +52,18 @@ export function ProductFilters({
   const [searchSuggestions, setSearchSuggestions] = useState<Array<{ type: string; text: string }>>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [searchInput, setSearchInput] = useState(search);
-  const [priceMinInput, setPriceMinInput] = useState<string | null>(null);
-  const [priceMaxInput, setPriceMaxInput] = useState<string | null>(null);
+  const [priceMinInput, setPriceMinInput] = useState('');
+  const [priceMaxInput, setPriceMaxInput] = useState('');
   const [isPriceMinFocused, setIsPriceMinFocused] = useState(false);
   const [isPriceMaxFocused, setIsPriceMaxFocused] = useState(false);
   const [showCustomColorInput, setShowCustomColorInput] = useState(false);
   const [customColorInput, setCustomColorInput] = useState('');
-
-  // Reset input states when priceRange changes externally (e.g., clearAll)
-  // Only reset if the value actually changed, not if user just entered the same value
-  useEffect(() => {
-    if (!isPriceMinFocused) {
-      const currentMin = priceMinInput !== null
-        ? (priceMinInput === '' ? 0 : Number(priceMinInput) || 0)
-        : null;
-      // Only update if the value actually changed from external source
-      if (currentMin !== priceRange[0]) {
-        if (priceRange[0] === 0) {
-          setPriceMinInput(null);
-        } else {
-          setPriceMinInput(priceRange[0].toString());
-        }
-      }
-    }
-    if (!isPriceMaxFocused) {
-      const currentMax = priceMaxInput !== null
-        ? (priceMaxInput === '' ? maxPrice : Number(priceMaxInput) || maxPrice)
-        : null;
-      // Only update if the value actually changed from external source
-      // Don't reset if user entered maxPrice explicitly (priceMaxInput matches priceRange[1])
-      if (currentMax !== priceRange[1]) {
-        if (priceRange[1] === maxPrice && priceMaxInput === null) {
-          // Only reset to null if it was already null (external change)
-          setPriceMaxInput(null);
-        } else if (priceRange[1] !== maxPrice) {
-          setPriceMaxInput(priceRange[1].toString());
-        }
-        // If priceRange[1] === maxPrice and priceMaxInput is not null, keep it (user entered it)
-      }
-    }
-  }, [priceRange, maxPrice, isPriceMinFocused, isPriceMaxFocused]);
 
   const { data: categoriesData } = useQuery({
     queryKey: ['categories'],
     queryFn: () => productsApi.getCategories().then((res) => res.data),
   });
 
-  // Ensure categories is always an array
   const categories = useMemo(() => {
     if (!categoriesData) return [];
     return Array.isArray(categoriesData)
@@ -112,13 +89,10 @@ export function ProductFilters({
 
   const handleSearchChange = (value: string) => {
     setSearchInput(value);
-    // Search suggestions only for 2+ characters
     if (value.length < 2) {
       setSearchSuggestions([]);
       setShowSuggestions(false);
     }
-
-    // Always call onSearchChange, even if empty - search works with all filters
     onSearchChange(value);
   };
 
@@ -186,22 +160,20 @@ export function ProductFilters({
   const { data: metadata } = useQuery({
     queryKey: ['product-metadata'],
     queryFn: () => productsApi.getMetadata().then((res) => res.data),
-    staleTime: 1000 * 60 * 60, // Cache for 1 hour
+    staleTime: 1000 * 60 * 60,
   });
 
   const SIZE_OPTIONS = useMemo(() => {
     if (metadata?.sizes) {
       return metadata.sizes.map((s: { value: string; label: string }) => s.value);
     }
-    // Fallback to default sizes if API fails
     return ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'];
   }, [metadata]);
 
-  const COLOR_OPTIONS = useMemo(() => {
+  const COLOR_OPTIONS = useMemo((): ColorOption[] => {
     if (metadata?.colors) {
       return metadata.colors;
     }
-    // Fallback to default colors if API fails
     return [
       { name: 'أحمر', value: 'red', hex: '#EF4444' },
       { name: 'أزرق', value: 'blue', hex: '#3B82F6' },
@@ -215,6 +187,15 @@ export function ProductFilters({
       { name: 'ذهبي', value: 'gold', hex: '#FBBF24' },
     ];
   }, [metadata]);
+
+  // Derive display values from priceRange when not focused
+  const priceMinDisplay = isPriceMinFocused
+    ? priceMinInput
+    : (priceRange[0] === 0 ? '' : priceRange[0].toString());
+
+  const priceMaxDisplay = isPriceMaxFocused
+    ? priceMaxInput
+    : (priceRange[1] === maxPrice ? '' : priceRange[1].toString());
 
   return (
     <Card>
@@ -243,11 +224,9 @@ export function ProductFilters({
                 size="sm"
                 onClick={() => {
                   if (selectedCategories.length === categories.length) {
-                    // Deselect all
                     onCategoriesChange([]);
                   } else {
-                    // Select all
-                    onCategoriesChange(categories.map((cat: any) => cat.id.toString()));
+                    onCategoriesChange(categories.map((cat: Category) => cat.id.toString()));
                   }
                 }}
                 className="text-xs h-auto py-1 px-2"
@@ -258,7 +237,7 @@ export function ProductFilters({
           </div>
           {categories && categories.length > 0 ? (
             <div className="space-y-2 max-h-48 overflow-y-auto">
-              {categories.map((category: any) => (
+              {categories.map((category: Category) => (
                 <div key={category.id} className="flex items-center space-x-2 space-x-reverse">
                   <input
                     type="checkbox"
@@ -298,27 +277,26 @@ export function ProductFilters({
                   inputMode="numeric"
                   pattern="[0-9]*"
                   placeholder="0"
-                  value={priceMinInput !== null ? priceMinInput : (priceRange[0] === 0 ? '' : priceRange[0].toString())}
+                  value={priceMinDisplay}
                   onChange={(e) => {
                     const inputValue = e.target.value.replace(/[^0-9]/g, '');
                     setPriceMinInput(inputValue);
-                    // Don't update priceRange immediately, wait for blur
                   }}
                   onBlur={(e) => {
                     setIsPriceMinFocused(false);
                     const inputValue = e.target.value.replace(/[^0-9]/g, '');
                     if (inputValue === '') {
-                      setPriceMinInput(null);
+                      setPriceMinInput('');
                       onPriceRangeChange([0, priceRange[1]]);
                       return;
                     }
                     const numValue = Number(inputValue);
                     if (!isNaN(numValue) && numValue >= 0) {
                       const minValue = priceRange[1] ? Math.min(numValue, priceRange[1]) : numValue;
-                      setPriceMinInput(null);
+                      setPriceMinInput('');
                       onPriceRangeChange([minValue, priceRange[1]]);
                     } else {
-                      setPriceMinInput(null);
+                      setPriceMinInput('');
                       onPriceRangeChange([0, priceRange[1]]);
                     }
                   }}
@@ -344,32 +322,26 @@ export function ProductFilters({
                   inputMode="numeric"
                   pattern="[0-9]*"
                   placeholder="0"
-                  value={priceMaxInput !== null ? priceMaxInput : (priceRange[1] === maxPrice ? '' : priceRange[1].toString())}
+                  value={priceMaxDisplay}
                   onChange={(e) => {
                     const inputValue = e.target.value.replace(/[^0-9]/g, '');
                     setPriceMaxInput(inputValue);
-                    // Don't update priceRange immediately, wait for blur
                   }}
                   onBlur={(e) => {
                     setIsPriceMaxFocused(false);
                     const inputValue = e.target.value.replace(/[^0-9]/g, '');
                     if (inputValue === '') {
-                      setPriceMaxInput(null);
+                      setPriceMaxInput('');
                       onPriceRangeChange([priceRange[0], maxPrice]);
                       return;
                     }
                     const numValue = Number(inputValue);
                     if (!isNaN(numValue) && numValue >= 0) {
                       const maxValue = Math.max(numValue, priceRange[0] || 0);
-                      // Keep the input value if user entered maxPrice explicitly
-                      if (maxValue === maxPrice) {
-                        setPriceMaxInput(maxValue.toString());
-                      } else {
-                        setPriceMaxInput(null);
-                      }
+                      setPriceMaxInput('');
                       onPriceRangeChange([priceRange[0], maxValue]);
                     } else {
-                      setPriceMaxInput(null);
+                      setPriceMaxInput('');
                       onPriceRangeChange([priceRange[0], maxPrice]);
                     }
                   }}
@@ -386,17 +358,15 @@ export function ProductFilters({
             </div>
           </div>
           {(() => {
-            // Get current display values (use local input if available, otherwise use priceRange)
             let currentMin: number;
-            if (priceMinInput !== null) {
+            if (isPriceMinFocused && priceMinInput) {
               currentMin = priceMinInput === '' ? 0 : (Number(priceMinInput) || 0);
             } else {
               currentMin = priceRange[0];
             }
 
             let currentMax: number;
-            if (priceMaxInput !== null) {
-              // If user is typing, use the typed value (even if empty, treat as maxPrice for display)
+            if (isPriceMaxFocused && priceMaxInput) {
               if (priceMaxInput === '') {
                 currentMax = maxPrice;
               } else {
@@ -406,8 +376,7 @@ export function ProductFilters({
               currentMax = priceRange[1];
             }
 
-            // Show warning if max is still at default and user is not typing
-            if (currentMax === maxPrice && priceMaxInput === null && !isPriceMaxFocused) {
+            if (currentMax === maxPrice && !isPriceMaxFocused) {
               return (
                 <div className="text-xs text-red-500 pt-1 text-center animate-soft-pulse">
                   الرجاء وضع سقف للسعر
@@ -415,8 +384,7 @@ export function ProductFilters({
               );
             }
 
-            // Always show range if user is typing or if values are different from defaults
-            const isTyping = priceMinInput !== null || priceMaxInput !== null || isPriceMinFocused || isPriceMaxFocused;
+            const isTyping = isPriceMinFocused || isPriceMaxFocused;
             const hasCustomValues = currentMin > 0 || currentMax !== maxPrice;
 
             if (isTyping || hasCustomValues) {
@@ -457,7 +425,7 @@ export function ProductFilters({
         <div className="space-y-2">
           <label className="text-sm font-medium">الألوان</label>
           <div className="flex flex-wrap gap-2">
-            {COLOR_OPTIONS.map((color: any) => (
+            {COLOR_OPTIONS.map((color: ColorOption) => (
               <Button
                 key={color.value}
                 variant={colors.includes(color.value) ? 'default' : 'outline'}
@@ -472,7 +440,6 @@ export function ProductFilters({
                 {color.name}
               </Button>
             ))}
-            {/* Custom Color Button */}
             <Button
               variant={showCustomColorInput ? 'default' : 'outline'}
               size="sm"
@@ -484,7 +451,6 @@ export function ProductFilters({
             </Button>
           </div>
 
-          {/* Custom Color Input */}
           {showCustomColorInput && (
             <div className="flex gap-2 items-center">
               <Input
@@ -519,11 +485,10 @@ export function ProductFilters({
             </div>
           )}
 
-          {/* Display Custom Colors */}
-          {colors.filter((c) => !COLOR_OPTIONS.find((co: any) => co.value === c)).length > 0 && (
+          {colors.filter((c) => !COLOR_OPTIONS.find((co: ColorOption) => co.value === c)).length > 0 && (
             <div className="flex flex-wrap gap-2 mt-2">
               {colors
-                .filter((c) => !COLOR_OPTIONS.find((co: any) => co.value === c))
+                .filter((c) => !COLOR_OPTIONS.find((co: ColorOption) => co.value === c))
                 .map((customColor) => (
                   <Badge
                     key={customColor}
@@ -543,7 +508,7 @@ export function ProductFilters({
           )}
         </div>
 
-        {/* Search with Autocomplete - Moved to middle after Colors */}
+        {/* Search with Autocomplete */}
         <div className="space-y-2">
           <label className="text-sm font-medium">البحث</label>
           <div className="flex gap-2">
@@ -553,8 +518,7 @@ export function ProductFilters({
                 placeholder="يمكن تركه فارغا"
                 value={searchInput}
                 onChange={(e) => {
-                  const newValue = e.target.value;
-                  handleSearchChange(newValue);
+                  handleSearchChange(e.target.value);
                 }}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
@@ -587,7 +551,6 @@ export function ProductFilters({
             </div>
             <Button
               onClick={() => {
-                // Always trigger search, even if searchInput is empty (works with filters)
                 handleSearchChange(searchInput);
               }}
               variant="default"
@@ -603,4 +566,3 @@ export function ProductFilters({
     </Card>
   );
 }
-

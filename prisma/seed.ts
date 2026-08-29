@@ -9,7 +9,7 @@ function cid(prefix: string, num: number): string {
 }
 
 async function main() {
-  console.log('🌱 Seeding STANDARD.Rent database...');
+  console.warn('🌱 Seeding STANDARD.Rent database...');
 
   // ──── Users ────
   const hash = (pw: string) => bcrypt.hashSync(pw, 10);
@@ -327,7 +327,7 @@ async function main() {
     ],
   });
 
-  console.log('✅ Seed completed successfully!');
+  console.warn('✅ Seed completed successfully!');
 }
 
 main()

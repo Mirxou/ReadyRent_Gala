@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion, useInView, type Variants } from 'framer-motion';
 import { useRef } from 'react';
 import { ArrowLeft, Star, MapPin, Users } from 'lucide-react';
@@ -100,11 +101,13 @@ export function ArtisansGrid({ artisans }: { artisans: HomepageArtisan[] }) {
                   className="p-6 hover:border-sovereign-gold/30 transition-all duration-500 rounded-[2rem] text-center"
                 >
                   <div className="relative z-10 space-y-4">
-                    <div className="w-20 h-20 mx-auto rounded-full overflow-hidden border-2 border-sovereign-gold/20 group-hover:border-sovereign-gold/50 transition-colors">
-                      <img
+                    <div className="w-20 h-20 mx-auto rounded-full overflow-hidden border-2 border-sovereign-gold/20 group-hover:border-sovereign-gold/50 transition-colors relative">
+                      <Image
                         src={artisan.avatar || artisan.image || '/placeholder-avatar.jpg'}
                         alt={artisan.name_ar || artisan.name || 'حرفية'}
                         className="w-full h-full object-cover"
+                        fill
+                        unoptimized
                       />
                     </div>
                     <div>

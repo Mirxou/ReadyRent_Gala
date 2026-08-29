@@ -1,16 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { ForecastChart } from '@/components/forecast-chart';
 import { api } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
-import { TrendingUp, AlertCircle, BarChart3 } from 'lucide-react';
+import { BarChart3 } from 'lucide-react';
 
 interface Forecast {
   id: number;
@@ -26,6 +25,8 @@ interface Forecast {
   trend_factor: number;
 }
 
+type ApiErrorResponse = { response?: { data?: { error?: string } } };
+
 export default function ForecastingPage() {
   const { toast } = useToast();
   const [forecasts, setForecasts] = useState<Forecast[]>([]);
@@ -38,24 +39,24 @@ export default function ForecastingPage() {
     category_id: '',
   });
 
-  useEffect(() => {
-    loadForecasts();
-  }, []);
-
-  const loadForecasts = async () => {
+  const loadForecasts = useCallback(async () => {
     try {
       const response = await api.get('/analytics/forecasts/');
       setForecasts((response.data?.results ?? response.data ?? []) as Forecast[]);
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: 'خطأ',
-        description: error.response?.data?.error || 'فشل تحميل التنبؤات',
+        description: (error as ApiErrorResponse)?.response?.data?.error || 'فشل تحميل التنبؤات',
         variant: 'destructive',
       });
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    requestAnimationFrame(() => { loadForecasts(); });
+  }, [loadForecasts]);
 
   const handleGenerate = async () => {
     if (!formData.forecast_start || !formData.forecast_end) {
@@ -75,10 +76,10 @@ export default function ForecastingPage() {
         description: 'تم إنشاء التنبؤ بنجاح',
       });
       loadForecasts();
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: 'خطأ',
-        description: error.response?.data?.error || 'فشل إنشاء التنبؤ',
+        description: (error as ApiErrorResponse)?.response?.data?.error || 'فشل إنشاء التنبؤ',
         variant: 'destructive',
       });
     } finally {
@@ -101,10 +102,10 @@ export default function ForecastingPage() {
         `/analytics/forecasts/high-demand/?forecast_start=${formData.forecast_start}&forecast_end=${formData.forecast_end}&limit=10`
       );
       setForecasts((response.data?.results ?? response.data ?? []) as Forecast[]);
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: 'خطأ',
-        description: error.response?.data?.error || 'فشل تحميل المنتجات عالية الطلب',
+        description: (error as ApiErrorResponse)?.response?.data?.error || 'فشل تحميل المنتجات عالية الطلب',
         variant: 'destructive',
       });
     }
@@ -219,5 +220,3 @@ export default function ForecastingPage() {
     </div>
   );
 }
-
-

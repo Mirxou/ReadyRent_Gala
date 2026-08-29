@@ -22,13 +22,24 @@ import {
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 
+interface MaintenanceRecord {
+  id: number;
+  product_name?: string;
+  scheduled_start: string;
+  notes?: string;
+  status: string;
+  assigned_to_email?: string;
+}
+
+type MutationResponse = Record<string, unknown>;
+
 export default function AdminMaintenancePage() {
   const router = useRouter();
   const { user, isAuthenticated } = useAuthStore();
   const queryClient = useQueryClient();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [editingRecord, setEditingRecord] = useState<any>(null);
+  const [editingRecord, setEditingRecord] = useState<MaintenanceRecord | null>(null);
   const [formData, setFormData] = useState({
     product: '',
     scheduled_start: '',
@@ -49,10 +60,10 @@ export default function AdminMaintenancePage() {
   });
 
   const createMutation = useMutation({
-    mutationFn: (data: any) => maintenanceApi.createRecord(data),
-    onSuccess: (res: any) => {
+    mutationFn: (data: Record<string, string>) => maintenanceApi.createRecord(data),
+    onSuccess: (res: MutationResponse) => {
       if (res?.dignity_preserved || res?.error) {
-        toast.error(res?.message_ar || res?.error || 'حدث خطأ أثناء الإضافة');
+        toast.error((res?.message_ar as string) || (res?.error as string) || 'حدث خطأ أثناء الإضافة');
         return;
       }
       queryClient.invalidateQueries({ queryKey: ['maintenance-records'] });
@@ -63,10 +74,10 @@ export default function AdminMaintenancePage() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: any }) => maintenanceApi.updateRecord(id, data),
-    onSuccess: (res: any) => {
+    mutationFn: ({ id, data }: { id: number; data: Record<string, string> }) => maintenanceApi.updateRecord(id, data),
+    onSuccess: (res: MutationResponse) => {
       if (res?.dignity_preserved || res?.error) {
-        toast.error(res?.message_ar || res?.error || 'حدث خطأ أثناء التحديث');
+        toast.error((res?.message_ar as string) || (res?.error as string) || 'حدث خطأ أثناء التحديث');
         return;
       }
       queryClient.invalidateQueries({ queryKey: ['maintenance-records'] });
@@ -78,9 +89,9 @@ export default function AdminMaintenancePage() {
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => maintenanceApi.deleteRecord(id),
-    onSuccess: (res: any) => {
+    onSuccess: (res: MutationResponse) => {
       if (res?.dignity_preserved || res?.error) {
-        toast.error(res?.message_ar || res?.error || 'حدث خطأ أثناء الحذف');
+        toast.error((res?.message_ar as string) || (res?.error as string) || 'حدث خطأ أثناء الحذف');
         return;
       }
       queryClient.invalidateQueries({ queryKey: ['maintenance-records'] });
@@ -92,10 +103,10 @@ export default function AdminMaintenancePage() {
     createMutation.mutate(formData);
   };
 
-  const handleEdit = (record: any) => {
+  const handleEdit = (record: MaintenanceRecord) => {
     setEditingRecord(record);
     setFormData({
-      product: record.product?.toString() || '',
+      product: record.id?.toString() || '',
       scheduled_start: record.scheduled_start ? new Date(record.scheduled_start).toISOString().slice(0, 16) : '',
       notes: record.notes || '',
       status: record.status || 'scheduled',
@@ -125,7 +136,7 @@ export default function AdminMaintenancePage() {
       cancelled: { label: 'ملغي', variant: 'destructive' },
     };
     
-    const config = statusConfig[status] || { label: status, variant: 'outline' };
+    const config = statusConfig[status] || { label: status, variant: 'outline' as const };
     return <Badge variant={config.variant}>{config.label}</Badge>;
   };
 
@@ -213,7 +224,7 @@ export default function AdminMaintenancePage() {
         </Card>
       ) : (
         <div className="grid grid-cols-1 gap-6">
-          {records?.map((record: any) => (
+          {records?.map((record: MaintenanceRecord) => (
             <Card key={record.id}>
               <CardHeader>
                 <div className="flex items-start justify-between">
@@ -338,4 +349,3 @@ export default function AdminMaintenancePage() {
     </div>
   );
 }
-

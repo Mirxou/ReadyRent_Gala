@@ -26,6 +26,7 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import { SovereignGlow } from '@/shared/components/sovereign/sovereign-sparkle';
+import Image from 'next/image';
 import { useState, useRef, useEffect } from 'react';
 import { toast } from 'sonner';
 
@@ -153,9 +154,9 @@ export default function DisputeDetailPage() {
   const sendMessageMutation = useMutation({
     mutationFn: (text: string) =>
       disputesApi.createMessage(Number(disputeId), text),
-    onSuccess: (res: any) => {
+    onSuccess: (res: Record<string, unknown>) => {
       if (res?.dignity_preserved || res?.error) {
-        toast.error(res?.message_ar || res?.error || 'فشل إرسال الرسالة');
+        toast.error((res?.message_ar as string) || (res?.error as string) || 'فشل إرسال الرسالة');
         return;
       }
       queryClient.invalidateQueries({ queryKey: ['dispute', disputeId] });
@@ -286,8 +287,8 @@ export default function DisputeDetailPage() {
                 <h4 className="text-sm font-black uppercase tracking-widest text-muted-foreground opacity-60 mb-4">تفاصيل الحجز</h4>
                 <div className="flex items-center gap-4">
                   {dispute.booking.product_image && (
-                    <div className="w-16 h-16 rounded-2xl overflow-hidden bg-white/5 flex-shrink-0">
-                      <img src={dispute.booking.product_image} alt="" className="w-full h-full object-cover" />
+                    <div className="w-16 h-16 rounded-2xl overflow-hidden bg-white/5 flex-shrink-0 relative">
+                      <Image src={dispute.booking.product_image} alt="" className="w-full h-full object-cover" fill unoptimized />
                     </div>
                   )}
                   <div className="flex-1 min-w-0">
@@ -323,8 +324,8 @@ export default function DisputeDetailPage() {
                   {evidenceUrls.map((url: string, idx: number) => (
                     <div key={idx} className="aspect-square bg-white/5 rounded-3xl border border-white/5 flex flex-col items-center justify-center gap-3 group cursor-pointer hover:border-sovereign-gold/40 transition-all overflow-hidden">
                       {url.match(/\.(jpg|jpeg|png|gif|webp|svg)/i) ? (
-                        <div className="w-full h-full flex items-center justify-center p-2">
-                          <img src={url} alt={`الدليل ${idx + 1}`} className="w-full h-full object-cover rounded-2xl" />
+                        <div className="w-full h-full flex items-center justify-center p-2 relative">
+                          <Image src={url} alt={`الدليل ${idx + 1}`} className="w-full h-full object-cover rounded-2xl" fill unoptimized />
                         </div>
                       ) : (
                         <>

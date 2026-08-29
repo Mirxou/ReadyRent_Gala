@@ -1,17 +1,30 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
+import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { ProductCard } from '@/components/product-card';
 import { productsApi } from '@/lib/api';
-import { Palette, ShoppingCart } from 'lucide-react';
+import { Palette } from 'lucide-react';
 import Link from 'next/link';
 
 interface AccessorySuggestionsProps {
   productId: number;
   limit?: number;
+}
+
+interface Accessory {
+  id: number;
+  slug?: string;
+  name_ar?: string;
+  name?: string;
+  primary_image?: string;
+  images?: Array<{ image: string }>;
+  compatibility?: string;
+  compatibility_label?: string;
+  price_per_day: number;
+  color_hex?: string;
+  color?: string;
 }
 
 export function AccessorySuggestions({ productId, limit = 5 }: AccessorySuggestionsProps) {
@@ -56,7 +69,7 @@ export function AccessorySuggestions({ productId, limit = 5 }: AccessorySuggesti
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-          {data.accessories.map((accessory: any) => (
+          {data.accessories.map((accessory: Accessory) => (
             <div key={accessory.id} className="relative">
               <div className="relative group">
                 <Link href={`/products/${accessory.slug || accessory.id}`}>
@@ -65,10 +78,12 @@ export function AccessorySuggestions({ productId, limit = 5 }: AccessorySuggesti
                       {/* Product Image */}
                       <div className="relative aspect-[3/4] w-full overflow-hidden rounded-t-lg">
                         {accessory.primary_image || accessory.images?.[0]?.image ? (
-                          <img
-                            src={accessory.primary_image || accessory.images[0].image}
-                            alt={accessory.name_ar || accessory.name}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          <Image
+                            src={accessory.primary_image || accessory.images[0]!.image}
+                            alt={accessory.name_ar || accessory.name || ''}
+                            fill
+                            unoptimized
+                            className="object-cover group-hover:scale-105 transition-transform duration-300"
                           />
                         ) : (
                           <div className="w-full h-full bg-muted flex items-center justify-center">
@@ -78,7 +93,7 @@ export function AccessorySuggestions({ productId, limit = 5 }: AccessorySuggesti
                         
                         {/* Compatibility Badge */}
                         <div className="absolute top-2 left-2">
-                          {getCompatibilityBadge(accessory.compatibility || accessory.compatibility_label)}
+                          {getCompatibilityBadge(accessory.compatibility || accessory.compatibility_label || '')}
                         </div>
 
                         {/* Color Circle */}
@@ -133,4 +148,3 @@ export function AccessorySuggestions({ productId, limit = 5 }: AccessorySuggesti
     </Card>
   );
 }
-

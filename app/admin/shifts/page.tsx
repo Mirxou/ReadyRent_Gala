@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -73,13 +73,7 @@ export default function AdminShiftsPage() {
     notes: '',
   });
 
-  useEffect(() => {
-    fetchShifts();
-    fetchBranches();
-    fetchStaff();
-  }, []);
-
-  const fetchShifts = async () => {
+  const fetchShifts = useCallback(async () => {
     try {
       // NOTE: /api/users/staff/shifts/ is handled by a mock API handler.
       // If this endpoint doesn't exist yet, the shifts will be empty.
@@ -98,31 +92,38 @@ export default function AdminShiftsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const fetchBranches = async () => {
-    try {
-      const response = await fetch('/api/branches/');
-      if (response.ok) {
-        const data = await response.json();
-        setBranches(data.results || data);
-      }
-    } catch (error) {
-      console.error('Error fetching branches:', error);
-    }
-  };
+  useEffect(() => {
+    let cancelled = false;
 
-  const fetchStaff = async () => {
-    try {
-      const response = await fetch('/api/users/staff/list/');
-      if (response.ok) {
-        const data = await response.json();
-        setStaff(data.results || data);
+    const doFetchBranches = async () => {
+      try {
+        const response = await fetch('/api/branches/');
+        if (response.ok && !cancelled) {
+          const data = await response.json();
+          setBranches(data.results || data);
+        }
+      } catch (error) {
+        console.error('Error fetching branches:', error);
       }
-    } catch (error) {
-      console.error('Error fetching staff:', error);
-    }
-  };
+    };
+
+    const doFetchStaff = async () => {
+      try {
+        const response = await fetch('/api/users/staff/list/');
+        if (response.ok && !cancelled) {
+          const data = await response.json();
+          setStaff(data.results || data);
+        }
+      } catch (error) {
+        console.error('Error fetching staff:', error);
+      }
+    };
+
+    requestAnimationFrame(() => { fetchShifts(); doFetchBranches(); doFetchStaff(); });
+    return () => { cancelled = true; };
+  }, [fetchShifts]);
 
   const handleCreateShift = () => {
     setSelectedShift(null);

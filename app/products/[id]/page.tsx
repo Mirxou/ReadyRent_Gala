@@ -74,9 +74,9 @@ export default function ProductDetailsPage() {
 
   const createBookingMutation = useMutation({
     mutationFn: (data: Record<string, unknown>) => bookingsApi.create(data),
-    onSuccess: (res: any) => {
+    onSuccess: (res: Record<string, unknown>) => {
       if (res?.dignity_preserved || res?.error) {
-        toast.error(res?.message_ar || res?.error || 'فشل في توثيق العقد');
+        toast.error((res?.message_ar as string) || (res?.error as string) || 'فشل في توثيق العقد');
         return;
       }
       toast.success('تم إبرام العقد السيادي بنجاح (Contract Sealed)');

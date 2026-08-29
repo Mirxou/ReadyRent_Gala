@@ -20,7 +20,7 @@ interface AgreementWidgetProps {
         created_at: string;
     };
     currentUserId: number;
-    onAgreementUpdated: (updatedAgreement: any) => void;
+    onAgreementUpdated: (updatedAgreement: Record<string, unknown>) => void;
 }
 
 export const AgreementWidget = ({ agreement, currentUserId, onAgreementUpdated }: AgreementWidgetProps) => {
@@ -41,7 +41,7 @@ export const AgreementWidget = ({ agreement, currentUserId, onAgreementUpdated }
                 description: "تم تسجيل توقيعك الرقمي وتوثيقه."
             });
             onAgreementUpdated(res.data);
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Sign error:", error);
             toast.error("فشل التوقيع. حاول مرة أخرى.");
         } finally {

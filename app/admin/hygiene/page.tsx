@@ -22,13 +22,26 @@ import {
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 
+interface HygieneRecord {
+  id: number;
+  product?: { id: number; name_ar: string } | null;
+  product_name?: string;
+  cleaning_type: string;
+  status: string;
+  cleaning_notes?: string;
+  completed_at?: string;
+  passed_inspection?: boolean;
+}
+
+type MutationResponse = Record<string, unknown>;
+
 export default function AdminHygienePage() {
   const router = useRouter();
   const { user, isAuthenticated } = useAuthStore();
   const queryClient = useQueryClient();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [editingRecord, setEditingRecord] = useState<any>(null);
+  const [editingRecord, setEditingRecord] = useState<HygieneRecord | null>(null);
   const [formData, setFormData] = useState({
     product: '',
     cleaning_type: '',
@@ -49,10 +62,10 @@ export default function AdminHygienePage() {
   });
 
   const createMutation = useMutation({
-    mutationFn: (data: any) => hygieneApi.createRecord(data),
-    onSuccess: (res: any) => {
+    mutationFn: (data: Record<string, string>) => hygieneApi.createRecord(data),
+    onSuccess: (res: MutationResponse) => {
       if (res?.dignity_preserved || res?.error) {
-        toast.error(res?.message_ar || res?.error || 'حدث خطأ أثناء الإضافة');
+        toast.error((res?.message_ar as string) || (res?.error as string) || 'حدث خطأ أثناء الإضافة');
         return;
       }
       queryClient.invalidateQueries({ queryKey: ['hygiene-records'] });
@@ -63,10 +76,10 @@ export default function AdminHygienePage() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: any }) => hygieneApi.updateRecord(id, data),
-    onSuccess: (res: any) => {
+    mutationFn: ({ id, data }: { id: number; data: Record<string, string> }) => hygieneApi.updateRecord(id, data),
+    onSuccess: (res: MutationResponse) => {
       if (res?.dignity_preserved || res?.error) {
-        toast.error(res?.message_ar || res?.error || 'حدث خطأ أثناء التحديث');
+        toast.error((res?.message_ar as string) || (res?.error as string) || 'حدث خطأ أثناء التحديث');
         return;
       }
       queryClient.invalidateQueries({ queryKey: ['hygiene-records'] });
@@ -78,9 +91,9 @@ export default function AdminHygienePage() {
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => hygieneApi.deleteRecord(id),
-    onSuccess: (res: any) => {
+    onSuccess: (res: MutationResponse) => {
       if (res?.dignity_preserved || res?.error) {
-        toast.error(res?.message_ar || res?.error || 'حدث خطأ أثناء الحذف');
+        toast.error((res?.message_ar as string) || (res?.error as string) || 'حدث خطأ أثناء الحذف');
         return;
       }
       queryClient.invalidateQueries({ queryKey: ['hygiene-records'] });
@@ -92,7 +105,7 @@ export default function AdminHygienePage() {
     createMutation.mutate(formData);
   };
 
-  const handleEdit = (record: any) => {
+  const handleEdit = (record: HygieneRecord) => {
     setEditingRecord(record);
     setFormData({
       product: record.product?.toString() || '',
@@ -126,7 +139,7 @@ export default function AdminHygienePage() {
       failed: { label: 'فشل الفحص', variant: 'destructive' },
     };
 
-    const config = statusConfig[status] || { label: status, variant: 'outline' };
+    const config = statusConfig[status] || { label: status, variant: 'outline' as const };
     return <Badge variant={config.variant}>{config.label}</Badge>;
   };
 
@@ -215,11 +228,11 @@ export default function AdminHygienePage() {
         </Card>
       ) : (
         <div className="grid grid-cols-1 gap-6">
-          {records?.map((record: any) => (
+          {records?.map((record: HygieneRecord) => (
             <Card key={record.id}>
               <CardHeader>
                 <div className="flex items-start justify-between">
-                  <CardTitle>{record.product?.name_ar || 'منتج'}</CardTitle>
+                  <CardTitle>{record.product?.name_ar || record.product_name || 'منتج'}</CardTitle>
                   {getStatusBadge(record.status)}
                 </div>
               </CardHeader>
@@ -345,4 +358,3 @@ export default function AdminHygienePage() {
     </div>
   );
 }
-

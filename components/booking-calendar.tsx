@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { useQuery } from '@tanstack/react-query';
 import { bookingsApi, api, locationsApi } from '@/lib/api';
 import { CalendarIcon, Clock, Zap } from 'lucide-react';
-const HijriDate = require('hijri-date-converter');
+import HijriDate from 'hijri-date-converter';
 
 interface BookingCalendarProps {
   productId: number;

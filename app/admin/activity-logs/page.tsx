@@ -53,41 +53,42 @@ export default function AdminActivityLogsPage() {
   const [modelFilter, setModelFilter] = useState<string>('all');
 
   useEffect(() => {
+    let cancelled = false;
+    const fetchLogs = async () => {
+      try {
+        let url = '/api/users/staff/activity-logs/';
+        const params = new URLSearchParams();
+        
+        if (actionFilter !== 'all') {
+          params.append('action', actionFilter);
+        }
+        if (modelFilter !== 'all') {
+          params.append('model_name', modelFilter);
+        }
+        
+        if (params.toString()) {
+          url += `?${params.toString()}`;
+        }
+
+        const response = await fetch(url, {
+          headers: {
+            ...getAuthHeaders(),
+          },
+        });
+
+        if (response.ok && !cancelled) {
+          const data = await response.json();
+          setLogs(data.results || data);
+        }
+      } catch (error) {
+        console.error('Error fetching logs:', error);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
     fetchLogs();
+    return () => { cancelled = true; };
   }, [actionFilter, modelFilter]);
-
-  const fetchLogs = async () => {
-    try {
-      let url = '/api/users/staff/activity-logs/';
-      const params = new URLSearchParams();
-      
-      if (actionFilter !== 'all') {
-        params.append('action', actionFilter);
-      }
-      if (modelFilter !== 'all') {
-        params.append('model_name', modelFilter);
-      }
-      
-      if (params.toString()) {
-        url += `?${params.toString()}`;
-      }
-
-      const response = await fetch(url, {
-        headers: {
-          ...getAuthHeaders(),
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setLogs(data.results || data);
-      }
-    } catch (error) {
-      console.error('Error fetching logs:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const filteredLogs = logs.filter((log) => {
     const matchesSearch =
@@ -196,5 +197,3 @@ export default function AdminActivityLogsPage() {
     </div>
   );
 }
-
-

@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MessageSquare, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { MessageSquare, Clock, XCircle, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
@@ -25,7 +25,7 @@ interface DisputeCardProps {
   onStatusChange?: (id: number, status: string) => void;
 }
 
-export function DisputeCard({ dispute, onStatusChange }: DisputeCardProps) {
+export function DisputeCard({ dispute, onStatusChange: _onStatusChange }: DisputeCardProps) {
   const getStatusBadge = (status: string) => {
     const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
       open: { label: 'مفتوح', variant: 'default' },

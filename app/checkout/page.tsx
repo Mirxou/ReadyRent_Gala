@@ -2,7 +2,7 @@
 import { formatNumber } from '@/lib/utils';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -21,7 +21,6 @@ import { toast } from 'sonner';
 export default function CheckoutPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const queryClient = useQueryClient();
   const { isAuthenticated } = useAuthStore();
 
   // Booking ID from URL (cart → checkout flow)
@@ -33,9 +32,8 @@ export default function CheckoutPage() {
 
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
   const [selectedWilaya, setSelectedWilaya] = useState<string>('');
-  const [paymentCompleted, setPaymentCompleted] = useState(false);
+  const [apiPaymentError, setApiPaymentError] = useState<string | null>(null);
   const [isRedirecting, setIsRedirecting] = useState(false);
-  const [paymentError, setPaymentError] = useState<string | null>(null);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -45,20 +43,25 @@ export default function CheckoutPage() {
   }, [isAuthenticated, router]);
 
   // Handle webhook return
+  const [webhookState, setWebhookState] = useState<'idle' | 'success' | 'failed'>('idle');
+  const paymentCompleted = webhookState === 'success';
+  const webhookError = webhookState === 'failed' ? 'فشلت عملية الدفع. يرجى المحاولة مرة أخرى.' : null;
+  const paymentError = webhookError || apiPaymentError;
+
   useEffect(() => {
-    if (returnStatus === 'success') {
-      setPaymentCompleted(true);
+    if (returnStatus === 'success' && webhookState === 'idle') {
+      requestAnimationFrame(() => { setWebhookState('success'); });
       toast.success('تم الدفع بنجاح!');
       const timer = setTimeout(() => {
         router.push('/dashboard/bookings');
       }, 3000);
       return () => clearTimeout(timer);
     }
-    if (returnStatus === 'failed') {
-      setPaymentError('فشلت عملية الدفع. يرجى المحاولة مرة أخرى.');
+    if (returnStatus === 'failed' && webhookState === 'idle') {
+      requestAnimationFrame(() => { setWebhookState('failed'); });
       toast.error('فشلت عملية الدفع');
     }
-  }, [returnStatus, returnPaymentId, router]);
+  }, [returnStatus, returnPaymentId, router, webhookState]);
 
   // Get payment methods
   const { data: paymentMethods, isLoading: methodsLoading } = useQuery({
@@ -84,7 +87,7 @@ export default function CheckoutPage() {
     }
 
     setIsRedirecting(true);
-    setPaymentError(null);
+    setApiPaymentError(null);
 
     try {
       const response = await fetch('/api/payments/chargily/checkout', {
@@ -104,12 +107,12 @@ export default function CheckoutPage() {
       } else {
         const msg = result.message_ar || result.error || 'فشل إنشاء عملية الدفع';
         toast.error(msg);
-        setPaymentError(msg);
+        setApiPaymentError(msg);
         setIsRedirecting(false);
       }
     } catch {
       toast.error('خطأ في الاتصال بالخادم');
-      setPaymentError('خطأ في الاتصال بالخادم');
+      setApiPaymentError('خطأ في الاتصال بالخادم');
       setIsRedirecting(false);
     }
   }, [bookingId, totalAmount]);
@@ -251,7 +254,7 @@ export default function CheckoutPage() {
                 {selectedMethod && (
                   <Button
                     variant="outline"
-                    onClick={() => { setSelectedMethod(null); setPaymentError(null); }}
+                    onClick={() => { setSelectedMethod(null); setApiPaymentError(null); }}
                     className="w-full"
                   >
                     تغيير طريقة الدفع

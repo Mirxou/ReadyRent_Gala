@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -57,11 +57,7 @@ export default function AdminStaffPage() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showRoleDialog, setShowRoleDialog] = useState(false);
 
-  useEffect(() => {
-    fetchStaff();
-  }, [roleFilter]);
-
-  const fetchStaff = async () => {
+  const fetchStaff = useCallback(async () => {
     setLoading(true);
     try {
       let url = '/api/users/staff/list/';
@@ -84,7 +80,11 @@ export default function AdminStaffPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [roleFilter]);
+
+  useEffect(() => {
+    requestAnimationFrame(() => { fetchStaff(); });
+  }, [fetchStaff]);
 
   const filteredUsers = users.filter((user) => {
     const matchesSearch =

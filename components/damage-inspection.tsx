@@ -1,15 +1,17 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Upload, Camera, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
+import { Upload } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { api } from '@/lib/api';
+import Image from 'next/image';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 interface DamageAssessment {
   id: number;
@@ -56,7 +58,7 @@ interface DamageInspectionProps {
 
 export function DamageInspection({ bookingId, onComplete }: DamageInspectionProps) {
   const { toast } = useToast();
-  const [assessment, setAssessment] = useState<DamageAssessment | null>(null);
+  const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [formData, setFormData] = useState({
@@ -69,49 +71,33 @@ export function DamageInspection({ bookingId, onComplete }: DamageInspectionProp
   const [selectedPhotoType, setSelectedPhotoType] = useState<DamagePhoto['photo_type']>('damage');
   const [photoDescription, setPhotoDescription] = useState('');
 
-  useEffect(() => {
-    loadAssessment();
-  }, [bookingId]);
-
-  const loadAssessment = async () => {
-    try {
-      const response = await api.get(`/bookings/damage-assessment/`);
-      const rawData = response.data?.results ?? response.data ?? [];
+  const { data: assessment } = useQuery({
+    queryKey: ['damage-assessment', bookingId],
+    queryFn: async () => {
+      const res = await api.get(`/bookings/damage-assessment/`);
+      const rawData = res.data?.results ?? res.data ?? [];
       const assessments = rawData as DamageAssessment[];
-      const bookingAssessment = assessments.find((a: DamageAssessment) => a.booking === bookingId);
-      if (bookingAssessment) {
-        setAssessment(bookingAssessment);
-        setFormData({
-          severity: bookingAssessment.severity,
-          damage_description: bookingAssessment.damage_description || '',
-          repair_cost: bookingAssessment.repair_cost || 0,
-          replacement_cost: bookingAssessment.replacement_cost || 0,
-          notes: bookingAssessment.notes || '',
-        });
-      }
-    } catch (error: any) {
-      if (error.response?.status !== 404) {
-        console.error('Error loading assessment:', error);
-      }
-    }
-  };
+      return assessments.find((a: DamageAssessment) => a.booking === bookingId) || null;
+    },
+  });
 
   const createAssessment = async () => {
     setLoading(true);
     try {
-      const response = await api.post('/bookings/damage-assessment/', {
+      await api.post('/bookings/damage-assessment/', {
         booking_id: bookingId,
         ...formData,
       });
-      setAssessment(response.data);
+      queryClient.invalidateQueries({ queryKey: ['damage-assessment', bookingId] });
       toast({
         title: 'تم إنشاء التقييم',
         description: 'تم إنشاء تقييم الأضرار بنجاح',
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { error?: string } } };
       toast({
         title: 'خطأ',
-        description: error.response?.data?.error || 'فشل إنشاء التقييم',
+        description: err.response?.data?.error || 'فشل إنشاء التقييم',
         variant: 'destructive',
       });
     } finally {
@@ -123,16 +109,17 @@ export function DamageInspection({ bookingId, onComplete }: DamageInspectionProp
     if (!assessment) return;
     setLoading(true);
     try {
-      const response = await api.patch(`/bookings/damage-assessment/${assessment.id}/`, formData);
-      setAssessment(response.data);
+      await api.patch(`/bookings/damage-assessment/${assessment.id}/`, formData);
+      queryClient.invalidateQueries({ queryKey: ['damage-assessment', bookingId] });
       toast({
         title: 'تم التحديث',
         description: 'تم تحديث التقييم بنجاح',
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { error?: string } } };
       toast({
         title: 'خطأ',
-        description: error.response?.data?.error || 'فشل تحديث التقييم',
+        description: err.response?.data?.error || 'فشل تحديث التقييم',
         variant: 'destructive',
       });
     } finally {
@@ -145,26 +132,27 @@ export function DamageInspection({ bookingId, onComplete }: DamageInspectionProp
     if (!file || !assessment) return;
 
     setUploading(true);
-    const formData = new FormData();
-    formData.append('photo', file);
-    formData.append('assessment_id', assessment.id.toString());
-    formData.append('photo_type', selectedPhotoType);
-    formData.append('description', photoDescription);
+    const uploadFormData = new FormData();
+    uploadFormData.append('photo', file);
+    uploadFormData.append('assessment_id', assessment.id.toString());
+    uploadFormData.append('photo_type', selectedPhotoType);
+    uploadFormData.append('description', photoDescription);
 
     try {
-      await api.post('/bookings/damage-photos/', formData, {
+      await api.post('/bookings/damage-photos/', uploadFormData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       toast({
         title: 'تم رفع الصورة',
         description: 'تم رفع الصورة بنجاح',
       });
-      loadAssessment();
+      queryClient.invalidateQueries({ queryKey: ['damage-assessment', bookingId] });
       setPhotoDescription('');
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { error?: string } } };
       toast({
         title: 'خطأ',
-        description: error.response?.data?.error || 'فشل رفع الصورة',
+        description: err.response?.data?.error || 'فشل رفع الصورة',
         variant: 'destructive',
       });
     } finally {
@@ -312,10 +300,13 @@ export function DamageInspection({ bookingId, onComplete }: DamageInspectionProp
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {assessment.photos.map((photo) => (
                     <div key={photo.id} className="relative">
-                      <img
+                      <Image
                         src={photo.photo}
                         alt={photo.description}
+                        width={200}
+                        height={128}
                         className="w-full h-32 object-cover rounded-lg"
+                        unoptimized
                       />
                       <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-1 rounded-b-lg">
                         {photo.description || photo.photo_type}
@@ -369,5 +360,3 @@ export function DamageInspection({ bookingId, onComplete }: DamageInspectionProp
     </div>
   );
 }
-
-

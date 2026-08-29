@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -36,24 +36,24 @@ export default function VendorDashboardPage() {
   const [dashboard, setDashboard] = useState<VendorDashboard | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const loadDashboard = async () => {
+  const loadDashboard = useCallback(async () => {
     try {
       const response = await api.get('/vendors/dashboard/');
       setDashboard(response.data);
     } catch (error: unknown) {
       toast({
         title: 'خطأ',
-        description: error?.data?.error || 'فشل تحميل لوحة التحكم',
+        description: (error as Record<string, Record<string, string>>)?.data?.error || 'فشل تحميل لوحة التحكم',
         variant: 'destructive',
       });
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
   useEffect(() => {
     requestAnimationFrame(() => { loadDashboard(); });
-  }, []);
+  }, [loadDashboard]);
 
   if (loading) {
     return (

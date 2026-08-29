@@ -50,7 +50,7 @@ function ProductCardComponent({ product, priority = false }: ProductCardProps) {
   // Toggle wishlist mutation
   const toggleWishlistMutation = useMutation({
     mutationFn: () => productsApi.toggleWishlist(product.id),
-    onSuccess: (data: any) => {
+    onSuccess: (data: { dignity_preserved?: boolean; error?: string; message_ar?: string; data?: { in_wishlist?: boolean } }) => {
       if (data?.dignity_preserved || data?.error) {
         toast.error(data?.message_ar || data?.error || 'حدث خطأ أثناء تحديث قائمة المفضلة');
         return;

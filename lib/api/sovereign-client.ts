@@ -3,7 +3,7 @@ import { SovereignResponse } from '@/types/sovereign';
 
 // Extended options type that supports query params (compatible with fetch RequestInit)
 interface SovereignRequestOptions extends Omit<RequestInit, 'body'> {
-  params?: Record<string, any>;
+  params?: Record<string, unknown>;
   body?: BodyInit | null;
 }
 
@@ -89,7 +89,7 @@ export class SovereignClient {
     return this.request<T>(endpoint, { ...options, method: 'GET' });
   }
 
-  async post<T>(endpoint: string, data?: any, options?: SovereignRequestOptions) {
+  async post<T>(endpoint: string, data?: unknown, options?: SovereignRequestOptions) {
     return this.request<T>(endpoint, {
       ...options,
       method: 'POST',
@@ -97,7 +97,7 @@ export class SovereignClient {
     });
   }
 
-  async put<T>(endpoint: string, data?: any, options?: SovereignRequestOptions) {
+  async put<T>(endpoint: string, data?: unknown, options?: SovereignRequestOptions) {
     return this.request<T>(endpoint, {
       ...options,
       method: 'PUT',
@@ -105,7 +105,7 @@ export class SovereignClient {
     });
   }
 
-  async patch<T>(endpoint: string, data?: any, options?: SovereignRequestOptions) {
+  async patch<T>(endpoint: string, data?: unknown, options?: SovereignRequestOptions) {
     return this.request<T>(endpoint, {
       ...options,
       method: 'PATCH',

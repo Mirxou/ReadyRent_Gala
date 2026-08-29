@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Search, Calendar, Clock, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { ParticleField } from '@/components/ui/particle-field';
 import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
@@ -126,10 +127,12 @@ export default function BlogPage() {
                     className="!rounded-2xl !p-0 overflow-hidden cursor-pointer group h-full"
                   >
                     <div className="relative h-52 w-full overflow-hidden">
-                      <img
+                      <Image
                         src={post.image || '/placeholder.svg'}
                         alt={post.title}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        fill
+                        unoptimized
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                       <div className="absolute top-4 right-4">

@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { useAuthStore } from '@/lib/store';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Search, Plus, Package, AlertTriangle, TrendingUp, TrendingDown, Edit, Trash2 } from 'lucide-react';
+import { Search, Plus, Package, AlertTriangle, TrendingDown, Edit, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   Dialog,
@@ -29,6 +29,24 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+
+interface InventoryItem {
+  id: number;
+  product_name?: string;
+  sku?: string;
+  quantity: number;
+  low_stock_threshold: number;
+  location?: string;
+}
+
+interface StockAlert {
+  id: number;
+  product_name?: string;
+  current_quantity: number;
+  threshold: number;
+}
+
+type MutationResponse = Record<string, unknown>;
 
 export default function AdminInventoryPage() {
   const router = useRouter();
@@ -53,7 +71,7 @@ export default function AdminInventoryPage() {
     enabled: isAuthenticated && (user?.role === 'admin' || user?.role === 'staff'),
   });
 
-  const { data: stockAlerts, isLoading: alertsLoading } = useQuery({
+  const { data: stockAlerts } = useQuery({
     queryKey: ['stock-alerts'],
     queryFn: () => inventoryApi.getStockAlerts().then((res) => res.data),
     enabled: isAuthenticated && (user?.role === 'admin' || user?.role === 'staff'),
@@ -61,7 +79,7 @@ export default function AdminInventoryPage() {
 
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState<any>(null);
+  const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
   const [formData, setFormData] = useState({
     product: '',
     sku: '',
@@ -71,9 +89,9 @@ export default function AdminInventoryPage() {
   });
 
   const createMutation = useMutation({
-    mutationFn: (data: any) => inventoryApi.createItem(data),
-    onSuccess: (res: any) => {
-      if (res?.dignity_preserved || res?.error) { toast.error(res?.message_ar || res?.error || 'عنصر المخزون'); return; }
+    mutationFn: (data: Record<string, string | number>) => inventoryApi.createItem(data),
+    onSuccess: (res: MutationResponse) => {
+      if (res?.dignity_preserved || res?.error) { toast.error((res?.message_ar as string) || (res?.error as string) || 'عنصر المخزون'); return; }
       queryClient.invalidateQueries({ queryKey: ['inventory-items'] });
       toast.success('تم إضافة العنصر بنجاح');
       setIsCreateDialogOpen(false);
@@ -82,9 +100,9 @@ export default function AdminInventoryPage() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: any }) => inventoryApi.updateItem(id, data),
-    onSuccess: (res: any) => {
-      if (res?.dignity_preserved || res?.error) { toast.error(res?.message_ar || res?.error || 'عنصر المخزون'); return; }
+    mutationFn: ({ id, data }: { id: number; data: Record<string, string | number> }) => inventoryApi.updateItem(id, data),
+    onSuccess: (res: MutationResponse) => {
+      if (res?.dignity_preserved || res?.error) { toast.error((res?.message_ar as string) || (res?.error as string) || 'عنصر المخزون'); return; }
       queryClient.invalidateQueries({ queryKey: ['inventory-items'] });
       toast.success('تم تحديث العنصر بنجاح');
       setIsEditDialogOpen(false);
@@ -94,8 +112,8 @@ export default function AdminInventoryPage() {
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => inventoryApi.deleteItem(id),
-    onSuccess: (res: any) => {
-      if (res?.dignity_preserved || res?.error) { toast.error(res?.message_ar || res?.error || 'عنصر المخزون'); return; }
+    onSuccess: (res: MutationResponse) => {
+      if (res?.dignity_preserved || res?.error) { toast.error((res?.message_ar as string) || (res?.error as string) || 'عنصر المخزون'); return; }
       queryClient.invalidateQueries({ queryKey: ['inventory-items'] });
       toast.success('تم حذف العنصر بنجاح');
     },
@@ -105,10 +123,10 @@ export default function AdminInventoryPage() {
     createMutation.mutate(formData);
   };
 
-  const handleEdit = (item: any) => {
+  const handleEdit = (item: InventoryItem) => {
     setEditingItem(item);
     setFormData({
-      product: item.product?.toString() || '',
+      product: item.id?.toString() || '',
       sku: item.sku || '',
       quantity: item.quantity || 0,
       low_stock_threshold: item.low_stock_threshold || 0,
@@ -127,7 +145,7 @@ export default function AdminInventoryPage() {
     return null;
   }
 
-  const filteredItems = items?.filter((item: any) => {
+  const filteredItems = items?.filter((item: InventoryItem) => {
     if (search) {
       const searchLower = search.toLowerCase();
       return (
@@ -144,7 +162,7 @@ export default function AdminInventoryPage() {
     return true;
   }) || items || [];
 
-  const getStockStatus = (item: any) => {
+  const getStockStatus = (item: InventoryItem) => {
     if (item.quantity === 0) {
       return { label: 'نفد المخزون', variant: 'destructive' as const };
     }
@@ -192,7 +210,7 @@ export default function AdminInventoryPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-500">
-              {filteredItems.filter((item: any) => item.quantity === 0).length}
+              {filteredItems.filter((item: InventoryItem) => item.quantity === 0).length}
             </div>
           </CardContent>
         </Card>
@@ -246,7 +264,7 @@ export default function AdminInventoryPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              {stockAlerts.slice(0, 5).map((alert: any) => (
+              {stockAlerts.slice(0, 5).map((alert: StockAlert) => (
                 <div
                   key={alert.id}
                   className="flex items-center justify-between p-3 bg-orange-500/10 rounded-lg"
@@ -373,7 +391,7 @@ export default function AdminInventoryPage() {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredItems.map((item: any) => {
+                  filteredItems.map((item: InventoryItem) => {
                     const status = getStockStatus(item);
                     return (
                       <TableRow key={item.id}>
@@ -496,4 +514,3 @@ export default function AdminInventoryPage() {
     </div>
   );
 }
-

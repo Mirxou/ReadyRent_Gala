@@ -22,9 +22,9 @@ export default function WaitlistPage() {
 
   const removeFromWaitlistMutation = useMutation({
     mutationFn: (id: string) => bookingsApi.removeFromWaitlist(id),
-    onSuccess: (res: any) => {
+    onSuccess: (res: Record<string, unknown>) => {
       if (res?.dignity_preserved || res?.error) {
-        toast.error(res?.message_ar || res?.error || 'حدث خطأ');
+        toast.error((res?.message_ar as string) || (res?.error as string) || 'حدث خطأ');
         return;
       }
       queryClient.invalidateQueries({ queryKey: ['waitlist'] });

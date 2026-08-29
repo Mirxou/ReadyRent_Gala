@@ -45,14 +45,13 @@ const SovereignButton = React.forwardRef<HTMLButtonElement, SovereignButtonProps
             xl: "h-24 px-16 text-lg font-black uppercase tracking-[0.4em] rounded-full",
         };
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const Component: any = href ? motion(Link) : motion.button;
+        const Component = href ? motion(Link) : motion.button;
 
         return (
             <Component
                 ref={ref}
                 href={href}
-                disabled={isLoading || (props as any).disabled}
+                disabled={isLoading || (props as HTMLMotionProps<"button">).disabled}
                 className={cn(
                     "relative inline-flex items-center justify-center border-2 transition-all duration-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-sovereign-gold disabled:pointer-events-none disabled:opacity-50 overflow-hidden",
                     variants[variant],
@@ -60,8 +59,8 @@ const SovereignButton = React.forwardRef<HTMLButtonElement, SovereignButtonProps
                     className
                 )}
                 // "Ethical Motion" - No bounce, just smooth deliberate scale
-                whileHover={!isLoading && !(props as any).disabled ? { scale: 1.02, y: -2 } : {}}
-                whileTap={!isLoading && !(props as any).disabled ? { scale: 0.98 } : {}}
+                whileHover={!isLoading && !(props as HTMLMotionProps<"button">).disabled ? { scale: 1.02, y: -2 } : {}}
+                whileTap={!isLoading && !(props as HTMLMotionProps<"button">).disabled ? { scale: 0.98 } : {}}
                 transition={{ duration: 0.5, ease: [0.32, 0.72, 0, 1] }} // Slow ease-out
                 {...props}
             >

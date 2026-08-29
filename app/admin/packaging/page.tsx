@@ -79,8 +79,8 @@ export default function AdminPackagingPage() {
 
   const createTypeMutation = useMutation({
     mutationFn: (data: Record<string, unknown>) => packagingApi.createType(data),
-    onSuccess: (res: any) => {
-      if (res?.dignity_preserved || res?.error) { toast.error(res?.message_ar || res?.error || 'نوع التغليف'); return; }
+    onSuccess: (res: Record<string, unknown>) => {
+      if (res?.dignity_preserved || res?.error) { toast.error((res?.message_ar as string) || (res?.error as string) || 'نوع التغليف'); return; }
       queryClient.invalidateQueries({ queryKey: ['packaging-types'] });
       toast.success('تم إضافة النوع بنجاح');
       setIsCreateDialogOpen(false);
@@ -90,8 +90,8 @@ export default function AdminPackagingPage() {
 
   const updateTypeMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: Record<string, unknown> }) => packagingApi.updateType(id, data),
-    onSuccess: (res: any) => {
-      if (res?.dignity_preserved || res?.error) { toast.error(res?.message_ar || res?.error || 'نوع التغليف'); return; }
+    onSuccess: (res: Record<string, unknown>) => {
+      if (res?.dignity_preserved || res?.error) { toast.error((res?.message_ar as string) || (res?.error as string) || 'نوع التغليف'); return; }
       queryClient.invalidateQueries({ queryKey: ['packaging-types'] });
       toast.success('تم التحديث بنجاح');
       setIsEditDialogOpen(false);
@@ -101,8 +101,8 @@ export default function AdminPackagingPage() {
 
   const deleteTypeMutation = useMutation({
     mutationFn: (id: number) => packagingApi.deleteType(id),
-    onSuccess: (res: any) => {
-      if (res?.dignity_preserved || res?.error) { toast.error(res?.message_ar || res?.error || 'نوع التغليف'); return; }
+    onSuccess: (res: Record<string, unknown>) => {
+      if (res?.dignity_preserved || res?.error) { toast.error((res?.message_ar as string) || (res?.error as string) || 'نوع التغليف'); return; }
       queryClient.invalidateQueries({ queryKey: ['packaging-types'] });
       toast.success('تم الحذف بنجاح');
     },
@@ -110,8 +110,8 @@ export default function AdminPackagingPage() {
 
   const createMaterialMutation = useMutation({
     mutationFn: (data: Record<string, unknown>) => packagingApi.createMaterial(data),
-    onSuccess: (res: any) => {
-      if (res?.dignity_preserved || res?.error) { toast.error(res?.message_ar || res?.error || 'مادة التغليف'); return; }
+    onSuccess: (res: Record<string, unknown>) => {
+      if (res?.dignity_preserved || res?.error) { toast.error((res?.message_ar as string) || (res?.error as string) || 'مادة التغليف'); return; }
       queryClient.invalidateQueries({ queryKey: ['packaging-materials'] });
       toast.success('تم إضافة المادة بنجاح');
       setIsCreateDialogOpen(false);
@@ -121,8 +121,8 @@ export default function AdminPackagingPage() {
 
   const updateMaterialMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: Record<string, unknown> }) => packagingApi.updateMaterial(id, data),
-    onSuccess: (res: any) => {
-      if (res?.dignity_preserved || res?.error) { toast.error(res?.message_ar || res?.error || 'مادة التغليف'); return; }
+    onSuccess: (res: Record<string, unknown>) => {
+      if (res?.dignity_preserved || res?.error) { toast.error((res?.message_ar as string) || (res?.error as string) || 'مادة التغليف'); return; }
       queryClient.invalidateQueries({ queryKey: ['packaging-materials'] });
       toast.success('تم التحديث بنجاح');
       setIsEditDialogOpen(false);
@@ -132,8 +132,8 @@ export default function AdminPackagingPage() {
 
   const deleteMaterialMutation = useMutation({
     mutationFn: (id: number) => packagingApi.deleteMaterial(id),
-    onSuccess: (res: any) => {
-      if (res?.dignity_preserved || res?.error) { toast.error(res?.message_ar || res?.error || 'مادة التغليف'); return; }
+    onSuccess: (res: Record<string, unknown>) => {
+      if (res?.dignity_preserved || res?.error) { toast.error((res?.message_ar as string) || (res?.error as string) || 'مادة التغليف'); return; }
       queryClient.invalidateQueries({ queryKey: ['packaging-materials'] });
       toast.success('تم الحذف بنجاح');
     },
@@ -141,8 +141,8 @@ export default function AdminPackagingPage() {
 
   const createRuleMutation = useMutation({
     mutationFn: (data: Record<string, unknown>) => packagingApi.createRule(data),
-    onSuccess: (res: any) => {
-      if (res?.dignity_preserved || res?.error) { toast.error(res?.message_ar || res?.error || 'قاعدة التغليف'); return; }
+    onSuccess: (res: Record<string, unknown>) => {
+      if (res?.dignity_preserved || res?.error) { toast.error((res?.message_ar as string) || (res?.error as string) || 'قاعدة التغليف'); return; }
       queryClient.invalidateQueries({ queryKey: ['packaging-rules'] });
       toast.success('تم إضافة القاعدة بنجاح');
       setIsCreateDialogOpen(false);
@@ -152,8 +152,8 @@ export default function AdminPackagingPage() {
 
   const updateRuleMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: Record<string, unknown> }) => packagingApi.updateRule(id, data),
-    onSuccess: (res: any) => {
-      if (res?.dignity_preserved || res?.error) { toast.error(res?.message_ar || res?.error || 'قاعدة التغليف'); return; }
+    onSuccess: (res: Record<string, unknown>) => {
+      if (res?.dignity_preserved || res?.error) { toast.error((res?.message_ar as string) || (res?.error as string) || 'قاعدة التغليف'); return; }
       queryClient.invalidateQueries({ queryKey: ['packaging-rules'] });
       toast.success('تم التحديث بنجاح');
       setIsEditDialogOpen(false);
@@ -163,8 +163,8 @@ export default function AdminPackagingPage() {
 
   const deleteRuleMutation = useMutation({
     mutationFn: (id: number) => packagingApi.deleteRule(id),
-    onSuccess: (res: any) => {
-      if (res?.dignity_preserved || res?.error) { toast.error(res?.message_ar || res?.error || 'قاعدة التغليف'); return; }
+    onSuccess: (res: Record<string, unknown>) => {
+      if (res?.dignity_preserved || res?.error) { toast.error((res?.message_ar as string) || (res?.error as string) || 'قاعدة التغليف'); return; }
       queryClient.invalidateQueries({ queryKey: ['packaging-rules'] });
       toast.success('تم الحذف بنجاح');
     },

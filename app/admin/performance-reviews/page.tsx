@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -88,12 +88,7 @@ export default function AdminPerformanceReviewsPage() {
     comments: '',
   });
 
-  useEffect(() => {
-    fetchReviews();
-    fetchStaff();
-  }, []);
-
-  const fetchReviews = async () => {
+  const fetchReviews = useCallback(async () => {
     try {
       const response = await fetch('/api/users/staff/performance-reviews/', {
         headers: {
@@ -110,19 +105,26 @@ export default function AdminPerformanceReviewsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const fetchStaff = async () => {
-    try {
-      const response = await fetch('/api/users/staff/list/');
-      if (response.ok) {
-        const data = await response.json();
-        setStaff(data.results || data);
+  useEffect(() => {
+    let cancelled = false;
+
+    const doFetchStaff = async () => {
+      try {
+        const response = await fetch('/api/users/staff/list/');
+        if (response.ok && !cancelled) {
+          const data = await response.json();
+          setStaff(data.results || data);
+        }
+      } catch (error) {
+        console.error('Error fetching staff:', error);
       }
-    } catch (error) {
-      console.error('Error fetching staff:', error);
-    }
-  };
+    };
+
+    requestAnimationFrame(() => { fetchReviews(); doFetchStaff(); });
+    return () => { cancelled = true; };
+  }, [fetchReviews]);
 
   const handleCreateReview = () => {
     setSelectedReview(null);

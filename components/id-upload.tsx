@@ -6,9 +6,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Upload, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
+import { Upload } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { api } from '@/lib/api';
+import Image from 'next/image';
 
 interface IDUploadProps {
   onComplete?: () => void;
@@ -68,10 +69,11 @@ export function IDUpload({ onComplete }: IDUploadProps) {
       });
 
       if (onComplete) onComplete();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { error?: string } } };
       toast({
         title: 'خطأ',
-        description: error.response?.data?.error || 'فشل رفع الصور',
+        description: err.response?.data?.error || 'فشل رفع الصور',
         variant: 'destructive',
       });
     } finally {
@@ -133,11 +135,12 @@ export function IDUpload({ onComplete }: IDUploadProps) {
                 </Button>
               </label>
               {formData.id_front_image && (
-                <div className="mt-2">
-                  <img
+                <div className="mt-2 relative w-full h-32">
+                  <Image
                     src={URL.createObjectURL(formData.id_front_image)}
                     alt="Front ID"
-                    className="w-full h-32 object-cover rounded"
+                    fill
+                    className="object-cover rounded"
                   />
                 </div>
               )}
@@ -163,11 +166,12 @@ export function IDUpload({ onComplete }: IDUploadProps) {
                 </Button>
               </label>
               {formData.id_back_image && (
-                <div className="mt-2">
-                  <img
+                <div className="mt-2 relative w-full h-32">
+                  <Image
                     src={URL.createObjectURL(formData.id_back_image)}
                     alt="Back ID"
-                    className="w-full h-32 object-cover rounded"
+                    fill
+                    className="object-cover rounded"
                   />
                 </div>
               )}
@@ -182,5 +186,3 @@ export function IDUpload({ onComplete }: IDUploadProps) {
     </Card>
   );
 }
-
-

@@ -44,8 +44,8 @@ export const InteractiveProductCard = ({
 
     const PLACEHOLDER = 'https://picsum.photos/seed/standard-placeholder/600/800';
     const primaryImage = product.primary_image ||
-        product.images?.find((img: any) => img.is_primary || img.is_main)?.image ||
-        product.images?.find((img: any) => img.is_primary || img.is_main)?.url ||
+        product.images?.find((img: { image?: string; url?: string; is_primary?: boolean; is_main?: boolean }) => img.is_primary || img.is_main)?.image ||
+        product.images?.find((img: { image?: string; url?: string; is_primary?: boolean; is_main?: boolean }) => img.is_primary || img.is_main)?.url ||
         product.images?.[0]?.image ||
         product.images?.[0]?.url ||
         product.image ||

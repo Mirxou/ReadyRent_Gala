@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 // ═══════════════════════════════════════════════════════════════════
 // STANDARD.Rent — API Gateway
@@ -102,15 +101,15 @@ function normPath(raw: string): string {
   return raw.replace(/^\/+|\/+$/g, '').replace(/\/+/g, '/');
 }
 
-/** Extract query params from full URL */
-function getQueryParams(request: NextRequest): Record<string, string> {
-  const url = new URL(request.url, 'http://localhost');
-  const params: Record<string, string> = {};
-  url.searchParams.forEach((v, k) => {
-    params[k] = v;
-  });
-  return params;
-}
+// getQueryParams reserved for future use
+// function getQueryParams(request: NextRequest): Record<string, string> {
+//   const url = new URL(request.url, 'http://localhost');
+//   const params: Record<string, string> = {};
+//   url.searchParams.forEach((v, k) => {
+//     params[k] = v;
+//   });
+//   return params;
+// }
 
 // ═══════════════════════════════════════════════════════════════════
 // Known API prefix patterns (return 501 instead of 404)

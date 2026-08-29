@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
 import { logger } from '@/lib/logger';
+import { Prisma } from '@prisma/client';
 
 // ═══════════════════════════════════════════════════════════════
 // POST /api/bookings/[id]/cancel — Cancel a booking with escrow awareness
@@ -111,7 +112,7 @@ export async function POST(
       : null;
 
     // Build transaction operations
-    const txOps: any[] = [
+    const txOps: Prisma.PrismaPromise<unknown>[] = [
       // Always update booking status
       db.booking.update({
         where: { id },

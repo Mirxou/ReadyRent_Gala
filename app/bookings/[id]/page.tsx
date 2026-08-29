@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useAuthStore } from '@/lib/store';
 
 import {
@@ -359,7 +360,7 @@ export default function BookingDetailPage() {
                     {(booking.product_image ||
                       booking.product?.primary_image) && (
                       <div className="relative w-20 h-20 rounded-2xl border border-white/10 overflow-hidden flex-shrink-0">
-                        <img
+                        <Image
                           src={
                             booking.product_image ||
                             booking.product?.primary_image ||
@@ -371,6 +372,8 @@ export default function BookingDetailPage() {
                             'منتج'
                           }
                           className="w-full h-full object-cover"
+                          fill
+                          unoptimized
                         />
                       </div>
                     )}

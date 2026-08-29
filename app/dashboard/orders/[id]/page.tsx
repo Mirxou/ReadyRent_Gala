@@ -30,6 +30,7 @@ import { SovereignRadar } from '@/shared/components/sovereign/sovereign-radar';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import Link from 'next/link';
+import Image from 'next/image';
 import { format } from 'date-fns';
 import { cn, formatNumber } from '@/lib/utils';
 import { useQueryClient } from '@tanstack/react-query';
@@ -56,9 +57,9 @@ export default function BookingDetailsPage() {
   const updateStatusMutation = useMutation({
     mutationFn: ({ bookingId, status }: { bookingId: string; status: string }) =>
       bookingsApi.updateStatus(Number(bookingId), status),
-    onSuccess: (res: any) => {
+    onSuccess: (res: Record<string, unknown>) => {
       if (res?.dignity_preserved || res?.error) {
-        toast.error(res?.message_ar || res?.error || 'فشل في تحديث حالة الحجز');
+        toast.error((res?.message_ar as string) || (res?.error as string) || 'فشل في تحديث حالة الحجز');
         return;
       }
       toast.success('تم تحديث حالة الحجز بنجاح');
@@ -68,9 +69,9 @@ export default function BookingDetailsPage() {
 
   const createDisputeMutation = useMutation({
     mutationFn: (data: Record<string, unknown>) => disputesApi.initiateDispute(data as Parameters<typeof disputesApi.initiateDispute>[0]),
-    onSuccess: (res: any) => {
+    onSuccess: (res: Record<string, unknown>) => {
       if (res?.dignity_preserved || res?.error) {
-        toast.error(res?.message_ar || res?.error || 'فشل في رفع النزاع');
+        toast.error((res?.message_ar as string) || (res?.error as string) || 'فشل في رفع النزاع');
         return;
       }
       toast.success('تم رفع النزاع للتحكيم السيادي (Dispute Lodged)');
@@ -229,8 +230,8 @@ export default function BookingDetailsPage() {
             {/* 2. Sovereign Agreement Header */}
             <GlassPanel className="p-8 relative overflow-hidden" gradientBorder>
                 <div className="flex flex-col md:flex-row gap-10">
-                    <div className="w-full md:w-64 h-80 rounded-3xl overflow-hidden shadow-2xl border border-white/5">
-                        <img src={booking.product_image || booking.product?.images?.[0]?.image} className="w-full h-full object-cover" alt={booking.product_name || 'صورة المنتج'} />
+                    <div className="w-full md:w-64 h-80 rounded-3xl overflow-hidden shadow-2xl border border-white/5 relative">
+                        <Image src={booking.product_image || booking.product?.images?.[0]?.image} className="w-full h-full object-cover" alt={booking.product_name || 'صورة المنتج'} fill unoptimized />
                     </div>
                     <div className="flex-1 space-y-6">
                         <div className="flex justify-between items-start">

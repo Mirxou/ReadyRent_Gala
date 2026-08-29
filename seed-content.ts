@@ -8,7 +8,7 @@ import { PrismaClient } from '@prisma/client';
 const db = new PrismaClient();
 
 async function main() {
-  console.log('🌱 Seeding CMS pages & blog posts...\n');
+  console.warn('🌱 Seeding CMS pages & blog posts...\n');
 
   // ──── CMS Pages ────
   const cmsPages = [
@@ -117,7 +117,7 @@ async function main() {
   ];
 
   // ──── Seed CMS Pages ────
-  console.log('📄 Seeding CMS pages...');
+  console.warn('📄 Seeding CMS pages...');
   for (const page of cmsPages) {
     const result = await db.cMSPage.upsert({
       where: { slug: page.slug },
@@ -133,11 +133,11 @@ async function main() {
         status: page.status,
       },
     });
-    console.log(`  ✅ CMS page "${page.slug}" → id: ${result.id}`);
+    console.warn(`  ✅ CMS page "${page.slug}" → id: ${result.id}`);
   }
 
   // ──── Seed Blog Posts ────
-  console.log('\n📝 Seeding blog posts...');
+  console.warn('\n📝 Seeding blog posts...');
   for (const post of blogPosts) {
     const result = await db.blogPost.upsert({
       where: { slug: post.slug },
@@ -161,12 +161,12 @@ async function main() {
         readTime: post.readTime,
       },
     });
-    console.log(`  ✅ Blog post "${post.slug}" → id: ${result.id}`);
+    console.warn(`  ✅ Blog post "${post.slug}" → id: ${result.id}`);
   }
 
-  console.log('\n🎉 Seeding complete!');
-  console.log(`  - ${cmsPages.length} CMS pages`);
-  console.log(`  - ${blogPosts.length} blog posts`);
+  console.warn('\n🎉 Seeding complete!');
+  console.warn(`  - ${cmsPages.length} CMS pages`);
+  console.warn(`  - ${blogPosts.length} blog posts`);
 }
 
 main()

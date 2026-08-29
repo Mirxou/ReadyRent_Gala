@@ -1,6 +1,7 @@
 "use client";
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion, useInView, type Variants } from 'framer-motion';
 import { useRef, useState, useEffect } from 'react';
 import { SovereignButton } from "@/shared/components/sovereign/sovereign-button";
@@ -143,11 +144,13 @@ function CategoriesGrid() {
                 <Link href={`/products?category=${cat.slug}`} className="block group h-full">
                   <div className="relative p-5 md:p-6 rounded-[2rem] border border-white/5 bg-white/[0.02] backdrop-blur-sm hover:border-sovereign-gold/20 hover:bg-sovereign-gold/5 transition-all duration-500 text-center h-full">
                     <div className="space-y-3">
-                      <div className="w-14 h-14 mx-auto rounded-2xl overflow-hidden border border-white/10 group-hover:border-sovereign-gold/30 transition-colors">
-                        <img
+                      <div className="w-14 h-14 mx-auto rounded-2xl overflow-hidden border border-white/10 group-hover:border-sovereign-gold/30 transition-colors relative">
+                        <Image
                           src={cat.icon}
                           alt={cat.name_ar}
                           className="w-full h-full object-cover"
+                          fill
+                          unoptimized
                         />
                       </div>
                       <h3 className="text-sm md:text-base font-black tracking-tight group-hover:text-sovereign-gold transition-colors">

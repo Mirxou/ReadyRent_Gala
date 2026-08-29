@@ -7,6 +7,7 @@ import { Calendar, User, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 import { ParticleField } from '@/components/ui/particle-field';
 import { Button } from '@/components/ui/button';
 import DOMPurify from 'dompurify';
@@ -90,10 +91,12 @@ export default function BlogPostPage() {
 
           {post.featured_image && (
             <div className="relative h-96 w-full overflow-hidden rounded-2xl mb-8">
-              <img
+              <Image
                 src={isValidImageUrl(post.featured_image) ? post.featured_image : '/placeholder.svg'}
                 alt={post.title}
                 className="w-full h-full object-cover"
+                fill
+                unoptimized
               />
             </div>
           )}

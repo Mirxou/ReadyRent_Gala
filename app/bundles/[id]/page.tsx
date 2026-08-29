@@ -12,6 +12,7 @@ import { ParticleField } from '@/components/ui/particle-field';
 import { useAuthStore } from '@/lib/store';
 import { toast } from 'sonner';
 import { useState } from 'react';
+import Image from 'next/image';
 
 export default function BundleDetailPage() {
   const params = useParams();
@@ -132,10 +133,12 @@ export default function BundleDetailPage() {
             <div>
               {bundle.image ? (
                 <div className="relative w-full h-96 overflow-hidden rounded-3xl mb-4">
-                  <img
+                  <Image
                     src={bundle.image}
                     alt={bundleName}
                     className="w-full h-full object-cover"
+                    fill
+                    unoptimized
                   />
                   {discount > 0 && (
                     <Badge className="absolute top-4 left-4 bg-sovereign-gold text-black text-lg px-4 py-2 font-bold">
@@ -300,10 +303,12 @@ export default function BundleDetailPage() {
                       <Card className="card-glass border-0 rounded-2xl overflow-hidden hover:border-sovereign-gold/30 transition-colors group cursor-pointer">
                         <div className="aspect-square bg-muted/30 relative overflow-hidden">
                           {String(product.primaryImage) ? (
-                            <img
+                            <Image
                               src={String(product.primaryImage)}
                               alt={String(product.nameAr || product.name || 'منتج')}
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                              fill
+                              unoptimized
                             />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center">
