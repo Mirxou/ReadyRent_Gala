@@ -14,16 +14,9 @@ export const paymentsApi = {
   getMethods: () => 
     sovereignClient.get<PaymentMethod[]>('/payments/methods/'),
 
-  /** Create a payment — flexible params (used by bank-card-form, baridimob-form) */
+  /** Create a payment — flexible params (used by baridimob-form, booking-wizard) */
   create: (data: { booking_id?: number | string; payment_method?: string; amount?: number; [key: string]: unknown }) => 
     sovereignClient.post<unknown>('/payments/create/', data),
-
-  /** Create a payment — strict params (alias) */
-  createPayment: (bookingId: number, methodId: string) => 
-    sovereignClient.post<unknown>('/payments/create/', { 
-      booking_id: bookingId, 
-      payment_method: methodId 
-    }),
 
   getStatus: (paymentId: string) => 
     sovereignClient.get<{ status: string }>(`/payments/${paymentId}/status/`),

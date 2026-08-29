@@ -157,8 +157,31 @@ export async function hashPassword(password: string): Promise<string> {
 export async function authenticateUser(email: string, password: string) {
   const user = await db.user.findUnique({ where: { email } });
   if (!user || !user.isActive) return null;
+
+  // Check if account is locked (don't reveal lock status — return null like wrong creds)
+  if (user.lockedUntil && new Date(user.lockedUntil) > new Date()) {
+    return null;
+  }
+
   const valid = await verifyPassword(password, user.passwordHash);
-  if (!valid) return null;
+  if (!valid) {
+    // Increment failed attempts and lock if >= 10
+    await db.user.update({
+      where: { id: user.id },
+      data: {
+        failedLoginAttempts: { increment: 1 },
+        lockedUntil: (user.failedLoginAttempts + 1) >= 10 ? new Date(Date.now() + 30 * 60 * 1000) : undefined,
+      },
+    });
+    return null;
+  }
+
+  // Reset failed attempts on successful login
+  await db.user.update({
+    where: { id: user.id },
+    data: { failedLoginAttempts: 0, lockedUntil: null },
+  });
+
   return user;
 }
 

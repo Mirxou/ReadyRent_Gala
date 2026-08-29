@@ -33,7 +33,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const body = await request.json();
+    const bodyText = await request.text();
+    if (bodyText.length > 1024) {
+      return NextResponse.json(
+        { success: false, dignity_preserved: true, message_ar: 'بيانات كبيرة جداً', message_en: 'Request body too large', code: 'PAYLOAD_TOO_LARGE' },
+        { status: 413 }
+      );
+    }
+    const body = JSON.parse(bodyText);
 
     // ── Zod validation ──
     const vResult = validateBody(registerSchema, body);

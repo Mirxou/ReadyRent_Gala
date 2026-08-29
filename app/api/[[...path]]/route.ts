@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { checkGeneralRateLimit, getClientIp } from '@/lib/rate-limiter';
 
 
 // ═══════════════════════════════════════════════════════════════════
@@ -6,44 +7,6 @@ import { NextRequest, NextResponse } from 'next/server';
 // Clean proxy layer — no mock data. Returns 501 for known endpoints
 // that don't have a real backend yet, and 404 for unknown paths.
 // ═══════════════════════════════════════════════════════════════════
-
-// ──── In-Memory Rate Limiter ────
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
-const RATE_LIMIT_WINDOW = 60_000; // 1 minute
-const RATE_LIMIT_MAX = 60; // per window (general)
-const AUTH_RATE_LIMIT_MAX = 5; // stricter for auth endpoints
-
-function rateLimit(key: string, max: number = RATE_LIMIT_MAX): boolean {
-  const now = Date.now();
-  const entry = rateLimitMap.get(key);
-  if (!entry || now > entry.resetAt) {
-    rateLimitMap.set(key, { count: 1, resetAt: now + RATE_LIMIT_WINDOW });
-    return true;
-  }
-  if (entry.count >= max) return false;
-  entry.count++;
-  return true;
-}
-
-// Cleanup old entries every 5 minutes
-setInterval(() => {
-  const now = Date.now();
-  for (const [key, entry] of rateLimitMap) {
-    if (now > entry.resetAt) rateLimitMap.delete(key);
-  }
-}, 300_000);
-
-// ──── Auth Helper ────
-function getAuthToken(request: NextRequest): string | null {
-  const authHeader = request.headers.get('authorization');
-  if (authHeader?.startsWith('Bearer ')) return authHeader.slice(7);
-  return null;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function isAuthenticated(request: NextRequest): boolean {
-  return !!getAuthToken(request);
-}
 
 // ──── Response Helpers ────
 
@@ -159,10 +122,10 @@ function handleHealth() {
 
 export async function GET(request: NextRequest) {
   const path = normPath(request.nextUrl.pathname.replace('/api/', ''));
-  const clientIp = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+  const clientIp = getClientIp(request);
 
   // Rate limiting
-  if (!rateLimit(clientIp)) {
+  if (!checkGeneralRateLimit(clientIp).allowed) {
     return rateLimitedResponse();
   }
 
@@ -182,11 +145,10 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   const path = normPath(request.nextUrl.pathname.replace('/api/', ''));
-  const clientIp = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+  const clientIp = getClientIp(request);
 
-  // Stricter rate limiting for POST
-  const isAuth = path.startsWith('auth/');
-  if (!rateLimit(clientIp, isAuth ? AUTH_RATE_LIMIT_MAX : RATE_LIMIT_MAX)) {
+  // Rate limiting
+  if (!checkGeneralRateLimit(clientIp).allowed) {
     return rateLimitedResponse();
   }
 
@@ -199,9 +161,10 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   const path = normPath(request.nextUrl.pathname.replace('/api/', ''));
-  const clientIp = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+  const clientIp = getClientIp(request);
 
-  if (!rateLimit(clientIp)) {
+  // Rate limiting
+  if (!checkGeneralRateLimit(clientIp).allowed) {
     return rateLimitedResponse();
   }
 
@@ -214,9 +177,10 @@ export async function PUT(request: NextRequest) {
 
 export async function PATCH(request: NextRequest) {
   const path = normPath(request.nextUrl.pathname.replace('/api/', ''));
-  const clientIp = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+  const clientIp = getClientIp(request);
 
-  if (!rateLimit(clientIp)) {
+  // Rate limiting
+  if (!checkGeneralRateLimit(clientIp).allowed) {
     return rateLimitedResponse();
   }
 
@@ -229,9 +193,10 @@ export async function PATCH(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   const path = normPath(request.nextUrl.pathname.replace('/api/', ''));
-  const clientIp = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+  const clientIp = getClientIp(request);
 
-  if (!rateLimit(clientIp)) {
+  // Rate limiting
+  if (!checkGeneralRateLimit(clientIp).allowed) {
     return rateLimitedResponse();
   }
 

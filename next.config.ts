@@ -15,7 +15,11 @@ const nextConfig: NextConfig = {
     typescript: {
         ignoreBuildErrors: true, // TODO: fix remaining unknown→string JSX casts in cart, bundles, artisans pages
     },
-
+    experimental: {
+        serverActions: {
+            bodySizeLimit: '256kb',
+        },
+    },
     images: {
         formats: ['image/avif', 'image/webp'],
         minimumCacheTTL: 3600,
@@ -42,6 +46,33 @@ const nextConfig: NextConfig = {
     },
     turbopack: {
         root: '.',
+    },
+    async headers() {
+        return [
+            {
+                source: '/(.*)',
+                headers: [
+                    { key: 'X-Content-Type-Options', value: 'nosniff' },
+                    { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+                    { key: 'X-XSS-Protection', value: '1; mode=block' },
+                    { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+                    { key: 'Permissions-Policy', value: 'camera=(self), microphone=(), geolocation=(self), payment=(self)' },
+                    {
+                        key: 'Content-Security-Policy',
+                        value: [
+                            "default-src 'self'",
+                            "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+                            "style-src 'self' 'unsafe-inline'",
+                            "img-src 'self' data: https://res.cloudinary.com https://picsum.photos https://images.unsplash.com blob:",
+                            "font-src 'self' data:",
+                            "connect-src 'self' ws: wss:",
+                            "frame-ancestors 'self'",
+                            "base-uri 'self'",
+                        ].join('; '),
+                    },
+                ],
+            },
+        ];
     },
 };
 

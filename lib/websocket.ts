@@ -1,6 +1,10 @@
 /**
  * Socket.IO client for real-time notifications
  * Connects to the notifications mini-service via Caddy gateway
+ * 
+ * Security: Auth is cookie-based (session_token is HttpOnly).
+ * The server reads the cookie from the handshake request.
+ * An explicit `authenticate` event is sent as a fallback.
  */
 
 import { io as socketIO, Socket } from 'socket.io-client';
@@ -49,7 +53,9 @@ class NotificationSocketClient {
     this.userId = userId;
 
     try {
-      // Connect via Caddy gateway using XTransformPort query parameter
+      // Connect via Caddy gateway using XTransformPort query parameter.
+      // The session_token cookie (HttpOnly) is sent automatically by the browser.
+      // The server reads it from the handshake request.
       this.socket = socketIO('/?XTransformPort=3004', {
         transports: ['websocket', 'polling'],
         reconnection: true,
@@ -60,17 +66,15 @@ class NotificationSocketClient {
       this.socket.on('connect', () => {
         this.isConnecting = false;
         this.reconnectAttempts = 0;
-
-        // Join user-specific room
-        if (this.userId) {
-          this.socket!.emit('join', { userId: String(this.userId) });
-        }
-
         this.emit('connected', {});
       });
 
       this.socket.on('joined', (_data) => {
-        // Successfully joined user room
+        // Successfully authenticated and joined user room
+      });
+
+      this.socket.on('auth_error', (_data) => {
+        // Auth failed — will be disconnected by server
       });
 
       this.socket.on('notification', (data: NotificationPayload) => {

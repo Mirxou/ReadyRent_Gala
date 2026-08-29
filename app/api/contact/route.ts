@@ -1,12 +1,23 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { logger } from '@/lib/logger';
+import { checkContactRateLimit, getClientIp } from '@/lib/rate-limiter';
 
 // ═══════════════════════════════════════════════════════════════
 // POST /api/contact — Submit a contact message (no auth required)
 // ═══════════════════════════════════════════════════════════════
 export async function POST(request: Request) {
   try {
+    // ── Rate limiting ──
+    const clientIp = getClientIp(request);
+    const rateCheck = checkContactRateLimit(clientIp);
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        { success: false, dignity_preserved: true, message_ar: 'محاولات كثيرة. حاول بعد قليل.', message_en: 'Too many requests. Please try again later.', code: 'RATE_LIMITED' },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
     const { name, email, subject, message } = body;
 

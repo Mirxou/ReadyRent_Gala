@@ -1589,3 +1589,163 @@ Stage Summary:
 - 1 dead file deleted (innovation.ts)
 - Root cause: monolith-to-Next.js migration left URL paths mismatched between client and server
 - Total: ~50+ individual fixes across ~30 files
+---
+Task ID: security-c1-c3-h3
+Agent: Security Fix Agent A
+
+Task: Fix C1 (PCI-DSS dead code), C3 (WebSocket auth), H3 (CORS)
+
+Work Log:
+- **C1: PCI-DSS Dead Code Removal**
+  - Deleted `components/payment/bank-card-form.tsx` — collected raw card PAN/CVV and sent to server (PCI-DSS violation)
+  - Verified `components/payment/baridimob-form.tsx` is NOT dead code (imported by `components/checkout/sovereign-checkout-modal.tsx`) — kept it
+  - Removed unused `createPayment` method from `lib/api/payments.ts` (had 0 callers outside deleted file)
+  - Kept `paymentsApi.create()` method — still actively used by `baridimob-form.tsx` and `booking-wizard.tsx`
+  - Kept `app/api/payments/create/route.ts` — still used by active payment flows (no card data accepted by the server-side Zod schema)
+  - Updated comment in `lib/api/payments.ts` to remove bank-card-form reference
+
+- **C3: WebSocket Authentication**
+  - Rewrote `mini-services/notifications-service/index.ts`:
+    - Changed CORS from `origin: '*'` to `origin: ['http://localhost:3000', 'http://21.0.21.29:3000']`
+    - Added `bun:sqlite` (read-only) to query the sessions table directly
+    - Added HMAC-SHA256 token verification matching `lib/auth-server.ts` `verifyTokenSignature()`
+    - Server reads `session_token` from the HTTP handshake cookie (HttpOnly — browser sends automatically)
+    - Added `authenticate` event fallback for programmatic clients
+    - Removed trust in client-provided `userId` from `join` event
+    - 10-second auth timeout — unauthenticated sockets are disconnected
+    - Legacy `join` event is now a no-op if authenticated, rejected otherwise
+    - Auto-joins room after successful cookie-based or explicit auth
+  - Updated `lib/websocket.ts` client:
+    - Removed `join` event emission (server auto-authenticates via cookie)
+    - Added `auth_error` event listener
+    - Updated JSDoc to explain cookie-based auth flow
+
+- **H3: CORS Configuration**
+  - WebSocket CORS: Fixed as part of C3 (restricted to specific origins)
+  - `next.config.ts`: No CORS headers added — app is same-origin, browsers don't add CORS headers for same-origin requests
+  - `Caddyfile`: Already has security headers (X-Content-Type-Options, X-Frame-Options, X-XSS-Protection, Referrer-Policy, Permissions-Policy) — no changes needed
+
+Stage Summary:
+- **Files deleted**: `components/payment/bank-card-form.tsx`
+- **Files modified**: `lib/api/payments.ts`, `mini-services/notifications-service/index.ts`, `lib/websocket.ts`
+- **Files verified safe to keep**: `components/payment/baridimob-form.tsx`, `app/api/payments/create/route.ts`, `app/checkout/sovereign-checkout-modal.tsx`
+- **Lint**: Main app passes with 0 errors (1 pre-existing warning in register/page.tsx unrelated to changes)
+---
+Task ID: security-h2-m3-m7-h4
+Agent: Security Fix Agent B
+
+Task: Fix H2 (rate limiting gaps), M3 (account lockout), M7 (body size), H4 (CSP)
+
+Work Log:
+- Read all target files before editing
+- H2: Added 3 new rate limiters to lib/rate-limiter.ts: checkSmsRateLimit (3/hr), checkCreateRateLimit (20/min), checkContactRateLimit (3/hr)
+- H2: Applied checkSmsRateLimit to auth/phone/send (replaced checkLoginRateLimit) and auth/forgot-password
+- H2: Applied checkCreateRateLimit to bookings/create, disputes/create, reviews/create
+- H2: Applied checkContactRateLimit to contact route
+- H2: Applied checkPaymentRateLimit to payments/chargily/checkout
+- H2: Refactored app/api/[[...path]]/route.ts to use shared checkGeneralRateLimit from lib/rate-limiter.ts, removing duplicate in-memory rate limiter
+- M3: Added failedLoginAttempts (Int, default 0) and lockedUntil (DateTime?) to User model in prisma/schema.prisma
+- M3: Ran db:push to apply schema — successful
+- M3: Updated authenticateUser in lib/auth-server.ts: checks lock status before password, increments on failure (locks at 10 for 30 min), resets on success
+- M7: Added experimental.serverActions.bodySizeLimit: 256kb to next.config.ts
+- M7: Added 1KB body size validation to auth/login and auth/register routes (returns 413)
+- H4: Added headers() async function to next.config.ts with CSP, X-Content-Type-Options, X-Frame-Options, X-XSS-Protection, Referrer-Policy, Permissions-Policy
+- Ran bun run lint — 0 errors, 1 pre-existing warning (unrelated)
+
+Stage Summary:
+- H2: 7 routes now have appropriate rate limiting; catch-all gateway uses shared limiter
+- M3: Brute-force protection locks accounts after 10 failed attempts for 30 minutes
+- M7: Server actions capped at 256KB; login/register reject bodies >1KB
+- H4: CSP and security headers applied to all responses via Next.js config
+
+
+---
+Task ID: security-step-2.1
+Agent: Main Orchestrator
+
+Task: Step 2.1 Critical Security Hardening — fix all 15 documented vulnerabilities from 09-SECURITY-HARDENING.md
+
+Work Log:
+
+**Phase 0: Field Review (Explore agent)**
+- Read all 15 vulnerability targets and compared to actual code
+- Found: 8/15 already fixed (C2, H1, H5, M1, M2, M4, M5, M6)
+- Found: 3 partially fixed (C1, H2, M7)
+- Found: 4 not fixed (C3, H3, H4, M3)
+
+**Phase 1: C1 — PCI-DSS Dead Code Removal (Agent A)**
+- Deleted components/payment/bank-card-form.tsx (collected raw PAN/CVV)
+- Removed unused createPayment() from lib/api/payments.ts
+- Kept baridimob-form (actively imported by checkout modal)
+- Kept paymentsApi.create (used by baridimob + booking wizard)
+
+**Phase 2: C3 — WebSocket Authentication (Agent A)**
+- Rewrote mini-services/notifications-service/index.ts:
+  - Cookie-based auth: reads session_token from HttpOnly cookie on handshake
+  - HMAC-SHA256 verification using NEXTAUTH_SECRET (matches auth-server.ts)
+  - SQLite query validates token + expiry against sessions table
+  - 10-second auth timeout — unauthenticated sockets force-disconnected
+  - authenticate event as programmatic fallback
+  - Legacy join event rejected unless already authenticated
+- Fixed DB path: dev.db → custom.db
+- Fixed column name: "expiresAt" → expires_at (Prisma @map)
+- Changed CORS from origin: '*' to specific allowed origins
+- Updated lib/websocket.ts client — removed client-side join emission
+
+**Phase 3: H3 — CORS Configuration (Agent A)**
+- WebSocket: origin '*' → ['http://localhost:3000', 'http://21.0.21.29:3000']
+- Next.js: no CORS needed (same-origin app)
+- Caddyfile: already had comprehensive security headers
+
+**Phase 4: H2 — Rate Limiting Gaps (Agent B)**
+- Added 3 new limiters to lib/rate-limiter.ts:
+  - checkSmsRateLimit: 3/hour/IP (SMS + email bombing prevention)
+  - checkCreateRateLimit: 20/min/IP (bookings, disputes, reviews)
+  - checkContactRateLimit: 3/hour/IP (contact form spam)
+- Applied rate limiting to 7 routes:
+  - auth/phone/send → checkSmsRateLimit
+  - bookings/create → checkCreateRateLimit
+  - disputes/create → checkCreateRateLimit
+  - reviews/create → checkCreateRateLimit
+  - contact → checkContactRateLimit
+  - payments/chargily/checkout → checkPaymentRateLimit
+  - auth/forgot-password → checkSmsRateLimit
+- Refactored catch-all [[...path]]/route.ts: removed duplicate rate limiter
+
+**Phase 5: M3 — Account Lockout (Agent B)**
+- Added to Prisma User model: failedLoginAttempts (Int, default 0), lockedUntil (DateTime?)
+- Pushed schema via db:push
+- authenticateUser() in lib/auth-server.ts:
+  - Checks locked status before password (returns null — doesn't reveal lock)
+  - Increments counter on failure
+  - Locks for 30 minutes at 10 consecutive failures
+  - Resets counter on successful login
+
+**Phase 6: M7 — Request Body Size Limits (Agent B)**
+- Added experimental.serverActions.bodySizeLimit: '256kb' to next.config.ts
+- Login + register routes validate body <= 1KB (returns 413 if exceeded)
+
+**Phase 7: H4 — CSP + Security Headers (Agent B)**
+- Added headers() to next.config.ts with 6 security headers:
+  - Content-Security-Policy (comprehensive: default-src, script-src, style-src, img-src with Cloudinary/picsum/Unsplash/blob, font-src, connect-src with ws/wss, frame-ancestors, base-uri)
+  - X-Content-Type-Options: nosniff
+  - X-Frame-Options: SAMEORIGIN
+  - X-XSS-Protection: 1; mode=block
+  - Referrer-Policy: strict-origin-when-cross-origin
+  - Permissions-Policy: camera=(self), microphone=(), geolocation=(self), payment=(self)
+
+**Phase 8: Additional Fixes**
+- Set NEXTAUTH_SECRET + AUTH_SECRET in .env (64-char hex, crypto-secure)
+- Fixed notifications-service DB path and column name mismatch
+
+Stage Summary:
+- 15/15 vulnerabilities addressed (8 already fixed, 7 newly fixed)
+- Files modified: ~15 across API routes, lib/, mini-services/, prisma/
+- Files deleted: 1 (bank-card-form.tsx)
+- New files: 0
+- Prisma schema: 2 fields added (failedLoginAttempts, lockedUntil)
+- Security headers verified: CSP, X-Frame-Options, X-Content-Type-Options, X-XSS-Protection, Referrer-Policy, Permissions-Policy all present
+- Rate limiting verified: forgot-password 4th attempt returns 429
+- Login body size: 413 on oversized payload
+- WebSocket: cookie-based auth with HMAC verification + 10s timeout
+- Lint: 0 errors, 1 pre-existing warning

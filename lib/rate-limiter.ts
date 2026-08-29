@@ -84,6 +84,21 @@ export function checkGeneralRateLimit(ip: string): RateLimitResult {
   return rateLimit(`general:${ip}`, 60, 60 * 1000);
 }
 
+/** SMS: 3 per hour per IP (SMS bombing prevention) */
+export function checkSmsRateLimit(ip: string): RateLimitResult {
+  return rateLimit(`sms:${ip}`, 3, 60 * 60 * 1000);
+}
+
+/** Create (bookings, disputes, reviews): 20 per minute per IP */
+export function checkCreateRateLimit(ip: string): RateLimitResult {
+  return rateLimit(`create:${ip}`, 20, 60 * 1000);
+}
+
+/** Contact form: 3 per hour per IP (spam prevention) */
+export function checkContactRateLimit(ip: string): RateLimitResult {
+  return rateLimit(`contact:${ip}`, 3, 60 * 60 * 1000);
+}
+
 // ──── IP extraction helper ────
 export function getClientIp(request: Request): string {
   return (

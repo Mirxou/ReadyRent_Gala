@@ -8,6 +8,7 @@ import { db } from '@/lib/db';
 import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
 import { getChargilyProvider } from '@/lib/payment-provider';
 import { logger } from '@/lib/logger';
+import { checkPaymentRateLimit, getClientIp } from '@/lib/rate-limiter';
 
 const ALLOWED_AMOUNTS = { min: 100, max: 5_000_000 };
 
@@ -15,6 +16,16 @@ export async function POST(request: Request) {
   try {
     const session = await getSessionFromRequest(request);
     if (!session) return authRequiredResponse();
+
+    // ── Rate limiting ──
+    const clientIp = getClientIp(request);
+    const rateCheck = checkPaymentRateLimit(clientIp);
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        { success: false, dignity_preserved: true, message_ar: 'محاولات كثيرة. حاول بعد قليل.', message_en: 'Too many requests. Please try again later.', code: 'RATE_LIMITED' },
+        { status: 429 }
+      );
+    }
 
     const body = await request.json();
     const { booking_id, amount } = body;

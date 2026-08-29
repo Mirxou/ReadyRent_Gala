@@ -3,6 +3,7 @@ import { db } from '@/lib/db';
 import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
 import { logger } from '@/lib/logger';
 import { createDisputeSchema, validateBody } from '@/lib/validators';
+import { checkCreateRateLimit, getClientIp } from '@/lib/rate-limiter';
 
 // ═══════════════════════════════════════════════════════════════
 // POST /api/disputes/create — Create a dispute
@@ -10,6 +11,16 @@ import { createDisputeSchema, validateBody } from '@/lib/validators';
 // ═══════════════════════════════════════════════════════════════
 export async function POST(request: Request) {
   try {
+    // ── Rate limiting ──
+    const clientIp = getClientIp(request);
+    const rateCheck = checkCreateRateLimit(clientIp);
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        { success: false, dignity_preserved: true, message_ar: 'محاولات كثيرة. حاول بعد قليل.', message_en: 'Too many requests. Please try again later.', code: 'RATE_LIMITED' },
+        { status: 429 }
+      );
+    }
+
     const session = await getSessionFromRequest(request);
     if (!session) return authRequiredResponse();
 

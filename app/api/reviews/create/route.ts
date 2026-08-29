@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getSessionFromRequest } from '@/lib/auth-server';
 import { logger } from '@/lib/logger';
+import { checkCreateRateLimit, getClientIp } from '@/lib/rate-limiter';
 
 // ═══════════════════════════════════════════════════════════════════
 // Create Review API — Submit a new review (status: pending)
@@ -27,6 +28,18 @@ function errorResponse(
 
 export async function POST(request: NextRequest) {
   try {
+    // ── Rate limiting ──
+    const clientIp = getClientIp(request);
+    const rateCheck = checkCreateRateLimit(clientIp);
+    if (!rateCheck.allowed) {
+      return errorResponse(
+        'محاولات كثيرة. حاول بعد قليل.',
+        'Too many requests. Please try again later.',
+        'RATE_LIMITED',
+        429
+      );
+    }
+
     // Check auth
     const session = await getSessionFromRequest(request);
     if (!session) {

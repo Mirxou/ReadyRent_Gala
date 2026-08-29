@@ -6,13 +6,13 @@
 import { NextResponse } from 'next/server';
 import { sendPhoneVerification } from '@/lib/social-auth';
 import { logger } from '@/lib/logger';
-import { checkLoginRateLimit, getClientIp } from '@/lib/rate-limiter';
+import { checkSmsRateLimit, getClientIp } from '@/lib/rate-limiter';
 
 export async function POST(request: Request) {
   try {
     // ── Rate limiting ──
     const clientIp = getClientIp(request);
-    const rateCheck = checkLoginRateLimit(clientIp);
+    const rateCheck = checkSmsRateLimit(clientIp);
     if (!rateCheck.allowed) {
       return NextResponse.json(
         {

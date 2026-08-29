@@ -4,6 +4,7 @@ import crypto from 'crypto';
 import { logger } from '@/lib/logger';
 import { sendEmail } from '@/lib/email';
 import { passwordResetEmail } from '@/lib/email-templates';
+import { checkSmsRateLimit, getClientIp } from '@/lib/rate-limiter';
 
 // ═══════════════════════════════════════════════════════════════
 // POST /api/auth/forgot-password — Request a password reset
@@ -13,6 +14,16 @@ import { passwordResetEmail } from '@/lib/email-templates';
 
 export async function POST(request: Request) {
   try {
+    // ── Rate limiting (same as SMS — email bombing prevention) ──
+    const clientIp = getClientIp(request);
+    const rateCheck = checkSmsRateLimit(clientIp);
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        { success: false, dignity_preserved: true, message_ar: 'محاولات كثيرة. حاول بعد قليل.', message_en: 'Too many requests. Please try again later.', code: 'RATE_LIMITED' },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
     const { email } = body;
 
