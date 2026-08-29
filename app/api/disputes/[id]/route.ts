@@ -60,7 +60,17 @@ export async function GET(
     });
     const isAdmin = currentUser?.role === 'admin' || currentUser?.role === 'staff';
 
-    if (!isOwner && !isAdmin) {
+    // Check if user is the vendor of the booking's product
+    let isVendor = false;
+    if (dispute.bookingId) {
+      const bookingWithProduct = await db.booking.findUnique({
+        where: { id: dispute.bookingId },
+        select: { product: { select: { vendorId: true } } },
+      });
+      isVendor = bookingWithProduct?.product?.vendorId === session.userId;
+    }
+
+    if (!isOwner && !isVendor && !isAdmin) {
       return NextResponse.json(
         {
           success: false,

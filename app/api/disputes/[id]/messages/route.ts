@@ -42,17 +42,16 @@ export async function POST(
       );
     }
 
-    // Authorization: dispute owner, admin/staff
-    // (The "other party" — vendor — isn't directly linked as a user in current schema,
-    //  so admin/staff can also post on behalf of the platform)
+    // Authorization: dispute owner, vendor, or admin/staff
     const isOwner = dispute.userId === session.userId;
+    const isVendor = dispute.booking?.product?.vendorId === session.userId;
     const currentUser = await db.user.findUnique({
       where: { id: session.userId },
       select: { role: true },
     });
     const isAdmin = currentUser?.role === 'admin' || currentUser?.role === 'staff';
 
-    if (!isOwner && !isAdmin) {
+    if (!isOwner && !isVendor && !isAdmin) {
       return NextResponse.json(
         {
           success: false,
@@ -122,24 +121,45 @@ export async function POST(
         : []),
     ]);
 
-    // Create notification for the dispute owner (if sender is not the owner)
-    if (dispute.userId && dispute.userId !== session.userId) {
+    // Notify the other party(ies)
+    const notificationRecipients: string[] = [];
+    if (isVendor) {
+      // Vendor sent message → notify dispute owner
+      if (dispute.userId && dispute.userId !== session.userId) {
+        notificationRecipients.push(dispute.userId);
+      }
+    } else if (isOwner) {
+      // Dispute owner sent message → notify vendor
+      if (dispute.bookingId) {
+        const bookingForVendor = await db.booking.findUnique({
+          where: { id: dispute.bookingId },
+          select: { product: { select: { vendorId: true } } },
+        });
+        if (bookingForVendor?.product?.vendorId) {
+          notificationRecipients.push(bookingForVendor.product.vendorId);
+        }
+      }
+    } else if (isAdmin) {
+      // Admin sent message → notify both parties
+      if (dispute.userId) notificationRecipients.push(dispute.userId);
+      if (dispute.bookingId) {
+        const bookingForVendor = await db.booking.findUnique({
+          where: { id: dispute.bookingId },
+          select: { product: { select: { vendorId: true } } },
+        });
+        if (bookingForVendor?.product?.vendorId && !notificationRecipients.includes(bookingForVendor.product.vendorId)) {
+          notificationRecipients.push(bookingForVendor.product.vendorId);
+        }
+      }
+    }
+
+    for (const recipientId of notificationRecipients) {
       await db.notification.create({
         data: {
-          userId: dispute.userId,
+          userId: recipientId,
           type: 'system',
           title: 'رسالة جديدة في النزاع',
-          message: `تم إضافة رسالة جديدة في نزاعك${dispute.title ? ` "${dispute.title}"` : ''}`,
-        },
-      });
-    } else if (isAdmin && dispute.userId) {
-      // Admin replied — notify the owner
-      await db.notification.create({
-        data: {
-          userId: dispute.userId,
-          type: 'system',
-          title: 'رد جديد من فريق الدعم',
-          message: `تم الرد على نزاعك${dispute.title ? ` "${dispute.title}"` : ''} من قبل فريق الدعم`,
+          message: `تم إضافة رسالة جديدة في نزاع${dispute.title ? ` "${dispute.title}"` : ''}`,
         },
       });
     }

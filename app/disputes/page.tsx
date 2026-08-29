@@ -39,19 +39,41 @@ export default function DisputesPage() {
   ];
 
   const canProceed = () => {
-    if (step === 1) return !!formData.disputeType;
-    if (step === 2) return !!formData.subject && !!formData.description;
+    if (step === 1) return !!formData.disputeType && !!formData.bookingId;
+    if (step === 2) return !!formData.title && !!formData.description;
     return true;
   };
 
   const handleSubmit = async () => {
+    if (!formData.bookingId) {
+      toast.error('يرجى تحديد الحجز أولاً');
+      return;
+    }
+    if (!formData.title || formData.title.length < 5) {
+      toast.error('عنوان النزاع يجب أن يكون 5 أحرف على الأقل');
+      return;
+    }
+    if (!formData.description || formData.description.length < 10) {
+      toast.error('تفاصيل النزاع يجب أن تكون 10 أحرف على الأقل');
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      await disputesApi.initiateDispute({
-        booking_id: formData.bookingId || 0,
+      const res = await disputesApi.initiateDispute({
+        booking_id: formData.bookingId,
+        title: formData.title,
+        reason: formData.description,
+        description: formData.description,
         claim_type: formData.disputeType,
-        description: formData.description + '\n\n' + formData.subject,
+        evidence_urls: formData.evidence.map(e => e.url),
       });
+      
+      if (res.metadata?.failed || (res.httpStatus && res.httpStatus >= 400)) {
+        toast.error(res.message_en || res.message_ar || 'حدث خطأ أثناء إنشاء النزاع');
+        return;
+      }
+      
       toast.success('تم إنشاء النزاع بنجاح');
       setIsSuccess(true);
       resetWizard();

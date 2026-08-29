@@ -51,7 +51,7 @@ export default function AppealFilingPage() {
   // Get dispute — single query instead of separate status/verdict
   const { data: dispute, isLoading } = useQuery({
     queryKey: ['dispute', disputeId],
-    queryFn: () => disputesApi.getDispute(Number(disputeId)).then(res => res.data),
+    queryFn: () => disputesApi.getDispute(disputeId as string).then(res => res.data),
     enabled: !!disputeId && isAuthenticated,
   });
 
@@ -62,11 +62,12 @@ export default function AppealFilingPage() {
       if (!canAppeal) throw new Error('لا يمكن تقديم استئناف على هذه القضية');
       const reason =
         selectedReason === 'other' ? customText.trim() : `${selectedReason}: ${customText.trim()}`;
-      const res = await disputesApi.fileAppeal(Number(disputeId), reason);
+      const description = customText.trim();
+      const res = await disputesApi.fileAppeal(disputeId as string, { reason, description });
       return res.data;
     },
     onSuccess: () => {
-      trackAppealFiled(Number(disputeId), selectedReason);
+      trackAppealFiled(disputeId as string, selectedReason);
       setStep('success');
       toast.success('تم تقديم الاستئناف بنجاح');
     },

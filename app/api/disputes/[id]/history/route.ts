@@ -20,7 +20,7 @@ export async function GET(
     // Verify dispute exists
     const dispute = await db.dispute.findUnique({
       where: { id },
-      select: { userId: true, status: true },
+      select: { userId: true, status: true, createdAt: true },
     });
 
     if (!dispute) {
@@ -69,7 +69,7 @@ export async function GET(
         id: 'dispute_created',
         type: 'system',
         message: `تم إنشاء النزاع بحالة "${dispute.status}"`,
-        created_at: dispute.status, // placeholder, overwritten below
+        created_at: dispute.createdAt.toISOString(),
         is_status_change: true,
         status: 'filed',
       },
@@ -82,15 +82,6 @@ export async function GET(
         is_status_change: m.type === 'system' && m.message.startsWith('تم تغيير حالة النزاع'),
       })),
     ];
-
-    // Fix first entry timestamp
-    const disputeRecord = await db.dispute.findUnique({
-      where: { id },
-      select: { createdAt: true },
-    });
-    if (disputeRecord) {
-      (timeline[0] as Record<string, unknown>).created_at = disputeRecord.createdAt.toISOString();
-    }
 
     return NextResponse.json({ success: true, dignity_preserved: true, data: timeline });
   } catch (error) {

@@ -67,6 +67,13 @@ export const createDisputeSchema = z.object({
   evidence_urls: z.array(z.string().url('رابط الأدلة غير صالح').max(500)).max(10, 'الحد الأقصى 10 أدلة').optional(),
 });
 
+// ──── Return Requests ────
+export const createReturnRequestSchema = z.object({
+  booking_id: z.string().min(1, 'معرف الحجز مطلوب'),
+  reason: z.string().min(3, 'السبب مطلوب').max(500),
+  description: z.string().max(2000).optional(),
+});
+
 // ──── Wallet ────
 export const walletDepositSchema = z.object({
   amount: z.number().int().positive('المبلغ يجب أن يكون رقماً موجباً').max(100000, 'الحد الأقصى للإيداع 100,000 د.ج للمعاملة الواحدة'),

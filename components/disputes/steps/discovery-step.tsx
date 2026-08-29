@@ -3,8 +3,9 @@
 import * as React from 'react';
 import { useDisputeStore } from '@/lib/hooks/use-dispute-store';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { AlertCircle, Package, Receipt, Truck } from 'lucide-react';
+import { AlertCircle, Clock, Package, Truck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export function DiscoveryStep() {
@@ -16,9 +17,11 @@ export function DiscoveryStep() {
 
   const options = [
     { value: 'damage', label: 'ضرر في المنتج', icon: Package, description: 'كافة الأضرار المادية أو الأعطال التقنية' },
-    { value: 'refund', label: 'استرداد مالي', icon: Receipt, description: 'طلب استرداد بسبب عدم الرضا أو إلغاء قانوني' },
-    { value: 'delivery', label: 'مشكلة في التوصيل', icon: Truck, description: 'تأخير، تلف أثناء النقل، أو عدم وصول المنتج' },
-    { value: 'other', label: 'أسباب أخرى', icon: AlertCircle, description: 'خلافات تعاقدية أو مشاكل تواصل' },
+    { value: 'non_delivery', label: 'عدم التسليم', icon: Truck, description: 'تأخير أو عدم وصول المنتج' },
+    { value: 'quality', label: 'مشكلة في الجودة', icon: AlertCircle, description: 'المنتج لا يطابق الوصف المعلن' },
+    { value: 'wrong_item', label: 'منتج خاطئ', icon: Package, description: 'استلمت منتجاً مختلفاً عن المطلوب' },
+    { value: 'late_return', label: 'تأخر في الإرجاع', icon: Clock, description: 'المؤجر تأخر في استلام المنتج' },
+    { value: 'general', label: 'أسباب أخرى', icon: AlertCircle, description: 'خلافات تعاقدية أو مشاكل أخرى' },
   ];
 
   return (
@@ -33,6 +36,16 @@ export function DiscoveryStep() {
         onValueChange={handleTypeChange}
         className="grid grid-cols-1 md:grid-cols-2 gap-4"
       >
+        <div className="space-y-3 col-span-full">
+          <Label htmlFor="bookingId" className="text-sm font-black text-gray-700">رقم الحجز</Label>
+          <Input
+            id="bookingId"
+            value={formData.bookingId || ''}
+            onChange={(e) => setFormData({ bookingId: e.target.value || undefined })}
+            placeholder="أدخل رقم الحجز (مثال: clxxxxxxxxxxxxxxx)"
+            className="rounded-2xl h-14 border-gray-200 focus:ring-blue-600 focus:border-blue-600 transition-all font-mono text-sm"
+          />
+        </div>
         {options.map((opt) => (
           <div key={opt.value}>
             <RadioGroupItem

@@ -139,21 +139,21 @@ export default function DisputeDetailPage() {
   // Fetch single dispute with messages
   const { data: dispute, isLoading } = useQuery({
     queryKey: ['dispute', disputeId],
-    queryFn: () => disputesApi.getDispute(Number(disputeId)).then(res => res.data),
+    queryFn: () => disputesApi.getDispute(disputeId as string).then(res => res.data),
     enabled: isAuthenticated,
   });
 
   // Fetch dispute history for timeline
   const { data: historyData } = useQuery({
     queryKey: ['dispute-history', disputeId],
-    queryFn: () => disputesApi.getDisputeHistory(Number(disputeId)).then(res => res.data),
+    queryFn: () => disputesApi.getDisputeHistory(disputeId as string).then(res => res.data),
     enabled: isAuthenticated,
   });
 
   // Send message mutation
   const sendMessageMutation = useMutation({
     mutationFn: (text: string) =>
-      disputesApi.createMessage(Number(disputeId), text),
+      disputesApi.createMessage(disputeId as string, text),
     onSuccess: (res: Record<string, unknown>) => {
       if (res?.dignity_preserved || res?.error) {
         toast.error((res?.message_ar as string) || (res?.error as string) || 'فشل إرسال الرسالة');

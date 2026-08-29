@@ -96,7 +96,7 @@ function ChatBubble({ msg }: { msg: ChatMessage }) {
 
 // ── Main Component ────────────────────────────────────────────────────────────
 interface AIDisputeAssistantProps {
-  disputeId?: number;
+  disputeId?: string;
   /** If true, renders inline (no floating button) */
   inline?: boolean;
 }

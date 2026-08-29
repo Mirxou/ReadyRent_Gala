@@ -1,10 +1,11 @@
 import { create } from 'zustand';
 
 interface DisputeFormData {
-  bookingId?: number;
-  disputeType: string;
-  subject: string;
+  bookingId?: string;
+  title: string;
+  reason: string;
   description: string;
+  disputeType: string;
   evidence: { id: string; url: string; type: string }[];
   isAdmissible: boolean;
 }
@@ -24,9 +25,10 @@ interface DisputeStore {
 
 const initialData: DisputeFormData = {
   bookingId: undefined,
-  disputeType: '',
-  subject: '',
+  title: '',
+  reason: '',
   description: '',
+  disputeType: '',
   evidence: [],
   isAdmissible: false,
 };

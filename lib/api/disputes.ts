@@ -29,8 +29,11 @@ export const disputesApi = {
 
   initiateDispute: (data: {
     booking_id: string;
+    title: string;
+    reason: string;
+    description?: string;
     claim_type: string;
-    description: string;
+    claimed_amount?: number;
     evidence_urls?: string[];
   }) =>
     sovereignClient.post<Dispute>('/disputes/create/', data),
@@ -51,8 +54,8 @@ export const disputesApi = {
     sovereignClient.get<DisputeHistoryStage[]>(`/disputes/${id}/history/`),
 
   // Messaging & Evidence
-  createMessage: (disputeId: string, message: string, attachments: string[] = []) =>
-    sovereignClient.post<unknown>(`/disputes/${disputeId}/messages/`, { message, attachments }),
+  createMessage: (disputeId: string, message: string, _attachments: string[] = []) =>
+    sovereignClient.post<unknown>(`/disputes/${disputeId}/messages/`, { content: message }),
 
   // TODO: route not yet implemented — /disputes/[id]/evidence
   // getEvidenceLogs: (disputeId: string) =>
@@ -88,12 +91,27 @@ export const disputesApi = {
   //   sovereignClient.post<unknown>(`/disputes/mediation/offers/${offerId}/accept/`),
 
   // Appeals
-  fileAppeal: (disputeId: string, reason: string) =>
-    sovereignClient.post<unknown>(`/disputes/${disputeId}/appeal/`, { reason }),
+  fileAppeal: (disputeId: string, data: { reason: string; description: string }) =>
+    sovereignClient.post<unknown>(`/disputes/${disputeId}/appeal/`, data),
 
   // Public Judicial Ledger
   getPublicLedger: (params?: { page?: number; page_size?: number }) =>
     sovereignClient.get<unknown>('/disputes/public-ledger/', { params }),
+
+  resolveDispute: (id: string, data: { resolution: 'approved' | 'rejected'; decision_note?: string }) =>
+    sovereignClient.post<unknown>(`/disputes/${id}/resolve/`, data),
+};
+
+export const returnsApi = {
+  listReturns: () =>
+    sovereignClient.get<unknown[]>('/returns/'),
+
+  createReturn: (data: {
+    booking_id: string;
+    reason: string;
+    description?: string;
+  }) =>
+    sovereignClient.post<unknown>('/returns/create/', data),
 };
 
 export const supportApi = {

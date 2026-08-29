@@ -2023,4 +2023,226 @@ Stage Summary:
 - 1 file rewritten: social/vouch/[userId]/route.ts (added GET handler)
 - 1 file updated: vendors API (added user_id to response)
 - Lint: 0 errors (1 known unfixable warning: React Hook Form watch, 1 non-critical exhaustive-deps warning)
-- Step 2.2 trust score system is now fully functional: algorithm ✅, display on profiles ✅, trust colors ✅, vouch system ✅
+- Step 2.2 trust score system is now fully functional: algorithm ✅, display on profiles ✅, trust colors ✅, vouch system ✅.....
+---
+Task ID: 2-a
+Agent: General-Purpose Sub Agent
+
+Task: Read dispute reference docs from production-plan directory
+
+Work Log:
+
+- Grepped 4 files for dispute/return/refund/نزاع/إرجاع/استرداد/استرجاع patterns
+- **00-MASTER-PLAN.md**: Found 8 matches (lines 90, 112, 118, 120, 127, 205, 236, 238)
+  - Phase 1: disputes, contracts, bundles, bookings, cart, returns API fixes needed (line 90)
+  - Phase 2: Trust score algorithm includes disputes as negative factor (line 112)
+  - Phase 2.3: Dispute system with appeal flow + AI integration (lines 118, 120)
+  - Phase 2.5: Escrow refund on dispute/cancellation (line 127)
+  - Phase 5: Incident response for major disputes (line 205)
+  - Page plan: /disputes, /disputes/[id], /disputes/[id]/appeal, /returns all need API path fixes (lines 236, 238)
+- **03-TRUST-SAFETY-SYSTEM.md**: Found 50+ matches — this is the primary reference doc
+  - 2.1 Trust Score: lost disputes = -5 pts each (max -30), refunded escrows = -3 pts each (max -30) (lines 51-52, 93-99)
+  - 2.3 Escrow: hold→release→refund flow; API endpoints for escrow/release and escrow/refund (lines 207-239)
+  - 2.4 Contracts: includes return terms and dispute resolution clauses (lines 315, 323-324)
+  - 2.5 Dispute System: full flow (filed→under_review→mediation→resolved/appealed/closed), 6 API routes (2 missing), 5 pages, AI Dispute Assistant (lines 336-403)
+  - 2.6 Returns System: pending→approved/rejected→completed flow with AI analysis, link to dispute appeals (lines 407-441)
+  - 2.7 Insurance: claims linked to disputes/returns (line 467)
+  - 2.9 Notifications: 13 event types including dispute.filed, dispute.message, dispute.resolved, escrow.refunded, return.approved (lines 545-551)
+  - 2.10 Task list: fix broken dispute API routes, implement escrow full flow, implement dispute flow with AI, implement return flow (lines 563-573)
+- **08-FEATURES-AUDIT.md**: Found 7 matches
+  - /disputes: BROKEN — dual API paths (line 228)
+  - /disputes/[id]: BROKEN — missing API route (line 231)
+  - /disputes/[id]/appeal: partial + auth guarded (line 234)
+  - /returns: partial + auth guarded + dual API paths (line 240-242)
+  - /dashboard/disputes: BROKEN — same API path issue (line 282)
+  - /dashboard/disputes/[id]: BROKEN (line 285)
+  - Critical priority: create missing API routes (disputes/[id], disputes/[id]/messages) (line 399)
+- **10-TECHNICAL-DEBT.md**: Found 2 matches
+  - components/dispute-form.tsx (~200 lines) is dead code — replaced by components/disputes/dispute-form.tsx (line 96)
+  - lib/api/disputes.ts listed as part of split API architecture (line 159)
+- All content returned to requester in full.
+
+
+---
+Task ID: 2-b
+Agent: Sub-Agent (Read Dispute & Return API Routes)
+
+Task: Read all dispute/return API route files and related lib files
+
+Work Log:
+
+Files read (full contents):
+- app/api/disputes/route.ts — 57 lines, GET handler, lists user disputes with booking info
+- app/api/disputes/create/route.ts — 147 lines, POST handler, Zod validated, rate-limited, duplicate prevention, vendor counter-claim support
+- app/api/disputes/[id]/route.ts — 150 lines, GET handler, full dispute detail with messages, approval/rejection counts, owner+admin auth
+- app/api/disputes/[id]/messages/route.ts — 170 lines, POST handler, add message, auto-transitions status from filed→under_review, notifies owner
+- app/api/disputes/[id]/appeal/route.ts — 166 lines, POST handler, appeal resolved/closed disputes, owner-only, transactional
+- app/api/disputes/[id]/history/route.ts — 109 lines, GET handler, timeline of dispute messages with synthetic creation entry
+- app/api/returns/route.ts — 56 lines, GET handler, lists user return requests with booking info
+- app/api/returns/create/route.ts — 77 lines, POST handler, minimal validation (no Zod, no rate limit, no duplicate check)
+- lib/api/disputes.ts — 112 lines, client-side API wrapper with TODO stubs for unimplemented routes
+- lib/api.ts — DOES NOT EXIST (searched with Grep, got IO error; closest is lib/api-response.ts which has no dispute/return/refund content)
+- lib/api-response.ts — 68 lines, general helpers only (sovereignError, sovereignSuccess, errors shorthand)
+
+Observations:
+- 6 dispute routes, 2 return routes, 1 client-side disputes lib
+- Dispute routes are more mature: Zod validation, rate limiting, duplicate prevention, admin auth
+- Return routes are minimal: no Zod, no rate limit, no duplicate check
+- lib/api/disputes.ts has 5 commented-out TODO stubs for unimplemented routes (status, verdict, evidence, evidence/upload, mediation/offers)
+- Syntax error in lib/api/disputes.ts line 108: missing closing parenthesis on getTicket call
+- History route has a bug: first timeline entry uses dispute.status as timestamp placeholder (line 72)
+- All routes use dignity_preserved: true pattern consistently
+- No code changes made — read-only task
+---
+Task ID: 2-c
+Agent: Dispute/Returns Frontend Reader
+
+Task: Read all dispute/returns frontend pages and related code (read-only)
+
+Work Log:
+
+Files read (complete):
+
+1. **app/disputes/page.tsx** (282 lines)
+   - Client component, RTL Arabic UI, dark sovereign theme
+   - Multi-step wizard: DiscoveryStep → GroundsStep → EvidenceStep
+   - Uses useDisputeStore (zustand) for form state, disputesApi.initiateDispute for submit
+   - Auth guard: redirects to /login if not authenticated
+   - Shows AIDisputeAssistant floating widget
+   - Has empty-state with GlassPanel when no disputes open
+   - Submit payload: { booking_id, claim_type, description + subject }
+
+2. **app/disputes/[id]/page.tsx** (237 lines)
+   - Dispute detail with SovereignSeal, JusticeReceipt timeline
+   - Fetches single dispute via disputesApi.getDispute + disputesApi.getDisputeHistory
+   - Sets SovereignContext mode to 'DISPUTE' or 'VERDICT' (if resolved/closed)
+   - Shows resolution summary card with appeal CTA linking to /disputes/[id]/appeal
+   - Builds fallback timeline stages if history API fails
+   - Floating AIDisputeAssistant with disputeId prop
+
+3. **app/disputes/[id]/appeal/page.tsx** (290 lines)
+   - Appeal filing form with 5 predefined reasons (new_evidence, procedural_error, legal_error, disproportionate, other)
+   - Auth guard, canAppeal check (only resolved/closed disputes)
+   - Uses @tanstack/react-query for dispute fetch + mutation for filing
+   - Tracks via trackAppealFiled() analytics
+   - Custom text required for 'other' reason (min 20 chars)
+   - AnimatePresence form → success state transition
+
+4. **app/dashboard/disputes/page.tsx** (169 lines)
+   - Dashboard disputes list using @tanstack/react-query (queryKey: ['disputes'])
+   - Sovereign-themed with GlassPanel, SovereignButton, Badge components
+   - Shows dispute cards with status (open/resolved/other), reference IDs (ARB-XXXXXX)
+   - Sidebar: active count, settlement rate %, links to terms/faq
+   - Links to /dashboard/disputes/[id]
+
+5. **app/dashboard/disputes/[id]/page.tsx** (486 lines)
+   - Rich dispute detail: judicial timeline, evidence vault, arbitrator chat hub
+   - STATUS_COLORS/STATUS_LABELS maps for 6 statuses
+   - buildTimelineFromHistory() parses history for timeline stages
+   - Chat: sends messages via disputesApi.createMessage, shows system/appeal/user/arbitrator messages
+   - Evidence vault: renders image files via next/image, shows file icons for non-images
+   - Credit warning panel for active disputes
+   - Booking info card with product image
+   - Input disabled when dispute is closed/resolved
+
+6. **app/returns/page.tsx** (392 lines)
+   - Return requests page, auth guarded, sovereign theme
+   - Fetches returns from /api/returns (raw fetch, NOT using lib/api)
+   - Create form: booking ref, reason dropdown (5 options), description, image upload
+   - Submits to /api/returns/create (POST, raw fetch)
+   - Expandable return list with accordion pattern
+   - Client-side state management (useState), no react-query
+
+7. **prisma/schema.prisma** — 3 models extracted:
+   - Dispute: id(cuid), userId, bookingId, title, description, claimType(6 enum values), status(6 values), priority, claimedAmount, evidenceUrls(JSON), timestamps. Relations: User, Booking, DisputeMessage[]
+   - DisputeMessage: id(cuid), disputeId, senderId, type(message/appeal/system), message, createdAt. Cascade delete on dispute.
+   - ReturnRequest: id(cuid), userId, bookingId, bookingRef, reason, description, status(4 values: pending/approved/rejected/completed), timestamps. Relations: User, Booking. No file/evidence fields.
+
+8. **lib/validators.ts** — Dispute section (lines 59-68):
+   - createDisputeSchema: booking_id(string min 1), title(string 5-255), reason(string 10-2000), description(optional max 2000), claim_type(enum: damage/non_delivery/quality/wrong_item/late_return/general, default general), claimed_amount(number 0-1M, optional), evidence_urls(array of URLs, max 10, optional)
+   - NOTE: No return request validation schema exists
+
+9. **lib/rate-limiter.ts** — checkCreateRateLimit EXISTS (line 93):
+   - `export function checkCreateRateLimit(ip: string): RateLimitResult` — 20 per minute per IP
+   - Comment says: "Create (bookings, disputes, reviews): 20 per minute per IP"
+
+10. **components/disputes/** — 5 files:
+    - AIDisputeAssistant.tsx (421 lines): Floating AI chatbot, uses chatbotApi for session/messaging, quick prompts, inline/floating modes
+    - dispute-card.tsx (108 lines): Generic Card-based dispute card with status badges, type icons, links to /disputes/[id]. Uses date-fns ar locale.
+    - steps/discovery-step.tsx (69 lines): RadioGroup for dispute type (damage/refund/delivery/other)
+    - steps/grounds-step.tsx (76 lines): Subject + description inputs, admissibility checkbox, judicial warning
+    - steps/evidence-step.tsx (124 lines): File upload dropzone (image/video), evidence gallery with remove, uploads via disputesApi.uploadEvidence if disputeId provided
+
+11. **app/admin/bookings/page.tsx** — NO dispute references found.
+
+Observations:
+- Two parallel UI paths exist: /disputes/* (public-facing, darker theme) and /dashboard/disputes/* (dashboard-embedded, sovereign theme). They use different styling but same API.
+- /disputes/page.tsx uses zustand store + custom wizard; /dashboard/disputes/[id]/page.tsx uses react-query with richer features (chat, evidence vault, timeline).
+- /returns/page.tsx uses raw fetch (not lib/api, not react-query) — inconsistent with dispute pages.
+- No return request Zod validation schema in validators.ts.
+- createDisputeSchema has 'reason' field but the frontend wizard submits 'description + subject' — potential schema mismatch.
+- DisputeCard component (dispute-card.tsx) exists but is NOT imported/used by any page — dead code.
+- ReturnRequest model has no file/evidence field despite the frontend allowing image uploads.
+- No code changes made — read-only task
+
+---
+Task ID: 3-a
+Agent: Backend API Fix Agent
+Task: Fix all Step 2.3 backend API issues (disputes + returns + resolve)
+
+Work Log:
+- Fixed lib/api/disputes.ts: syntax error (missing comma), field name mismatch (message→content), added resolveDispute + returnsApi
+- Fixed app/api/disputes/[id]/route.ts: added vendor access authorization
+- Fixed app/api/disputes/[id]/messages/route.ts: added vendor message sending + fixed notification logic for all parties
+- Fixed app/api/disputes/route.ts: query now includes vendor disputes (OR condition)
+- Fixed app/api/disputes/[id]/history/route.ts: fixed timestamp bug (was using dispute.status instead of dispute.createdAt)
+- Created app/api/disputes/[id]/resolve/route.ts: admin/staff dispute resolution endpoint
+- Rewrote app/api/returns/create/route.ts: added Zod validation, rate limiting, duplicate prevention, vendor notification
+- Added createReturnRequestSchema to lib/validators.ts
+
+Stage Summary:
+- 8 backend fixes applied
+- New resolve endpoint created
+- Vendor can now view, participate in, and receive notifications about disputes
+- Returns API now has proper validation and security
+
+---
+Task ID: 3-b
+Agent: Frontend Fix Agent
+Task: Fix all Step 2.3 frontend issues (wizard + store + returns page + dead code)
+
+Work Log:
+- Fixed lib/hooks/use-dispute-store.ts: bookingId string, added title/reason fields
+- Fixed components/disputes/steps/discovery-step.tsx: updated dispute types to match Zod enum, added booking ID input
+- Fixed components/disputes/steps/grounds-step.tsx: replaced subject with title, updated labels
+- Fixed app/disputes/page.tsx: updated handleSubmit to send correct fields (title, reason, claim_type), added validation
+- Rewrote app/returns/page.tsx: now uses returnsApi + useQuery/useMutation, proper status labels, removed fake file upload
+- Deleted dead code: components/disputes/dispute-card.tsx
+
+Stage Summary:
+- 6 frontend fixes applied
+- Wizard now sends all required fields matching Zod schema
+- Discovery step dispute types match backend enum
+- Returns page uses proper API client with react-query
+- Dead code removed
+---
+Task ID: 3-c
+Agent: Main Agent (post-subagent fixes)
+Task: Additional fixes found during verification — Number() casts, appeal data mismatch, AIDisputeAssistant type
+
+Work Log:
+- Fixed lib/api/disputes.ts: fileAppeal now accepts { reason, description } matching backend expectations
+- Fixed app/disputes/[id]/appeal/page.tsx: removed Number(disputeId) casts, sends both reason+description
+- Fixed lib/analytics.tsx: trackAppealFiled accepts string|number for disputeId
+- Fixed app/disputes/[id]/page.tsx: AIDisputeAssistant disputeId prop type string, removed Number(id) cast
+- Fixed components/disputes/AIDisputeAssistant.tsx: disputeId prop changed from number to string
+- Fixed app/dashboard/disputes/[id]/page.tsx: removed 3x Number(disputeId) casts on getDispute, getDisputeHistory, createMessage
+- Ran lint: 0 errors, 2 pre-existing warnings
+- Verified dev server: no compilation errors
+- Browser verified: homepage loads correctly
+
+Stage Summary:
+- 7 additional fixes beyond subagent work
+- All Number() casts on string IDs removed across 4 files
+- Appeal client-server data contract now matches
+- Total: 15 files modified for Step 2.3

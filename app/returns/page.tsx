@@ -3,8 +3,10 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Package, Plus, ChevronDown, ChevronUp, Clock, Eye } from 'lucide-react';
+import { Package, Plus, ChevronDown, ChevronUp, Clock, CheckCircle2, XCircle, Loader2 } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '@/lib/store';
+import { returnsApi } from '@/lib/api';
 import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
 import { SovereignGlow } from '@/shared/components/sovereign/sovereign-sparkle';
 import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
@@ -12,16 +14,21 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
-interface ReturnRequest {
-  id: string;
-  bookingRef: string;
-  reason: string;
-  description: string;
-  date: string;
-  status: string;
-  fileName?: string;
-}
+const STATUS_LABELS: Record<string, string> = {
+  pending: 'قيد المراجعة',
+  approved: 'مقبول',
+  rejected: 'مرفوض',
+  completed: 'مكتمل',
+};
+
+const STATUS_STYLES: Record<string, string> = {
+  pending: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+  approved: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+  rejected: 'bg-red-500/10 text-red-400 border-red-500/20',
+  completed: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+};
 
 const reasons = [
   'تلف المنتج',
@@ -34,16 +41,40 @@ const reasons = [
 export default function ReturnsPage() {
   const router = useRouter();
   const { isAuthenticated } = useAuthStore();
+  const queryClient = useQueryClient();
   const [showForm, setShowForm] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [expandedReturn, setExpandedReturn] = useState<string | null>(null);
-  const [returns, setReturns] = useState<ReturnRequest[]>([]);
+
+  // Fetch returns
+  const { data: returnsData, isLoading: isLoadingReturns } = useQuery({
+    queryKey: ['returns'],
+    queryFn: () => returnsApi.listReturns(),
+    enabled: isAuthenticated,
+  });
+
+  const returns = Array.isArray(returnsData?.data) ? returnsData.data : [];
+
+  // Create return mutation
+  const createMutation = useMutation({
+    mutationFn: (data: { booking_id: string; reason: string; description?: string }) =>
+      returnsApi.createReturn(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['returns'] });
+      toast.success('تم إرسال طلب الإرجاع بنجاح');
+      setShowForm(false);
+      setBookingId('');
+      setReason('');
+      setDescription('');
+    },
+    onError: () => {
+      toast.error('فشل إرسال طلب الإرجاع');
+    },
+  });
 
   // Form state
-  const [bookingRef, setBookingRef] = useState('');
+  const [bookingId, setBookingId] = useState('');
   const [reason, setReason] = useState('');
   const [description, setDescription] = useState('');
-  const [fileName, setFileName] = useState<string | null>(null);
 
   // Auth guard
   useEffect(() => {
@@ -52,36 +83,13 @@ export default function ReturnsPage() {
     }
   }, [isAuthenticated, router]);
 
-  useEffect(() => {
-    if (!isAuthenticated) return;
-    fetch('/api/returns', { credentials: 'include' })
-      .then((r) => r.json())
-      .then((d) => {
-        const list = Array.isArray(d) ? d : (d?.data || d?.results || []);
-        setReturns(list.map((r: Record<string, unknown>) => ({
-          id: r.id || `RET-${String(r.bookingRef || '').padStart(4, '0')}`,
-          bookingRef: r.bookingRef || r.booking_ref || '',
-          reason: r.reason || '',
-          description: r.description || '',
-          date: r.createdAt ? new Date(r.createdAt).toLocaleDateString('ar-DZ', { year: 'numeric', month: 'long', day: 'numeric' }) : new Date().toLocaleDateString('ar-DZ', { year: 'numeric', month: 'long', day: 'numeric' }),
-          status: r.status || 'قيد المراجعة',
-          fileName: r.file_name || r.fileName || undefined,
-        })));
-      })
-      .catch(() => {});
-  }, [isAuthenticated]);
+  if (!isAuthenticated) {
+    return null;
+  }
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-        setFileName(file.name);
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!bookingRef.trim()) {
+    if (!bookingId.trim()) {
       toast.error('يرجى إدخال رقم الحجز');
       return;
     }
@@ -89,43 +97,11 @@ export default function ReturnsPage() {
       toast.error('يرجى اختيار سبب الإرجاع');
       return;
     }
-
-    setIsSubmitting(true);
-    try {
-      const res = await fetch('/api/returns/create', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ booking_id: bookingRef, reason, description }) });
-      const json = await res.json();
-      if (res.ok) {
-        const newReturn: ReturnRequest = {
-          id: json?.data?.id || `RET-${String(returns.length + 1).padStart(4, '0')}`,
-          bookingRef: bookingRef,
-          reason: reason,
-          description: description,
-          date: new Date().toLocaleDateString('ar-DZ', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          }),
-          status: 'قيد المراجعة',
-          fileName: fileName || undefined,
-        };
-
-        setReturns([newReturn, ...returns]);
-        setIsSubmitting(false);
-        setShowForm(false);
-        setBookingRef('');
-        setReason('');
-        setDescription('');
-        setFileName(null);
-
-        toast.success('تم إرسال طلب الإرجاع بنجاح');
-      } else {
-        toast.error(json?.error || 'فشل إرسال طلب الإرجاع');
-        setIsSubmitting(false);
-      }
-    } catch {
-      toast.error('حدث خطأ أثناء الإرسال');
-      setIsSubmitting(false);
-    }
+    createMutation.mutate({
+      booking_id: bookingId.trim(),
+      reason,
+      description: description || undefined,
+    });
   };
 
   const toggleReturnExpand = (id: string) => {
@@ -134,7 +110,6 @@ export default function ReturnsPage() {
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-background to-background text-foreground" dir="rtl">
-      {/* Ambient glow */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <SovereignGlow color="gold" intensity="high" className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] opacity-20">
           <div />
@@ -142,7 +117,6 @@ export default function ReturnsPage() {
       </div>
 
       <div className="container mx-auto px-4 py-12 relative z-10 max-w-3xl">
-        {/* Page heading */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -181,16 +155,15 @@ export default function ReturnsPage() {
             >
               <GlassPanel className="p-6 md:p-8">
                 <h2 className="text-xl font-bold mb-6 text-sovereign-gold">طلب إرجاع جديد</h2>
-
                 <form onSubmit={handleSubmit} className="space-y-5">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div className="space-y-2">
-                      <Label className="text-white/70 text-sm">رقم الحجز / الطلب</Label>
+                      <Label className="text-white/70 text-sm">رقم الحجز</Label>
                       <Input
-                        value={bookingRef}
-                        onChange={(e) => setBookingRef(e.target.value)}
-                        placeholder="مثال: BK-2024-001"
-                        className="bg-white/5 border-white/10 text-white"
+                        value={bookingId}
+                        onChange={(e) => setBookingId(e.target.value)}
+                        placeholder="أدخل رقم الحجز"
+                        className="bg-white/5 border-white/10 text-white font-mono text-sm"
                       />
                     </div>
                     <div className="space-y-2">
@@ -218,52 +191,23 @@ export default function ReturnsPage() {
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <Label className="text-white/70 text-sm">صورة توضيحية (اختياري)</Label>
-                    <div className="relative">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleFileChange}
-                        className="hidden"
-                        id="return-file-upload"
-                      />
-                      <label
-                        htmlFor="return-file-upload"
-                        className="flex items-center gap-4 p-6 border-2 border-dashed border-white/10 rounded-2xl cursor-pointer hover:border-sovereign-gold/40 hover:bg-sovereign-gold/5 transition-colors"
-                      >
-                        <div className="w-12 h-12 rounded-xl bg-sovereign-gold/10 border border-sovereign-gold/30 flex items-center justify-center flex-shrink-0">
-                          <Package className="w-6 h-6 text-sovereign-gold/70" />
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-sm font-bold text-white/80">
-                            {fileName || 'انقر لاختيار صورة'}
-                          </p>
-                          <p className="text-xs text-white/40 mt-0.5">JPG, PNG — الحد الأقصى: 10 ميغابايت</p>
-                        </div>
-                      </label>
-                    </div>
-                  </div>
-
                   <div className="flex gap-3 pt-2">
                     <SovereignButton
                       variant="primary"
                       type="submit"
-                      isLoading={isSubmitting}
+                      isLoading={createMutation.isPending}
                     >
-                      {isSubmitting ? 'جارٍ الإرسال...' : 'إرسال طلب الإرجاع'}
+                      {createMutation.isPending ? 'جارٍ الإرسال...' : 'إرسال طلب الإرجاع'}
                     </SovereignButton>
                     <SovereignButton
                       variant="ghost"
                       onClick={() => {
                         setShowForm(false);
-                        setBookingRef('');
+                        setBookingId('');
                         setReason('');
                         setDescription('');
-                        setFileName(null);
-                
                       }}
-                      disabled={isSubmitting}
+                      disabled={createMutation.isPending}
                     >
                       إلغاء
                     </SovereignButton>
@@ -275,10 +219,14 @@ export default function ReturnsPage() {
         </AnimatePresence>
 
         {/* Returns List */}
-        {returns.length > 0 && (
+        {isLoadingReturns ? (
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="w-8 h-8 text-sovereign-gold animate-spin" />
+          </div>
+        ) : returns.length > 0 ? (
           <div className="space-y-4 mb-8">
             <h2 className="text-lg font-bold text-white/60 mb-4">الطلبات المرسلة ({returns.length})</h2>
-            {returns.map((ret, index) => (
+            {returns.map((ret: Record<string, unknown>, index: number) => (
               <motion.div
                 key={ret.id}
                 initial={{ opacity: 0, y: 20 }}
@@ -286,37 +234,49 @@ export default function ReturnsPage() {
                 transition={{ delay: index * 0.1, duration: 0.4 }}
               >
                 <GlassPanel className="!p-0 overflow-hidden">
-                  {/* Return Header */}
                   <button
-                    onClick={() => toggleReturnExpand(ret.id)}
+                    onClick={() => toggleReturnExpand(String(ret.id))}
                     className="w-full p-5 flex items-center gap-4 hover:bg-white/[0.02] transition-colors text-right"
                   >
-                    <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center flex-shrink-0">
-                      <Eye className="w-5 h-5 text-amber-400" />
+                    <div className={cn(
+                      'w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 border',
+                      STATUS_STYLES[ret.status as string] || STATUS_STYLES.pending
+                    )}>
+                      {ret.status === 'approved' || ret.status === 'completed' ? (
+                        <CheckCircle2 className="w-5 h-5" />
+                      ) : ret.status === 'rejected' ? (
+                        <XCircle className="w-5 h-5" />
+                      ) : (
+                        <Clock className="w-5 h-5" />
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-3 flex-wrap">
-                        <span className="font-bold text-sm text-white/90">{ret.id}</span>
-                        <span className="text-xs text-white/40">—</span>
-                        <span className="text-xs text-white/60">حجز: {ret.bookingRef}</span>
+                        <span className="font-bold text-sm text-white/90">
+                          {ret.booking_ref || ret.booking_id || ret.id}
+                        </span>
                       </div>
                       <div className="flex items-center gap-3 mt-1">
-                        <span className="text-xs text-muted-foreground">{ret.date}</span>
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                          {ret.status}
+                        <span className="text-xs text-muted-foreground">
+                          {ret.created_at ? new Date(ret.created_at as string).toLocaleDateString('ar-DZ', { year: 'numeric', month: 'long', day: 'numeric' }) : ''}
+                        </span>
+                        <span className={cn(
+                          'text-xs px-2 py-0.5 rounded-full border',
+                          STATUS_STYLES[ret.status as string] || STATUS_STYLES.pending
+                        )}>
+                          {STATUS_LABELS[ret.status as string] || ret.status}
                         </span>
                       </div>
                     </div>
-                    {expandedReturn === ret.id ? (
+                    {expandedReturn === String(ret.id) ? (
                       <ChevronUp className="w-5 h-5 text-white/40 flex-shrink-0" />
                     ) : (
                       <ChevronDown className="w-5 h-5 text-white/40 flex-shrink-0" />
                     )}
                   </button>
 
-                  {/* Return Details */}
                   <AnimatePresence>
-                    {expandedReturn === ret.id && (
+                    {expandedReturn === String(ret.id) && (
                       <motion.div
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
@@ -328,26 +288,22 @@ export default function ReturnsPage() {
                           <div className="grid grid-cols-2 gap-4">
                             <div>
                               <p className="text-xs text-white/40 mb-1">السبب</p>
-                              <p className="text-sm font-bold text-white/80">{ret.reason}</p>
+                              <p className="text-sm font-bold text-white/80">{ret.reason || '—'}</p>
                             </div>
                             <div>
                               <p className="text-xs text-white/40 mb-1">الحالة</p>
                               <div className="flex items-center gap-2">
                                 <Clock className="w-4 h-4 text-amber-400" />
-                                <p className="text-sm font-bold text-amber-400">{ret.status}</p>
+                                <p className="text-sm font-bold">
+                                  {STATUS_LABELS[ret.status as string] || ret.status}
+                                </p>
                               </div>
                             </div>
                           </div>
                           {ret.description && (
                             <div>
                               <p className="text-xs text-white/40 mb-1">الوصف</p>
-                              <p className="text-sm text-white/70 leading-relaxed">{ret.description}</p>
-                            </div>
-                          )}
-                          {ret.fileName && (
-                            <div>
-                              <p className="text-xs text-white/40 mb-1">الملف المرفق</p>
-                              <p className="text-sm text-sovereign-gold">📎 {ret.fileName}</p>
+                              <p className="text-sm text-white/70 leading-relaxed">{ret.description as string}</p>
                             </div>
                           )}
                         </div>
@@ -358,10 +314,7 @@ export default function ReturnsPage() {
               </motion.div>
             ))}
           </div>
-        )}
-
-        {/* Empty state - shown only when no returns and form is hidden */}
-        {returns.length === 0 && !showForm && (
+        ) : (
           <motion.div
             initial={{ opacity: 0, y: 30, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -376,7 +329,6 @@ export default function ReturnsPage() {
               >
                 <Package className="w-12 h-12 text-sovereign-gold/80" />
               </motion.div>
-
               <h2 className="text-2xl md:text-3xl font-bold mb-3">
                 لا توجد طلبات إرجاع حالياً
               </h2>

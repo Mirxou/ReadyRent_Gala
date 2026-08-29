@@ -60,7 +60,7 @@ export const trackSearch = (searchTerm: string) => {
 };
 
 // Judicial & Dispute Tracking
-export const trackAppealFiled = (disputeId: number, reason: string) => {
+export const trackAppealFiled = (disputeId: string | number, reason: string) => {
     event({
         action: 'appeal_filed',
         category: 'judicial',

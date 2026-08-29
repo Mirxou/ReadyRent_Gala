@@ -12,7 +12,16 @@ export async function GET(request: Request) {
   if (!session) return authRequiredResponse();
 
   const disputes = await db.dispute.findMany({
-    where: { userId: session.userId },
+    where: {
+      OR: [
+        { userId: session.userId },
+        {
+          booking: {
+            product: { vendorId: session.userId },
+          },
+        },
+      ],
+    },
     include: {
       booking: {
         select: {

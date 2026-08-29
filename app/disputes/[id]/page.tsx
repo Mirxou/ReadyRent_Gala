@@ -231,7 +231,7 @@ export default function DisputeDetailPage() {
       </div>
       
       {/* AI Assistant - Floating */}
-      <AIDisputeAssistant disputeId={Number(id)} />
+      <AIDisputeAssistant disputeId={id || ''} />
     </div>
   );
 }
