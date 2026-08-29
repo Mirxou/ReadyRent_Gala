@@ -34,6 +34,7 @@ function errorResponse(
 }
 
 function transformProduct(product: Record<string, unknown>) {
+  const vendor = product.vendor as Record<string, unknown> | null;
   return {
     id: product.id,
     name: product.name,
@@ -48,7 +49,9 @@ function transformProduct(product: Record<string, unknown>) {
     is_available: product.isAvailable,
     rating: product.rating,
     is_verified: product.isVerified,
-    trust_score: product.trustScore,
+    vendor_trust_score: (vendor as Record<string, unknown>)?.trustScore ?? 0,
+    vendor_verified: (vendor as Record<string, unknown>)?.isVerified ?? false,
+    vendor_id: product.vendorId ?? null,
     is_premium: product.isPremium,
     listing_type: product.listingType,
     deposit_amount: product.depositAmount,
@@ -138,6 +141,9 @@ export async function GET(request: NextRequest) {
         include: {
           category: {
             select: { id: true, nameAr: true, nameEn: true, slug: true, icon: true },
+          },
+          vendor: {
+            select: { id: true, trustScore: true, isVerified: true },
           },
         },
         orderBy,

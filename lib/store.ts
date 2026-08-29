@@ -68,6 +68,7 @@ export const useAuthStore = create<AuthState>()(
           username: state.user.username,
           role: state.user.role,
           is_verified: state.user.is_verified,
+          trust_score: state.user.trust_score,
         } : null,
         isAuthenticated: state.isAuthenticated,
       }),

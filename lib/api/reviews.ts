@@ -1,4 +1,5 @@
 import { sovereignClient } from './sovereign-client';
+import type { TrustTier } from '@/lib/trust-score';
 
 export interface Review {
   id: string;
@@ -13,16 +14,18 @@ export interface Review {
 }
 
 export interface TrustScore {
-  overall_score: number; // 0-100
+  overall_score: number;
+  is_verified: boolean;
+  vouch_count: number;
+  review_count: number;
+  avg_rating: number;
   components: {
-    payment_reliability: number;
-    dispute_history: number;
-    contract_compliance: number;
-    review_sentiment: number;
-    identity_verification: number;
+    verification: number;
+    rating: number;
+    vouches: number;
   };
-  tier: 'bronze' | 'silver' | 'gold' | 'platinum' | 'sovereign';
-  last_calculated: string;
+  tier: TrustTier;
+  tier_label: string;
 }
 
 export const reviewsApi = {
@@ -61,10 +64,9 @@ export const reviewsApi = {
     comment: string;
   }) => sovereignClient.post<Review>('/reviews/create/', data),
 
-  // TODO: route not yet implemented — /social/score/me or /reviews/trust-score/my
   /** Get the trust score for the current user */
   getMyTrustScore: () =>
-    sovereignClient.get<TrustScore>('/reviews/trust-score/my/'),
+    sovereignClient.get<TrustScore>('/social/score/me/'),
 
   /** Get the trust score for a specific user (public) */
   getUserTrustScore: (userId: string) =>

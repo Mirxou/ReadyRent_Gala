@@ -93,9 +93,9 @@ export function IdentityShield({
                 </span>
             )}
 
-            {/* Trust Score Mini-Badge (Only if verified) */}
-            {status === 'verified' && trustScore > 0 && (
-                <div className="ml-3 pl-3 border-l border-sovereign-gold/30 text-xs font-black text-sovereign-gold font-mono tracking-tighter">
+            {/* Trust Score Mini-Badge (show for ALL users with score > 0) */}
+            {trustScore > 0 && (
+                <div className="ml-3 pl-3 border-l border-current/30 text-xs font-black font-mono tracking-tighter">
                     {trustScore}
                 </div>
             )}

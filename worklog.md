@@ -1789,3 +1789,168 @@ Stage Summary:
 - 15/15 ثغرة أمنية مُعالَجة (11 كانت مُصلحة مسبقًا + 4 إصلحت الآن)
 - lint: 0 errors, 1 warning (React Hook Form watch — معروف غير قابل للإصلاح)
 - Files changed: auth-server.ts, verification/submit/route.ts, upload.ts, rate-limiter.ts, reset-password/route.ts, forgot-password/route.ts, contact/route.ts, next.config.ts
+
+---
+Task ID: 2.2-fix
+Agent: Trust Score Fix Agent
+Date: 2025-01-01
+Title: Fix ProductCard trust score, IdentityShield, and forbidden color
+
+## Problem
+`components/product/product-card.tsx` had three issues:
+1. `isElite` used `product.trust_score` (always 0) instead of `product.vendor_trust_score`
+2. `IdentityShield` had hardcoded `status="verified"` and fallback `trustScore=85`
+3. `SovereignGlow color` used forbidden `'blue'`
+4. Rating fallback was `product.rating || 5` instead of `|| 0`
+
+## Changes Made
+- Line 21: Changed `product.trust_score` → `product.vendor_trust_score` in `isElite`
+- Added `vendorVerified` derived from `product.vendor_verified || product.is_verified`
+- Added `vendorTrustScore` derived from `Number(product.vendor_trust_score || 0)`
+- Line 26: Changed `SovereignGlow color` from `isElite ? 'gold' : 'blue'` → `'gold'` (neutral not valid in SovereignGlow)
+- Line 63: Changed `IdentityShield status` from `"verified"` → `vendorVerified ? 'verified' : 'unverified'`
+- Line 63: Changed `trustScore` from `product.trust_score || 85` → `vendorTrustScore`
+- Line 84: Changed rating fallback from `|| 5` → `|| 0`
+
+## Verification
+- Lint: No new errors/warnings introduced (pre-existing errors in unrelated files)
+- SovereignGlow valid colors checked: `gold | blue | obsidian | emerald | purple` — no `neutral`, so used `gold` per instructions
+
+Stage Summary:
+- All 4 issues fixed in product-card.tsx
+- No new lint errors
+- File changed: components/product/product-card.tsx
+---
+Task ID: step-2.2-trust-score-fix
+Agent: Field Review Fix Agent
+
+Task: Fix product API routes to return vendor trust score instead of product trust score (always 0)
+
+Work Log:
+
+- **app/api/products/route.ts** (Product List API)
+  - Added `vendor: { select: { id: true, trustScore: true, isVerified: true } }` to the Prisma `findMany` include
+  - In `transformProduct`, extracted vendor relation and replaced `trust_score: product.trustScore` (always 0) with:
+    - `vendor_trust_score: vendor?.trustScore ?? 0` — the Vendor model's real trust score
+    - `vendor_verified: vendor?.isVerified ?? false` — the Vendor model's verification status
+
+- **app/api/products/[id]/route.ts** (Product Detail API)
+  - Vendor was already included in `productIncludes` with `trustScore` and `isVerified` selected
+  - Replaced `trust_score: product.trustScore` (always 0) with:
+    - `vendor_trust_score: product.vendor?.trustScore ?? 0`
+    - `vendor_verified: product.vendor?.isVerified ?? false`
+
+Lint: No new errors introduced (pre-existing 2 errors in social/score route unrelated).
+
+---
+Task ID: Step 2.2 Field Review Fix
+Agent: Main Agent
+
+Task: Fix Trust Score field review issues per Step 2.2 spec
+
+Changes:
+
+1. **app/api/social/vouch/[userId]/route.ts**
+   - Added sender `isVerified` check after session validation (returns 403 if not verified)
+   - Added max 20 received vouches cap check before creating vouch (returns 400 "MAX_VOUCHES_REACHED")
+   - Removed `trustScore: { increment: 5 }` from transaction — trust score is now calculated on demand by `lib/trust-score.ts`, not incremented piecemeal
+   - Simplified from `$transaction` with two writes to a single `socialVouch.create()` call
+   - Removed `trust_score_increment` from response (no longer applicable)
+
+2. **app/api/verification/vote/route.ts**
+   - Removed `trustScore: { increment: 15 }` from the user update on verification approval — trust score is calculated on demand, not incremented
+   - Updated notification message from "+15 نقطة" to "+30 نقطة" to match MVP spec (isVerified = +30 points)
+
+Lint: No new errors introduced (pre-existing 2 errors in social/score route unrelated).
+---
+Task ID: 2e
+Agent: Field Review Fix Agent (Step 2.2 Trust Score)
+
+Task: Fix trust score UI to use 3-color MVP spec, remove indigo/blue, fix data fetching
+
+## File 1: shared/components/sovereign/trust-assurance-chips.tsx
+- Was: only showed 1 badge for trustScore >= 80, score number chip always visible
+- Now: imports `getTrustLevel` from `@/lib/trust-score`
+- Shows trust level badge for ALL scores:
+  - 0-20: red badge "مستوى ثقة منخفض"
+  - 21-40: amber badge "مبتدئ"
+  - 41-60: emerald badge "موثوق"
+  - 61+: emerald badge with Award icon "مستوى ثقة عالي"
+- Score number chip always visible (unchanged)
+
+## File 2: shared/components/sovereign/identity-shield.tsx
+- Was: trust score mini-badge only showed for `status === 'verified'` (line 97)
+- Now: removed the `status === 'verified'` condition — trust score appears for ALL users when > 0
+- Border color uses `border-current/30` instead of hardcoded `border-sovereign-gold/30` so it adapts to any status
+- Text color inherits from parent via no explicit color class (was `text-sovereign-gold`)
+
+## File 3: app/trust-score/page.tsx (full rewrite)
+- Removed old 5-tier system (bronze/silver/gold/platinum/sovereign) with indigo/blue gradients
+- New 5-level 3-color system: untrusted(red) / beginner(amber) / trusted(emerald) / highly_trusted(emerald) / fully_trusted(emerald)
+- Updated TrustScoreApiResponse interface to match new API: `overall_score`, `components.verification/rating/vouches`, `tier`, `tier_label`
+- API fetch now uses `/api/social/score/me/` (correct route for current user)
+- Removed stale `user?.trust_score` from store — only uses API data
+- Component bars now show `value/max` format (e.g. 25/30) since components have different max values
+- Component breakdown uses 3 components (verification, rating, vouches) with correct max values (30, 25, 15)
+- Score ring gradient uses emerald/amber/red based on score thresholds
+- Updated tips to match MVP spec (KYC +30, ratings, vouches)
+- NO indigo, NO blue/purple colors anywhere
+
+## File 4: components/trust/TrustScoreDashboard.tsx (full rewrite)
+- Updated TIER_CONFIG to use red/amber/emerald (no indigo/blue/purple)
+- Updated COMPONENT_META keys to: verification, rating, vouches (with correct max values)
+- ScoreRing gradient now uses dynamic colors: red (0-20), amber (21-40), emerald (41+) — no indigo #6366f1
+- Uses `getTrustLevel` from `@/lib/trust-score` for ring text color
+- TrustScore interface already correct in `lib/api/reviews.ts` (matched new API format)
+- Component bars show `value/max` and use percentage-based coloring
+- Loader spinner changed from `text-blue-500` to `text-emerald-500`
+- Removed unused imports (CreditCard, etc.)
+
+## Verification
+- Lint: 0 new errors (2 pre-existing errors in `[userId]/route.ts` unrelated to this task)
+- Files modified: 4 (trust-assurance-chips.tsx, identity-shield.tsx, trust-score/page.tsx, TrustScoreDashboard.tsx)
+- No indigo/blue/purple colors in any modified file
+- All files use `getTrustLevel` or TrustTier from `@/lib/trust-score` for tier logic
+---
+Task ID: 2f
+Agent: Field Review Fix Agent (Step 2.2 Trust Score)
+
+Task: Fix app/vendors/[id]/page.tsx — 6 trust score & ID type issues
+
+## File 1: app/api/products/route.ts
+- Added `vendor_id: product.vendorId ?? null` to transformProduct output (line 54)
+- This field was missing, causing vendor page product filtering to fail entirely
+
+## File 2: app/vendors/[id]/page.tsx
+
+### Fix 1: ID types (lines 28, 47, 79)
+- Vendor interface `id: number` → `id: string` (cuid, not number)
+- Product interface `id: number` → `id: string` (cuid, not number)
+- `const vendorId = Number(params.id)` → `const vendorId = params.id as string`
+
+### Fix 2: Product filtering (line 113-114)
+- `(p: Product & { owner_id?: number }) => p.owner_id === vendorId` → `(p: Product) => p.vendor_id === vendorId`
+- `owner_id` does not exist; correct field is `vendor_id` (string, matches Vendor.id)
+
+### Fix 3: Product interface (lines 57-59)
+- Removed unused `trust_score?: number`
+- Added `vendor_trust_score?: number`, `vendor_verified?: boolean`, `vendor_id?: string | null` to match API output
+
+### Fix 4: Trust score in header (lines 243-247, 262-268)
+- Replaced `ثقة {vendor.trust_score}%` with colored label using `getTrustLevel()` from `@/lib/trust-score`
+- Shows trust level label (e.g. "موثوق", "مبتدئ", "غير موثوق") with red/amber/emerald color
+- Added `TrustAssuranceChips` component in vendor name area showing verification + trust level + point count
+
+### Fix 5: Trust score in stats grid (lines 343-351)
+- Changed `trust_score ? vendor.trust_score + '%' : '—'` → `trust_score ? vendor.trust_score : '—'` (points not %)
+- Shield icon and score number now colored with `getTrustLevel().color` (red/amber/emerald)
+- Label changed from `نقطة الثقة` to `نقاط الثقة` (plural)
+
+### New imports added:
+- `import { getTrustLevel } from '@/lib/trust-score'`
+- `import { TrustAssuranceChips } from '@/shared/components/sovereign/trust-assurance-chips'`
+
+## Verification
+- Lint: 0 new errors (2 pre-existing errors in `[userId]/route.ts` unrelated)
+- No indigo/blue/purple colors used
+- All trust score display uses getTrustLevel 3-color system (red/amber/emerald)

@@ -5,92 +5,86 @@ import { reviewsApi, type TrustScore } from '@/lib/api/reviews';
 import { motion } from 'framer-motion';
 import {
   Shield,
-  CreditCard,
-  Scale,
-  FileCheck,
   Star,
-  IdCard,
+  Users,
+  CheckCircle2,
   Loader2,
   TrendingUp,
-  Award,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { getTrustLevel, type TrustTier } from '@/lib/trust-score';
 
-// ── Tier config ───────────────────────────────────────────────────────────────
-const TIER_CONFIG: Record<
-  TrustScore['tier'],
-  { label: string; gradient: string; ring: string; icon: string }
-> = {
-  bronze: {
-    label: 'برونزي',
-    gradient: 'from-amber-700 to-amber-500',
+// ── Tier config — 3-color system (no indigo/blue) ─────────────────────────
+const TIER_CONFIG: Record<TrustTier, { label: string; gradient: string; ring: string; icon: string }> = {
+  untrusted: {
+    label: 'غير موثوق',
+    gradient: 'from-red-600 to-red-400',
+    ring: 'ring-red-400',
+    icon: '🔴',
+  },
+  beginner: {
+    label: 'مبتدئ',
+    gradient: 'from-amber-600 to-amber-400',
     ring: 'ring-amber-400',
-    icon: '🥉',
+    icon: '🟡',
   },
-  silver: {
-    label: 'فضي',
-    gradient: 'from-slate-500 to-slate-300',
-    ring: 'ring-slate-300',
-    icon: '🥈',
+  trusted: {
+    label: 'موثوق',
+    gradient: 'from-emerald-600 to-emerald-400',
+    ring: 'ring-emerald-400',
+    icon: '🟢',
   },
-  gold: {
-    label: 'ذهبي',
-    gradient: 'from-yellow-500 to-amber-400',
-    ring: 'ring-yellow-400',
-    icon: '🥇',
+  highly_trusted: {
+    label: 'موثوق بدرجة عالية',
+    gradient: 'from-emerald-600 to-emerald-400',
+    ring: 'ring-emerald-400',
+    icon: '✨',
   },
-  platinum: {
-    label: 'بلاتيني',
-    gradient: 'from-indigo-500 to-purple-400',
-    ring: 'ring-indigo-400',
-    icon: '💎',
-  },
-  sovereign: {
-    label: 'سيادي',
-    gradient: 'from-blue-600 to-cyan-400',
-    ring: 'ring-blue-400',
-    icon: '👑',
+  fully_trusted: {
+    label: 'موثوق تمامًا',
+    gradient: 'from-emerald-600 to-emerald-400',
+    ring: 'ring-emerald-400',
+    icon: '🏆',
   },
 };
 
-// ── Component map for score breakdown ─────────────────────────────────────────
+// ── Component map for score breakdown (verification, rating, vouches) ────────
 const COMPONENT_META: Record<
   keyof TrustScore['components'],
-  { label: string; icon: React.ElementType; description: string }
+  { label: string; icon: React.ElementType; description: string; max: number }
 > = {
-  payment_reliability: {
-    label: 'موثوقية الدفع',
-    icon: CreditCard,
-    description: 'الالتزام بالمدفوعات وعدم التخلف',
+  verification: {
+    label: 'التوثيق (KYC)',
+    icon: CheckCircle2,
+    description: 'التحقق من الهوية — 30 نقطة عند التحقق الكامل',
+    max: 30,
   },
-  dispute_history: {
-    label: 'سجل النزاعات',
-    icon: Scale,
-    description: 'نسبة النزاعات التي حُسمت لصالحك',
-  },
-  contract_compliance: {
-    label: 'التزام العقود',
-    icon: FileCheck,
-    description: 'مدى الالتزام بشروط عقود الإيجار',
-  },
-  review_sentiment: {
+  rating: {
     label: 'تقييمات المجتمع',
     icon: Star,
-    description: 'متوسط تقييمات المستخدمين الآخرين',
+    description: 'متوسط التقييمات — حتى 25 نقطة عند 5 نجوم',
+    max: 25,
   },
-  identity_verification: {
-    label: 'توثيق الهوية',
-    icon: IdCard,
-    description: 'اكتمال بيانات KYC والتحقق من الهوية',
+  vouches: {
+    label: 'تزكيات المجتمع',
+    icon: Users,
+    description: 'التزكيات المُستلمة — حتى 15 نقطة (5 تزكيات)',
+    max: 15,
   },
 };
 
 // ── Score ring ────────────────────────────────────────────────────────────────
-function ScoreRing({ score, tier }: { score: number; tier: TrustScore['tier'] }) {
-  const config = TIER_CONFIG[tier];
+function ScoreRing({ score }: { score: number; _tier: TrustTier }) {
+  const level = getTrustLevel(score);
   const radius = 54;
   const circumference = 2 * Math.PI * radius;
   const dashOffset = circumference * (1 - score / 100);
+
+  // Gradient color based on tier — no indigo/blue
+  const gradientFrom =
+    score >= 41 ? '#059669' : score >= 21 ? '#d97706' : '#dc2626';
+  const gradientTo =
+    score >= 41 ? '#34d399' : score >= 21 ? '#fbbf24' : '#f87171';
 
   return (
     <div className="relative flex items-center justify-center w-40 h-40 mx-auto">
@@ -116,13 +110,13 @@ function ScoreRing({ score, tier }: { score: number; tier: TrustScore['tier'] })
         />
         <defs>
           <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#6366f1" />
-            <stop offset="100%" stopColor="#22d3ee" />
+            <stop offset="0%" stopColor={gradientFrom} />
+            <stop offset="100%" stopColor={gradientTo} />
           </linearGradient>
         </defs>
       </svg>
       <div className="text-center z-10">
-        <span className={cn('text-4xl font-black bg-gradient-to-br bg-clip-text text-transparent', config.gradient)}>
+        <span className={cn('text-4xl font-black', level.color)}>
           {score}
         </span>
         <p className="text-xs text-slate-400 mt-0.5">/100</p>
@@ -141,8 +135,9 @@ function ComponentBar({
 }) {
   const meta = COMPONENT_META[componentKey];
   const Icon = meta.icon;
+  const percentage = meta.max > 0 ? (value / meta.max) * 100 : 0;
   const color =
-    value >= 80 ? 'bg-emerald-500' : value >= 50 ? 'bg-amber-400' : 'bg-red-400';
+    percentage >= 80 ? 'bg-emerald-500' : percentage >= 50 ? 'bg-amber-400' : 'bg-red-400';
 
   return (
     <div className="space-y-1.5" role="listitem">
@@ -154,11 +149,11 @@ function ComponentBar({
         <span
           className={cn(
             'font-bold tabular-nums',
-            value >= 80 ? 'text-emerald-600' : value >= 50 ? 'text-amber-500' : 'text-red-500'
+            percentage >= 80 ? 'text-emerald-600' : percentage >= 50 ? 'text-amber-500' : 'text-red-500'
           )}
-          aria-label={`${value} من 100`}
+          aria-label={`${value} من ${meta.max}`}
         >
-          {value}
+          {value}<span className="text-xs text-slate-400 font-normal">/{meta.max}</span>
         </span>
       </div>
       <div
@@ -166,13 +161,13 @@ function ComponentBar({
         role="progressbar"
         aria-valuenow={value}
         aria-valuemin={0}
-        aria-valuemax={100}
+        aria-valuemax={meta.max}
         aria-label={meta.label}
       >
         <motion.div
           className={cn('h-full rounded-full', color)}
           initial={{ width: 0 }}
-          animate={{ width: `${value}%` }}
+          animate={{ width: `${percentage}%` }}
           transition={{ duration: 1, ease: 'easeOut', delay: 0.2 }}
         />
       </div>
@@ -186,7 +181,7 @@ export function TrustScoreDashboard() {
   const { data, isLoading, isError } = useQuery({
     queryKey: ['my-trust-score'],
     queryFn: () => reviewsApi.getMyTrustScore(),
-    staleTime: 10 * 60 * 1000, // 10 min cache
+    staleTime: 10 * 60 * 1000,
   });
 
   const score = data?.data;
@@ -194,7 +189,7 @@ export function TrustScoreDashboard() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[300px]">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
       </div>
     );
   }
@@ -228,21 +223,21 @@ export function TrustScoreDashboard() {
           {/* Tier badge */}
           <div className={cn('inline-flex items-center gap-2 bg-white/20 px-4 py-1.5 rounded-full text-sm font-bold')}>
             <span aria-hidden="true">{tierConfig.icon}</span>
-            المستوى {tierConfig.label}
+            {score.tier_label}
           </div>
 
-          <ScoreRing score={score.overall_score} tier={score.tier} />
+          <ScoreRing score={score.overall_score} _tier={score.tier} />
 
           <div className="text-center">
             <h2 className="text-xl font-bold">نقاط الثقة الخاصة بك</h2>
             <p className="text-white/70 text-sm mt-1">
-              آخر تحديث: {new Date(score.last_calculated).toLocaleDateString('ar-DZ')}
+              آخر تحديث: اليوم
             </p>
           </div>
         </div>
       </motion.div>
 
-      {/* Tier ladder */}
+      {/* Tier ladder — 3-color system */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -250,11 +245,11 @@ export function TrustScoreDashboard() {
         className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-6"
       >
         <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4 flex items-center gap-2">
-          <Award className="w-4 h-4" aria-hidden="true" />
+          <TrendingUp className="w-4 h-4" aria-hidden="true" />
           المستويات
         </h3>
         <div className="flex items-center gap-2 overflow-x-auto pb-1">
-          {(Object.keys(TIER_CONFIG) as TrustScore['tier'][]).map((t) => (
+          {(Object.keys(TIER_CONFIG) as TrustTier[]).map((t) => (
             <div
               key={t}
               className={cn(

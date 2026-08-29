@@ -5,14 +5,10 @@ import { useQuery } from '@tanstack/react-query';
 import {
   Shield,
   Star,
-  CreditCard,
-  Scale,
-  FileCheck,
-  IdCard,
-  TrendingUp,
-  Award,
-  Crown,
   CheckCircle2,
+  Users,
+  TrendingUp,
+  Crown,
   ArrowLeft,
 } from 'lucide-react';
 import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
@@ -20,71 +16,54 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
 import { useAuthStore } from '@/lib/store';
+import { type TrustTier } from '@/lib/trust-score';
 
 /* ────────────────────────────────────────────
-   Types
+   Types — matches new API response format
    ──────────────────────────────────────────── */
-interface TrustScoreData {
-  user_id: string;
-  trust_score: number;
+interface TrustScoreApiResponse {
+  overall_score: number;
   is_verified: boolean;
   vouch_count: number;
-  breakdown: {
-    payment_reliability: number;
-    dispute_history: number;
-    verification_level: number;
-    community_vouches: number;
-    rental_history: number;
+  review_count: number;
+  avg_rating: number;
+  components: {
+    verification: number;
+    rating: number;
+    vouches: number;
   };
+  tier: TrustTier;
+  tier_label: string;
 }
 
 interface TrustComponent {
   key: string;
   label: string;
   value: number;
+  max: number;
   icon: React.ElementType;
   description: string;
 }
 
-interface TierInfo {
-  key: string;
-  label: string;
-  icon: string;
-  range: string;
-  gradient: string;
-}
-
 /* ────────────────────────────────────────────
-   Tier ladder (derived from score)
+   3-Color Tier System (MVP spec)
    ──────────────────────────────────────────── */
-const tiers: TierInfo[] = [
-  { key: 'bronze', label: 'برونزي', icon: '🥉', range: '0-39', gradient: 'from-amber-700 to-amber-500' },
-  { key: 'silver', label: 'فضي', icon: '🥈', range: '40-59', gradient: 'from-slate-500 to-slate-300' },
-  { key: 'gold', label: 'ذهبي', icon: '🥇', range: '60-79', gradient: 'from-yellow-500 to-amber-400' },
-  { key: 'platinum', label: 'بلاتيني', icon: '💎', range: '80-94', gradient: 'from-indigo-500 to-purple-400' },
-  { key: 'sovereign', label: 'سيادي', icon: '👑', range: '95-100', gradient: 'from-blue-600 to-cyan-400' },
+const TIERS: { key: TrustTier; label: string; icon: string; range: string; gradient: string }[] = [
+  { key: 'untrusted', label: 'غير موثوق', icon: '🔴', range: '0-20', gradient: 'from-red-600 to-red-400' },
+  { key: 'beginner', label: 'مبتدئ', icon: '🟡', range: '21-40', gradient: 'from-amber-600 to-amber-400' },
+  { key: 'trusted', label: 'موثوق', icon: '🟢', range: '41-60', gradient: 'from-emerald-600 to-emerald-400' },
+  { key: 'highly_trusted', label: 'موثوق بدرجة عالية', icon: '✨', range: '61-80', gradient: 'from-emerald-600 to-emerald-400' },
+  { key: 'fully_trusted', label: 'موثوق تمامًا', icon: '🏆', range: '81-100', gradient: 'from-emerald-600 to-emerald-400' },
 ];
 
-function getTierFromScore(score: number): TierInfo {
-  if (score >= 95) return tiers[4];
-  if (score >= 80) return tiers[3];
-  if (score >= 60) return tiers[2];
-  if (score >= 40) return tiers[1];
-  return tiers[0];
-}
-
 /* ────────────────────────────────────────────
-   Component breakdown template (labels/icons/descriptions)
-   Values are derived from API breakdown at runtime
+   Component breakdown (3 components: verification, rating, vouches)
    ──────────────────────────────────────────── */
-function buildComponents(breakdown?: TrustScoreData['breakdown'], totalScore?: number): TrustComponent[] {
-  const bd = breakdown;
+function buildComponents(components?: TrustScoreApiResponse['components']): TrustComponent[] {
   return [
-    { key: 'payment_reliability', label: 'موثوقية الدفع', value: bd?.payment_reliability ?? Math.round((totalScore ?? 0) * 0.95), icon: CreditCard, description: 'الالتزام بالمدفوعات وعدم التخلف' },
-    { key: 'dispute_history', label: 'سجل النزاعات', value: bd?.dispute_history ?? Math.round((totalScore ?? 0) * 0.75), icon: Scale, description: 'نسبة النزاعات التي حُسمت لصالحك' },
-    { key: 'rental_history', label: 'سجل الكراء', value: bd?.rental_history ?? Math.round((totalScore ?? 0) * 0.88), icon: FileCheck, description: 'مدى الالتزام بشروط عقود الإيجار' },
-    { key: 'community_vouches', label: 'تزكيات المجتمع', value: bd?.community_vouches ?? Math.round((totalScore ?? 0) * 0.82), icon: Star, description: 'عدد التزكيات التي حصلت عليها' },
-    { key: 'verification_level', label: 'مستوى التوثيق', value: bd?.verification_level ?? Math.round((totalScore ?? 0) * 0.70), icon: IdCard, description: 'اكتمال بيانات KYC والتحقق من الهوية' },
+    { key: 'verification', label: 'التوثيق (KYC)', value: components?.verification ?? 0, max: 30, icon: CheckCircle2, description: 'التحقق من الهوية — 30 نقطة عند التحقق الكامل' },
+    { key: 'rating', label: 'تقييمات المجتمع', value: components?.rating ?? 0, max: 25, icon: Star, description: 'متوسط التقييمات — حتى 25 نقطة عند 5 نجوم' },
+    { key: 'vouches', label: 'تزكيات المجتمع', value: components?.vouches ?? 0, max: 15, icon: Users, description: 'التزكيات المُستلمة — حتى 15 نقطة (5 تزكيات)' },
   ];
 }
 
@@ -109,7 +88,7 @@ const fadeUp: Variants = {
    ──────────────────────────────────────────── */
 function ScoreRingSkeleton() {
   return (
-    <div className="rounded-[2.5rem] p-8 md:p-12 text-white bg-gradient-to-br from-yellow-500 to-amber-400 shadow-xl relative overflow-hidden">
+    <div className="rounded-[2.5rem] p-8 md:p-12 text-white bg-gradient-to-br from-amber-600 to-amber-400 shadow-xl relative overflow-hidden">
       <div className="absolute inset-0 opacity-20 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white" />
       <div className="relative z-10 flex flex-col items-center gap-6">
         <Skeleton className="h-7 w-36 rounded-full bg-white/20" />
@@ -127,7 +106,7 @@ function ComponentsSkeleton() {
   return (
     <div className="rounded-[2rem] border border-white/5 bg-white/[0.02] p-6 md:p-8 space-y-6">
       <Skeleton className="h-4 w-32" />
-      {Array.from({ length: 5 }).map((_, i) => (
+      {Array.from({ length: 3 }).map((_, i) => (
         <div key={i} className="space-y-2">
           <div className="flex items-center justify-between">
             <Skeleton className="h-4 w-32" />
@@ -142,27 +121,34 @@ function ComponentsSkeleton() {
 }
 
 export default function TrustScorePage() {
-  const { user, isAuthenticated } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
 
-  // Use store trust_score as primary, API as supplementary
-  const storeScore = user?.trust_score;
-
-  // Fetch trust score from API (supplementary)
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ['trust-score', user?.id],
+  // Fetch trust score from API
+  const { data, isLoading, isError } = useQuery<TrustScoreApiResponse>({
+    queryKey: ['trust-score-me'],
     queryFn: () =>
-      fetch('/api/social/score/' + user!.id)
+      fetch('/api/social/score/me/')
         .then((r) => r.json())
         .then((d) => d.data),
-    enabled: !!user?.id && isAuthenticated,
+    enabled: isAuthenticated,
   });
 
-  // Primary: store score, fallback to API, fallback to 0
-  const overall = storeScore ?? data?.trust_score ?? 0;
-  const components = buildComponents(data?.breakdown, overall);
-  const tier = getTierFromScore(overall);
+  const overall = data?.overall_score ?? 0;
+  const components = buildComponents(data?.components);
+
+  // Determine score ring gradient based on trust level
+  const ringGradient =
+    overall >= 41
+      ? 'from-emerald-600 to-emerald-400'
+      : overall >= 21
+        ? 'from-amber-600 to-amber-400'
+        : 'from-red-600 to-red-400';
+
   const circumference = 2 * Math.PI * 72;
   const dashOffset = circumference * (1 - overall / 100);
+
+  // Find current tier info
+  const currentTier = TIERS.find((t) => t.key === data?.tier) ?? TIERS[0];
 
   return (
     <div className="min-h-screen bg-background text-foreground" dir="rtl">
@@ -234,15 +220,15 @@ export default function TrustScorePage() {
             <ScoreRingSkeleton />
           ) : (
             <div
-              className={`rounded-[2.5rem] p-8 md:p-12 text-white bg-gradient-to-br shadow-xl relative overflow-hidden ${tier.gradient}`}
+              className={`rounded-[2.5rem] p-8 md:p-12 text-white bg-gradient-to-br shadow-xl relative overflow-hidden ${ringGradient}`}
             >
               <div className="absolute inset-0 opacity-20 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white" />
 
               <div className="relative z-10 flex flex-col items-center gap-6">
                 {/* Tier badge */}
                 <div className="inline-flex items-center gap-2 bg-white/20 px-4 py-1.5 rounded-full text-sm font-bold">
-                  <span>{tier.icon}</span>
-                  المستوى {tier.label}
+                  <span>{currentTier.icon}</span>
+                  {data?.tier_label ?? currentTier.label}
                 </div>
 
                 {/* Score Ring */}
@@ -288,7 +274,7 @@ export default function TrustScorePage() {
           )}
         </motion.div>
 
-        {/* Tier Ladder */}
+        {/* Tier Ladder — 3-color system */}
         <motion.div
           initial="hidden"
           whileInView="visible"
@@ -302,15 +288,15 @@ export default function TrustScorePage() {
             variant="obsidian"
           >
             <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
-              <Award className="w-4 h-4" />
+              <Shield className="w-4 h-4" />
               المستويات
             </h3>
             <div className="flex items-center gap-2 overflow-x-auto pb-1">
-              {tiers.map((t) => (
+              {TIERS.map((t) => (
                 <div
                   key={t.key}
                   className={`flex-shrink-0 flex flex-col items-center gap-1 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                    t.key === tier.key
+                    t.key === data?.tier
                       ? `text-white bg-gradient-to-br shadow-md ${t.gradient}`
                       : 'bg-white/5 text-muted-foreground'
                   }`}
@@ -347,18 +333,19 @@ export default function TrustScorePage() {
               <div className="space-y-6">
                 {components.map((comp) => {
                   const Icon = comp.icon;
+                  const percentage = comp.max > 0 ? (comp.value / comp.max) * 100 : 0;
                   const color =
-                    comp.value >= 80
+                    percentage >= 80
                       ? 'bg-emerald-500'
-                      : comp.value >= 50
-                      ? 'bg-amber-400'
-                      : 'bg-red-400';
+                      : percentage >= 50
+                        ? 'bg-amber-400'
+                        : 'bg-red-400';
                   const textColor =
-                    comp.value >= 80
+                    percentage >= 80
                       ? 'text-emerald-500'
-                      : comp.value >= 50
-                      ? 'text-amber-400'
-                      : 'text-red-400';
+                      : percentage >= 50
+                        ? 'text-amber-400'
+                        : 'text-red-400';
 
                   return (
                     <div key={comp.key} className="space-y-2">
@@ -368,14 +355,14 @@ export default function TrustScorePage() {
                           <span className="font-medium">{comp.label}</span>
                         </div>
                         <span className={`font-bold tabular-nums ${textColor}`}>
-                          {comp.value}
+                          {comp.value}<span className="text-xs text-muted-foreground font-normal">/{comp.max}</span>
                         </span>
                       </div>
                       <div className="w-full h-2.5 rounded-full bg-white/5 overflow-hidden">
                         <motion.div
                           className={`h-full rounded-full ${color}`}
                           initial={{ width: 0 }}
-                          whileInView={{ width: `${comp.value}%` }}
+                          whileInView={{ width: `${percentage}%` }}
                           viewport={{ once: true }}
                           transition={{ duration: 1, ease: 'easeOut', delay: 0.2 }}
                         />
@@ -447,10 +434,10 @@ export default function TrustScorePage() {
             </h3>
             <div className="space-y-4">
               {[
-                'أكمل التحقق من الهوية للحصول على نقاط إضافية',
+                'أكمل التحقق من الهوية للحصول على +30 نقطة',
+                'حصل على تقييمات إيجابية من المستأجرين والبائعين',
+                'اطلب تزكيات من المستخدمين الموثوقين في المجتمع',
                 'التزم بمواعيد الإرجاع في كل حجوزاتك',
-                'احصل على تقييمات إيجابية من المستأجرين والبائعين',
-                'تجنب فتح نزاعات غير ضرورية',
                 'استخدم منصة الدفع الموثوقة لجميع المعاملات',
               ].map((tip, i) => (
                 <div key={i} className="flex items-start gap-3">

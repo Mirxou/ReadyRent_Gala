@@ -15,15 +15,17 @@ import {
   ChevronLeft,
 } from 'lucide-react';
 import { formatNumber } from '@/lib/utils';
+import { getTrustLevel } from '@/lib/trust-score';
 import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
 import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
 import { SovereignGlow } from '@/shared/components/sovereign/sovereign-sparkle';
 import { DignifiedLoader } from '@/shared/components/sovereign/dignified-loader';
+import { TrustAssuranceChips } from '@/shared/components/sovereign/trust-assurance-chips';
 import { Badge } from '@/components/ui/badge';
 import { ProductCard } from '@/components/product/product-card';
 
 interface Vendor {
-  id: number;
+  id: string;
   name: string;
   name_ar?: string;
   description?: string;
@@ -42,7 +44,7 @@ interface Vendor {
 }
 
 interface Product {
-  id: number;
+  id: string;
   name_ar: string;
   primary_image?: string;
   images?: { url: string; is_main: boolean }[];
@@ -52,7 +54,9 @@ interface Product {
   category?: { name_ar: string; slug: string };
   location?: string;
   is_premium?: boolean;
-  trust_score?: number;
+  vendor_trust_score?: number;
+  vendor_verified?: boolean;
+  vendor_id?: string | null;
   slug?: string;
 }
 
@@ -72,7 +76,7 @@ const staggerContainer = {
 
 export default function VendorProfilePage() {
   const params = useParams();
-  const vendorId = Number(params.id);
+  const vendorId = params.id as string;
 
   const [vendor, setVendor] = useState<Vendor | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
@@ -107,8 +111,7 @@ export default function VendorProfilePage() {
         setVendor(foundVendor);
 
         const vendorProducts = (productsData.data || []).filter(
-          (p: Product & { owner_id?: number }) =>
-            p.owner_id === vendorId
+          (p: Product) => p.vendor_id === vendorId
         );
         setProducts(vendorProducts);
       } catch {
@@ -237,6 +240,11 @@ export default function VendorProfilePage() {
                 </Badge>
               )}
             </div>
+            <TrustAssuranceChips
+              trustScore={vendor.trust_score ?? 0}
+              isVerified={vendor.is_verified ?? false}
+              className="mt-2"
+            />
 
             <div className="flex items-center justify-center sm:justify-start gap-4 text-sm text-white/60">
               {vendor.rating && (
@@ -251,10 +259,12 @@ export default function VendorProfilePage() {
                   <span>{vendor.location}</span>
                 </div>
               )}
-              {vendor.trust_score && (
+              {typeof vendor.trust_score === 'number' && vendor.trust_score > 0 && (
                 <div className="flex items-center gap-1.5">
-                  <Shield className="w-4 h-4 text-sovereign-gold" />
-                  <span>ثقة {vendor.trust_score}%</span>
+                  <Shield className={`w-4 h-4 ${getTrustLevel(vendor.trust_score).color}`} />
+                  <span className={`font-medium ${getTrustLevel(vendor.trust_score).color}`}>
+                    {getTrustLevel(vendor.trust_score).label}
+                  </span>
                 </div>
               )}
             </div>
@@ -331,12 +341,12 @@ export default function VendorProfilePage() {
               </GlassPanel>
 
               <GlassPanel variant="default" className="p-6 text-center">
-                <Shield className="w-6 h-6 text-sovereign-gold mx-auto mb-3" />
-                <p className="text-2xl sm:text-3xl font-black tracking-tighter text-white">
-                  {vendor.trust_score ? `${vendor.trust_score}%` : '—'}
+                <Shield className={`w-6 h-6 mx-auto mb-3 ${vendor.trust_score ? getTrustLevel(vendor.trust_score).color : 'text-white/30'}`} />
+                <p className={`text-2xl sm:text-3xl font-black tracking-tighter ${vendor.trust_score ? getTrustLevel(vendor.trust_score).color : 'text-white'}`}>
+                  {vendor.trust_score ? `${vendor.trust_score}` : '—'}
                 </p>
                 <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 mt-1">
-                  نقطة الثقة
+                  نقاط الثقة
                 </p>
               </GlassPanel>
 

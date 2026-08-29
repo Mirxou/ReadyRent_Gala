@@ -16,6 +16,23 @@ export async function POST(
     const session = await getSessionFromRequest(request);
     if (!session) return authRequiredResponse();
 
+    // Sender must be verified to vouch
+    const currentUser = await db.user.findUnique({
+      where: { id: session.userId },
+      select: { isVerified: true },
+    });
+    if (!currentUser || !currentUser.isVerified) {
+      return NextResponse.json(
+        {
+          success: false,
+          dignity_preserved: true,
+          message_ar: 'يجب أن تكون موثقاً للتصويت لصالح مستخدم آخر',
+          code: 'NOT_VERIFIED',
+        },
+        { status: 403 }
+      );
+    }
+
     const { userId: receiverId } = await params;
 
     if (!receiverId) {
@@ -61,6 +78,22 @@ export async function POST(
       );
     }
 
+    // Cap: max 20 received vouches
+    const existingVouchCount = await db.socialVouch.count({
+      where: { receiverId },
+    });
+    if (existingVouchCount >= 20) {
+      return NextResponse.json(
+        {
+          success: false,
+          dignity_preserved: true,
+          message_ar: 'وصل هذا المستخدم إلى الحد الأقصى من التوصيات',
+          code: 'MAX_VOUCHES_REACHED',
+        },
+        { status: 400 }
+      );
+    }
+
     // Check if already vouched (unique constraint will also catch this)
     const existingVouch = await db.socialVouch.findUnique({
       where: {
@@ -83,31 +116,21 @@ export async function POST(
       );
     }
 
-    // Create vouch and increment trust score in a transaction
-    await db.$transaction([
-      db.socialVouch.create({
-        data: {
-          senderId: session.userId,
-          receiverId: receiverId,
-        },
-      }),
-      db.user.update({
-        where: { id: receiverId },
-        data: { trustScore: { increment: 5 } },
-      }),
-    ]);
-
-    // Get new vouch count
-    const newVouchCount = await db.socialVouch.count({
-      where: { receiverId },
+    // Create vouch — trust score is calculated on demand by lib/trust-score.ts
+    await db.socialVouch.create({
+      data: {
+        senderId: session.userId,
+        receiverId: receiverId,
+      },
     });
+
+    const newVouchCount = existingVouchCount + 1;
 
     return NextResponse.json({
       success: true,
       dignity_preserved: true,
       data: {
         vouch_count: newVouchCount,
-        trust_score_increment: 5,
         message_ar: 'تم التصويت لصالح المستخدم بنجاح',
       },
     });

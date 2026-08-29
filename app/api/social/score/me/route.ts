@@ -1,31 +1,20 @@
 // ═══════════════════════════════════════════════════════════════
-// STANDARD.Rent — Public Trust Score API
-// GET /api/social/score/[userId]
+// STANDARD.Rent — My Trust Score API
+// GET /api/social/score/me
 // ═══════════════════════════════════════════════════════════════
 
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
 import { logger } from '@/lib/logger';
 import { calculateTrustBreakdown } from '@/lib/trust-score';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ userId: string }> }
-) {
+export async function GET(request: NextRequest) {
   try {
-    const { userId } = await params;
+    const session = await getSessionFromRequest(request);
+    if (!session) return authRequiredResponse();
 
-    if (!userId) {
-      return NextResponse.json(
-        {
-          success: false,
-          dignity_preserved: true,
-          message_ar: 'معرف المستخدم مطلوب',
-          code: 'VALIDATION_ERROR',
-        },
-        { status: 400 }
-      );
-    }
+    const userId = session.userId;
 
     // Fetch user basic info
     const user = await db.user.findUnique({
@@ -35,23 +24,15 @@ export async function GET(
 
     if (!user) {
       return NextResponse.json(
-        {
-          success: false,
-          dignity_preserved: true,
-          message_ar: 'المستخدم غير موجود',
-          code: 'USER_NOT_FOUND',
-        },
+        { success: false, dignity_preserved: true, message_ar: 'المستخدم غير موجود', code: 'USER_NOT_FOUND' },
         { status: 404 }
       );
     }
 
-    // Fetch data needed for trust calculation in parallel
+    // Fetch data for trust calculation in parallel
     const [vouchCount, userProducts] = await Promise.all([
       db.socialVouch.count({ where: { receiverId: userId } }),
-      db.product.findMany({
-        where: { vendorId: userId },
-        select: { id: true },
-      }),
+      db.product.findMany({ where: { vendorId: userId }, select: { id: true } }),
     ]);
 
     const productIds = userProducts.map(p => p.id);
@@ -69,7 +50,6 @@ export async function GET(
       reviewCount = reviewStats._count;
     }
 
-    // Calculate trust score using the MVP algorithm
     const breakdown = calculateTrustBreakdown({
       isVerified: user.isVerified,
       avgRating,
@@ -77,11 +57,18 @@ export async function GET(
       vouchCount,
     });
 
+    // Also update User.trustScore in DB for other consumers
+    await db.user.update({
+      where: { id: userId },
+      data: { trustScore: breakdown.overall },
+    }).catch(() => {
+      // Non-critical — don't fail the request
+    });
+
     return NextResponse.json({
       success: true,
       dignity_preserved: true,
       data: {
-        user_id: userId,
         overall_score: breakdown.overall,
         is_verified: user.isVerified,
         vouch_count: vouchCount,
@@ -94,18 +81,12 @@ export async function GET(
         },
         tier: breakdown.level.tier,
         tier_label: breakdown.level.label,
-        tier_color: breakdown.level.color,
       },
     });
   } catch (error) {
-    logger.error('Social Score', 'Error', error);
+    logger.error('Social Score Me', 'Error', error);
     return NextResponse.json(
-      {
-        success: false,
-        dignity_preserved: true,
-        message_ar: 'حدث خطأ أثناء جلب نقاط الثقة',
-        code: 'INTERNAL_ERROR',
-      },
+      { success: false, dignity_preserved: true, message_ar: 'حدث خطأ أثناء جلب نقاط الثقة', code: 'INTERNAL_ERROR' },
       { status: 500 }
     );
   }

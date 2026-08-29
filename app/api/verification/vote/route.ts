@@ -99,7 +99,7 @@ export async function POST(request: Request) {
         notificationData = {
           type: 'trust',
           title: 'تم توثيق هويتك بنجاح!',
-          message: `تهانينا! تم توثيق هويتك بعد حصولك على ${newApprovalCount} موافقات. رصيد الثقة +15 نقطة.`,
+          message: `تهانينا! تم توثيق هويتك بعد حصولك على ${newApprovalCount} موافقات. رصيد الثقة +30 نقطة.`,
         };
       } else if (newRejectionCount >= 3) {
         newStatus = 'rejected';
@@ -137,7 +137,7 @@ export async function POST(request: Request) {
       if (shouldVerifyUser) {
         await tx.user.update({
           where: { id: verification.userId },
-          data: { isVerified: true, trustScore: { increment: 15 } },
+          data: { isVerified: true },
         });
       }
 

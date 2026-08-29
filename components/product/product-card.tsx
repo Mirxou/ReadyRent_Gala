@@ -18,12 +18,14 @@ interface ProductCardProps {
 
 export function ProductCard({ product, priority = false }: ProductCardProps) {
   const PLACEHOLDER = '/placeholder-product.jpg';
-  const isElite = product.is_premium || (product.trust_score && product.trust_score > 90);
+  const isElite = product.is_premium || (product.vendor_trust_score && product.vendor_trust_score > 90);
+  const vendorVerified = product.vendor_verified || product.is_verified;
+  const vendorTrustScore = Number(product.vendor_trust_score || 0);
   const images = product.images as Array<{ image?: string; url?: string }> | undefined;
   const primaryImage = product.primary_image || images?.[0]?.image || images?.[0]?.url || product.image || PLACEHOLDER;
 
   return (
-    <SovereignGlow color={isElite ? 'gold' : 'blue'}>
+    <SovereignGlow color={'gold'}>
         <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -58,7 +60,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
                 </div>
 
                 <div className="absolute top-6 left-6 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <IdentityShield status="verified" showLabel={false} trustScore={product.trust_score || 85} className="w-12 h-12" />
+                    <IdentityShield status={vendorVerified ? 'verified' : 'unverified'} showLabel={false} trustScore={vendorTrustScore} className="w-12 h-12" />
                 </div>
 
                 <div className="absolute bottom-6 inset-x-6">
@@ -79,7 +81,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1 bg-muted rounded-full border border-border">
                         <Star className="w-3 h-3 fill-sovereign-gold text-sovereign-gold" />
-                        <span className="text-xs font-bold font-mono tracking-tighter">{Number(product.rating || 5).toFixed(1)}</span>
+                        <span className="text-xs font-bold font-mono tracking-tighter">{Number(product.rating || 0).toFixed(1)}</span>
                     </div>
                 </div>
 
