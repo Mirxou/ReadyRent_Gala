@@ -51,3 +51,21 @@ export async function GET(request: Request) {
     );
   }
 }
+
+// ═══════════════════════════════════════════════════════════════
+// DELETE /api/bookings/cart — Clear all cart items for the session user
+// ═══════════════════════════════════════════════════════════════
+export async function DELETE(request: Request) {
+  try {
+    const session = await getSessionFromRequest(request);
+    if (!session) return authRequiredResponse();
+    await db.cartItem.deleteMany({ where: { userId: session.userId } });
+    return NextResponse.json({ success: true, dignity_preserved: true, data: { cleared: true } });
+  } catch (error) {
+    logger.error('Cart API DELETE', 'Error', error);
+    return NextResponse.json(
+      { success: false, dignity_preserved: true, message: 'Failed to clear cart' },
+      { status: 500 }
+    );
+  }
+}

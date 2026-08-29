@@ -68,6 +68,11 @@ export class SovereignClient {
         console.warn('⚠️ Response might be missing dignity_preserved flag!', path);
       }
 
+      // Attach HTTP status to the returned data for callers that need it
+      if (data && typeof data === 'object') {
+        data.httpStatus = response.status;
+      }
+
       return data;
     } catch (error) {
       // Use warn instead of error to avoid Next.js treating this as a build failure

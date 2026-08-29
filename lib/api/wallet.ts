@@ -32,22 +32,22 @@ export const walletApi = {
     if (params?.page) searchParams.append('page', params.page.toString());
     if (params?.limit) searchParams.append('limit', params.limit.toString());
     if (params?.type) searchParams.append('type', params.type);
-    
+
     return sovereignClient.get<Transaction[]>(`/wallet/transactions/?${searchParams.toString()}`);
   },
 
   /**
-   * Initiate a wallet top-up (Simulated for Phase 3)
+   * Initiate a wallet deposit (actual route: /wallet/deposit/)
    */
-  topUp: (amount: number, methodId: string) => 
-    sovereignClient.post<{ success: boolean; transaction_id: string }>('/payments/wallet/top-up/', { 
-      amount, 
-      payment_method_id: methodId 
+  topUp: (amount: number, methodId: string) =>
+    sovereignClient.post<{ success: boolean; transaction_id: string }>('/wallet/deposit/', {
+      amount,
+      payment_method_id: methodId,
     }),
 
   /**
-   * Get specific transaction details
+   * Get wallet transactions (no single transaction route exists)
    */
-  getTransaction: (id: string) => 
-    sovereignClient.get<Transaction>(`/payments/wallet/transactions/${id}/`),
+  getTransaction: (id: string) =>
+    sovereignClient.get<Transaction>(`/wallet/transactions/?id=${id}`),
 };

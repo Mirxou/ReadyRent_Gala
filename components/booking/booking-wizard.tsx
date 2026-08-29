@@ -114,7 +114,7 @@ export function BookingWizard() {
   if (isSuccess) {
     return (
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="max-w-2xl p-8 bg-white rounded-[3rem] border-none shadow-2xl overflow-hidden">
+        <DialogContent className="max-w-2xl p-8 bg-background rounded-[3rem] border-none shadow-2xl overflow-hidden">
           <SuccessView bookingReference={bookingRef} />
         </DialogContent>
       </Dialog>
@@ -123,12 +123,12 @@ export function BookingWizard() {
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="max-w-4xl p-0 overflow-hidden bg-white rounded-[3rem] border-none shadow-2xl">
+      <DialogContent className="max-w-4xl p-0 overflow-hidden bg-background rounded-[3rem] border-none shadow-2xl">
         <div className="flex flex-col h-[85vh] md:h-[750px]">
           {/* Header & Progress */}
-          <div className="p-8 pb-4 bg-white z-20">
+          <div className="p-8 pb-4 bg-background z-20">
             <DialogHeader className="mb-8">
-              <DialogTitle className="text-3xl font-black tracking-tighter text-blue-900 flex items-center gap-2">
+              <DialogTitle className="text-3xl font-black tracking-tighter text-foreground flex items-center gap-2">
                 <Sparkles className="text-gold-500 h-6 w-6" />
                 حجز منتج فاخر
               </DialogTitle>
@@ -136,9 +136,9 @@ export function BookingWizard() {
 
             {/* Stepper Infrastructure */}
             <div className="flex items-center justify-between relative px-2">
-              <div className="absolute top-1/2 left-0 w-full h-1 bg-gray-100 -translate-y-1/2 z-0" />
+              <div className="absolute top-1/2 left-0 w-full h-1 bg-muted -translate-y-1/2 z-0" />
               <div 
-                className="absolute top-1/2 left-0 h-1 bg-blue-600 -translate-y-1/2 z-0 transition-all duration-500"
+                className="absolute top-1/2 left-0 h-1 bg-primary -translate-y-1/2 z-0 transition-all duration-500"
                 style={{ width: `${((step - 1) / (steps.length - 1)) * 100}%` }}
               />
               
@@ -146,14 +146,14 @@ export function BookingWizard() {
                 <div key={s.id} className="relative z-10 flex flex-col items-center gap-2">
                   <div className={cn(
                     "w-10 h-10 rounded-full flex items-center justify-center font-bold transition-all duration-300",
-                    step === s.id ? "bg-blue-600 text-white scale-110 shadow-lg shadow-blue-200" :
-                    step > s.id ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-400"
+                    step === s.id ? "bg-primary text-primary-foreground scale-110 shadow-lg" :
+                    step > s.id ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
                   )}>
                     {step > s.id ? <Check className="w-5 h-5" /> : s.id}
                   </div>
                   <span className={cn(
                     "text-[10px] font-black uppercase tracking-widest",
-                    step >= s.id ? "text-blue-600" : "text-gray-400"
+                    step >= s.id ? "text-primary" : "text-muted-foreground"
                   )}>
                     {s.title}
                   </span>
@@ -173,12 +173,12 @@ export function BookingWizard() {
                   exit={{ opacity: 0 }}
                   className="h-full flex flex-col items-center justify-center space-y-4"
                 >
-                  <Loader2 className="h-10 w-10 text-blue-100 animate-spin" />
+                  <Loader2 className="h-10 w-10 text-muted animate-spin" />
                   <div className="space-y-2 w-full max-w-sm">
-                    <div className="h-4 bg-slate-50 rounded-full w-3/4 mx-auto animate-pulse" />
-                    <div className="h-4 bg-slate-50/50 rounded-full w-1/2 mx-auto animate-pulse" />
+                    <div className="h-4 bg-muted rounded-full w-3/4 mx-auto animate-pulse" />
+                    <div className="h-4 bg-muted/50 rounded-full w-1/2 mx-auto animate-pulse" />
                   </div>
-                  <p className="text-[10px] text-slate-300 font-mono tracking-widest uppercase">
+                  <p className="text-[10px] text-muted-foreground font-mono tracking-widest uppercase">
                     Sovereign Protocol: Authenticating Step {step}...
                   </p>
                 </motion.div>
@@ -197,12 +197,12 @@ export function BookingWizard() {
           </div>
 
           {/* Footer Actions */}
-          <div className="p-8 bg-gray-50/80 backdrop-blur-md flex items-center justify-between border-t border-gray-100">
+          <div className="p-8 bg-muted/50 backdrop-blur-md flex items-center justify-between border-t border-border">
             <Button
               variant="ghost"
               onClick={prevStep}
               disabled={step === 1 || isSubmitting}
-              className="rounded-2xl px-6 h-14 font-bold text-gray-500 hover:bg-gray-200/50"
+              className="rounded-2xl px-6 h-14 font-bold text-muted-foreground hover:bg-muted/50"
             >
               <ChevronLeft className="w-5 h-5 mr-2" />
               السابق
@@ -212,7 +212,7 @@ export function BookingWizard() {
               <Button
                 variant="ghost"
                 onClick={() => setIsOpen(false)}
-                className="text-gray-400 font-medium"
+                className="text-muted-foreground font-medium"
               >
                 إلغاء
               </Button>
@@ -221,7 +221,7 @@ export function BookingWizard() {
                 disabled={isSubmitting || (step === 1 && !formData.startDate) || (step === 5 && !formData.signature)}
                 className={cn(
                   "rounded-2xl px-10 h-14 font-black shadow-xl transition-all active:scale-95",
-                  step === 5 ? "bg-success-600 hover:bg-success-700 text-white shadow-success-200" : "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-200"
+                  step === 5 ? "bg-success-600 hover:bg-success-700 text-white" : "bg-primary hover:bg-primary/90 text-primary-foreground"
                 )}
               >
                 {isSubmitting ? (

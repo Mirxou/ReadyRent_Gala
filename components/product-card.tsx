@@ -11,6 +11,7 @@ import { Star, ShoppingCart, Heart } from 'lucide-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { productsApi } from '@/lib/api';
 import { useAuthStore } from '@/lib/store';
+import { useBookingStore } from '@/lib/hooks/use-booking-store';
 import { toast } from 'sonner';
 
 interface ProductCardProps {
@@ -35,6 +36,7 @@ interface ProductCardProps {
 
 function ProductCardComponent({ product, priority = false }: ProductCardProps) {
   const { isAuthenticated } = useAuthStore();
+  const { setIsOpen: setBookingOpen, updateFormData } = useBookingStore();
   const queryClient = useQueryClient();
   const router = useRouter();
   
@@ -161,6 +163,12 @@ function ProductCardComponent({ product, priority = false }: ProductCardProps) {
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
+              if (!isAuthenticated) {
+                toast.error('يجب تسجيل الدخول لإضافة المنتج إلى السلة');
+                return;
+              }
+              updateFormData({ productId: String(product.id) });
+              setBookingOpen(true);
             }}
           >
             <ShoppingCart className="h-4 w-4" aria-hidden="true" />

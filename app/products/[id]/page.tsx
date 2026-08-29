@@ -49,7 +49,7 @@ export default function ProductDetailsPage() {
   const { user, isAuthenticated } = useAuthStore();
   const { setIsOpen: setBookingOpen, updateFormData } = useBookingStore();
   const [selectedStartDate, setSelectedStartDate] = useState<Date | null>(null);
-  const [selectedEndDate, _setSelectedEndDate] = useState<Date | null>(null);
+  const [selectedEndDate, setSelectedEndDate] = useState<Date | null>(null);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
@@ -367,10 +367,22 @@ export default function ProductDetailsPage() {
                    <p className="text-[10px] text-muted-foreground uppercase tracking-[0.2em] font-black opacity-40">حجز المواعيد</p>
                 </div>
 
+                <p className="text-sm font-black text-foreground mb-2">تاريخ البداية</p>
                 <SovereignCalendar
+                  selectedDate={selectedStartDate ? selectedStartDate.toISOString().split('T')[0] : undefined}
                   onDateSelect={(dateStr: string) => {
                     if (dateStr) {
                       setSelectedStartDate(new Date(dateStr));
+                    }
+                  }}
+                />
+
+                <p className="text-sm font-black text-foreground mb-2 mt-6">تاريخ النهاية</p>
+                <SovereignCalendar
+                  selectedDate={selectedEndDate ? selectedEndDate.toISOString().split('T')[0] : undefined}
+                  onDateSelect={(dateStr: string) => {
+                    if (dateStr) {
+                      setSelectedEndDate(new Date(dateStr));
                     }
                   }}
                 />

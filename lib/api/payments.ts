@@ -38,5 +38,5 @@ export const paymentsApi = {
     return sovereignClient.post<unknown>(`/payments/${paymentId}/verify_otp/`, { otp_code: otp });
   },
 
-  getAll: () => sovereignClient.get<unknown>('/payments/'),
+  getAll: () => sovereignClient.get<unknown>('/payments/payments/'),
 };

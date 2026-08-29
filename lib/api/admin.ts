@@ -20,33 +20,31 @@ export const adminApi = {
 
   // Bookings Admin
   getAllBookings: (params?: Record<string, unknown>) =>
-    sovereignClient.get<unknown[]>(`/bookings/admin/${buildQuery(params)}`),
+    sovereignClient.get<unknown[]>(`/admin/bookings/${buildQuery(params)}`),
 
-  updateBooking: (id: number, data: Record<string, unknown>) =>
-    sovereignClient.patch<unknown>(`/bookings/admin/${id}/`, data),
+  updateBooking: (id: string, data: Record<string, unknown>) =>
+    sovereignClient.patch<unknown>(`/admin/bookings/${id}/`, data),
 
   // Products Admin
   getAllProducts: (params?: Record<string, unknown>) =>
-    sovereignClient.get<unknown[]>(`/products/admin/products/${buildQuery(params)}`),
+    sovereignClient.get<unknown[]>(`/products/admin/${buildQuery(params)}`),
 
   createProduct: (data: Record<string, unknown>) =>
-    sovereignClient.post<unknown>('/products/admin/products/', data),
+    sovereignClient.post<unknown>('/products/admin/', data),
 
   // Users Admin
   getAllUsers: (params?: Record<string, unknown>) =>
-    sovereignClient.get<unknown[]>(`/auth/admin/users/${buildQuery(params)}`),
+    sovereignClient.get<unknown[]>(`/admin/users/${buildQuery(params)}`),
 
-  updateUser: (id: number, data: Record<string, unknown>) =>
-    sovereignClient.patch<unknown>(`/auth/admin/users/${id}/`, data),
+  updateUser: (id: string, data: Record<string, unknown>) =>
+    sovereignClient.patch<unknown>(`/admin/users/${id}/`, data),
 
-  deleteProduct: (id: number) =>
-    sovereignClient.delete<void>(`/products/admin/products/${id}/`),
+  deleteProduct: (id: string) =>
+    sovereignClient.delete<void>(`/products/admin/${id}/`),
 
   getBookingStats: () =>
-    sovereignClient.get<unknown>('/bookings/admin/stats/'),
+    sovereignClient.get<unknown>('/admin/bookings/stats/'),
 
   getSalesReport: (params?: { days?: number; export?: boolean }) =>
     sovereignClient.get<unknown>(`/analytics/admin/sales-report/${buildQuery(params)}`),
 };
-
-

@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { apiFetch } from './core';
 
 // ═══════════════════════════════════════════════════════════════════
@@ -8,7 +6,7 @@ import { apiFetch } from './core';
 // ═══════════════════════════════════════════════════════════════════
 
 export const chatbotApi = {
-  quickChat: (message: string, options?: { language?: string; [key: string]: any }) =>
+  quickChat: (message: string, options?: { language?: string; [key: string]: unknown }) =>
     apiFetch('chatbot/quick-chat', { method: 'POST', body: { message, language: options?.language || 'ar', ...options } }),
   chat: (message: string, sessionId: string, language: string = 'ar') =>
     apiFetch('chatbot/chat', { method: 'POST', body: { message, sessionId, language } }),
@@ -19,11 +17,11 @@ export const chatbotApi = {
 };
 
 export const bundlesApi = {
-  getAll: (params?: any) => apiFetch('bundles', { params }),
+  getAll: (params?: Record<string, unknown>) => apiFetch('bundles/bundles', { params }),
   getById: (id: string) => apiFetch(`bundles/${id}`),
   calculatePrice: (id: string, params: { start_date: string; end_date: string }) =>
     apiFetch(`bundles/${id}/calculate-price`, { params }),
-  book: (id: string, data: any) => apiFetch(`bundles/${id}/book`, { method: 'POST', body: data }),
+  book: (id: string, data: Record<string, unknown>) => apiFetch(`bundles/${id}/book`, { method: 'POST', body: data }),
 };
 
 export const cancellationApi = {
@@ -36,68 +34,68 @@ export const depositApi = {
 };
 
 export const analyticsApi = {
-  trackEvent: (data: any) => apiFetch('analytics/events', { method: 'POST', body: data }),
-  getEvents: (params?: any) => apiFetch('analytics/events', { params }),
+  trackEvent: (data: Record<string, unknown>) => apiFetch('analytics/events', { method: 'POST', body: data }),
+  getEvents: (params?: Record<string, unknown>) => apiFetch('analytics/events', { params }),
   getProductActivity: (productId: number) => apiFetch(`analytics/live/activity/${productId}`),
-  getUserBehavior: (params?: any) => apiFetch('analytics/daily/summary', { params }),
+  getUserBehavior: (params?: Record<string, unknown>) => apiFetch('analytics/daily/summary', { params }),
   getDailyAnalytics: (params?: { days?: number }) => apiFetch('analytics/daily/summary', { params }),
 };
 
 export const socialApi = {
   vouch: (userId: string) => apiFetch(`social/vouch/${userId}`, { method: 'POST' }),
   getSocialScore: (userId: string) => apiFetch(`social/score/${userId}`),
-  getFeed: (params?: any) => apiFetch('social/feed', { params }),
+  getFeed: (params?: Record<string, unknown>) => apiFetch('social/feed', { params }),
 };
 
 // ──── الأنظمة المساندة ────
 
 export const artisansApi = {
-  getAll: (params?: any) => apiFetch('artisans', { params }),
+  getAll: (params?: Record<string, unknown>) => apiFetch('artisans/artisans', { params }),
 };
 
 export const vendorsApi = {
-  getAll: (params?: any) => apiFetch('vendors', { params }),
+  getAll: (params?: Record<string, unknown>) => apiFetch('vendors/vendors', { params }),
   getDashboard: () => apiFetch('vendors/dashboard'),
 };
 
 export const servicesApi = {
-  getAll: (params?: any) => apiFetch('services', { params }),
+  getAll: (params?: Record<string, unknown>) => apiFetch('services', { params }),
   getCategories: () => apiFetch('services/categories'),
-  book: (data: any) => apiFetch('services/book', { method: 'POST', body: data }),
+  book: (data: Record<string, unknown>) => apiFetch('services/book', { method: 'POST', body: data }),
 };
 
 export const returnsApi = {
-  getAll: (params?: any) => apiFetch('returns', { params }),
-  create: (data: any) => apiFetch('returns/create', { method: 'POST', body: data }),
+  getAll: (params?: Record<string, unknown>) => apiFetch('returns', { params }),
+  create: (data: Record<string, unknown>) => apiFetch('returns/create', { method: 'POST', body: data }),
 };
 
 export const insuranceApi = {
   getAll: () => apiFetch('insurance'),
-  purchase: (data: any) => apiFetch('insurance/purchase', { method: 'POST', body: data }),
+  purchase: (data: Record<string, unknown>) => apiFetch('insurance/purchase', { method: 'POST', body: data }),
 };
 
 export const subscriptionsApi = {
   getAll: () => apiFetch('subscriptions'),
-  subscribe: (data: any) => apiFetch('subscriptions/subscribe', { method: 'POST', body: data }),
+  subscribe: (data: Record<string, unknown>) => apiFetch('subscriptions/subscribe', { method: 'POST', body: data }),
   cancel: (planId: string) => apiFetch('subscriptions/cancel', { method: 'POST', body: { planId } }),
 };
 
 export const blogApi = {
-  getAll: (params?: any) => apiFetch('blog', { params }),
+  getAll: (params?: Record<string, unknown>) => apiFetch('blog', { params }),
   getById: (id: string) => apiFetch(`blog/${id}`),
   getBySlug: (slug: string) => apiFetch(`blog/${slug}`),
 };
 
 export const cmsApi = {
-  getPages: (params?: any) => apiFetch('cms/pages', { params }),
+  getPages: (params?: Record<string, unknown>) => apiFetch('cms/pages', { params }),
   getBySlug: (slug: string) => apiFetch(`cms/pages/${slug}`),
-  create: (data: any) => apiFetch('cms/pages', { method: 'POST', body: data }),
-  update: (id: string, data: any) => apiFetch(`cms/pages/${id}`, { method: 'PUT', body: data }),
+  create: (data: Record<string, unknown>) => apiFetch('cms/pages', { method: 'POST', body: data }),
+  update: (id: string, data: Record<string, unknown>) => apiFetch(`cms/pages/${id}`, { method: 'PUT', body: data }),
   delete: (id: string) => apiFetch(`cms/pages/${id}`, { method: 'DELETE' }),
 };
 
 export const contactApi = {
-  submit: (data: any) => apiFetch('contact', { method: 'POST', body: data }),
+  submit: (data: Record<string, unknown>) => apiFetch('contact', { method: 'POST', body: data }),
 };
 
 // ═══════════════════════════════════════════════════════════════════
@@ -107,16 +105,16 @@ export const contactApi = {
 export const hygieneApi = {
   getRecords: () => apiFetch('hygiene'),
   getLatestForProduct: (productId: string) => apiFetch(`hygiene/product/${productId}`),
-  createRecord: (data: any) => apiFetch('hygiene', { method: 'POST', body: data }),
-  updateRecord: (id: number, data: any) => apiFetch(`hygiene/${id}`, { method: 'PUT', body: data }),
+  createRecord: (data: Record<string, unknown>) => apiFetch('hygiene', { method: 'POST', body: data }),
+  updateRecord: (id: number, data: Record<string, unknown>) => apiFetch(`hygiene/${id}`, { method: 'PUT', body: data }),
   deleteRecord: (id: number) => apiFetch(`hygiene/${id}`, { method: 'DELETE' }),
 };
 
 export const inventoryApi = {
   getItems: () => apiFetch('inventory'),
   getStockAlerts: () => apiFetch('inventory/alerts'),
-  createItem: (data: any) => apiFetch('inventory', { method: 'POST', body: data }),
-  updateItem: (id: number, data: any) => apiFetch(`inventory/${id}`, { method: 'PUT', body: data }),
+  createItem: (data: Record<string, unknown>) => apiFetch('inventory', { method: 'POST', body: data }),
+  updateItem: (id: number, data: Record<string, unknown>) => apiFetch(`inventory/${id}`, { method: 'PUT', body: data }),
   deleteItem: (id: number) => apiFetch(`inventory/${id}`, { method: 'DELETE' }),
 };
 
@@ -125,20 +123,20 @@ export const packagingApi = {
   getMaterials: () => apiFetch('packaging/materials'),
   getRules: () => apiFetch('packaging/rules'),
   getInstances: () => apiFetch('packaging/instances'),
-  createType: (data: any) => apiFetch('packaging/types', { method: 'POST', body: data }),
-  updateType: (id: number, data: any) => apiFetch(`packaging/types/${id}`, { method: 'PUT', body: data }),
+  createType: (data: Record<string, unknown>) => apiFetch('packaging/types', { method: 'POST', body: data }),
+  updateType: (id: number, data: Record<string, unknown>) => apiFetch(`packaging/types/${id}`, { method: 'PUT', body: data }),
   deleteType: (id: number) => apiFetch(`packaging/types/${id}`, { method: 'DELETE' }),
-  createMaterial: (data: any) => apiFetch('packaging/materials', { method: 'POST', body: data }),
-  updateMaterial: (id: number, data: any) => apiFetch(`packaging/materials/${id}`, { method: 'PUT', body: data }),
+  createMaterial: (data: Record<string, unknown>) => apiFetch('packaging/materials', { method: 'POST', body: data }),
+  updateMaterial: (id: number, data: Record<string, unknown>) => apiFetch(`packaging/materials/${id}`, { method: 'PUT', body: data }),
   deleteMaterial: (id: number) => apiFetch(`packaging/materials/${id}`, { method: 'DELETE' }),
-  createRule: (data: any) => apiFetch('packaging/rules', { method: 'POST', body: data }),
-  updateRule: (id: number, data: any) => apiFetch(`packaging/rules/${id}`, { method: 'PUT', body: data }),
+  createRule: (data: Record<string, unknown>) => apiFetch('packaging/rules', { method: 'POST', body: data }),
+  updateRule: (id: number, data: Record<string, unknown>) => apiFetch(`packaging/rules/${id}`, { method: 'PUT', body: data }),
   deleteRule: (id: number) => apiFetch(`packaging/rules/${id}`, { method: 'DELETE' }),
 };
 
 export const maintenanceApi = {
   getRecords: () => apiFetch('maintenance'),
-  createRecord: (data: any) => apiFetch('maintenance', { method: 'POST', body: data }),
-  updateRecord: (id: number, data: any) => apiFetch(`maintenance/${id}`, { method: 'PUT', body: data }),
+  createRecord: (data: Record<string, unknown>) => apiFetch('maintenance', { method: 'POST', body: data }),
+  updateRecord: (id: number, data: Record<string, unknown>) => apiFetch(`maintenance/${id}`, { method: 'PUT', body: data }),
   deleteRecord: (id: number) => apiFetch(`maintenance/${id}`, { method: 'DELETE' }),
 };

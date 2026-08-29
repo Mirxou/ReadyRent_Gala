@@ -27,7 +27,7 @@ export default function ForgotPasswordPage() {
 
     setIsLoading(true);
     try {
-      await authApi.passwordResetRequest(email);
+      await authApi.passwordResetRequest({ email });
       setEmailSent(true);
       toast.success('تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني');
     } catch {

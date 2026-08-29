@@ -12,7 +12,7 @@ export function SovereignCalendar({ onDateSelect, selectedDate, className = '' }
       type="date"
       value={selectedDate || ''}
       onChange={(e) => onDateSelect?.(e.target.value)}
-      className={`rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-sovereign-gold/50 ${className}`}
+      className={`rounded-xl border border-input bg-background px-4 py-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-sovereign-gold/50 ${className}`}
     />
   );
 }

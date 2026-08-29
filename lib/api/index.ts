@@ -10,7 +10,6 @@ export * from './contracts';
 export * from './disputes';
 export * from './admin';
 export * from './logistics';
-export * from './innovation';
 export * from './reviews';
 export * from './appeals';
 export * from './notifications';

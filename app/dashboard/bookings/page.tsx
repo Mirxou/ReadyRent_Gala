@@ -64,16 +64,7 @@ export default function BookingsPage() {
           >
             <div className="mb-6">
               <h1 
-                className="text-5xl md:text-7xl font-bold mb-6"
-                style={{
-                  background: 'linear-gradient(to right, #8B5CF6, #EC4899, #F59E0B)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                  display: 'inline-block',
-                  lineHeight: '1.1',
-                  padding: '0.5rem 1rem',
-                }}
+                className="text-5xl md:text-7xl font-bold mb-6 inline-block leading-[1.1] p-2 px-4 bg-gradient-to-r from-purple-500 via-pink-500 to-amber-500 bg-clip-text text-transparent"
               >
                 حجوزاتي
               </h1>
@@ -110,21 +101,7 @@ export default function BookingsPage() {
         >
           <div className="mb-6" style={{ overflow: 'visible', width: '100%' }}>
             <h1 
-              className="text-5xl md:text-7xl font-bold mb-6"
-              style={{
-                background: 'linear-gradient(to right, #8B5CF6, #EC4899, #F59E0B)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-                display: 'inline-block',
-                lineHeight: '1.5',
-                padding: '2rem 6rem 2rem 1rem',
-                margin: '0 auto',
-                width: 'auto',
-                maxWidth: '100%',
-                overflow: 'visible',
-                whiteSpace: 'nowrap',
-              }}
+              className="text-5xl md:text-7xl font-bold mb-6 inline-block leading-[1.5] py-8 pr-24 pl-4 mx-auto w-auto max-w-full overflow-visible whitespace-nowrap bg-gradient-to-r from-purple-500 via-pink-500 to-amber-500 bg-clip-text text-transparent"
             >
               حجوزاتي
             </h1>
@@ -169,11 +146,11 @@ export default function BookingsPage() {
                         {booking.escrow_status && booking.escrow_status !== 'none' && (
                           <Badge variant="outline" className={
                             booking.escrow_status === 'held'
-                              ? 'bg-amber-100 text-amber-800 border-amber-200'
+                              ? 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800'
                               : booking.escrow_status === 'released'
-                                ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
+                                ? 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800'
                                 : booking.escrow_status === 'refunded'
-                                  ? 'bg-sky-100 text-sky-800 border-sky-200'
+                                  ? 'bg-sky-100 text-sky-800 border-sky-200 dark:bg-sky-900/30 dark:text-sky-400 dark:border-sky-800'
                                   : ''
                           }>
                             {booking.escrow_status === 'held' ? 'محتجز'

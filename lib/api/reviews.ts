@@ -1,11 +1,11 @@
 import { sovereignClient } from './sovereign-client';
 
 export interface Review {
-  id: number;
-  booking_id: number;
-  reviewer_id: number;
+  id: string;
+  booking_id: string;
+  reviewer_id: string;
   reviewer_name: string;
-  product_id: number;
+  product_id: string;
   rating: number; // 1-5
   comment: string;
   is_verified: boolean;
@@ -27,8 +27,8 @@ export interface TrustScore {
 
 export const reviewsApi = {
   /** List reviews for a product */
-  listForProduct: (productId: number, params?: { page?: number }) => {
-    const q = new URLSearchParams({ product_id: productId.toString() });
+  listForProduct: (productId: string, params?: { page?: number }) => {
+    const q = new URLSearchParams({ product_id: productId });
     if (params?.page) q.append('page', params.page.toString());
     return sovereignClient.get<Review[]>(`/reviews/?${q.toString()}`);
   },
@@ -43,12 +43,12 @@ export const reviewsApi = {
 
   /** Get reviews given by or received by the current user */
   listMyReviews: () =>
-    sovereignClient.get<Review[]>('/reviews/my_reviews/'),
+    sovereignClient.get<Review[]>('/reviews/?my=true'),
 
   /** Submit a review — used by review-form.tsx */
   create: (data: {
-    product_id?: number;
-    booking_id?: number;
+    product_id?: string;
+    booking_id?: string;
     rating: number;
     title?: string;
     comment: string;
@@ -56,16 +56,17 @@ export const reviewsApi = {
 
   /** Submit a review for a completed booking (alias) */
   createReview: (data: {
-    booking_id: number;
+    booking_id: string;
     rating: number;
     comment: string;
   }) => sovereignClient.post<Review>('/reviews/create/', data),
 
+  // TODO: route not yet implemented — /social/score/me or /reviews/trust-score/my
   /** Get the trust score for the current user */
   getMyTrustScore: () =>
     sovereignClient.get<TrustScore>('/reviews/trust-score/my/'),
 
   /** Get the trust score for a specific user (public) */
-  getUserTrustScore: (userId: number) =>
-    sovereignClient.get<TrustScore>(`/reviews/trust-score/${userId}/`),
+  getUserTrustScore: (userId: string) =>
+    sovereignClient.get<TrustScore>(`/social/score/${userId}/`),
 };

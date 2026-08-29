@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 // ═══════════════════════════════════════════════════════════════════
 // STANDARD.Rent — Sovereign Unified API Client
 // Auth: HttpOnly cookie sent automatically via credentials: 'include'.
@@ -27,11 +25,11 @@ export async function apiFetch(
   path: string,
   options: {
     method?: string;
-    body?: any;
-    params?: Record<string, any>;
+    body?: unknown;
+    params?: Record<string, unknown>;
     headers?: Record<string, string>;
   } = {},
-): Promise<{ data: any; status: number; meta?: any }> {
+): Promise<{ data: unknown; status: number; meta?: unknown }> {
   let url = `/api/${path.replace(/^\/+/, '')}`;
 
   // Append query params
@@ -64,7 +62,7 @@ export async function apiFetch(
     const res = await fetch(url, {
       method: options.method || 'GET',
       headers,
-      body: isFormData ? options.body : options.body ? JSON.stringify(options.body) : undefined,
+      body: isFormData ? options.body as BodyInit : options.body ? JSON.stringify(options.body) : undefined,
       credentials: 'include',
     });
 
@@ -93,18 +91,18 @@ export async function apiFetch(
 // Components use: `api.get('/path')`, `api.post('/path', body)`, etc.
 // These return `{ data: ..., status: ... }` just like axios responses.
 export const api = {
-  get: (url: string, config?: { params?: any; headers?: any }) =>
+  get: (url: string, config?: { params?: Record<string, unknown>; headers?: Record<string, string> }) =>
     apiFetch(url, { method: 'GET', params: config?.params, headers: config?.headers }),
 
-  post: (url: string, body?: any, config?: { headers?: any }) =>
+  post: (url: string, body?: unknown, config?: { headers?: Record<string, string> }) =>
     apiFetch(url, { method: 'POST', body, headers: config?.headers }),
 
-  put: (url: string, body?: any, config?: { headers?: any }) =>
+  put: (url: string, body?: unknown, config?: { headers?: Record<string, string> }) =>
     apiFetch(url, { method: 'PUT', body, headers: config?.headers }),
 
-  patch: (url: string, body?: any, config?: { headers?: any }) =>
+  patch: (url: string, body?: unknown, config?: { headers?: Record<string, string> }) =>
     apiFetch(url, { method: 'PATCH', body, headers: config?.headers }),
 
-  delete: (url: string, config?: { headers?: any }) =>
+  delete: (url: string, config?: { headers?: Record<string, string> }) =>
     apiFetch(url, { method: 'DELETE', headers: config?.headers }),
 };

@@ -34,13 +34,14 @@ export default function RegisterPage() {
       const registerData = {
         email: data.email,
         password: data.password,
+        password_confirm: data.password_confirm,
         first_name: data.first_name,
         phone: data.phone_number,
         username: data.first_name ? data.first_name.replace(/\s+/g, '_') : undefined,
       };
       const response = await authApi.register(registerData);
-      if (response.status >= 400) {
-        const msg = (response.data as { message_ar?: string })?.message_ar || 'فشل إنشاء الهوية. تحقق من المدخلات.';
+      if (!response.success || (response.httpStatus && response.httpStatus >= 400)) {
+        const msg = response.message_ar || 'فشل إنشاء الهوية. تحقق من المدخلات.';
         toast.error(msg);
         return;
       }

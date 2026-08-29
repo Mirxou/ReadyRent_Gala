@@ -56,11 +56,11 @@ export const WalletDashboard = () => {
   if (loading || !balance) {
     return (
       <div className="space-y-8 animate-pulse p-6">
-        <div className="h-48 bg-slate-200 rounded-3xl" />
+        <div className="h-48 bg-muted rounded-3xl" />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="h-32 bg-slate-100 rounded-2xl" />
-          <div className="h-32 bg-slate-100 rounded-2xl" />
-          <div className="h-32 bg-slate-100 rounded-2xl" />
+          <div className="h-32 bg-muted rounded-2xl" />
+          <div className="h-32 bg-muted rounded-2xl" />
+          <div className="h-32 bg-muted rounded-2xl" />
         </div>
       </div>
     );
@@ -79,8 +79,8 @@ export const WalletDashboard = () => {
       {/* Header */}
       <div className="flex justify-between items-center" dir="rtl">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">المحفظة السيادية</h1>
-          <p className="text-slate-500 mt-1">إدارة أموالك وتتبع ضماناتك في مكان واحد</p>
+          <h1 className="text-3xl font-bold text-foreground">المحفظة السيادية</h1>
+          <p className="text-muted-foreground mt-1">إدارة أموالك وتتبع ضماناتك في مكان واحد</p>
         </div>
         <Button size="lg" className="rounded-2xl gap-2 font-bold bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-200">
           <Plus size={20} />
@@ -144,7 +144,7 @@ export const WalletDashboard = () => {
 
       {/* Secondary Stats & Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="p-6 space-y-4 border-slate-100 hover:shadow-lg transition-shadow">
+        <Card className="p-6 space-y-4 border-border hover:shadow-lg transition-shadow">
           <div className="flex justify-between items-center">
             <h3 className="font-bold flex items-center gap-2">
               <ShieldCheck className="text-emerald-600" size={18} />
@@ -154,45 +154,45 @@ export const WalletDashboard = () => {
               {escrowCount > 0 ? `${escrowCount} نشط` : 'لا يوجد'}
             </Badge>
           </div>
-          <p className="text-sm text-slate-500" dir="rtl">
+          <p className="text-sm text-muted-foreground" dir="rtl">
             {escrowCount > 0 
               ? `لديك ${escrowCount} عقد في مرحلة الضمان المالي.`
               : 'لا توجد عقود في مرحلة الضمان حالياً.'}
           </p>
           <Progress value={escrowCount > 0 ? Math.min(100, 50 + escrowCount * 10) : 0} className="h-2" />
-          <div className="flex justify-between text-xs text-slate-400">
+          <div className="flex justify-between text-xs text-muted-foreground">
             <span>{escrowCount > 0 ? 'بانتظار التحرير' : 'مكتمل'}</span>
           </div>
         </Card>
 
-        <Card className="p-6 space-y-4 border-slate-100 hover:shadow-lg transition-shadow">
+        <Card className="p-6 space-y-4 border-border hover:shadow-lg transition-shadow">
           <div className="flex justify-between items-center">
             <h3 className="font-bold flex items-center gap-2">
               <Target className="text-emerald-600" size={18} />
               المعاملات المنجزة
             </h3>
           </div>
-          <p className="text-sm text-slate-500" dir="rtl">إجمالي معاملاتك المنجزة.</p>
-          <div className="relative h-2 bg-slate-100 rounded-full overflow-hidden">
+          <p className="text-sm text-muted-foreground" dir="rtl">إجمالي معاملاتك المنجزة.</p>
+          <div className="relative h-2 bg-muted rounded-full overflow-hidden">
              <div className="absolute inset-0 bg-emerald-500 w-full" />
           </div>
           <p className="text-lg font-bold text-emerald-600">{transactions.length} معاملة</p>
         </Card>
 
-        <Card className="p-6 space-y-4 border-slate-100 hover:shadow-lg transition-shadow">
+        <Card className="p-6 space-y-4 border-border hover:shadow-lg transition-shadow">
           <div className="flex justify-between items-center">
             <h3 className="font-bold flex items-center gap-2">
-              <CreditCard className="text-slate-900" size={18} />
+              <CreditCard className="text-foreground" size={18} />
               طرق الدفع
             </h3>
           </div>
-          <div className="flex items-center gap-3 bg-slate-50 p-3 rounded-xl">
-             <div className="w-10 h-6 bg-slate-200 rounded flex items-center justify-center text-[8px] font-bold">CIB</div>
+          <div className="flex items-center gap-3 bg-muted p-3 rounded-xl">
+             <div className="w-10 h-6 bg-muted-foreground/20 rounded flex items-center justify-center text-[8px] font-bold">CIB</div>
              <div className="flex-1">
-               <p className="text-xs font-bold text-slate-900">Chargily Pay</p>
-               <p className="text-[10px] text-slate-500">CIB + Edahabia</p>
+               <p className="text-xs font-bold text-foreground">Chargily Pay</p>
+               <p className="text-[10px] text-muted-foreground">CIB + Edahabia</p>
              </div>
-             <ChevronRight size={14} className="text-slate-400" />
+             <ChevronRight size={14} className="text-muted-foreground" />
           </div>
           <Button variant="outline" size="sm" className="w-full">إدارة طرق الدفع</Button>
         </Card>

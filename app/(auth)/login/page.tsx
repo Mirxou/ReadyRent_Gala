@@ -20,7 +20,7 @@ interface LoginForm {
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get('callbackUrl') || '/';
+  const callbackUrl = searchParams.get('redirect') || searchParams.get('callbackUrl') || '/';
   const { setAuth } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -35,11 +35,11 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginForm) => {
     setIsLoading(true);
     try {
-      const response = await authApi.login(data.email, data.password);
+      const response = await authApi.login({ email: data.email, password: data.password });
 
-      if (response.status === 429) {
+      if (response.httpStatus === 429) {
         // Rate limited
-        const retryMs = (response.data as { retry_after_ms?: number })?.retry_after_ms || 60000;
+        const retryMs = (response as Record<string, unknown>).retry_after_ms as number || 60000;
         const retrySec = Math.ceil(retryMs / 1000);
         setRateLimitCountdown(retrySec);
         const interval = setInterval(() => {
@@ -52,9 +52,8 @@ export default function LoginPage() {
         return;
       }
 
-      if (!response.data || response.status >= 400) {
-        const msg = (response.data as { message_ar?: string; message_en?: string; code?: string })?.message_ar
-          || 'بيانات الدخول غير صحيحة';
+      if (!response.success || (response.httpStatus && response.httpStatus >= 400)) {
+        const msg = response.message_ar || 'بيانات الدخول غير صحيحة';
         toast.error(msg);
         return;
       }

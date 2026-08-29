@@ -23,9 +23,11 @@ export type SovereignCode =
   | 'CONNECTION_ERROR';
 
 export interface SovereignResponse<T> {
-  status: SovereignStatus;
-  code: SovereignCode;
-  dignity_preserved: boolean;
+  status?: SovereignStatus;
+  code?: SovereignCode;
+  success?: boolean;
+  httpStatus?: number;
+  dignity_preserved?: boolean;
   timestamp?: string;
   message_ar?: string;
   message_en?: string;
@@ -53,7 +55,7 @@ export interface ReceiptStage {
 }
 
 export interface DisputeStatus {
-  id: number;
+  id: string;
   current_phase: string;
   waiting_type?: 'PROTECTIVE' | 'PROCEDURAL' | 'JUDGMENT';
   estimated_completion?: string;
@@ -64,7 +66,7 @@ export interface DisputeStatus {
 }
 
 export interface MediationOffer {
-  id: number;
+  id: string;
   amount: number;
   currency: string;
   reasoning: string;

@@ -1,14 +1,14 @@
 import { sovereignClient } from './sovereign-client';
 
 export interface Notification {
-  id: number;
+  id: string;
   type: string;
   title: string;
   message: string;
   is_read: boolean;
   action_url?: string;
   created_at: string;
-  related_object_id?: number;
+  related_object_id?: string;
   related_object_type?: string;
 }
 
@@ -19,7 +19,7 @@ export const notificationsApi = {
     if (params?.page) q.append('page', params.page.toString());
     if (params?.unread_only) q.append('unread_only', 'true');
     return sovereignClient.get<Notification[]>(
-      `/notifications/notifications/?${q.toString()}`
+      `/notifications/?${q.toString()}`
     );
   },
 
@@ -29,25 +29,24 @@ export const notificationsApi = {
     if (params?.page) q.append('page', params.page.toString());
     if (params?.unread_only) q.append('unread_only', 'true');
     return sovereignClient.get<Notification[]>(
-      `/notifications/notifications/?${q.toString()}`
+      `/notifications/?${q.toString()}`
     );
   },
 
   /** Get a single notification */
-  get: (id: number) =>
-    sovereignClient.get<Notification>(`/notifications/notifications/${id}/`),
+  get: (id: string) =>
+    sovereignClient.get<Notification>(`/notifications/${id}/`),
 
   /** Mark a notification as read */
-  markRead: (id: number) =>
-    sovereignClient.post<void>(`/notifications/notifications/${id}/mark_read/`),
+  markRead: (id: string) =>
+    sovereignClient.post<void>(`/notifications/${id}/`),
 
   /** Mark ALL notifications as read */
   markAllRead: () =>
-    sovereignClient.post<void>('/notifications/notifications/mark_all_read/'),
+    sovereignClient.post<void>('/notifications/read-all/'),
 
+  // TODO: route not yet implemented — /notifications/unread-count
   /** Get unread count */
   getUnreadCount: () =>
-    sovereignClient.get<{ count: number }>(
-      '/notifications/notifications/unread_count/'
-    ),
+    sovereignClient.get<{ count: number }>('/notifications/'),
 };

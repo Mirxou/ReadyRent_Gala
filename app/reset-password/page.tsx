@@ -54,7 +54,11 @@ export default function ResetPasswordPage() {
 
     setIsLoading(true);
     try {
-      await authApi.passwordResetConfirm(token, password, passwordConfirm);
+      const response = await authApi.passwordResetConfirm({ token, new_password: password, new_password_confirm: passwordConfirm });
+      if (!response.success || (response.httpStatus && response.httpStatus >= 400)) {
+        toast.error(response.message_ar || 'فشل إعادة تعيين كلمة المرور');
+        return;
+      }
       setSuccess(true);
       toast.success('تم إعادة تعيين كلمة المرور بنجاح');
       
@@ -62,8 +66,8 @@ export default function ResetPasswordPage() {
       setTimeout(() => {
         router.push('/login');
       }, 2000);
-    } catch (error: unknown) {
-      toast.error((error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'فشل إعادة تعيين كلمة المرور');
+    } catch (_error) {
+      toast.error('فشل إعادة تعيين كلمة المرور');
     } finally {
       setIsLoading(false);
     }

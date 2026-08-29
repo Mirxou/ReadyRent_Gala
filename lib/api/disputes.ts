@@ -1,9 +1,8 @@
 import { sovereignClient } from './sovereign-client';
-import { DisputeStatus, MediationOffer } from '@/types/sovereign';
 
 export interface Dispute {
-  id: number;
-  booking_id: number;
+  id: string;
+  booking_id: string;
   title: string;
   description: string;
   status: string;
@@ -23,71 +22,74 @@ export interface DisputeHistoryStage {
 export const disputesApi = {
   // Dispute Lifecycle
   listDisputes: (params?: Record<string, unknown>) =>
-    sovereignClient.get<Dispute[]>('/disputes/disputes/', { params }),
+    sovereignClient.get<Dispute[]>('/disputes/', { params }),
 
-  getDispute: (id: number) =>
-    sovereignClient.get<Dispute>(`/disputes/disputes/${id}/`),
+  getDispute: (id: string) =>
+    sovereignClient.get<Dispute>(`/disputes/${id}/`),
 
   initiateDispute: (data: {
-    booking_id: number;
+    booking_id: string;
     claim_type: string;
     description: string;
     evidence_urls?: string[];
   }) =>
-    sovereignClient.post<Dispute>('/disputes/disputes/create/', data),
+    sovereignClient.post<Dispute>('/disputes/create/', data),
 
-  getDisputeStatus: (id: number) =>
-    sovereignClient.get<DisputeStatus>(`/disputes/disputes/${id}/status/`),
+  // TODO: route not yet implemented — /disputes/[id]/status
+  // getDisputeStatus: (id: string) =>
+  //   sovereignClient.get<DisputeStatus>(`/disputes/${id}/status/`),
 
-  getDisputeVerdict: (id: number) =>
-    sovereignClient.get<unknown>(`/disputes/disputes/${id}/verdict/`),
+  // TODO: route not yet implemented — /disputes/[id]/verdict
+  // getDisputeVerdict: (id: string) =>
+  //   sovereignClient.get<unknown>(`/disputes/${id}/verdict/`),
 
   /**
    * Get the full phase history of a dispute from the backend.
    * Replaces the "Mock stages" in DisputeDetail.
    */
-  getDisputeHistory: (id: number) =>
-    sovereignClient.get<DisputeHistoryStage[]>(`/disputes/disputes/${id}/history/`),
+  getDisputeHistory: (id: string) =>
+    sovereignClient.get<DisputeHistoryStage[]>(`/disputes/${id}/history/`),
 
   // Messaging & Evidence
-  createMessage: (disputeId: number, message: string, attachments: string[] = []) =>
-    sovereignClient.post<unknown>(`/disputes/disputes/${disputeId}/messages/`, { message, attachments }),
+  createMessage: (disputeId: string, message: string, attachments: string[] = []) =>
+    sovereignClient.post<unknown>(`/disputes/${disputeId}/messages/`, { message, attachments }),
 
-  getEvidenceLogs: (disputeId: number) =>
-    sovereignClient.get<unknown[]>(`/disputes/disputes/${disputeId}/evidence/`),
+  // TODO: route not yet implemented — /disputes/[id]/evidence
+  // getEvidenceLogs: (disputeId: string) =>
+  //   sovereignClient.get<unknown[]>(`/disputes/${disputeId}/evidence/`),
 
   /**
    * Upload a real evidence file to the backend.
    * Uses multipart/form-data (not JSON).
    */
-  uploadEvidence: async (disputeId: number, file: File): Promise<unknown> => {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('dispute', String(disputeId));
+  // TODO: route not yet implemented — /disputes/[id]/evidence/upload
+  // uploadEvidence: async (disputeId: string, file: File): Promise<unknown> => {
+  //   const formData = new FormData();
+  //   formData.append('file', file);
+  //   formData.append('dispute', String(disputeId));
+  //   const response = await fetch(`/api/disputes/${disputeId}/evidence/upload/`, {
+  //     method: 'POST',
+  //     body: formData,
+  //     credentials: 'include',
+  //   });
+  //   if (!response.ok) {
+  //     const errorData = await response.json().catch(() => ({}));
+  //     throw new Error(errorData?.detail || 'فشل رفع الدليل');
+  //   }
+  //   return response.json();
+  // },
 
-    const response = await fetch(`/api/disputes/disputes/${disputeId}/evidence/upload/`, {
-      method: 'POST',
-      body: formData,
-      credentials: 'include',
-    });
+  // TODO: route not yet implemented — /disputes/[id]/mediation/offers
+  // getMediationOffers: (disputeId: string) =>
+  //   sovereignClient.get<MediationOffer[]>(`/disputes/${disputeId}/mediation/offers/`),
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData?.detail || 'فشل رفع الدليل');
-    }
-    return response.json();
-  },
-
-  // Mediation
-  getMediationOffers: (disputeId: number) =>
-    sovereignClient.get<MediationOffer[]>(`/disputes/disputes/${disputeId}/mediation/offers/`),
-
-  acceptOffer: (offerId: number) =>
-    sovereignClient.post<unknown>(`/disputes/mediation/offers/${offerId}/accept/`),
+  // TODO: route not yet implemented — /disputes/mediation/offers/[id]/accept
+  // acceptOffer: (offerId: string) =>
+  //   sovereignClient.post<unknown>(`/disputes/mediation/offers/${offerId}/accept/`),
 
   // Appeals
-  fileAppeal: (judgmentId: number, reason: string) =>
-    sovereignClient.post<unknown>(`/disputes/judgments/${judgmentId}/appeal/`, { reason }),
+  fileAppeal: (disputeId: string, reason: string) =>
+    sovereignClient.post<unknown>(`/disputes/${disputeId}/appeal/`, { reason }),
 
   // Public Judicial Ledger
   getPublicLedger: (params?: { page?: number; page_size?: number }) =>
@@ -95,15 +97,15 @@ export const disputesApi = {
 };
 
 export const supportApi = {
-  listTickets: (params?: Record<string, unknown>) => 
+  listTickets: (params?: Record<string, unknown>) =>
     sovereignClient.get<unknown[]>('/disputes/tickets/', { params }),
-  
-  createTicket: (data: Record<string, unknown>) => 
+
+  createTicket: (data: Record<string, unknown>) =>
     sovereignClient.post<unknown>('/disputes/tickets/create/', data),
-  
-  getTicket: (id: number) => 
+
+  getTicket: (id: string) =>
     sovereignClient.get<unknown>(`/disputes/tickets/${id}/`),
-  
-  createTicketMessage: (ticketId: number, message: string) => 
-    sovereignClient.post<unknown>(`/disputes/tickets/${ticketId}/messages/`, { message })
+
+  createTicketMessage: (ticketId: string, message: string) =>
+    sovereignClient.post<unknown>(`/disputes/tickets/${ticketId}/messages/`, { message }),
 };
