@@ -127,6 +127,8 @@ export default function ProductDetailsPage() {
     );
   }
 
+  const vendorTrustScore = Number(product.vendor_trust_score || 0);
+  const vendorVerified = Boolean(product.vendor_verified || product.is_verified);
   const trustScore = depositData?.trust_score ?? user?.trust_score ?? 0;
   const isSovereign = depositData ? !depositData.deposit_required : (trustScore >= 80);
   const isVerified = depositData?.is_verified ?? user?.is_verified ?? false;
@@ -288,7 +290,7 @@ export default function ProductDetailsPage() {
 
             {/* FABULOUS: Trust Assurance & Protection Shield */}
             <div className="space-y-8 h-fit">
-               <TrustAssuranceChips />
+               <TrustAssuranceChips trustScore={vendorTrustScore} isVerified={vendorVerified} />
                
                <GlassPanel className="p-8 space-y-6 border-emerald-500/10 bg-gradient-to-br from-emerald-500/5 to-transparent" gradientBorder>
                   <div className="flex items-center justify-between">
@@ -389,7 +391,7 @@ export default function ProductDetailsPage() {
                 
                 <div className="pt-6 border-t border-white/5 space-y-4">
                    <p className="text-[10px] font-black text-muted-foreground uppercase text-center tracking-[0.3em] opacity-40">قائمة التحقق</p>
-                   <TrustAssuranceChips />
+                   <TrustAssuranceChips trustScore={vendorTrustScore} isVerified={vendorVerified} />
                 </div>
              </GlassPanel>
           </div>

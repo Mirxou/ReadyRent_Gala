@@ -81,8 +81,8 @@ export default function DashboardPage() {
     : null;
 
   const trustScore = trustScoreValue;
-  const isElite = trustScore >= 100; // Phase 10 Obsidian Tier
-  const isSovereign = trustScore >= 1; 
+  const isElite = trustScore >= 61; // highly_trusted tier
+  const isSovereign = trustScore >= 41; // trusted tier 
   const is2FAEnabled = (user as Record<string, unknown>)?.is_2fa_enabled;
 
   if (!isAuthenticated) {
@@ -176,9 +176,9 @@ export default function DashboardPage() {
                             <div className="mt-8">
                                 <Badge className={cn(
                                     "px-4 py-2 text-[10px] font-black uppercase tracking-widest border-0",
-                                    isSovereign ? "bg-sovereign-gold/10 text-sovereign-gold" : "bg-white/5 text-muted-foreground"
+                                    isElite ? "bg-sovereign-gold/10 text-sovereign-gold" : isSovereign ? "bg-emerald-500/10 text-emerald-500" : "bg-white/5 text-muted-foreground"
                                 )}>
-                                    {isSovereign ? "مستوى النخبة (ثقة عالية)" : "مستوى قيد البناء"}
+                                    {isElite ? "مستوى النخبة (ثقة عالية)" : isSovereign ? "مستوى موثوق" : trustScore > 0 ? "مستوى مبتدئ" : "مستوى قيد البناء"}
                                 </Badge>
                             </div>
                         </div>

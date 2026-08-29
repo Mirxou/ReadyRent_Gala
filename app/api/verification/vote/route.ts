@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
+import { recalcAndSyncTrustScore } from '@/lib/trust-score-sync';
 
 // ═══════════════════════════════════════════════════════════════════
 // POST /api/verification/vote — Vote on a verification (approve/reject)
@@ -177,6 +178,17 @@ export async function POST(request: Request) {
         { success: false, dignity_preserved: true, message_ar: err.ar, message_en: err.en },
         { status: err.status }
       );
+    }
+
+    // If verification status changed, recalc trust score (fire-and-forget)
+    if (result.data.status === 'verified' || result.data.status === 'rejected') {
+      const verification = await db.identityVerification.findUnique({
+        where: { id: verification_id },
+        select: { userId: true },
+      });
+      if (verification) {
+        recalcAndSyncTrustScore(verification.userId).catch(() => {});
+      }
     }
 
     return NextResponse.json({

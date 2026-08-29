@@ -62,6 +62,7 @@ model User {
   identityVerification IdentityVerification?
   verificationVotes VerificationVote[] @relation("VerificationVoter")
   sessions         Session[]
+  vendors          Vendor[]
 
   @@map("users")
 }
@@ -138,10 +139,12 @@ model Vendor {
   website       String?
   commissionRate Float?  @map("commission_rate")
   joinedDate    String?  @map("joined_date")
+  userId        String?  @map("user_id")
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
 
   products      Product[]
+  user          User?    @relation(fields: [userId], references: [id])
 
   @@map("vendors")
 }

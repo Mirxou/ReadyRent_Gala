@@ -1,42 +1,30 @@
 // ═══════════════════════════════════════════════════════════════
 // STANDARD.Rent — My Trust Score API
-// GET /api/social/score/me
+// GET /api/social/score/me/
 // ═══════════════════════════════════════════════════════════════
 
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
 import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
 import { logger } from '@/lib/logger';
-import { calculateTrustBreakdown } from '@/lib/trust-score';
+import { recalcAndSyncTrustScore } from '@/lib/trust-score-sync';
 
 export async function GET(request: NextRequest) {
   try {
     const session = await getSessionFromRequest(request);
     if (!session) return authRequiredResponse();
 
-    const userId = session.userId;
+    const { db } = await import('@/lib/db');
 
-    // Fetch user basic info
-    const user = await db.user.findUnique({
-      where: { id: userId },
-      select: { id: true, isVerified: true },
-    });
+    // Recalculate trust score and sync to Vendor records (single source of truth)
+    const breakdown = await recalcAndSyncTrustScore(session.userId);
 
-    if (!user) {
-      return NextResponse.json(
-        { success: false, dignity_preserved: true, message_ar: 'المستخدم غير موجود', code: 'USER_NOT_FOUND' },
-        { status: 404 }
-      );
-    }
-
-    // Fetch data for trust calculation in parallel
+    // Fetch display counts
     const [vouchCount, userProducts] = await Promise.all([
-      db.socialVouch.count({ where: { receiverId: userId } }),
-      db.product.findMany({ where: { vendorId: userId }, select: { id: true } }),
+      db.socialVouch.count({ where: { receiverId: session.userId } }),
+      db.product.findMany({ where: { vendorId: session.userId }, select: { id: true } }),
     ]);
 
     const productIds = userProducts.map(p => p.id);
-
     let avgRating = 0;
     let reviewCount = 0;
 
@@ -50,27 +38,12 @@ export async function GET(request: NextRequest) {
       reviewCount = reviewStats._count;
     }
 
-    const breakdown = calculateTrustBreakdown({
-      isVerified: user.isVerified,
-      avgRating,
-      reviewCount,
-      vouchCount,
-    });
-
-    // Also update User.trustScore in DB for other consumers
-    await db.user.update({
-      where: { id: userId },
-      data: { trustScore: breakdown.overall },
-    }).catch(() => {
-      // Non-critical — don't fail the request
-    });
-
     return NextResponse.json({
       success: true,
       dignity_preserved: true,
       data: {
         overall_score: breakdown.overall,
-        is_verified: user.isVerified,
+        is_verified: breakdown.verification > 0,
         vouch_count: vouchCount,
         review_count: reviewCount,
         avg_rating: Math.round(avgRating * 10) / 10,

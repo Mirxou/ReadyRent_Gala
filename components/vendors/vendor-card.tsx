@@ -1,14 +1,14 @@
-'use client'
-import { formatNumber } from '@/lib/utils';;
-
+'use client';
+import { formatNumber } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Star, MapPin, Package, TrendingUp, ExternalLink } from 'lucide-react';
+import { Star, MapPin, Package, TrendingUp, ExternalLink, Shield } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { getTrustLevel } from '@/lib/trust-score';
 
 interface Vendor {
-  id: number;
+  id: string;
   name: string;
   name_ar?: string;
   description?: string;
@@ -20,6 +20,7 @@ interface Vendor {
   is_verified?: boolean;
   total_sales?: number;
   website?: string;
+  trust_score?: number;
 }
 
 interface VendorCardProps {
@@ -29,6 +30,8 @@ interface VendorCardProps {
 export function VendorCard({ vendor }: VendorCardProps) {
   const displayName = vendor.name_ar || vendor.name;
   const displayDescription = vendor.description_ar || vendor.description;
+  const trustScore = vendor.trust_score ?? 0;
+  const trustLevel = getTrustLevel(trustScore);
 
   return (
     <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer group">
@@ -56,7 +59,7 @@ export function VendorCard({ vendor }: VendorCardProps) {
                   </Badge>
                 )}
               </div>
-              {vendor.rating && (
+              {vendor.rating != null && vendor.rating > 0 && (
                 <div className="flex items-center gap-1">
                   <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                   <span className="text-sm font-medium">{vendor.rating.toFixed(1)}</span>
@@ -71,7 +74,17 @@ export function VendorCard({ vendor }: VendorCardProps) {
               {displayDescription}
             </p>
           )}
-          
+
+          <div className="flex items-center gap-2 mb-4">
+            <Shield className={`h-4 w-4 ${trustLevel.color}`} />
+            <span className={`text-xs font-bold ${trustLevel.color}`}>
+              {trustLevel.icon} {trustLevel.label}
+            </span>
+            <span className="text-xs text-muted-foreground">
+              ({trustScore}/100)
+            </span>
+          </div>
+
           <div className="flex items-center justify-between text-sm">
             {vendor.location && (
               <div className="flex items-center gap-1 text-muted-foreground">
@@ -79,7 +92,7 @@ export function VendorCard({ vendor }: VendorCardProps) {
                 <span>{vendor.location}</span>
               </div>
             )}
-            
+
             {vendor.products_count !== undefined && (
               <div className="flex items-center gap-1 text-muted-foreground">
                 <Package className="h-4 w-4" />
@@ -89,7 +102,7 @@ export function VendorCard({ vendor }: VendorCardProps) {
           </div>
 
           <div className="mt-4 pt-4 border-t flex items-center justify-between">
-            {vendor.total_sales !== undefined && (
+            {vendor.total_sales !== undefined && vendor.total_sales > 0 && (
               <div className="flex items-center gap-2">
                 <TrendingUp className="h-4 w-4 text-green-500" />
                 <span className="text-sm font-medium">

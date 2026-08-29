@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
 import { logger } from '@/lib/logger';
+import { recalcAndSyncTrustScore } from '@/lib/trust-score-sync';
 
 export async function POST(
   request: NextRequest,
@@ -116,13 +117,16 @@ export async function POST(
       );
     }
 
-    // Create vouch — trust score is calculated on demand by lib/trust-score.ts
+    // Create vouch
     await db.socialVouch.create({
       data: {
         senderId: session.userId,
         receiverId: receiverId,
       },
     });
+
+    // Recalculate trust score for the recipient (fire-and-forget)
+    recalcAndSyncTrustScore(receiverId).catch(() => {});
 
     const newVouchCount = existingVouchCount + 1;
 

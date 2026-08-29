@@ -3,6 +3,7 @@ import { db } from '@/lib/db';
 import { getSessionFromRequest } from '@/lib/auth-server';
 import { logger } from '@/lib/logger';
 import { checkCreateRateLimit, getClientIp } from '@/lib/rate-limiter';
+import { recalcVendorTrustScore } from '@/lib/trust-score-sync';
 
 // ═══════════════════════════════════════════════════════════════════
 // Create Review API — Submit a new review (status: pending)
@@ -75,10 +76,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify product exists
+    // Verify product exists and get vendorId
     const product = await db.product.findUnique({
       where: { id: product_id },
-      select: { id: true, nameAr: true },
+      select: { id: true, nameAr: true, vendorId: true },
     });
 
     if (!product) {
@@ -115,6 +116,11 @@ export async function POST(request: NextRequest) {
         },
       },
     });
+
+    // Recalculate vendor trust score after review (fire-and-forget)
+    if (product.vendorId) {
+      recalcVendorTrustScore(product.vendorId).catch(() => {});
+    }
 
     return NextResponse.json({
       success: true,

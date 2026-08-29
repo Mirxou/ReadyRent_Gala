@@ -1954,3 +1954,40 @@ Task: Fix app/vendors/[id]/page.tsx — 6 trust score & ID type issues
 - Lint: 0 new errors (2 pre-existing errors in `[userId]/route.ts` unrelated)
 - No indigo/blue/purple colors used
 - All trust score display uses getTrustLevel 3-color system (red/amber/emerald)
+---
+Task ID: 2.2
+Agent: Main Agent
+Task: Step 2.2 — Trust Score: Field Review + Fix All Issues
+
+Work Log:
+- Read execution priority doc (11-EXECUTION-PRIORITY.md) to identify Step 2.2 scope
+- Read reference doc (03-TRUST-SAFETY-SYSTEM.md) for full trust system design
+- Field reviewed 15+ files: lib/trust-score.ts, trust-score API routes, vendor model, product APIs, vendor card, product card, product detail page, dashboard, vouch API, review API, verification vote API, trust page, vendors page
+
+Field Review Findings (9 issues found, all fixed):
+
+F1 [CRITICAL] Vendor.trustScore never synced — Vendor model (used by products, vendor cards) has separate trustScore field NEVER calculated. User and Vendor models were completely disconnected. Added `userId` field to Vendor model + reverse relation to User.
+
+F2 [CRITICAL] No sync mechanism — Created `lib/trust-score-sync.ts` with `recalcAndSyncTrustScore()` and `recalcVendorTrustScore()` functions. Single source of truth for trust score updates.
+
+F3 [CRITICAL] Product detail page showed no vendor trust — `TrustAssuranceChips` was called without props (always showed score=0, verified=false). Fixed to pass `vendorTrustScore` and `vendorVerified` from API response.
+
+F4 [CRITICAL] Vendor card had no trust display + wrong id type — `id: number` changed to `id: string`. Added trust score badge with color-coded tier label.
+
+F5 [HIGH] Trust score not recalculated on review/vouch — Added `recalcVendorTrustScore()` call after review creation and `recalcAndSyncTrustScore()` call after vouch creation.
+
+F6 [MEDIUM] Dashboard trust thresholds were wrong — `isElite = trustScore >= 100` (impossible) fixed to `>= 61`. `isSovereign = trustScore >= 1` (any score) fixed to `>= 41`. Badge text now shows 4 tiers correctly.
+
+F7 [MEDIUM] Dead code + blue color — Deleted `components/product/trust-chips.tsx` (unused duplicate with blue color violation).
+
+F8 [LOW] Vendors page filter was dead code — `vendors?.results?.filter(...)` never matched (API returns `data` not `results`). Fixed to use `vendors?.filter(...)`.
+
+F9 [BONUS] Verification approval sync — Added trust score recalculation when verification status changes (approved/rejected).
+
+Stage Summary:
+- 1 new file created: lib/trust-score-sync.ts
+- 1 file deleted: components/product/trust-chips.tsx (dead code)
+- 8 files modified: schema.prisma, score/me API, vouch API, review/create API, verification/vote API, products/[id]/page.tsx, vendor-card.tsx, dashboard/page.tsx, vendors/page.tsx
+- DB migrated: Vendor.userId added, User.vendors relation added
+- Lint: 0 errors (1 known unfixable warning: React Hook Form watch)
+- Trust score now flows: User → Vendor via sync on calculation, review, vouch, and verification

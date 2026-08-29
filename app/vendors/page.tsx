@@ -18,12 +18,12 @@ export default function VendorsPage() {
     queryFn: () => fetch('/api/vendors/vendors').then(r => r.json()).then(d => d.data || d),
   });
 
-  const filteredVendors = vendors?.results?.filter((vendor: Record<string, unknown>) => {
+  const filteredVendors = vendors?.filter((vendor: Record<string, unknown>) => {
     if (search) {
       const searchLower = search.toLowerCase();
       return (
         vendor.name?.toLowerCase().includes(searchLower) ||
-        vendor.business_name_ar?.toLowerCase().includes(searchLower) ||
+        vendor.name_ar?.toLowerCase().includes(searchLower) ||
         vendor.description?.toLowerCase().includes(searchLower) ||
         vendor.description_ar?.toLowerCase().includes(searchLower) ||
         vendor.location?.toLowerCase().includes(searchLower) ||
@@ -31,7 +31,7 @@ export default function VendorsPage() {
       );
     }
     return true;
-  }) || vendors?.results || vendors || [];
+  }) || [];
 
   return (
     <div className="relative min-h-screen">
