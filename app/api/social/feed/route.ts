@@ -1,6 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // STANDARD.Rent — Social Feed API
 // GET /api/social/feed
+// Returns rich activity items with userName, action, type fields
 // ═══════════════════════════════════════════════════════════════
 
 import { NextResponse } from 'next/server';
@@ -20,6 +21,7 @@ export async function GET() {
             firstName: true,
             lastName: true,
             username: true,
+            trustScore: true,
           },
         },
         receiver: {
@@ -28,25 +30,42 @@ export async function GET() {
             firstName: true,
             lastName: true,
             username: true,
+            trustScore: true,
           },
         },
       },
     });
 
-    const data = vouches.map((v) => ({
-      id: v.id,
-      created_at: v.createdAt.toISOString(),
-      sender: {
-        id: v.sender.id,
-        name: `${v.sender.firstName || ''} ${v.sender.lastName || ''}`.trim() || v.sender.username,
-        username: v.sender.username,
-      },
-      receiver: {
-        id: v.receiver.id,
-        name: `${v.receiver.firstName || ''} ${v.receiver.lastName || ''}`.trim() || v.receiver.username,
-        username: v.receiver.username,
-      },
-    }));
+    const data = vouches.map((v) => {
+      const senderName =
+        `${v.sender.firstName || ''} ${v.sender.lastName || ''}`.trim() ||
+        v.sender.username ||
+        'مستخدم';
+      const receiverName =
+        `${v.receiver.firstName || ''} ${v.receiver.lastName || ''}`.trim() ||
+        v.receiver.username ||
+        'مستخدم';
+
+      return {
+        id: v.id,
+        created_at: v.createdAt.toISOString(),
+        userName: senderName,
+        action: `ضَمِن لـ${receiverName}`,
+        type: 'vouch',
+        sender: {
+          id: v.sender.id,
+          name: senderName,
+          username: v.sender.username,
+          trust_score: v.sender.trustScore,
+        },
+        receiver: {
+          id: v.receiver.id,
+          name: receiverName,
+          username: v.receiver.username,
+          trust_score: v.receiver.trustScore,
+        },
+      };
+    });
 
     return NextResponse.json({
       success: true,

@@ -74,7 +74,7 @@ const COMPONENT_META: Record<
 };
 
 // ── Score ring ────────────────────────────────────────────────────────────────
-function ScoreRing({ score }: { score: number; _tier: TrustTier }) {
+function ScoreRing({ score }: { score: number }) {
   const level = getTrustLevel(score);
   const radius = 54;
   const circumference = 2 * Math.PI * radius;
@@ -226,7 +226,7 @@ export function TrustScoreDashboard() {
             {score.tier_label}
           </div>
 
-          <ScoreRing score={score.overall_score} _tier={score.tier} />
+          <ScoreRing score={score.overall_score} />
 
           <div className="text-center">
             <h2 className="text-xl font-bold">نقاط الثقة الخاصة بك</h2>

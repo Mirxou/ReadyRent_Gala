@@ -12,18 +12,36 @@ import { ParticleField } from '@/components/ui/particle-field';
 import { useAuthStore } from '@/lib/store';
 import { useRouter } from 'next/navigation';
 import { socialApi } from '@/lib/api';
+import { getTrustLevel, type TrustTier } from '@/lib/trust-score';
+
+const TIER_ICONS: Record<TrustTier, string> = {
+  untrusted: '🔴',
+  beginner: '🟡',
+  trusted: '🟢',
+  highly_trusted: '✨',
+  fully_trusted: '🏆',
+};
 
 export default function SocialPage() {
   const router = useRouter();
-  const { isAuthenticated } = useAuthStore();
-  // userId available via useAuthStore if needed for future features
+  const { isAuthenticated, user } = useAuthStore();
 
   const { data: feedData, isLoading: feedLoading } = useQuery({
     queryKey: ['social-feed'],
     queryFn: () => socialApi.getFeed().then(r => r.data),
   });
 
+  const { data: trustData } = useQuery({
+    queryKey: ['my-trust-score-social'],
+    queryFn: () => fetch('/api/social/score/me', { credentials: 'include' }).then(r => r.json()).then(d => d.data),
+    enabled: isAuthenticated,
+    staleTime: 10 * 60 * 1000,
+  });
+
   const feed = feedData?.data || feedData || [];
+
+  const myTrustScore = trustData?.overall_score ?? user?.trust_score ?? 0;
+  const myLevel = getTrustLevel(myTrustScore);
 
   return (
     <div className="relative min-h-screen">
@@ -44,6 +62,46 @@ export default function SocialPage() {
             نظام الثقة المجتمعي — حيث يضمن المجتمع بعضه البعض. كل ضمان يزيد من نقاط الثقة ويبني شبكة أمان حقيقية.
           </p>
         </motion.div>
+
+        {/* My Trust Score Card (authenticated users) */}
+        {isAuthenticated && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="mb-12"
+          >
+            <GlassPanel className="p-6">
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                <div className="flex items-center gap-4">
+                  <div className={`w-14 h-14 rounded-full flex items-center justify-center text-2xl font-black ${myLevel.bgColor} ${myLevel.color} border ${myLevel.borderColor}`}>
+                    {myTrustScore}
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">نقاط ثقتك</p>
+                    <p className={`text-lg font-bold ${myLevel.color}`}>
+                      {TIER_ICONS[myLevel.tier]} {myLevel.label}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="text-center px-4">
+                    <p className="text-2xl font-black text-sovereign-gold">{trustData?.vouch_count ?? '—'}</p>
+                    <p className="text-xs text-muted-foreground">تزكية مستلمة</p>
+                  </div>
+                  <div className="text-center px-4">
+                    <p className="text-2xl font-black text-sovereign-gold">{trustData?.review_count ?? '—'}</p>
+                    <p className="text-xs text-muted-foreground">تقييم</p>
+                  </div>
+                  <div className="text-center px-4">
+                    <p className="text-2xl font-black text-sovereign-gold">{trustData?.avg_rating?.toFixed(1) ?? '—'}</p>
+                    <p className="text-xs text-muted-foreground">متوسط التقييم</p>
+                  </div>
+                </div>
+              </div>
+            </GlassPanel>
+          </motion.div>
+        )}
 
         {/* Features */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
@@ -88,7 +146,7 @@ export default function SocialPage() {
                     <p className="text-xs text-muted-foreground">{item.action || 'نشاط جديد'}</p>
                   </div>
                   <Badge variant="outline" className="text-xs border-sovereign-gold/30 text-sovereign-gold shrink-0">
-                    {item.type || 'social'}
+                    {item.type === 'vouch' ? 'تزكية' : (item.type || 'social')}
                   </Badge>
                 </div>
               ))}

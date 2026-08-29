@@ -26,7 +26,7 @@ export function VouchButton({ userId, vouched, vouchCount = 0, onVouch }: VouchB
       const res = await fetch(`/api/social/vouch/${userId}`, { method: 'POST', credentials: 'include' });
       const json = await res.json();
       if (res.ok) { toast.success('تم تسجيل الضمان بنجاح'); onVouch?.(); }
-      else toast.error(json?.message || 'فشل تسجيل الضمان');
+      else toast.error(json?.message_ar || json?.message || 'فشل تسجيل الضمان');
     } catch { toast.error('حدث خطأ'); }
     finally { setLoading(false); }
   };

@@ -126,7 +126,7 @@ export class SovereignClient {
    * System status check — used by SovereignContext to detect sovereign_halt
    */
   async getSystemStatus() {
-    return this.get<{ status: string; code?: string }>('/health/');
+    return this.get<{ status: string; code?: string }>('/health');
   }
 }
 

@@ -1,7 +1,8 @@
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
 // STANDARD.Rent — Social Vouch API
-// POST /api/social/vouch/[userId]
-// ═══════════════════════════════════════════════════════════════
+// POST /api/social/vouch/[userId]  — Create a vouch
+// GET  /api/social/vouch/[userId]  — Check vouch status
+// ═══════════════════════════════════════════════════
 
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
@@ -9,6 +10,53 @@ import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
 import { logger } from '@/lib/logger';
 import { recalcAndSyncTrustScore } from '@/lib/trust-score-sync';
 
+// ──── GET: Check if current user has vouched for target user ────
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ userId: string }> }
+) {
+  try {
+    const session = await getSessionFromRequest(request);
+    if (!session) {
+      return NextResponse.json({
+        success: true,
+        dignity_preserved: true,
+        data: { vouched: false },
+      });
+    }
+
+    const { userId: targetUserId } = await params;
+    if (!targetUserId) {
+      return NextResponse.json(
+        { success: false, dignity_preserved: true, message_ar: 'معرف المستخدم مطلوب', code: 'VALIDATION_ERROR' },
+        { status: 400 }
+      );
+    }
+
+    const existing = await db.socialVouch.findUnique({
+      where: {
+        senderId_receiverId: {
+          senderId: session.userId,
+          receiverId: targetUserId,
+        },
+      },
+    });
+
+    return NextResponse.json({
+      success: true,
+      dignity_preserved: true,
+      data: { vouched: !!existing },
+    });
+  } catch (error) {
+    logger.error('Social Vouch Status', 'Error', error);
+    return NextResponse.json(
+      { success: false, dignity_preserved: true, message_ar: 'حدث خطأ', code: 'INTERNAL_ERROR' },
+      { status: 500 }
+    );
+  }
+}
+
+// ──── POST: Create a vouch ────
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ userId: string }> }

@@ -127,7 +127,7 @@ export default function TrustScorePage() {
   const { data, isLoading, isError } = useQuery<TrustScoreApiResponse>({
     queryKey: ['trust-score-me'],
     queryFn: () =>
-      fetch('/api/social/score/me/')
+      fetch('/api/social/score/me')
         .then((r) => r.json())
         .then((d) => d.data),
     enabled: isAuthenticated,

@@ -1991,3 +1991,36 @@ Stage Summary:
 - DB migrated: Vendor.userId added, User.vendors relation added
 - Lint: 0 errors (1 known unfixable warning: React Hook Form watch)
 - Trust score now flows: User → Vendor via sync on calculation, review, vouch, and verification
+
+---
+Task ID: 2.2
+Agent: Main Agent
+
+Task: Step 2.2 Field Review — نظام الثقة الأساسي (Basic Trust Score System)
+
+Work Log:
+- Read 11-EXECUTION-PRIORITY.md → identified Step 2.2 scope: Trust Score display + colors + vouches
+- Read 03-TRUST-SAFETY-SYSTEM.md → understood full trust architecture
+- Read 15+ files: trust-score.ts, trust-score-sync.ts, TrustScoreDashboard.tsx, trust-score/page.tsx, vendors/[id]/page.tsx, social/page.tsx, vouch-button.tsx, social/feed API, social/vouch API, social/score APIs, reviews API, auth/profile API, dashboard/sidebar.tsx, products API, vendors API
+- Compared code against Step 2.2 requirements (trust score on profiles, trust colors, vouch functionality)
+
+F1 [CRITICAL] Social feed API response mismatch — API returned {sender, receiver} but social page expected {userName, action, type}. Feed showed "مستخدم" / "نشاط جديد" for every item. Fixed API to add userName, action, type fields.
+
+F2 [HIGH] Vouch button error toast — Used json?.message but API returns json?.message_ar. Fixed to check message_ar first.
+
+F3 [HIGH] No vouch button on vendor profile — Users couldn't vouch for vendors. Added VouchButton component to vendor profile, created GET /api/social/vouch/[userId] status endpoint, added user_id to vendors API response.
+
+F4 [MEDIUM] Social page didn't show trust score — Authenticated users saw no trust info on social page. Added trust score card with score, vouch count, review count, and avg rating.
+
+F5 [MEDIUM] Trailing slashes in API URLs — sovereignClient used /reviews/, /social/score/me/, /social/score/{id}/ which caused unnecessary 308 redirects. Fixed all URLs in reviews.ts, sovereign-client.ts, and trust-score/page.tsx.
+
+F6 [LOW] Unused _tier prop in ScoreRing — Component defined { score: number; _tier: TrustTier } but _tier was unused. Removed prop and the corresponding usage.
+
+F7 [MEDIUM] Dashboard sidebar had no trust score — Users couldn't see their trust level from dashboard. Added trust score badge with color-coded tier, links to /trust-score.
+
+Stage Summary:
+- 8 files modified: social/feed API, vouch-button.tsx, vendors/[id]/page.tsx, social/page.tsx, reviews API, sovereign-client.ts, trust-score/page.tsx, dashboard/sidebar.tsx
+- 1 file rewritten: social/vouch/[userId]/route.ts (added GET handler)
+- 1 file updated: vendors API (added user_id to response)
+- Lint: 0 errors (1 known unfixable warning: React Hook Form watch, 1 non-critical exhaustive-deps warning)
+- Step 2.2 trust score system is now fully functional: algorithm ✅, display on profiles ✅, trust colors ✅, vouch system ✅

@@ -46,6 +46,7 @@ export async function GET(request: NextRequest) {
 
     const data = vendors.map((v) => ({
       id: v.id,
+      user_id: v.userId,
       name: v.name,
       name_ar: v.nameAr,
       description: v.description,

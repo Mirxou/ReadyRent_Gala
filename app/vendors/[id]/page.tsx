@@ -21,8 +21,10 @@ import { SovereignButton } from '@/shared/components/sovereign/sovereign-button'
 import { SovereignGlow } from '@/shared/components/sovereign/sovereign-sparkle';
 import { DignifiedLoader } from '@/shared/components/sovereign/dignified-loader';
 import { TrustAssuranceChips } from '@/shared/components/sovereign/trust-assurance-chips';
+import { VouchButton } from '@/shared/components/sovereign/vouch-button';
 import { Badge } from '@/components/ui/badge';
 import { ProductCard } from '@/components/product/product-card';
+import { useAuthStore } from '@/lib/store';
 
 interface Vendor {
   id: string;
@@ -41,6 +43,7 @@ interface Vendor {
   website?: string;
   trust_score?: number;
   joined_date?: string;
+  user_id?: string;
 }
 
 interface Product {
@@ -82,6 +85,9 @@ export default function VendorProfilePage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [vouched, setVouched] = useState(false);
+  const [vouchCount, setVouchCount] = useState(0);
+  const { isAuthenticated, user } = useAuthStore();
 
   useEffect(() => {
     async function fetchData() {
@@ -109,6 +115,16 @@ export default function VendorProfilePage() {
         }
 
         setVendor(foundVendor);
+
+        // Fetch vouch status if vendor has a linked user and current user is authenticated
+        if (foundVendor.user_id && isAuthenticated) {
+          const [vouchStatusRes, trustRes] = await Promise.all([
+            fetch(`/api/social/vouch/${foundVendor.user_id}/status`, { credentials: 'include' }).then(r => r.ok ? r.json() : null).catch(() => null),
+            fetch(`/api/social/score/${foundVendor.user_id}`).then(r => r.ok ? r.json() : null).catch(() => null),
+          ]);
+          if (vouchStatusRes?.data) setVouched(vouchStatusRes.data.vouched);
+          if (trustRes?.data) setVouchCount(trustRes.data.vouch_count || 0);
+        }
 
         const vendorProducts = (productsData.data || []).filter(
           (p: Product) => p.vendor_id === vendorId
@@ -245,6 +261,17 @@ export default function VendorProfilePage() {
               isVerified={vendor.is_verified ?? false}
               className="mt-2"
             />
+
+            {vendor.user_id && vendor.user_id !== user?.id && (
+              <div className="mt-3">
+                <VouchButton
+                  userId={vendor.user_id}
+                  vouched={vouched}
+                  vouchCount={vouchCount}
+                  onVouch={() => { setVouched(true); setVouchCount(c => c + 1); }}
+                />
+              </div>
+            )}
 
             <div className="flex items-center justify-center sm:justify-start gap-4 text-sm text-white/60">
               {vendor.rating && (

@@ -21,8 +21,10 @@ import {
     ClipboardList,
     CalendarCheck,
     Bell,
+    Shield,
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/store';
+import { getTrustLevel } from '@/lib/trust-score';
 
 const sidebarSections = [
     {
@@ -69,16 +71,17 @@ const sidebarSections = [
 
 export function DashboardSidebar() {
     const pathname = usePathname();
-    const { logout } = useAuthStore();
+    const { user, logout } = useAuthStore();
+    const trustLevel = getTrustLevel(user?.trust_score ?? 0);
 
     return (
         <div className="flex flex-col h-full w-72 bg-background/80 backdrop-blur-3xl border-l border-white/5 relative overflow-hidden" dir="rtl">
-            
             {/* Background Ambience */}
             <div className="absolute top-0 right-0 w-32 h-32 bg-sovereign-gold/5 rounded-full blur-[80px] -z-10" />
             <div className="absolute bottom-0 left-0 w-40 h-40 bg-sovereign-gold/5 rounded-full blur-[100px] -z-10" />
 
             <div className="p-6 flex-1 overflow-y-auto">
+                {/* Logo */}
                 <div className="flex items-center gap-3 mb-10 group cursor-pointer">
                     <div className="relative">
                         <ShieldCheck className="w-7 h-7 text-sovereign-gold group-hover:scale-110 transition-transform duration-500" />
@@ -93,6 +96,34 @@ export function DashboardSidebar() {
                     </div>
                 </div>
 
+                {/* Trust Score Badge */}
+                <div className="mb-8">
+                    <Link
+                        href="/trust-score"
+                        className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 transition-all duration-300 group"
+                    >
+                        <div className={cn(
+                            'w-9 h-9 rounded-full flex items-center justify-center text-sm font-black border',
+                            trustLevel.bgColor,
+                            trustLevel.color,
+                            trustLevel.borderColor,
+                        )}>
+                            {user?.trust_score ?? 0}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <p className="text-xs text-muted-foreground">نقاط الثقة</p>
+                            <p className={cn(
+                                'text-sm font-bold truncate',
+                                trustLevel.color,
+                            )}>
+                                {trustLevel.icon} {trustLevel.label}
+                            </p>
+                        </div>
+                        <Shield className="w-4 h-4 text-muted-foreground/40 group-hover:text-sovereign-gold transition-colors" />
+                    </Link>
+                </div>
+
+                {/* Navigation */}
                 <nav className="space-y-6">
                     {sidebarSections.map((section, sIdx) => (
                         <div key={sIdx}>
@@ -115,19 +146,19 @@ export function DashboardSidebar() {
                                                     : "text-muted-foreground hover:text-foreground hover:bg-white/5"
                                             )}
                                         >
-                                                {isActive && (
-                                                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-sovereign-gold rounded-l-full shadow-[0_0_10px_rgba(180,146,84,0.4)]" />
-                                                )}
-                                                <Icon className={cn(
-                                                    "w-4 h-4 transition-all duration-300",
-                                                    isActive ? "text-sovereign-gold scale-110" : "group-hover:text-sovereign-gold"
-                                                )} />
-                                                <span className={cn(
-                                                    "font-medium",
-                                                    isActive ? "opacity-100" : "opacity-60 group-hover:opacity-100"
-                                                )}>
-                                                    {item.title}
-                                                </span>
+                                            {isActive && (
+                                                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-sovereign-gold rounded-l-full shadow-[0_0_10px_rgba(180,146,84,0.4)]" />
+                                            )}
+                                            <Icon className={cn(
+                                                "w-4 h-4 transition-all duration-300",
+                                                isActive ? "text-sovereign-gold scale-110" : "group-hover:text-sovereign-gold"
+                                            )} />
+                                            <span className={cn(
+                                                "font-medium",
+                                                isActive ? "opacity-100" : "opacity-60 group-hover:opacity-100"
+                                            )}>
+                                                {item.title}
+                                            </span>
                                         </Link>
                                     );
                                 })}
@@ -137,6 +168,7 @@ export function DashboardSidebar() {
                 </nav>
             </div>
 
+            {/* Logout */}
             <div className="p-6 mt-auto border-t border-white/5">
                 <button
                     onClick={() => logout()}

@@ -33,7 +33,7 @@ export const reviewsApi = {
   listForProduct: (productId: string, params?: { page?: number }) => {
     const q = new URLSearchParams({ product_id: productId });
     if (params?.page) q.append('page', params.page.toString());
-    return sovereignClient.get<Review[]>(`/reviews/?${q.toString()}`);
+    return sovereignClient.get<Review[]>(`/reviews?${q.toString()}`);
   },
 
   /** List reviews — used by /products/[id] page */
@@ -41,12 +41,12 @@ export const reviewsApi = {
     const q = new URLSearchParams();
     if (params?.product_id) q.append('product_id', String(params.product_id));
     if (params?.page) q.append('page', String(params.page));
-    return sovereignClient.get<Review[]>(`/reviews/?${q.toString()}`);
+    return sovereignClient.get<Review[]>(`/reviews?${q.toString()}`);
   },
 
   /** Get reviews given by or received by the current user */
   listMyReviews: () =>
-    sovereignClient.get<Review[]>('/reviews/?my=true'),
+    sovereignClient.get<Review[]>('/reviews?my=true'),
 
   /** Submit a review — used by review-form.tsx */
   create: (data: {
@@ -55,20 +55,20 @@ export const reviewsApi = {
     rating: number;
     title?: string;
     comment: string;
-  }) => sovereignClient.post<Review>('/reviews/create/', data),
+  }) => sovereignClient.post<Review>('/reviews/create', data),
 
   /** Submit a review for a completed booking (alias) */
   createReview: (data: {
     booking_id: string;
     rating: number;
     comment: string;
-  }) => sovereignClient.post<Review>('/reviews/create/', data),
+  }) => sovereignClient.post<Review>('/reviews/create', data),
 
   /** Get the trust score for the current user */
   getMyTrustScore: () =>
-    sovereignClient.get<TrustScore>('/social/score/me/'),
+    sovereignClient.get<TrustScore>('/social/score/me'),
 
   /** Get the trust score for a specific user (public) */
   getUserTrustScore: (userId: string) =>
-    sovereignClient.get<TrustScore>(`/social/score/${userId}/`),
+    sovereignClient.get<TrustScore>(`/social/score/${userId}`),
 };
