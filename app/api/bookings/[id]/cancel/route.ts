@@ -123,6 +123,11 @@ export async function POST(
           ...(escrowWasHeld ? { escrowStatus: 'refunded' } : {}),
         },
       }),
+      // BUG-6: Expire any associated contract when booking is cancelled
+      db.contract.updateMany({
+        where: { bookingId: id, status: { in: ['draft', 'signed'] } },
+        data: { status: 'expired' },
+      }),
     ];
 
     // If escrow was held, update payment status too

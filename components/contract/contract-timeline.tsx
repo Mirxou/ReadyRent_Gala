@@ -121,7 +121,7 @@ function deriveActivePhaseIndex(contract: Contract & { [k: string]: unknown }): 
   if (snap.has_dispute) return -3;
 
   if (status === 'finalized' || status === 'completed') return 4;
-  if (snap.escrow_locked || snap.escrow_status === 'HELD' || snap.escrow_status === 'held') return 2;
+  if (snap.escrow_locked || snap.escrow_status === 'held') return 2;
   if (contract.renter_signature) return 1;
   return 0;
 }
@@ -265,7 +265,7 @@ export function ContractTimeline({ contract, className }: ContractTimelineProps)
   const activeIndex = useMemo(() => deriveActivePhaseIndex(contract), [contract]);
   const snap = (contract.snapshot || {}) as Record<string, unknown>;
 
-  const isVoid = contract.status === 'void';
+  const isVoid = contract.status === 'void' || contract.status === 'expired';
   const isDisputed = snap.has_dispute;
 
   // Timestamps from snapshot

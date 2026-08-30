@@ -171,16 +171,17 @@ export default function BookingDetailPage() {
   const pricePerDay = booking.items?.[0]?.price_per_day;
 
   const contractData = booking.contracts?.[0] || null;
+  // BUG-7: Preserve actual contract status instead of forcing 'signed'
+  const contractDisplayStatus = contractData
+    ? booking.status === 'cancelled'
+      ? 'expired'
+      : contractData.status // draft, signed, or finalized — pass through as-is
+    : null;
   const timelineContract = contractData
     ? {
         id: contractData.id,
         booking_id: booking.id,
-        status:
-          booking.status === 'cancelled'
-            ? ('void' as const)
-            : contractData.status === 'finalized'
-              ? ('finalized' as const)
-              : ('signed' as const),
+        status: contractDisplayStatus || contractData.status,
         is_finalized: contractData.status === 'finalized' || false,
         contract_hash: contractData.contract_hash || '',
         renter_signature: contractData.signed_at ? 'signed' : undefined,
@@ -394,12 +395,14 @@ export default function BookingDetailPage() {
                       </p>
                     </div>
                   </div>
+                  {contractData && (
                   <Link
                     href={`/contracts/${contractData.id}`}
                     className="inline-flex items-center justify-center w-full gap-2 text-white bg-amber-600 hover:bg-amber-700 rounded-xl px-4 py-3 transition-colors"
                   >
                     عرض العقد الرقمي <ArrowUpRight className="w-4 h-4" />
                   </Link>
+                  )}
                 </div>
               </div>
             </GlassPanel>

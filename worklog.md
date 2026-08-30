@@ -2426,3 +2426,35 @@ Stage Summary:
 - Hash is fully deterministic across all routes
 - All colors comply with no-blue rule
 - Brand is consistently STANDARD.Rent
+
+---
+Task ID: 2.4-fix
+Agent: Main Agent
+Task: Step 2.4 Contracts & Documentation — Fix all 13 bugs from microscopic field review
+
+Work Log:
+- Read 18 files covering contracts API, components, webhook, booking page, KYC, Prisma schema, spec docs
+- Used LLM assistant for microscopic review — 14 bugs found, 6 false positives rejected
+- Fixed BUG-1: booking.depositAmount doesn't exist → use product.depositAmount (generate route + webhook)
+- Fixed BUG-2: contractData.id null crash → added null guard on Link in bookings page
+- Fixed BUG-3: sign API returns raw Prisma (parties=string) → parse to match GET format (array)
+- Fixed BUG-4: generate route allowed contract for any booking status → added confirmed/active check
+- Fixed BUG-5: duplicate notification in webhook → removed second copy
+- Fixed BUG-6: contract not updated on cancellation → added contract.updateMany(status:expired) in cancel transaction
+- Fixed BUG-7: timelineContract forced 'signed' for draft → pass through actual contract status
+- Fixed BUG-8: snapshot inconsistency between generate and webhook → unified to 7 fields including deposit_amount
+- Fixed BUG-9: notification type 'system' → changed to 'booking' in generate, sign, and webhook
+- Fixed BUG-10: 7 sections vs 9 in spec → split cost section, added بند 9 التوقيع الرقمي
+- Fixed BUG-11: redundant isSigning+signing states → merged into signingState state machine
+- Fixed BUG-12: dead code 'HELD' uppercase check in timeline → removed
+- Fixed BUG-13: ensureContractForBooking not in transaction → wrapped in db.$transaction
+- Updated contract-timeline isVoid to include 'expired' status
+- Updated contract-viewer isSigned to include 'expired'
+- Lint: 0 errors, 2 warnings (pre-existing unfixable)
+
+Stage Summary:
+- 13 bugs fixed across 8 files (BUG-14 KYC base64 deferred for production)
+- Contract system now has 9 sections matching spec, proper null safety, consistent snapshots
+- Contracts are properly expired on booking cancellation
+- All API responses return properly typed data
+- Hash remains deterministic (no Date.now() used)

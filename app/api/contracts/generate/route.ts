@@ -29,7 +29,7 @@ export async function POST(request: Request) {
       where: { id: booking_id },
       include: {
         product: {
-          select: { id: true, name: true, nameAr: true, vendorId: true, description: true },
+          select: { id: true, name: true, nameAr: true, vendorId: true, description: true, depositAmount: true },
         },
         user: {
           select: { id: true, username: true, firstName: true, lastName: true, email: true, phone: true },
@@ -41,6 +41,14 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { success: false, dignity_preserved: true, message_en: 'الحجز غير موجود', code: 'NOT_FOUND' },
         { status: 404 }
+      );
+    }
+
+    // BUG-4: Only allow contract generation for confirmed/active bookings
+    if (!['confirmed', 'active'].includes(booking.status)) {
+      return NextResponse.json(
+        { success: false, dignity_preserved: true, message_ar: 'لا يمكن إنشاء عقد لحجز غير مؤكد', message_en: 'Contract can only be generated for confirmed or active bookings', code: 'INVALID_BOOKING_STATUS' },
+        { status: 400 }
       );
     }
 
@@ -83,7 +91,7 @@ export async function POST(request: Request) {
       startDate: booking.startDate?.toISOString().split('T')[0] || '',
       endDate: booking.endDate?.toISOString().split('T')[0] || '',
       totalPrice: booking.totalPrice || 0,
-      depositAmount: booking.depositAmount || undefined,
+      depositAmount: booking.product?.depositAmount || undefined,
     });
 
     // Compute SHA-256 hash
@@ -95,12 +103,13 @@ export async function POST(request: Request) {
       ...(vendor ? [{ id: vendor.id, name: vendorName, role: 'vendor', signed: false }] : []),
     ]);
 
-    // Build snapshot JSON
+    // Build snapshot JSON (consistent with webhook ensureContractForBooking)
     const snapshot = JSON.stringify({
       booking_id,
       product_name: booking.productName,
       product_id: booking.productId,
       total_price: booking.totalPrice,
+      deposit_amount: booking.product?.depositAmount ?? null,
       start_date: booking.startDate?.toISOString(),
       end_date: booking.endDate?.toISOString(),
       escrow_status: booking.escrowStatus,
@@ -122,9 +131,9 @@ export async function POST(request: Request) {
     await db.notification.create({
       data: {
         userId: session.userId,
-        type: 'system',
+        type: 'booking',
         title: 'تم إنشاء عقد إيجارك',
-        message: `تم إنشاء عقد رقمي لحجزك. يرجى مراجعة البنود والتوقيع.`,
+        message: 'تم إنشاء عقد رقمي لحجزك. يرجى مراجعة البنود والتوقيع.',
       },
     });
 

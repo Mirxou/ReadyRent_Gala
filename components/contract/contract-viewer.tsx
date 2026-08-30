@@ -56,23 +56,22 @@ const statusConfig: Record<string, { label: string; variant: 'default' | 'second
 };
 
 export const ContractViewer: React.FC<ContractViewerProps> = ({ contract, onSign }) => {
-  const [isSigning, setIsSigning] = useState(false);
-  const [signing, setSigning] = useState(false);
+  // BUG-11: Merged isSigning+signing into a single state machine
+  const [signingState, setSigningState] = useState<'idle' | 'confirming' | 'signing'>('idle');
 
   const currentUser = contract.parties?.find((p) => p.role === 'renter');
-  const isSigned = contract.status === 'signed' || contract.status === 'finalized';
+  const isSigned = contract.status === 'signed' || contract.status === 'finalized' || contract.status === 'expired';
   const cfg = statusConfig[contract.status] || statusConfig.draft;
 
   const handleSign = async () => {
-    setSigning(true);
+    setSigningState('signing');
     try {
       await onSign();
       toast.success('تم التوقيع بنجاح');
     } catch {
       toast.error('فشل التوقيع. يرجى المحاولة مرة أخرى.');
     } finally {
-      setSigning(false);
-      setIsSigning(false);
+      setSigningState('idle');
     }
   };
 
@@ -196,7 +195,7 @@ export const ContractViewer: React.FC<ContractViewerProps> = ({ contract, onSign
             exit={{ opacity: 0, scale: 0.95 }}
             className="flex flex-col items-center gap-6 py-8"
           >
-            {isSigning ? (
+            {signingState === 'confirming' || signingState === 'signing' ? (
               <div className="w-full max-w-lg space-y-4 bg-white p-8 rounded-2xl border border-slate-200 shadow-sm text-center">
                 <Fingerprint className="w-16 h-16 text-amber-500 mx-auto" />
                 <h3 className="font-bold text-slate-900 text-lg">توقيع العقد رقمي</h3>
@@ -208,18 +207,18 @@ export const ContractViewer: React.FC<ContractViewerProps> = ({ contract, onSign
                   <Button
                     className="flex-1 h-12 text-base font-bold"
                     onClick={handleSign}
-                    disabled={signing}
+                    disabled={signingState === 'signing'}
                   >
-                    {signing ? 'جاري التوقيع...' : 'أوقّع العقد'}
+                    {signingState === 'signing' ? 'جاري التوقيع...' : 'أوقّع العقد'}
                   </Button>
-                  <Button variant="outline" className="h-12 px-6" onClick={() => setIsSigning(false)}>إلغاء</Button>
+                  <Button variant="outline" className="h-12 px-6" onClick={() => setSigningState('idle')}>إلغاء</Button>
                 </div>
               </div>
             ) : (
               <Button 
                 size="lg" 
                 className="px-12 py-8 text-xl font-bold rounded-2xl shadow-xl hover:shadow-amber-200/50 transition-all gap-4 ring-offset-2 ring-amber-500 hover:ring-2"
-                onClick={() => setIsSigning(true)}
+                onClick={() => setSigningState('confirming')}
               >
                 <Fingerprint size={28} />
                 توقيع العقد الآن

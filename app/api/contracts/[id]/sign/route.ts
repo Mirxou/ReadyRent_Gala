@@ -89,7 +89,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       await db.notification.create({
         data: {
           userId: vendorBooking.product.vendorId,
-          type: 'system',
+          type: 'booking',
           title: 'تم توقيع عقد حجز جديد',
           message: `تم توقيع عقد إيجار ${vendorBooking.product.nameAr || vendorBooking.product.name || ''}. يمكنك البدء في تنفيذ الحجز.`,
         },
@@ -97,7 +97,28 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     }
   }
 
-  return NextResponse.json({ success: true, dignity_preserved: true, data: updated });
+  // BUG-3: Parse parties to match GET endpoint response format (array, not string)
+  function safeJsonParse<T>(str: string | null, fallback: T): T {
+    if (!str) return fallback;
+    try { return JSON.parse(str) as T; } catch { return fallback; }
+  }
+
+  const data = {
+    id: updated.id,
+    booking_id: updated.bookingId,
+    status: updated.status,
+    is_finalized: updated.isFinalized,
+    contract_hash: updated.contractHash,
+    terms: updated.terms,
+    parties: safeJsonParse(updated.parties, []),
+    renter_signature: updated.renterSignature,
+    signed_at: updated.signedAt?.toISOString() ?? null,
+    snapshot: safeJsonParse(updated.snapshot, null),
+    created_at: updated.createdAt.toISOString(),
+    updated_at: updated.updatedAt.toISOString(),
+  };
+
+  return NextResponse.json({ success: true, dignity_preserved: true, data });
   } catch (error) {
     logger.error('Contract Sign API', 'Error', error);
     return NextResponse.json(
