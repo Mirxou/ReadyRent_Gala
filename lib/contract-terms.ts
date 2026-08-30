@@ -11,6 +11,7 @@ interface ContractTermsData {
   startDate: string;
   endDate: string;
   totalPrice: number;
+  depositAmount?: number;
   currency?: string;
 }
 
@@ -41,7 +42,7 @@ ${data.productDescription ? `الوصف: ${data.productDescription}` : ''}
 تاريخ النهاية: ${data.endDate}
 المدة: ${days} يوم
 السعر اليومي: ${dailyPrice.toLocaleString('ar-DZ')} ${currency}
-الإجمالي: ${data.totalPrice.toLocaleString('ar-DZ')} ${currency}`,
+الإجمالي: ${data.totalPrice.toLocaleString('ar-DZ')} ${currency}${data.depositAmount ? `\nالوديعة: ${data.depositAmount.toLocaleString('ar-DZ')} ${currency}` : ''}`,
 
     `بند 4: شروط الاستخدام`,
     `يتعهد المستأجر باستخدام المنتج وفقًا للغرض المحدد وبحالة جيدة.
@@ -70,6 +71,29 @@ ${data.productDescription ? `الوصف: ${data.productDescription}` : ''}
 }
 
 export function computeContractHash(terms: string, bookingId: string): string {
-  const payload = `${bookingId}:${terms}:${new Date().toISOString().split('T')[0]}`;
-  return crypto.createHash('sha256').update(payload, 'utf8').digest('hex');
+  // Deterministic: uses ONLY terms + bookingId — no Date, no timestamp
+  // This ensures the hash is stable across days and verifiable later
+  return crypto.createHash('sha256').update(`${bookingId}:${terms}`, 'utf8').digest('hex');
+}
+
+/**
+ * Compute contract hash from raw booking fields (used by release-escrow for verification).
+ * MUST match the output of computeContractHash(terms, bookingId) when terms are generated
+ * from the same booking fields.
+ */
+export function computeContractHashFromBooking(fields: {
+  bookingId: string;
+  renterName: string;
+  renterEmail: string;
+  vendorName: string;
+  vendorEmail: string;
+  productName: string;
+  productDescription: string | null;
+  startDate: string;
+  endDate: string;
+  totalPrice: number;
+  depositAmount?: number;
+}): string {
+  const terms = generateContractTerms(fields);
+  return computeContractHash(terms, fields.bookingId);
 }

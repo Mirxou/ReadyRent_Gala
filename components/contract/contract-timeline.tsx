@@ -55,8 +55,8 @@ const CONTRACT_PHASES: Phase[] = [
     label: 'توقيع المستأجر',
     sublabel: 'التحقق من الهوية الرقمية',
     icon: PenLine,
-    color: 'text-blue-600',
-    dotColor: 'bg-blue-500',
+    color: 'text-amber-600',
+    dotColor: 'bg-amber-500',
   },
   {
     id: 'escrow_locked',
@@ -231,7 +231,7 @@ function TimelineNode({
 
         {/* Blockchain hash */}
         {hash && !isPending && (
-          <div className="mt-1.5 flex items-center gap-1 text-[9px] font-mono text-blue-400 truncate">
+          <div className="mt-1.5 flex items-center gap-1 text-[9px] font-mono text-amber-600 truncate">
             <Link2 className="w-2.5 h-2.5 flex-shrink-0" />
             <span className="truncate">{hash.slice(0, 24)}…</span>
           </div>
@@ -242,10 +242,10 @@ function TimelineNode({
           <motion.div
             initial={{ opacity: 0, x: -4 }}
             animate={{ opacity: 1, x: 0 }}
-            className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800"
+            className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800"
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-            <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+            <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400">
               المرحلة الحالية
             </span>
           </motion.div>
@@ -288,7 +288,7 @@ export function ContractTimeline({ contract, className }: ContractTimelineProps)
   return (
     <div className={cn('bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-6', className)}>
       <h3 className="text-base font-bold text-slate-700 dark:text-slate-300 mb-6 flex items-center gap-2">
-        <FileText className="w-4 h-4 text-blue-500" />
+        <FileText className="w-4 h-4 text-amber-500" />
         مسار العقد الزمني
       </h3>
 
@@ -333,7 +333,7 @@ export function ContractTimeline({ contract, className }: ContractTimelineProps)
               {isDisputed && snap.dispute_id && (
                 <a
                   href={`/disputes/${snap.dispute_id}`}
-                  className="text-xs text-blue-500 hover:underline mt-1 inline-flex items-center gap-1"
+                  className="text-xs text-amber-600 hover:underline mt-1 inline-flex items-center gap-1"
                 >
                   عرض ملف النزاع #{snap.dispute_id}
                 </a>

@@ -4,7 +4,7 @@ export interface ContractParty {
   id: string;
   name: string;
   role: 'renter' | 'vendor';
-  signed: boolean;
+  signed?: boolean;
   signedAt?: string;
   ipAddress?: string;
 }
@@ -24,6 +24,7 @@ export interface Contract {
   updated_at: string;
   booking?: {
     id: string;
+    user_id?: string;
     product_name: string | null;
     product_image: string | null;
     start_date: string | null;
@@ -34,14 +35,14 @@ export interface Contract {
 
 export const contractsApi = {
   listContracts: () =>
-    sovereignClient.get<Contract[]>('/contracts/'),
+    sovereignClient.get<Contract[]>('/contracts'),
 
   getContract: (id: string) =>
-    sovereignClient.get<Contract>(`/contracts/${id}/`),
+    sovereignClient.get<Contract>(`/contracts/${id}`),
 
   generateContract: (bookingId: string) =>
-    sovereignClient.post<Contract>('/contracts/generate/', { booking_id: bookingId }),
+    sovereignClient.post<Contract>('/contracts/generate', { booking_id: bookingId }),
 
   signContract: (id: string) =>
-    sovereignClient.post<Contract>(`/contracts/${id}/sign/`),
+    sovereignClient.post<Contract>(`/contracts/${id}/sign`),
 };

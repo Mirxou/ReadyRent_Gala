@@ -83,6 +83,7 @@ export async function POST(request: Request) {
       startDate: booking.startDate?.toISOString().split('T')[0] || '',
       endDate: booking.endDate?.toISOString().split('T')[0] || '',
       totalPrice: booking.totalPrice || 0,
+      depositAmount: booking.depositAmount || undefined,
     });
 
     // Compute SHA-256 hash

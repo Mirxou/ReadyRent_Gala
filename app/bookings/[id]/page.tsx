@@ -21,7 +21,6 @@ import {
 import { formatNumber } from '@/lib/utils';
 import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
 import { SovereignSeal } from '@/shared/components/sovereign/sovereign-seal';
-import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
 import { Badge } from '@/components/ui/badge';
 import { EscrowTracker } from '@/features/finance/components/escrow-tracker';
 import { ContractTimeline } from '@/components/contract/contract-timeline';
@@ -395,10 +394,12 @@ export default function BookingDetailPage() {
                       </p>
                     </div>
                   </div>
-                  <SovereignButton variant="secondary" size="sm" className="w-full">
-                    عرض بروتوكول الأصل{' '}
-                    <ArrowUpRight className="w-4 h-4 ml-2" />
-                  </SovereignButton>
+                  <Link
+                    href={`/contracts/${contractData.id}`}
+                    className="inline-flex items-center justify-center w-full gap-2 text-white bg-amber-600 hover:bg-amber-700 rounded-xl px-4 py-3 transition-colors"
+                  >
+                    عرض العقد الرقمي <ArrowUpRight className="w-4 h-4" />
+                  </Link>
                 </div>
               </div>
             </GlassPanel>

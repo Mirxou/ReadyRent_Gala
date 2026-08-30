@@ -8,6 +8,7 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getChargilyProvider } from '@/lib/payment-provider';
 import { logger } from '@/lib/logger';
+import { generateContractTerms, computeContractHash } from '@/lib/contract-terms';
 
 // Disable Next.js body parsing — we need raw body for HMAC verification
 export const runtime = 'nodejs';
@@ -154,16 +155,115 @@ async function handlePaymentSuccess(paymentId: string, bookingId: string | null)
     });
   }
 
-  // 5. Update contract → signed (auto-generated contract for rental)
-  const contract = await db.contract.findFirst({
-    where: { bookingId },
-    orderBy: { createdAt: 'desc' },
-  });
+  // 5. Auto-generate contract for this booking (Step 2.4)
+  //    If a draft contract already exists, leave it as-is for manual signing.
+  //    If no contract exists, create one in 'draft' status — user signs later.
+  await ensureContractForBooking(bookingId, payment.userId);
 
-  if (contract && contract.status === 'draft') {
-    await db.contract.update({
-      where: { id: contract.id },
-      data: { status: 'signed' },
+  // 6. Create notification
+  if (payment?.userId) {
+    await db.notification.create({
+      data: {
+        userId: payment.userId,
+        type: 'financial',
+        title: 'تم تأكيد الدفع',
+        message: `تم استلام دفع حجزك بنجاح. المبلغ محتجز في الضمان حتى تأكيد الاستلام.`,
+      },
     });
   }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Auto-generate contract on payment success (Step 2.4)
+// Creates draft contract with all 7 sections if none exists.
+// ═══════════════════════════════════════════════════════════════
+async function ensureContractForBooking(bookingId: string, userId: string) {
+  // Skip if contract already exists (may have been pre-generated)
+  const existing = await db.contract.findUnique({ where: { bookingId } });
+  if (existing) {
+    logger.info('Webhook', 'Contract already exists for booking — skipping auto-generation', { bookingId, contractId: existing.id, status: existing.status });
+    return;
+  }
+
+  // Fetch booking with product + user info
+  const booking = await db.booking.findUnique({
+    where: { id: bookingId },
+    include: {
+      product: { select: { id: true, name: true, nameAr: true, vendorId: true, description: true } },
+      user: { select: { id: true, username: true, firstName: true, lastName: true, email: true, phone: true } },
+    },
+  });
+
+  if (!booking?.product || !booking.user) {
+    logger.warn('Webhook', 'Cannot generate contract — missing booking/product/user', { bookingId });
+    return;
+  }
+
+  // Get vendor info
+  const vendor = booking.product.vendorId
+    ? await db.user.findUnique({ where: { id: booking.product.vendorId }, select: { id: true, username: true, firstName: true, lastName: true, email: true } })
+    : null;
+
+  const renterName = `${booking.user.firstName || ''} ${booking.user.lastName || ''}`.trim() || booking.user.username || 'مستأجر';
+  const vendorName = vendor ? `${vendor.firstName || ''} ${vendor.lastName || ''}`.trim() || vendor.username || 'مؤجر' : 'مؤجر';
+
+  // Generate terms (7-section Arabic contract)
+  const terms = generateContractTerms({
+    renterName,
+    renterEmail: booking.user.email || '',
+    renterPhone: booking.user.phone || null,
+    vendorName,
+    vendorEmail: vendor?.email || '',
+    productName: booking.product.nameAr || booking.product.name || booking.productName || 'منتج',
+    productDescription: booking.product.description || null,
+    startDate: booking.startDate?.toISOString().split('T')[0] || '',
+    endDate: booking.endDate?.toISOString().split('T')[0] || '',
+    totalPrice: booking.totalPrice || 0,
+    depositAmount: booking.depositAmount || undefined,
+  });
+
+  // Deterministic SHA-256 hash
+  const contractHash = computeContractHash(terms, bookingId);
+
+  // Build parties JSON
+  const parties = JSON.stringify([
+    { id: booking.userId, name: renterName, role: 'renter', signed: false },
+    ...(vendor ? [{ id: vendor.id, name: vendorName, role: 'vendor', signed: false }] : []),
+  ]);
+
+  // Build snapshot JSON
+  const snapshot = JSON.stringify({
+    booking_id: bookingId,
+    product_name: booking.productName,
+    product_id: booking.productId,
+    total_price: booking.totalPrice,
+    deposit_amount: booking.depositAmount,
+    start_date: booking.startDate?.toISOString(),
+    end_date: booking.endDate?.toISOString(),
+    escrow_status: 'held',
+  });
+
+  // Create contract in 'draft' status — user must sign explicitly
+  await db.contract.create({
+    data: {
+      bookingId,
+      status: 'draft',
+      contractHash,
+      terms,
+      parties,
+      snapshot,
+    },
+  });
+
+  // Notify user to review & sign
+  await db.notification.create({
+    data: {
+      userId,
+      type: 'system',
+      title: 'تم إنشاء عقد إيجارك',
+      message: 'تم إنشاء عقد رقمي لحجزك تلقائيًا. يرجى مراجعة البنود والتوقيع.',
+    },
+  });
+
+  logger.info('Webhook', 'Auto-generated draft contract for booking', { bookingId });
 }

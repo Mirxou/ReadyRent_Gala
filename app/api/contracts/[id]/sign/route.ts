@@ -5,7 +5,8 @@ import { logger } from '@/lib/logger';
 
 // ═══════════════════════════════════════════════════════════════
 // POST /api/contracts/[id]/sign — Sign a contract
-// Updates contract status to 'signed' and confirms the booking atomically
+// Only updates contract status to 'signed' with renter signature.
+// Does NOT touch booking.status — that's handled by webhook on payment.
 // ═══════════════════════════════════════════════════════════════
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -49,28 +50,40 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     request.headers.get('x-real-ip') ||
     'unknown';
 
-  // Atomic: update contract + confirm booking in a single transaction
-  const [updated] = await db.$transaction([
-    db.contract.update({
-      where: { id },
-      data: {
-        status: 'signed',
-        renterSignature: JSON.stringify({ signedAt: new Date().toISOString(), ipAddress }),
-        signedAt: new Date(),
-      },
-    }),
-    // Promote the linked booking to confirmed
-    db.booking.update({
-      where: { id: contract.bookingId },
-      data: { status: 'confirmed' },
-    }),
-  ]);
+  const signedAt = new Date();
+  const signatureData = JSON.stringify({ signedAt: signedAt.toISOString(), ipAddress });
+
+  // Update parties: mark renter as signed
+  let updatedParties = contract.parties;
+  try {
+    const parties = JSON.parse(contract.parties || '[]');
+    const renterIdx = parties.findIndex((p: Record<string, unknown>) => p.role === 'renter');
+    if (renterIdx >= 0) {
+      parties[renterIdx].signed = true;
+      parties[renterIdx].signedAt = signedAt.toISOString();
+      parties[renterIdx].ipAddress = ipAddress;
+    }
+    updatedParties = JSON.stringify(parties);
+  } catch {
+    // If parties JSON is corrupt, keep original
+  }
+
+  // Update contract: sign + update parties (no booking.status change)
+  const updated = await db.contract.update({
+    where: { id },
+    data: {
+      status: 'signed',
+      renterSignature: signatureData,
+      signedAt,
+      parties: updatedParties,
+    },
+  });
 
   // Notify vendor
   if (contract.bookingId) {
     const vendorBooking = await db.booking.findUnique({
       where: { id: contract.bookingId },
-      select: { product: { select: { vendorId: true, name: true } } },
+      select: { product: { select: { vendorId: true, name: true, nameAr: true } } },
     });
     if (vendorBooking?.product?.vendorId) {
       await db.notification.create({
@@ -78,7 +91,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
           userId: vendorBooking.product.vendorId,
           type: 'system',
           title: 'تم توقيع عقد حجز جديد',
-          message: `تم توقيع عقد إيجار ${vendorBooking.product.name || ''}. يمكنك البدء في تنفيذ الحجز.`,
+          message: `تم توقيع عقد إيجار ${vendorBooking.product.nameAr || vendorBooking.product.name || ''}. يمكنك البدء في تنفيذ الحجز.`,
         },
       });
     }

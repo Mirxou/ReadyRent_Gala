@@ -2385,3 +2385,44 @@ Stage Summary:
 - 75 issues identified, 31 most impactful fixed
 - Remaining 44 are: low-priority type annotations (4), dead code (product-filters.tsx 568 lines), architectural (dual API clients), env-dependent (CHARGILY_API_KEY), and edge cases
 - 0 lint errors, 2 pre-existing warnings
+---
+Task ID: 2.4-contracts-fixes
+Agent: Main Agent
+Task: Step 2.4 Contracts & Documentation — Microscopic review + fix all issues
+
+Work Log:
+- Read all 11-EXECUTION-PRIORITY.md, 03-TRUST-SAFETY-SYSTEM.md for Step 2.4 scope
+- Analyzed VLM screenshots (Agent Router platform with API key provided as assistant)
+- Read 8 contract-related files: Prisma schema, lib/contract-terms.ts, lib/api/contracts.ts, 3 API routes (generate, [id], [id]/sign), contract-viewer, contract-timeline, contracts/[id]/page, webhook, release-escrow, bookings/[id]/page
+- Identified 15 issues across all files
+
+Fixes Applied (15 total):
+
+🔴 CRITICAL (5 fixes):
+1. lib/contract-terms.ts: computeContractHash used Date — produced different hash every day. Made fully deterministic (terms + bookingId only). Added computeContractHashFromBooking helper.
+2. app/api/payments/webhook/route.ts: Was auto-signing contracts without renterSignature — completely bypassed signing flow. Changed to auto-GENERATE draft contracts on payment success (user signs explicitly after).
+3. app/api/contracts/[id]/sign/route.ts: Was setting booking.status='confirmed' — but webhook already confirmed booking. This was a race condition. Removed booking status change from sign route entirely.
+4. app/api/contracts/[id]/sign/route.ts: Was NOT updating parties JSON when signing. Now marks renter as signed with timestamp + IP.
+5. app/api/bookings/[id]/release-escrow/route.ts: Computed a DIFFERENT hash (raw fields pipe-separated) than generate route (terms-based). Now reuses the existing contractHash from DB, with fallback to computeContractHash.
+
+🟡 MEDIUM (8 fixes):
+6. components/contract/contract-viewer.tsx: Brand 'سيادي' + 'ReadyRent' → 'STANDARD.Rent'
+7. components/contract/contract-viewer.tsx: Removed indigo/purple/blue colors → amber/green
+8. components/contract/contract-viewer.tsx: Canvas signature was drawn but NEVER sent to API. Replaced with simple digital click-sign (signature data is server-side IP + timestamp).
+9. lib/api/contracts.ts: Removed trailing slashes from URLs that could cause double-slash
+10. components/contract/contract-timeline.tsx: Replaced all 6 'blue' references with 'amber'
+11. app/contracts/[id]/page.tsx: Fixed type mismatch — Contract type now properly typed
+12. app/bookings/[id]/page.tsx: 'عرض بروتوكول الأصل' button was dead (SovereignButton, no href). Now a proper Link to /contracts/[id]
+13. lib/contract-terms.ts: Added depositAmount field to contract terms display
+14. app/api/contracts/generate/route.ts: Added depositAmount to generate call
+
+🟠 LOW (1 fix):
+15. app/api/bookings/[id]/release-escrow/route.ts: Removed unused 'crypto' import
+
+Stage Summary:
+- 15 issues found, 15 fixed
+- Lint: 0 errors, 2 pre-existing warnings (unchangeable)
+- Contract flow now: payment → webhook creates draft → user reviews & signs → release-escrow finalizes
+- Hash is fully deterministic across all routes
+- All colors comply with no-blue rule
+- Brand is consistently STANDARD.Rent

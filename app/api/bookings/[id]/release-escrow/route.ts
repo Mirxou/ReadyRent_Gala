@@ -1,8 +1,8 @@
-import crypto from 'crypto';
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
 import { logger } from '@/lib/logger';
+import { computeContractHash } from '@/lib/contract-terms';
 
 // ═══════════════════════════════════════════════════════════════
 // POST /api/bookings/[id]/release-escrow
@@ -124,11 +124,12 @@ export async function POST(
       where: { bookingId: id },
     });
 
-    // ── Compute contract hash: SHA-256(deterministic booking fields) ──
-    const contractHash = crypto
-      .createHash('sha256')
-      .update(`${booking.id}|${booking.userId}|${booking.productId}|${booking.startDate}|${booking.endDate}|${booking.totalPrice}`)
-      .digest('hex');
+    // ── Compute contract hash using the SAME deterministic function as generate ──
+    let contractHash = contract?.contractHash || null;
+    if (!contractHash && contract) {
+      // Fallback: recompute from contract.terms if hash was missing
+      contractHash = computeContractHash(contract.terms || '', id);
+    }
 
     const vendorId = booking.product?.vendorId ?? null;
 
