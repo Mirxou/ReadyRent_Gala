@@ -57,7 +57,7 @@ export default function CancelBookingPage() {
       // Normalize API shape to match CancellationPolicy component expectations
       const normalized: CancellationPolicyData = {
         fee_info: {
-          fee_percentage: 100 - (data.refund_percentage || 100),
+          fee_percentage: 100 - (data.refund_percentage ?? 100),
           fee_amount: (data.total_price || 0) - (data.refund_amount || 0),
           refund_amount: data.refund_amount || 0,
           hours_until_start: data.hours_until_start || 0,
@@ -97,7 +97,7 @@ export default function CancelBookingPage() {
 
     toast({
       title: 'تم الإلغاء',
-      description: 'تم إلغاء الحجز بنجاح. سيتم استرجاع المبلغ خلال 3 أيام',
+      description: 'تم إلغاء الحجز بنجاح. سيتم استرجاع المبلغ خلال 48 ساعة',
     });
     router.push('/dashboard/bookings');
     setLoading(false);

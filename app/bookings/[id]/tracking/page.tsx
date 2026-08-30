@@ -62,7 +62,7 @@ export default function TrackingPage() {
 
   const statusColors: Record<string, string> = {
     pending: 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20',
-    confirmed: 'bg-blue-500/10 text-blue-600 border-blue-500/20',
+    confirmed: 'bg-sovereign-gold/10 text-sovereign-gold border-sovereign-gold/20',
     active: 'bg-green-500/10 text-green-600 border-green-500/20',
     completed: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20',
     cancelled: 'bg-red-500/10 text-red-600 border-red-500/20',
@@ -77,7 +77,7 @@ export default function TrackingPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8" dir="rtl">
+    <div className="container mx-auto px-4 py-8 relative" dir="rtl">
       <div className="max-w-2xl mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">تتبع الطلب</h1>
@@ -97,11 +97,11 @@ export default function TrackingPage() {
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <p className="text-muted-foreground">تاريخ البدء</p>
-                <p className="font-medium">{new Date(booking.start_date).toLocaleDateString('ar-DZ')}</p>
+                <p className="font-medium">{booking.start_date ? new Date(booking.start_date).toLocaleDateString('ar-DZ') : '—'}</p>
               </div>
               <div>
                 <p className="text-muted-foreground">تاريخ الانتهاء</p>
-                <p className="font-medium">{new Date(booking.end_date).toLocaleDateString('ar-DZ')}</p>
+                <p className="font-medium">{booking.end_date ? new Date(booking.end_date).toLocaleDateString('ar-DZ') : '—'}</p>
               </div>
               <div>
                 <p className="text-muted-foreground">المبلغ الإجمالي</p>
@@ -127,7 +127,7 @@ export default function TrackingPage() {
               {stages.map((stage, index) => {
                 const Icon = stage.icon;
                 return (
-                  <div key={stage.key} className="flex items-center gap-4">
+                  <div key={stage.key} className="relative flex items-center gap-4">
                     <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${stage.done ? 'bg-sovereign-gold/20 text-sovereign-gold' : 'bg-muted text-muted-foreground'}`}>
                       <Icon className="h-5 w-5" />
                     </div>

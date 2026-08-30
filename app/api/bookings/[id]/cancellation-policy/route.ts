@@ -31,8 +31,9 @@ export async function GET(
       }
     }
 
-    // Can only cancel pending or confirmed bookings
-    let canCancel = booking.status === 'pending' || booking.status === 'confirmed';
+    // Can only cancel pending, confirmed, or active bookings
+    // FIX 12: Add 'active' to match cancel route
+    let canCancel = booking.status === 'pending' || booking.status === 'confirmed' || booking.status === 'active';
 
     // Calculate refund percentage based on hours until start
     const startDate = new Date(booking.startDate as string | Date);
@@ -40,10 +41,11 @@ export async function GET(
     let refundPercentage = 0;
     let policyMessage = '';
 
-    if (hoursUntilStart > 48) {
+    // FIX 3: Use >= (consistent with cancel route, more generous at boundary)
+    if (hoursUntilStart >= 48) {
       refundPercentage = 100;
-      policyMessage = 'يمكنك الإلغاء واسترداد المبلغ كاملاً (أكثر من 48 ساعة قبل موعد الاستلام)';
-    } else if (hoursUntilStart > 24) {
+      policyMessage = 'يمكنك الإلغاء واسترداد المبلغ كاملاً (48 ساعة أو أكثر قبل موعد الاستلام)';
+    } else if (hoursUntilStart >= 24) {
       refundPercentage = 50;
       policyMessage = 'يمكنك الإلغاء واسترداد 50% من المبلغ (24-48 ساعة قبل موعد الاستلام)';
     } else if (hoursUntilStart > 0) {

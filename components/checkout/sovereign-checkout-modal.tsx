@@ -134,7 +134,7 @@ export function SovereignCheckoutModal({
                                             <Lock className="w-4 h-4 text-sovereign-gold" /> بروتوكول الحماية
                                         </h4>
                                         <p className="text-xs text-muted-foreground leading-relaxed italic">
-                                            {`"بإبرام هذا العقد، تلتزم ReadyRent بحماية الأصل خلال فترة الحجز، وتجميد مبلغ الضمان في حساب الضمان السيادي (Escrow) لضمان حقوق كافة الأطراف."`}
+                                            {`"بإبرام هذا العقد، تلتزم STANDARD.Rent بحماية الأصل خلال فترة الحجز، وتجميد مبلغ الضمان في حساب الضمان السيادي (Escrow) لضمان حقوق كافة الأطراف."`}
                                         </p>
                                         <GlassPanel className="p-6 bg-emerald-500/5 border-emerald-500/10">
                                             <div className="flex items-center gap-4">

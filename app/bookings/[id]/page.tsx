@@ -7,6 +7,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useAuthStore } from '@/lib/store';
 
+import { toast } from 'sonner';
 import {
   ShieldCheck,
   Calendar,
@@ -128,7 +129,7 @@ export default function BookingDetailPage() {
         );
       }
     } catch {
-      // silent
+      toast.error('فشل تحرير الضمان. يرجى المحاولة لاحقاً');
     } finally {
       setReleasing(false);
     }

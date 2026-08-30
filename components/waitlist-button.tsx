@@ -20,7 +20,7 @@ export function WaitlistButton({ productId }: WaitlistButtonProps) {
   const addToWaitlistMutation = useMutation({
     mutationFn: (data: Record<string, unknown>) => bookingsApi.addToWaitlist(data),
     onSuccess: (res: { dignity_preserved?: boolean; error?: string; message_ar?: string }) => {
-      if (res?.dignity_preserved || res?.error) {
+      if (res?.success === false || res?.error) {
         toast.error(res?.message_ar || res?.error || 'حدث خطأ');
         return;
       }

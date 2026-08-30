@@ -48,6 +48,7 @@ export const productsApi = {
     if (params?.availability) q.append('availability', String(params.availability));
     if (params?.sort) q.append('ordering', String(params.sort));
     if (params?.page) q.append('page', String(params.page));
+    if (params?.limit) q.append('limit', String(params.limit));
     const qs = q.toString();
     return sovereignClient.get<Product[]>(`/products/${qs ? `?${qs}` : ''}`);
   },

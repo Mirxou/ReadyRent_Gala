@@ -1,5 +1,5 @@
 'use client'
-import { formatNumber } from '@/lib/utils';;
+import { formatNumber } from '@/lib/utils';
 
 import { useState } from 'react';
 import { Input } from '@/components/ui/input';
@@ -49,16 +49,18 @@ export function BaridiMobForm({
         phone_number: phoneNumber,
       });
 
-      if (response.data?.success) {
-        setPaymentId(response.data?.payment?.id ?? 0);
+      if (response.success) {
+        const paymentData = response.data as Record<string, unknown> | null;
+        const pid = (paymentData?.id as string | number) ?? 0;
+        setPaymentId(pid as number);
         setStep('otp');
         toast.success('تم إرسال رمز التحقق إلى هاتفك');
-        onPaymentInitiated?.(response.data?.payment?.id ?? 0, true);
+        onPaymentInitiated?.(pid as number, true);
       } else {
-        toast.error(response.data?.error || 'فشل بدء عملية الدفع');
+        toast.error(response.message_ar || 'فشل بدء عملية الدفع');
       }
     } catch (error: unknown) {
-      const msg = (error as { data?: { error?: string } })?.data?.error || 'حدث خطأ أثناء بدء عملية الدفع';
+      const msg = (error as { message_ar?: string; message?: string })?.message_ar || (error as Error)?.message || 'حدث خطأ أثناء بدء عملية الدفع';
       toast.error(msg);
     } finally {
       setIsLoading(false);
@@ -82,14 +84,14 @@ export function BaridiMobForm({
     try {
       const response = await paymentsApi.verifyOtp({ paymentId: String(paymentId), otp: otpCode });
 
-      if (response.data?.success) {
+      if (response.success) {
         toast.success('تم الدفع بنجاح!');
         onPaymentCompleted?.();
       } else {
-        toast.error(response.data?.error || 'فشل التحقق من رمز OTP');
+        toast.error(response.message_ar || 'فشل التحقق من رمز OTP');
       }
     } catch (error: unknown) {
-      const msg = (error as { data?: { error?: string } })?.data?.error || 'حدث خطأ أثناء التحقق من رمز OTP';
+      const msg = (error as { message_ar?: string; message?: string })?.message_ar || (error as Error)?.message || 'حدث خطأ أثناء التحقق من رمز OTP';
       toast.error(msg);
     } finally {
       setIsLoading(false);

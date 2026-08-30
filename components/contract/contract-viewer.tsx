@@ -17,6 +17,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { toast } from 'sonner';
 
 interface Contract {
@@ -110,10 +111,17 @@ export const ContractViewer: React.FC<ContractViewerProps> = ({ contract, onSign
           <Badge variant={isFinalized ? "default" : "secondary"} className="px-4 py-1.5 text-sm">
             {isFinalized ? 'مكتمل وموثق' : 'بانتظار التواقيع'}
           </Badge>
-          <Button variant="outline" size="sm" className="gap-2">
-            <Download size={16} />
-            تحميل PDF
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="outline" size="sm" className="gap-2" disabled>
+                <Download size={16} />
+                تحميل PDF
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>قريباً</p>
+            </TooltipContent>
+          </Tooltip>
         </div>
       </div>
 

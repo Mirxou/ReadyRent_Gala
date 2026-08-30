@@ -70,18 +70,17 @@ export function CancellationPolicy({ feeInfo, canCancel, message }: Cancellation
                   {feeInfo.refund_amount.toFixed(2)} دج
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  سيتم استرجاعه خلال 3 أيام
+                  سيتم استرجاعه خلال 48 ساعة
                 </p>
               </div>
             </div>
 
-            <div className="bg-blue-50 border border-blue-200 rounded p-4">
-              <p className="text-sm font-medium mb-2">جدول الرسوم:</p>
+            <div className="bg-amber-50 border border-amber-200 rounded p-4">
+              <p className="text-sm font-medium mb-2">جدول الرسوم (القانون 18-05):</p>
               <ul className="text-sm space-y-1">
-                <li>• أكثر من 24 ساعة: 0% رسوم</li>
-                <li>• 12-24 ساعة: 10% رسوم</li>
-                <li>• 6-12 ساعة: 25% رسوم</li>
-                <li>• أقل من 6 ساعات: 50% رسوم</li>
+                <li>• أكثر من 48 ساعة قبل البدء: 0% رسوم (استرداد كامل)</li>
+                <li>• 24-48 ساعة قبل البدء: 50% رسوم (استرداد نصف)</li>
+                <li>• أقل من 24 ساعة قبل البدء: 100% رسوم (لا استرداد)</li>
               </ul>
             </div>
           </>

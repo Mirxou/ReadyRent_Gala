@@ -207,7 +207,7 @@ export default function CheckoutPage() {
                   </CardHeader>
                   <CardContent>
                     <div className="grid gap-4">
-                      {paymentMethods?.map((method: Record<string, unknown>) => (
+                      {paymentMethods?.filter((m: Record<string, unknown>) => m.available !== false).map((method: Record<string, unknown>) => (
                         <Button
                           key={method.type}
                           variant="outline"
@@ -249,7 +249,7 @@ export default function CheckoutPage() {
                 )}
                 <div>
                   <p className="text-sm text-muted-foreground">المبلغ الإجمالي</p>
-                  <p className="text-2xl font-bold">{formatNumber(totalAmount)} DZD</p>
+                  <p className="text-2xl font-bold">{formatNumber(totalAmount)} دج</p>
                 </div>
                 {selectedMethod && (
                   <Button

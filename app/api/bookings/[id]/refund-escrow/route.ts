@@ -102,6 +102,20 @@ export async function POST(
       );
     }
 
+    // FIX 8: Prevent refunding a completed booking
+    if (booking.status === 'completed') {
+      return NextResponse.json(
+        {
+          success: false,
+          dignity_preserved: true,
+          message_ar: 'لا يمكن استرداد حجز مكتمل — تم تحرير المبلغ بالفعل',
+          message_en: 'Cannot refund a completed booking — funds already released',
+          code: 'BOOKING_ALREADY_COMPLETED',
+        },
+        { status: 400 }
+      );
+    }
+
     if (!booking.userId) {
       return NextResponse.json(
         {

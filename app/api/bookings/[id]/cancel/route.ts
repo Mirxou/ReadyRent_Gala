@@ -21,6 +21,8 @@ export async function POST(
 
   try {
     const { id } = await params;
+    const body = await request.json().catch(() => ({}));
+    const cancelReason = (body as Record<string, string>).reason || '';
 
     // Get booking with payment info
     const booking = await db.booking.findUnique({
@@ -143,6 +145,12 @@ export async function POST(
     }
 
     // Wallet credit for refund amount (store credit)
+    // FIX 1: Only credit wallet if escrow was 'held' (meaning payment was actually received)
+    if (!escrowWasHeld) {
+      refundAmount = 0;
+      refundPercent = 0;
+    }
+
     if (refundAmount > 0 && booking.userId) {
       txOps.push(
         db.user.update({
@@ -161,33 +169,43 @@ export async function POST(
       );
     }
 
-    // Execute all operations atomically
-    await db.$transaction(txOps);
-
     // Create RefundRecord for manual tracking (only if real money was in escrow)
+    // FIX 1: Move RefundRecord.create() INSIDE the $transaction for atomicity
     let refundRecordId: string | null = null;
     if (escrowWasHeld && payment) {
-      const refundRecord = await db.refundRecord.create({
-        data: {
-          bookingId: id,
-          paymentId: payment.id,
-          userId: booking.userId!,
-          amount: booking.totalPrice,
-          reason: 'cancelled',
-          status: 'pending_manual_transfer',
-          refundDeadline: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
-          processedBy: session.userId,
-          notes: `إلغاء تلقائي — سياسة استرداد ${refundPercent}%`,
-        },
-      });
-      refundRecordId = refundRecord.id;
-      logger.info('Booking Cancel', `RefundRecord created: ${refundRecord.id} for booking ${id}`);
+      txOps.push(
+        db.refundRecord.create({
+          data: {
+            bookingId: id,
+            paymentId: payment.id,
+            userId: booking.userId!,
+            amount: booking.totalPrice,
+            reason: 'cancelled',
+            status: 'pending_manual_transfer',
+            refundDeadline: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
+            processedBy: session.userId,
+            notes: `إلغاء تلقائي — سياسة استرداد ${refundPercent}%${cancelReason ? ` | السبب: ${cancelReason}` : ''}`,
+          },
+        })
+      );
+    }
+
+    // Execute all operations atomically
+    const txResult = await db.$transaction(txOps);
+
+    // Extract refundRecordId from transaction result if applicable
+    if (escrowWasHeld && payment) {
+      const lastOp = txResult[txResult.length - 1];
+      if (lastOp && typeof lastOp === 'object' && 'id' in lastOp) {
+        refundRecordId = (lastOp as { id: string }).id;
+      }
+      logger.info('Booking Cancel', `RefundRecord created: ${refundRecordId} for booking ${id}`);
     }
 
     // Create notification for the user
     const notificationMsg = escrowWasHeld
-      ? `تم إلغاء حجز "${productName}". المبلغ محجوز في الضمان — سيتم التحويل خلال 48 ساعة (القانون 18-05 مادة 22).`
-      : `تم إلغاء حجز "${productName}". مبلغ الاسترداد: ${refundAmount} د.ج (${refundPercent}%)`;
+      ? `تم إلغاء حجز "${productName}". المبلغ محجوز في الضمان — سيتم التحويل خلال 48 ساعة (القانون 18-05 مادة 22).${cancelReason ? ` السبب: ${cancelReason}` : ''}`
+      : `تم إلغاء حجز "${productName}". لا يوجد مبلغ لاسترداده لأنه لم يتم الدفع.${cancelReason ? ` السبب: ${cancelReason}` : ''}`;
 
     if (booking.userId) {
       await db.notification.create({
@@ -213,11 +231,7 @@ export async function POST(
         escrow_was_held: escrowWasHeld,
         message: escrowWasHeld
           ? 'تم إلغاء الحجز — المبلغ محجوز وسيتم تحويله يدوياً خلال 48 ساعة'
-          : refundPercent === 100
-            ? 'تم إلغاء الحجز واسترداد المبلغ كاملاً'
-            : refundPercent === 50
-              ? 'تم إلغاء الحجز واسترداد 50% من المبلغ'
-              : 'تم إلغاء الحجز. لا يوجد مبلغ لاسترداده (أقل من 24 ساعة)',
+          : 'تم إلغاء الحجز. لا يوجد مبلغ لاسترداده لأنه لم يتم الدفع بعد',
       },
     });
   } catch (error) {

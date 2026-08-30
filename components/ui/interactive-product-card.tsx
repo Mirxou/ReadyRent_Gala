@@ -1,5 +1,5 @@
 "use client"
-import { formatNumber } from '@/lib/utils';;
+import { formatNumber } from '@/lib/utils';
 
 import React, { useState } from "react";
 import Image from "next/image";

@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
 import { SovereignGlow, SovereignSparkle } from '@/shared/components/sovereign/sovereign-sparkle';
 import { IdentityShield } from '@/shared/components/sovereign/identity-shield';
+import { productsApi } from '@/lib/api';
 
 interface ProductCardProps {
   product: Record<string, unknown>;
@@ -23,6 +24,27 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
   const vendorTrustScore = Number(product.vendor_trust_score || 0);
   const images = product.images as Array<{ image?: string; url?: string }> | undefined;
   const primaryImage = product.primary_image || images?.[0]?.image || images?.[0]?.url || product.image || PLACEHOLDER;
+  const [isWishlisted, setIsWishlisted] = useState(Boolean(product.is_wishlisted));
+  const [wishlistLoading, setWishlistLoading] = useState(false);
+
+  const handleToggleWishlist = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (wishlistLoading) return;
+    setWishlistLoading(true);
+    const prev = isWishlisted;
+    setIsWishlisted(!prev);
+    try {
+      await productsApi.toggleWishlist(String(product.id));
+    } catch {
+      setIsWishlisted(prev);
+    } finally {
+      setWishlistLoading(false);
+    }
+  };
+
+  const categoryDisplay = (product as Record<string, unknown>).category_name || product.category?.name_ar || 'التصنيف';
+  const locationDisplay = (product as Record<string, unknown>).location_name || product.location || 'الجزائر العاصمة';
 
   return (
     <SovereignGlow color={'gold'}>
@@ -74,7 +96,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
             <div className="p-8 space-y-6 flex-1 flex flex-col">
                 <div className="flex justify-between items-start">
                     <div className="space-y-1">
-                        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-sovereign-gold/60">{product.category?.name_ar || 'التصنيف'}</p>
+                        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-sovereign-gold/60">{categoryDisplay}</p>
                         <h3 className="text-xl font-black italic tracking-tighter group-hover:text-sovereign-gold transition-colors line-clamp-1">
                             {product.name_ar}
                         </h3>
@@ -87,7 +109,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
 
                 <div className="flex items-center gap-2 text-muted-foreground opacity-60">
                     <MapPin className="w-3 h-3" />
-                    <span className="text-[10px] font-black uppercase tracking-widest">{product.location || 'الجزائر العاصمة'}</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest">{locationDisplay}</span>
                 </div>
 
                 <div className="pt-6 border-t border-border flex items-end justify-between mt-auto">
@@ -97,8 +119,17 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
                             {formatNumber(product.price_per_day)} <span className="text-xs font-normal opacity-40">دج</span>
                         </p>
                     </div>
-                    <button className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-all">
-                        <Heart className="w-5 h-5" />
+                    <button
+                      onClick={handleToggleWishlist}
+                      disabled={wishlistLoading}
+                      className={cn(
+                        "w-10 h-10 rounded-full flex items-center justify-center transition-all",
+                        isWishlisted
+                          ? "bg-red-500/10 text-red-500"
+                          : "bg-muted text-muted-foreground hover:text-red-500 hover:bg-red-500/10"
+                      )}
+                    >
+                        <Heart className={cn("w-5 h-5", isWishlisted && "fill-current")} />
                     </button>
                 </div>
             </div>

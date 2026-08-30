@@ -124,10 +124,10 @@ export async function POST(
       where: { bookingId: id },
     });
 
-    // ── Compute contract hash: SHA-256(booking.id + timestamp) ──
+    // ── Compute contract hash: SHA-256(deterministic booking fields) ──
     const contractHash = crypto
       .createHash('sha256')
-      .update(`${booking.id}${Date.now()}`)
+      .update(`${booking.id}|${booking.userId}|${booking.productId}|${booking.startDate}|${booking.endDate}|${booking.totalPrice}`)
       .digest('hex');
 
     const vendorId = booking.product?.vendorId ?? null;

@@ -63,7 +63,7 @@ export default function ProductDetailsPage() {
   const { data: depositData } = useQuery({
     queryKey: ['deposit', product?.id],
     queryFn: () => depositApi.calculateDeposit({ product_id: product!.id, start_date: selectedStartDate?.toISOString().split('T')[0] || '', end_date: selectedEndDate?.toISOString().split('T')[0] || '' }).then((res) => res.data),
-    enabled: !!product?.id && isAuthenticated,
+    enabled: !!product?.id && isAuthenticated && !!selectedStartDate && !!selectedEndDate,
   });
 
   const { data: productReviews } = useQuery({
@@ -75,7 +75,7 @@ export default function ProductDetailsPage() {
   const createBookingMutation = useMutation({
     mutationFn: (data: Record<string, unknown>) => bookingsApi.create(data),
     onSuccess: (res: Record<string, unknown>) => {
-      if (res?.dignity_preserved || res?.error) {
+      if (res?.success === false || res?.error) {
         toast.error((res?.message_ar as string) || (res?.error as string) || 'فشل في توثيق العقد');
         return;
       }
@@ -226,7 +226,7 @@ export default function ProductDetailsPage() {
                   <span className="text-2xl font-black font-mono">{Number(product.rating || 5).toFixed(1)}</span>
                 </div>
                 <div className="h-2 w-2 rounded-full bg-white/20" />
-                <span className="text-xs text-muted-foreground font-black uppercase tracking-[0.3em]">{product.total_bookings || 0} حجز ناجح</span>
+                <span className="text-xs text-muted-foreground font-black uppercase tracking-[0.3em]">{product.total_bookings || '—'} حجز ناجح</span>
                 <LiveViewerCount productId={product.id} />
               </div>
             </div>
@@ -327,7 +327,7 @@ export default function ProductDetailsPage() {
                  <h3 className="text-3xl font-black italic">أصل سيادي: قصة المسار</h3>
               </div>
               <p className="text-2xl text-muted-foreground leading-relaxed font-light italic opacity-80 pl-10 border-l-2 border-sovereign-gold/20">
-                {product.description_ar || product.description}
+                {product.description}
               </p>
             </section>
             
@@ -345,9 +345,9 @@ export default function ProductDetailsPage() {
             {/* Sovereign Specifications */}
             <section className="grid grid-cols-2 md:grid-cols-4 gap-8">
                {[
-                  { label: 'اللون', value: product.color || 'ذهبي', icon: Palette },
-                  { label: 'القماش', value: product.fabric || 'حرير فاخر', icon: Scissors },
-                  { label: 'المقاس', value: product.size || 'مقاس قياسي', icon: Ruler },
+                  { label: 'اللون', value: (() => { try { const opts = typeof product.color_options === 'string' ? JSON.parse(product.color_options) : product.color_options; return Array.isArray(opts) && opts.length > 0 ? opts[0] : '—'; } catch { return product.color || '—'; } })(), icon: Palette },
+                  { label: 'القماش', value: product.fabric || '—', icon: Scissors },
+                  { label: 'المقاس', value: (() => { try { const opts = typeof product.size_options === 'string' ? JSON.parse(product.size_options) : product.size_options; return Array.isArray(opts) && opts.length > 0 ? opts[0] : '—'; } catch { return product.size || '—'; } })(), icon: Ruler },
                   { label: 'الحالة', value: 'ممتازة', icon: ShieldCheck }
                ].map((spec, i) => (
                   <div key={i} className="p-8 bg-white/5 rounded-[2rem] border border-white/5 group hover:border-sovereign-gold/20 transition-all">

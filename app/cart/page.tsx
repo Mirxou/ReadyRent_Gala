@@ -65,7 +65,7 @@ export default function CartPage() {
   });
 
   const removeFromCartMutation = useMutation({
-    mutationFn: (itemId: number) => fetch('/api/bookings/cart/items/' + itemId, { method: 'DELETE', credentials: 'include' }).then(r => r.json()),
+    mutationFn: (itemId: string) => fetch('/api/bookings/cart/items/' + itemId, { method: 'DELETE', credentials: 'include' }).then(r => r.json()),
     onMutate: async (itemId) => {
       // Cancel any outgoing refetchs (so they don't overwrite our optimistic update)
       await queryClient.cancelQueries({ queryKey: ['cart'] });
@@ -75,10 +75,14 @@ export default function CartPage() {
 
       // Optimistically update to the new value
       if (previousCart) {
-        queryClient.setQueryData(['cart'], (old: Record<string, unknown>) => ({
-          ...old,
-          items: (old.items as Record<string, unknown>[]).filter((item: Record<string, unknown>) => item.id !== itemId),
-        }));
+        if (Array.isArray(previousCart)) {
+          queryClient.setQueryData(['cart'], (previousCart as Record<string, unknown>[]).filter((item: Record<string, unknown>) => item.id !== itemId));
+        } else {
+          queryClient.setQueryData(['cart'], (old: Record<string, unknown>) => ({
+            ...old,
+            items: (old.items as Record<string, unknown>[]).filter((item: Record<string, unknown>) => item.id !== itemId),
+          }));
+        }
       }
 
       // Return a context object with the snapshotted value
@@ -104,19 +108,20 @@ export default function CartPage() {
     mutationFn: async () => {
       if (!items || items.length === 0) throw new Error('السلة فارغة');
 
-      const bookings: { id: number }[] = [];
+      const bookings: { id: string }[] = [];
 
       // Create a booking for each cart item
       for (const item of items as Record<string, unknown>[]) {
         const res = await bookingsApi.create({
-          product_id: item.product_id as number,
+          product_id: item.product_id,
           start_date: item.start_date as string,
           end_date: item.end_date as string,
+          quantity: item.quantity || 1,
           has_insurance: false,
           extra_services: [],
         });
         if (res.data && 'id' in (res.data as Record<string, unknown>)) {
-          bookings.push(res.data as { id: number });
+          bookings.push(res.data as { id: string });
         }
       }
 
@@ -159,12 +164,12 @@ export default function CartPage() {
     );
   }
 
-  const items = cart?.items || [];
+  const items = Array.isArray(cart) ? cart : (cart?.items || []);
   const totalPrice = items.reduce((sum: number, item: Record<string, unknown>) => {
     const days = Math.ceil(
       (new Date(item.end_date).getTime() - new Date(item.start_date).getTime()) /
       (1000 * 60 * 60 * 24)
-    ) + 1;
+    );
     return sum + (item.product.price_per_day * days);
   }, 0);
 
@@ -232,7 +237,7 @@ export default function CartPage() {
                 const days = Math.ceil(
                   (new Date(item.end_date).getTime() - new Date(item.start_date).getTime()) /
                   (1000 * 60 * 60 * 24)
-                ) + 1;
+                );
                 const itemTotal = item.product.price_per_day * days;
                 const primaryImage = item.product.primary_image ||
                   item.product.images?.[0]?.image ||
@@ -323,7 +328,7 @@ export default function CartPage() {
                     const days = Math.ceil(
                       (new Date(item.end_date).getTime() - new Date(item.start_date).getTime()) /
                       (1000 * 60 * 60 * 24)
-                    ) + 1;
+                    );
                     const itemTotal = item.product.price_per_day * days;
                     return (
                       <div key={item.id} className="flex justify-between items-center text-sm font-medium">
