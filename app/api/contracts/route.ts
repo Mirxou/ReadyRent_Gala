@@ -23,7 +23,10 @@ export async function GET(request: Request) {
   // Find contracts through the user's bookings
   const contracts = await db.contract.findMany({
     where: {
-      booking: { userId: session.userId },
+      OR: [
+        { booking: { userId: session.userId } },
+        { booking: { product: { vendorId: session.userId } } },
+      ],
     },
     include: {
       booking: {

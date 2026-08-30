@@ -2,17 +2,19 @@
 
 import { useMemo } from 'react';
 import { motion } from 'framer-motion';
+
 interface Contract {
   id: string;
   booking_id: string;
-  status: 'draft' | 'signed' | 'finalized' | 'void';
+  status: string;
   is_finalized: boolean;
-  contract_hash: string;
-  renter_signature?: string;
-  signed_at?: string;
+  contract_hash: string | null;
+  renter_signature?: string | null;
+  signed_at?: string | null;
   snapshot: Record<string, unknown>;
   parties?: Record<string, unknown>[];
-  terms?: string;
+  terms?: string | null;
+  created_at?: string;
 }
 
 import {
@@ -55,14 +57,6 @@ const CONTRACT_PHASES: Phase[] = [
     icon: PenLine,
     color: 'text-blue-600',
     dotColor: 'bg-blue-500',
-  },
-  {
-    id: 'owner_signed',
-    label: 'توقيع المالك',
-    sublabel: 'إغلاق دورة التوقيع',
-    icon: PenLine,
-    color: 'text-indigo-600',
-    dotColor: 'bg-indigo-500',
   },
   {
     id: 'escrow_locked',
@@ -123,15 +117,13 @@ function deriveActivePhaseIndex(contract: Contract & { [k: string]: unknown }): 
   const status = contract.status as string;
   const snap = contract.snapshot || {};
 
-  if (status === 'void') return -2;           // special: cancelled
-  if (snap.has_dispute) return -3;            // special: disputed
+  if (status === 'void' || status === 'expired') return -2;
+  if (snap.has_dispute) return -3;
 
-  if (status === 'finalized' || status === 'completed') return 5;
-  if (snap.escrow_locked || snap.escrow_status === 'HELD') return 4; // active
-  if (snap.escrow_status === 'PENDING' || (contract.renter_signature && contract.owner_signature)) return 3;
-  if (contract.owner_signature) return 2;     // owner signed
-  if (contract.renter_signature) return 1;    // renter signed
-  return 0;                                   // created
+  if (status === 'finalized' || status === 'completed') return 4;
+  if (snap.escrow_locked || snap.escrow_status === 'HELD' || snap.escrow_status === 'held') return 2;
+  if (contract.renter_signature) return 1;
+  return 0;
 }
 
 // ── Node component ────────────────────────────────────────────────────────────
@@ -279,8 +271,7 @@ export function ContractTimeline({ contract, className }: ContractTimelineProps)
   // Timestamps from snapshot
   const timestamps: Record<string, string | undefined> = {
     created:       contract.created_at,
-    renter_signed: snap.renter_signed_at || (contract.renter_signature ? contract.created_at : undefined),
-    owner_signed:  snap.owner_signed_at  || (contract.owner_signature  ? contract.signed_at  : undefined),
+    renter_signed: snap.renter_signed_at || (contract.renter_signature ? contract.signed_at : undefined),
     escrow_locked: snap.escrow_locked_at,
     active:        snap.active_since,
     completed:     snap.completed_at || contract.signed_at,
@@ -288,9 +279,8 @@ export function ContractTimeline({ contract, className }: ContractTimelineProps)
 
   // Hashes — contract_hash for the creation step, others from snapshot
   const hashes: Record<string, string | undefined> = {
-    created:       contract.contract_hash,
+    created:       contract.contract_hash ?? undefined,
     renter_signed: snap.renter_signature_hash,
-    owner_signed:  snap.owner_signature_hash,
     escrow_locked: snap.escrow_hash,
     completed:     snap.completion_hash,
   };

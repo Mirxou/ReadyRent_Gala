@@ -2246,3 +2246,82 @@ Stage Summary:
 - All Number() casts on string IDs removed across 4 files
 - Appeal client-server data contract now matches
 - Total: 15 files modified for Step 2.3
+---
+Task ID: 4-a
+Agent: Read-Only Agent
+
+Task: Read all contract-related files and return complete contents
+
+Work Log:
+- Read 6 primary contract files:
+  1. app/api/contracts/route.ts (72 lines) — GET endpoint listing user contracts via booking relation
+  2. app/api/contracts/[id]/route.ts (85 lines) — GET single contract with ownership check
+  3. app/api/contracts/[id]/sign/route.ts (77 lines) — POST sign endpoint with atomic transaction (contract+booking update)
+  4. app/contracts/[id]/page.tsx (180 lines) — Client page with manual fetch to /api/contracts/digital/{id}/ (wrong URL pattern)
+  5. lib/api/contracts.ts (34 lines) — API client with contractsApi (getById, getByBookingId, generate, sign)
+  6. prisma/schema.prisma Contract model (lines 359-376) — 12 fields, @@map("contracts")
+- Searched for additional contract-related files:
+  - app/ tsx files (7 matches): bookings/[id]/page.tsx, contracts/[id]/page.tsx, contracts/_id_/page.tsx, products/[id]/page.tsx, dashboard/orders/[id]/page.tsx, dashboard/orders/page.tsx, dashboard/page.tsx
+  - lib/api/ (2 matches): index.ts (re-exports contracts), contracts.ts
+  - components/ (8 matches): contract/contract-viewer.tsx, contract/contract-timeline.tsx, contracts/AgreementWidget.tsx, ui/skeletons.tsx, wallet/active-escrow-list.tsx, disputes/steps/evidence-step.tsx, booking/steps/payment-step.tsx, booking/booking-wizard.tsx
+- Read 3 additional component files in full:
+  - app/contracts/_id_/page.tsx (93 lines) — DUPLICATE page using lib/api/contracts.ts client (cleaner version)
+  - components/contract/contract-viewer.tsx (263 lines) — Full contract viewer with canvas signature, parties, terms
+  - components/contract/contract-timeline.tsx (364 lines) — 6-phase timeline with dispute/void branches
+  - components/contracts/AgreementWidget.tsx (163 lines) — Legacy widget using old api.post pattern
+
+Stage Summary:
+- 0 files modified (read-only task)
+- Key findings: Duplicate page at contracts/_id_/page.tsx vs contracts/[id]/page.tsx; contracts/[id]/page.tsx uses WRONG API URL (/api/contracts/digital/{id}/) and PATCH method instead of POST; contracts/_id_/page.tsx uses correct lib/api client but duplicate routes may cause routing conflicts
+- All file contents returned in full
+---
+Task ID: 4-b
+Agent: Contract Frontend Fix Agent
+Task: Fix contract frontend, delete dead code, fix types
+
+Work Log:
+- Deleted app/contracts/_id_/page.tsx (duplicate page with wrong dynamic segment)
+- Deleted app/contracts/_id_/ empty directory
+- Deleted components/contracts/AgreementWidget.tsx (dead code, wrong apiFetch usage, number IDs)
+- Deleted components/contracts/ empty directory
+- Rewrote lib/api/contracts.ts: replaced apiFetch with sovereignClient, fixed ContractParty role to 'vendor', added nullable types, added booking relation
+- Rewrote app/contracts/[id]/page.tsx: fixed API path (removed 'digital' typo), removed parseInt ID conversion, added auth guard via useAuthStore, used sovereignClient, removed owner_signature references, used unified result state to avoid lint set-state-in-effect error, sign endpoint uses POST not PATCH
+- Fixed components/contract/contract-viewer.tsx: updated Contract interface (status string, contract_hash nullable, added created_at), changed onSign prop to () => Promise<void>, removed signature validation (backend auto-generates from IP)
+- Fixed components/contract/contract-timeline.tsx: removed owner_signed phase from CONTRACT_PHASES (6→5 phases), removed all owner_signature references, simplified deriveActivePhaseIndex, removed owner timestamps/hashes
+
+Stage Summary:
+- 6 files modified/deleted (2 deleted, 4 rewritten)
+- All contract pages now use sovereignClient with correct string IDs
+- Dead code removed
+- Lint passes with 0 errors (2 pre-existing warnings in unrelated files)
+---
+Task ID: 4-c
+Agent: Contract Backend Agent
+Task: Create contract generation API, terms utility, fix vendor access
+
+Work Log:
+- Created lib/contract-terms.ts: 7-section Arabic contract terms + SHA-256 hash
+- Created app/api/contracts/generate/route.ts: auto-generate contract from booking
+- Fixed app/api/contracts/route.ts: added vendor access (OR condition)
+- Fixed app/api/contracts/[id]/route.ts: added vendor access authorization
+- Fixed app/api/contracts/[id]/sign/route.ts: added vendor notification
+
+Stage Summary:
+- 5 files created/modified
+- Contract generation with Arabic terms and SHA-256 hash
+- Vendor can view contracts for their products
+- Notifications sent on contract creation and signing
+---
+Task ID: 4-d
+Agent: Main Agent
+Task: Step 2.4 verification + worklog
+
+Work Log:
+- Verified lint: 0 errors, 2 pre-existing warnings
+- Restarted dev server (Turbopack unresponsive), confirmed 200 OK
+- Verified all files created/modified correctly
+
+Stage Summary:
+- Step 2.4 complete: contract generation, Arabic terms, SHA-256, vendor access
+- Total files for Step 2.4: 4 created, 5 modified, 2 deleted
+- Dev server responding correctly

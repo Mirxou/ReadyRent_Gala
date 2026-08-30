@@ -36,7 +36,33 @@ export async function GET(
     },
   });
 
-  if (!contract || contract.booking?.userId !== session.userId) {
+  if (!contract) {
+    return NextResponse.json(
+      {
+        success: false,
+        dignity_preserved: true,
+        message_en: 'Contract not found',
+        code: 'NOT_FOUND',
+      },
+      { status: 404 }
+    );
+  }
+
+  // Authorization: renter, vendor, or admin/staff
+  const currentUser = await db.user.findUnique({ where: { id: session.userId }, select: { role: true } });
+  const isAdmin = currentUser?.role === 'admin' || currentUser?.role === 'staff';
+
+  // Check if user is the vendor of the booking's product
+  let isVendor = false;
+  if (contract.bookingId) {
+    const bookingForVendor = await db.booking.findUnique({
+      where: { id: contract.bookingId },
+      select: { product: { select: { vendorId: true } } },
+    });
+    isVendor = bookingForVendor?.product?.vendorId === session.userId;
+  }
+
+  if (contract.booking?.userId !== session.userId && !isVendor && !isAdmin) {
     return NextResponse.json(
       {
         success: false,

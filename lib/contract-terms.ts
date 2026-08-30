@@ -1,0 +1,75 @@
+import crypto from 'crypto';
+
+interface ContractTermsData {
+  renterName: string;
+  renterEmail: string;
+  renterPhone: string | null;
+  vendorName: string;
+  vendorEmail: string;
+  productName: string;
+  productDescription: string | null;
+  startDate: string;
+  endDate: string;
+  totalPrice: number;
+  currency?: string;
+}
+
+export function generateContractTerms(data: ContractTermsData): string {
+  const days = Math.max(1, Math.ceil(
+    (new Date(data.endDate).getTime() - new Date(data.startDate).getTime()) / (1000 * 60 * 60 * 24)
+  ));
+  const dailyPrice = Math.round(data.totalPrice / days);
+  const currency = data.currency || 'د.ج';
+
+  const sections = [
+    `بند 1: بيانات الأطراف`,
+    `المستأجر: ${data.renterName}
+البريد الإلكتروني: ${data.renterEmail}
+الهاتف: ${data.renterPhone || 'غير محدد'}
+
+المؤجر: ${data.vendorName}
+البريد الإلكتروني: ${data.vendorEmail}`,
+
+    `بند 2: المنتج المؤجر`,
+    `المنتج: ${data.productName}
+${data.productDescription ? `الوصف: ${data.productDescription}` : ''}
+
+يقر المستأجر بأنه اطلع على حالة المنتج ووافق على تأجيره كما هو.`,
+
+    `بند 3: مدة الإيجار`,
+    `تاريخ البداية: ${data.startDate}
+تاريخ النهاية: ${data.endDate}
+المدة: ${days} يوم
+السعر اليومي: ${dailyPrice.toLocaleString('ar-DZ')} ${currency}
+الإجمالي: ${data.totalPrice.toLocaleString('ar-DZ')} ${currency}`,
+
+    `بند 4: شروط الاستخدام`,
+    `يتعهد المستأجر باستخدام المنتج وفقًا للغرض المحدد وبحالة جيدة.
+لا يجوز للمستأجر إعادة تأجير المنتج أو تفويض استخدامه لطرف ثالث دون موافقة كتابية من المؤجر.
+المستأجر مسؤول عن أي تلف ينتج عن الاستخدام غير السليم أو الإهمال.
+في حالة التلف، يحق للمؤجر المطالبة بقيمة الإصلاح أو الاستبدال.`,
+
+    `بند 5: شروط الإرجاع`,
+    `يُرجَع المنتج في نفس الحالة التي استُلِم بها أو في حالة مماثلة مع مراعاة الاستهلاك الطبيعي.
+يتم الفحص المشترك عند الاستلام والإرجاع.
+في حالة التأخر عن الإرجاع، يتحمل المستأجر رسوم تأخير تعادل قيمة إيجار يوم إضافي عن كل يوم تأخير.`,
+
+    `بند 6: الضمان والتأمين`,
+    `يتم حجز المبلغ المالي في حساب الضمان (Escrow) الخاص بالمنصة.
+يتم تحرير المبلغ للمؤجر بعد تأكيد المستأجر بالاستلام ورضاه عن حالة المنتج.
+في حالة نزاع، يُحتجز المبلغ حتى يتم الفصل في النزاع وفقًا لنظام المنصة.`,
+
+    `بند 7: حل النزاعات`,
+    `في حالة نزاع، يُلجأ أولاً لنظام النزاعات في المنصة.
+يتم تبادل الرسائل والأدلة بين الطرفين خلال 48 ساعة.
+إذا لم يتم التوصل لحل ودي، يتدخل فريق الدعم لاتخاذ قرار نهائي.
+يخضع هذا العقد للقانون الجزائري رقم 18-05 المتعلق بالتجارة الإلكترونية.`,
+  ];
+
+  return sections.join('\n\n---\n\n');
+}
+
+export function computeContractHash(terms: string, bookingId: string): string {
+  const payload = `${bookingId}:${terms}:${new Date().toISOString().split('T')[0]}`;
+  return crypto.createHash('sha256').update(payload, 'utf8').digest('hex');
+}

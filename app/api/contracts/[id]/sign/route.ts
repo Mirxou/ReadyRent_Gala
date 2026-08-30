@@ -66,6 +66,24 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     }),
   ]);
 
+  // Notify vendor
+  if (contract.bookingId) {
+    const vendorBooking = await db.booking.findUnique({
+      where: { id: contract.bookingId },
+      select: { product: { select: { vendorId: true, name: true } } },
+    });
+    if (vendorBooking?.product?.vendorId) {
+      await db.notification.create({
+        data: {
+          userId: vendorBooking.product.vendorId,
+          type: 'system',
+          title: 'تم توقيع عقد حجز جديد',
+          message: `تم توقيع عقد إيجار ${vendorBooking.product.name || ''}. يمكنك البدء في تنفيذ الحجز.`,
+        },
+      });
+    }
+  }
+
   return NextResponse.json({ success: true, dignity_preserved: true, data: updated });
   } catch (error) {
     logger.error('Contract Sign API', 'Error', error);

@@ -1,9 +1,9 @@
-import { apiFetch } from './core';
+import { sovereignClient } from './sovereign-client';
 
 export interface ContractParty {
   id: string;
   name: string;
-  role: 'renter' | 'owner';
+  role: 'renter' | 'vendor';
   signed: boolean;
   signedAt?: string;
   ipAddress?: string;
@@ -12,23 +12,36 @@ export interface ContractParty {
 export interface Contract {
   id: string;
   booking_id: string;
-  status: 'draft' | 'signed' | 'finalized' | 'expired';
+  status: string;
   is_finalized: boolean;
-  contract_hash: string;
-  renter_signature?: string;
-  owner_signature?: string;
+  contract_hash: string | null;
+  terms: string | null;
+  parties: ContractParty[];
+  renter_signature: string | null;
+  signed_at: string | null;
+  snapshot: Record<string, unknown> | null;
   created_at: string;
-  signed_at?: string;
-  snapshot: unknown;
-  parties?: ContractParty[];
-  terms?: string;
+  updated_at: string;
+  booking?: {
+    id: string;
+    product_name: string | null;
+    product_image: string | null;
+    start_date: string | null;
+    end_date: string | null;
+    total_price: number;
+  };
 }
 
 export const contractsApi = {
-  getById: (id: string) => apiFetch(`contracts/${id}`),
-  getByBookingId: (bookingId: string) => apiFetch(`contracts?booking=${bookingId}`),
-  generate: (bookingId: string) => apiFetch('contracts/generate/', { method: 'POST', body: { booking_id: bookingId } }),
-  sign: (contractId: string, ipAddress: string) => apiFetch(`contracts/${contractId}/sign`, { method: 'POST', body: { ip_address: ipAddress } }),
-  getContract: (id: string) => contractsApi.getById(id),
-  signContract: (contractId: string, ipAddress: string) => contractsApi.sign(contractId, ipAddress),
+  listContracts: () =>
+    sovereignClient.get<Contract[]>('/contracts/'),
+
+  getContract: (id: string) =>
+    sovereignClient.get<Contract>(`/contracts/${id}/`),
+
+  generateContract: (bookingId: string) =>
+    sovereignClient.post<Contract>('/contracts/generate/', { booking_id: bookingId }),
+
+  signContract: (id: string) =>
+    sovereignClient.post<Contract>(`/contracts/${id}/sign/`),
 };

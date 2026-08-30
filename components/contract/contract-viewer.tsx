@@ -22,19 +22,20 @@ import { toast } from 'sonner';
 interface Contract {
   id: string;
   booking_id: string;
-  status: 'draft' | 'signed' | 'finalized' | 'void';
+  status: string;
   is_finalized: boolean;
-  contract_hash: string;
-  renter_signature?: string;
-  signed_at?: string;
+  contract_hash: string | null;
+  renter_signature?: string | null;
+  signed_at?: string | null;
   snapshot: Record<string, unknown>;
   parties?: Record<string, unknown>[];
-  terms?: string;
+  terms?: string | null;
+  created_at?: string;
 }
 
 interface ContractViewerProps {
   contract: Contract;
-  onSign: (signatureData: string) => Promise<void>;
+  onSign: () => Promise<void>;
 }
 
 export const ContractViewer: React.FC<ContractViewerProps> = ({ contract, onSign }) => {
@@ -89,11 +90,7 @@ export const ContractViewer: React.FC<ContractViewerProps> = ({ contract, onSign
   };
 
   const handleSign = async () => {
-    if (!signature) {
-      toast.error('يرجى التوقيع أولاً');
-      return;
-    }
-    await onSign(signature);
+    await onSign();
     setIsSigning(false);
     toast.success('تم التوقيع بنجاح');
   };
