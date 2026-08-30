@@ -1,15 +1,18 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { logger } from '@/lib/logger';
 import { getSessionFromRequest } from '@/lib/auth-server';
+import { logger } from '@/lib/logger';
 
 // ═══════════════════════════════════════════════════════════════════
-// Subscription Plans API — Returns { plans, active_plan, history }
+// Subscription Plans API — Full database integration
+// Returns { active_plan, plans, history }
 // ═══════════════════════════════════════════════════════════════════
 
-export async function GET(request: NextRequest) {
+export async function GET(request: Request) {
   try {
-    // Fetch all active plans (public)
+    const session = await getSessionFromRequest(request);
+
+    // ── Fetch all active plans (public, no auth needed) ──
     const plans = await db.subscriptionPlan.findMany({
       where: { isActive: true },
       orderBy: { price: 'asc' },
@@ -25,68 +28,65 @@ export async function GET(request: NextRequest) {
       features: JSON.parse(p.features || '[]'),
     }));
 
-    // Try to get session for personalized data (optional — plans are always returned)
-    let activePlan = null;
-    let history: Array<Record<string, unknown>> = [];
+    // ── Authenticated data: active plan + history ──
+    let active_plan: Record<string, unknown> | null = null;
+    let history: Record<string, unknown>[] = [];
 
-    try {
-      const session = await getSessionFromRequest(request);
-      if (session) {
-        // Get active subscription
-        const activeSub = await db.userSubscription.findFirst({
-          where: { userId: session.userId, status: 'active' },
-          orderBy: { createdAt: 'desc' },
-          include: { plan: { select: { planId: true, nameAr: true, price: true, bookingsLimit: true, features: true } } },
+    if (session) {
+      // Fetch user's active subscription
+      const activeSub = await db.userSubscription.findFirst({
+        where: {
+          userId: session.userId,
+          status: 'active',
+        },
+        include: { plan: true },
+        orderBy: { createdAt: 'desc' },
+      });
+
+      if (activeSub) {
+        // Count bookings made during subscription period
+        const bookingsUsed = await db.booking.count({
+          where: {
+            userId: session.userId,
+            createdAt: { gte: activeSub.startDate },
+          },
         });
 
-        if (activeSub && activeSub.plan) {
-          // Count bookings in the current subscription period
-          const bookingsUsed = await db.booking.count({
-            where: {
-              userId: session.userId,
-              createdAt: { gte: activeSub.startDate },
-            },
-          });
-
-          activePlan = {
-            id: activeSub.plan.planId,
-            plan_id: activeSub.plan.planId,
-            name: activeSub.plan.nameAr || activeSub.plan.planId,
-            price: activeSub.plan.price,
-            bookings_limit: activeSub.plan.bookingsLimit,
-            end_date: activeSub.endDate?.toISOString() || null,
-            bookings_used: bookingsUsed,
-            features: JSON.parse(activeSub.plan.features || '[]'),
-          };
-        }
-
-        // Get subscription history
-        const subs = await db.userSubscription.findMany({
-          where: { userId: session.userId },
-          orderBy: { createdAt: 'desc' },
-          include: { plan: { select: { nameAr: true } } },
-        });
-
-        history = subs.map((sub) => ({
-          id: sub.id,
-          date: sub.createdAt.toISOString(),
-          plan: sub.plan?.nameAr || sub.planId,
-          amount: sub.amount,
-          status: sub.status === 'active' ? 'نشط' as const
-            : sub.status === 'cancelled' ? 'ملغي' as const
-            : 'مدفوع' as const,
-        }));
+        active_plan = {
+          id: activeSub.plan.id,
+          plan_id: activeSub.plan.planId,
+          name_ar: activeSub.plan.nameAr,
+          name_en: activeSub.plan.nameEn || null,
+          price: activeSub.plan.price,
+          end_date: activeSub.endDate?.toISOString() || null,
+          bookings_used: bookingsUsed,
+          bookings_limit: activeSub.plan.bookingsLimit,
+        };
       }
-    } catch {
-      // Auth not available — return public plans only
+
+      // Fetch subscription history (last 20)
+      const subscriptions = await db.userSubscription.findMany({
+        where: { userId: session.userId },
+        include: { plan: { select: { nameAr: true } } },
+        orderBy: { createdAt: 'desc' },
+        take: 20,
+      });
+
+      history = subscriptions.map((s) => ({
+        id: s.id,
+        date: s.createdAt.toISOString(),
+        plan: s.plan.nameAr,
+        amount: s.amount,
+        status: s.status === 'active' ? 'نشط' : s.status === 'cancelled' ? 'ملغي' : 'مدفوع',
+      }));
     }
 
     return NextResponse.json({
       success: true,
       dignity_preserved: true,
       data: {
+        active_plan: active_plan,
         plans: plansData,
-        active_plan: activePlan,
         history,
       },
     });
@@ -96,8 +96,8 @@ export async function GET(request: NextRequest) {
       {
         success: false,
         dignity_preserved: true,
-        message_ar: 'حدث خطأ أثناء جلب خطط الاشتراك',
-        message_en: 'An error occurred while fetching subscription plans',
+        message_ar: 'حدث خطأ أثناء جلب بيانات الاشتراكات',
+        message_en: 'An error occurred while fetching subscription data',
         code: 'INTERNAL_ERROR',
       },
       { status: 500 }

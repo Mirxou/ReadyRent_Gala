@@ -12,6 +12,16 @@ export interface Plan {
   bookingsLimit: number | null;
 }
 
+export interface ActivePlanData {
+  id: string;
+  plan_id: string;
+  name_ar: string;
+  price: number;
+  end_date: string | null;
+  bookings_used: number;
+  bookings_limit: number;
+}
+
 export interface SubscriptionHistory {
   id: string;
   date: string;
@@ -20,7 +30,7 @@ export interface SubscriptionHistory {
   status: 'مدفوع' | 'نشط' | 'ملغي';
 }
 
-// ── Icon mapping ──
+// ── Icon mapping (keyed by plan_id: free, basic, premium, vip) ──
 export const planIconMap: Record<string, React.ElementType> = {
   free: Shield,
   basic: Star,
@@ -49,13 +59,23 @@ export const staggerContainer = {
   visible: { transition: { staggerChildren: 0.1 } },
 };
 
+// ── Helpers ──
+export function formatRenewalDate(isoDate: string | null): string {
+  if (!isoDate) return '—';
+  return new Date(isoDate).toLocaleDateString('ar-DZ', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+}
 
 export function mapApiPlan(apiPlan: Record<string, unknown>): Plan {
-  const planId = (apiPlan.plan_id as string) || (apiPlan.id as string);
+  const id = apiPlan.id as string;
+  const planId = (apiPlan.plan_id as string) || id;
   const bookingsLimit = apiPlan.bookings_limit as number;
   return {
-    id: planId,
-    name: (apiPlan.name_ar as string) || planId,
+    id,
+    name: (apiPlan.name_ar as string) || id,
     price: (apiPlan.price as number) || 0,
     features: (apiPlan.features as string[]) || [],
     icon: planIconMap[planId] || Shield,

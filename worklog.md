@@ -2486,3 +2486,29 @@ Stage Summary:
 - Insurance page converted from broken purchase page to informational page.
 - Summary step now fetches real prices from API instead of hardcoded values.
 - Server-side booking creation now includes insurance fee in total price.
+---
+Task ID: 2.5-fix
+Agent: Main Agent
+Task: Fix all 13 bugs from Step 2.5 microscopic review (Insurance & Subscriptions)
+
+Work Log:
+- **SUB-BUG-1**: Rewrote `app/api/subscriptions/route.ts` GET to return `{active_plan, plans, history}` shape with auth-aware data (active subscription with end_date + bookings count, subscription history from UserSubscription)
+- **SUB-BUG-2**: Fixed `app/subscriptions/_components/types.ts` `mapApiPlan` to use `plan_id` (free/basic/premium/vip) for `planIconMap` and `planPopularSet` lookups instead of cuid `id`
+- **SUB-BUG-3**: Replaced `getRenewalDate()` (always today+30) with `formatRenewalDate(isoDate)` that formats actual `endDate` from API
+- **SUB-BUG-4**: Fixed hardcoded `formatNumber(1)` in `active-subscription.tsx` to use `activePlanData.bookings_used` from API
+- **SUB-BUG-5**: Already fixed (toast.info on button click)
+- **SUB-BUG-6+7**: Already fixed (both use `type: 'financial'`)
+- **INS-BUG-1**: Removed broken purchase flow from insurance page (API requires booking_id but page doesn't have one). Page is now informational — shows plans, how-it-works, why-insurance sections. Purchase happens during booking flow.
+- **INS-BUG-2**: Fixed `ApiPlan.id` type from `number` to `string`, changed `planEnrichment` key from `Record<number,...>` with keys 1,2,3 to `Record<string,...>` keyed by `nameAr` (خطة أساسية/خطة متقدمة/خطة VIP). Removed all `useState` for purchase flow.
+- **INS-BUG-3**: Fixed `summary-step.tsx` — removed hardcoded `basePrice=5000` and `insurancePrice=2500`, now uses `formData.totalPrice` from store and shows "يُحسب تلقائياً" for insurance
+- **INS-BUG-4**: Booking create API now adds insurance fee from DB (most expensive plan) to `calculatedTotalPrice` when `has_insurance` is true
+- **INS-BUG-5**: `insurance-selector.tsx` already deleted
+- **INS-BUG-6**: Replaced all `blue-600`, `blue-50`, `blue-100` in summary-step with `sovereign-gold`, `muted`, `border` theme-aware classes
+- Updated `app/subscriptions/page.tsx` to pass `activePlanData` (with end_date, bookings_used, bookings_limit) to `ActiveSubscription` component
+- Updated `ActiveSubscription` component props to accept `activePlanData: ActivePlanData | null` instead of `currentPlanId: string`
+
+Stage Summary:
+- 13/13 bugs addressed (3 were already fixed, 10 fixed now)
+- Lint: 0 errors, 2 pre-existing warnings
+- No new lint errors introduced
+- All changes are backwards-compatible

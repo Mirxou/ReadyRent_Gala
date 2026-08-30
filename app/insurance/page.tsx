@@ -1,28 +1,28 @@
-'use client'
+'use client';
 
 import { formatNumber } from '@/lib/utils';
 
+import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
-import { Shield, Check, ArrowLeft, Info, Phone, FileText, ShoppingCart } from 'lucide-react';
+import { Shield, Check, ArrowLeft, Info, Phone, FileText } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { motion } from 'framer-motion';
 import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
 import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
 import Link from 'next/link';
 
 /* ────────────────────────────────────────────
-   Types — match actual API (id is string/cuid)
+   Types
    ──────────────────────────────────────────── */
 interface ApiPlan {
   id: string;
-  name_ar: string;
-  name_en: string;
+  nameAr: string;
+  nameEn: string;
   price: number;
-  coverage_ar: string;
-  coverage_en: string;
+  coverageAr: string;
+  coverageEn: string;
+  isActive: boolean;
 }
 
 interface EnrichedPlan {
@@ -38,11 +38,13 @@ interface EnrichedPlan {
 }
 
 /* ────────────────────────────────────────────
-   Enrichment indexed by array position (not DB id)
-   Plans are ordered by price ASC from API
+   Local enrichment data (keyed by nameAr from DB)
    ──────────────────────────────────────────── */
-const planEnrichment: Omit<EnrichedPlan, 'id' | 'name' | 'price' | 'coverage'>[] = [
-  {
+const planEnrichment: Record<
+  string,
+  Omit<EnrichedPlan, 'id' | 'name' | 'price' | 'coverage'>
+> = {
+  'خطة أساسية': {
     icon: '🛡️',
     features: [
       'تغطية التلفيات البسيطة',
@@ -54,7 +56,7 @@ const planEnrichment: Omit<EnrichedPlan, 'id' | 'name' | 'price' | 'coverage'>[]
     borderColor: 'border-slate-500/30',
     popular: false,
   },
-  {
+  'خطة متقدمة': {
     icon: '⚔️',
     features: [
       'تغطية التلفيات المتوسطة والكبيرة',
@@ -67,7 +69,7 @@ const planEnrichment: Omit<EnrichedPlan, 'id' | 'name' | 'price' | 'coverage'>[]
     borderColor: 'border-sovereign-gold/40',
     popular: true,
   },
-  {
+  'خطة VIP': {
     icon: '👑',
     features: [
       'تغطية شاملة بلا حدود',
@@ -82,24 +84,48 @@ const planEnrichment: Omit<EnrichedPlan, 'id' | 'name' | 'price' | 'coverage'>[]
     borderColor: 'border-purple-400/40',
     popular: false,
   },
-];
+};
 
-function mapApiToPlan(apiPlan: ApiPlan, index: number): EnrichedPlan {
-  const enrichment = planEnrichment[index] || planEnrichment[0];
+const defaultEnrichment: Omit<EnrichedPlan, 'id' | 'name' | 'price' | 'coverage'> = {
+  icon: '🛡️',
+  features: ['تغطية أساسية'],
+  color: 'from-slate-600 to-slate-400',
+  borderColor: 'border-slate-500/30',
+  popular: false,
+};
+
+function mapApiToPlan(apiPlan: ApiPlan): EnrichedPlan {
+  const enrichment = planEnrichment[apiPlan.nameAr] || defaultEnrichment;
   return {
     id: apiPlan.id,
-    name: apiPlan.name_ar,
+    name: apiPlan.nameAr,
     price: apiPlan.price,
-    coverage: apiPlan.coverage_ar,
+    coverage: apiPlan.coverageAr || '',
     ...enrichment,
   };
 }
 
 const steps = [
-  { step: 1, title: 'اختر المنتج', description: 'اختر المنتج الذي تريد استئجاره من المنصة' },
-  { step: 2, title: 'أضف التأمين', description: 'اختر خطة التأمين المناسبة أثناء عملية الحجز' },
-  { step: 3, title: 'استلم وتأمّن', description: 'استلم المنتج وأنت مطمئن بوجود التغطية التأمينية' },
-  { step: 4, title: 'التعويض عند الحاجة', description: 'في حالة أي تلف، قدم طلب تعويض وسنحل الأمر بسرعة' },
+  {
+    step: 1,
+    title: 'اختر المنتج',
+    description: 'اختر المنتج الذي تريد استئجاره من المنصة',
+  },
+  {
+    step: 2,
+    title: 'أضف التأمين',
+    description: 'اختر خطة التأمين المناسبة أثناء عملية الحجز',
+  },
+  {
+    step: 3,
+    title: 'استلم وتأمّن',
+    description: 'استلم المنتج وأنت مطمئن بوجود التغطية التأمينية',
+  },
+  {
+    step: 4,
+    title: 'التعويض عند الحاجة',
+    description: 'في حالة أي تلف، قدم طلب تعويض وسنحل الأمر بسرعة',
+  },
 ];
 
 const fadeUp = {
@@ -150,7 +176,7 @@ export default function InsurancePage() {
         .then((d) => d.data || []),
   });
 
-  const plans: EnrichedPlan[] = (Array.isArray(data) ? data : []).map((p: ApiPlan, i: number) => mapApiToPlan(p, i));
+  const plans: EnrichedPlan[] = (Array.isArray(data) ? data : []).map(mapApiToPlan);
 
   const handleContactSupport = () => {
     const waNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER;
@@ -206,7 +232,7 @@ export default function InsurancePage() {
           </div>
         )}
 
-        {/* Insurance Plan Cards — INFORMATIONAL ONLY */}
+        {/* Insurance Plan Cards */}
         {isLoading ? (
           <PlansLoadingSkeleton />
         ) : (
@@ -229,9 +255,9 @@ export default function InsurancePage() {
                 >
                   {plan.popular && (
                     <div className="absolute top-4 left-4">
-                      <Badge className="bg-sovereign-gold text-black font-bold text-xs">
+                      <span className="bg-sovereign-gold text-black text-xs font-bold px-3 py-1 rounded-full">
                         الأكثر طلباً
-                      </Badge>
+                      </span>
                     </div>
                   )}
 
@@ -262,16 +288,9 @@ export default function InsurancePage() {
                       ))}
                     </div>
 
-                    <SovereignButton
-                      variant={plan.popular ? 'primary' : 'secondary'}
-                      className="w-full"
-                      onClick={() => {
-                        window.location.href = '/products';
-                      }}
-                    >
-                      <ShoppingCart className="w-4 h-4 ml-2" />
-                      استأجر بتأمين
-                    </SovereignButton>
+                    <p className="text-center text-xs text-muted-foreground">
+                      يُفعّل أثناء الحجز
+                    </p>
                   </CardContent>
                 </Card>
               </motion.div>

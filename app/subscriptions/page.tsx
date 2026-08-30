@@ -9,7 +9,7 @@ import { PlansSection } from './_components/plans-section';
 import { HistorySection } from './_components/history-section';
 import { ConfirmationDialog } from './_components/confirmation-dialog';
 import { ActiveSubscriptionSkeleton, PlansSkeleton, HistorySkeleton } from './_components/skeletons';
-import { type Plan, type SubscriptionHistory, mapApiPlan } from './_components/types';
+import { type Plan, type SubscriptionHistory, type ActivePlanData, mapApiPlan } from './_components/types';
 
 export default function SubscriptionsPage() {
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
@@ -25,11 +25,8 @@ export default function SubscriptionsPage() {
         .then((d) => d.data || d),
   });
 
-  // API now returns { plans, active_plan, history }
-  const activePlan = data?.active_plan as Record<string, unknown> | null;
-  const currentPlanId = (activePlan?.id as string) || 'free';
-  const activeEndDate = activePlan?.end_date as string | null;
-  const activeBookingsUsed = (activePlan?.bookings_used as number) || 0;
+  const activePlanData = (data?.active_plan as ActivePlanData) || null;
+  const currentPlanId = activePlanData?.id || 'free';
   const plans: Plan[] = (data?.plans || []).map(mapApiPlan);
   const history: SubscriptionHistory[] = (data?.history || []).map(
     (h: Record<string, unknown>) => ({
@@ -107,7 +104,12 @@ export default function SubscriptionsPage() {
           </div>
         </section>
       ) : (
-        <ActiveSubscription currentPlanId={currentPlanId} plansList={plans} onUpgrade={handleUpgrade} onCancel={handleCancel} endDate={activeEndDate} bookingsUsed={activeBookingsUsed} />
+        <ActiveSubscription
+          activePlanData={activePlanData}
+          plansList={plans}
+          onUpgrade={handleUpgrade}
+          onCancel={handleCancel}
+        />
       )}
 
       <div className="max-w-5xl mx-auto w-full px-4">

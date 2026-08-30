@@ -8,23 +8,32 @@ import { SovereignGlow } from '@/shared/components/sovereign/sovereign-sparkle';
 import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
 import { Badge } from '@/components/ui/badge';
 import { formatNumber } from '@/lib/utils';
-import { type Plan, fadeUp, staggerContainer } from './types';
+import { type Plan, type ActivePlanData, fadeUp, staggerContainer, formatRenewalDate } from './types';
 
 interface ActiveSubscriptionProps {
-  currentPlanId: string;
+  activePlanData: ActivePlanData | null;
   plansList: Plan[];
   onUpgrade: () => void;
   onCancel: () => void;
-  endDate?: string | null;
-  bookingsUsed?: number;
 }
 
-export function ActiveSubscription({ currentPlanId, plansList, onUpgrade, onCancel, endDate, bookingsUsed = 0 }: ActiveSubscriptionProps) {
+export function ActiveSubscription({ activePlanData, plansList, onUpgrade, onCancel }: ActiveSubscriptionProps) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: '-80px' });
-  const currentPlan = plansList.find((p) => p.id === currentPlanId);
+
+  // If user has an active subscription, use its data; otherwise find 'free' plan
+  const currentPlan = activePlanData
+    ? plansList.find((p) => p.id === activePlanData.id) || plansList[0]
+    : plansList.find((p) => p.id === 'free') || plansList[0];
 
   if (!currentPlan) return null;
+
+  const bookingsUsed = activePlanData?.bookings_used ?? 0;
+  const bookingsLimit = activePlanData?.bookings_limit ?? currentPlan.bookingsLimit ?? 0;
+  const renewalDate = activePlanData?.end_date
+    ? formatRenewalDate(activePlanData.end_date)
+    : '—';
+  const isFree = !activePlanData || activePlanData.plan_id === 'free';
 
   return (
     <section ref={ref} className="py-10 md:py-16 px-4">
@@ -67,10 +76,7 @@ export function ActiveSubscription({ currentPlanId, plansList, onUpgrade, onCanc
                   </div>
                   <Badge className="bg-sovereign-gold/10 text-sovereign-gold border-sovereign-gold/20 px-4 py-1.5 text-xs font-bold self-start sm:self-center">
                     <Clock className="w-3 h-3 ml-1" />
-                    يتجدد {endDate
-                        ? new Date(endDate).toLocaleDateString('ar-DZ', { year: 'numeric', month: 'long', day: 'numeric' })
-                        : '—'
-                      }
+                    يتجدد {renewalDate}
                   </Badge>
                 </div>
 
@@ -82,13 +88,13 @@ export function ActiveSubscription({ currentPlanId, plansList, onUpgrade, onCanc
                     <div className="text-2xl font-black text-sovereign-gold">
                       {formatNumber(bookingsUsed)}{' '}
                       <span className="text-muted-foreground text-base font-normal">
-                        / {currentPlan.bookingsLimit ? formatNumber(currentPlan.bookingsLimit) : '∞'}
+                        / {bookingsLimit && bookingsLimit !== -1 ? formatNumber(bookingsLimit) : '∞'}
                       </span>
                     </div>
                     <div className="mt-3 h-1.5 rounded-full bg-white/5 overflow-hidden">
                       <div
                         className="h-full rounded-full bg-sovereign-gold transition-all duration-700"
-                        style={{ width: `${currentPlan.bookingsLimit ? Math.min((1 / currentPlan.bookingsLimit) * 100, 100) : 5}%` }}
+                        style={{ width: `${bookingsLimit && bookingsLimit !== -1 ? Math.min((bookingsUsed / bookingsLimit) * 100, 100) : bookingsUsed > 0 ? 5 : 0}%` }}
                       />
                     </div>
                   </div>
@@ -113,7 +119,7 @@ export function ActiveSubscription({ currentPlanId, plansList, onUpgrade, onCanc
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-3">
-                  {currentPlan.id === 'free' ? (
+                  {isFree ? (
                     <SovereignButton variant="primary" size="sm" className="w-full sm:w-auto" onClick={onUpgrade}>
                       <Zap className="w-4 h-4 ml-2" /> ترقية الاشتراك
                     </SovereignButton>
