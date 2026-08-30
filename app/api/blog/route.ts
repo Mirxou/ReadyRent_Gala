@@ -108,12 +108,22 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate slug from title
-    const slug = title
+    let slug = title
       .toLowerCase()
       .replace(/[^\w\u0600-\u06FF\s-]/g, '')
       .replace(/\s+/g, '-')
       .replace(/-+/g, '-')
       .trim();
+
+    // Ensure slug uniqueness
+    let slugExists = await db.blogPost.findUnique({ where: { slug } });
+    let suffix = 1;
+    const baseSlug = slug;
+    while (slugExists) {
+      slug = `${baseSlug}-${suffix}`;
+      slugExists = await db.blogPost.findUnique({ where: { slug } });
+      suffix++;
+    }
 
     const post = await db.blogPost.create({
       data: {

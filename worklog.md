@@ -2512,3 +2512,21 @@ Stage Summary:
 - Lint: 0 errors, 2 pre-existing warnings
 - No new lint errors introduced
 - All changes are backwards-compatible
+---
+Task ID: 3.1-fix
+Agent: Main Agent
+Task: Fix all 6 bugs from Step 3.1 microscopic review (Blog)
+
+Work Log:
+- **BLOG-BUG-1**: Rewrote `app/blog/page.tsx` — replaced `useEffect` + manual state with `useQuery`. Added error detection via `meta.failed` check (since apiFetch never throws). Added proper `isError` error state display.
+- **BLOG-BUG-2**: Changed image fallback from non-existent `/placeholder-blog.jpg` to existing `/placeholder.svg`. Removed double-fallback issue.
+- **BLOG-BUG-3**: Added `isSearchActive` flag — empty state shows "لا توجد مقالات بعد" (no posts) vs "لا توجد مقالات مطابقة لبحثك" (search active).
+- **BLOG-BUG-4**: Added slug uniqueness loop in `app/api/blog/route.ts` POST — appends `-2`, `-3`, etc. suffix when slug exists.
+- **BLOG-BUG-5**: Removed dead `post.tags` badges section from `app/blog/[id]/page.tsx`. Also removed unused `Badge` import.
+- **BLOG-BUG-6**: Added client-side pagination controls (prev/next + page numbers) using API's `?page=&limit=` params. `POSTS_PER_PAGE = 6`. Reset to page 1 on search change.
+- Also fixed purple gradient in blog title from `#8B5CF6` (violet) to `#C5A059` (sovereign-gold equivalent).
+
+Stage Summary:
+- 6/6 bugs fixed
+- Lint: 0 errors, 2 pre-existing warnings
+- No new lint errors

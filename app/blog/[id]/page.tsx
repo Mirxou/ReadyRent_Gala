@@ -2,7 +2,6 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Calendar, User, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
@@ -100,14 +99,6 @@ export default function BlogPostPage() {
               />
             </div>
           )}
-
-          <div className="flex items-center gap-4 mb-6">
-            {post.tags?.map((tag: string) => (
-              <Badge key={tag} variant="outline">
-                {tag}
-              </Badge>
-            ))}
-          </div>
 
           <h1 
             className="text-4xl md:text-5xl font-bold mb-6"
