@@ -2458,3 +2458,31 @@ Stage Summary:
 - Contracts are properly expired on booking cancellation
 - All API responses return properly typed data
 - Hash remains deterministic (no Date.now() used)
+
+---
+Task ID: step-2.5-fix
+Agent: Main Agent
+Task: Fix all 13 bugs from microscopic review of Step 2.5 (Insurance & Subscriptions)
+
+Work Log:
+- **SUB-BUG-1**: Rewrote `app/api/subscriptions/route.ts` GET to return `{ plans, active_plan, history }` shape. Added optional auth check to fetch user's active subscription (with `end_date`, `bookings_used`) and subscription history.
+- **SUB-BUG-2**: Fixed `mapApiPlan` in `app/subscriptions/_components/types.ts` to use `plan_id` (free/basic/premium/vip) instead of cuid `id` for icon map and popular set lookup.
+- **INS-BUG-1**: Rewrote `app/insurance/page.tsx` as informational-only page. Removed broken purchase flow (API requires `booking_id` which standalone page cannot provide). Changed button to redirect to `/products`.
+- **INS-BUG-2**: Changed `ApiPlan.id` type from `number` to `string`. Changed `planEnrichment` from `Record<number, ...>` to indexed array, using array position instead of DB id for enrichment lookup.
+- **SUB-BUG-3**: Added `endDate` prop to `ActiveSubscription` component. Uses actual subscription end date from API instead of fake `getRenewalDate()`. Removed dead `getRenewalDate` function.
+- **SUB-BUG-4**: Added `bookingsUsed` prop to `ActiveSubscription`. API now fetches actual booking count for the subscription period. Replaced hardcoded `formatNumber(1)`.
+- **SUB-BUG-5**: Added `onClick` handler to invoice buttons in `history-section.tsx` (both desktop and mobile). Shows toast 'الفاتورة غير متاحة حالياً'.
+- **SUB-BUG-6**: Changed notification type in `subscribe/route.ts` from `'system'` to `'financial'`.
+- **SUB-BUG-7**: Changed notification type in `cancel/route.ts` from `'system'` to `'financial'`.
+- **INS-BUG-3**: Rewrote `summary-step.tsx` to fetch actual product price via `useQuery` and insurance plans dynamically. No more hardcoded `basePrice = 5000` or `insurancePrice = 2500`.
+- **INS-BUG-4**: Added insurance fee lookup in `bookings/create/route.ts`. Server now queries the most expensive active insurance plan and adds its price to `calculatedTotalPrice` when `has_insurance` is true.
+- **INS-BUG-5**: Deleted dead `components/insurance-selector.tsx` (called non-existent endpoints, had invalid Tailwind classes, not imported anywhere).
+- **INS-BUG-6**: Replaced all blue colors (`text-blue-600`, `bg-blue-50`, `bg-blue-100`, `border-blue-100`) with sovereign-gold/theme colors in summary-step.tsx.
+
+Stage Summary:
+- All 13 bugs fixed. 0 lint errors (only 2 pre-existing warnings).
+- Files modified: 10 files, 1 deleted.
+- Key architectural fix: Subscription GET API now requires auth (optional) and returns proper `{plans, active_plan, history}` shape.
+- Insurance page converted from broken purchase page to informational page.
+- Summary step now fetches real prices from API instead of hardcoded values.
+- Server-side booking creation now includes insurance fee in total price.

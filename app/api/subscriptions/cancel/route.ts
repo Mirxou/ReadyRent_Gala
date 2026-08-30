@@ -59,7 +59,7 @@ export async function POST(request: Request) {
     await db.notification.create({
       data: {
         userId: session.userId,
-        type: 'system',
+        type: 'financial',
         title: 'تم إلغاء الاشتراك',
         message: `تم إلغاء اشتراكك بنجاح. يمكنك الاشتراك مجدداً في أي وقت.`,
       },

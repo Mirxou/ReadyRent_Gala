@@ -25,7 +25,11 @@ export default function SubscriptionsPage() {
         .then((d) => d.data || d),
   });
 
-  const currentPlanId = (data?.active_plan?.id as string) || 'free';
+  // API now returns { plans, active_plan, history }
+  const activePlan = data?.active_plan as Record<string, unknown> | null;
+  const currentPlanId = (activePlan?.id as string) || 'free';
+  const activeEndDate = activePlan?.end_date as string | null;
+  const activeBookingsUsed = (activePlan?.bookings_used as number) || 0;
   const plans: Plan[] = (data?.plans || []).map(mapApiPlan);
   const history: SubscriptionHistory[] = (data?.history || []).map(
     (h: Record<string, unknown>) => ({
@@ -103,7 +107,7 @@ export default function SubscriptionsPage() {
           </div>
         </section>
       ) : (
-        <ActiveSubscription currentPlanId={currentPlanId} plansList={plans} onUpgrade={handleUpgrade} onCancel={handleCancel} />
+        <ActiveSubscription currentPlanId={currentPlanId} plansList={plans} onUpgrade={handleUpgrade} onCancel={handleCancel} endDate={activeEndDate} bookingsUsed={activeBookingsUsed} />
       )}
 
       <div className="max-w-5xl mx-auto w-full px-4">

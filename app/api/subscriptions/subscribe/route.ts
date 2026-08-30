@@ -144,7 +144,7 @@ export async function POST(request: Request) {
     await db.notification.create({
       data: {
         userId: session.userId,
-        type: 'system',
+        type: 'financial',
         title: 'تم الاشتراك بنجاح',
         message: `تم الاشتراك في خطة "${planName}" بنجاح. اشتراكك صالح لمدة 30 يوماً.`,
       },

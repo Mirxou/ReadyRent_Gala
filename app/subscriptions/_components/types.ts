@@ -49,27 +49,17 @@ export const staggerContainer = {
   visible: { transition: { staggerChildren: 0.1 } },
 };
 
-// ── Helpers ──
-export function getRenewalDate(): string {
-  const d = new Date();
-  d.setDate(d.getDate() + 30);
-  return d.toLocaleDateString('ar-DZ', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
-}
 
 export function mapApiPlan(apiPlan: Record<string, unknown>): Plan {
-  const id = apiPlan.id as string;
+  const planId = (apiPlan.plan_id as string) || (apiPlan.id as string);
   const bookingsLimit = apiPlan.bookings_limit as number;
   return {
-    id,
-    name: (apiPlan.name_ar as string) || id,
+    id: planId,
+    name: (apiPlan.name_ar as string) || planId,
     price: (apiPlan.price as number) || 0,
     features: (apiPlan.features as string[]) || [],
-    icon: planIconMap[id] || Shield,
-    popular: planPopularSet.has(id),
+    icon: planIconMap[planId] || Shield,
+    popular: planPopularSet.has(planId),
     bookingsLimit: bookingsLimit === -1 ? null : bookingsLimit,
   };
 }

@@ -83,7 +83,19 @@ export async function POST(request: Request) {
     }
 
     const numberOfDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-    const calculatedTotalPrice = product.pricePerDay * numberOfDays * quantity;
+    let calculatedTotalPrice = product.pricePerDay * numberOfDays * quantity;
+
+    // Add insurance fee if requested (use the most expensive plan = comprehensive)
+    let insuranceFee = 0;
+    if (vResult.data.has_insurance) {
+      const topInsurance = await db.insurancePlan.findFirst({
+        where: { isActive: true },
+        orderBy: { price: 'desc' },
+        select: { price: true },
+      });
+      insuranceFee = topInsurance?.price ?? 0;
+      calculatedTotalPrice += insuranceFee;
+    }
 
     const productName = vResult.data.product_name ?? product.nameAr ?? product.name;
     const productImage = vResult.data.product_image ?? product.primaryImage;

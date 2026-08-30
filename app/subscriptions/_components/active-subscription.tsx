@@ -8,16 +8,18 @@ import { SovereignGlow } from '@/shared/components/sovereign/sovereign-sparkle';
 import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
 import { Badge } from '@/components/ui/badge';
 import { formatNumber } from '@/lib/utils';
-import { type Plan, fadeUp, staggerContainer, getRenewalDate } from './types';
+import { type Plan, fadeUp, staggerContainer } from './types';
 
 interface ActiveSubscriptionProps {
   currentPlanId: string;
   plansList: Plan[];
   onUpgrade: () => void;
   onCancel: () => void;
+  endDate?: string | null;
+  bookingsUsed?: number;
 }
 
-export function ActiveSubscription({ currentPlanId, plansList, onUpgrade, onCancel }: ActiveSubscriptionProps) {
+export function ActiveSubscription({ currentPlanId, plansList, onUpgrade, onCancel, endDate, bookingsUsed = 0 }: ActiveSubscriptionProps) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: '-80px' });
   const currentPlan = plansList.find((p) => p.id === currentPlanId);
@@ -65,7 +67,10 @@ export function ActiveSubscription({ currentPlanId, plansList, onUpgrade, onCanc
                   </div>
                   <Badge className="bg-sovereign-gold/10 text-sovereign-gold border-sovereign-gold/20 px-4 py-1.5 text-xs font-bold self-start sm:self-center">
                     <Clock className="w-3 h-3 ml-1" />
-                    يتجدد {getRenewalDate()}
+                    يتجدد {endDate
+                        ? new Date(endDate).toLocaleDateString('ar-DZ', { year: 'numeric', month: 'long', day: 'numeric' })
+                        : '—'
+                      }
                   </Badge>
                 </div>
 
@@ -75,7 +80,7 @@ export function ActiveSubscription({ currentPlanId, plansList, onUpgrade, onCanc
                       <Calendar className="w-4 h-4" /> الحجوزات
                     </div>
                     <div className="text-2xl font-black text-sovereign-gold">
-                      {formatNumber(1)}{' '}
+                      {formatNumber(bookingsUsed)}{' '}
                       <span className="text-muted-foreground text-base font-normal">
                         / {currentPlan.bookingsLimit ? formatNumber(currentPlan.bookingsLimit) : '∞'}
                       </span>

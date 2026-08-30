@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
 import { formatNumber } from '@/lib/utils';
 import { type SubscriptionHistory, fadeUp, staggerContainer } from './types';
+import { toast } from 'sonner';
 
 interface HistorySectionProps {
   history: SubscriptionHistory[];
@@ -71,7 +72,10 @@ export function HistorySection({ history }: HistorySectionProps) {
                           <Badge className={`${statusStyles[entry.status] || ''} border text-[10px] font-bold px-2.5 py-0.5`}>{entry.status}</Badge>
                         </td>
                         <td className="py-4 px-3">
-                          <button className="flex items-center gap-1.5 text-sovereign-gold/60 hover:text-sovereign-gold transition-colors text-xs font-bold">
+                          <button
+                            className="flex items-center gap-1.5 text-sovereign-gold/60 hover:text-sovereign-gold transition-colors text-xs font-bold"
+                            onClick={() => toast.info('الفاتورة غير متاحة حالياً')}
+                          >
                             <FileText className="w-3.5 h-3.5" /> عرض
                           </button>
                         </td>
@@ -99,7 +103,10 @@ export function HistorySection({ history }: HistorySectionProps) {
                       <span>{new Date(entry.date).toLocaleDateString('ar-DZ', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
                       <span className="text-sovereign-gold font-bold">{formatAmount(entry.amount)}</span>
                     </div>
-                    <button className="mt-3 flex items-center gap-1.5 text-sovereign-gold/60 hover:text-sovereign-gold transition-colors text-xs font-bold">
+                    <button
+                      className="mt-3 flex items-center gap-1.5 text-sovereign-gold/60 hover:text-sovereign-gold transition-colors text-xs font-bold"
+                      onClick={() => toast.info('الفاتورة غير متاحة حالياً')}
+                    >
                       <FileText className="w-3.5 h-3.5" /> عرض الفاتورة
                     </button>
                   </motion.div>

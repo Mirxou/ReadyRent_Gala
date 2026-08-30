@@ -2,38 +2,27 @@
 
 import { formatNumber } from '@/lib/utils';
 
-import { useState } from 'react';
-import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
-import { Shield, Check, ArrowLeft, Info, Phone, FileText } from 'lucide-react';
+import { Shield, Check, ArrowLeft, Info, Phone, FileText, ShoppingCart } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from '@/components/ui/dialog';
+import { motion } from 'framer-motion';
 import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
 import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
 import Link from 'next/link';
-import { toast } from 'sonner';
 
 /* ────────────────────────────────────────────
-   Types
+   Types — match actual API (id is string/cuid)
    ──────────────────────────────────────────── */
 interface ApiPlan {
-  id: number;
-  nameAr: string;
-  nameEn: string;
+  id: string;
+  name_ar: string;
+  name_en: string;
   price: number;
-  coverageAr: string;
-  coverageEn: string;
-  isActive: boolean;
+  coverage_ar: string;
+  coverage_en: string;
 }
 
 interface EnrichedPlan {
@@ -49,13 +38,11 @@ interface EnrichedPlan {
 }
 
 /* ────────────────────────────────────────────
-   Local enrichment data (API doesn't provide these)
+   Enrichment indexed by array position (not DB id)
+   Plans are ordered by price ASC from API
    ──────────────────────────────────────────── */
-const planEnrichment: Record<
-  number,
-  Omit<EnrichedPlan, 'id' | 'name' | 'price' | 'coverage'>
-> = {
-  1: {
+const planEnrichment: Omit<EnrichedPlan, 'id' | 'name' | 'price' | 'coverage'>[] = [
+  {
     icon: '🛡️',
     features: [
       'تغطية التلفيات البسيطة',
@@ -67,7 +54,7 @@ const planEnrichment: Record<
     borderColor: 'border-slate-500/30',
     popular: false,
   },
-  2: {
+  {
     icon: '⚔️',
     features: [
       'تغطية التلفيات المتوسطة والكبيرة',
@@ -80,7 +67,7 @@ const planEnrichment: Record<
     borderColor: 'border-sovereign-gold/40',
     popular: true,
   },
-  3: {
+  {
     icon: '👑',
     features: [
       'تغطية شاملة بلا حدود',
@@ -95,40 +82,24 @@ const planEnrichment: Record<
     borderColor: 'border-purple-400/40',
     popular: false,
   },
-};
+];
 
-function mapApiToPlan(apiPlan: ApiPlan): EnrichedPlan {
-  const enrichment = planEnrichment[apiPlan.id] || planEnrichment[1];
+function mapApiToPlan(apiPlan: ApiPlan, index: number): EnrichedPlan {
+  const enrichment = planEnrichment[index] || planEnrichment[0];
   return {
-    id: String(apiPlan.id),
-    name: apiPlan.nameAr,
+    id: apiPlan.id,
+    name: apiPlan.name_ar,
     price: apiPlan.price,
-    coverage: apiPlan.coverageAr,
+    coverage: apiPlan.coverage_ar,
     ...enrichment,
   };
 }
 
 const steps = [
-  {
-    step: 1,
-    title: 'اختر المنتج',
-    description: 'اختر المنتج الذي تريد استئجاره من المنصة',
-  },
-  {
-    step: 2,
-    title: 'أضف التأمين',
-    description: 'اختر خطة التأمين المناسبة أثناء عملية الحجز',
-  },
-  {
-    step: 3,
-    title: 'استلم وتأمّن',
-    description: 'استلم المنتج وأنت مطمئن بوجود التغطية التأمينية',
-  },
-  {
-    step: 4,
-    title: 'التعويض عند الحاجة',
-    description: 'في حالة أي تلف، قدم طلب تعويض وسنحل الأمر بسرعة',
-  },
+  { step: 1, title: 'اختر المنتج', description: 'اختر المنتج الذي تريد استئجاره من المنصة' },
+  { step: 2, title: 'أضف التأمين', description: 'اختر خطة التأمين المناسبة أثناء عملية الحجز' },
+  { step: 3, title: 'استلم وتأمّن', description: 'استلم المنتج وأنت مطمئن بوجود التغطية التأمينية' },
+  { step: 4, title: 'التعويض عند الحاجة', description: 'في حالة أي تلف، قدم طلب تعويض وسنحل الأمر بسرعة' },
 ];
 
 const fadeUp = {
@@ -170,11 +141,6 @@ function PlansLoadingSkeleton() {
 }
 
 export default function InsurancePage() {
-  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
-  const [showConfirm, setShowConfirm] = useState(false);
-  const [isPurchasing, setIsPurchasing] = useState(false);
-  const [purchasedPlan, setPurchasedPlan] = useState<string | null>(null);
-
   // Fetch insurance plans from API
   const { data, isLoading, isError } = useQuery({
     queryKey: ['insurance-plans'],
@@ -184,37 +150,7 @@ export default function InsurancePage() {
         .then((d) => d.data || []),
   });
 
-  const plans: EnrichedPlan[] = (Array.isArray(data) ? data : []).map(mapApiToPlan);
-  const selectedPlanData = plans.find((p) => p.id === selectedPlan);
-
-  const handleSelectPlan = (planId: string) => {
-    if (purchasedPlan) return;
-    setSelectedPlan(planId);
-    setShowConfirm(true);
-  };
-
-  const handleConfirmPurchase = async () => {
-    setIsPurchasing(true);
-    setShowConfirm(false);
-    try {
-      const res = await fetch('/api/insurance/purchase', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan_id: selectedPlan }),
-      });
-      const json = await res.json();
-      if (res.ok && json.success) {
-        toast.success('تم شراء خطة التأمين بنجاح');
-        if (selectedPlan) setPurchasedPlan(selectedPlan);
-      } else {
-        toast.error(json.message_ar || 'فشل في شراء خطة التأمين');
-      }
-    } catch {
-      toast.error('حدث خطأ أثناء معالجة طلب الشراء');
-    } finally {
-      setIsPurchasing(false);
-    }
-  };
+  const plans: EnrichedPlan[] = (Array.isArray(data) ? data : []).map((p: ApiPlan, i: number) => mapApiToPlan(p, i));
 
   const handleContactSupport = () => {
     const waNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER;
@@ -222,7 +158,6 @@ export default function InsurancePage() {
       const formatted = waNumber.replace(/[^0-9]/g, '');
       window.open(`https://wa.me/${formatted}?text=${encodeURIComponent('مرحباً، أريد الاستفسار عن التأمين')}`, '_blank');
     } else {
-      // Fallback to contact page
       window.location.href = '/contact';
     }
   };
@@ -271,7 +206,7 @@ export default function InsurancePage() {
           </div>
         )}
 
-        {/* Insurance Plan Cards */}
+        {/* Insurance Plan Cards — INFORMATIONAL ONLY */}
         {isLoading ? (
           <PlansLoadingSkeleton />
         ) : (
@@ -330,11 +265,12 @@ export default function InsurancePage() {
                     <SovereignButton
                       variant={plan.popular ? 'primary' : 'secondary'}
                       className="w-full"
-                      onClick={() => handleSelectPlan(plan.id)}
-                      disabled={purchasedPlan === plan.id}
-                      isLoading={purchasedPlan === plan.id}
+                      onClick={() => {
+                        window.location.href = '/products';
+                      }}
                     >
-                      {purchasedPlan === plan.id ? '✓ مشتراة' : 'اختيار هذه الخطة'}
+                      <ShoppingCart className="w-4 h-4 ml-2" />
+                      استأجر بتأمين
                     </SovereignButton>
                   </CardContent>
                 </Card>
@@ -476,65 +412,6 @@ export default function InsurancePage() {
           </GlassPanel>
         </motion.div>
       </div>
-
-      {/* Confirmation Dialog */}
-      <Dialog open={showConfirm} onOpenChange={setShowConfirm}>
-        <DialogContent className="bg-sovereign-obsidian border-sovereign-gold/20 text-foreground sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-black text-sovereign-gold text-right">
-              تأكيد شراء خطة التأمين
-            </DialogTitle>
-            <DialogDescription className="text-muted-foreground text-right">
-              تأكد من تفاصيل الخطة قبل التأكيد
-            </DialogDescription>
-          </DialogHeader>
-
-          {selectedPlanData && (
-            <div className="space-y-4 my-4">
-              <div className="flex items-center gap-3">
-                <span className="text-3xl">{selectedPlanData.icon}</span>
-                <div>
-                  <p className="font-bold text-lg">{selectedPlanData.name}</p>
-                  <p className="text-sovereign-gold font-black text-xl">
-                    {formatNumber(selectedPlanData.price)} دج / لكل حجز
-                  </p>
-                </div>
-              </div>
-
-              <div className="border-t border-white/10 pt-4">
-                <p className="text-sm font-bold mb-2 text-white/70">المزايا المشمولة:</p>
-                <ul className="space-y-2">
-                  {selectedPlanData.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2 text-sm">
-                      <Check className="w-4 h-4 mt-0.5 text-emerald-500 flex-shrink-0" />
-                      <span>{f}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          )}
-
-          <DialogFooter className="flex gap-3 sm:gap-0">
-            <SovereignButton
-              variant="primary"
-              className="flex-1"
-              onClick={handleConfirmPurchase}
-              isLoading={isPurchasing}
-            >
-              {isPurchasing ? 'جارٍ المعالجة...' : 'تأكيد الشراء'}
-            </SovereignButton>
-            <SovereignButton
-              variant="secondary"
-              className="flex-1"
-              onClick={() => setShowConfirm(false)}
-              disabled={isPurchasing}
-            >
-              إلغاء
-            </SovereignButton>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
