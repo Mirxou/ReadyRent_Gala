@@ -2530,3 +2530,30 @@ Stage Summary:
 - 6/6 bugs fixed
 - Lint: 0 errors, 2 pre-existing warnings
 - No new lint errors
+---
+Task ID: 3.2-fix
+Agent: Main Agent
+Task: Step 3.2 CMS Dynamic Pages — Microscopic review + fix all 8 bugs
+
+Work Log:
+- Read all 6 CMS-related files: 2 API routes, 1 public page, 1 admin page, 1 API client, 1 FAQ page
+- Read Prisma schema (CMSPage model: id, title, slug, content?, status, createdAt, updatedAt)
+- Read seed-content.ts (4 CMS pages seeded: about, privacy, terms, faq)
+- Read lib/api/core.ts to confirm apiFetch never throws (catches internally)
+- Used z-ai LLM assistant for deep code analysis
+- Used web-reader for Claude Code repo patterns (not applicable to this codebase)
+
+Bugs found and fixed:
+- **CMS-BUG-1 (CRITICAL)**: app/pages/[slug]/page.tsx:39 — raw fetch + error envelope treated as page content. Fixed: replaced with cmsApi.getBySlug + meta.failed check
+- **CMS-BUG-2 (CRITICAL)**: app/admin/cms/pages/page.tsx:60-69 — fetchPages crashes on API failure (res.data={error} passed to .map()). Fixed: Array.isArray guard + meta.failed check
+- **CMS-BUG-3 (CRITICAL)**: app/admin/cms/pages/page.tsx:100-115 — handleSave shows success toast even on failure (apiFetch never throws). Fixed: status/meta check
+- **CMS-BUG-4 (MEDIUM)**: app/pages/[slug]/page.tsx:90-100 — dead code for featured_image (field not in CMSPage). Fixed: removed entire section
+- **CMS-BUG-5 (MEDIUM)**: app/pages/[slug]/page.tsx:105 — purple gradient #8B5CF6. Fixed: replaced with sovereign-gold gradient
+- **CMS-BUG-6 (MEDIUM)**: app/api/cms/pages/[slug]/route.ts:108 — PUT accepts unsanitized slug. Fixed: added slugify() on newSlug
+- **CMS-BUG-7 (LOW)**: app/faq/page.tsx:62 — purple gradient #8B5CF6. Fixed: replaced with sovereign-gold gradient
+- **CMS-BUG-8 (LOW)**: app/admin/cms/pages/page.tsx:110-112 — dead catch block with wrong type cast. Fixed: removed try/catch, used meta.failed
+
+Stage Summary:
+- 8/8 bugs fixed
+- Lint: 0 errors, 2 pre-existing warnings
+- No new lint errors

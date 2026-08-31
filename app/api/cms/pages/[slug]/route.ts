@@ -32,6 +32,16 @@ function formatPage(page: { id: string; title: string; slug: string; content: st
   };
 }
 
+// CMS-BUG-6 FIX: sanitize slug on PUT (same as POST)
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/[^\w\-\u0600-\u06FF]+/g, '')
+    .replace(/\-+/g, '-');
+}
+
 // GET — public read by slug (or id)
 export async function GET(
   request: NextRequest,
@@ -104,9 +114,10 @@ export async function PUT(
       );
     }
 
-    // If slug is being changed, check for duplicates
-    if (newSlug && newSlug !== existing.slug) {
-      const duplicate = await db.cMSPage.findUnique({ where: { slug: newSlug } });
+    // CMS-BUG-6 FIX: sanitize newSlug before checking/updating
+    const sanitizedSlug = newSlug ? slugify(String(newSlug)) : undefined;
+    if (sanitizedSlug && sanitizedSlug !== existing.slug) {
+      const duplicate = await db.cMSPage.findUnique({ where: { slug: sanitizedSlug } });
       if (duplicate) {
         return errorResponse(
           'رابط الصفحة موجود بالفعل',
@@ -121,7 +132,7 @@ export async function PUT(
       where: { id },
       data: {
         ...(title ? { title } : {}),
-        ...(newSlug ? { slug: newSlug } : {}),
+        ...(sanitizedSlug ? { slug: sanitizedSlug } : {}),
         ...(content !== undefined ? { content } : {}),
         ...(status ? { status } : {}),
       },

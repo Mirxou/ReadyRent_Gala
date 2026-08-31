@@ -7,8 +7,8 @@ import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { motion } from 'framer-motion';
-import Image from 'next/image';
 import { ParticleField } from '@/components/ui/particle-field';
+import { cmsApi } from '@/lib/api';
 import DOMPurify from 'dompurify';
 
 const DOMPURIFY_CONFIG = {
@@ -19,26 +19,21 @@ const DOMPURIFY_CONFIG = {
   FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover', 'onfocus', 'onblur'],
 };
 
-function isValidImageUrl(url: string): boolean {
-  if (!url || typeof url !== 'string') return false;
-  try {
-    const parsed = new URL(url, 'https://example.com');
-    const allowedHosts = ['res.cloudinary.com', 'amazonaws.com', 'localhost'];
-    return allowedHosts.some(h => parsed.hostname === h || parsed.hostname.endsWith('.' + h));
-  } catch {
-    return false;
-  }
-}
-
 export default function DynamicPage() {
   const params = useParams();
   const slug = params.slug as string;
 
-  const { data: page, isLoading } = useQuery({
+  const { data: res, isLoading, isError } = useQuery({
     queryKey: ['cms-page', slug],
-    queryFn: () => fetch('/api/cms/pages/' + slug).then(r => r.json()).then(d => d.data || d).then(d => Array.isArray(d) ? d[0] : d),
+    queryFn: () => cmsApi.getBySlug(slug),
     enabled: !!slug,
   });
+
+  // CMS-BUG-1 FIX: detect apiFetch failure via meta.failed + extract actual page data
+  const metaFailed = res?.meta && typeof res.meta === 'object' && 'failed' in res.meta && (res.meta as { failed: boolean }).failed;
+  const page = (metaFailed || !res?.data || typeof res.data !== 'object' || Array.isArray(res.data) || !('title' in res.data))
+    ? null
+    : res.data as { id: string; title: string; slug: string; content: string; status: string };
 
   if (isLoading) {
     return (
@@ -53,7 +48,7 @@ export default function DynamicPage() {
     );
   }
 
-  if (!page) {
+  if (!page || isError) {
     return (
       <div className="relative min-h-screen">
         <ParticleField />
@@ -87,22 +82,12 @@ export default function DynamicPage() {
             </Link>
           </Button>
 
-          {page.featured_image && (
-            <div className="relative h-64 w-full overflow-hidden rounded-2xl mb-8">
-              <Image
-                src={isValidImageUrl(page.featured_image) ? page.featured_image : '/placeholder.svg'}
-                alt={page.title}
-                className="w-full h-full object-cover"
-                fill
-                unoptimized
-              />
-            </div>
-          )}
+          {/* CMS-BUG-4 FIX: removed dead featured_image section — field doesn't exist in CMSPage model */}
 
           <h1 
             className="text-4xl md:text-5xl font-bold mb-8"
             style={{
-              background: 'linear-gradient(to right, #8B5CF6, #EC4899, #F59E0B)',
+              background: 'linear-gradient(to right, #C5A059, #D4AF37, #E8C547)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',

@@ -57,16 +57,19 @@ export default function CMSPagesPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<CMSPage | null>(null);
 
+  // CMS-BUG-2 FIX: apiFetch never throws — check meta.failed instead of try/catch
+  // On failure, res.data is {error: msg} (truthy), so we must guard with Array.isArray
   const fetchPages = useCallback(async () => {
     setLoading(true);
-    try {
-      const res = await cmsApi.getPages({ all: 'true' });
-      setPages(res.data || []);
-    } catch {
+    const res = await cmsApi.getPages({ all: 'true' });
+    const meta = res.meta as { failed?: boolean } | undefined;
+    if (meta?.failed || !Array.isArray(res.data)) {
       toast.error('فشل تحميل الصفحات');
-    } finally {
-      setLoading(false);
+      setPages([]);
+    } else {
+      setPages(res.data as CMSPage[]);
     }
+    setLoading(false);
   }, []);
 
   useEffect(() => {
@@ -96,39 +99,38 @@ export default function CMSPagesPage() {
       return;
     }
 
+    // CMS-BUG-3 FIX: apiFetch never throws — check status/meta instead of try/catch
     setSaving(true);
-    try {
-      if (selectedId) {
-        await cmsApi.update(selectedId, form);
-        toast.success('تم تحديث الصفحة بنجاح');
-      } else {
-        await cmsApi.create(form);
-        toast.success('تم إنشاء الصفحة بنجاح');
-      }
+    const res = selectedId
+      ? await cmsApi.update(selectedId, form)
+      : await cmsApi.create(form);
+    const meta = res.meta as { failed?: boolean } | undefined;
+    if (meta?.failed || res.status >= 400) {
+      const errData = res.data as Record<string, string> | undefined;
+      toast.error(errData?.message_en || errData?.message_ar || 'حدث خطأ أثناء الحفظ');
+    } else {
+      toast.success(selectedId ? 'تم تحديث الصفحة بنجاح' : 'تم إنشاء الصفحة بنجاح');
       setEditing(false);
       fetchPages();
-    } catch (err: unknown) {
-      const msg = (err as Record<string, Record<string, string>> | undefined)?.data?.message_en || 'حدث خطأ أثناء الحفظ';
-      toast.error(msg);
-    } finally {
-      setSaving(false);
     }
+    setSaving(false);
   };
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
     const id = deleteTarget.id;
     setDeleteTarget(null);
+    // CMS-BUG-8 FIX: same apiFetch pattern — check meta.failed
     setDeletingId(id);
-    try {
-      await cmsApi.delete(id);
+    const res = await cmsApi.delete(id);
+    const meta = res.meta as { failed?: boolean } | undefined;
+    if (meta?.failed || res.status >= 400) {
+      toast.error('فشل حذف الصفحة');
+    } else {
       toast.success('تم حذف الصفحة بنجاح');
       fetchPages();
-    } catch {
-      toast.error('فشل حذف الصفحة');
-    } finally {
-      setDeletingId(null);
     }
+    setDeletingId(null);
   };
 
   // ── Role guard ──
