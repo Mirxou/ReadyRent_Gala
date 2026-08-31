@@ -119,26 +119,30 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create waitlist item + notification in transaction
-    const item = await db.waitlistItem.create({
-      data: {
-        userId: session.userId,
-        productId,
-        productName: product.nameAr || product.name,
-        productImage: product.primaryImage,
-        pricePerDay: product.pricePerDay,
-        status: 'waiting',
-      },
-    });
+    // WL-BUG-6 FIX: wrap create + notification in transaction
+    const item = await db.$transaction(async (tx) => {
+      const created = await tx.waitlistItem.create({
+        data: {
+          userId: session.userId,
+          productId,
+          productName: product.nameAr || product.name,
+          productImage: product.primaryImage,
+          pricePerDay: product.pricePerDay,
+          preferredStart: body.preferred_start || null,
+          status: 'waiting',
+        },
+      });
 
-    // Create notification
-    await db.notification.create({
-      data: {
-        userId: session.userId,
-        type: 'system',
-        title: 'تمت إضافتك لقائمة الانتظار',
-        message: `تمت إضافة "${product.nameAr || product.name}" إلى قائمة انتظارك. سنعلمك فور توفره.`,
-      },
+      await tx.notification.create({
+        data: {
+          userId: session.userId,
+          type: 'system',
+          title: 'تمت إضافتك لقائمة الانتظار',
+          message: `تمت إضافة "${product.nameAr || product.name}" إلى قائمة انتظارك. سنعلمك فور توفره.`,
+        },
+      });
+
+      return created;
     });
 
     return NextResponse.json(

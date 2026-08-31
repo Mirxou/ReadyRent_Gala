@@ -2557,3 +2557,29 @@ Stage Summary:
 - 8/8 bugs fixed
 - Lint: 0 errors, 2 pre-existing warnings
 - No new lint errors
+---
+Task ID: 3.3-fix
+Agent: Main Agent
+
+Task: Step 3.3 Waitlist — Microscopic review + fix all 8 bugs
+
+Work Log:
+- Read all 5 waitlist files: 2 API routes, 1 dashboard page, 1 button component, 1 API client
+- Read Prisma WaitlistItem model, SovereignClient source, SovereignResponse type
+- Used z-ai LLM assistant for deep analysis
+- Identified core pattern: sovereignClient ALWAYS sets dignity_preserved=true, making it useless for error detection
+
+Bugs found and fixed:
+- **WL-BUG-1 (CRITICAL)**: dashboard/waitlist/page.tsx:25 — delete mutation checks dignity_preserved (always true) → always shows error toast, never refreshes. Fixed: check status==='sovereign_halt' and API success field
+- **WL-BUG-2 (CRITICAL)**: waitlist-button.tsx:22 — network failure shows success toast. Fixed: check status==='sovereign_halt' before success path
+- **WL-BUG-3 (CRITICAL)**: dashboard/waitlist/page.tsx:19 — sovereignClient returns data:null on failure, shown as "empty" not error. Fixed: throw on halt/null, use isError state
+- **WL-BUG-4 (MEDIUM)**: dashboard/waitlist/page.tsx:79 — item.product?.name_ar but API returns 'name'. Fixed: item.product?.name
+- **WL-BUG-5 (MEDIUM)**: lib/api/bookings.ts:62 — type {product_id:number|string} mismatch. Fixed: {productId:string, preferred_start?}
+- **WL-BUG-6 (LOW)**: app/api/bookings/waitlist/route.ts:122 — create+notification not in transaction. Fixed: wrapped in db.$transaction, also added preferredStart from body
+- **WL-BUG-7 (LOW)**: dashboard/waitlist/page.tsx:75 — Record<string,unknown>. Fixed: proper WaitlistItem interface
+- **WL-BUG-8 (LOW)**: waitlist-button.tsx:50 — no preferredStart. Fixed: type now supports it, API now saves it
+
+Stage Summary:
+- 8/8 bugs fixed
+- Lint: 0 errors, 2 pre-existing warnings
+- Key pattern documented: sovereignClient error detection must use status==='sovereign_halt' NOT dignity_preserved

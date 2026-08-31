@@ -57,9 +57,9 @@ export const bookingsApi = {
   removeFromCart: (itemId: string) => 
     sovereignClient.delete<void>(`/bookings/cart/items/${itemId}/`),
 
-  // Waitlist
+  // Waitlist — WL-BUG-5 FIX: productId (string) matches API expectation {productId}
   getWaitlist: () => sovereignClient.get<unknown>('/bookings/waitlist/'),
-  addToWaitlist: (data: { product_id: number | string; start_date?: string; end_date?: string }) =>
+  addToWaitlist: (data: { productId: string; preferred_start?: string }) =>
     sovereignClient.post<unknown>('/bookings/waitlist/', data),
   removeFromWaitlist: (id: string) =>
     sovereignClient.delete<void>(`/bookings/waitlist/${id}/`),
