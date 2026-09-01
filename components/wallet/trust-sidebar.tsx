@@ -98,7 +98,7 @@ export function TrustSidebar({
       </GlassPanel>
 
       {/* Sovereign Shield */}
-      <div className="p-8 rounded-[2.5rem] bg-gradient-to-br from-sovereign-blue to-black border border-white/5 relative overflow-hidden shadow-2xl">
+      <div className="p-8 rounded-[2.5rem] bg-gradient-to-br from-sovereign-gold/30 to-black border border-white/5 relative overflow-hidden shadow-2xl">
         <Sparkles className="absolute top-4 left-4 w-4 h-4 text-sovereign-gold/40" />
         <Lock className="w-10 h-10 text-sovereign-gold mb-6" />
         <h4 className="text-white font-bold mb-2">تأمين Standard المطلق</h4>

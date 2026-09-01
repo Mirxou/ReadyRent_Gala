@@ -36,7 +36,7 @@ export function ActiveEscrowList({ bookings }: ActiveEscrowListProps) {
                 b.escrow_status === 'released'
                   ? 'bg-emerald-500/10 text-emerald-400 border-0 text-[10px] font-black'
                   : b.escrow_status === 'refunded'
-                    ? 'bg-sky-500/10 text-sky-400 border-0 text-[10px] font-black'
+                    ? 'bg-amber-500/10 text-amber-400 border-0 text-[10px] font-black'
                     : 'bg-sovereign-gold/10 text-sovereign-gold border-0 text-[10px] font-black'
               }>
                 {b.escrow_status === 'released' ? 'محرر' : b.escrow_status === 'refunded' ? 'مسترد' : 'محتجز'}

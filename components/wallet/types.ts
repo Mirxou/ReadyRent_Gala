@@ -1,5 +1,5 @@
 export interface WalletTransaction {
-  id: string | number;
+  id: string;
   type: string;
   amount: number;
   date: string;
@@ -8,7 +8,7 @@ export interface WalletTransaction {
 }
 
 export interface WalletBooking {
-  id: string | number;
+  id: string;
   status: string;
   escrow_status?: string;
   deposit_amount?: number;
@@ -18,7 +18,7 @@ export interface WalletBooking {
 }
 
 export interface WalletPayment {
-  id: string | number;
+  id: string;
   amount: number;
   created_at: string;
   status: string;

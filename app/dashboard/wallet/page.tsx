@@ -101,7 +101,7 @@ export default function WalletPage() {
       {/* Background Ambience */}
       <div className="absolute inset-0 z-0 pointer-events-none">
         <div className="absolute top-0 right-1/4 w-[800px] h-[800px] bg-sovereign-gold/5 rounded-full blur-[140px] opacity-40" />
-        <div className="absolute bottom-0 left-1/4 w-[600px] h-[600px] bg-sovereign-blue/5 rounded-full blur-[140px] opacity-30" />
+        <div className="absolute bottom-0 left-1/4 w-[600px] h-[600px] bg-sovereign-gold/5 rounded-full blur-[140px] opacity-30" />
       </div>
 
       <div className="container mx-auto max-w-6xl py-12 relative z-10">

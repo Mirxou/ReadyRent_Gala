@@ -63,6 +63,9 @@ export function useWalletData() {
     queryKey: ['payments-history'],
     queryFn: async () => {
       const res = await paymentsApi.getAll();
+      if (res.status === 'sovereign_halt' || res.code === 'SYSTEM_HALT') {
+        throw new Error(res.message_en || 'Connection error');
+      }
       return res.data || [];
     },
   });

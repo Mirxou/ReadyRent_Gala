@@ -17,7 +17,7 @@ export function BalanceOverview({ balance, escrowAmount, onDeposit, onWithdraw }
   return (
     <SovereignGlow color="gold">
       <GlassPanel className="p-10 relative overflow-hidden group h-full" gradientBorder>
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-sovereign-gold via-sovereign-blue to-sovereign-gold opacity-30" />
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-sovereign-gold via-emerald-500 to-sovereign-gold opacity-30" />
 
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 relative z-10 h-full">
           <div className="space-y-8">
