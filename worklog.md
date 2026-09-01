@@ -2692,3 +2692,25 @@ Work Log:
 Stage Summary:
 - 7 bugs fixed, 6 pages frozen, 0 lint errors
 - Files modified: admin/users, admin/products, admin/reports, admin/branches, admin/hygiene, admin/maintenance, admin/packaging, admin/inventory, admin/damage-assessment, admin/forecasting, admin/activity-logs, components/admin/quick-actions, lib/api/admin.ts
+---
+Task ID: 4-2
+Agent: Main Agent
+Task: المراقبة الميدانية + إصلاح أخطاء المهمة 4.2 — CRUD المنتجات للأدمين
+
+Work Log:
+- فحص API routes: /api/products/admin (GET/POST) و /api/products/admin/[id] (GET/PUT/DELETE)
+- فحص صفحات الواجهة: admin/products و admin/products/new
+- اكتشاف BUG-1 (حرج): camelCase vs snake_case — API يُرجع category.nameAr لكن الواجهة تقرأ category.name_ar → كل التصنيفات تظهر '-'
+- اكتشاف BUG-2 (حرج): isFeatured غير موجود في Prisma → API يُرجع undefined
+- إصلاح BUG-1: products/admin/route.ts — تحويل category إلى {name_ar, name_en, slug} يدوياً
+- إصلاح BUG-1b: products/admin/[id]/route.ts — نفس الإصلاح
+- إصلاح BUG-2: isFeatured → isPremium (الحقل الحقيقي في Prisma)
+- إضافة description_ar و price_per_day لتغطية كل الاستخدامات
+- تحويل vendor إلى snake_case أيضاً
+- Lint: 0 errors
+
+Stage Summary:
+- CRUD المنتجات مكتمل: Create (POST) + Read (GET list + GET single) + Update (PUT) + Delete (DELETE)
+- API response now uses consistent snake_case for category/vendor fields
+- is_featured correctly maps to isPremium
+- Files modified: app/api/products/admin/route.ts, app/api/products/admin/[id]/route.ts
