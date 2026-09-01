@@ -154,7 +154,7 @@ export default function BookingDetailPage() {
 
   const statusColorMap: Record<string, string> = {
     pending: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20',
-    confirmed: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
+    confirmed: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
     active: 'bg-green-500/10 text-green-500 border-green-500/20',
     completed: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
     cancelled: 'bg-red-500/10 text-red-500 border-red-500/20',

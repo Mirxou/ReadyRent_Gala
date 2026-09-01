@@ -78,7 +78,7 @@ function ProductCard({ product }: { product: Product }) {
               {product.location_name}
             </div>
           )}
-          <p className="text-base font-black text-blue-600">
+          <p className="text-base font-black text-emerald-600">
             {formatNumber(product.price_per_day ?? product.daily_rate)} دج<span className="text-xs font-normal text-slate-400">/يوم</span>
           </p>
         </div>
@@ -95,16 +95,16 @@ function TrustScoreExplainer() {
       animate={{ opacity: 1, scale: 1 }}
       className="p-6 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-md relative overflow-hidden group"
     >
-      <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 blur-[50px] -mr-16 -mt-16 group-hover:bg-indigo-500/20 transition-colors" />
+      <div className="absolute top-0 right-0 w-32 h-32 bg-sovereign-gold/10 blur-[50px] -mr-16 -mt-16 group-hover:bg-sovereign-gold/20 transition-colors" />
       
       <div className="flex gap-4 items-start relative z-10">
-        <div className="w-12 h-12 rounded-2xl bg-indigo-600/20 flex items-center justify-center text-indigo-400 border border-indigo-500/30 flex-shrink-0">
+        <div className="w-12 h-12 rounded-2xl bg-sovereign-gold/20 flex items-center justify-center text-sovereign-gold border border-sovereign-gold/30 flex-shrink-0">
           <Shield className="w-6 h-6" />
         </div>
         <div className="space-y-2">
           <h3 className="text-lg font-bold text-white flex items-center gap-2">
             لماذا تظهر هذه النتائج أولاً؟
-            <Badge variant="outline" className="text-[10px] border-indigo-500/50 text-indigo-400">نظام الثقة السيادي</Badge>
+            <Badge variant="outline" className="text-[10px] border-sovereign-gold/50 text-sovereign-gold">نظام الثقة السيادي</Badge>
           </h3>
           <p className="text-sm text-slate-400 leading-relaxed">
             نقوم بترتيب المنتجات بناءً على «نقاط الثقة» للمؤجرين. هذا النظام المتطور يضمن لك تجربة آمنة عبر تحليل 3 معايير سيادية:
@@ -113,7 +113,7 @@ function TrustScoreExplainer() {
             {[
               { label: 'التزام العقود', icon: FileCheck, color: 'text-emerald-400' },
               { label: 'موثوقية الدفع', icon: CreditCard, color: 'text-amber-400' },
-              { label: 'الضمان المالي', icon: Lock, color: 'text-blue-400' },
+              { label: 'الضمان المالي', icon: Lock, color: 'text-emerald-400' },
             ].map((item) => (
               <div key={item.label} className="flex items-center gap-2 bg-white/5 p-2 rounded-xl text-xs font-medium text-slate-300">
                 <item.icon className={cn('w-4 h-4', item.color)} />
@@ -165,15 +165,15 @@ function AIExplainer({ query, onDismiss }: { query: string; onDismiss: () => voi
       initial={{ opacity: 0, y: -8 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -8 }}
-      className="flex gap-4 items-start p-5 rounded-3xl bg-indigo-600/10 border border-indigo-500/20 backdrop-blur-xl"
+      className="flex gap-4 items-start p-5 rounded-3xl bg-sovereign-gold/10 border border-sovereign-gold/20 backdrop-blur-xl"
     >
-      <div className="w-10 h-10 rounded-2xl bg-indigo-500 flex items-center justify-center flex-shrink-0 shadow-lg shadow-indigo-500/30">
+      <div className="w-10 h-10 rounded-2xl bg-sovereign-gold flex items-center justify-center flex-shrink-0 shadow-lg shadow-sovereign-gold/30">
         <Sparkles className="w-5 h-5 text-white" aria-hidden="true" />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-xs font-black text-indigo-400 uppercase tracking-widest mb-1.5 flex items-center gap-2">
+        <p className="text-xs font-black text-sovereign-gold uppercase tracking-widest mb-1.5 flex items-center gap-2">
           تحليل الذكاء الاصطناعي
-          <span className="w-1 h-1 rounded-full bg-indigo-400" />
+          <span className="w-1 h-1 rounded-full bg-sovereign-gold" />
           مباشر
         </p>
         {loading ? (
@@ -181,7 +181,7 @@ function AIExplainer({ query, onDismiss }: { query: string; onDismiss: () => voi
             {[0, 1, 2].map((i) => (
               <motion.span
                 key={i}
-                className="w-1.5 h-1.5 rounded-full bg-indigo-400"
+                className="w-1.5 h-1.5 rounded-full bg-sovereign-gold"
                 animate={{ scale: [1, 1.5, 1], opacity: [0.4, 1, 0.4] }}
                 transition={{ repeat: Infinity, duration: 1, delay: i * 0.2 }}
               />
@@ -238,8 +238,8 @@ export default function AISearchPage() {
       <section className="relative py-20 px-4 text-center overflow-hidden">
         {/* Ambient blobs */}
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 left-1/4 w-72 h-72 rounded-full bg-indigo-600/20 blur-[100px]" />
-          <div className="absolute bottom-0 right-1/4 w-72 h-72 rounded-full bg-blue-500/15 blur-[100px]" />
+          <div className="absolute top-0 left-1/4 w-72 h-72 rounded-full bg-sovereign-gold/20 blur-[100px]" />
+          <div className="absolute bottom-0 right-1/4 w-72 h-72 rounded-full bg-emerald-500/15 blur-[100px]" />
         </div>
 
         <motion.div
@@ -247,7 +247,7 @@ export default function AISearchPage() {
           animate={{ opacity: 1, y: 0 }}
           className="relative z-10 max-w-2xl mx-auto space-y-6"
         >
-          <div className="inline-flex items-center gap-2 bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 text-xs font-bold px-4 py-1.5 rounded-full">
+          <div className="inline-flex items-center gap-2 bg-sovereign-gold/20 border border-sovereign-gold/30 text-sovereign-gold text-xs font-bold px-4 py-1.5 rounded-full">
             <Sparkles className="w-3.5 h-3.5" aria-hidden="true" />
             مدعوم بالذكاء الاصطناعي
           </div>
@@ -260,7 +260,7 @@ export default function AISearchPage() {
           </p>
 
           {/* Search bar */}
-          <div className="relative flex items-center gap-2 bg-white/5 border border-white/10 rounded-2xl px-4 py-3 focus-within:border-indigo-400 transition-colors">
+          <div className="relative flex items-center gap-2 bg-white/5 border border-white/10 rounded-2xl px-4 py-3 focus-within:border-sovereign-gold transition-colors">
             <Search className="w-5 h-5 text-slate-400 flex-shrink-0" aria-hidden="true" />
             <label htmlFor="ai-search-input" className="sr-only">بحث بالذكاء الاصطناعي</label>
             <input
@@ -278,7 +278,7 @@ export default function AISearchPage() {
             <button
               onClick={handleSearch}
               disabled={!input.trim()}
-              className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white text-sm font-bold px-4 py-1.5 rounded-xl transition-colors flex items-center gap-1.5"
+              className="bg-sovereign-gold hover:bg-sovereign-gold disabled:opacity-40 text-white text-sm font-bold px-4 py-1.5 rounded-xl transition-colors flex items-center gap-1.5"
               aria-label="تنفيذ البحث"
             >
               بحث
@@ -293,7 +293,7 @@ export default function AISearchPage() {
                 <button
                   key={s}
                   onClick={() => { setInput(s); setCommittedQuery(s); setShowExplainer(true); trackSearch(s); }}
-                  className="text-xs px-3 py-1.5 rounded-full bg-white/5 hover:bg-indigo-500/20 border border-white/10 hover:border-indigo-400 text-slate-300 hover:text-white transition-all"
+                  className="text-xs px-3 py-1.5 rounded-full bg-white/5 hover:bg-sovereign-gold/20 border border-white/10 hover:border-sovereign-gold text-slate-300 hover:text-white transition-all"
                 >
                   {s}
                 </button>
@@ -323,8 +323,8 @@ export default function AISearchPage() {
         {isFetching && (
           <div className="flex items-center justify-center py-24">
             <div className="flex flex-col items-center gap-4">
-              <Loader2 className="w-10 h-10 animate-spin text-indigo-500" />
-              <p className="text-sm font-bold tracking-widest text-indigo-400 animate-pulse">
+              <Loader2 className="w-10 h-10 animate-spin text-sovereign-gold" />
+              <p className="text-sm font-bold tracking-widest text-sovereign-gold animate-pulse">
                 جارٍ البحث عن أفضل النتائج...
               </p>
             </div>

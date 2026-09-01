@@ -12,7 +12,7 @@ export default function ProductsPage() {
       {/* 🌌 Atmospheric Backdrop */}
       <div className="absolute inset-0 z-0 pointer-events-none">
         <div className="absolute top-0 right-0 w-[1000px] h-[1000px] bg-sovereign-gold/5 rounded-full blur-[140px] opacity-30" />
-        <div className="absolute bottom-1/2 left-0 w-[800px] h-[800px] bg-sovereign-blue/5 rounded-full blur-[140px] opacity-40 animate-pulse" />
+        <div className="absolute bottom-1/2 left-0 w-[800px] h-[800px] bg-sovereign-gold/5 rounded-full blur-[140px] opacity-40 animate-pulse" />
       </div>
 
       <div className="container mx-auto px-6 py-24 relative z-10 space-y-24">

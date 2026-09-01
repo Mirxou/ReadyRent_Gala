@@ -61,10 +61,10 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center relative overflow-hidden bg-sovereign-blue">
+    <div className="min-h-screen w-full flex items-center justify-center relative overflow-hidden bg-sovereign-gold">
       {/* Dynamic Background */}
       <div className="absolute inset-0 bg-background">
-        <div className="absolute inset-0 bg-gradient-to-tl from-sovereign-charcoal via-background to-sovereign-blue opacity-90" />
+        <div className="absolute inset-0 bg-gradient-to-tl from-sovereign-charcoal via-background to-sovereign-gold opacity-90" />
       </div>
 
       <motion.div

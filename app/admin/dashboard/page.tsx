@@ -149,7 +149,7 @@ export default function AdminDashboardPage() {
           <TiltCard className="card-glass border-0 rounded-[2.5rem] overflow-hidden group">
             <CardHeader className="p-8 pb-4">
               <CardTitle className="text-xl font-bold flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-cyan-500/20 text-cyan-500 group-hover:bg-cyan-500 group-hover:text-white transition-colors">
+                <div className="p-2 rounded-xl bg-emerald-500/20 text-emerald-500 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
                   <Users className="h-6 w-6" />
                 </div>
                 المستخدمون

@@ -169,7 +169,7 @@ export default function AnalyticsPage() {
                         <span className="text-xs font-normal"> DA</span>
                       </p>
                     </div>
-                    <div className="p-6 bg-white/5 rounded-3xl border border-white/5 group hover:bg-cyan-500/5 transition-all">
+                    <div className="p-6 bg-white/5 rounded-3xl border border-white/5 group hover:bg-emerald-500/5 transition-all">
                       <p className="text-[10px] text-muted-foreground mb-2 font-black">متوسط المدة</p>
                       <p className="text-2xl font-black">
                         {avgDuration !== null ? avgDuration : '—'}
@@ -183,9 +183,9 @@ export default function AnalyticsPage() {
           </SovereignGlow>
 
           {/* Oracle Forecasts */}
-          <GlassPanel className="p-10 bg-gradient-to-br from-cyan-500/10 to-transparent border-cyan-500/20 space-y-8" gradientBorder>
+          <GlassPanel className="p-10 bg-gradient-to-br from-emerald-500/10 to-transparent border-emerald-500/20 space-y-8" gradientBorder>
             <div className="flex items-center gap-4">
-              <Compass className="w-10 h-10 text-cyan-400" />
+              <Compass className="w-10 h-10 text-emerald-400" />
               <h4 className="text-xl font-black italic">توقعات الـ Oracle</h4>
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed italic opacity-80">
@@ -274,7 +274,7 @@ export default function AnalyticsPage() {
               </p>
             </GlassPanel>
             <GlassPanel className="p-8 border-white/5 group hover:border-sovereign-gold/20 transition-all">
-              <Users className="w-8 h-8 mb-6 text-cyan-400 transition-transform group-hover:scale-110" />
+              <Users className="w-8 h-8 mb-6 text-emerald-400 transition-transform group-hover:scale-110" />
               <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-3 opacity-40">نقاط الثقة</p>
               <p className="text-2xl font-black italic">{userProfile?.trust_score || 0} <span className="text-xs font-normal">/ 100</span></p>
             </GlassPanel>

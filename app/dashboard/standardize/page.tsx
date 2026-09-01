@@ -141,8 +141,8 @@ export default function StandardizeAssetPage() {
              </GlassPanel>
            ))}
 
-           <GlassPanel className="p-8 bg-gradient-to-br from-cyan-500/10 to-black border-cyan-500/20">
-              <ShieldCheck className="w-10 h-10 text-cyan-400 mb-6" />
+           <GlassPanel className="p-8 bg-gradient-to-br from-emerald-500/10 to-black border-emerald-500/20">
+              <ShieldCheck className="w-10 h-10 text-emerald-400 mb-6" />
               <h4 className="text-lg font-black mb-4">ضمانة STANDARD</h4>
               <p className="text-xs text-muted-foreground leading-relaxed italic">
                  بمجرد معيرة الأصل، يتم إدراجه في سجل الأصول مع تأمين كامل على القيمة.

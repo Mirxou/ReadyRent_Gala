@@ -103,7 +103,7 @@ export default function BlogPostPage() {
           <h1 
             className="text-4xl md:text-5xl font-bold mb-6"
             style={{
-              background: 'linear-gradient(to right, #8B5CF6, #EC4899, #F59E0B)',
+              background: 'linear-gradient(to right, #C5A059, #D4AF37, #E8C547)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',

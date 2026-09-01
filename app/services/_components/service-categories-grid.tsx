@@ -24,16 +24,16 @@ export function ServiceCategoriesGrid({ selectedCategory, onSelectCategory }: Se
           className="flex flex-col sm:flex-row items-start sm:items-end justify-between mb-10 md:mb-14 gap-4"
         >
           <motion.div variants={fadeUp}>
-            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-purple-400/60 mb-3">دليل الخدمات</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-sovereign-gold/60 mb-3">دليل الخدمات</p>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tighter">
-              أصناف <span className="text-purple-400">الخدمات</span>
+              أصناف <span className="text-sovereign-gold">الخدمات</span>
             </h2>
           </motion.div>
           {selectedCategory && (
             <motion.div variants={fadeUp}>
               <button
                 onClick={() => onSelectCategory(null)}
-                className="flex items-center gap-2 text-purple-400 text-sm font-bold hover:gap-3 transition-all"
+                className="flex items-center gap-2 text-sovereign-gold text-sm font-bold hover:gap-3 transition-all"
               >
                 <span>عرض الكل</span>
                 <ArrowLeft className="w-4 h-4" />
@@ -59,23 +59,23 @@ export function ServiceCategoriesGrid({ selectedCategory, onSelectCategory }: Se
                   <div
                     className={`relative p-5 md:p-6 rounded-[2rem] border backdrop-blur-sm transition-all duration-500 text-center h-full ${
                       isActive
-                        ? 'border-purple-400/40 bg-purple-500/10 shadow-lg shadow-purple-500/10'
-                        : 'border-white/5 bg-gradient-to-br ' + cat.gradient + ' hover:border-purple-400/20'
+                        ? 'border-sovereign-gold/40 bg-sovereign-gold/10 shadow-lg shadow-sovereign-gold/10'
+                        : 'border-white/5 bg-gradient-to-br ' + cat.gradient + ' hover:border-sovereign-gold/20'
                     }`}
                   >
                     <div className="space-y-3">
                       <div
                         className={`w-12 h-12 mx-auto rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-500 ${
                           isActive
-                            ? 'bg-purple-400/20 text-purple-300'
-                            : 'bg-purple-400/10 text-purple-400'
+                            ? 'bg-sovereign-gold/20 text-purple-300'
+                            : 'bg-sovereign-gold/10 text-sovereign-gold'
                         }`}
                       >
                         <cat.icon className="w-6 h-6" />
                       </div>
                       <h3
                         className={`text-sm md:text-base font-black tracking-tight transition-colors ${
-                          isActive ? 'text-purple-300' : 'group-hover:text-purple-400'
+                          isActive ? 'text-purple-300' : 'group-hover:text-sovereign-gold'
                         }`}
                       >
                         {cat.name}

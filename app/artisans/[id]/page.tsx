@@ -292,7 +292,7 @@ export default function ArtisanDetailPage() {
                     href={artisan.facebook}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-muted-foreground hover:text-blue-600 transition-colors"
+                    className="text-muted-foreground hover:text-emerald-600 transition-colors"
                   >
                     <Facebook className="h-6 w-6" />
                   </a>

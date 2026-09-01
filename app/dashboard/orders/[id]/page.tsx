@@ -213,7 +213,7 @@ export default function BookingDetailsPage() {
                        
                        <GlassPanel className="p-8 border-white/5 bg-white/5 overflow-hidden">
                            <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2">
-                               <Activity className="w-4 h-4 text-sovereign-blue" /> تتبع المسار التكتيكي (Radar)
+                               <Activity className="w-4 h-4 text-sovereign-gold" /> تتبع المسار التكتيكي (Radar)
                            </h4>
                            <SovereignRadar 
                              className="h-32 border-none bg-transparent" 
@@ -243,7 +243,7 @@ export default function BookingDetailsPage() {
                             </div>
                             <Badge className={cn(
                                 "px-4 py-1.5 text-xs font-black uppercase rounded-full",
-                                statusBadgeColors[booking.status] || 'bg-sovereign-blue/10 text-sovereign-blue'
+                                statusBadgeColors[booking.status] || 'bg-sovereign-gold/10 text-sovereign-gold'
                             )}>
                                 {statusLabels[booking.status] || booking.status}
                             </Badge>
@@ -410,12 +410,12 @@ export default function BookingDetailsPage() {
             </GlassPanel>
 
             {/* 3. Marketplace Service Layer: The Artisan Connection */}
-            <GlassPanel className="p-8 space-y-6 border-sovereign-blue/10" gradientBorder>
+            <GlassPanel className="p-8 space-y-6 border-sovereign-gold/10" gradientBorder>
                 <div className="flex items-center justify-between">
-                   <h4 className="text-sm font-black uppercase tracking-[0.3em] text-sovereign-blue flex items-center gap-2">
+                   <h4 className="text-sm font-black uppercase tracking-[0.3em] text-sovereign-gold flex items-center gap-2">
                       <Scissors className="w-5 h-5" /> خدمات المختصين (Specialist Services)
                    </h4>
-                   <Badge variant="outline" className="text-[9px] border-sovereign-blue/20 text-sovereign-blue">Ecosystem Perks</Badge>
+                   <Badge variant="outline" className="text-[9px] border-sovereign-gold/20 text-sovereign-gold">Ecosystem Perks</Badge>
                 </div>
                 
                 <p className="text-xs text-muted-foreground leading-relaxed">
@@ -423,9 +423,9 @@ export default function BookingDetailsPage() {
                 </p>
 
                 <div className="space-y-3 pt-2">
-                   <div className="p-4 bg-white/5 rounded-2xl border border-white/5 flex items-center justify-between group hover:border-sovereign-blue/20 transition-all cursor-pointer">
+                   <div className="p-4 bg-white/5 rounded-2xl border border-white/5 flex items-center justify-between group hover:border-sovereign-gold/20 transition-all cursor-pointer">
                       <div className="flex items-center gap-3">
-                         <div className="p-2 bg-sovereign-blue/10 rounded-lg text-sovereign-blue">
+                         <div className="p-2 bg-sovereign-gold/10 rounded-lg text-sovereign-gold">
                             <Scissors className="w-4 h-4" />
                          </div>
                          <div className="space-y-0.5">
@@ -433,7 +433,7 @@ export default function BookingDetailsPage() {
                             <p className="text-[10px] text-muted-foreground">بواسطة خياط معتمد (Tailor)</p>
                          </div>
                       </div>
-                      <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-sovereign-blue transition-colors" />
+                      <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-sovereign-gold transition-colors" />
                    </div>
 
                    <div className="p-4 bg-white/5 rounded-2xl border border-white/5 flex items-center justify-between group hover:border-sovereign-gold/20 transition-all cursor-pointer">

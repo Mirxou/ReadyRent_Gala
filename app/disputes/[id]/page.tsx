@@ -190,7 +190,7 @@ export default function DisputeDetailPage() {
                 <Link href={`/disputes/${id}/appeal`}>
                   <Button 
                     variant="outline" 
-                    className="gap-2 text-blue-600 border-blue-200 hover:bg-blue-50 dark:hover:bg-blue-950/30"
+                    className="gap-2 text-emerald-600 border-emerald-500/20 hover:bg-emerald-500/5 dark:hover:bg-emerald-950/30"
                   >
                     <Scale className="w-4 h-4" />
                     تقديم استئناف على هذا الحكم

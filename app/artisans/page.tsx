@@ -78,7 +78,7 @@ export default function ArtisansPage() {
             <h1 
               className="text-5xl md:text-7xl font-bold mb-6"
               style={{
-                background: 'linear-gradient(to right, #8B5CF6, #EC4899, #F59E0B)',
+                background: 'linear-gradient(to right, #C5A059, #D4AF37, #E8C547)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
@@ -192,7 +192,7 @@ export default function ArtisansPage() {
                             </Badge>
                           )}
                           {artisan.is_verified && (
-                            <Badge className="bg-cyan-500 text-white border-0 font-bold shadow-lg">
+                            <Badge className="bg-emerald-500 text-white border-0 font-bold shadow-lg">
                               ✓ موثقة
                             </Badge>
                           )}

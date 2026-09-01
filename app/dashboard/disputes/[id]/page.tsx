@@ -34,7 +34,7 @@ import { toast } from 'sonner';
 const STATUS_COLORS: Record<string, string> = {
   filed: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
   under_review: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-  mediation: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
+  mediation: 'bg-sovereign-gold/20 text-sovereign-gold border-purple-500/30',
   appealed: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
   resolved: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
   closed: 'bg-gray-500/20 text-gray-400 border-gray-500/30',

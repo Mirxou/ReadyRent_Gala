@@ -259,14 +259,14 @@ export default function DashboardPage() {
                     </GlassPanel>
                 </Link>
                 <Link href="/dashboard/social">
-                    <GlassPanel className="p-6 flex items-center justify-between hover:bg-white/5 transition-all cursor-pointer group border-white/5 bg-gradient-to-br from-cyan-500/5 to-transparent">
+                    <GlassPanel className="p-6 flex items-center justify-between hover:bg-white/5 transition-all cursor-pointer group border-white/5 bg-gradient-to-br from-emerald-500/5 to-transparent">
                         <div className="space-y-2">
                             <p className="font-black text-md tracking-tight text-foreground">قائد التواصل</p>
-                            <p className="text-[9px] text-cyan-400 font-black uppercase tracking-widest opacity-60">
+                            <p className="text-[9px] text-emerald-400 font-black uppercase tracking-widest opacity-60">
                                 مركز التواصل الاجتماعي
                             </p>
                         </div>
-                        <Smartphone className="w-6 h-6 text-cyan-400 group-hover:scale-110 transition-transform opacity-40 group-hover:opacity-100" />
+                        <Smartphone className="w-6 h-6 text-emerald-400 group-hover:scale-110 transition-transform opacity-40 group-hover:opacity-100" />
                     </GlassPanel>
                 </Link>
                 <Link href="/dashboard/analytics">

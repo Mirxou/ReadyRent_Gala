@@ -56,7 +56,7 @@ export default function SovereignShowcasePage() {
 
       {/* Section 2: The Justice Receipt */}
       <section className="space-y-8">
-        <h2 className="text-2xl font-bold border-r-4 border-blue-500 pr-4 text-slate-800 dark:text-slate-200">
+        <h2 className="text-2xl font-bold border-r-4 border-emerald-500 pr-4 text-slate-800 dark:text-slate-200">
           إيصال العدالة
         </h2>
         <div className="flex flex-col md:flex-row gap-12 items-center justify-center">

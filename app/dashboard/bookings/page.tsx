@@ -150,7 +150,7 @@ export default function BookingsPage() {
                               : booking.escrow_status === 'released'
                                 ? 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800'
                                 : booking.escrow_status === 'refunded'
-                                  ? 'bg-sky-100 text-sky-800 border-sky-200 dark:bg-sky-900/30 dark:text-sky-400 dark:border-sky-800'
+                                  ? 'bg-emerald-500/10 text-emerald-800 border-emerald-500/20 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800'
                                   : ''
                           }>
                             {booking.escrow_status === 'held' ? 'محتجز'

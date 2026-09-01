@@ -62,9 +62,9 @@ export function BookingDialog({ service, open, onOpenChange }: BookingDialogProp
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-sovereign-obsidian border-purple-500/20 text-sovereign-white sm:max-w-lg rounded-2xl p-6 md:p-8 font-arabic" dir="rtl" showCloseButton>
+      <DialogContent className="bg-sovereign-obsidian border-sovereign-gold/20 text-sovereign-white sm:max-w-lg rounded-2xl p-6 md:p-8 font-arabic" dir="rtl" showCloseButton>
         <DialogHeader className="text-right">
-          <DialogTitle className="text-xl font-black tracking-tight text-purple-400">
+          <DialogTitle className="text-xl font-black tracking-tight text-sovereign-gold">
             احجز خدمة
           </DialogTitle>
           <DialogDescription className="text-muted-foreground text-sm mt-1">
@@ -74,20 +74,20 @@ export function BookingDialog({ service, open, onOpenChange }: BookingDialogProp
 
         <form onSubmit={handleSubmit} className="space-y-5 mt-2">
           <div className="space-y-2">
-            <Label className="text-sm font-bold text-purple-400/80 flex items-center gap-2">
+            <Label className="text-sm font-bold text-sovereign-gold/80 flex items-center gap-2">
               <Sparkles className="w-4 h-4" />
               اسم الخدمة
             </Label>
             <Input
               value={service.name_ar}
               readOnly
-              className="bg-white/5 border-purple-500/20 text-sovereign-white cursor-not-allowed opacity-80 h-11"
+              className="bg-white/5 border-sovereign-gold/20 text-sovereign-white cursor-not-allowed opacity-80 h-11"
               dir="rtl"
             />
           </div>
 
           <div className="space-y-2">
-            <Label className="text-sm font-bold text-purple-400/80 flex items-center gap-2">
+            <Label className="text-sm font-bold text-sovereign-gold/80 flex items-center gap-2">
               <CalendarCheck className="w-4 h-4" />
               تاريخ المناسبة <span className="text-red-400/70">*</span>
             </Label>
@@ -95,14 +95,14 @@ export function BookingDialog({ service, open, onOpenChange }: BookingDialogProp
               type="date"
               value={formData.date}
               onChange={(e) => setFormData((prev) => ({ ...prev, date: e.target.value }))}
-              className="bg-white/5 border-purple-500/20 text-sovereign-white focus:border-purple-400/50 h-11 [color-scheme:dark]"
+              className="bg-white/5 border-sovereign-gold/20 text-sovereign-white focus:border-sovereign-gold/50 h-11 [color-scheme:dark]"
               dir="ltr"
               required
             />
           </div>
 
           <div className="space-y-2">
-            <Label className="text-sm font-bold text-purple-400/80 flex items-center gap-2">
+            <Label className="text-sm font-bold text-sovereign-gold/80 flex items-center gap-2">
               <Phone className="w-4 h-4" />
               رقم الهاتف <span className="text-red-400/70">*</span>
             </Label>
@@ -111,14 +111,14 @@ export function BookingDialog({ service, open, onOpenChange }: BookingDialogProp
               placeholder="0555 123 456"
               value={formData.phone}
               onChange={(e) => setFormData((prev) => ({ ...prev, phone: e.target.value }))}
-              className="bg-white/5 border-purple-500/20 text-sovereign-white placeholder:text-muted-foreground/50 focus:border-purple-400/50 h-11"
+              className="bg-white/5 border-sovereign-gold/20 text-sovereign-white placeholder:text-muted-foreground/50 focus:border-sovereign-gold/50 h-11"
               dir="ltr"
               required
             />
           </div>
 
           <div className="space-y-2">
-            <Label className="text-sm font-bold text-purple-400/80 flex items-center gap-2">
+            <Label className="text-sm font-bold text-sovereign-gold/80 flex items-center gap-2">
               <StickyNote className="w-4 h-4" />
               ملاحظات إضافية
             </Label>
@@ -126,7 +126,7 @@ export function BookingDialog({ service, open, onOpenChange }: BookingDialogProp
               placeholder="أضف أي تفاصيل أو طلبات خاصة..."
               value={formData.notes}
               onChange={(e) => setFormData((prev) => ({ ...prev, notes: e.target.value }))}
-              className="bg-white/5 border-purple-500/20 text-sovereign-white placeholder:text-muted-foreground/50 focus:border-purple-400/50 min-h-[80px]"
+              className="bg-white/5 border-sovereign-gold/20 text-sovereign-white placeholder:text-muted-foreground/50 focus:border-sovereign-gold/50 min-h-[80px]"
               dir="rtl"
             />
           </div>
@@ -136,7 +136,7 @@ export function BookingDialog({ service, open, onOpenChange }: BookingDialogProp
             size="lg"
             variant="primary"
             disabled={isSubmitting}
-            className="w-full h-12 rounded-xl bg-purple-600 hover:bg-purple-700 shadow-2xl shadow-purple-500/20 text-sm font-black"
+            className="w-full h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 shadow-2xl shadow-sovereign-gold/20 text-sm font-black"
             withShimmer
           >
             {isSubmitting ? 'جارٍ التأكيد...' : 'تأكيد الحجز'}

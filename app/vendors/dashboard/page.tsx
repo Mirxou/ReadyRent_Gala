@@ -141,7 +141,7 @@ export default function VendorDashboardPage() {
   const getBookingStatusBadge = (status: string) => {
     const map: Record<string, { label: string; className: string }> = {
       active: { label: 'نشط', className: 'bg-green-500' },
-      completed: { label: 'مكتمل', className: 'bg-blue-500' },
+      completed: { label: 'مكتمل', className: 'bg-emerald-500' },
       cancelled: { label: 'ملغي', className: 'bg-red-500' },
       pending: { label: 'قيد الانتظار', className: 'bg-yellow-500' },
     };

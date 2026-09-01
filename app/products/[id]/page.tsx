@@ -148,7 +148,7 @@ export default function ProductDetailsPage() {
       
       {/* Background Ambience (Fabulous Layer) */}
       <div className="absolute inset-0 z-0 pointer-events-none">
-        <div className="absolute top-0 left-0 w-[1000px] h-[1000px] bg-sovereign-blue/5 rounded-full blur-[140px] opacity-40 animate-pulse" />
+        <div className="absolute top-0 left-0 w-[1000px] h-[1000px] bg-sovereign-gold/5 rounded-full blur-[140px] opacity-40 animate-pulse" />
         <div className="absolute bottom-1/2 right-0 w-[800px] h-[800px] bg-sovereign-gold/5 rounded-full blur-[140px] opacity-30" />
       </div>
 
@@ -334,7 +334,7 @@ export default function ProductDetailsPage() {
             {/* Hygiene Identity */}
             <section className="space-y-8">
                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-sovereign-blue/10 flex items-center justify-center text-sovereign-blue">
+                  <div className="w-12 h-12 rounded-2xl bg-sovereign-gold/10 flex items-center justify-center text-sovereign-gold">
                      <Sparkles className="w-6 h-6" />
                   </div>
                   <h3 className="text-3xl font-black italic">الهوية البيئية</h3>

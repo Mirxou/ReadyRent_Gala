@@ -89,7 +89,7 @@ export default function ArtisansPage() {
               <div className="absolute inset-0 bg-gradient-to-t from-sovereign-gold/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className={cn(
                 "w-16 h-16 rounded-2xl flex items-center justify-center transition-all duration-700 shadow-2xl",
-                c.color === 'gold' ? "bg-sovereign-gold/10 text-sovereign-gold" : "bg-cyan-500/10 text-cyan-400"
+                c.color === 'gold' ? "bg-sovereign-gold/10 text-sovereign-gold" : "bg-emerald-500/10 text-emerald-400"
               )}>
                  <c.icon className="w-8 h-8" />
               </div>
