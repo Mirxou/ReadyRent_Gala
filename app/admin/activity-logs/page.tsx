@@ -171,7 +171,7 @@ export default function AdminActivityLogsPage() {
                   <TableRow key={log.id}>
                     <TableCell>{log.user_name || log.user_email || 'النظام'}</TableCell>
                     <TableCell>
-                      <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
+                      <span className="px-2 py-1 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded text-xs">
                         {ACTION_LABELS[log.action] || log.action}
                       </span>
                     </TableCell>

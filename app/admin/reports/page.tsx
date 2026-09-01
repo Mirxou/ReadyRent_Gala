@@ -1,5 +1,6 @@
 'use client'
 import { formatNumber } from '@/lib/utils';
+import { toast } from 'sonner';
 
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -46,7 +47,18 @@ export default function ReportsPage() {
   const handleExportRevenue = async () => {
     try {
       const response = await adminApi.getRevenue({ days });
-      const blob = new Blob([response.data], { type: 'text/csv;charset=utf-8;' });
+      if (response?.status === 'sovereign_halt' || response?.code === 'SYSTEM_HALT') {
+        toast.error('فشل تحميل بيانات الإيرادات');
+        return;
+      }
+      const rows = (response?.data as Record<string, unknown>)?.data as Array<{ date?: string; revenue?: number; bookings?: number }> | undefined;
+      if (!Array.isArray(rows) || rows.length === 0) {
+        toast.error('لا توجد بيانات للتصدير');
+        return;
+      }
+      const csv = 'التاريخ,الإيرادات (دج),عدد الحجوزات\n' +
+        rows.map(r => `${r.date || ''},${r.revenue || 0},${r.bookings || 0}`).join('\n');
+      const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement('a');
       const url = URL.createObjectURL(blob);
       link.setAttribute('href', url);
@@ -55,6 +67,7 @@ export default function ReportsPage() {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Error exporting revenue:', error);
     }
@@ -63,7 +76,19 @@ export default function ReportsPage() {
   const handleExportSales = async () => {
     try {
       const response = await adminApi.getSalesReport({ days, export: true } as Parameters<typeof adminApi.getSalesReport>[0]);
-      const blob = new Blob([response.data], { type: 'text/csv;charset=utf-8;' });
+      if (response?.status === 'sovereign_halt' || response?.code === 'SYSTEM_HALT') {
+        toast.error('فشل تحميل بيانات المبيعات');
+        return;
+      }
+      const report = response?.data as Record<string, unknown> | undefined;
+      const categories = report?.categories as Array<{ name_ar?: string; name?: string; total?: number; count?: number }> | undefined;
+      if (!Array.isArray(categories) || categories.length === 0) {
+        toast.error('لا توجد بيانات للتصدير');
+        return;
+      }
+      const csv = 'التصنيف,الإيرادات (دج),عدد الحجوزات\n' +
+        categories.map(c => `${c.name_ar || c.name || ''},${c.total || 0},${c.count || 0}`).join('\n');
+      const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement('a');
       const url = URL.createObjectURL(blob);
       link.setAttribute('href', url);
@@ -72,6 +97,7 @@ export default function ReportsPage() {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Error exporting sales report:', error);
     }

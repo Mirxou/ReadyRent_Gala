@@ -2668,3 +2668,27 @@ Stage Summary:
 - Lint: 0 errors, 2 pre-existing warnings
 - Homepage: 200, Services: 200 (verified via HTTP)
 - Note: Turbopack OOM on sequential multi-page compilation due to 3.9GB RAM limit, not code errors
+---
+Task ID: 4-1
+Agent: Main Agent
+Task: المراقبة الميدانية + إصلاح أخطاء المهمة 4.1 — تصنيف صفحات الأدمين
+
+Work Log:
+- فحص كل 18 صفحة أدمين + layout + quick-actions + adminApi
+- اكتشاف 7 أخطاء (3 حرجة، 2 متوسطة، 2 منخفضة)
+- إصلاح BUG-1: admin/users dignity_preserved دائماً true → sovereign_halt check
+- إصلاح BUG-2: admin/products delete نفس المشكلة
+- إصلاح BUG-3: admin/reports CSV export يصدّر كائن JS → بناء CSV حقيقي مع BOM
+- إصلاح BUG-4: admin/branches dead error handling (apiFetch لا يرمي) + كراش على خطأ
+- إصلاح BUG-5: quick-actions blue+purple → sovereign-gold+amber, رابط ميت /settings → /branches
+- إصلاح BUG-6: adminApi trailing slashes (11 نقطة)
+- إصلاح BUG-7: activity-logs bg-blue → bg-amber
+- تجميد 6 صفحات غير مناسبة لكراء فساتين: hygiene, maintenance, packaging, inventory, damage-assessment, forecasting
+- تصنيف صفحات الأدمين:
+  - ✅ تعمل: dashboard, bookings, reports, users, products, products/new, cms/pages, branches
+  - ❄️ مجمّدة: hygiene, maintenance, packaging, inventory, damage-assessment, forecasting
+  - 🔧 تحتاج APIs جديدة (خطوات لاحقة): staff, shifts, performance-reviews, activity-logs
+
+Stage Summary:
+- 7 bugs fixed, 6 pages frozen, 0 lint errors
+- Files modified: admin/users, admin/products, admin/reports, admin/branches, admin/hygiene, admin/maintenance, admin/packaging, admin/inventory, admin/damage-assessment, admin/forecasting, admin/activity-logs, components/admin/quick-actions, lib/api/admin.ts

@@ -57,8 +57,8 @@ export default function AdminUsersPage() {
     mutationFn: ({ id, data }: { id: string; data: { role?: string; is_active?: boolean } }) =>
       adminApi.updateUser(id, data),
     onSuccess: (res: Record<string, unknown>) => {
-      if (res?.dignity_preserved || res?.error) {
-        toast.error((res?.message_ar as string) || (res?.error as string) || 'حدث خطأ أثناء التحديث');
+      if (res?.status === 'sovereign_halt' || res?.code === 'SYSTEM_HALT') {
+        toast.error((res?.message_ar as string) || 'حدث خطأ أثناء التحديث');
         setUpdatingUserId(null);
         return;
       }

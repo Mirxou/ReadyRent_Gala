@@ -20,8 +20,8 @@ export function QuickActions() {
       title: 'إضافة منتج جديد',
       description: 'إضافة منتج جديد إلى الكتالوج',
       icon: Plus,
-      href: '/admin/products/create',
-      color: 'from-blue-500 to-cyan-500',
+      href: '/admin/products/new',
+      color: 'from-sovereign-gold to-amber-400',
     },
     {
       title: 'الحجوزات المعلقة',
@@ -42,7 +42,7 @@ export function QuickActions() {
       description: 'عرض وإدارة حسابات المستخدمين',
       icon: Users,
       href: '/admin/users',
-      color: 'from-purple-500 to-pink-500',
+      color: 'from-amber-500 to-orange-400',
     },
     {
       title: 'إدارة المنتجات',
@@ -55,7 +55,7 @@ export function QuickActions() {
       title: 'الإعدادات',
       description: 'إعدادات النظام العامة',
       icon: Settings,
-      href: '/admin/settings',
+      href: '/admin/branches',
       color: 'from-gray-500 to-slate-500',
     },
   ];

@@ -60,19 +60,16 @@ export default function BranchesPage() {
   });
 
   const loadBranches = useCallback(async () => {
-    try {
-      const response = await api.get('/admin/branches/');
-      const data = response.data?.results ?? response.data ?? [];
-      setBranches(data as Branch[]);
-    } catch (error: unknown) {
-      toast({
-        title: 'خطأ',
-        description: (error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'فشل تحميل الفروع',
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
+    const response = await api.get('admin/branches');
+    const meta = response.meta as { failed?: boolean } | undefined;
+    if (meta?.failed || response.status >= 400 || !Array.isArray(response.data)) {
+      const errData = response.data as Record<string, string> | undefined;
+      toast({ title: 'خطأ', description: errData?.error || 'فشل تحميل الفروع', variant: 'destructive' });
+      setBranches([]);
+    } else {
+      setBranches(response.data as Branch[]);
     }
+    setLoading(false);
   }, [toast]);
 
   useEffect(() => {
@@ -89,26 +86,25 @@ export default function BranchesPage() {
       return;
     }
 
-    try {
-      const submitData = {
+    const submitData = {
         ...formData,
         latitude: formData.latitude ? parseFloat(formData.latitude) : null,
         longitude: formData.longitude ? parseFloat(formData.longitude) : null,
       };
 
+      let response;
       if (editingBranch) {
-        await api.patch(`/admin/branches/${editingBranch.id}`, submitData);
-        toast({
-          title: 'تم التحديث',
-          description: 'تم تحديث الفرع بنجاح',
-        });
+        response = await api.patch(`admin/branches/${editingBranch.id}`, submitData);
       } else {
-        await api.post('/admin/branches/', submitData);
-        toast({
-          title: 'تم الإضافة',
-          description: 'تم إضافة الفرع بنجاح',
-        });
+        response = await api.post('admin/branches', submitData);
       }
+      const meta = response.meta as { failed?: boolean } | undefined;
+      if (meta?.failed || response.status >= 400) {
+        const errData = response.data as Record<string, string> | undefined;
+        toast({ title: 'خطأ', description: errData?.error || 'فشل حفظ الفرع', variant: 'destructive' });
+        return;
+      }
+      toast({ title: editingBranch ? 'تم التحديث' : 'تم الإضافة', description: editingBranch ? 'تم تحديث الفرع بنجاح' : 'تم إضافة الفرع بنجاح' });
       setShowForm(false);
       setEditingBranch(null);
       setFormData({
@@ -125,13 +121,6 @@ export default function BranchesPage() {
         is_active: true,
       });
       loadBranches();
-    } catch (error: unknown) {
-      toast({
-        title: 'خطأ',
-        description: (error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'فشل حفظ الفرع',
-        variant: 'destructive',
-      });
-    }
   };
 
   const handleEdit = (branch: Branch) => {
@@ -156,20 +145,15 @@ export default function BranchesPage() {
     if (!deleteTarget) return;
     const branchId = deleteTarget.id;
     setDeleteTarget(null);
-    try {
-      await api.delete(`/admin/branches/${branchId}`);
-      toast({
-        title: 'تم الحذف',
-        description: 'تم حذف الفرع بنجاح',
-      });
-      loadBranches();
-    } catch (error: unknown) {
-      toast({
-        title: 'خطأ',
-        description: (error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'فشل حذف الفرع',
-        variant: 'destructive',
-      });
+    const response = await api.delete(`admin/branches/${branchId}`);
+    const meta = response.meta as { failed?: boolean } | undefined;
+    if (meta?.failed || response.status >= 400) {
+      const errData = response.data as Record<string, string> | undefined;
+      toast({ title: 'خطأ', description: errData?.error || 'فشل حذف الفرع', variant: 'destructive' });
+      return;
     }
+    toast({ title: 'تم الحذف', description: 'تم حذف الفرع بنجاح' });
+    loadBranches();
   };
 
   // ── Role guard ──
