@@ -1,8 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { useAuthStore } from '@/lib/store';
-import { useNotificationStore } from '@/lib/store';
+import { useAuthStore, useNotificationStore } from '@/lib/store';
 import { websocketClient } from '@/lib/websocket';
 import { toast } from 'sonner';
 
@@ -19,7 +18,7 @@ export function RealtimeNotifications() {
     // Connect WebSocket — gracefully handle errors
     if (user?.id) {
       try {
-        websocketClient.connect(Number(user.id));
+        websocketClient.connect(user.id);
         connectedRef.current = true;
       } catch {
         // WebSocket not available — silent fail, no crash

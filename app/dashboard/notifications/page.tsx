@@ -39,9 +39,9 @@ const typeIconMap: Record<string, React.ReactNode> = {
 
 const typeColorMap: Record<string, string> = {
   trust: 'gold',
-  financial: 'blue',
+  financial: 'emerald',
   asset: 'gold',
-  system: 'blue',
+  system: 'emerald',
 };
 
 export default function NotificationsPage() {
@@ -52,37 +52,37 @@ export default function NotificationsPage() {
 
   const handleMarkAllRead = async () => {
     setIsMarkingAllRead(true);
-    try {
-      const res = await notificationsApi.markAllRead();
-      if (res.status === 0 || res.data?.error) throw new Error();
+    const res = await notificationsApi.markAllRead();
+    if (res.status === 'sovereign_halt' || res.code === 'SYSTEM_HALT') {
+      toast.error('فشل في تحديث الإشعارات');
+    } else {
       toast.success('تم تعليم جميع الإشعارات كمقروءة');
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
-    } catch {
-      toast.error('فشل في تحديث الإشعارات');
-    } finally {
-      setIsMarkingAllRead(false);
     }
+    setIsMarkingAllRead(false);
   };
 
-  const { data: notifications, isLoading } = useQuery({
+  const { data: notifications, isLoading, isError } = useQuery({
     queryKey: ['notifications'],
     queryFn: async () => {
       const res = await notificationsApi.getAll();
+      if (res.status === 'sovereign_halt' || res.code === 'SYSTEM_HALT') {
+        throw new Error(res.message_en || 'Connection error');
+      }
       return res.data || [];
     },
     enabled: isAuthenticated,
   });
 
   const handleMarkRead = async (id: string) => {
-    try {
-      const res = await notificationsApi.markRead(id);
-      if (res.status === 0 || res.data?.error) throw new Error();
-      queryClient.setQueryData(['notifications'], (old: Record<string, unknown>[]) =>
-        old?.map((n: Record<string, unknown>) => (n.id === id ? { ...n, is_read: true } : n))
-      );
-    } catch {
+    const res = await notificationsApi.markRead(id);
+    if (res.status === 'sovereign_halt' || res.code === 'SYSTEM_HALT') {
       toast.error('فشل في تحديث الإشعار');
+      return;
     }
+    queryClient.setQueryData<Record<string, unknown>[]>(['notifications'], (old) =>
+      old?.map((n) => (n.id === id ? { ...n, is_read: true } : n))
+    );
   };
 
   // Real stats calculated from notifications data
@@ -146,8 +146,17 @@ export default function NotificationsPage() {
         </div>
       )}
 
+      {/* Error State */}
+      {isError && (
+        <div className="flex flex-col items-center justify-center py-20 gap-4">
+          <BellOff className="w-16 h-16 text-red-500/30" />
+          <p className="text-lg text-muted-foreground">فشل في تحميل الإشعارات</p>
+          <p className="text-sm text-muted-foreground/60">تحقق من اتصالك بالإنترنت وأعد المحاولة.</p>
+        </div>
+      )}
+
       {/* Empty State */}
-      {!isLoading && (!notifications || notifications.length === 0) && (
+      {!isLoading && !isError && (!notifications || notifications.length === 0) && (
         <div className="flex flex-col items-center justify-center py-20 gap-4">
           <BellOff className="w-16 h-16 text-muted-foreground/10" />
           <p className="text-lg text-muted-foreground">لا توجد إشعارات</p>
@@ -184,7 +193,7 @@ export default function NotificationsPage() {
                        <GlassPanel className={cn("p-8 group hover:border-sovereign-gold/20 transition-all duration-700 relative overflow-hidden", !n.is_read && "border-sovereign-gold/10")} gradientBorder>
                           <div className={cn(
                             "absolute top-1/2 -right-16 -translate-y-1/2 w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-700 z-10",
-                            color === 'gold' ? "bg-sovereign-gold text-black shadow-3xl" : "bg-sovereign-blue text-white shadow-3xl shadow-sovereign-blue/20"
+                            color === 'gold' ? "bg-sovereign-gold text-black shadow-3xl" : "bg-emerald-600 text-white shadow-3xl shadow-emerald-600/20"
                           )}>
                              <Icon className="w-6 h-6" />
                           </div>
@@ -233,7 +242,7 @@ export default function NotificationsPage() {
               <div className="space-y-6">
                  {[
                    { label: 'نسبة المقروء', value: `${readPct}%`, color: 'gold' as const },
-                   { label: 'نسبة غير المقروء', value: `${unreadPct}%`, color: 'blue' as const },
+                   { label: 'نسبة غير المقروء', value: `${unreadPct}%`, color: 'emerald' as const },
                    { label: 'مؤشر النظام', value: `${systemPct}%`, color: 'gold' as const }
                  ].map((stat, i) => (
                    <div key={i} className="space-y-2">
@@ -245,7 +254,7 @@ export default function NotificationsPage() {
                          <div 
                            className={cn(
                              "h-full transition-all duration-1000",
-                             stat.color === 'gold' ? "bg-sovereign-gold shadow-lg" : "bg-sovereign-blue shadow-lg shadow-sovereign-blue/20"
+                             stat.color === 'gold' ? "bg-sovereign-gold shadow-lg" : "bg-emerald-600 shadow-lg shadow-emerald-600/20"
                            )} 
                            style={{ width: stat.value }} 
                          />

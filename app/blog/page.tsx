@@ -120,7 +120,7 @@ export default function BlogPage() {
                   transition={{ delay: index * 0.1 }}
                 >
                   <Link href={`/blog/${post.id}`} className="block h-full">
-                  <SovereignGlow color="purple" intensity="low">
+                  <SovereignGlow color="gold" intensity="low">
                     <GlassPanel
                       variant="obsidian"
                       className="!rounded-2xl !p-0 overflow-hidden cursor-pointer group h-full"

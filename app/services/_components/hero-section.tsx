@@ -24,7 +24,7 @@ export function HeroSection() {
           </motion.div>
 
           <motion.h1 custom={1} variants={fadeUp} className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-none mb-6">
-            <SovereignGlow color="purple" intensity="high">
+            <SovereignGlow color="gold" intensity="high">
               خدمات <span className="text-purple-400">المناسبات</span>
             </SovereignGlow>
           </motion.h1>

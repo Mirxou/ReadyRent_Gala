@@ -2583,3 +2583,35 @@ Stage Summary:
 - 8/8 bugs fixed
 - Lint: 0 errors, 2 pre-existing warnings
 - Key pattern documented: sovereignClient error detection must use status==='sovereign_halt' NOT dignity_preserved
+---
+Task ID: 3.4-fix
+Agent: Main Agent
+Task: Step 3.4 Advanced Notifications — Field monitoring + fix all bugs
+
+Work Log:
+- Field monitoring via Agent Browser: homepage, blog, FAQ, CMS pages — all rendering correctly
+- VLM screenshot analysis: no blue/purple colors on homepage, layout clean
+- Identified 11 bugs across notifications system + 5 purple SovereignGlow violations
+
+**NOTIF-BUG-1 (CRITICAL)**: lib/api/notifications.ts:42 — markRead used sovereignClient.post() but server expects PATCH. Fixed: changed to .patch()
+**NOTIF-BUG-2 (CRITICAL)**: lib/api/notifications.ts:46 — markAllRead used sovereignClient.post() but server expects PATCH. Fixed: changed to .patch()
+**NOTIF-BUG-3 (CRITICAL)**: dashboard/notifications/page.tsx:57,79 — Error detection used `res.status === 0` but sovereignClient returns `status: 'sovereign_halt'` on failure. Fixed: check `res.status === 'sovereign_halt' || res.code === 'SYSTEM_HALT'`
+**NOTIF-BUG-4 (CRITICAL)**: dashboard/notifications/page.tsx:70-72 — GET queryFn never threw on failure (sovereignClient catches internally, returns null data as empty array). Fixed: added explicit sovereign_halt check that throws, enabling isError state
+**NOTIF-BUG-5 (MEDIUM)**: dashboard/notifications/page.tsx:42-44 — typeColorMap used 'blue' for financial/system. Fixed: changed to 'emerald'
+**NOTIF-BUG-6 (MEDIUM)**: dashboard/notifications/page.tsx:187 — Icon badge used bg-sovereign-blue. Fixed: changed to bg-emerald-600
+**NOTIF-BUG-7 (MEDIUM)**: dashboard/notifications/page.tsx:237-248 — Analytics panel used 'blue' and bg-sovereign-blue. Fixed: changed to 'emerald' and bg-emerald-600
+**NOTIF-BUG-8 (LOW)**: lib/api/notifications.ts:3-13 — Notification interface had dead fields (action_url, related_object_id, related_object_type) not in Prisma model. Fixed: removed dead fields, added user_id to match API response
+**NOTIF-BUG-9 (LOW)**: lib/api/notifications.ts:21,32,38 — Trailing slashes in URLs (/notifications/). Fixed: removed trailing slashes
+**NOTIF-BUG-10 (LOW)**: lib/api/notifications.ts:48-51 — getUnreadCount was dead TODO that just called list(). Fixed: removed, added delete() method instead
+**NOTIF-BUG-11 (LOW)**: dashboard/notifications/page.tsx:150-156 — No error state (failure showed empty state). Fixed: added isError state with red icon and error message
+**RT-BUG-1 (MEDIUM)**: components/notifications/realtime-notifications.tsx:22 — Number(user.id) on string cuid ID. Fixed: pass user.id directly
+**RT-BUG-2 (LOW)**: components/notifications/realtime-notifications.tsx:4-5 — Duplicate import from @/lib/store. Fixed: merged into single import
+**COLOR-BUG (LOW)**: SovereignGlow color="purple" in 5 files (blog, faq, bundles, disputes, services hero). Fixed: all changed to color="gold"
+
+Stage Summary:
+- 13+3 = 16 total fixes across 8 files
+- Lint: 0 errors, 2 pre-existing warnings
+- All pages returning 200 (blog, faq, services verified)
+- Notifications now use correct HTTP methods (PATCH) matching server routes
+- Error detection uses sovereign_halt pattern consistently
+- Zero blue/purple colors remaining in notifications page or SovereignGlow usage

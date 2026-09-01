@@ -103,7 +103,7 @@ export default function FAQPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.05 }}
               >
-                <SovereignGlow color="purple" intensity="low">
+                <SovereignGlow color="gold" intensity="low">
                   <GlassPanel
                     variant="obsidian"
                     className="!rounded-2xl !p-0 cursor-pointer overflow-hidden"

@@ -2,51 +2,46 @@ import { sovereignClient } from './sovereign-client';
 
 export interface Notification {
   id: string;
+  user_id: string;
   type: string;
   title: string;
   message: string;
   is_read: boolean;
-  action_url?: string;
   created_at: string;
-  related_object_id?: string;
-  related_object_type?: string;
 }
 
 export const notificationsApi = {
   /** List all notifications for the current user */
-  list: (params?: { page?: number; unread_only?: boolean }) => {
+  list: (params?: { limit?: number }) => {
     const q = new URLSearchParams();
-    if (params?.page) q.append('page', params.page.toString());
-    if (params?.unread_only) q.append('unread_only', 'true');
+    if (params?.limit) q.append('limit', params.limit.toString());
     return sovereignClient.get<Notification[]>(
-      `/notifications/?${q.toString()}`
+      `/notifications${q.toString() ? `?${q.toString()}` : ''}`
     );
   },
 
   /** Alias used by dashboard/notifications */
-  getAll: (params?: { page?: number; unread_only?: boolean }) => {
+  getAll: (params?: { limit?: number }) => {
     const q = new URLSearchParams();
-    if (params?.page) q.append('page', params.page.toString());
-    if (params?.unread_only) q.append('unread_only', 'true');
+    if (params?.limit) q.append('limit', params.limit.toString());
     return sovereignClient.get<Notification[]>(
-      `/notifications/?${q.toString()}`
+      `/notifications${q.toString() ? `?${q.toString()}` : ''}`
     );
   },
 
   /** Get a single notification */
   get: (id: string) =>
-    sovereignClient.get<Notification>(`/notifications/${id}/`),
+    sovereignClient.get<Notification>(`/notifications/${id}`),
 
-  /** Mark a notification as read */
+  /** Mark a notification as read (PATCH) */
   markRead: (id: string) =>
-    sovereignClient.post<void>(`/notifications/${id}/`),
+    sovereignClient.patch<void>(`/notifications/${id}`),
 
-  /** Mark ALL notifications as read */
+  /** Mark ALL notifications as read (PATCH) */
   markAllRead: () =>
-    sovereignClient.post<void>('/notifications/read-all/'),
+    sovereignClient.patch<void>('/notifications/read-all'),
 
-  // TODO: route not yet implemented — /notifications/unread-count
-  /** Get unread count */
-  getUnreadCount: () =>
-    sovereignClient.get<{ count: number }>('/notifications/'),
+  /** Delete a notification */
+  delete: (id: string) =>
+    sovereignClient.delete<void>(`/notifications/${id}`),
 };
