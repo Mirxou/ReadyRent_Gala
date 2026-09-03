@@ -100,10 +100,13 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
 
     if (!body.name && !body.name_ar) {
-      return NextResponse.json({ success: false, message_en: 'Product name is required', code: 'VALIDATION_ERROR' }, { status: 400 });
+      return NextResponse.json({ success: false, dignity_preserved: true, message_en: 'Product name is required', code: 'VALIDATION_ERROR' }, { status: 400 });
     }
     if (!body.daily_rate || body.daily_rate <= 0) {
-      return NextResponse.json({ success: false, message_en: 'Valid daily_rate is required', code: 'VALIDATION_ERROR' }, { status: 400 });
+      return NextResponse.json({ success: false, dignity_preserved: true, message_en: 'Valid daily_rate is required', code: 'VALIDATION_ERROR' }, { status: 400 });
+    }
+    if (!body.category_id) {
+      return NextResponse.json({ success: false, dignity_preserved: true, message_en: 'Category is required', message_ar: 'التصنيف مطلوب', code: 'VALIDATION_ERROR' }, { status: 400 });
     }
 
     // Validate category exists

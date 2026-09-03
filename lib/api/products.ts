@@ -50,7 +50,7 @@ export const productsApi = {
     if (params?.page) q.append('page', String(params.page));
     if (params?.limit) q.append('limit', String(params.limit));
     const qs = q.toString();
-    return sovereignClient.get<Product[]>(`/products/${qs ? `?${qs}` : ''}`);
+    return sovereignClient.get<Product[]>(`/products${qs ? `?${qs}` : ''}`);
   },
 
   /**
@@ -69,71 +69,71 @@ export const productsApi = {
     if (filters.availability) params.append('availability', filters.availability);
     if (filters.sortBy) params.append('ordering', filters.sortBy);
 
-    return sovereignClient.get<Product[]>(`/products/?${params.toString()}`);
+    return sovereignClient.get<Product[]>(`/products?${params.toString()}`);
   },
 
   /**
    * Get product by ID or Slug
    */
   getDetail: (idOrSlug: string) =>
-    sovereignClient.get<Product>(`/products/${idOrSlug}/`),
+    sovereignClient.get<Product>(`/products/${idOrSlug}`),
 
   getBySlug: (slug: string) =>
-    sovereignClient.get<Product>(`/products/${slug}/`),
+    sovereignClient.get<Product>(`/products/${slug}`),
 
   getById: (id: string) =>
-    sovereignClient.get<Product>(`/products/${id}/`),
+    sovereignClient.get<Product>(`/products/${id}`),
 
   /**
    * Get all categories for filter sidebar
    */
   getCategories: () =>
-    sovereignClient.get<unknown[]>('/products/categories/'),
+    sovereignClient.get<unknown[]>('/products/categories'),
 
   /**
    * Get search suggestions based on partial input
    */
   getSuggestions: (query: string) =>
-    sovereignClient.get<string[]>(`/products/search-suggestions/?q=${encodeURIComponent(query)}`),
+    sovereignClient.get<string[]>(`/products/search-suggestions?q=${encodeURIComponent(query)}`),
 
   /** Alias used by product-filters.tsx */
   getSearchSuggestions: (query: string) =>
-    sovereignClient.get<string[]>(`/products/search-suggestions/?q=${encodeURIComponent(query)}`),
+    sovereignClient.get<string[]>(`/products/search-suggestions?q=${encodeURIComponent(query)}`),
 
   /**
    * Get product recommendations
    */
   getRecommendations: (productId: string) =>
-    sovereignClient.get<Product[]>(`/products/${productId}/recommendations/`),
+    sovereignClient.get<Product[]>(`/products/${productId}/recommendations`),
 
   /**
    * Wishlist
    */
-  getWishlist: () => sovereignClient.get<Product[]>('/products/wishlist/'),
+  getWishlist: () => sovereignClient.get<Product[]>('/products/wishlist'),
 
   addToWishlist: (productId: string) =>
-    sovereignClient.post<void>('/products/wishlist/', { product_id: productId }),
+    sovereignClient.post<void>('/products/wishlist', { product_id: productId }),
 
   removeFromWishlist: (id: string) =>
-    sovereignClient.delete<void>(`/products/wishlist/${id}/`),
+    sovereignClient.delete<void>(`/products/wishlist/${id}`),
 
   // TODO: route not yet implemented — /products/wishlist/check
   /** Check if a product is in the user's wishlist (used by product-card.tsx) */
   checkWishlist: (productId: string) =>
-    sovereignClient.get<{ in_wishlist: boolean }>(`/products/wishlist/?product_id=${productId}`),
+    sovereignClient.get<{ in_wishlist: boolean }>(`/products/wishlist?product_id=${productId}`),
 
   // TODO: route not yet implemented — /products/wishlist/toggle
   /** Toggle wishlist status — add if not in, remove if in (used by product-card.tsx) */
   toggleWishlist: (productId: string) =>
-    sovereignClient.post<{ in_wishlist: boolean }>('/products/wishlist/', { product_id: productId }),
+    sovereignClient.post<{ in_wishlist: boolean }>('/products/wishlist', { product_id: productId }),
 
   // TODO: route not yet implemented — /products/[id]/accessories
   /** Get accessories that match a product (used by accessory-suggestions.tsx) */
   getMatchingAccessories: (productId: string, limit = 4) =>
-    sovereignClient.get<Product[]>(`/products/?limit=${limit}`),
+    sovereignClient.get<Product[]>(`/products?limit=${limit}`),
 
   // TODO: route not yet implemented — /products/metadata
   /** Get product metadata — categories, price ranges, locations (used by product-filters.tsx) */
   getMetadata: () =>
-    sovereignClient.get<{ categories: unknown[]; price_range: { min: number; max: number }; locations: string[] }>('/products/categories/'),
+    sovereignClient.get<{ categories: unknown[]; price_range: { min: number; max: number }; locations: string[] }>('/products/categories'),
 };

@@ -33,9 +33,18 @@ export default function AdminProductsPage() {
     }
   }, [isAuthenticated, user, router]);
 
-  const { data: products, isLoading } = useQuery({
+  const { data: products, isLoading, isError } = useQuery({
     queryKey: ['admin-products'],
-    queryFn: () => adminApi.getAllProducts().then((res) => res.data),
+    queryFn: async () => {
+      const res = await adminApi.getAllProducts();
+      // Check sovereign_halt or API failure
+      if (res?.status === 'sovereign_halt' || res?.code === 'SYSTEM_HALT' || res?.success === false) {
+        throw new Error((res?.message_en as string) || (res?.message_ar as string) || 'حدث خطأ أثناء جلب المنتجات');
+      }
+      const data = res?.data;
+      if (!Array.isArray(data)) return [];
+      return data;
+    },
     enabled: isAuthenticated && (user?.role === 'admin' || user?.role === 'staff'),
   });
 
@@ -43,8 +52,14 @@ export default function AdminProductsPage() {
     mutationFn: (id: string) => adminApi.deleteProduct(id),
     onMutate: () => { setDeleteTarget(null); },
     onSuccess: (res: Record<string, unknown>) => {
+      // Check sovereign_halt (network error / 503)
       if (res?.status === 'sovereign_halt' || res?.code === 'SYSTEM_HALT') {
         toast.error((res?.message_ar as string) || 'حدث خطأ أثناء حذف المنتج');
+        return;
+      }
+      // Check API-level failure (409 active bookings, 403 forbidden, etc.)
+      if (res?.success === false) {
+        toast.error((res?.message_en as string) || (res?.message_ar as string) || 'حدث خطأ أثناء حذف المنتج');
         return;
       }
       queryClient.invalidateQueries({ queryKey: ['admin-products'] });
@@ -56,7 +71,8 @@ export default function AdminProductsPage() {
     return null;
   }
 
-  const filteredProducts = products?.filter((product: Record<string, unknown>) => {
+  const productList = Array.isArray(products) ? products : [];
+  const filteredProducts = productList.filter((product: Record<string, unknown>) => {
     if (search) {
       const searchLower = search.toLowerCase();
       return (
@@ -66,7 +82,7 @@ export default function AdminProductsPage() {
       );
     }
     return true;
-  }) || products || [];
+  });
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -100,6 +116,14 @@ export default function AdminProductsPage() {
       {isLoading ? (
         <div className="text-center py-12">
           <p className="text-muted-foreground">جاري تحميل المنتجات...</p>
+        </div>
+      ) : isError ? (
+        <div className="text-center py-12">
+          <p className="text-destructive">حدث خطأ أثناء تحميل المنتجات. حاول مرة أخرى.</p>
+        </div>
+      ) : filteredProducts.length === 0 ? (
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">{search ? 'لا توجد نتائج للبحث' : 'لا توجد منتجات بعد'}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

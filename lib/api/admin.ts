@@ -29,8 +29,17 @@ export const adminApi = {
   getAllProducts: (params?: Record<string, unknown>) =>
     sovereignClient.get<unknown[]>(`/products/admin${buildQuery(params)}`),
 
+  getProduct: (id: string) =>
+    sovereignClient.get<unknown>(`/products/admin/${id}`),
+
   createProduct: (data: Record<string, unknown>) =>
     sovereignClient.post<unknown>('/products/admin', data),
+
+  updateProduct: (id: string, data: Record<string, unknown>) =>
+    sovereignClient.put<unknown>(`/products/admin/${id}`, data),
+
+  deleteProduct: (id: string) =>
+    sovereignClient.delete<void>(`/products/admin/${id}`),
 
   // Users Admin
   getAllUsers: (params?: Record<string, unknown>) =>
@@ -38,9 +47,6 @@ export const adminApi = {
 
   updateUser: (id: string, data: Record<string, unknown>) =>
     sovereignClient.patch<unknown>(`/admin/users/${id}`, data),
-
-  deleteProduct: (id: string) =>
-    sovereignClient.delete<void>(`/products/admin/${id}`),
 
   getBookingStats: () =>
     sovereignClient.get<unknown>('/admin/bookings/stats'),

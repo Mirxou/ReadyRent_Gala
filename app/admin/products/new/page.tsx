@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import Link from 'next/link';
 import { ArrowLeft, Loader2, Save, ImageIcon, CheckCircle, ShieldAlert } from 'lucide-react';
 import { useAuthStore } from '@/lib/store';
+import { adminApi, productsApi } from '@/lib/api';
 import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
 import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
 import { Input } from '@/components/ui/input';
@@ -111,10 +112,14 @@ function ProductForm() {
   useEffect(() => {
     async function loadCategories() {
       try {
-        const res = await fetch('/api/products/categories');
-        const json = await res.json();
-        if (json.success && json.data) {
-          setCategories(json.data);
+        const res = await productsApi.getCategories();
+        // Check sovereign_halt or API failure
+        if (res?.status === 'sovereign_halt' || res?.code === 'SYSTEM_HALT' || res?.success === false) {
+          toast.error('حدث خطأ أثناء تحميل التصنيفات');
+          return;
+        }
+        if (Array.isArray(res?.data)) {
+          setCategories(res.data);
         }
       } catch {
         toast.error('حدث خطأ أثناء تحميل التصنيفات');
@@ -131,16 +136,16 @@ function ProductForm() {
 
     async function loadProduct() {
       try {
-        const res = await fetch(`/api/products/admin/${editId}`);
-        const json = await res.json();
+        const res = await adminApi.getProduct(editId);
 
-        if (!json.success) {
+        // Check sovereign_halt or API failure
+        if (res?.status === 'sovereign_halt' || res?.code === 'SYSTEM_HALT' || res?.success === false) {
           toast.error('المنتج غير موجود');
           router.push('/admin/products');
           return;
         }
 
-        const p: ProductData = json.data;
+        const p: ProductData = res.data;
         const parsedImages = safeJsonParse(p.images, []);
         const parsedSizes = safeJsonParse(p.sizes, []);
         const parsedColors = safeJsonParse(p.colors, []);
@@ -181,6 +186,10 @@ function ProductForm() {
         toast.error('يجب إدخال اسم المنتج بالعربية أو الإنجليزية');
         return;
       }
+      if (!form.category_id) {
+        toast.error('يجب اختيار التصنيف');
+        return;
+      }
       if (!form.daily_rate || Number(form.daily_rate) <= 0) {
         toast.error('يجب إدخال سعر يومي صحيح');
         return;
@@ -217,24 +226,24 @@ function ProductForm() {
       setSubmitting(true);
 
       try {
-        const url = isEditMode ? `/api/products/admin/${editId}` : '/api/products/admin';
-        const method = isEditMode ? 'PUT' : 'POST';
+        const res = isEditMode
+          ? await adminApi.updateProduct(editId, body)
+          : await adminApi.createProduct(body);
 
-        const res = await fetch(url, {
-          method,
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body),
-        });
-
-        const json = await res.json();
-
-        if (json.success) {
-          toast.success(isEditMode ? 'تم تحديث المنتج بنجاح' : 'تم إضافة المنتج بنجاح');
-          router.push('/admin/products');
-        } else {
-          const msg = json.message_en || json.message_ar || 'حدث خطأ غير متوقع';
-          toast.error(msg);
+        // Check sovereign_halt
+        if (res?.status === 'sovereign_halt' || res?.code === 'SYSTEM_HALT') {
+          toast.error('خطأ في الاتصال بالنظام');
+          return;
         }
+        // Check API-level failure
+        if (res?.success === false) {
+          const msg = (res?.message_en as string) || (res?.message_ar as string) || 'حدث خطأ غير متوقع';
+          toast.error(msg);
+          return;
+        }
+
+        toast.success(isEditMode ? 'تم تحديث المنتج بنجاح' : 'تم إضافة المنتج بنجاح');
+        router.push('/admin/products');
       } catch {
         toast.error('حدث خطأ أثناء حفظ المنتج');
       } finally {
@@ -390,7 +399,7 @@ function ProductForm() {
               {/* Category */}
               <div className="space-y-2.5">
                 <Label className="text-white/80 text-sm font-bold">
-                  التصنيف
+                  التصنيف <span className="text-red-400">*</span>
                 </Label>
                 {categoriesLoading ? (
                   <Skeleton className="h-12 w-full bg-white/5 rounded-xl" />

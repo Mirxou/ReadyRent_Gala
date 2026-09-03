@@ -93,8 +93,9 @@ export async function PUT(
     const updateData: Record<string, unknown> = {};
     if (body.name !== undefined) updateData.name = body.name;
     if (body.name_ar !== undefined) updateData.nameAr = body.name_ar;
+    // description: prefer explicit description, fallback to description_ar for backward compat
     if (body.description !== undefined) updateData.description = body.description;
-    if (body.description_ar !== undefined) updateData.description = body.description_ar;
+    else if (body.description_ar !== undefined) updateData.description = body.description_ar;
     if (body.daily_rate !== undefined) updateData.pricePerDay = body.daily_rate;
     if (body.primary_image !== undefined) updateData.primaryImage = body.primary_image;
     // Ensure JSON fields are serialized before storing

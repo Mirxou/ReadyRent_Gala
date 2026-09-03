@@ -2714,3 +2714,54 @@ Stage Summary:
 - API response now uses consistent snake_case for category/vendor fields
 - is_featured correctly maps to isPremium
 - Files modified: app/api/products/admin/route.ts, app/api/products/admin/[id]/route.ts
+---
+Task ID: 4.2
+Agent: Main Field Monitor
+Task: Step 4.2 — Admin Products CRUD: Field Monitoring & Bug Fixing
+
+Work Log:
+- Read all 10 relevant files: API routes (4), admin pages (2), API clients (2), sovereign-client, categories route
+- Discovered APIs already exist: POST /api/products/admin, PUT /api/products/admin/[id], DELETE /api/products/admin/[id]
+- Discovered form page already exists at /admin/products/new with create+edit mode
+- Found and fixed 6 bugs (3 critical, 3 medium)
+
+BUG 4.2-1 (CRITICAL): Delete mutation showed success on API failure
+  - Only checked sovereign_halt, missed API-level failures (409 active bookings, 403 forbidden)
+  - Fix: Added `res?.success === false` check in deleteMutation.onSuccess
+  - File: app/admin/products/page.tsx
+
+BUG 4.2-2 (CRITICAL): Creating product without category crashed with Prisma error
+  - categoryId is required in schema (String without ?) but form sent null when no category selected
+  - Fix: Added API validation (400 if no category_id) + form validation + required asterisk on label
+  - Files: app/api/products/admin/route.ts, app/admin/products/new/page.tsx
+
+BUG 4.2-3 (CRITICAL): PUT route description_ar overwrote description field
+  - Both `body.description` and `body.description_ar` mapped to same `updateData.description`, with Arabic winning
+  - Fix: Changed to priority logic — prefer explicit description, fallback to description_ar
+  - File: app/api/products/admin/[id]/route.ts
+
+BUG 4.2-4 (MEDIUM): Query silently failed on API error — no error shown to user
+  - queryFn extracted res.data without checking for errors; null data became empty list
+  - Fix: Added sovereign_halt + success===false check in queryFn, isError state, empty state UI
+  - File: app/admin/products/page.tsx
+
+BUG 4.2-5 (MEDIUM): Form page used raw fetch() instead of adminApi/productsApi
+  - Lost sovereign error handling, retry logic, protocol compliance
+  - Fix: Replaced all 3 raw fetch() calls with adminApi.getProduct(), adminApi.createProduct(), adminApi.updateProduct(), productsApi.getCategories()
+  - File: app/admin/products/new/page.tsx
+
+BUG 4.2-6 (MEDIUM): Missing adminApi methods + 14 trailing slashes in productsApi
+  - Added getProduct() and updateProduct() to adminApi
+  - Removed duplicate deleteProduct from adminApi
+  - Removed 14 trailing slashes from productsApi endpoints
+  - Files: lib/api/admin.ts, lib/api/products.ts
+
+Lint: 0 errors, 2 pre-existing warnings
+Browser verification: Both /admin/products and /admin/products/new render correctly with auth guards
+
+Stage Summary:
+- Step 4.2 is COMPLETE — all 6 bugs fixed
+- Admin Products CRUD is fully functional: List + Search + Create + Edit + Delete
+- API routes already existed; bugs were in error handling, validation, and client-side API usage
+- All form API calls now go through sovereignClient (was raw fetch before)
+- Category is now properly required (API + form validation)
