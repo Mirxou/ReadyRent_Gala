@@ -33,7 +33,7 @@ export default function SocialPage() {
 
   const { data: trustData } = useQuery({
     queryKey: ['my-trust-score-social'],
-    queryFn: () => fetch('/api/social/score/me', { credentials: 'include' }).then(r => r.json()).then(d => d.data),
+    queryFn: () => socialApi.getSocialScore('me').then(r => r.data as Record<string, unknown>),
     enabled: isAuthenticated,
     staleTime: 10 * 60 * 1000,
   });

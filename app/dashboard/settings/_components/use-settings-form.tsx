@@ -7,7 +7,7 @@ import { defaultProfileData, defaultNotifSettings, defaultSecurityData, defaultA
 
 interface ProfileApiResponse {
   user: {
-    id?: number;
+    id?: string;
     username?: string;
     email?: string;
     first_name?: string;

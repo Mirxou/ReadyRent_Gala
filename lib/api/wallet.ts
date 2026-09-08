@@ -39,10 +39,10 @@ export const walletApi = {
   /**
    * Initiate a wallet deposit (actual route: /wallet/deposit/)
    */
-  topUp: (amount: number, methodId: string) =>
-    sovereignClient.post<{ success: boolean; transaction_id: string }>('/wallet/deposit/', {
+  topUp: (amount: number, methodId?: string) =>
+    sovereignClient.post<{ success: boolean; balance?: number; transaction_id: string }>('/wallet/deposit/', {
       amount,
-      payment_method_id: methodId,
+      ...(methodId ? { payment_method_id: methodId } : {}),
     }),
 
   /**
@@ -50,4 +50,22 @@ export const walletApi = {
    */
   getTransaction: (id: string) =>
     sovereignClient.get<Transaction>(`/wallet/transactions/?id=${id}`),
+
+  /**
+   * Initiate a wallet withdrawal
+   */
+  withdraw: (amount: number, method?: string) =>
+    sovereignClient.post<{ success: boolean; balance?: number; transaction_id?: string }>('/wallet/withdraw/', {
+      amount,
+      method,
+    }),
+
+  /**
+   * Initiate a wallet transfer to another user
+   */
+  transfer: (amount: number, recipientPhone: string) =>
+    sovereignClient.post<{ success: boolean; balance?: number; transaction_id?: string }>('/wallet/transfer/', {
+      amount,
+      recipient_phone: recipientPhone,
+    }),
 };

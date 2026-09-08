@@ -2765,3 +2765,319 @@ Stage Summary:
 - API routes already existed; bugs were in error handling, validation, and client-side API usage
 - All form API calls now go through sovereignClient (was raw fetch before)
 - Category is now properly required (API + form validation)
+---
+Task ID: SESSION-CONTEXT-SAVE
+Agent: Main Agent (Session Continuation)
+
+Task: Save all context from previous sessions to worklog before starting comprehensive audit
+
+Work Log:
+- Session restored with full context from Steps 3.4, 3.5, 4.1, 4.2
+- Step 4.2 (Admin Products CRUD) completed: 10 files reviewed, 6 bugs fixed
+- Key bugs fixed in Step 4.2:
+  - BUG 4.2-1 (CRITICAL): Delete mutation showed success on API failure
+  - BUG 4.2-2 (CRITICAL): Creating product without category crashed with Prisma error
+  - BUG 4.2-3 (CRITICAL): PUT route description_ar overwrote description
+  - BUG 4.2-4 (MEDIUM): Query silently failed on API error
+  - BUG 4.2-5 (MEDIUM): Form page used raw fetch() losing sovereign error handling
+  - BUG 4.2-6 (MEDIUM): Missing adminApi.getProduct()/updateProduct() + 14 trailing slashes
+- Known patterns:
+  - sovereignClient never throws, returns {status:'sovereign_halt'} on failure
+  - apiFetch never throws, returns {data:{error}, status:0, meta:{failed:true}} on failure
+  - Error detection: sovereign_halt OR res.success === false
+  - dignity_preserved is ALWAYS true — never use as error check
+  - All IDs are String cuid() — NEVER use Number() on IDs
+  - Sovereign-gold gradient: linear-gradient(to right, #C5A059, #D4AF37, #E8C547)
+- 6 frozen admin pages from Step 4.1 remain
+- 3 GitHub Dependabot vulnerabilities (2 high, 1 medium) unaddressed
+- User requested comprehensive project audit — now executing
+
+Stage Summary:
+- Full session context preserved in worklog
+- Audit phase initiated
+---
+
+Task ID: 5
+Agent: BUG-3 Fix Agent
+Task: Fix raw fetch() calls missing credentials:'include' → migrate to sovereignClient/apiFetch
+
+Work Log:
+
+**API Client Extensions (lib/api/):**
+
+- **lib/api/wallet.ts**: Added `withdraw(amount, method?)` and `transfer(amount, recipientPhone)` methods to `walletApi`. Updated `topUp()` to accept optional `methodId` and return `balance` in response type.
+
+- **lib/api/payments.ts**: Added `chargilyCheckout(data)` method to `paymentsApi` for Chargily hosted checkout flow.
+
+**File Fixes (8 files, 13 raw fetch calls eliminated):**
+
+1. **app/wallet/_components/deposit-tab.tsx** (2 fetch calls → walletApi)
+   - `fetch('/api/wallet/deposit')` → `walletApi.topUp(amount, dwMethod)`
+   - `fetch('/api/wallet/withdraw')` → `walletApi.withdraw(amount, dwMethod)`
+   - Sovereign error pattern: `res.status === 'sovereign_halt'` → show error toast
+
+2. **app/wallet/_components/transfer-tab.tsx** (1 fetch call → walletApi)
+   - `fetch('/api/wallet/transfer')` → `walletApi.transfer(amount, trRecipient)`
+   - Sovereign error pattern: `res.status === 'sovereign_halt'`
+
+3. **app/dashboard/settings/_components/use-settings-form.ts** (5 fetch calls → authApi + sovereignClient)
+   - `fetch('/api/auth/profile')` GET → `authApi.getProfile()`
+   - `fetch('/api/auth/profile')` PATCH (save profile) → `sovereignClient.patch('/auth/profile/', data)`
+   - `fetch('/api/auth/profile')` POST (notif prefs) → `sovereignClient.post('/auth/profile/', data)`
+   - `fetch('/api/auth/profile')` POST (change password) → `sovereignClient.post('/auth/change-password/', data)`
+   - `fetch('/api/auth/profile')` POST (appearance) → `sovereignClient.post('/auth/profile/', data)`
+   - All use sovereign error pattern `res.status === 'sovereign_halt'`
+
+4. **app/dashboard/wallet/page.tsx** (2 fetch calls → walletApi)
+   - `fetch('/api/wallet/deposit')` → `walletApi.topUp(val, '')`
+   - `fetch('/api/wallet/withdraw')` → `walletApi.withdraw(val)`
+
+5. **app/bookings/[id]/page.tsx** (2 fetch calls → bookingsApi + sovereignClient)
+   - **BUG FIX**: Wrong URL `/api/booking/${id}` → `bookingsApi.getDetail(id)` (correctly calls `/api/bookings/${id}/`)
+   - `fetch('/api/bookings/${id}/release-escrow')` → `sovereignClient.post('/bookings/${id}/release-escrow/')`
+
+6. **app/social/page.tsx** (1 fetch call → socialApi)
+   - `fetch('/api/social/score/me', { credentials: 'include' })` → `socialApi.getSocialScore('me')`
+   - apiFetch already includes `credentials: 'include'`
+
+7. **app/trust-score/page.tsx** (1 fetch call → socialApi)
+   - `fetch('/api/social/score/me')` (MISSING credentials!) → `socialApi.getSocialScore('me')`
+   - Critical fix: raw fetch had no `credentials: 'include'`, cookies wouldn't be sent
+
+8. **app/checkout/page.tsx** (1 fetch call → paymentsApi)
+   - `fetch('/api/payments/chargily/checkout')` → `paymentsApi.chargilyCheckout(data)`
+   - Sovereign error pattern with `res.status === 'sovereign_halt'`
+
+Stage Summary:
+- 13 raw `fetch()` calls eliminated across 8 files
+- All calls now go through sovereignClient (credentials:'include' guaranteed) or socialApi (apiFetch, also credentials:'include')
+- Fixed critical bug: `/api/booking/` → `/api/bookings/` (wrong endpoint URL)
+- Fixed critical bug: trust-score/page.tsx missing `credentials:'include'` entirely
+- Added 3 new API methods: walletApi.withdraw(), walletApi.transfer(), paymentsApi.chargilyCheckout()
+- Zero UI/layout changes — only data fetching logic modified
+
+---
+
+Task ID: 6
+Agent: Security Routes Auth+Rate Fix Agent
+Task: Fix critical security issues in API routes — add auth guards and rate limiting
+
+Work Log:
+
+**Fix 1: Auth guard on `/api/social/feed/route.ts`**
+- Added `NextRequest` import, `getSessionFromRequest` and `authRequiredResponse` from `@/lib/auth-server`
+- Changed `GET()` → `GET(request: NextRequest)` with session check
+- Unauthenticated users now get 401 instead of seeing all users' names/IDs/trust scores/vouch history
+
+**Fix 2: Auth guard on `/api/social/score/[userId]/route.ts`**
+- Added `getSessionFromRequest` and `authRequiredResponse` from `@/lib/auth-server`
+- Added session check before processing — unauthenticated users can no longer query arbitrary trust scores
+
+**Fix 3: Rate limiting on `/api/auth/reset-password/route.ts`**
+- Added `checkSmsRateLimit` and `getClientIp` from `@/lib/rate-limiter`
+- IP-based rate limit: 3 per hour (prevents password reset bombing)
+- Returns 429 with `RATE_LIMITED` code when exceeded
+
+**Fix 4: Rate limiting on `/api/payments/create/route.ts`**
+- Added `checkPaymentRateLimit` from `@/lib/rate-limiter`
+- User-based rate limit: 10 per minute (prevents payment flooding)
+- Returns 429 when exceeded
+
+**Fix 5: Rate limiting on `/api/auth/google/route.ts`**
+- Added `checkLoginRateLimit` and `getClientIp` from `@/lib/rate-limiter`
+- IP-based rate limit: 5 per 15 minutes (prevents OAuth abuse)
+- Returns 429 when exceeded
+
+**Fix 6: Rate limiting on `/api/subscriptions/subscribe/route.ts`**
+- Added `checkWalletRateLimit` from `@/lib/rate-limiter`
+- User-based rate limit: 20 per minute (prevents subscription wallet drain)
+- Returns 429 when exceeded
+
+**Fix 7: Rate limiting on `/api/insurance/purchase/route.ts`**
+- Added `checkWalletRateLimit` from `@/lib/rate-limiter`
+- User-based rate limit: 20 per minute (prevents insurance wallet drain)
+- Returns 429 when exceeded
+
+Stage Summary:
+- 2 routes secured with auth guards (social/feed, social/score/[userId])
+- 5 routes secured with rate limiting (reset-password, payments/create, auth/google, subscriptions/subscribe, insurance/purchase)
+- All rate-limited routes return consistent 429 response: `{ success: false, dignity_preserved: true, message_ar: 'طلبات كثيرة جداً', message_en: 'Too many requests', code: 'RATE_LIMITED' }`
+- Zero functional changes to existing logic — only security layers added
+
+---
+Task ID: 7
+Agent: DB Index Agent
+
+Task: Add critical database indexes to Prisma schema
+
+Work Log:
+
+- **User model**: Added `@@index([role])`, `@@index([isActive])`, `@@index([isVerified])` (3 indexes)
+- **Product model**: Added `@@index([categoryId])`, `@@index([vendorId])`, `@@index([isAvailable])`, `@@index([listingType])` (4 indexes)
+- **Booking model**: Added `@@index([userId])`, `@@index([productId])`, `@@index([status])` (3 indexes)
+- **Review model**: Added `@@index([productId])`, `@@index([status])` (2 indexes)
+- **CartItem model**: Added `@@index([userId])` (1 index)
+- **Wishlist model**: Added `@@index([userId])`, `@@index([productId])` (2 indexes)
+- **Notification model**: Added `@@index([userId])`, `@@index([isRead])` (2 indexes)
+- **Dispute model**: Added `@@index([bookingId])`, `@@index([status])` (2 indexes)
+- **Payment model**: Added `@@index([userId])`, `@@index([bookingId])`, `@@index([status])` (3 indexes)
+- **Transaction model**: Added `@@index([userId])`, `@@index([type])` (2 indexes)
+- **Session model**: Added `@@index([userId])` (1 index — existing `@@index([token])` preserved)
+
+- Total indexes added: 25 (from 1 existing → 26 total)
+- Schema validated with `bunx prisma format` — no errors
+- Database synced with `bun run db:push` — applied successfully
+- Prisma Client regenerated
+
+Stage Summary:
+- 25 new database indexes added across 11 models
+- All indexes placed before `@@map` lines as specified
+- Critical query paths (user lookups, product filtering, booking status, notification reads, etc.) now indexed
+- Zero schema breaking changes — indexes are additive only
+- Database is fully in sync
+
+---
+Task ID: 8
+Agent: Bug Fix Agent
+
+Task: Fix useQuery+admin+other bugs (Fix A through E)
+
+Work Log:
+
+- **Fix A: useQuery sovereign_halt error handling** (6 files)
+  - `app/dashboard/page.tsx` — Converted `authApi.me().then(res => res.data)` to async/await with sovereign_halt/SYSTEM_HALT/success===false checks that throw
+  - `app/dashboard/analytics/page.tsx` — Fixed both queries (authApi.me + bookingsApi.getAll)
+  - `app/dashboard/bookings/page.tsx` — Fixed bookingsApi.getAll query
+  - `app/dashboard/disputes/page.tsx` — Fixed disputesApi.listDisputes query (preserved `?? []` fallback)
+  - `app/dashboard/orders/page.tsx` — Fixed bookingsApi.getAll query
+  - `app/dashboard/wishlist/page.tsx` — Fixed productsApi.getWishlist query (preserved `?? []` fallback)
+  - Pattern: `async () => { const res = await api(); if (res.status === 'sovereign_halt' || res.code === 'SYSTEM_HALT') throw new Error(...); if (res.success === false) throw new Error(...); return res.data; }`
+
+- **Fix B: Admin pages missing role check** (4 files)
+  - `app/admin/shifts/page.tsx` — Added `useAuthStore` import, extracted `user`+`isAuthenticated`, added role gate `if (!isAuthenticated || (user?.role !== 'admin' && user?.role !== 'staff')) return <div>غير مصرح بالوصول</div>;`
+  - `app/admin/staff/page.tsx` — Same pattern
+  - `app/admin/performance-reviews/page.tsx` — Same pattern
+  - `app/admin/activity-logs/page.tsx` — Same pattern
+
+- **Fix C: Hardcoded dark color**
+  - `app/admin/dashboard/page.tsx` — Changed `bg-[#020617]` → `bg-background` (respects light/dark mode)
+
+- **Fix D: Settings page user.id type**
+  - `app/dashboard/settings/_components/use-settings-form.tsx` — Changed `id?: number` → `id?: string` in ProfileApiResponse interface (cuid IDs are strings)
+
+- **Fix E: parseInt() on cuid IDs**
+  - `app/admin/shifts/page.tsx` — Removed `parseInt()` for `formData.staff` and `formData.branch` (cuid strings, not numeric IDs)
+  - `app/admin/performance-reviews/page.tsx` — Removed `parseInt()` for `formData.staff` only (kept parseInt for rating fields which ARE numbers)
+
+---
+Task ID: COMPREHENSIVE-AUDIT
+Agent: Main Agent
+
+Task: Comprehensive project audit + all critical bug fixes
+
+## AUDIT SUMMARY
+
+### Project: STANDARD.Rent
+- **Framework**: Next.js 16 + Bun + TypeScript + Prisma (SQLite) + TailwindCSS
+- **Models**: 27 Prisma models, 93 API routes, ~60 page components
+- **Auth**: Custom HMAC-signed session tokens (not NextAuth)
+
+---
+
+## BUGS FIXED (This Session)
+
+### 🔴 CRITICAL (5 fixes)
+1. **BUG-AUDIT-1**: `dignity_preserved` used as error check (ALWAYS true → every success showed error toast) — Fixed in 5 files: orders/[id], products, disputes/[id], product-card
+2. **BUG-AUDIT-2**: `Number(bookingId)` on cuid string ID → NaN sent to API — Fixed in orders/[id]
+3. **BUG-AUDIT-3**: 13 raw `fetch()` calls without `credentials:'include'` → silent 401 failures — Migrated to sovereignClient/apiFetch across 8 files
+4. **BUG-AUDIT-4**: Social feed/score routes had no auth → public exposure of user data — Added auth guard to both routes
+5. **BUG-AUDIT-5**: Missing rate limiting on auth reset-password and payments/create → bombing/flooding attacks — Added rate limits to 5 routes
+
+### 🟠 HIGH (8 fixes)
+6. **BUG-AUDIT-6**: API client functions used `number` for cuid string IDs — Changed all to `string` in clients.ts + bookings.ts
+7. **BUG-AUDIT-7**: useQuery queryFn didn't throw on sovereign_halt → isError never set — Fixed in 6 dashboard pages
+8. **BUG-AUDIT-8**: Product card `id` typed as `number` → changed to `string`
+9. **BUG-AUDIT-9**: 4 admin pages missing role check → any user could access — Added role gate
+10. **BUG-AUDIT-10**: Wrong API URL `/api/booking/${id}` → `/api/bookings/${id}/` — Fixed via bookingsApi.getDetail()
+11. **BUG-AUDIT-11**: db.ts had no logging, no error handling, no graceful shutdown — Added all 3
+12. **BUG-AUDIT-12**: Only 1 DB index in entire schema → added 25 critical indexes across 11 models
+13. **BUG-AUDIT-13**: Hardcoded `bg-[#020617]` in admin dashboard → changed to `bg-background`
+
+### 🟡 MEDIUM (4 fixes)
+14. **BUG-AUDIT-14**: Settings user.id typed as `number` → changed to `string`
+15. **BUG-AUDIT-15**: `parseInt()` on cuid IDs in admin shifts/performance-reviews → removed
+16. **BUG-AUDIT-16**: walletApi missing withdraw/transfer methods → added
+17. **BUG-AUDIT-17**: paymentsApi missing chargilyCheckout → added
+
+---
+
+## REMAINING ISSUES (Not Fixed — Require Larger Refactor)
+
+### Security
+- **CSRF**: No CSRF token validation on mutations (mitigated by SameSite cookies + JSON-only body)
+- **BOLA**: Dispute history doesn't include vendor party check
+- **Mass Assignment**: Admin routes (users, branches, products) lack Zod schemas
+- **Zod unused**: reviews/create and verification/vote have schemas but don't use them
+
+### Database
+- **Wallet race condition**: Balance check+decrement not atomic (needs $transaction)
+- **Money unit inconsistency**: Some code uses cents, some uses dinars
+- **Missing relations**: RefundRecord, PayoutRecord, Payment have orphan FKs
+- **String enums**: 20+ fields should be Prisma enums
+- **No soft delete**: Financial records permanently deleted (compliance risk)
+- **Date strings**: Booking.startDate/endDate are String, not DateTime
+
+### Performance
+- **SQLite limitations**: Single-writer lock, no FTS, no CHECK constraints
+- **JSON-as-String**: 9 fields require full deserialization
+
+### Code Quality
+- **Remaining raw fetch()**: ~15 pages still use raw fetch (lower-priority pages)
+- **i18n**: All Arabic strings hardcoded inline
+- **seed.ts**: Uses create() not upsert() → fails on re-seed
+
+### Testing
+- **Zero test coverage**: Test infrastructure exists (Jest, Testing Library) but no tests written
+- **No CI/CD**: No GitHub Actions or deployment pipeline
+
+---
+
+## FILES MODIFIED (This Session)
+1. app/dashboard/orders/[id]/page.tsx
+2. app/dashboard/products/page.tsx
+3. app/dashboard/disputes/[id]/page.tsx
+4. components/product-card.tsx
+5. lib/api/clients.ts
+6. lib/api/bookings.ts
+7. lib/api/wallet.ts (methods added)
+8. lib/api/payments.ts (method added)
+9. app/wallet/_components/deposit-tab.tsx
+10. app/wallet/_components/transfer-tab.tsx
+11. app/dashboard/settings/_components/use-settings-form.tsx
+12. app/dashboard/wallet/page.tsx
+13. app/bookings/[id]/page.tsx
+14. app/social/page.tsx
+15. app/trust-score/page.tsx
+16. app/checkout/page.tsx
+17. app/api/social/feed/route.ts
+18. app/api/social/score/[userId]/route.ts
+19. app/api/auth/reset-password/route.ts
+20. app/api/payments/create/route.ts
+21. app/api/auth/google/route.ts
+22. app/api/subscriptions/subscribe/route.ts
+23. app/api/insurance/purchase/route.ts
+24. lib/db.ts
+25. prisma/schema.prisma (25 indexes added)
+26. app/dashboard/page.tsx
+27. app/dashboard/analytics/page.tsx
+28. app/dashboard/bookings/page.tsx
+29. app/dashboard/disputes/page.tsx
+30. app/dashboard/orders/page.tsx
+31. app/dashboard/wishlist/page.tsx
+32. app/admin/shifts/page.tsx
+33. app/admin/staff/page.tsx
+34. app/admin/performance-reviews/page.tsx
+35. app/admin/activity-logs/page.tsx
+36. app/admin/dashboard/page.tsx
+
+**Lint Result**: 0 errors, 2 warnings (pre-existing)

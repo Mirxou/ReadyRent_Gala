@@ -6,8 +6,19 @@
 import { NextResponse } from 'next/server';
 import { googleAuth } from '@/lib/social-auth';
 import { logger } from '@/lib/logger';
+import { checkLoginRateLimit, getClientIp } from '@/lib/rate-limiter';
 
 export async function POST(request: Request) {
+  // Rate limit: 5 per 15 minutes per IP (OAuth abuse prevention)
+  const ip = getClientIp(request);
+  const rateCheck = checkLoginRateLimit(ip);
+  if (!rateCheck.allowed) {
+    return NextResponse.json(
+      { success: false, dignity_preserved: true, message_ar: 'طلبات كثيرة جداً', message_en: 'Too many requests', code: 'RATE_LIMITED' },
+      { status: 429 }
+    );
+  }
+
   try {
     const body = await request.json();
     const { code } = body;

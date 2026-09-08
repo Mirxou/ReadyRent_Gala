@@ -28,6 +28,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { getAuthHeaders } from '@/lib/auth-helpers';
+import { useAuthStore } from '@/lib/store';
 
 interface Shift {
   id: number;
@@ -58,6 +59,7 @@ interface User {
 }
 
 export default function AdminShiftsPage() {
+  const { user, isAuthenticated } = useAuthStore();
   const [shifts, setShifts] = useState<Shift[]>([]);
   const [branches, setBranches] = useState<Branch[]>([]);
   const [staff, setStaff] = useState<User[]>([]);
@@ -171,8 +173,8 @@ export default function AdminShiftsPage() {
         },
         body: JSON.stringify({
           ...formData,
-          staff: parseInt(formData.staff),
-          branch: parseInt(formData.branch),
+          staff: formData.staff,
+          branch: formData.branch,
         }),
       });
 
@@ -207,6 +209,10 @@ export default function AdminShiftsPage() {
       console.error('Error updating shift:', error);
     }
   };
+
+  if (!isAuthenticated || (user?.role !== 'admin' && user?.role !== 'staff')) {
+    return <div className="flex items-center justify-center min-h-[60vh]"><p className="text-lg text-muted-foreground">غير مصرح بالوصول</p></div>;
+  }
 
   return (
     <div className="container mx-auto py-8">

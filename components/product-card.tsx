@@ -16,7 +16,7 @@ import { toast } from 'sonner';
 
 interface ProductCardProps {
   product: {
-    id: number;
+    id: string;
     name_ar: string;
     slug: string;
     price_per_day: number;
@@ -52,14 +52,14 @@ function ProductCardComponent({ product, priority = false }: ProductCardProps) {
   // Toggle wishlist mutation
   const toggleWishlistMutation = useMutation({
     mutationFn: () => productsApi.toggleWishlist(product.id),
-    onSuccess: (data: { dignity_preserved?: boolean; error?: string; message_ar?: string; data?: { in_wishlist?: boolean } }) => {
-      if (data?.dignity_preserved || data?.error) {
-        toast.error(data?.message_ar || data?.error || 'حدث خطأ أثناء تحديث قائمة المفضلة');
+    onSuccess: (data: Record<string, unknown>) => {
+      if (data?.status === 'sovereign_halt' || data?.code === 'SYSTEM_HALT' || data?.success === false || data?.error) {
+        toast.error((data?.message_ar as string) || (data?.error as string) || 'حدث خطأ أثناء تحديث قائمة المفضلة');
         return;
       }
       queryClient.invalidateQueries({ queryKey: ['wishlist-status', product.id] });
       queryClient.invalidateQueries({ queryKey: ['wishlist'] });
-      if (data.data?.in_wishlist) {
+      if ((data.data as Record<string, unknown>)?.in_wishlist) {
         toast.success('تم إضافة المنتج إلى قائمة المفضلة');
       } else {
         toast.success('تم إزالة المنتج من قائمة المفضلة');

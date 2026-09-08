@@ -56,9 +56,9 @@ export default function BookingDetailsPage() {
 
   const updateStatusMutation = useMutation({
     mutationFn: ({ bookingId, status }: { bookingId: string; status: string }) =>
-      bookingsApi.updateStatus(Number(bookingId), status),
+      bookingsApi.updateStatus(bookingId, status),
     onSuccess: (res: Record<string, unknown>) => {
-      if (res?.dignity_preserved || res?.error) {
+      if (res?.status === 'sovereign_halt' || res?.code === 'SYSTEM_HALT' || res?.success === false || res?.error) {
         toast.error((res?.message_ar as string) || (res?.error as string) || 'فشل في تحديث حالة الحجز');
         return;
       }
@@ -70,7 +70,7 @@ export default function BookingDetailsPage() {
   const createDisputeMutation = useMutation({
     mutationFn: (data: Record<string, unknown>) => disputesApi.initiateDispute(data as Parameters<typeof disputesApi.initiateDispute>[0]),
     onSuccess: (res: Record<string, unknown>) => {
-      if (res?.dignity_preserved || res?.error) {
+      if (res?.status === 'sovereign_halt' || res?.code === 'SYSTEM_HALT' || res?.success === false || res?.error) {
         toast.error((res?.message_ar as string) || (res?.error as string) || 'فشل في رفع النزاع');
         return;
       }

@@ -90,24 +90,22 @@ export default function CheckoutPage() {
     setApiPaymentError(null);
 
     try {
-      const response = await fetch('/api/payments/chargily/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          booking_id: bookingId,
-          amount: totalAmount,
-        }),
+      const result = await paymentsApi.chargilyCheckout({
+        booking_id: bookingId,
+        amount: totalAmount,
       });
 
-      const result = await response.json();
-
-      if (response.ok && result.success && result.data?.checkout_url) {
+      if (result.status === 'sovereign_halt') {
+        const msg = result.message_en || 'فشل إنشاء عملية الدفع';
+        toast.error(msg);
+        setApiPaymentError(msg);
+        setIsRedirecting(false);
+      } else if (result.data?.checkout_url) {
         // Redirect to Chargily hosted checkout (PCI-DSS compliant)
         window.location.href = result.data.checkout_url;
       } else {
-        const msg = result.message_ar || result.error || 'فشل إنشاء عملية الدفع';
-        toast.error(msg);
-        setApiPaymentError(msg);
+        toast.error('فشل إنشاء عملية الدفع');
+        setApiPaymentError('فشل إنشاء عملية الدفع');
         setIsRedirecting(false);
       }
     } catch {

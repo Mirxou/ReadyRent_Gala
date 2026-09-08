@@ -63,7 +63,7 @@ export default function AdminDashboardPage() {
   }
 
   return (
-    <div className="relative min-h-screen pb-20 bg-[#020617]">
+    <div className="relative min-h-screen pb-20 bg-background">
       <ParticleField />
 
       <motion.div

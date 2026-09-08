@@ -65,7 +65,7 @@ export const bookingsApi = {
     sovereignClient.delete<void>(`/bookings/waitlist/${id}/`),
 
   // Aliases used by pages
-  getById: (id: string | number) => 
+  getById: (id: string) => 
     sovereignClient.get<Booking>(`/bookings/${id}/`),
 
   // Agreements

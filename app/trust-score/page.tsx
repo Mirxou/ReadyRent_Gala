@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
 import { useAuthStore } from '@/lib/store';
+import { socialApi } from '@/lib/api';
 import { type TrustTier } from '@/lib/trust-score';
 
 /* ────────────────────────────────────────────
@@ -127,9 +128,7 @@ export default function TrustScorePage() {
   const { data, isLoading, isError } = useQuery<TrustScoreApiResponse>({
     queryKey: ['trust-score-me'],
     queryFn: () =>
-      fetch('/api/social/score/me')
-        .then((r) => r.json())
-        .then((d) => d.data),
+      socialApi.getSocialScore('me').then(r => r.data as TrustScoreApiResponse),
     enabled: isAuthenticated,
   });
 

@@ -4,11 +4,14 @@
 // Returns rich activity items with userName, action, type fields
 // ═══════════════════════════════════════════════════════════════
 
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { logger } from '@/lib/logger';
+import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const session = await getSessionFromRequest(request);
+  if (!session) return authRequiredResponse();
   try {
     // Fetch recent vouches with sender and receiver info (last 20)
     const vouches = await db.socialVouch.findMany({

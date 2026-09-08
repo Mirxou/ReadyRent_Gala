@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/select';
 import RoleSelector from '@/components/role-selector';
 import { getAuthHeaders } from '@/lib/auth-helpers';
+import { useAuthStore } from '@/lib/store';
 import {
   Dialog,
   DialogContent,
@@ -50,6 +51,7 @@ const ROLE_CHOICES: Record<string, string> = {
 };
 
 export default function AdminStaffPage() {
+  const { user, isAuthenticated } = useAuthStore();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -100,6 +102,10 @@ export default function AdminStaffPage() {
     setSelectedUser(user);
     setShowRoleDialog(true);
   };
+
+  if (!isAuthenticated || (user?.role !== 'admin' && user?.role !== 'staff')) {
+    return <div className="flex items-center justify-center min-h-[60vh]"><p className="text-lg text-muted-foreground">غير مصرح بالوصول</p></div>;
+  }
 
   return (
     <div className="container mx-auto py-8">

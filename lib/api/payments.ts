@@ -32,4 +32,8 @@ export const paymentsApi = {
   },
 
   getAll: () => sovereignClient.get<unknown>('/payments/payments'),
+
+  /** Create a Chargily checkout session (redirect to hosted payment page) */
+  chargilyCheckout: (data: { booking_id: string; amount: number }) =>
+    sovereignClient.post<{ checkout_url: string }>('/payments/chargily/checkout/', data),
 };

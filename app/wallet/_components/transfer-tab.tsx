@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { formatNumber } from '@/lib/utils';
+import { walletApi } from '@/lib/api';
 
 interface TransferTabProps {
   balance: number;
@@ -28,18 +29,12 @@ export function TransferTab({ balance, onBalanceUpdate }: TransferTabProps) {
     if (amount > balance) { toast.error('المبلغ يتجاوز الرصيد المتاح'); return; }
     setTrLoading(true);
     try {
-      const res = await fetch('/api/wallet/transfer', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount, recipient_phone: trRecipient }),
-      });
-      const json = await res.json();
-      if (res.ok) {
-        if (json?.data?.balance !== undefined) onBalanceUpdate(() => json.data.balance);
-        else onBalanceUpdate(prev => prev - amount);
-        toast.success('تم التحويل بنجاح');
-        setTrRecipient(''); setTrAmount(''); setTrNote('');
-      } else { toast.error(json?.error || 'فشل التحويل'); }
+      const res = await walletApi.transfer(amount, trRecipient);
+      if (res.status === 'sovereign_halt') { toast.error(res.message_en || 'فشل التحويل'); return; }
+      if (res.data?.balance !== undefined) onBalanceUpdate(() => res.data.balance!);
+      else onBalanceUpdate(prev => prev - amount);
+      toast.success('تم التحويل بنجاح');
+      setTrRecipient(''); setTrAmount(''); setTrNote('');
     } catch { toast.error('حدث خطأ أثناء التحويل'); }
     finally { setTrLoading(false); }
   }, [trRecipient, trAmount, balance, onBalanceUpdate]);

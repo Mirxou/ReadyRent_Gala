@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { authApi, sovereignClient } from '@/lib/api';
 import {
   defaultProfileData, defaultNotifSettings, defaultSecurityData, defaultAppearanceData
 } from './data';
@@ -48,9 +49,9 @@ export function useSettingsForm() {
   const { data: profileResponse, isLoading: isProfileLoading, isError } = useQuery<ProfileApiResponse>({
     queryKey: ['auth', 'profile'],
     queryFn: async () => {
-      const res = await fetch('/api/auth/profile');
-      if (!res.ok) throw new Error('فشل في تحميل الملف الشخصي');
-      return res.json();
+      const res = await authApi.getProfile();
+      if (res.status === 'sovereign_halt') throw new Error('فشل في تحميل الملف الشخصي');
+      return { user: res.data as ProfileApiResponse['user'] };
     },
   });
 
@@ -103,9 +104,9 @@ export function useSettingsForm() {
 
   const saveProfileMutation = useMutation({
     mutationFn: async (data: typeof defaultProfileData) => {
-      const res = await fetch('/api/auth/profile', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: data.name, email: data.email, phone: data.phone, city: data.city, bio: data.bio }) });
-      if (!res.ok) throw new Error('فشل');
-      return res.json();
+      const res = await sovereignClient.patch('/auth/profile/', { name: data.name, email: data.email, phone: data.phone, city: data.city, bio: data.bio });
+      if (res.status === 'sovereign_halt') throw new Error('فشل');
+      return res.data;
     },
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['auth', 'profile'] }); toast.success('تم حفظ التغييرات بنجاح'); },
     onError: () => { toast.error('فشل في حفظ التغييرات، يرجى المحاولة لاحقاً'); },
@@ -113,9 +114,9 @@ export function useSettingsForm() {
 
   const saveNotifsMutation = useMutation({
     mutationFn: async (prefs: typeof defaultNotifSettings) => {
-      const res = await fetch('/api/auth/profile', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ notification_preferences: prefs }) });
-      if (!res.ok) throw new Error('فشل');
-      return res.json();
+      const res = await sovereignClient.post('/auth/profile/', { notification_preferences: prefs });
+      if (res.status === 'sovereign_halt') throw new Error('فشل');
+      return res.data;
     },
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['auth', 'profile'] }); toast.success('تم حفظ تفضيلات الإشعارات بنجاح'); },
     onError: () => { toast.error('فشل في حفظ تفضيلات الإشعارات، يرجى المحاولة لاحقاً'); },
@@ -123,9 +124,9 @@ export function useSettingsForm() {
 
   const changePasswordMutation = useMutation({
     mutationFn: async (data: { currentPassword: string; newPassword: string }) => {
-      const res = await fetch('/api/auth/profile', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ current_password: data.currentPassword, new_password: data.newPassword }) });
-      if (!res.ok) throw new Error('فشل');
-      return res.json();
+      const res = await sovereignClient.post('/auth/change-password/', { current_password: data.currentPassword, new_password: data.newPassword });
+      if (res.status === 'sovereign_halt') throw new Error('فشل');
+      return res.data;
     },
     onSuccess: () => { setSecurityData(defaultSecurityData); toast.success('تم تغيير كلمة المرور بنجاح'); },
     onError: () => { toast.error('فشل في تغيير كلمة المرور، يرجى التحقق من كلمة المرور الحالية'); },
@@ -133,9 +134,9 @@ export function useSettingsForm() {
 
   const saveAppearanceMutation = useMutation({
     mutationFn: async (data: typeof defaultAppearanceData) => {
-      const res = await fetch('/api/auth/profile', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ theme: data.theme, language: data.language }) });
-      if (!res.ok) throw new Error('فشل');
-      return res.json();
+      const res = await sovereignClient.post('/auth/profile/', { theme: data.theme, language: data.language });
+      if (res.status === 'sovereign_halt') throw new Error('فشل');
+      return res.data;
     },
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['auth', 'profile'] }); toast.success('تم حفظ تفضيلات المظهر بنجاح'); },
     onError: () => { toast.error('فشل في حفظ تفضيلات المظهر، يرجى المحاولة لاحقاً'); },

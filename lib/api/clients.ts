@@ -36,7 +36,7 @@ export const depositApi = {
 export const analyticsApi = {
   trackEvent: (data: Record<string, unknown>) => apiFetch('analytics/events', { method: 'POST', body: data }),
   getEvents: (params?: Record<string, unknown>) => apiFetch('analytics/events', { params }),
-  getProductActivity: (productId: number) => apiFetch(`analytics/live/activity/${productId}`),
+  getProductActivity: (productId: string) => apiFetch(`analytics/live/activity/${productId}`),
   getUserBehavior: (params?: Record<string, unknown>) => apiFetch('analytics/daily/summary', { params }),
   getDailyAnalytics: (params?: { days?: number }) => apiFetch('analytics/daily/summary', { params }),
 };
@@ -106,16 +106,16 @@ export const hygieneApi = {
   getRecords: () => apiFetch('hygiene'),
   getLatestForProduct: (productId: string) => apiFetch(`hygiene/product/${productId}`),
   createRecord: (data: Record<string, unknown>) => apiFetch('hygiene', { method: 'POST', body: data }),
-  updateRecord: (id: number, data: Record<string, unknown>) => apiFetch(`hygiene/${id}`, { method: 'PUT', body: data }),
-  deleteRecord: (id: number) => apiFetch(`hygiene/${id}`, { method: 'DELETE' }),
+  updateRecord: (id: string, data: Record<string, unknown>) => apiFetch(`hygiene/${id}`, { method: 'PUT', body: data }),
+  deleteRecord: (id: string) => apiFetch(`hygiene/${id}`, { method: 'DELETE' }),
 };
 
 export const inventoryApi = {
   getItems: () => apiFetch('inventory'),
   getStockAlerts: () => apiFetch('inventory/alerts'),
   createItem: (data: Record<string, unknown>) => apiFetch('inventory', { method: 'POST', body: data }),
-  updateItem: (id: number, data: Record<string, unknown>) => apiFetch(`inventory/${id}`, { method: 'PUT', body: data }),
-  deleteItem: (id: number) => apiFetch(`inventory/${id}`, { method: 'DELETE' }),
+  updateItem: (id: string, data: Record<string, unknown>) => apiFetch(`inventory/${id}`, { method: 'PUT', body: data }),
+  deleteItem: (id: string) => apiFetch(`inventory/${id}`, { method: 'DELETE' }),
 };
 
 export const packagingApi = {
@@ -124,19 +124,19 @@ export const packagingApi = {
   getRules: () => apiFetch('packaging/rules'),
   getInstances: () => apiFetch('packaging/instances'),
   createType: (data: Record<string, unknown>) => apiFetch('packaging/types', { method: 'POST', body: data }),
-  updateType: (id: number, data: Record<string, unknown>) => apiFetch(`packaging/types/${id}`, { method: 'PUT', body: data }),
-  deleteType: (id: number) => apiFetch(`packaging/types/${id}`, { method: 'DELETE' }),
+  updateType: (id: string, data: Record<string, unknown>) => apiFetch(`packaging/types/${id}`, { method: 'PUT', body: data }),
+  deleteType: (id: string) => apiFetch(`packaging/types/${id}`, { method: 'DELETE' }),
   createMaterial: (data: Record<string, unknown>) => apiFetch('packaging/materials', { method: 'POST', body: data }),
-  updateMaterial: (id: number, data: Record<string, unknown>) => apiFetch(`packaging/materials/${id}`, { method: 'PUT', body: data }),
-  deleteMaterial: (id: number) => apiFetch(`packaging/materials/${id}`, { method: 'DELETE' }),
+  updateMaterial: (id: string, data: Record<string, unknown>) => apiFetch(`packaging/materials/${id}`, { method: 'PUT', body: data }),
+  deleteMaterial: (id: string) => apiFetch(`packaging/materials/${id}`, { method: 'DELETE' }),
   createRule: (data: Record<string, unknown>) => apiFetch('packaging/rules', { method: 'POST', body: data }),
-  updateRule: (id: number, data: Record<string, unknown>) => apiFetch(`packaging/rules/${id}`, { method: 'PUT', body: data }),
-  deleteRule: (id: number) => apiFetch(`packaging/rules/${id}`, { method: 'DELETE' }),
+  updateRule: (id: string, data: Record<string, unknown>) => apiFetch(`packaging/rules/${id}`, { method: 'PUT', body: data }),
+  deleteRule: (id: string) => apiFetch(`packaging/rules/${id}`, { method: 'DELETE' }),
 };
 
 export const maintenanceApi = {
   getRecords: () => apiFetch('maintenance'),
   createRecord: (data: Record<string, unknown>) => apiFetch('maintenance', { method: 'POST', body: data }),
-  updateRecord: (id: number, data: Record<string, unknown>) => apiFetch(`maintenance/${id}`, { method: 'PUT', body: data }),
-  deleteRecord: (id: number) => apiFetch(`maintenance/${id}`, { method: 'DELETE' }),
+  updateRecord: (id: string, data: Record<string, unknown>) => apiFetch(`maintenance/${id}`, { method: 'PUT', body: data }),
+  deleteRecord: (id: string) => apiFetch(`maintenance/${id}`, { method: 'DELETE' }),
 };

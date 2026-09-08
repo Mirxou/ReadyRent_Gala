@@ -7,11 +7,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { logger } from '@/lib/logger';
 import { calculateTrustBreakdown } from '@/lib/trust-score';
+import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ userId: string }> }
 ) {
+  const session = await getSessionFromRequest(request);
+  if (!session) return authRequiredResponse();
+
   try {
     const { userId } = await params;
 

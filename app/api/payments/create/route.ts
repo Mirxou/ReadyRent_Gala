@@ -3,6 +3,7 @@ import { db } from '@/lib/db';
 import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
 import { createPaymentSchema, validateBody } from '@/lib/validators';
 import { logger } from '@/lib/logger';
+import { checkPaymentRateLimit } from '@/lib/rate-limiter';
 
 // ═══════════════════════════════════════════════════════════════
 // POST /api/payments/create — Create a payment record
@@ -11,6 +12,15 @@ export async function POST(request: Request) {
   try {
   const session = await getSessionFromRequest(request);
   if (!session) return authRequiredResponse();
+
+  // Rate limit: 10 per minute per userId (payment flooding prevention)
+  const rateCheck = checkPaymentRateLimit(session.userId);
+  if (!rateCheck.allowed) {
+    return NextResponse.json(
+      { success: false, dignity_preserved: true, message_ar: 'طلبات كثيرة جداً', message_en: 'Too many requests', code: 'RATE_LIMITED' },
+      { status: 429 }
+    );
+  }
 
   const body = await request.json();
 

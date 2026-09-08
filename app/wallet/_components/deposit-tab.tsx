@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { formatNumber } from '@/lib/utils';
+import { walletApi } from '@/lib/api';
 import type { DepositMode } from './types';
 
 interface DepositTabProps {
@@ -41,14 +42,12 @@ export function DepositTab({ balance, onBalanceUpdate }: DepositTabProps) {
     if (!amount || amount <= 0) { toast.error('يرجى إدخال مبلغ صحيح'); return; }
     setDwLoading(true);
     try {
-      const res = await fetch('/api/wallet/deposit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount, method: dwMethod }) });
-      const json = await res.json();
-      if (res.ok) {
-        if (json?.data?.balance !== undefined) onBalanceUpdate(() => json.data.balance);
-        else onBalanceUpdate(prev => prev + amount);
-        toast.success('تم الإيداع بنجاح');
-        resetForm();
-      } else { toast.error(json?.error || 'فشل الإيداع'); }
+      const res = await walletApi.topUp(amount, dwMethod);
+      if (res.status === 'sovereign_halt') { toast.error(res.message_en || 'فشل الإيداع'); return; }
+      if (res.data?.balance !== undefined) onBalanceUpdate(() => res.data.balance!);
+      else onBalanceUpdate(prev => prev + amount);
+      toast.success('تم الإيداع بنجاح');
+      resetForm();
     } catch { toast.error('حدث خطأ أثناء الإيداع'); }
     finally { setDwLoading(false); }
   }, [dwAmount, dwMethod, resetForm, onBalanceUpdate]);
@@ -59,14 +58,12 @@ export function DepositTab({ balance, onBalanceUpdate }: DepositTabProps) {
     if (amount > balance) { toast.error('المبلغ يتجاوز الرصيد المتاح'); return; }
     setDwLoading(true);
     try {
-      const res = await fetch('/api/wallet/withdraw', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount, method: dwMethod }) });
-      const json = await res.json();
-      if (res.ok) {
-        if (json?.data?.balance !== undefined) onBalanceUpdate(() => json.data.balance);
-        else onBalanceUpdate(prev => prev - amount);
-        toast.success('تم السحب بنجاح');
-        resetForm();
-      } else { toast.error(json?.error || 'فشل السحب'); }
+      const res = await walletApi.withdraw(amount, dwMethod);
+      if (res.status === 'sovereign_halt') { toast.error(res.message_en || 'فشل السحب'); return; }
+      if (res.data?.balance !== undefined) onBalanceUpdate(() => res.data.balance!);
+      else onBalanceUpdate(prev => prev - amount);
+      toast.success('تم السحب بنجاح');
+      resetForm();
     } catch { toast.error('حدث خطأ أثناء السحب'); }
     finally { setDwLoading(false); }
   }, [dwAmount, balance, dwMethod, resetForm, onBalanceUpdate]);

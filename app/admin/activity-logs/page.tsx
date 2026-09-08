@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { getAuthHeaders } from '@/lib/auth-helpers';
+import { useAuthStore } from '@/lib/store';
 import {
   Table,
   TableBody,
@@ -46,6 +47,7 @@ const ACTION_LABELS: Record<string, string> = {
 };
 
 export default function AdminActivityLogsPage() {
+  const { user, isAuthenticated } = useAuthStore();
   const [logs, setLogs] = useState<ActivityLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -101,6 +103,10 @@ export default function AdminActivityLogsPage() {
   });
 
   const uniqueModels = Array.from(new Set(logs.map((log) => log.model_name)));
+
+  if (!isAuthenticated || (user?.role !== 'admin' && user?.role !== 'staff')) {
+    return <div className="flex items-center justify-center min-h-[60vh]"><p className="text-lg text-muted-foreground">غير مصرح بالوصول</p></div>;
+  }
 
   return (
     <div className="container mx-auto py-8">

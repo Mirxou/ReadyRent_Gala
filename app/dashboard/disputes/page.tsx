@@ -24,7 +24,14 @@ export default function DisputesPage() {
 
   const { data: disputes = [], isLoading } = useQuery({
     queryKey: ['disputes'],
-    queryFn: () => disputesApi.listDisputes().then(res => res.data ?? []),
+    queryFn: async () => {
+      const res = await disputesApi.listDisputes();
+      if (res.status === 'sovereign_halt' || res.code === 'SYSTEM_HALT') {
+        throw new Error(res.message_en || 'Connection error');
+      }
+      if (res.success === false) throw new Error(res.message_en || 'Error');
+      return res.data ?? [];
+    },
     enabled: isAuthenticated,
   });
 

@@ -51,7 +51,14 @@ export default function DashboardPage() {
   // Sync User Data
   const { data: me } = useQuery({
     queryKey: ['me'],
-    queryFn: () => authApi.me().then(res => res.data),
+    queryFn: async () => {
+      const res = await authApi.me();
+      if (res.status === 'sovereign_halt' || res.code === 'SYSTEM_HALT') {
+        throw new Error(res.message_en || 'Connection error');
+      }
+      if (res.success === false) throw new Error(res.message_en || 'Error');
+      return res.data;
+    },
     enabled: isAuthenticated,
   });
 

@@ -29,6 +29,7 @@ import {
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { getAuthHeaders } from '@/lib/auth-helpers';
+import { useAuthStore } from '@/lib/store';
 
 interface PerformanceReview {
   id: number;
@@ -69,6 +70,7 @@ const RATING_LABELS: Record<number, string> = {
 };
 
 export default function AdminPerformanceReviewsPage() {
+  const { user, isAuthenticated } = useAuthStore();
   const [reviews, setReviews] = useState<PerformanceReview[]>([]);
   const [staff, setStaff] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -182,7 +184,7 @@ export default function AdminPerformanceReviewsPage() {
         },
         body: JSON.stringify({
           ...formData,
-          staff: parseInt(formData.staff),
+          staff: formData.staff,
           overall_rating: parseInt(formData.overall_rating),
           punctuality_rating: parseInt(formData.punctuality_rating),
           quality_rating: parseInt(formData.quality_rating),
@@ -202,6 +204,10 @@ export default function AdminPerformanceReviewsPage() {
       alert('حدث خطأ أثناء حفظ التقييم');
     }
   };
+
+  if (!isAuthenticated || (user?.role !== 'admin' && user?.role !== 'staff')) {
+    return <div className="flex items-center justify-center min-h-[60vh]"><p className="text-lg text-muted-foreground">غير مصرح بالوصول</p></div>;
+  }
 
   return (
     <div className="container mx-auto py-8">

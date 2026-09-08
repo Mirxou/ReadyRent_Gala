@@ -155,7 +155,7 @@ export default function DisputeDetailPage() {
     mutationFn: (text: string) =>
       disputesApi.createMessage(disputeId as string, text),
     onSuccess: (res: Record<string, unknown>) => {
-      if (res?.dignity_preserved || res?.error) {
+      if (res?.status === 'sovereign_halt' || res?.code === 'SYSTEM_HALT' || res?.success === false || res?.error) {
         toast.error((res?.message_ar as string) || (res?.error as string) || 'فشل إرسال الرسالة');
         return;
       }

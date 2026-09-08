@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
 import { logger } from '@/lib/logger';
+import { checkWalletRateLimit } from '@/lib/rate-limiter';
 
 // ═══════════════════════════════════════════════════════════════
 // POST /api/subscriptions/subscribe — Subscribe to a plan
@@ -9,6 +10,15 @@ import { logger } from '@/lib/logger';
 export async function POST(request: Request) {
   const session = await getSessionFromRequest(request);
   if (!session) return authRequiredResponse();
+
+  // Rate limit: 20 per minute per userId (wallet drain prevention)
+  const rateCheck = checkWalletRateLimit(session.userId);
+  if (!rateCheck.allowed) {
+    return NextResponse.json(
+      { success: false, dignity_preserved: true, message_ar: 'طلبات كثيرة جداً', message_en: 'Too many requests', code: 'RATE_LIMITED' },
+      { status: 429 }
+    );
+  }
 
   try {
     const body = await request.json();

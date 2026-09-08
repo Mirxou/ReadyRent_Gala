@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
+import { walletApi } from '@/lib/api';
 import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
 import { Badge } from '@/components/ui/badge';
 import { formatNumber } from '@/lib/utils';
@@ -52,18 +53,13 @@ export default function WalletPage() {
     if (val > 100000) { toast.error('الحد الأقصى للعملية الواحدة: 100,000 دج'); return; }
     setIsProcessing(true);
     try {
-      const res = await fetch('/api/wallet/deposit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: val }),
-      });
-      const json = await res.json();
-      if (json.success) {
+      const res = await walletApi.topUp(val, '');
+      if (res.status === 'sovereign_halt') {
+        toast.error(res.message_en || 'فشلت العملية');
+      } else {
         toast.success(`تم شحن ${formatNumber(val)} دج بنجاح`);
         setDepositOpen(false);
         invalidateWalletQueries();
-      } else {
-        toast.error(json.message_en || 'فشلت العملية');
       }
     } catch {
       toast.error('حدث خطأ في الاتصال');
@@ -76,18 +72,13 @@ export default function WalletPage() {
     if (val > balance) { toast.error('رصيد غير كافٍ'); return; }
     setIsProcessing(true);
     try {
-      const res = await fetch('/api/wallet/withdraw', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: val }),
-      });
-      const json = await res.json();
-      if (json.success) {
+      const res = await walletApi.withdraw(val);
+      if (res.status === 'sovereign_halt') {
+        toast.error(res.message_en === 'Insufficient wallet balance' ? 'رصيد غير كافٍ' : (res.message_en || 'فشلت العملية'));
+      } else {
         toast.success(`تم سحب ${formatNumber(val)} دج بنجاح`);
         setWithdrawOpen(false);
         invalidateWalletQueries();
-      } else {
-        toast.error(json.message_en === 'Insufficient wallet balance' ? 'رصيد غير كافٍ' : (json.message_en || 'فشلت العملية'));
       }
     } catch {
       toast.error('حدث خطأ في الاتصال');

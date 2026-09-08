@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { hashPassword } from '@/lib/auth-server';
 import { logger } from '@/lib/logger';
-import { readValidatedBody } from '@/lib/rate-limiter';
+import { readValidatedBody, checkSmsRateLimit, getClientIp } from '@/lib/rate-limiter';
 
 // ═══════════════════════════════════════════════════════════════
 // POST /api/auth/reset-password — Reset password using a token
@@ -10,6 +10,16 @@ import { readValidatedBody } from '@/lib/rate-limiter';
 // ═══════════════════════════════════════════════════════════════
 
 export async function POST(request: Request) {
+  // Rate limit: 3 per hour per IP (password reset bombing prevention)
+  const ip = getClientIp(request);
+  const rateCheck = checkSmsRateLimit(ip);
+  if (!rateCheck.allowed) {
+    return NextResponse.json(
+      { success: false, dignity_preserved: true, message_ar: 'طلبات كثيرة جداً', message_en: 'Too many requests', code: 'RATE_LIMITED' },
+      { status: 429 }
+    );
+  }
+
   try {
     // Body size limit (1KB is plenty for token + 2 passwords)
     const bodyResult = await readValidatedBody(request, 1024);

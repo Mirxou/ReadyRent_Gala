@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAuthStore } from '@/lib/store';
+import { bookingsApi, sovereignClient } from '@/lib/api';
 
 import { toast } from 'sonner';
 import {
@@ -95,10 +96,9 @@ export default function BookingDetailPage() {
       return;
     }
     if (!id) return;
-    fetch(`/api/bookings/${id}`, { credentials: 'include' })
-      .then((r) => r.json())
+    bookingsApi.getDetail(id)
       .then((res) => {
-        if (res.success && res.data) setBooking(res.data);
+        if (res.status !== 'sovereign_halt' && res.data) setBooking(res.data as BookingDetail);
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -115,12 +115,8 @@ export default function BookingDetailPage() {
     if (!id || releasing) return;
     setReleasing(true);
     try {
-      const res = await fetch(`/api/bookings/${id}/release-escrow`, {
-        method: 'POST',
-        credentials: 'include',
-      });
-      const data = await res.json();
-      if (data.success) {
+      const res = await sovereignClient.post(`/bookings/${id}/release-escrow/`);
+      if (res.status !== 'sovereign_halt') {
         setBooking((prev) =>
           prev
             ? { ...prev, status: 'completed', escrow_status: 'released' }

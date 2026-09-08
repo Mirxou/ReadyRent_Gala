@@ -25,59 +25,62 @@ datasource db {
 
 // ──── User & Auth ────
 model User {
-  id              String   @id @default(cuid())
-  email           String   @unique
-  username        String?
-  passwordHash    String   @map("password_hash")
-  firstName       String?  @map("first_name")
-  lastName        String?  @map("last_name")
-  phone           String?
-  role            String   @default("customer") // customer, vendor, admin, staff
-  trustScore      Int      @default(0) @map("trust_score")
-  walletBalance   Int      @default(0) @map("wallet_balance")
-  isVerified      Boolean  @default(false) @map("is_verified")
-  is2FaEnabled    Boolean  @default(false) @map("is_2fa_enabled")
-  twoFaSecret     String?  @map("two_fa_secret")
-  isActive        Boolean  @default(true) @map("is_active")
-  failedLoginAttempts  Int      @default(0) @map("failed_login_attempts")
-  lockedUntil           DateTime? @map("locked_until")
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
+  id                  String    @id @default(cuid())
+  email               String    @unique
+  username            String?
+  passwordHash        String    @map("password_hash")
+  firstName           String?   @map("first_name")
+  lastName            String?   @map("last_name")
+  phone               String?
+  role                String    @default("customer") // customer, vendor, admin, staff
+  trustScore          Int       @default(0) @map("trust_score")
+  walletBalance       Int       @default(0) @map("wallet_balance")
+  isVerified          Boolean   @default(false) @map("is_verified")
+  is2FaEnabled        Boolean   @default(false) @map("is_2fa_enabled")
+  twoFaSecret         String?   @map("two_fa_secret")
+  isActive            Boolean   @default(true) @map("is_active")
+  failedLoginAttempts Int       @default(0) @map("failed_login_attempts")
+  lockedUntil         DateTime? @map("locked_until")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
 
   // Relations
-  addresses       Address[]
-  bookings        Booking[]
-  reviews         Review[]
-  wishlistItems   Wishlist[]
-  cartItems       CartItem[]
-  waitlistItems   WaitlistItem[]
-  notifications   Notification[]
-  disputes        Dispute[]
-  transactions    Transaction[]
-  subscriptions   UserSubscription[]
-  returnRequests  ReturnRequest[]
-  activityLogs    ActivityLog[]
-  sentVouches     SocialVouch[] @relation("VouchSender")
-  receivedVouches SocialVouch[] @relation("VouchReceiver")
+  addresses            Address[]
+  bookings             Booking[]
+  reviews              Review[]
+  wishlistItems        Wishlist[]
+  cartItems            CartItem[]
+  waitlistItems        WaitlistItem[]
+  notifications        Notification[]
+  disputes             Dispute[]
+  transactions         Transaction[]
+  subscriptions        UserSubscription[]
+  returnRequests       ReturnRequest[]
+  activityLogs         ActivityLog[]
+  sentVouches          SocialVouch[]         @relation("VouchSender")
+  receivedVouches      SocialVouch[]         @relation("VouchReceiver")
   identityVerification IdentityVerification?
-  verificationVotes VerificationVote[] @relation("VerificationVoter")
-  sessions         Session[]
-  vendors          Vendor[]
+  verificationVotes    VerificationVote[]    @relation("VerificationVoter")
+  sessions             Session[]
+  vendors              Vendor[]
 
+  @@index([role])
+  @@index([isActive])
+  @@index([isVerified])
   @@map("users")
 }
 
 // ──── Category ────
 model Category {
-  id          String  @id @default(cuid())
-  nameAr      String  @map("name_ar")
-  nameEn      String? @map("name_en")
-  slug        String  @unique
-  icon        String?
-  productCount Int    @default(0) @map("product_count")
-  createdAt   DateTime @default(now()) @map("created_at")
+  id           String   @id @default(cuid())
+  nameAr       String   @map("name_ar")
+  nameEn       String?  @map("name_en")
+  slug         String   @unique
+  icon         String?
+  productCount Int      @default(0) @map("product_count")
+  createdAt    DateTime @default(now()) @map("created_at")
 
-  products    Product[]
+  products Product[]
 
   @@map("categories")
 }
@@ -107,8 +110,8 @@ model Product {
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
 
-  category      Category @relation(fields: [categoryId], references: [id])
-  vendor        Vendor?  @relation(fields: [vendorId], references: [id])
+  category      Category       @relation(fields: [categoryId], references: [id])
+  vendor        Vendor?        @relation(fields: [vendorId], references: [id])
   reviews       Review[]
   bookings      Booking[]
   wishlistItems Wishlist[]
@@ -116,35 +119,39 @@ model Product {
   waitlistItems WaitlistItem[]
   bundleItems   BundleItem[]
 
+  @@index([categoryId])
+  @@index([vendorId])
+  @@index([isAvailable])
+  @@index([listingType])
   @@map("products")
 }
 
 // ──── Vendor ────
 model Vendor {
-  id            String   @id @default(cuid())
-  name          String
-  nameAr        String   @map("name_ar")
-  description   String?
-  descriptionAr String?  @map("description_ar")
-  location      String?
-  city          String?
-  rating        Float    @default(0)
-  trustScore    Int      @default(0) @map("trust_score")
-  productsCount Int      @default(0) @map("products_count")
-  totalSales    Int      @default(0) @map("total_sales")
-  avatar        String?
-  logo          String?
-  isVerified    Boolean  @default(false) @map("is_verified")
-  isActive      Boolean  @default(true) @map("is_active")
-  website       String?
-  commissionRate Float?  @map("commission_rate")
-  joinedDate    String?  @map("joined_date")
-  userId        String?  @map("user_id")
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @updatedAt @map("updated_at")
+  id             String   @id @default(cuid())
+  name           String
+  nameAr         String   @map("name_ar")
+  description    String?
+  descriptionAr  String?  @map("description_ar")
+  location       String?
+  city           String?
+  rating         Float    @default(0)
+  trustScore     Int      @default(0) @map("trust_score")
+  productsCount  Int      @default(0) @map("products_count")
+  totalSales     Int      @default(0) @map("total_sales")
+  avatar         String?
+  logo           String?
+  isVerified     Boolean  @default(false) @map("is_verified")
+  isActive       Boolean  @default(true) @map("is_active")
+  website        String?
+  commissionRate Float?   @map("commission_rate")
+  joinedDate     String?  @map("joined_date")
+  userId         String?  @map("user_id")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
 
-  products      Product[]
-  user          User?    @relation(fields: [userId], references: [id])
+  products Product[]
+  user     User?     @relation(fields: [userId], references: [id])
 
   @@map("vendors")
 }
@@ -173,103 +180,109 @@ model Artisan {
 
 // ──── Bundle ────
 model Bundle {
-  id                String   @id @default(cuid())
-  name              String
-  nameAr            String   @map("name_ar")
-  descriptionAr     String?  @map("description_ar")
-  discountPercentage Int     @default(0) @map("discount_percentage")
-  totalPrice        Int      @default(0) @map("total_price")
-  image             String?
-  includes          String   @default("[]") // JSON array
-  validDays         Int      @default(1) @map("valid_days")
-  createdAt         DateTime @default(now()) @map("created_at")
+  id                 String   @id @default(cuid())
+  name               String
+  nameAr             String   @map("name_ar")
+  descriptionAr      String?  @map("description_ar")
+  discountPercentage Int      @default(0) @map("discount_percentage")
+  totalPrice         Int      @default(0) @map("total_price")
+  image              String?
+  includes           String   @default("[]") // JSON array
+  validDays          Int      @default(1) @map("valid_days")
+  createdAt          DateTime @default(now()) @map("created_at")
 
-  items             BundleItem[]
+  items BundleItem[]
 
   @@map("bundles")
 }
 
 model BundleItem {
-  id        String  @id @default(cuid())
-  bundleId  String  @map("bundle_id")
-  productId String  @map("product_id")
-  order     Int     @default(0)
+  id        String @id @default(cuid())
+  bundleId  String @map("bundle_id")
+  productId String @map("product_id")
+  order     Int    @default(0)
 
-  bundle    Bundle  @relation(fields: [bundleId], references: [id], onDelete: Cascade)
-  product   Product @relation(fields: [productId], references: [id])
+  bundle  Bundle  @relation(fields: [bundleId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
 
   @@map("bundle_items")
 }
 
 // ──── Review ────
 model Review {
-  id          String   @id @default(cuid())
-  userId      String   @map("user_id")
-  bookingId   String?  @map("booking_id")
-  productId   String   @map("product_id")
-  reviewerName String  @map("reviewer_name")
-  rating      Int
-  comment     String?
-  isVerified  Boolean  @default(false) @map("is_verified")
-  status      String   @default("pending") // pending, approved, rejected
-  createdAt   DateTime @default(now()) @map("created_at")
+  id           String   @id @default(cuid())
+  userId       String   @map("user_id")
+  bookingId    String?  @map("booking_id")
+  productId    String   @map("product_id")
+  reviewerName String   @map("reviewer_name")
+  rating       Int
+  comment      String?
+  isVerified   Boolean  @default(false) @map("is_verified")
+  status       String   @default("pending") // pending, approved, rejected
+  createdAt    DateTime @default(now()) @map("created_at")
 
-  user        User     @relation(fields: [userId], references: [id])
-  booking     Booking? @relation(fields: [bookingId], references: [id])
-  product     Product  @relation(fields: [productId], references: [id])
+  user    User     @relation(fields: [userId], references: [id])
+  booking Booking? @relation(fields: [bookingId], references: [id])
+  product Product  @relation(fields: [productId], references: [id])
 
+  @@index([productId])
+  @@index([status])
   @@map("reviews")
 }
 
 // ──── Booking ────
 model Booking {
-  id              String   @id @default(cuid())
-  userId          String?  @map("user_id")
-  productId       String?  @map("product_id")
-  productName     String?  @map("product_name")
-  productImage    String?  @map("product_image")
-  startDate       String?  @map("start_date")
-  endDate         String?  @map("end_date")
-  totalPrice      Int      @default(0) @map("total_price")
-  status          String   @default("pending") // pending, confirmed, active, completed, cancelled
-  escrowStatus    String   @default("none") @map("escrow_status") // none, held, released, refunded
-  hasInsurance    Boolean  @default(false) @map("has_insurance")
-  extraServices   String   @default("[]") @map("extra_services") // JSON
-  quantity        Int      @default(1)
-  size            String?
-  color           String?
-  notes           String?
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
+  id            String   @id @default(cuid())
+  userId        String?  @map("user_id")
+  productId     String?  @map("product_id")
+  productName   String?  @map("product_name")
+  productImage  String?  @map("product_image")
+  startDate     String?  @map("start_date")
+  endDate       String?  @map("end_date")
+  totalPrice    Int      @default(0) @map("total_price")
+  status        String   @default("pending") // pending, confirmed, active, completed, cancelled
+  escrowStatus  String   @default("none") @map("escrow_status") // none, held, released, refunded
+  hasInsurance  Boolean  @default(false) @map("has_insurance")
+  extraServices String   @default("[]") @map("extra_services") // JSON
+  quantity      Int      @default(1)
+  size          String?
+  color         String?
+  notes         String?
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
 
-  user            User?    @relation(fields: [userId], references: [id])
-  product         Product? @relation(fields: [productId], references: [id])
-  reviews         Review[]
-  contracts       Contract[]
-  returnRequests  ReturnRequest[]
-  disputes        Dispute[]
+  user           User?           @relation(fields: [userId], references: [id])
+  product        Product?        @relation(fields: [productId], references: [id])
+  reviews        Review[]
+  contracts      Contract[]
+  returnRequests ReturnRequest[]
+  disputes       Dispute[]
 
+  @@index([userId])
+  @@index([productId])
+  @@index([status])
   @@map("bookings")
 }
 
 // ──── Cart Item ────
 model CartItem {
-  id            String   @id @default(cuid())
-  userId        String   @map("user_id")
-  productId     String   @map("product_id")
-  productName   String?  @map("product_name")
-  productImage  String?  @map("product_image")
-  pricePerDay   Int      @default(0) @map("price_per_day")
-  startDate     String?  @map("start_date")
-  endDate       String?  @map("end_date")
-  quantity      Int      @default(1)
-  size          String?
-  color         String?
-  addedAt       DateTime @default(now()) @map("added_at")
+  id           String   @id @default(cuid())
+  userId       String   @map("user_id")
+  productId    String   @map("product_id")
+  productName  String?  @map("product_name")
+  productImage String?  @map("product_image")
+  pricePerDay  Int      @default(0) @map("price_per_day")
+  startDate    String?  @map("start_date")
+  endDate      String?  @map("end_date")
+  quantity     Int      @default(1)
+  size         String?
+  color        String?
+  addedAt      DateTime @default(now()) @map("added_at")
 
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  product       Product  @relation(fields: [productId], references: [id])
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
 
+  @@index([userId])
   @@map("cart_items")
 }
 
@@ -280,27 +293,29 @@ model Wishlist {
   productId String   @map("product_id")
   createdAt DateTime @default(now()) @map("created_at")
 
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@unique([userId, productId])
+  @@index([userId])
+  @@index([productId])
   @@map("wishlist")
 }
 
 // ──── Waitlist ────
 model WaitlistItem {
-  id              String   @id @default(cuid())
-  userId          String   @map("user_id")
-  productId       String   @map("product_id")
-  productName     String?  @map("product_name")
-  productImage    String?  @map("product_image")
-  pricePerDay     Int      @default(0) @map("price_per_day")
-  preferredStart  String?  @map("preferred_start")
-  status          String   @default("waiting") // waiting, notified, fulfilled, expired
-  createdAt       DateTime @default(now()) @map("created_at")
+  id             String   @id @default(cuid())
+  userId         String   @map("user_id")
+  productId      String   @map("product_id")
+  productName    String?  @map("product_name")
+  productImage   String?  @map("product_image")
+  pricePerDay    Int      @default(0) @map("price_per_day")
+  preferredStart String?  @map("preferred_start")
+  status         String   @default("waiting") // waiting, notified, fulfilled, expired
+  createdAt      DateTime @default(now()) @map("created_at")
 
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  product         Product  @relation(fields: [productId], references: [id])
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
 
   @@map("waitlist_items")
 }
@@ -309,14 +324,16 @@ model WaitlistItem {
 model Notification {
   id        String   @id @default(cuid())
   userId    String   @map("user_id")
-  type      String   // trust, financial, asset, system, booking
+  type      String // trust, financial, asset, system, booking
   title     String
   message   String
   isRead    Boolean  @default(false) @map("is_read")
   createdAt DateTime @default(now()) @map("created_at")
 
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId])
+  @@index([isRead])
   @@map("notifications")
 }
 
@@ -335,10 +352,12 @@ model Dispute {
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
 
-  user          User?    @relation(fields: [userId], references: [id])
-  booking       Booking? @relation(fields: [bookingId], references: [id])
-  messages      DisputeMessage[]
+  user     User?            @relation(fields: [userId], references: [id])
+  booking  Booking?         @relation(fields: [bookingId], references: [id])
+  messages DisputeMessage[]
 
+  @@index([bookingId])
+  @@index([status])
   @@map("disputes")
 }
 
@@ -350,27 +369,27 @@ model DisputeMessage {
   message   String
   createdAt DateTime @default(now()) @map("created_at")
 
-  dispute   Dispute  @relation(fields: [disputeId], references: [id], onDelete: Cascade)
+  dispute Dispute @relation(fields: [disputeId], references: [id], onDelete: Cascade)
 
   @@map("dispute_messages")
 }
 
 // ──── Contract ────
 model Contract {
-  id             String   @id @default(cuid())
-  bookingId      String   @map("booking_id")
-  status         String   @default("draft") // draft, signed, finalized, expired
-  isFinalized    Boolean  @default(false) @map("is_finalized")
-  contractHash   String?  @map("contract_hash")
-  terms          String?
-  parties        String   @default("[]") // JSON array
-  renterSignature String? @map("renter_signature")
-  signedAt       DateTime? @map("signed_at")
-  snapshot       String?  // JSON
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @updatedAt @map("updated_at")
+  id              String    @id @default(cuid())
+  bookingId       String    @map("booking_id")
+  status          String    @default("draft") // draft, signed, finalized, expired
+  isFinalized     Boolean   @default(false) @map("is_finalized")
+  contractHash    String?   @map("contract_hash")
+  terms           String?
+  parties         String    @default("[]") // JSON array
+  renterSignature String?   @map("renter_signature")
+  signedAt        DateTime? @map("signed_at")
+  snapshot        String? // JSON
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
 
-  booking        Booking  @relation(fields: [bookingId], references: [id])
+  booking Booking @relation(fields: [bookingId], references: [id])
 
   @@map("contracts")
 }
@@ -387,27 +406,30 @@ model ReturnRequest {
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
-  user        User?    @relation(fields: [userId], references: [id])
-  booking     Booking? @relation(fields: [bookingId], references: [id])
+  user    User?    @relation(fields: [userId], references: [id])
+  booking Booking? @relation(fields: [bookingId], references: [id])
 
   @@map("return_requests")
 }
 
 // ──── Payment ────
 model Payment {
-  id              String   @id @default(cuid())
-  userId          String?  @map("user_id")
-  bookingId       String?  @map("booking_id")
-  amount          Int      @default(0)
-  method          String?  // baridimob, card
-  status          String   @default("pending") // pending, completed, failed, refunded
-  escrowStatus    String?  @map("escrow_status")
-  requires3DSecure Boolean @default(false) @map("requires_3d_secure")
-  redirectUrl     String?  @map("redirect_url")
+  id                String   @id @default(cuid())
+  userId            String?  @map("user_id")
+  bookingId         String?  @map("booking_id")
+  amount            Int      @default(0)
+  method            String? // baridimob, card
+  status            String   @default("pending") // pending, completed, failed, refunded
+  escrowStatus      String?  @map("escrow_status")
+  requires3DSecure  Boolean  @default(false) @map("requires_3d_secure")
+  redirectUrl       String?  @map("redirect_url")
   providerPaymentId String?  @map("provider_payment_id") // Chargily checkout ID
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
 
+  @@index([userId])
+  @@index([bookingId])
+  @@index([status])
   @@map("payments")
 }
 
@@ -415,15 +437,17 @@ model Payment {
 model Transaction {
   id          String   @id @default(cuid())
   userId      String   @map("user_id")
-  type        String   // INCOME, EXPENDITURE, ESCROW_HELD, ESCROW_RELEASED, ESCROW_REFUNDED, DEPOSIT, WITHDRAWAL, TRANSFER
+  type        String // INCOME, EXPENDITURE, ESCROW_HELD, ESCROW_RELEASED, ESCROW_REFUNDED, DEPOSIT, WITHDRAWAL, TRANSFER
   amount      Int      @default(0)
   referenceId String?  @map("reference_id") // bookingId or refundRecordId
   note        String?
   hash        String?
   createdAt   DateTime @default(now()) @map("created_at")
 
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId])
+  @@index([type])
   @@map("transactions")
 }
 
@@ -432,56 +456,56 @@ model Transaction {
 // These models track the REAL money movement outside our system.
 
 model RefundRecord {
-  id              String    @id @default(cuid())
-  bookingId       String    @map("booking_id")
-  paymentId       String    @map("payment_id")
-  userId          String    @map("user_id")
-  amount          Int       // المبلغ بالسنتات (DZD)
-  reason          String    // late_delivery, defective, cancelled, other
-  status          String    @default("pending_manual_transfer") // pending_manual_transfer, processing, completed, failed
-  requestedAt     DateTime  @default(now()) @map("requested_at")
-  refundDeadline  DateTime  // requestedAt + 15 يوم (القانون 18-05 مادة 22)
- completedAt     DateTime? @map("completed_at")
-  transferMethod  String?   @map("transfer_method")  // ccp_transfer, bank_transfer, wallet_credit, baridimob
-  transferRef     String?   @map("transfer_ref")     // رقم التحويل البنكي
-  processedBy     String?   @map("processed_by")     // Admin who completed it
-  notes           String?
-  createdAt       DateTime  @default(now()) @map("created_at")
-  updatedAt       DateTime  @updatedAt @map("updated_at")
+  id             String    @id @default(cuid())
+  bookingId      String    @map("booking_id")
+  paymentId      String    @map("payment_id")
+  userId         String    @map("user_id")
+  amount         Int // المبلغ بالسنتات (DZD)
+  reason         String // late_delivery, defective, cancelled, other
+  status         String    @default("pending_manual_transfer") // pending_manual_transfer, processing, completed, failed
+  requestedAt    DateTime  @default(now()) @map("requested_at")
+  refundDeadline DateTime // requestedAt + 15 يوم (القانون 18-05 مادة 22)
+  completedAt    DateTime? @map("completed_at")
+  transferMethod String?   @map("transfer_method") // ccp_transfer, bank_transfer, wallet_credit, baridimob
+  transferRef    String?   @map("transfer_ref") // رقم التحويل البنكي
+  processedBy    String?   @map("processed_by") // Admin who completed it
+  notes          String?
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
 
   @@map("refund_records")
 }
 
 model PayoutRecord {
-  id              String    @id @default(cuid())
-  bookingId       String    @map("booking_id")
-  vendorId        String?   @map("vendor_id")
-  userId          String    @map("user_id")     // the renter who paid
-  amount          Int       // المبلغ بالسنتات (DZD)
-  status          String    @default("pending_payout") // pending_payout, processing, paid, failed
-  requestedAt     DateTime  @default(now()) @map("requested_at")
-  paidAt          DateTime? @map("paid_at")
-  transferMethod  String?   @map("transfer_method")  // ccp_transfer, bank_transfer, chargily_payout
-  transferRef     String?   @map("transfer_ref")
-  processedBy     String?   @map("processed_by")
-  notes           String?
-  createdAt       DateTime  @default(now()) @map("created_at")
-  updatedAt       DateTime  @updatedAt @map("updated_at")
+  id             String    @id @default(cuid())
+  bookingId      String    @map("booking_id")
+  vendorId       String?   @map("vendor_id")
+  userId         String    @map("user_id") // the renter who paid
+  amount         Int // المبلغ بالسنتات (DZD)
+  status         String    @default("pending_payout") // pending_payout, processing, paid, failed
+  requestedAt    DateTime  @default(now()) @map("requested_at")
+  paidAt         DateTime? @map("paid_at")
+  transferMethod String?   @map("transfer_method") // ccp_transfer, bank_transfer, chargily_payout
+  transferRef    String?   @map("transfer_ref")
+  processedBy    String?   @map("processed_by")
+  notes          String?
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
 
   @@map("payout_records")
 }
 
 // ──── Subscription Plan ────
 model SubscriptionPlan {
-  id              String   @id @default(cuid())
-  planId          String   @unique @map("plan_id") // free, basic, premium, vip
-  nameAr          String   @map("name_ar")
-  nameEn          String?  @map("name_en")
-  price           Int      @default(0)
-  bookingsLimit   Int      @default(3) @map("bookings_limit") // -1 = unlimited
-  features        String   @default("[]") // JSON array
-  isActive        Boolean  @default(true) @map("is_active")
-  createdAt       DateTime @default(now()) @map("created_at")
+  id            String   @id @default(cuid())
+  planId        String   @unique @map("plan_id") // free, basic, premium, vip
+  nameAr        String   @map("name_ar")
+  nameEn        String?  @map("name_en")
+  price         Int      @default(0)
+  bookingsLimit Int      @default(3) @map("bookings_limit") // -1 = unlimited
+  features      String   @default("[]") // JSON array
+  isActive      Boolean  @default(true) @map("is_active")
+  createdAt     DateTime @default(now()) @map("created_at")
 
   userSubscriptions UserSubscription[]
 
@@ -489,95 +513,95 @@ model SubscriptionPlan {
 }
 
 model UserSubscription {
-  id        String   @id @default(cuid())
-  userId    String   @map("user_id")
-  planId    String   @map("plan_id")
-  amount    Int      @default(0)
-  status    String   @default("active") // active, cancelled, expired
-  startDate DateTime @default(now()) @map("start_date")
+  id        String    @id @default(cuid())
+  userId    String    @map("user_id")
+  planId    String    @map("plan_id")
+  amount    Int       @default(0)
+  status    String    @default("active") // active, cancelled, expired
+  startDate DateTime  @default(now()) @map("start_date")
   endDate   DateTime? @map("end_date")
-  createdAt DateTime @default(now()) @map("created_at")
+  createdAt DateTime  @default(now()) @map("created_at")
 
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  plan      SubscriptionPlan @relation(fields: [planId], references: [id])
+  user User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan SubscriptionPlan @relation(fields: [planId], references: [id])
 
   @@map("user_subscriptions")
 }
 
 // ──── Insurance Plan ────
 model InsurancePlan {
-  id            String   @id @default(cuid())
-  nameAr        String   @map("name_ar")
-  nameEn        String?  @map("name_en")
-  price         Int      @default(0)
-  coverageAr    String?  @map("coverage_ar")
-  coverageEn    String?  @map("coverage_en")
-  isActive      Boolean  @default(true) @map("is_active")
-  createdAt     DateTime @default(now()) @map("created_at")
+  id         String   @id @default(cuid())
+  nameAr     String   @map("name_ar")
+  nameEn     String?  @map("name_en")
+  price      Int      @default(0)
+  coverageAr String?  @map("coverage_ar")
+  coverageEn String?  @map("coverage_en")
+  isActive   Boolean  @default(true) @map("is_active")
+  createdAt  DateTime @default(now()) @map("created_at")
 
   @@map("insurance_plans")
 }
 
 // ──── Address ────
 model Address {
-  id            String   @id @default(cuid())
-  userId        String   @map("user_id")
-  address       String
-  city          String?
-  isDefault     Boolean  @default(false) @map("is_default")
-  deliveryZoneId String? @map("delivery_zone_id")
-  createdAt     DateTime @default(now()) @map("created_at")
+  id             String   @id @default(cuid())
+  userId         String   @map("user_id")
+  address        String
+  city           String?
+  isDefault      Boolean  @default(false) @map("is_default")
+  deliveryZoneId String?  @map("delivery_zone_id")
+  createdAt      DateTime @default(now()) @map("created_at")
 
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("addresses")
 }
 
 // ──── Delivery Zone ────
 model DeliveryZone {
-  id                String   @id @default(cuid())
-  name              String
-  sameDayAvailable  Boolean  @default(false) @map("same_day_available")
-  deliveryFee       Int      @default(0) @map("delivery_fee")
-  createdAt         DateTime @default(now()) @map("created_at")
+  id               String   @id @default(cuid())
+  name             String
+  sameDayAvailable Boolean  @default(false) @map("same_day_available")
+  deliveryFee      Int      @default(0) @map("delivery_fee")
+  createdAt        DateTime @default(now()) @map("created_at")
 
   @@map("delivery_zones")
 }
 
 // ──── Local Guide Category ────
 model LocalGuideCategory {
-  id           String  @id @default(cuid())
-  nameAr       String  @map("name_ar")
-  nameEn       String? @map("name_en")
-  slug         String  @unique
+  id           String   @id @default(cuid())
+  nameAr       String   @map("name_ar")
+  nameEn       String?  @map("name_en")
+  slug         String   @unique
   icon         String?
-  serviceCount Int     @default(0) @map("service_count")
+  serviceCount Int      @default(0) @map("service_count")
   createdAt    DateTime @default(now()) @map("created_at")
 
-  services     LocalGuideService[]
+  services LocalGuideService[]
 
   @@map("local_guide_categories")
 }
 
 model LocalGuideService {
-  id              String   @id @default(cuid())
-  name            String
-  nameAr          String   @map("name_ar")
-  categoryId      String   @map("category_id")
-  city            String?
-  rating          Float    @default(0)
-  reviewCount     Int      @default(0) @map("review_count")
-  priceRange      String?  @map("price_range")
-  imageUrl        String?  @map("image_url")
-  descriptionAr   String?  @map("description_ar")
-  descriptionEn   String?  @map("description_en")
-  phone           String?
-  whatsapp        String?
-  isVerified      Boolean  @default(false) @map("is_verified")
-  featured        Boolean  @default(false)
-  createdAt       DateTime @default(now()) @map("created_at")
+  id            String   @id @default(cuid())
+  name          String
+  nameAr        String   @map("name_ar")
+  categoryId    String   @map("category_id")
+  city          String?
+  rating        Float    @default(0)
+  reviewCount   Int      @default(0) @map("review_count")
+  priceRange    String?  @map("price_range")
+  imageUrl      String?  @map("image_url")
+  descriptionAr String?  @map("description_ar")
+  descriptionEn String?  @map("description_en")
+  phone         String?
+  whatsapp      String?
+  isVerified    Boolean  @default(false) @map("is_verified")
+  featured      Boolean  @default(false)
+  createdAt     DateTime @default(now()) @map("created_at")
 
-  category        LocalGuideCategory @relation(fields: [categoryId], references: [id])
+  category LocalGuideCategory @relation(fields: [categoryId], references: [id])
 
   @@map("local_guide_services")
 }
@@ -596,19 +620,19 @@ model CMSPage {
 }
 
 model BlogPost {
-  id          String   @id @default(cuid())
-  title       String
-  slug        String   @unique
-  content     String?
-  excerpt     String?
-  imageUrl    String?  @map("image_url")
-  status      String   @default("draft") // draft, published
-  authorId    String?  @map("author_id")
-  category    String?  @default("عام")
-  readTime    Int?     @map("read_time")
-  authorName  String?  @map("author_name")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  id         String   @id @default(cuid())
+  title      String
+  slug       String   @unique
+  content    String?
+  excerpt    String?
+  imageUrl   String?  @map("image_url")
+  status     String   @default("draft") // draft, published
+  authorId   String?  @map("author_id")
+  category   String?  @default("عام")
+  readTime   Int?     @map("read_time")
+  authorName String?  @map("author_name")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
 
   @@map("blog_posts")
 }
@@ -622,7 +646,7 @@ model ActivityLog {
   ip        String?
   createdAt DateTime @default(now()) @map("created_at")
 
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("activity_logs")
 }
@@ -647,13 +671,13 @@ model Branch {
 
 // ──── Social Vouch ────
 model SocialVouch {
-  id            String   @id @default(cuid())
-  senderId      String   @map("sender_id")
-  receiverId    String   @map("receiver_id")
-  createdAt     DateTime @default(now()) @map("created_at")
+  id         String   @id @default(cuid())
+  senderId   String   @map("sender_id")
+  receiverId String   @map("receiver_id")
+  createdAt  DateTime @default(now()) @map("created_at")
 
-  sender        User     @relation("VouchSender", fields: [senderId], references: [id], onDelete: Cascade)
-  receiver      User     @relation("VouchReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  sender   User @relation("VouchSender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User @relation("VouchReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
 
   @@unique([senderId, receiverId])
   @@map("social_vouches")
@@ -672,38 +696,38 @@ model ChatSession {
 // ──── Identity Verification ────
 // AI face verification + 5-vouch community review system
 model IdentityVerification {
-  id              String   @id @default(cuid())
-  userId          String   @unique @map("user_id")
-  facePhoto       String   @map("face_photo") // base64 encoded face capture
-  status          String   @default("pending") @map("status") // pending, ai_approved, ai_rejected, community_review, verified, rejected
-  aiAnalysis      String?  @map("ai_analysis") // JSON: AI analysis result from VLM
-  aiScore         Int      @default(0) @map("ai_score") // 0-100 AI confidence score
-  approvalCount   Int      @default(0) @map("approval_count")
-  rejectionCount  Int      @default(0) @map("rejection_count")
-  requiredApprovals Int    @default(5) @map("required_approvals") // needs 5 verified users to approve
-  rejectionReason String?  @map("rejection_reason")
-  reviewedAt      DateTime? @map("reviewed_at")
-  verifiedAt      DateTime? @map("verified_at")
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
+  id                String    @id @default(cuid())
+  userId            String    @unique @map("user_id")
+  facePhoto         String    @map("face_photo") // base64 encoded face capture
+  status            String    @default("pending") @map("status") // pending, ai_approved, ai_rejected, community_review, verified, rejected
+  aiAnalysis        String?   @map("ai_analysis") // JSON: AI analysis result from VLM
+  aiScore           Int       @default(0) @map("ai_score") // 0-100 AI confidence score
+  approvalCount     Int       @default(0) @map("approval_count")
+  rejectionCount    Int       @default(0) @map("rejection_count")
+  requiredApprovals Int       @default(5) @map("required_approvals") // needs 5 verified users to approve
+  rejectionReason   String?   @map("rejection_reason")
+  reviewedAt        DateTime? @map("reviewed_at")
+  verifiedAt        DateTime? @map("verified_at")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
 
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  votes           VerificationVote[]
+  user  User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  votes VerificationVote[]
 
   @@map("identity_verifications")
 }
 
 // ──── Verification Vote (by already-verified users) ────
 model VerificationVote {
-  id               String   @id @default(cuid())
-  verificationId   String   @map("verification_id")
-  voterId          String   @map("voter_id") // the verified user who voted
-  vote             String   @map("vote") // approve, reject
-  comment          String?
-  createdAt        DateTime @default(now()) @map("created_at")
+  id             String   @id @default(cuid())
+  verificationId String   @map("verification_id")
+  voterId        String   @map("voter_id") // the verified user who voted
+  vote           String   @map("vote") // approve, reject
+  comment        String?
+  createdAt      DateTime @default(now()) @map("created_at")
 
-  verification     IdentityVerification @relation(fields: [verificationId], references: [id], onDelete: Cascade)
-  voter            User     @relation("VerificationVoter", fields: [voterId], references: [id], onDelete: Cascade)
+  verification IdentityVerification @relation(fields: [verificationId], references: [id], onDelete: Cascade)
+  voter        User                 @relation("VerificationVoter", fields: [voterId], references: [id], onDelete: Cascade)
 
   @@unique([verificationId, voterId]) // one vote per verified user per verification
   @@map("verification_votes")
@@ -719,5 +743,6 @@ model Session {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([token])
+  @@index([userId])
   @@map("sessions")
 }
