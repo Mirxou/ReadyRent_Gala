@@ -37,12 +37,14 @@ export const walletApi = {
   },
 
   /**
-   * Initiate a wallet deposit (actual route: /wallet/deposit/)
+   * Initiate a wallet deposit
+   * NOTE: server accepts `method` (not `payment_method_id`).
+   * The previous client sent `payment_method_id` which the server never read.
    */
-  topUp: (amount: number, methodId?: string) =>
+  topUp: (amount: number, method?: string) =>
     sovereignClient.post<{ success: boolean; balance?: number; transaction_id: string }>('/wallet/deposit/', {
       amount,
-      ...(methodId ? { payment_method_id: methodId } : {}),
+      method,
     }),
 
   /**
@@ -61,11 +63,34 @@ export const walletApi = {
     }),
 
   /**
-   * Initiate a wallet transfer to another user
+   * Resolve a phone or email to a recipient user ID (CUID).
+   * P1 fix: /api/wallet/transfer expects `recipient_id`, but the UI collects
+   * phone/email from the user. This lookup bridges the gap.
    */
-  transfer: (amount: number, recipientPhone: string) =>
+  resolveRecipient: (identifier: string) =>
+    sovereignClient.get<{
+      recipient_id: string;
+      username: string | null;
+      first_name: string | null;
+      last_name: string | null;
+      is_verified: boolean;
+      trust_score: number;
+    }>(`/wallet/resolve-recipient/?identifier=${encodeURIComponent(identifier)}`),
+
+  /**
+   * Initiate a wallet transfer to another user
+   * P1 fix: server expects `recipient_id` (CUID), not `recipient_phone`.
+   * The previous client sent `recipient_phone` and the server's Zod schema
+   * (`walletTransferSchema.recipient_id: z.string().min(1)`) rejected it
+   * with VALIDATION_ERROR every time.
+   *
+   * If the UI only has the recipient's phone, the caller must first resolve
+   * it to a user ID via `walletApi.resolveRecipient`. For now, we expose `recipient_id`.
+   */
+  transfer: (amount: number, recipientId: string, note?: string) =>
     sovereignClient.post<{ success: boolean; balance?: number; transaction_id?: string }>('/wallet/transfer/', {
       amount,
-      recipient_phone: recipientPhone,
+      recipient_id: recipientId,
+      ...(note ? { note } : {}),
     }),
 };

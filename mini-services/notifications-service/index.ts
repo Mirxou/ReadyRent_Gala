@@ -4,14 +4,22 @@ import { Database } from 'bun:sqlite';
 import { createHmac, timingSafeEqual } from 'crypto';
 
 // ──── Configuration ────
-const AUTH_SECRET = process.env.NEXTAUTH_SECRET || '';
-if (!AUTH_SECRET) {
-  console.error('[AUTH] NEXTAUTH_SECRET not set — WebSocket auth will reject all connections');
+// P0-5 fix: throw on missing NEXTAUTH_SECRET instead of silently using ''
+// (prevents an attacker from forging any session token with an empty HMAC)
+const AUTH_SECRET = process.env.NEXTAUTH_SECRET;
+if (!AUTH_SECRET || AUTH_SECRET.trim() === '') {
+  console.error('[AUTH] NEXTAUTH_SECRET not set — WebSocket auth will reject all connections. Set NEXTAUTH_SECRET in your environment.');
 }
 
-const DB_PATH = process.env.DB_PATH || '/home/z/my-project/db/custom.db';
+// P2 fix: DB_PATH now configurable (was hardcoded to /home/z/my-project/db/custom.db
+// which doesn't exist inside the Docker container)
+const DB_PATH = process.env.DB_PATH || '/app/data/custom.db';
 
-const ALLOWED_ORIGINS = ['http://localhost:3000', 'http://21.0.21.29:3000'];
+// P2 fix: ALLOWED_ORIGINS env-configurable (was hardcoded with a production IP)
+const DEFAULT_ORIGINS = ['http://localhost:3000', 'http://localhost:3001'];
+const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',').map(s => s.trim()).filter(Boolean)
+  : DEFAULT_ORIGINS;
 
 const AUTH_TIMEOUT_MS = 10_000; // 10 seconds
 
@@ -26,6 +34,8 @@ try {
 // ──── HMAC Token Verification ────
 // Matches auth-server.ts verifyTokenSignature()
 function verifyTokenSignature(signedToken: string): string | null {
+  if (!AUTH_SECRET) return null;
+
   const dotIndex = signedToken.lastIndexOf('.');
   if (dotIndex === -1) return null;
 

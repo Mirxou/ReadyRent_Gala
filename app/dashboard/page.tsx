@@ -254,7 +254,7 @@ export default function DashboardPage() {
 
             {/* Quick Actions Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-4 gap-6">
-                <Link href="/dashboard/wallet">
+                <Link href="/wallet">
                     <GlassPanel className="p-6 flex items-center justify-between hover:bg-white/5 transition-all cursor-pointer group border-white/5">
                         <div className="space-y-2">
                             <p className="font-black text-md tracking-tight text-foreground">الخزانة المالية</p>

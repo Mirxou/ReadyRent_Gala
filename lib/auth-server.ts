@@ -8,13 +8,27 @@ import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import { NextResponse } from 'next/server';
 import { db } from './db';
+import { getAuthSecret, tryGetAuthSecret } from './startup-checks';
 
 // ──── Session Signing Secret ────
-const _authSecret = process.env.NEXTAUTH_SECRET || '';
-if (!_authSecret) {
-  console.error('[AUTH] NEXTAUTH_SECRET غير معرّف في .env — المصادقة لن تعمل');
+// P0-5 fix: previously `process.env.NEXTAUTH_SECRET || ''` — if the env var was
+// missing, the HMAC key became the empty string and an attacker could forge
+// any user's session token. Now we throw at first use instead.
+//
+// We keep `AUTH_SECRET` lazily-evaluated so that importing this module doesn't
+// crash during build/SSG (where NEXTAUTH_SECRET may legitimately be absent).
+let _cachedSecret: string | null | undefined;
+function authSecret(): string {
+  if (_cachedSecret === undefined) {
+    _cachedSecret = tryGetAuthSecret();
+  }
+  if (_cachedSecret === null) {
+    // This will only fire when a real request tries to sign/verify a token,
+    // not at module load time.
+    return getAuthSecret();
+  }
+  return _cachedSecret;
 }
-const AUTH_SECRET = _authSecret;
 
 const SESSION_DURATION_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
@@ -44,7 +58,7 @@ cleanupExpiredSessions();
 
 function signToken(rawToken: string): string {
   const hmac = crypto
-    .createHmac('sha256', AUTH_SECRET)
+    .createHmac('sha256', authSecret())
     .update(rawToken)
     .digest('hex');
   return `${rawToken}.${hmac}`;
@@ -58,7 +72,7 @@ function verifyTokenSignature(signedToken: string): string | null {
   const providedHmac = signedToken.slice(dotIndex + 1);
 
   const expectedHmac = crypto
-    .createHmac('sha256', AUTH_SECRET)
+    .createHmac('sha256', authSecret())
     .update(rawToken)
     .digest('hex');
 
@@ -131,10 +145,13 @@ export async function getSessionFromRequest(request: Request): Promise<{ userId:
   }
 
   // Check cookie
+  // P2-36 fix: try both the dev (session_token) and prod (__Host-session_token)
+  // cookie names so a session issued in dev still works if someone copies it
+  // over, and vice-versa.
   const cookieHeader = request.headers.get('cookie') || '';
-  const match = cookieHeader.match(/session_token=([^;]+)/);
-  if (match) {
-    const signedToken = match[1];
+  const cookieMatch = cookieHeader.match(/(?:__Host-)?session_token=([^;]+)/);
+  if (cookieMatch) {
+    const signedToken = cookieMatch[1];
     const session = await validateSession(signedToken);
     if (session) return { ...session, token: signedToken };
   }

@@ -2,9 +2,11 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
 import { logger } from '@/lib/logger';
+import { checkAdminMutationRateLimit } from '@/lib/rate-limiter';
 
 // ═══════════════════════════════════════════════════════════════
 // PATCH /api/admin/users/[id] — Update user (admin/staff only)
+// P1 fix: rate limit added (30/min/admin) — slows down mass-escalation attempts
 // ═══════════════════════════════════════════════════════════════
 export async function PATCH(
   request: Request,
@@ -16,6 +18,15 @@ export async function PATCH(
   const admin = await db.user.findUnique({ where: { id: session.userId }, select: { role: true } });
   if (!admin || (admin.role !== 'admin' && admin.role !== 'staff')) {
     return NextResponse.json({ success: false, message_en: 'Forbidden', code: 'FORBIDDEN' }, { status: 403 });
+  }
+
+  // P1 fix: rate limit (30/min/admin) — slows down compromised-admin mass-escalation
+  const rateCheck = checkAdminMutationRateLimit(session.userId);
+  if (!rateCheck.allowed) {
+    return NextResponse.json(
+      { success: false, dignity_preserved: true, message_en: 'Too many admin mutations, please slow down.', code: 'RATE_LIMITED' },
+      { status: 429 }
+    );
   }
 
   try {

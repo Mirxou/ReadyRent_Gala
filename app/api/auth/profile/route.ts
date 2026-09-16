@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // STANDARD.Rent — Auth Profile API Route
 // GET  /api/auth/profile  — Fetch current user profile
-// PUT  /api/auth/profile  — Update current user profile
+// PUT  /api/auth/profile  — Update current user profile (incl. prefs/theme/language)
 // ═══════════════════════════════════════════════════════════════
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -45,11 +45,33 @@ export async function GET(request: Request) {
       );
     }
 
+    // P1 fix: include notification_preferences, theme, language in the response
+    // (was missing — the settings page couldn't prefill these fields)
+    let notificationPreferences: Record<string, boolean> | undefined;
+    try {
+      if (user.notificationPrefs) {
+        notificationPreferences = JSON.parse(user.notificationPrefs) as Record<string, boolean>;
+      }
+    } catch {
+      // Corrupt JSON in DB — fall back to undefined
+    }
+
+    const address = await db.address.findUnique({
+      where: { id: `${session.userId}_default` },
+      select: { city: true },
+    }).catch(() => null);
+
     return NextResponse.json(
       {
         success: true,
         dignity_preserved: true,
-        data: formatUserResponse(user),
+        data: {
+          ...formatUserResponse(user),
+          city: address?.city ?? null,
+          notification_preferences: notificationPreferences,
+          theme: user.theme,
+          language: user.language,
+        },
       },
       { status: 200 }
     );
@@ -85,18 +107,48 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { firstName, lastName, phone, city } = body;
+    const { firstName, lastName, phone, city, notification_preferences, theme, language } = body;
 
-    // Build update data — only include provided fields
+    // ── Build update data — only include provided fields ──
     const updateData: Record<string, string | null> = {};
     if (firstName !== undefined) updateData.firstName = firstName;
     if (lastName !== undefined) updateData.lastName = lastName;
     if (phone !== undefined) updateData.phone = phone;
+
+    // P1 fix: persist notification_preferences as JSON string
+    if (notification_preferences !== undefined) {
+      if (typeof notification_preferences !== 'object' || notification_preferences === null) {
+        return NextResponse.json(
+          { success: false, dignity_preserved: true, message_ar: 'تفضيلات الإشعارات غير صالحة', code: 'VALIDATION_ERROR' },
+          { status: 400 }
+        );
+      }
+      updateData.notificationPrefs = JSON.stringify(notification_preferences);
+    }
+
+    // P1 fix: persist theme / language
+    if (theme !== undefined) {
+      if (!['light', 'dark', 'system'].includes(theme)) {
+        return NextResponse.json(
+          { success: false, dignity_preserved: true, message_ar: 'قيمة السمة غير صالحة', code: 'VALIDATION_ERROR' },
+          { status: 400 }
+        );
+      }
+      updateData.theme = theme;
+    }
+    if (language !== undefined) {
+      if (!['ar', 'en', 'fr'].includes(language)) {
+        return NextResponse.json(
+          { success: false, dignity_preserved: true, message_ar: 'قيمة اللغة غير صالحة', code: 'VALIDATION_ERROR' },
+          { status: 400 }
+        );
+      }
+      updateData.language = language;
+    }
+
     // city is stored on Address; if a top-level city field is requested,
-    // we store it as a simple field update (the schema has no city on User,
-    // so we skip it gracefully or use a first address)
+    // we store it on the user's default address row
     if (city !== undefined) {
-      // Try to update the user's default address city
       await db.address.upsert({
         where: {
           id: `${session.userId}_default`,
@@ -111,8 +163,9 @@ export async function PUT(request: NextRequest) {
         update: {
           city: city,
         },
-      }).catch(() => {
-        // Silently ignore address errors — not critical
+      }).catch((e: unknown) => {
+        // P2 fix: log the error instead of silently swallowing it
+        logger.error('Profile Update', 'Address upsert failed (non-critical)', e);
       });
     }
 

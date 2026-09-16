@@ -5,6 +5,7 @@
 // ═══════════════════════════════════════════════════
 
 import { NextRequest, NextResponse } from 'next/server';
+import { Prisma } from '@prisma/client';
 import { db } from '@/lib/db';
 import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
 import { logger } from '@/lib/logger';
@@ -113,6 +114,9 @@ export async function POST(request: NextRequest) {
       });
 
       return { walletBalance: updatedSender?.walletBalance ?? 0 } as const;
+    }, {
+      // P1 fix: Serializable prevents concurrent transfer-from + withdrawal races.
+      isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
     });
 
     if ('error' in result) {

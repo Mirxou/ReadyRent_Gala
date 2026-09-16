@@ -118,8 +118,12 @@ export async function POST(request: NextRequest) {
     });
 
     // Recalculate vendor trust score after review (fire-and-forget)
+    // P1 fix: was `.catch(() => {})` — silently swallowed errors so a stale
+    // trust score could persist forever. Now we log + the offline-queue can retry.
     if (product.vendorId) {
-      recalcVendorTrustScore(product.vendorId).catch(() => {});
+      recalcVendorTrustScore(product.vendorId).catch((e: unknown) => {
+        logger.error('TrustScore', `Failed to recalc vendor trust score for vendor ${product.vendorId} after review ${review.id}`, e);
+      });
     }
 
     return NextResponse.json({

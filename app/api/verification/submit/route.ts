@@ -2,16 +2,34 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
 import { logger } from '@/lib/logger';
-import { readValidatedBody } from '@/lib/rate-limiter';
+import { readValidatedBody, checkVerificationSubmitRateLimit } from '@/lib/rate-limiter';
 
 // ═══════════════════════════════════════════════════════════════
 // POST /api/verification/submit — Submit face photo for verification
 // VLM analysis is unavailable; stores null and flags for manual review
+// P1 fix: rate limit added (3/hour/user) — prevents DB-growth DoS via
+// repeated 5MB base64 submissions.
 // ═══════════════════════════════════════════════════════════════
 export async function POST(request: Request) {
   try {
     const session = await getSessionFromRequest(request);
     if (!session) return authRequiredResponse();
+
+    // P1 fix: rate limit (3/hour/user) — 5MB base64 photos could grow DB
+    // by hundreds of MB in seconds without this limit.
+    const rateCheck = checkVerificationSubmitRateLimit(session.userId);
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          dignity_preserved: true,
+          message_ar: 'لقد تجاوزت حد تقديم طلبات التوثيق (3 في الساعة). حاول لاحقاً.',
+          message_en: 'Verification submit rate limit exceeded (3/hour). Try again later.',
+          code: 'RATE_LIMITED',
+        },
+        { status: 429 }
+      );
+    }
 
     // Parse body with size limit (5MB max for base64 face photo)
     const bodyResult = await readValidatedBody(request, 5 * 1024 * 1024);

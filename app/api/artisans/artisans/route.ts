@@ -4,7 +4,12 @@ import { logger } from '@/lib/logger';
 
 // ═══════════════════════════════════════════════════════════════════
 // Artisans API — Full database integration
+// P1 fix: was `take: limit` with `limit = undefined` when no query param,
+// which made Prisma return ALL artisans. Now uses default 20 + max 50 + skip.
 // ═══════════════════════════════════════════════════════════════════
+
+const MAX_PAGE_SIZE = 50;
+const DEFAULT_PAGE_SIZE = 20;
 
 export async function GET(request: NextRequest) {
   try {
@@ -12,8 +17,14 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get('search') || '';
     const specialty = searchParams.get('specialty') || '';
     const location = searchParams.get('location') || '';
-    const limitParam = searchParams.get('limit');
-    const limit = limitParam ? parseInt(limitParam, 10) : undefined;
+
+    // P1 fix: parse + sanitize pagination params (was undefined → ALL rows)
+    let page = parseInt(searchParams.get('page') || '1', 10);
+    let limit = parseInt(searchParams.get('limit') || String(DEFAULT_PAGE_SIZE), 10);
+    if (!Number.isFinite(page) || page < 1) page = 1;
+    if (!Number.isFinite(limit) || limit < 1) limit = DEFAULT_PAGE_SIZE;
+    if (limit > MAX_PAGE_SIZE) limit = MAX_PAGE_SIZE;
+    const skip = (page - 1) * limit;
 
     const where: Record<string, unknown> = {};
 
@@ -39,11 +50,15 @@ export async function GET(request: NextRequest) {
       where.location = { contains: location };
     }
 
-    const artisans = await db.artisan.findMany({
-      where,
-      take: limit,
-      orderBy: { createdAt: 'desc' },
-    });
+    const [artisans, total] = await Promise.all([
+      db.artisan.findMany({
+        where,
+        take: limit,
+        skip,
+        orderBy: { createdAt: 'desc' },
+      }),
+      db.artisan.count({ where }),
+    ]);
 
     const data = artisans.map((a) => ({
       id: a.id,
@@ -66,6 +81,7 @@ export async function GET(request: NextRequest) {
       success: true,
       dignity_preserved: true,
       data,
+      pagination: { page, limit, total, total_pages: Math.ceil(total / limit) },
     });
   } catch (error) {
     logger.error('Artisans API', 'Error', error);

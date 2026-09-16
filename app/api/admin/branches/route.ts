@@ -41,8 +41,13 @@ export async function GET(request: NextRequest) {
       latitude: b.latitude,
       longitude: b.longitude,
       is_active: b.isActive,
-      staff_count: 0,
-      product_count: 0,
+      // P2-40 fix: was `staff_count: 0, product_count: 0` hardcoded — these
+      // counts can't be computed because the schema has no relation from User
+      // or Product to Branch. Return null + a clear `counts_available: false`
+      // flag so the admin UI can render "—" instead of misleading "0".
+      staff_count: null,
+      product_count: null,
+      counts_available: false,
       created_at: b.createdAt.toISOString(),
     }));
 
@@ -87,8 +92,10 @@ export async function POST(request: NextRequest) {
       latitude: branch.latitude,
       longitude: branch.longitude,
       is_active: branch.isActive,
-      staff_count: 0,
-      product_count: 0,
+      // P2-40 fix: same as GET — return null + counts_available: false
+      staff_count: null,
+      product_count: null,
+      counts_available: false,
       created_at: branch.createdAt.toISOString(),
     };
 

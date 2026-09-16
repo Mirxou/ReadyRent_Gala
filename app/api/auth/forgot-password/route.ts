@@ -1,23 +1,32 @@
+// ═══════════════════════════════════════════════════════════════
+// POST /api/auth/forgot-password — Request a password reset
+// P2-32 fix: token is now stored as bcrypt hash (was plain text → DB read = use any token)
+// P2-33 fix: per-email rate limit added (was IP-only → attacker with many IPs could spam)
+// No auth required. Always returns success to prevent email enumeration.
+// ═══════════════════════════════════════════════════════════════
+
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import crypto from 'crypto';
+import bcrypt from 'bcryptjs';
 import { logger } from '@/lib/logger';
 import { sendEmail } from '@/lib/email';
 import { passwordResetEmail } from '@/lib/email-templates';
-import { checkSmsRateLimit, getClientIp, readValidatedBody } from '@/lib/rate-limiter';
+import {
+  checkSmsRateLimit,
+  checkForgotPasswordRateLimit,
+  getClientIp,
+  readValidatedBody,
+} from '@/lib/rate-limiter';
 
-// ═══════════════════════════════════════════════════════════════
-// POST /api/auth/forgot-password — Request a password reset
-// No auth required. Always returns success to prevent email enumeration.
-// In production, an email service would send the reset link.
-// ═══════════════════════════════════════════════════════════════
+const RESET_TOKEN_TTL_MS = 60 * 60 * 1000; // 1 hour
 
 export async function POST(request: Request) {
   try {
-    // ── Rate limiting (same as SMS — email bombing prevention) ──
+    // ── Rate limiting — IP (3/hour) ──
     const clientIp = getClientIp(request);
-    const rateCheck = checkSmsRateLimit(clientIp);
-    if (!rateCheck.allowed) {
+    const ipRate = checkSmsRateLimit(clientIp);
+    if (!ipRate.allowed) {
       return NextResponse.json(
         { success: false, dignity_preserved: true, message_ar: 'محاولات كثيرة. حاول بعد قليل.', message_en: 'Too many requests. Please try again later.', code: 'RATE_LIMITED' },
         { status: 429 }
@@ -44,33 +53,61 @@ export async function POST(request: Request) {
       );
     }
 
+    const normalizedEmail = email.trim().toLowerCase();
+
+    // ── P2-33 fix: per-email rate limit (3/hour) ──
+    // Runs BEFORE we even hit the DB so an attacker spamming random emails
+    // doesn't generate DB load. Note: this is an early reject; if the email
+    // doesn't exist we still return success (anti-enumeration) but the limiter
+    // counts the request so an attacker can't probe infinitely.
+    const emailRate = checkForgotPasswordRateLimit(normalizedEmail);
+    if (!emailRate.allowed) {
+      return NextResponse.json(
+        { success: false, dignity_preserved: true, message_ar: 'محاولات كثيرة على هذا البريد. حاول بعد ساعة.', message_en: 'Too many requests for this email. Try again later.', code: 'RATE_LIMITED' },
+        { status: 429 }
+      );
+    }
+
     // Find user by email
     const user = await db.user.findUnique({
-      where: { email: email.trim().toLowerCase() },
+      where: { email: normalizedEmail },
       select: { id: true, isActive: true, firstName: true, username: true, email: true },
     });
 
-    // Generate a token, store it, and send reset email
+    // Generate a token, store it (hashed), and send reset email
     if (user && user.isActive) {
-      const token = crypto.randomBytes(32).toString('hex');
-      const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+      const rawToken = crypto.randomBytes(32).toString('hex');
+      const expiresAt = Date.now() + RESET_TOKEN_TTL_MS;
 
+      // ── P2-32 fix: hash the token with bcrypt before storing ──
+      // Was: `action: 'reset_token:<rawToken>:<expiresAtISO>'`
+      // Anyone with DB read access (backup, dev laptop) could use any active
+      // token to reset any user's password. Now we store only the hash.
+      // The expiry is encoded as a number to avoid the split(':') bug in
+      // reset-password where ISO timestamps contain colons.
+      const tokenHash = await bcrypt.hash(rawToken, 10);
       await db.activityLog.create({
         data: {
           userId: user.id,
-          action: `reset_token:${token}:${expiresAt.toISOString()}`,
+          // Format: reset_token:<bcryptHash>:<expiresAtMs>
+          action: `reset_token:${tokenHash}:${expiresAt}`,
           target: 'password_reset',
         },
       });
 
-      // Send password reset email (fire-and-forget)
-      const resetLink = `${process.env.NEXT_PUBLIC_APP_URL || ''}/reset-password?token=${token}`;
+      // Send password reset email (fire-and-forget, but logged on failure)
+      const resetLink = `${process.env.NEXT_PUBLIC_APP_URL || ''}/reset-password?token=${rawToken}`;
       const displayName = user.firstName || user.username || user.email;
       sendEmail({
         to: user.email,
         subject: 'إعادة تعيين كلمة المرور — STANDARD.Rent 🔐',
         html: passwordResetEmail(displayName, resetLink),
-      }).catch(() => {/* already logged inside sendEmail */});
+      }).catch((e: unknown) => {
+        // P2 fix: was `/* already logged inside sendEmail */` — but the catch
+        // swallowed errors silently. Now we log them so we can monitor email
+        // delivery failures.
+        logger.error('Forgot Password', 'Failed to send reset email', { userId: user.id, error: e });
+      });
     }
 
     // Always return success to prevent email enumeration

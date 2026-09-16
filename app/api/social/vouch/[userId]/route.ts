@@ -174,7 +174,11 @@ export async function POST(
     });
 
     // Recalculate trust score for the recipient (fire-and-forget)
-    recalcAndSyncTrustScore(receiverId).catch(() => {});
+    // P1 fix: was `.catch(() => {})` — silently swallowed errors so a stale
+    // trust score could persist forever. Now we log + the offline-queue can retry.
+    recalcAndSyncTrustScore(receiverId).catch((e: unknown) => {
+      logger.error('TrustScore', `Failed to recalc trust score for user ${receiverId} after vouch from ${session.userId}`, e);
+    });
 
     const newVouchCount = existingVouchCount + 1;
 

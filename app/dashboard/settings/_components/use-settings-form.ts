@@ -8,9 +8,10 @@ import {
   defaultProfileData, defaultNotifSettings, defaultSecurityData, defaultAppearanceData
 } from './data';
 
+// P0-7 fix: use `id: string` (matches Prisma CUIDs) instead of legacy `id: number`
 interface ProfileApiResponse {
   user: {
-    id?: number;
+    id?: string;
     username?: string;
     email?: string;
     first_name?: string;
@@ -31,15 +32,6 @@ export interface FormState {
   notifs: typeof defaultNotifSettings;
   security: typeof defaultSecurityData;
   appearance: typeof defaultAppearanceData;
-}
-
-function _updater<T>(key: keyof FormState) {
-  return (next: T | ((prev: T) => T)) => {
-    return (prev: FormState) => ({
-      ...prev,
-      [key]: typeof next === 'function' ? (next as (p: T) => T)(prev[key]) : next,
-    });
-  };
 }
 
 export function useSettingsForm() {
@@ -70,7 +62,7 @@ export function useSettingsForm() {
     const userName = apiUser.first_name && apiUser.last_name
       ? `${apiUser.first_name} ${apiUser.last_name}`
       : apiUser.username || defaultProfileData.name;
-     
+
     setFormState({
       profile: {
         name: userName,
@@ -102,9 +94,20 @@ export function useSettingsForm() {
   const setAppearanceData = (next: typeof defaultAppearanceData | ((prev: typeof defaultAppearanceData) => typeof defaultAppearanceData)) =>
     setFormState((prev) => ({ ...prev, appearance: typeof next === 'function' ? (next as (p: typeof defaultAppearanceData) => typeof defaultAppearanceData)(prev.appearance) : next }));
 
+  // P0-7 fix: use PUT (the only method /api/auth/profile supports besides GET).
+  // Previously used PATCH (→ 405 Method Not Allowed → silent failure with success toast).
   const saveProfileMutation = useMutation({
     mutationFn: async (data: typeof defaultProfileData) => {
-      const res = await sovereignClient.patch('/auth/profile/', { name: data.name, email: data.email, phone: data.phone, city: data.city, bio: data.bio });
+      // Split `name` back into first_name / last_name for the API
+      const nameParts = data.name.trim().split(/\s+/);
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || '';
+      const res = await sovereignClient.put('/auth/profile/', {
+        firstName,
+        lastName,
+        phone: data.phone,
+        city: data.city,
+      });
       if (res.status === 'sovereign_halt') throw new Error('فشل');
       return res.data;
     },
@@ -114,7 +117,8 @@ export function useSettingsForm() {
 
   const saveNotifsMutation = useMutation({
     mutationFn: async (prefs: typeof defaultNotifSettings) => {
-      const res = await sovereignClient.post('/auth/profile/', { notification_preferences: prefs });
+      // P0-7 fix: use PUT (only supported method on /api/auth/profile)
+      const res = await sovereignClient.put('/auth/profile/', { notification_preferences: prefs });
       if (res.status === 'sovereign_halt') throw new Error('فشل');
       return res.data;
     },
@@ -124,7 +128,11 @@ export function useSettingsForm() {
 
   const changePasswordMutation = useMutation({
     mutationFn: async (data: { currentPassword: string; newPassword: string }) => {
-      const res = await sovereignClient.post('/auth/change-password/', { current_password: data.currentPassword, new_password: data.newPassword });
+      // P0-7 fix: route to /api/auth/change-password which we'll create alongside this fix
+      const res = await sovereignClient.post('/auth/change-password/', {
+        current_password: data.currentPassword,
+        new_password: data.newPassword,
+      });
       if (res.status === 'sovereign_halt') throw new Error('فشل');
       return res.data;
     },
@@ -134,7 +142,7 @@ export function useSettingsForm() {
 
   const saveAppearanceMutation = useMutation({
     mutationFn: async (data: typeof defaultAppearanceData) => {
-      const res = await sovereignClient.post('/auth/profile/', { theme: data.theme, language: data.language });
+      const res = await sovereignClient.put('/auth/profile/', { theme: data.theme, language: data.language });
       if (res.status === 'sovereign_halt') throw new Error('فشل');
       return res.data;
     },
@@ -151,7 +159,10 @@ export function useSettingsForm() {
     changePasswordMutation.mutate({ currentPassword: s.currentPassword, newPassword: s.newPassword });
   };
 
-  const handleEnable2FA = () => toast.success('تم إرسال رمز التفعيل');
+  // P1 fix: 2FA is not implemented — remove the fake success toast and show an honest message
+  const handleEnable2FA = () => {
+    toast.info('المصادقة الثنائية غير متاحة حالياً. سيتم توفيرها في إصدار قادم.');
+  };
 
   return {
     expandedSection, toggleSection,

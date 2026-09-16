@@ -11,7 +11,12 @@ export async function GET(request: NextRequest) {
     const { searchParams } = request.nextUrl;
 
     const productId = searchParams.get('product_id');
-    const limit = Math.min(50, Math.max(1, parseInt(searchParams.get('limit') || '20', 10)));
+    // P2-38 fix: NaN guard on limit + add skip + page support
+    const parsedLimit = parseInt(searchParams.get('limit') || '20', 10);
+    const limit = Number.isFinite(parsedLimit) && parsedLimit > 0 ? Math.min(50, parsedLimit) : 20;
+    const parsedPage = parseInt(searchParams.get('page') || '1', 10);
+    const page = Number.isFinite(parsedPage) && parsedPage > 0 ? parsedPage : 1;
+    const skip = (page - 1) * limit;
     const status = searchParams.get('status') || 'approved';
 
     if (!productId) {
@@ -27,19 +32,23 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const reviews = await db.review.findMany({
-      where: {
-        productId,
-        status,
-      },
-      include: {
-        user: {
-          select: { id: true, username: true },
+    const [reviews, total] = await Promise.all([
+      db.review.findMany({
+        where: {
+          productId,
+          status,
         },
-      },
-      orderBy: { createdAt: 'desc' },
-      take: limit,
-    });
+        include: {
+          user: {
+            select: { id: true, username: true },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+        take: limit,
+        skip,
+      }),
+      db.review.count({ where: { productId, status } }),
+    ]);
 
     return NextResponse.json({
       success: true,
@@ -59,6 +68,7 @@ export async function GET(request: NextRequest) {
           ? { id: review.user.id, username: review.user.username }
           : null,
       })),
+      pagination: { page, limit, total, total_pages: Math.ceil(total / limit) },
     });
   } catch (error) {
     logger.error('Reviews API', 'Error', error);

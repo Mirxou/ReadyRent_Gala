@@ -30,9 +30,22 @@ export async function GET(request: Request) {
     }
 
     // Find all verifications ready for community review (ai_approved or community_review)
+    // P2-58 fix: use explicit `select` instead of `include` so the Prisma query
+    // itself never loads `facePhoto` (base64 biometric PII). The previous code
+    // used `include` which fetched ALL columns including `facePhoto`, then
+    // relied on a manual `.map()` to strip it from the response. A future
+    // edit to the map (e.g. spreading `...v`) would leak biometric PII to
+    // every verified user. Now the column never enters memory.
     const pendingVerifications = await db.identityVerification.findMany({
       where: { status: { in: ['ai_approved', 'community_review'] } },
-      include: {
+      select: {
+        id: true,
+        aiScore: true,
+        approvalCount: true,
+        rejectionCount: true,
+        requiredApprovals: true,
+        createdAt: true,
+        // facePhoto INTENTIONALLY OMITTED — biometric PII at-rest, never expose
         user: {
           select: {
             id: true,

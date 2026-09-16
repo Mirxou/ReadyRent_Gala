@@ -26,7 +26,9 @@ export async function POST(request: Request) {
     );
 
     // Clear session cookie
-    response.cookies.set('session_token', '', {
+    // P2-36 fix: match the cookie name used by login/register (__Host- in prod)
+    const cookieName = process.env.NODE_ENV === 'production' ? '__Host-session_token' : 'session_token';
+    response.cookies.set(cookieName, '', {
       path: '/',
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',

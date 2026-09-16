@@ -6,9 +6,13 @@
 import { z } from 'zod';
 
 // ──── Auth ────
+// P2-34 fix: password now requires a letter + a digit (was min(8) only — "aaaaaaaa" passed)
 export const registerSchema = z.object({
   email: z.string().email('صيغة البريد الإلكتروني غير صحيحة'),
-  password: z.string().min(8, 'كلمة المرور يجب أن تكون 8 أحرف على الأقل'),
+  password: z
+    .string()
+    .min(8, 'كلمة المرور يجب أن تكون 8 أحرف على الأقل')
+    .refine(pw => /[a-zA-Z]/.test(pw) && /\d/.test(pw), 'كلمة المرور يجب أن تحتوي على حرف ورقم على الأقل'),
   confirmPassword: z.string(),
   username: z.string().min(3).max(30).optional(),
   first_name: z.string().max(100).optional(),

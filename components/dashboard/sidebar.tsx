@@ -37,7 +37,7 @@ const sidebarSections = [
         title: 'إدارة',
         items: [
             { title: 'الحجوزات', href: '/dashboard/bookings', icon: CalendarCheck },
-            { title: 'الخزانة', href: '/dashboard/wallet', icon: Wallet },
+            { title: 'الخزانة', href: '/wallet', icon: Wallet },
             { title: 'الإشعارات', href: '/dashboard/notifications', icon: Bell },
             { title: 'سجل الرغبات', href: '/dashboard/wishlist', icon: Sparkles },
             { title: 'الأصول الملكية', href: '/dashboard/products', icon: Package },

@@ -2,15 +2,27 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
 import { recalcAndSyncTrustScore } from '@/lib/trust-score-sync';
+import { logger } from '@/lib/logger';
+import { checkVerificationVoteRateLimit } from '@/lib/rate-limiter';
 
 // ═══════════════════════════════════════════════════════════════════
 // POST /api/verification/vote — Vote on a verification (approve/reject)
 // All writes wrapped in a single $transaction to prevent race conditions
+// P1 fix: rate limit added (30/min/user) — blocks automated mass-voting.
 // ═══════════════════════════════════════════════════════════════════
 export async function POST(request: Request) {
   try {
     const session = await getSessionFromRequest(request);
     if (!session) return authRequiredResponse();
+
+    // P1 fix: rate limit (30/min/user) — allows active participation but blocks automated mass-voting
+    const rateCheck = checkVerificationVoteRateLimit(session.userId);
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        { success: false, dignity_preserved: true, message_en: 'Too many votes, please slow down.', code: 'RATE_LIMITED' },
+        { status: 429 }
+      );
+    }
 
     // Check that the requesting user is verified
     const currentUser = await db.user.findUnique({
@@ -181,13 +193,17 @@ export async function POST(request: Request) {
     }
 
     // If verification status changed, recalc trust score (fire-and-forget)
+    // P1 fix: was `.catch(() => {})` — silently swallowed errors so a stale
+    // trust score could persist forever. Now we log + the offline-queue can retry.
     if (result.data.status === 'verified' || result.data.status === 'rejected') {
       const verification = await db.identityVerification.findUnique({
         where: { id: verification_id },
         select: { userId: true },
       });
       if (verification) {
-        recalcAndSyncTrustScore(verification.userId).catch(() => {});
+        recalcAndSyncTrustScore(verification.userId).catch((e: unknown) => {
+          logger.error('TrustScore', `Failed to recalc trust score for user ${verification.userId} after vote ${verification_id}`, e);
+        });
       }
     }
 

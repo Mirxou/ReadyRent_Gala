@@ -19,6 +19,22 @@ const DOMPURIFY_CONFIG = {
   FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover', 'onfocus', 'onblur'],
 };
 
+// P2-53 fix: force rel="noopener noreferrer" on every <a target="_blank">
+// (prevents reverse tabnabbing)
+let domPurifyHookInstalled = false;
+function installDomPurifyHook() {
+  if (domPurifyHookInstalled) return;
+  domPurifyHookInstalled = true;
+  if (typeof DOMPurify.addHook === 'function') {
+    DOMPurify.addHook('afterSanitizeAttributes', (node: Element) => {
+      if (node.tagName === 'A' && (node as HTMLAnchorElement).getAttribute('target') === '_blank') {
+        (node as HTMLAnchorElement).setAttribute('rel', 'noopener noreferrer');
+      }
+    });
+  }
+}
+if (typeof window !== 'undefined') installDomPurifyHook();
+
 export default function DynamicPage() {
   const params = useParams();
   const slug = params.slug as string;

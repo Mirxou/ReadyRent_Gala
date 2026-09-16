@@ -6,6 +6,8 @@ import { Wallet, ArrowLeftRight, Send, ShieldCheck, Database } from 'lucide-reac
 import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
 import { Badge } from '@/components/ui/badge';
 import { useAuthStore } from '@/lib/store';
+import { toast } from 'sonner';
+import { walletApi } from '@/lib/api';
 import { type TabKey, type Transaction } from './_components/types';
 import { BalanceTab } from './_components/balance-tab';
 import { DepositTab } from './_components/deposit-tab';
@@ -39,17 +41,30 @@ export default function SovereignWallet() {
 
   useEffect(() => {
     if (!isAuthenticated) return;
-    fetch('/api/wallet', { credentials: 'include' })
-      .then((r) => r.json())
-      .then((d) => {
-        if (d?.data?.balance !== undefined) setBalance(d.data.balance);
-        if (Array.isArray(d?.data?.transactions)) setTransactions(d.data.transactions);
-        const escrow = (d?.data?.transactions || [])
-          .filter((t: Record<string, unknown>) => (t.type as string) === 'ESCROW_HELD' || t.type === 'escrow_lock')
-          .reduce((sum: number, t: Record<string, unknown>) => sum + (Number(t.amount as number) || 0), 0);
-        setEscrowTotal(escrow);
+    // P1 fix: was raw `fetch(...).catch(() => {})` which silently swallowed
+    // network errors and showed "0 balance" without telling the user.
+    // Now uses the unified walletApi client + surfaces errors via toast.
+    walletApi.getBalance()
+      .then((res) => {
+        if (res.status === 'sovereign_halt' || !res.data) {
+          toast.error('تعذّر تحميل رصيد المحفظة. تحقق من الاتصال بالخادم.');
+          return;
+        }
+        const data = res.data as { balance?: number; transactions?: Transaction[]; total?: number; available?: number; escrow?: number };
+        if (data.balance !== undefined) setBalance(data.balance);
+        else if (data.available !== undefined) setBalance(data.available);
+        if (Array.isArray(data.transactions)) setTransactions(data.transactions);
+        // Compute escrow from transactions if backend doesn't return it directly
+        const escrow = (data.transactions || [])
+          .filter((t: Transaction) => (t.type as string) === 'ESCROW_HELD' || t.type === 'escrow_lock')
+          .reduce((sum: number, t: Transaction) => sum + (Number(t.amount) || 0), 0);
+        setEscrowTotal(data.escrow ?? escrow);
       })
-      .catch(() => {})
+      .catch((e: unknown) => {
+        toast.error('فشل تحميل المحفظة. تحقق من اتصالك وحاول مرة أخرى.');
+        // eslint-disable-next-line no-console
+        console.error('Wallet load failed:', e);
+      })
       .finally(() => setIsLoading(false));
   }, [isAuthenticated]);
 

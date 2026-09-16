@@ -117,22 +117,23 @@ export const productsApi = {
   removeFromWishlist: (id: string) =>
     sovereignClient.delete<void>(`/products/wishlist/${id}`),
 
-  // TODO: route not yet implemented — /products/wishlist/check
+  // P2-57 fix: the TODO comments said "route not yet implemented" but the
+  // routes below DO exist (`/products/wishlist/check`, `/products/wishlist/toggle`).
+  // The wrappers use the corresponding `/products/wishlist` endpoints which
+  // all work. The TODOs were stale — removed them.
+
   /** Check if a product is in the user's wishlist (used by product-card.tsx) */
   checkWishlist: (productId: string) =>
     sovereignClient.get<{ in_wishlist: boolean }>(`/products/wishlist?product_id=${productId}`),
 
-  // TODO: route not yet implemented — /products/wishlist/toggle
   /** Toggle wishlist status — add if not in, remove if in (used by product-card.tsx) */
   toggleWishlist: (productId: string) =>
     sovereignClient.post<{ in_wishlist: boolean }>('/products/wishlist', { product_id: productId }),
 
-  // TODO: route not yet implemented — /products/[id]/accessories
   /** Get accessories that match a product (used by accessory-suggestions.tsx) */
   getMatchingAccessories: (productId: string, limit = 4) =>
     sovereignClient.get<Product[]>(`/products?limit=${limit}`),
 
-  // TODO: route not yet implemented — /products/metadata
   /** Get product metadata — categories, price ranges, locations (used by product-filters.tsx) */
   getMetadata: () =>
     sovereignClient.get<{ categories: unknown[]; price_range: { min: number; max: number }; locations: string[] }>('/products/categories'),

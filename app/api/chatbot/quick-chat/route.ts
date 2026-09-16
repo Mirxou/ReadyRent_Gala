@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 // ═══════════════════════════════════════════════════════════════════
-// Chatbot Quick Chat API — Smart rule-based responses
-// Uses z-ai-web-dev-sdk via CLI when available, otherwise smart fallback
+// Chatbot Quick Chat API — Rule-based responses
+// P2-41 fix: previously claimed "Uses z-ai-web-dev-sdk via CLI when available"
+// but no SDK was actually invoked. Comment updated to reflect reality.
+// To enable real LLM responses, import z-ai-web-dev-sdk and wire it here.
 // ═══════════════════════════════════════════════════════════════════
 
 export async function POST(request: NextRequest) {

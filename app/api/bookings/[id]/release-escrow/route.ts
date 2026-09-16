@@ -3,11 +3,13 @@ import { db } from '@/lib/db';
 import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
 import { logger } from '@/lib/logger';
 import { computeContractHash } from '@/lib/contract-terms';
+import { checkEscrowRateLimit } from '@/lib/rate-limiter';
 
 // ═══════════════════════════════════════════════════════════════
 // POST /api/bookings/[id]/release-escrow
 // LEGAL: Algerian Law 18-05 Article 17 — Delivery Receipt
 // Chargily Pay has NO refund/payout API → manual money-out (Yassir model)
+// P1 fix: rate limit added (was missing — compromised admin could mass-drain)
 // ═══════════════════════════════════════════════════════════════
 export async function POST(
   request: Request,
@@ -15,6 +17,15 @@ export async function POST(
 ) {
   const session = await getSessionFromRequest(request);
   if (!session) return authRequiredResponse();
+
+  // P1 fix: rate limit (10/min/user) — slows down mass-drain attempts
+  const rateCheck = checkEscrowRateLimit(session.userId);
+  if (!rateCheck.allowed) {
+    return NextResponse.json(
+      { success: false, dignity_preserved: true, message_en: 'Too many escrow operations, please wait.', code: 'RATE_LIMITED' },
+      { status: 429 }
+    );
+  }
 
   try {
     const { id } = await params;
@@ -102,8 +113,12 @@ export async function POST(
     }
 
     // ── Find payment for this booking ──
+    // P2-37 fix: was `findFirst({ where: { bookingId: id }})` — picked an
+    // arbitrary row when multiple payment attempts exist. Now we target the
+    // most recent completed payment, which is the one tied to the escrow.
     const payment = await db.payment.findFirst({
-      where: { bookingId: id },
+      where: { bookingId: id, status: 'completed' },
+      orderBy: { createdAt: 'desc' },
     });
 
     if (!payment) {

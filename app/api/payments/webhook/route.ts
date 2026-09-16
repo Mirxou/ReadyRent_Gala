@@ -47,13 +47,14 @@ export async function POST(request: Request) {
     // Webhook payload structure (verified against Chargily PHP/Laravel SDK):
     //   { id, type: "checkout.paid", data: <full Checkout object>, created_at, updated_at }
     const eventType = (event.type as string) || 'unknown';
+    const eventId = (event.id as string) || '';
     const eventData = event.data as Record<string, unknown> | undefined;
     const checkoutId = (eventData?.id as string) || '';
     const checkoutStatus = (eventData?.status as string) || '';
     const paymentId = (eventData?.metadata as Record<string, string>)?.payment_id || '';
     const bookingId = (eventData?.metadata as Record<string, string>)?.booking_id || '';
 
-    logger.info('Webhook', `Received event: ${eventType}`, { checkoutId, checkoutStatus, paymentId, bookingId });
+    logger.info('Webhook', `Received event: ${eventType}`, { eventId, checkoutId, checkoutStatus, paymentId, bookingId });
 
     // 4. Only process checkout events
     if (!eventType.startsWith('checkout')) {
@@ -61,28 +62,55 @@ export async function POST(request: Request) {
       return NextResponse.json({ received: true });
     }
 
-    // 5. Find our Payment record
+    if (!eventId) {
+      logger.warn('Webhook', 'Event has no id — cannot guarantee idempotency, refusing to process', { eventType });
+      return NextResponse.json({ error: 'MISSING_EVENT_ID' }, { status: 400 });
+    }
+
+    // 5. P1 fix: idempotency check — if we've already processed this event.id, ack and exit
+    const alreadyProcessed = await db.processedWebhookEvent.findUnique({
+      where: { eventId },
+      select: { id: true, eventType: true, processedAt: true },
+    });
+    if (alreadyProcessed) {
+      logger.info('Webhook', 'Duplicate event already processed — acking', { eventId, eventType: alreadyProcessed.eventType });
+      return NextResponse.json({ received: true, duplicate: true });
+    }
+
+    // 6. Find our Payment record
     const payment = paymentId
       ? await db.payment.findUnique({ where: { id: paymentId } })
       : await db.payment.findFirst({ where: { providerPaymentId: checkoutId } });
 
     if (!payment) {
       logger.warn('Webhook', 'Payment not found', { paymentId, checkoutId });
+      // Still record the event so we don't keep retrying a non-actionable event
+      await db.processedWebhookEvent.create({
+        data: { eventId, eventType, paymentId: null },
+      }).catch((e: unknown) => logger.error('Webhook', 'Failed to record non-actionable event', e));
       return NextResponse.json({ received: true }); // Acknowledge to prevent retries
     }
 
-    // 6. Process based on checkout status (verified: data.status === 'paid' | 'failed' | 'canceled')
+    // 7. P1 fix: wrap ALL side-effects in a single $transaction with the idempotency record
     if (checkoutStatus === 'paid' && payment.status !== 'completed') {
-      // ── PAYMENT SUCCESS ──
-      await handlePaymentSuccess(payment.id, payment.bookingId);
-      logger.info('Webhook', 'Payment confirmed', { paymentId: payment.id, bookingId: payment.bookingId });
+      await handlePaymentSuccessAtomic(payment.id, payment.bookingId, eventId, eventType);
+      logger.info('Webhook', 'Payment confirmed', { paymentId: payment.id, bookingId: payment.bookingId, eventId });
     } else if ((checkoutStatus === 'failed' || checkoutStatus === 'canceled') && payment.status !== 'failed') {
-      // ── PAYMENT FAILED ──
-      await db.payment.update({
-        where: { id: payment.id },
-        data: { status: 'failed' },
+      await db.$transaction([
+        db.processedWebhookEvent.create({
+          data: { eventId, eventType, paymentId: payment.id },
+        }),
+        db.payment.update({
+          where: { id: payment.id },
+          data: { status: 'failed' },
+        }),
+      ]);
+      logger.info('Webhook', 'Payment failed', { paymentId: payment.id, status: checkoutStatus, eventId });
+    } else {
+      // Already in the target state — just record the event for idempotency
+      await db.processedWebhookEvent.create({
+        data: { eventId, eventType, paymentId: payment.id },
       });
-      logger.info('Webhook', 'Payment failed', { paymentId: payment.id, status: checkoutStatus });
     }
 
     return NextResponse.json({ received: true });
@@ -93,77 +121,129 @@ export async function POST(request: Request) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// Side Effects: Payment Success
+// Side Effects: Payment Success (P1 fix — atomic $transaction)
+// All 5 writes (Payment update, Booking update, 2× Transaction, Notification)
+// are wrapped in a single transaction together with the idempotency record.
+// If any step fails, the entire side-effect is rolled back and Chargily will retry.
 // ═══════════════════════════════════════════════════════════════
 
-async function handlePaymentSuccess(paymentId: string, bookingId: string | null) {
-  // 1. Update Payment → completed + escrow held
-  await db.payment.update({
-    where: { id: paymentId },
-    data: {
-      status: 'completed',
-      escrowStatus: 'held',
-    },
-  });
+async function handlePaymentSuccessAtomic(
+  paymentId: string,
+  bookingId: string | null,
+  eventId: string,
+  eventType: string,
+) {
+  // ── 1. Atomic core: idempotency + payment + booking + transactions + notification ──
+  await db.$transaction(async (tx) => {
+    // Insert the idempotency record first — if it fails (unique constraint),
+    // the entire transaction rolls back, signaling a duplicate race.
+    await tx.processedWebhookEvent.create({
+      data: { eventId, eventType, paymentId },
+    });
 
-  if (!bookingId) return;
+    // Fetch the payment row inside the tx so we have a consistent snapshot
+    const payment = await tx.payment.findUnique({
+      where: { id: paymentId },
+      select: { id: true, userId: true, amount: true, status: true, bookingId: true },
+    });
 
-  // 2. Update Booking → confirmed
-  await db.booking.update({
-    where: { id: bookingId },
-    data: {
-      status: 'confirmed',
-      escrowStatus: 'held',
-    },
-  });
+    if (!payment) {
+      throw new Error(`Payment ${paymentId} vanished between lookup and transaction`);
+    }
 
-  // 3. Create wallet transaction record
-  const payment = await db.payment.findUnique({
-    where: { id: paymentId },
-    select: { userId: true, amount: true },
-  });
+    // Defensive: another concurrent webhook may have already completed it
+    if (payment.status === 'completed') {
+      logger.info('Webhook', 'Payment already completed inside tx — likely concurrent webhook, aborting', { paymentId });
+      // Throwing here will roll back the idempotency row too, so the duplicate event
+      // can be retried without falsely claiming to have processed it. We rely on the
+      // outer pre-check to short-circuit subsequent deliveries.
+      throw new Error('ALREADY_COMPLETED');
+    }
 
-  if (payment?.userId) {
-    await db.transaction.create({
+    // Update Payment → completed + escrow held
+    await tx.payment.update({
+      where: { id: paymentId },
       data: {
-        userId: payment.userId,
-        type: 'EXPENDITURE',
-        amount: payment.amount,
-        note: `دفع حجز #${bookingId} — عبر Chargily Pay`,
+        status: 'completed',
+        escrowStatus: 'held',
       },
     });
 
-    await db.transaction.create({
-      data: {
-        userId: payment.userId,
-        type: 'ESCROW_HELD',
-        amount: payment.amount,
-        note: `ضمان حجز #${bookingId}`,
-      },
+    // Update Booking → confirmed (only if bookingId exists)
+    if (bookingId) {
+      await tx.booking.update({
+        where: { id: bookingId },
+        data: {
+          status: 'confirmed',
+          escrowStatus: 'held',
+        },
+      });
+    }
+
+    // Create wallet transaction records (only if userId exists — P0-8 makes it required)
+    if (payment.userId) {
+      await tx.transaction.create({
+        data: {
+          userId: payment.userId,
+          type: 'EXPENDITURE',
+          amount: payment.amount,
+          note: `دفع حجز #${bookingId ?? '—'} — عبر Chargily Pay`,
+          referenceId: bookingId ?? undefined,
+        },
+      });
+
+      await tx.transaction.create({
+        data: {
+          userId: payment.userId,
+          type: 'ESCROW_HELD',
+          amount: payment.amount,
+          note: `ضمان حجز #${bookingId ?? '—'}`,
+          referenceId: bookingId ?? undefined,
+        },
+      });
+
+      // Create notification
+      await tx.notification.create({
+        data: {
+          userId: payment.userId,
+          type: 'financial',
+          title: 'تم تأكيد الدفع',
+          message: 'تم استلام دفع حجزك بنجاح. المبلغ محتجز في الضمان السيادي حتى تأكيد الاستلام.',
+        },
+      });
+    }
+  }).catch((err: unknown) => {
+    // If it was our defensive ALREADY_COMPLETED signal, swallow it
+    if (err instanceof Error && err.message === 'ALREADY_COMPLETED') {
+      return;
+    }
+    // Otherwise rethrow — the outer catch will return 500 to Chargily so it retries
+    throw err;
+  });
+
+  // ── 2. Auto-generate contract — outside the main tx, but idempotent ──
+  // Contract generation is heavy (9-section terms + SHA-256) and is idempotent
+  // on its own (it checks for an existing contract by bookingId), so it can run
+  // outside the main tx without breaking the financial state.
+  if (bookingId) {
+    // Re-read the payment to get userId (the tx above may have changed state)
+    const payment = await db.payment.findUnique({
+      where: { id: paymentId },
+      select: { userId: true },
     });
+    if (payment?.userId) {
+      await ensureContractForBooking(bookingId, payment.userId).catch((e: unknown) => {
+        // Don't fail the webhook if contract generation fails — payment is already recorded
+        logger.error('Webhook', 'Contract generation failed (non-fatal — payment is recorded)', e);
+      });
+    }
   }
-
-  // 4. Create notification
-  if (payment?.userId) {
-    await db.notification.create({
-      data: {
-        userId: payment.userId,
-        type: 'financial',
-        title: 'تم تأكيد الدفع',
-        message: 'تم استلام دفع حجزك بنجاح. المبلغ محتجز في الضمان السيادي حتى تأكيد الاستلام.',
-      },
-    });
-  }
-
-  // 5. Auto-generate contract for this booking (Step 2.4)
-  //    If a draft contract already exists, leave it as-is for manual signing.
-  //    If no contract exists, create one in 'draft' status — user signs later.
-  await ensureContractForBooking(bookingId, payment.userId);
 }
 
 // ═══════════════════════════════════════════════════════════════
 // Auto-generate contract on payment success (Step 2.4)
 // Creates draft contract with all 9 sections if none exists.
+// Already idempotent — uses findUnique on bookingId.
 // ═══════════════════════════════════════════════════════════════
 async function ensureContractForBooking(bookingId: string, userId: string) {
   // Skip if contract already exists (may have been pre-generated)

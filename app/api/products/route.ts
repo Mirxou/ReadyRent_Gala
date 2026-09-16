@@ -73,8 +73,11 @@ export async function GET(request: NextRequest) {
     const availability = searchParams.get('availability');
     const listingType = searchParams.get('listing_type') || undefined;
     const ordering = searchParams.get('ordering') || 'newest';
-    const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
-    const limit = Math.min(50, Math.max(1, parseInt(searchParams.get('limit') || '20', 10)));
+    // P2-38 fix: parse + sanitize pagination params with NaN guard (was Math.max(1, parseInt) which returned NaN if 'page=abc')
+    const parsedPage = parseInt(searchParams.get('page') || '1', 10);
+    const parsedLimit = parseInt(searchParams.get('limit') || '20', 10);
+    const page = Number.isFinite(parsedPage) && parsedPage > 0 ? parsedPage : 1;
+    const limit = Number.isFinite(parsedLimit) && parsedLimit > 0 ? Math.min(50, parsedLimit) : 20;
 
     // Build where clause
     const where: Prisma.ProductWhereInput = {};
@@ -91,13 +94,16 @@ export async function GET(request: NextRequest) {
       where.category = { slug: category };
     }
 
+    // P2-38 fix: NaN guard on price filters (was `parseInt(minPrice, 10)` returning NaN → Prisma throw)
     if (minPrice || maxPrice) {
       where.pricePerDay = {};
       if (minPrice) {
-        where.pricePerDay = { ...where.pricePerDay, gte: parseInt(minPrice, 10) };
+        const p = parseInt(minPrice, 10);
+        if (Number.isFinite(p)) where.pricePerDay = { ...where.pricePerDay, gte: p };
       }
       if (maxPrice) {
-        where.pricePerDay = { ...where.pricePerDay, lte: parseInt(maxPrice, 10) };
+        const p = parseInt(maxPrice, 10);
+        if (Number.isFinite(p)) where.pricePerDay = { ...where.pricePerDay, lte: p };
       }
     }
 

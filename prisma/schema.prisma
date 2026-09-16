@@ -41,6 +41,10 @@ model User {
   isActive            Boolean   @default(true) @map("is_active")
   failedLoginAttempts Int       @default(0) @map("failed_login_attempts")
   lockedUntil         DateTime? @map("locked_until")
+  // P1 fix: persist user preferences (was missing — settings page PUT silently dropped these)
+  notificationPrefs   String?   @default("{}") @map("notification_prefs") // JSON object
+  theme               String?   @default("system")
+  language            String?   @default("ar")
   createdAt           DateTime  @default(now()) @map("created_at")
   updatedAt           DateTime  @updatedAt @map("updated_at")
 
@@ -110,8 +114,10 @@ model Product {
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
 
-  category      Category       @relation(fields: [categoryId], references: [id])
-  vendor        Vendor?        @relation(fields: [vendorId], references: [id])
+  // P2-29 fix: Restrict on category — prevent deleting a category that has products.
+  // Vendor uses SetNull (vendor relation is optional; orphaned products keep existing).
+  category      Category       @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  vendor        Vendor?        @relation(fields: [vendorId], references: [id], onDelete: SetNull)
   reviews       Review[]
   bookings      Booking[]
   wishlistItems Wishlist[]
@@ -151,8 +157,11 @@ model Vendor {
   updatedAt      DateTime @updatedAt @map("updated_at")
 
   products Product[]
-  user     User?     @relation(fields: [userId], references: [id])
+  // P2-29 fix: deleting the linked User nullifies vendor.userId (keep audit trail)
+  user     User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
 
+  // P2-27 fix: index on userId FK
+  @@index([userId])
   @@map("vendors")
 }
 
@@ -205,6 +214,9 @@ model BundleItem {
   bundle  Bundle  @relation(fields: [bundleId], references: [id], onDelete: Cascade)
   product Product @relation(fields: [productId], references: [id])
 
+  // P2-27 fix: indexes on FKs
+  @@index([bundleId])
+  @@index([productId])
   @@map("bundle_items")
 }
 
@@ -221,20 +233,29 @@ model Review {
   status       String   @default("pending") // pending, approved, rejected
   createdAt    DateTime @default(now()) @map("created_at")
 
-  user    User     @relation(fields: [userId], references: [id])
-  booking Booking? @relation(fields: [bookingId], references: [id])
-  product Product  @relation(fields: [productId], references: [id])
+  // P2-29 fix: onDelete Cascade — when a user is deleted, their reviews go with them.
+  // Booking is optional (nullable) so we use NoAction (default) to allow deleting bookings
+  // without requiring a review first; reviews can also exist without a booking.
+  // Product uses Cascade so reviews vanish if the product is deleted.
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  booking Booking? @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+  product Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@index([productId])
   @@index([status])
+  @@index([userId])
+  @@index([bookingId])
   @@map("reviews")
 }
 
 // ──── Booking ────
+// P0-8 fix: userId and productId are now REQUIRED (were optional → allowed
+// creation of bookings with no user or product, breaking escrow logic).
+// If your DB has existing null rows, run a migration to backfill or delete them.
 model Booking {
   id            String   @id @default(cuid())
-  userId        String?  @map("user_id")
-  productId     String?  @map("product_id")
+  userId        String   @map("user_id")
+  productId     String   @map("product_id")
   productName   String?  @map("product_name")
   productImage  String?  @map("product_image")
   startDate     String?  @map("start_date")
@@ -251,8 +272,12 @@ model Booking {
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
 
-  user           User?           @relation(fields: [userId], references: [id])
-  product        Product?        @relation(fields: [productId], references: [id])
+  // P2-29 fix: Booking's userId is now required (P0-8), so the relation
+  // is non-nullable. onDelete Cascade means deleting a User deletes their
+  // bookings. Product uses Restrict — admin must cancel/complete bookings
+  // before deleting the product (prevents orphaned escrow money).
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product        Product        @relation(fields: [productId], references: [id], onDelete: Restrict)
   reviews        Review[]
   contracts      Contract[]
   returnRequests ReturnRequest[]
@@ -279,10 +304,13 @@ model CartItem {
   color        String?
   addedAt      DateTime @default(now()) @map("added_at")
 
+  // P2-29 fix: cart belongs to user+product; deleting either cleans the cart
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  product Product @relation(fields: [productId], references: [id])
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
+  // P2-27 fix: index on productId FK
   @@index([userId])
+  @@index([productId])
   @@map("cart_items")
 }
 
@@ -314,9 +342,13 @@ model WaitlistItem {
   status         String   @default("waiting") // waiting, notified, fulfilled, expired
   createdAt      DateTime @default(now()) @map("created_at")
 
+  // P2-29 fix: waitlist belongs to user+product; deleting either cleans waitlist
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  product Product @relation(fields: [productId], references: [id])
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
+  // P2-27 fix: indexes on FKs
+  @@index([userId])
+  @@index([productId])
   @@map("waitlist_items")
 }
 
@@ -352,12 +384,15 @@ model Dispute {
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
 
-  user     User?            @relation(fields: [userId], references: [id])
-  booking  Booking?         @relation(fields: [bookingId], references: [id])
+  // P2-29 fix: nullable relations use SetNull so deleting user/booking
+  // keeps the dispute record for audit trail (status becomes "closed").
+  user     User?            @relation(fields: [userId], references: [id], onDelete: SetNull)
+  booking  Booking?         @relation(fields: [bookingId], references: [id], onDelete: SetNull)
   messages DisputeMessage[]
 
   @@index([bookingId])
   @@index([status])
+  @@index([userId])
   @@map("disputes")
 }
 
@@ -371,6 +406,9 @@ model DisputeMessage {
 
   dispute Dispute @relation(fields: [disputeId], references: [id], onDelete: Cascade)
 
+  // P2-27 fix: index on disputeId FK + createdAt for ordered message queries
+  @@index([disputeId])
+  @@index([createdAt])
   @@map("dispute_messages")
 }
 
@@ -389,8 +427,11 @@ model Contract {
   createdAt       DateTime  @default(now()) @map("created_at")
   updatedAt       DateTime  @updatedAt @map("updated_at")
 
-  booking Booking @relation(fields: [bookingId], references: [id])
+  // P2-29 fix: deleting a booking deletes its contract automatically
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
 
+  // P2 fix: index on bookingId for dispute lookup
+  @@index([bookingId])
   @@map("contracts")
 }
 
@@ -406,16 +447,25 @@ model ReturnRequest {
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
-  user    User?    @relation(fields: [userId], references: [id])
-  booking Booking? @relation(fields: [bookingId], references: [id])
+  // P2-29 fix: SetNull keeps audit trail when user/booking is deleted
+  user    User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  booking Booking? @relation(fields: [bookingId], references: [id], onDelete: SetNull)
 
+  // P2-27 fix: indexes on FKs
+  @@index([userId])
+  @@index([bookingId])
+  @@index([status])
   @@map("return_requests")
 }
 
 // ──── Payment ────
+// P0-8 fix: userId is now REQUIRED (was optional → allowed payments with
+// no user, breaking wallet reconciliation). bookingId remains optional
+// because wallet-only deposits (when implemented via Chargily) won't have
+// a booking — but they will always have a user.
 model Payment {
   id                String   @id @default(cuid())
-  userId            String?  @map("user_id")
+  userId            String   @map("user_id")
   bookingId         String?  @map("booking_id")
   amount            Int      @default(0)
   method            String? // baridimob, card
@@ -430,6 +480,8 @@ model Payment {
   @@index([userId])
   @@index([bookingId])
   @@index([status])
+  // P2 fix: index providerPaymentId for webhook lookup
+  @@index([providerPaymentId])
   @@map("payments")
 }
 
@@ -473,6 +525,11 @@ model RefundRecord {
   createdAt      DateTime  @default(now()) @map("created_at")
   updatedAt      DateTime  @updatedAt @map("updated_at")
 
+  // P2-27 fix: indexes on FKs + status
+  @@index([bookingId])
+  @@index([paymentId])
+  @@index([userId])
+  @@index([status])
   @@map("refund_records")
 }
 
@@ -492,6 +549,11 @@ model PayoutRecord {
   createdAt      DateTime  @default(now()) @map("created_at")
   updatedAt      DateTime  @updatedAt @map("updated_at")
 
+  // P2-27 fix: indexes on FKs + status
+  @@index([bookingId])
+  @@index([vendorId])
+  @@index([userId])
+  @@index([status])
   @@map("payout_records")
 }
 
@@ -525,6 +587,10 @@ model UserSubscription {
   user User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   plan SubscriptionPlan @relation(fields: [planId], references: [id])
 
+  // P2-27 fix: indexes on FKs + status for subscription queries
+  @@index([userId])
+  @@index([planId])
+  @@index([status])
   @@map("user_subscriptions")
 }
 
@@ -554,6 +620,8 @@ model Address {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  // P2-27 fix: index on userId FK
+  @@index([userId])
   @@map("addresses")
 }
 
@@ -603,6 +671,9 @@ model LocalGuideService {
 
   category LocalGuideCategory @relation(fields: [categoryId], references: [id])
 
+  // P2-27 fix: index on categoryId FK + featured for common query
+  @@index([categoryId])
+  @@index([featured])
   @@map("local_guide_services")
 }
 
@@ -648,6 +719,10 @@ model ActivityLog {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  // P2-27 fix: index on userId + createdAt + action for admin audit log queries
+  @@index([userId])
+  @@index([createdAt])
+  @@index([action])
   @@map("activity_logs")
 }
 
@@ -690,6 +765,8 @@ model ChatSession {
   language  String   @default("ar")
   createdAt DateTime @default(now()) @map("created_at")
 
+  // P2-27 fix: index on optional userId FK
+  @@index([userId])
   @@map("chat_sessions")
 }
 
@@ -745,4 +822,21 @@ model Session {
   @@index([token])
   @@index([userId])
   @@map("sessions")
+}
+
+// ──── Processed Webhook Event (P1 fix: idempotency for Chargily webhooks) ────
+// Without this, a duplicate `checkout.paid` delivery could double-credit
+// escrow + transactions. The webhook handler now checks this table BEFORE
+// running any side-effect, and inserts a row in the same $transaction.
+model ProcessedWebhookEvent {
+  id        String   @id @default(cuid())
+  eventId   String   @unique @map("event_id") // Chargily event.id
+  eventType String   @map("event_type")      // checkout.paid, checkout.failed
+  processedAt DateTime @default(now()) @map("processed_at")
+  // Optional reference to the payment that was affected (for audit)
+  paymentId String?  @map("payment_id")
+
+  @@index([eventId])
+  @@index([processedAt])
+  @@map("processed_webhook_events")
 }

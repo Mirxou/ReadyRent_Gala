@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Send } from 'lucide-react';
 import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
@@ -21,23 +21,53 @@ export function TransferTab({ balance, onBalanceUpdate }: TransferTabProps) {
   const [trAmount, setTrAmount] = useState('');
   const [trNote, setTrNote] = useState('');
   const [trLoading, setTrLoading] = useState(false);
+  // P1 fix: track resolved recipient ID + display name after lookup
+  const [resolvedRecipient, setResolvedRecipient] = useState<{ id: string; name: string } | null>(null);
+  const [resolving, setResolving] = useState(false);
+
+  // ── Resolve recipient identifier (phone/email) → CUID ──
+  const handleResolveRecipient = useCallback(async () => {
+    if (!trRecipient.trim()) { setResolvedRecipient(null); return; }
+    setResolving(true);
+    try {
+      const res = await walletApi.resolveRecipient(trRecipient.trim());
+      if (res.status === 'sovereign_halt' || !res.data) { setResolvedRecipient(null); return; }
+      const data = res.data as { recipient_id: string; first_name: string | null; last_name: string | null; username: string | null; is_verified: boolean };
+      const name = data.first_name && data.last_name
+        ? `${data.first_name} ${data.last_name}`
+        : data.username || data.recipient_id;
+      setResolvedRecipient({ id: data.recipient_id, name });
+    } catch {
+      setResolvedRecipient(null);
+    } finally {
+      setResolving(false);
+    }
+  }, [trRecipient]);
+
+  // Re-resolve on identifier change (debounced via simple effect)
+  useEffect(() => {
+    if (!trRecipient.trim()) { setResolvedRecipient(null); return; }
+    const t = setTimeout(() => { handleResolveRecipient(); }, 400);
+    return () => clearTimeout(t);
+  }, [trRecipient, handleResolveRecipient]);
 
   const handleTransfer = useCallback(async () => {
     const amount = parseFloat(trAmount);
     if (!trRecipient.trim()) { toast.error('يرجى إدخال رقم المستلم'); return; }
+    if (!resolvedRecipient) { toast.error('لم يتم العثور على المستلم — تحقق من الرقم أو البريد'); return; }
     if (!amount || amount <= 0) { toast.error('يرجى إدخال مبلغ صحيح'); return; }
     if (amount > balance) { toast.error('المبلغ يتجاوز الرصيد المتاح'); return; }
     setTrLoading(true);
     try {
-      const res = await walletApi.transfer(amount, trRecipient);
+      const res = await walletApi.transfer(amount, resolvedRecipient.id, trNote || undefined);
       if (res.status === 'sovereign_halt') { toast.error(res.message_en || 'فشل التحويل'); return; }
       if (res.data?.balance !== undefined) onBalanceUpdate(() => res.data.balance!);
       else onBalanceUpdate(prev => prev - amount);
-      toast.success('تم التحويل بنجاح');
-      setTrRecipient(''); setTrAmount(''); setTrNote('');
+      toast.success(`تم التحويل بنجاح إلى ${resolvedRecipient.name}`);
+      setTrRecipient(''); setTrAmount(''); setTrNote(''); setResolvedRecipient(null);
     } catch { toast.error('حدث خطأ أثناء التحويل'); }
     finally { setTrLoading(false); }
-  }, [trRecipient, trAmount, balance, onBalanceUpdate]);
+  }, [trRecipient, resolvedRecipient, trAmount, trNote, balance, onBalanceUpdate]);
 
   return (
     <motion.div
@@ -62,6 +92,15 @@ export function TransferTab({ balance, onBalanceUpdate }: TransferTabProps) {
         <div className="space-y-3">
           <Label className="text-[11px] font-black uppercase text-white/40 tracking-widest">رقم المستلم (هاتف أو بريد إلكتروني)</Label>
           <Input type="text" placeholder="0555 XXX XXX أو email@example.com" value={trRecipient} onChange={(e) => setTrRecipient(e.target.value)} className="h-14 bg-white/5 border-white/10 rounded-2xl text-base text-right focus-visible:border-sovereign-gold focus-visible:ring-sovereign-gold/20 placeholder:text-white/10" dir="ltr" />
+          {resolving && <p className="text-xs text-white/40 font-light">جارٍ البحث عن المستلم...</p>}
+          {resolvedRecipient && !resolving && (
+            <p className="text-xs text-emerald-400 font-light">
+              ✓ تم العثور على: <span className="font-bold">{resolvedRecipient.name}</span>
+            </p>
+          )}
+          {trRecipient.trim() && !resolvedRecipient && !resolving && (
+            <p className="text-xs text-amber-400/70 font-light">لم يتم العثور على المستلم — تحقق من الرقم أو البريد</p>
+          )}
         </div>
 
         <div className="space-y-3">

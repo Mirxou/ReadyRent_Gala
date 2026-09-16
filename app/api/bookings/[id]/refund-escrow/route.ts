@@ -8,6 +8,7 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
 import { logger } from '@/lib/logger';
+import { checkEscrowRateLimit } from '@/lib/rate-limiter';
 
 const VALID_REFUND_REASONS = [
   'late_delivery',
@@ -31,6 +32,15 @@ export async function POST(
 ) {
   const session = await getSessionFromRequest(request);
   if (!session) return authRequiredResponse();
+
+  // P1 fix: rate limit (10/min/admin) — slows down mass-refund attempts
+  const rateCheck = checkEscrowRateLimit(session.userId);
+  if (!rateCheck.allowed) {
+    return NextResponse.json(
+      { success: false, dignity_preserved: true, message_en: 'Too many escrow operations, please wait.', code: 'RATE_LIMITED' },
+      { status: 429 }
+    );
+  }
 
   try {
     const { id } = await params;
@@ -130,8 +140,10 @@ export async function POST(
     }
 
     // ── Find payment for this booking ──
+    // P2-37 fix: target the most recent completed payment (the escrow-holding one)
     const payment = await db.payment.findFirst({
-      where: { bookingId: id },
+      where: { bookingId: id, status: 'completed' },
+      orderBy: { createdAt: 'desc' },
     });
 
     if (!payment) {

@@ -7,8 +7,23 @@ import { walletDepositSchema, validateBody } from '@/lib/validators';
 
 // ═══════════════════════════════════════════════════════════════
 // POST /api/wallet/deposit — Deposit to wallet
-// SECURITY: Non-admin deposits REQUIRE a payment reference.
-// Only admin_topup method bypasses this (for testing/manual topups).
+// P0-6 SECURITY FIX: this route previously accepted any 6-char `reference`
+// string from any authenticated user and immediately credited the wallet.
+// That allowed any user to inflate their balance by up to 500,000 DZD/day
+// by simply providing an arbitrary reference number with no verification
+// against any payment provider.
+//
+// NEW behaviour:
+//   - `admin_topup` (admin/staff only): unchanged — admin credits wallet
+//     manually after confirming offline payment
+//   - `baridimob` / `ccp` / `bank_card` from non-admin: REJECTED with
+//     403 + clear message. These methods must go through Chargily checkout
+//     → webhook reconciliation (TODO: implement /api/wallet/deposit/initiate
+//     that creates a Chargily checkout and lets the webhook credit the
+//     wallet on `checkout.paid`).
+//
+// This is a temporary lockdown until the Chargily-initiated deposit flow
+// ships. The 500,000 DZD/day self-inflation vulnerability is closed.
 // ═══════════════════════════════════════════════════════════════
 
 const MAX_DEPOSIT_PER_DAY = 500000;
@@ -18,7 +33,7 @@ export async function POST(request: Request) {
     const session = await getSessionFromRequest(request);
     if (!session) return authRequiredResponse();
 
-    // ── Rate limiting: 20 deposits per minute per user ──
+    // ── Rate limiting: 20 wallet operations per minute per user ──
     const rateCheck = checkWalletRateLimit(session.userId);
     if (!rateCheck.allowed) {
       return NextResponse.json(
@@ -43,11 +58,10 @@ export async function POST(request: Request) {
       );
     }
 
-    const { amount, method, reference } = vResult.data;
+    const { amount, method } = vResult.data;
     const resolvedMethod = method ?? 'baridimob';
 
-    // ── SECURITY: Non-admin deposits must have a payment reference ──
-    // This prevents users from self-reporting deposits without actual payment
+    // ── Fetch user role ──
     const user = await db.user.findUnique({
       where: { id: session.userId },
       select: { role: true },
@@ -55,33 +69,38 @@ export async function POST(request: Request) {
 
     const isAdmin = user?.role === 'admin' || user?.role === 'staff';
 
-    if (resolvedMethod !== 'admin_topup') {
-      if (!reference || reference.length < 6) {
+    // ── P0-6 fix: lockdown non-admin deposits ──
+    if (resolvedMethod === 'admin_topup') {
+      if (!isAdmin) {
         return NextResponse.json(
           {
             success: false,
             dignity_preserved: true,
-            message_ar: 'يجب توفير رقم مرجع الدفع من بوابة الدفع',
-            message_en: 'Payment reference number is required for deposits',
-            code: 'PAYMENT_REFERENCE_REQUIRED',
+            message_ar: 'طريقة الإيداع غير مصرّح بها',
+            message_en: 'Unauthorized deposit method',
+            code: 'FORBIDDEN',
           },
-          { status: 400 }
+          { status: 403 }
         );
       }
-    } else if (!isAdmin) {
-      // Only admin/staff can use admin_topup
+      // admin_topup proceeds below — no reference required
+    } else {
+      // Non-admin deposits via baridimob/ccp/bank_card are suspended until
+      // the Chargily-initiated deposit flow is implemented. Refuse with
+      // a clear message and link to the (future) initiate route.
       return NextResponse.json(
         {
           success: false,
           dignity_preserved: true,
-          message_en: 'Unauthorized deposit method',
-          code: 'FORBIDDEN',
+          message_ar: 'الإيداع الذاتي عبر BaridiMob/CCP/BankCard معطّل مؤقتاً. يرجى التواصل مع الإدارة أو استخدام بوابة Chargily عند توفرها.',
+          message_en: 'Self-service deposits via BaridiMob/CCP/BankCard are temporarily disabled. Please contact support or use the Chargily gateway once available.',
+          code: 'DEPOSIT_METHOD_UNAVAILABLE',
         },
         { status: 403 }
       );
     }
 
-    // Daily deposit limit
+    // ── Daily deposit limit ──
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
 
@@ -107,7 +126,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // Create transaction & update balance atomically
+    // ── Create transaction & update balance atomically ──
     const txHash = `dep_${crypto.randomUUID().replace(/-/g, '').slice(0, 16)}`;
     const [updatedUser, transaction] = await db.$transaction([
       db.user.update({
@@ -120,11 +139,25 @@ export async function POST(request: Request) {
           userId: session.userId,
           type: 'DEPOSIT',
           amount,
-          note: `إيداع عبر ${resolvedMethod}${reference ? ` — مرجع: ${reference}` : ''}`,
+          note: `إيداع بواسطة ${user?.role} (${resolvedMethod})`,
           hash: txHash,
         },
       }),
     ]);
+
+    // ── Log admin action for audit trail ──
+    if (isAdmin) {
+      await db.activityLog.create({
+        data: {
+          userId: session.userId,
+          action: 'admin_topup',
+          target: session.userId,
+          ip: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown',
+        },
+      }).catch((e: unknown) => {
+        logger.error('Wallet Deposit', 'Failed to write admin audit log', e);
+      });
+    }
 
     const data = {
       balance: updatedUser.walletBalance,

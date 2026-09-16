@@ -85,7 +85,11 @@ export async function POST(request: NextRequest) {
     );
 
     // Set HttpOnly session cookie
-    response.cookies.set('session_token', token, {
+    // P2-36 fix: __Host- prefix forces secure=true, path=/, no subdomain scope.
+    // In dev (NODE_ENV !== 'production') we keep secure=false so localhost
+    // over HTTP still works; in prod, __Host- requires HTTPS.
+    const cookieName = process.env.NODE_ENV === 'production' ? '__Host-session_token' : 'session_token';
+    response.cookies.set(cookieName, token, {
       path: '/',
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',

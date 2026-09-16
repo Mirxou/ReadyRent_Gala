@@ -53,8 +53,9 @@ function extractToken(request: NextRequest): string | null {
   if (authHeader?.startsWith('Bearer ')) {
     return authHeader.slice(7);
   }
-  // 2. Cookie: session_token=<token>
-  const cookie = request.cookies.get('session_token');
+  // 2. Cookie: session_token=<token> OR __Host-session_token=<token>
+  // P2-36 fix: support both dev (session_token) and prod (__Host-session_token) names
+  const cookie = request.cookies.get('session_token') || request.cookies.get('__Host-session_token');
   return cookie?.value || null;
 }
 

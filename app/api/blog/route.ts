@@ -26,8 +26,11 @@ export async function GET(request: NextRequest) {
     const { searchParams } = request.nextUrl;
 
     const search = searchParams.get('search') || undefined;
-    const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
-    const limit = Math.min(50, Math.max(1, parseInt(searchParams.get('limit') || '10', 10)));
+    // P2-38 fix: NaN guard on page+limit (was Math.max(1, parseInt) → NaN if 'page=abc')
+    const parsedPage = parseInt(searchParams.get('page') || '1', 10);
+    const parsedLimit = parseInt(searchParams.get('limit') || '10', 10);
+    const page = Number.isFinite(parsedPage) && parsedPage > 0 ? parsedPage : 1;
+    const limit = Number.isFinite(parsedLimit) && parsedLimit > 0 ? Math.min(50, parsedLimit) : 10;
 
     const where: Record<string, unknown> = { status: 'published' };
     if (search) {

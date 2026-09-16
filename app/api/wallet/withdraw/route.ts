@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { Prisma } from '@prisma/client';
 import { db } from '@/lib/db';
 import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
 import { logger } from '@/lib/logger';
@@ -7,6 +8,9 @@ import { checkWalletRateLimit } from '@/lib/rate-limiter';
 
 // ═══════════════════════════════════════════════════════════════
 // POST /api/wallet/withdraw — Withdraw from wallet
+// P1 fix: $transaction now uses isolationLevel Serializable so that two
+// concurrent withdrawals can't both pass the balance check on a stale snapshot
+// and result in a negative balance.
 // ═══════════════════════════════════════════════════════════════
 export async function POST(request: Request) {
   try {
@@ -35,7 +39,9 @@ export async function POST(request: Request) {
 
     const { amount, method } = vResult.data;
 
-    // Use interactive transaction to atomically check balance and decrement
+    // Use interactive transaction with SERIALIZABLE isolation to atomically
+    // check balance and decrement (prevents two concurrent withdrawals from
+    // both passing the check on a stale snapshot).
     const result = await db.$transaction(async (tx) => {
       const user = await tx.user.findUnique({
         where: { id: session.userId },
@@ -63,6 +69,12 @@ export async function POST(request: Request) {
       });
 
       return { updatedUser, transaction } as const;
+    }, {
+      // P1 fix: Serializable prevents concurrent balance-check races.
+      // NOTE: SQLite ignores this option (only one writer at a time anyway),
+      // but PostgreSQL honours it. When the project migrates to PostgreSQL
+      // (per schema.prisma comment) this becomes effective automatically.
+      isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
     });
 
     if ('error' in result) {
