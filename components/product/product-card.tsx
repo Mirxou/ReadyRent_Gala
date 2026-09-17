@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { Star, Heart, MapPin } from 'lucide-react';
+import { Star, Heart, MapPin } Shield, from 'lucide-react';
 import { cn, formatNumber } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
@@ -114,10 +114,36 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
 
                 <div className="pt-6 border-t border-border flex items-end justify-between mt-auto">
                     <div className="space-y-0.5">
-                        <p className="text-[9px] font-black text-muted-foreground uppercase opacity-40">السعر لليوم</p>
-                        <p className="text-2xl font-black tracking-tighter">
-                            {formatNumber(product.price_per_day)} <span className="text-xs font-normal opacity-40">دج</span>
+                        {/* P1: dynamic price label based on supported_units */}
+                        <p className="text-[9px] font-black text-muted-foreground uppercase opacity-40">
+                            {(() => {{
+                              const u = String(product.supported_units || 'DAY');
+                              if (u.includes('HOUR')) return 'السعر للساعة';
+                              if (u.includes('MONTH')) return 'السعر للشهر';
+                              return 'السعر لليوم';
+                            }})()}
                         </p>
+                        <p className="text-2xl font-black tracking-tighter">
+                            {{formatNumber(
+                              (product.price_per_hour && String(product.supported_units || 'DAY').includes('HOUR'))
+                                ? product.price_per_hour
+                                : (product.price_per_month && String(product.supported_units || 'DAY').includes('MONTH'))
+                                  ? product.price_per_month
+                                  : product.price_per_day
+                            )}} <span className="text-xs font-normal opacity-40">دج</span>
+                        </p>
+                        {/* P1: KYC badge if product requires verification */}
+                        {{product.required_kyc_tier && product.required_kyc_tier !== 'NONE' && (
+                          <span className="inline-flex items-center gap-1 mt-1 text-[9px] font-bold text-amber-600 bg-amber-500/10 px-2 py-0.5 rounded-full">
+                            <Shield className="w-2.5 h-2.5" /> يتطلب توثيق
+                          </span>
+                        )}}
+                        {/* P1: deposit mode badge */}
+                        {{product.deposit_mode === 'NONE' && (
+                          <span className="inline-flex items-center gap-1 ml-1 text-[9px] font-bold text-emerald-600 bg-emerald-500/10 px-2 py-0.5 rounded-full">
+                            بدون ضمان
+                          </span>
+                        )}}
                     </div>
                     <button
                       onClick={handleToggleWishlist}

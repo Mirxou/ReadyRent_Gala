@@ -200,6 +200,48 @@ export default function BookingsPage() {
                           </p>
                         </div>
                       </div>
+                      {/* P1: rental unit + duration display */}
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-4 w-4 text-muted-foreground" />
+                        <div>
+                          <p className="text-sm text-muted-foreground">الوحدة</p>
+                          <p className="font-semibold text-sm">
+                            {booking.rental_unit === 'HOUR' ? 'بالساعة' : booking.rental_unit === 'MONTH' ? 'بالشهر' : 'باليوم'}
+                            {booking.duration ? ` (${booking.duration})` : ''}
+                          </p>
+                        </div>
+                      </div>
+                      {/* P1: deposit amount display */}
+                      {booking.deposit_amount != null && booking.deposit_amount > 0 && (
+                        <div className="flex items-center gap-2">
+                          <Shield className="h-4 w-4 text-amber-500" />
+                          <div>
+                            <p className="text-sm text-muted-foreground">الضمان</p>
+                            <p className="font-semibold text-sm text-amber-600">{Number(booking.deposit_amount).toFixed(0)} دج</p>
+                          </div>
+                        </div>
+                      )}
+                      {/* P1: late fee display */}
+                      {booking.late_fee_charged != null && booking.late_fee_charged > 0 && (
+                        <div className="flex items-center gap-2">
+                          <AlertTriangle className="h-4 w-4 text-red-500" />
+                          <div>
+                            <p className="text-sm text-muted-foreground">رسوم تأخير</p>
+                            <p className="font-semibold text-sm text-red-600">{Number(booking.late_fee_charged).toFixed(0)} دج</p>
+                          </div>
+                        </div>
+                      )}
+                      {/* P1: custom offer badge */}
+                      {booking.is_custom_offer && (
+                        <div className="flex items-center gap-2">
+                          <Sparkles className="h-4 w-4 text-purple-500" />
+                          <div>
+                            <p className="text-sm text-muted-foreground">عرض خاص</p>
+                            <p className="font-semibold text-sm text-purple-600">{booking.custom_offer_note || 'اتفاق مباشر'}</p>
+                          </div>
+                        </div>
+                        </div>
+                      </div>
                     </div>
 
                     <div className="flex gap-2 pt-2">
