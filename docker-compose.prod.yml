@@ -1,0 +1,103 @@
+# ═══════════════════════════════════════════════════════════════
+# STANDARD.Rent — Production Docker Compose
+# Usage: docker-compose -f docker-compose.prod.yml up -d --build
+#
+# Differences from docker-compose.yml (dev):
+#   - No source-code volume mounts (uses built image only)
+#   - Named volumes for persistent data (not bind mounts)
+#   - restart: always (not unless-stopped)
+#   - Stricter resource limits
+#   - Logging configuration (json-file, 10MB × 3 files)
+#   - Caddy on :80 + :443 with auto-TLS
+# ═══════════════════════════════════════════════════════════════
+
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '127.0.0.1:3000:3000'  # Only localhost — Caddy proxies externally
+    environment:
+      - DATABASE_URL=file:/app/data/custom.db
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:?NEXTAUTH_SECRET must be set}
+      - CHARGILY_API_KEY=${CHARGILY_API_KEY:?CHARGILY_API_KEY must be set}
+      - CHARGILY_MODE=live
+      - CRON_SECRET=${CRON_SECRET:?CRON_SECRET must be set}
+      - RESEND_API_KEY=${RESEND_API_KEY:-}
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME:-}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY:-}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET:-}
+      - NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL:-https://readyrent.gala}
+      - NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL:-https://readyrent.gala}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-https://readyrent.gala}
+      - NODE_ENV=production
+    volumes:
+      - app-db:/app/data          # Named volume (persistent, survives restarts)
+    restart: always
+    healthcheck:
+      test: ['CMD', 'wget', '-qO-', 'http://localhost:3000/api/health']
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    mem_limit: 1g
+    cpus: '2.0'
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '3'
+    depends_on:
+      - notifications
+
+  notifications:
+    build: ./mini-services/notifications-service
+    ports:
+      - '127.0.0.1:3004:3004'  # Only localhost — Caddy proxies via XTransformPort
+    environment:
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:?NEXTAUTH_SECRET must be set}
+      - DB_PATH=/app/data/custom.db
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-https://readyrent.gala}
+      - NODE_ENV=production
+    volumes:
+      - app-db:/app/data:ro     # Read-only shared volume
+    restart: always
+    healthcheck:
+      test: ['CMD', 'wget', '-qO-', 'http://localhost:3004/health']
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    mem_limit: 256m
+    cpus: '0.5'
+    logging:
+      driver: json-file
+      options:
+        max-size: '5m'
+        max-file: '3'
+
+  caddy:
+    image: caddy:2-alpine
+    ports:
+      - '80:80'     # HTTP (redirects to HTTPS)
+      - '443:443'   # HTTPS with auto-TLS from Let's Encrypt
+    volumes:
+      - ./Caddyfile.prod:/etc/caddy/Caddyfile
+      - caddy-data:/data          # Caddy TLS certificates + state
+      - caddy-config:/config
+    restart: always
+    depends_on:
+      - app
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '3'
+
+volumes:
+  app-db:        # SQLite database (named volume — survives container rebuilds)
+  caddy-data:   # Caddy TLS certificates + ACME state
+  caddy-config: # Caddy runtime config

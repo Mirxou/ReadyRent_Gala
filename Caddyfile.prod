@@ -1,0 +1,57 @@
+# ═══════════════════════════════════════════════════════════════
+# STANDARD.Rent — Production Caddyfile
+# Auto-TLS via Let's Encrypt on :443
+# Replace readyrent.gala with your actual domain.
+# ═══════════════════════════════════════════════════════════════
+
+readyrent.gala {
+    # ──── Structured access log to stdout ────
+    log {
+        output stdout
+        format json
+    }
+
+    # ──── Security headers ────
+    header {
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        Permissions-Policy "camera=(self), microphone=(), geolocation=(self), payment=(self)"
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        -Server
+    }
+
+    # ──── WebSocket proxy for notifications (port 3004) ────
+    @ws_notifications {
+        query XTransformPort=3004
+        header Connection *Upgrade*
+        header Upgrade websocket
+    }
+    handle @ws_notifications {
+        reverse_proxy localhost:3004 {
+            header_up Host {host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+            header_up X-Real-IP {remote_host}
+        }
+    }
+
+    # ──── Block unauthorized XTransformPort values (SSRF protection) ────
+    @unauthorized_port {
+        query XTransformPort=*
+    }
+    handle @unauthorized_port {
+        respond 403 "{\"success\":false,\"code\":\"PORT_FORBIDDEN\",\"message\":\"Port not allowed\"}"
+    }
+
+    # ──── Default: proxy to Next.js app (port 3000) ────
+    handle {
+        reverse_proxy localhost:3000 {
+            header_up Host {host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+            header_up X-Real-IP {remote_host}
+        }
+    }
+}
