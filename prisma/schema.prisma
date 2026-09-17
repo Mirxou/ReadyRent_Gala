@@ -66,6 +66,7 @@ model User {
   identityVerification IdentityVerification?
   verificationVotes    VerificationVote[]    @relation("VerificationVoter")
   sessions             Session[]
+  withdrawalRequests WithdrawalRequest[]
   vendors              Vendor[]
 
   @@index([role])
@@ -151,6 +152,11 @@ model Vendor {
   isActive       Boolean  @default(true) @map("is_active")
   website        String?
   commissionRate Float?   @map("commission_rate")
+  // ── P0: Payout account info (CCP / BaridiMob) ──
+  ccpAccount       String?  @map("ccp_account")
+  ccpKey           String?  @map("ccp_key")
+  ccpName          String?  @map("ccp_name")
+  baridimobPhone   String?  @map("baridimob_phone")
   joinedDate     String?  @map("joined_date")
   userId         String?  @map("user_id")
   createdAt      DateTime @default(now()) @map("created_at")
@@ -839,4 +845,29 @@ model ProcessedWebhookEvent {
   @@index([eventId])
   @@index([processedAt])
   @@map("processed_webhook_events")
+}
+
+// ──── Withdrawal Request (P0: Vendor Payouts) ────
+// Vendor requests to withdraw accumulated earnings (from PayoutRecord).
+// Admin processes the transfer manually via CCP or BaridiMob.
+model WithdrawalRequest {
+  id              String    @id @default(cuid())
+  userId          String    @map("user_id")
+  amount          Int       // المبلغ بالدينار (minimum 2000 DZD)
+  method          String    @default("CCP") // CCP | BARIDIMOB
+  status          String    @default("PENDING") // PENDING | PROCESSING | COMPLETED | REJECTED
+  adminNote       String?   @map("admin_note")
+  // Aggregated payout record IDs included in this withdrawal
+  payoutRecordIds String    @default("[]") @map("payout_record_ids") // JSON array of PayoutRecord IDs
+  requestedAt     DateTime  @default(now()) @map("requested_at")
+  processedAt      DateTime? @map("processed_at")
+  processedBy      String?   @map("processed_by")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@map("withdrawal_requests")
 }
