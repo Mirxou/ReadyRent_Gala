@@ -205,3 +205,37 @@ Stage Summary:
 - P2 closed on the user's real project (ReadyRent_Gala): the platform now "speaks" at payment/late/return
   and reviews are strictly post-completion. Note: .env DATABASE_URL repointed to repo-local db;
   RESEND_API_KEY not set → emails logged to outbox (status=skipped) until a real key is added.
+
+---
+Task ID: 4
+Agent: main orchestrator (Z.ai Code)
+Task: Prepare P0+P1+P2 baseline for GitHub publication to Mirxou/ReadyRent_Gala
+
+Work Log:
+- Audited local git state: sandbox auto-commits (UUID messages) already contained all
+  P0-P2 sources; only db/custom.db was dirty.
+- Squashed lineage into single clean commit:
+  "feat: complete escrow, late-fee cron, review gating, and email notifications"
+  (123 files, +14,014 lines; history = Initial commit + this feat commit).
+- Removed stray tool-results/ read artifact from commit; added to .gitignore.
+- Verified .env contains no real secrets (DATABASE_URL only) — safe per repo convention.
+- Added remote origin = https://github.com/Mirxou/ReadyRent_Gala.git
+- Anonymous ls-remote SUCCESS (repo is public). CRITICAL discovery: remote is NOT empty —
+  it is a parallel mature codebase of the same product: app/ (no src/), Chargily Pay
+  checkout, KYC pipeline, admin panel (bookings/damage/forecasting), vendor portals,
+  production tooling (Docker/Caddyfile.prod/deploy.sh), CI workflow, 10 open PRs,
+  own staged plan ("feat: P1 — storefront + tenant dashboard Stage 3 visibility").
+- Histories are UNRELATED (different roots). Naive push → rejected; force push → would
+  destroy remote history + 10 PRs + CI. Vetoed.
+- Push NOT executed: sandbox has no GitHub credentials (no gh CLI, no token, no
+  credential helper). Even branch-push (Option A) requires a user-provided PAT.
+
+Stage Summary:
+- Local baseline is commit-clean, secret-safe, push-ready: single feat commit on main.
+- Remote topology documented; three integration options identified:
+  A) push local main as new branch feat/readyrent-core-baseline + PR (safe, mechanical)
+  B) port trust-engine (escrow/late-fee/email-outbox/review-gating) INTO their
+     app/-structured codebase as the real P3 (strategic recommendation)
+  C) force-push main (destructive — vetoed)
+- BLOCKED on: user-provided fine-grained PAT (Contents: Read+Write, single repo,
+  short expiry) OR user decision on option C (explicit confirmation required).
