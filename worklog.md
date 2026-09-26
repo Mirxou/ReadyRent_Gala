@@ -239,3 +239,39 @@ Stage Summary:
   C) force-push main (destructive — vetoed)
 - BLOCKED on: user-provided fine-grained PAT (Contents: Read+Write, single repo,
   short expiry) OR user decision on option C (explicit confirmation required).
+
+---
+Task ID: 5
+Agent: main orchestrator (Z.ai Code)
+Task: P3 phase 1 — graft trust engine into remote codebase (feat/escrow-trust-engine)
+
+Work Log:
+- Deep recon of origin/main (STANDARD.Rent, 524 files): found escrowStatus FLAG without
+  money amounts on Booking, ZERO late-fee machinery, open review gate (any user, no
+  booking linkage enforcement), Resend fire-and-forget email without audit trail.
+  Their own code notes Chargily has NO payout API ("Yassir model", Law 18-05 Art.17).
+- Created git worktree /home/z/readyrent-graft on branch feat/escrow-trust-engine
+  (from origin/main @ 393d47f). Sandbox app on :3000 untouched.
+- Schema graft (validated): Booking += depositHeld/depositReturned/lateFeePerDay/
+  lateFee/lateWarningSent/overdueAt + 'overdue' status; Review += @@unique([bookingId]);
+  new EmailLog model (email_logs).
+- Libs grafted to their conventions (@/lib/db, bilingual envelopes): lib/escrow.ts
+  (pure math), lib/email-outbox.ts (queueEmail: persist→Resend→sent/failed, never
+  throws), lib/late-check.ts (idempotent sweep + one-shot LATE_WARNING + Notification),
+  lib/scheduler.ts; instrumentation.ts starts sweep on boot.
+- Repaired THEIR pre-existing syntax breakage blocking tsc: product-card.tsx corrupted
+  lucide import; dashboard/bookings/page.tsx unbalanced JSX (missing )} + grid closer,
+  2 stray closers).
+- Verified: my graft files = 0 type errors. Remaining 99 files with type errors are
+  THEIR pre-existing debt (missing lib/api modules, gtag, framer-motion v12 easing) —
+  documented, not ours to fix in this PR. Their next.config now has
+  ignoreBuildErrors:false → their own build is red pre-graft.
+- Committed a2b6faa on feat/escrow-trust-engine. PORTING-MAP.md rides the branch with
+  phase-2 wiring table (webhook capture, release-escrow accounting, review gate
+  enforcement, refund mirror, UI breakdown/badges).
+
+Stage Summary:
+- PR #11 payload is READY: branch feat/escrow-trust-engine = origin/main + graft commit.
+- ONLY blocker for push: GitHub PAT (fine-grained, ReadyRent_Gala, Contents:RW) —
+  must be minted by the repo owner; sandbox has no credentials.
+- After push+PR: phase 2 wiring, then P3 payout loop (PayoutRequest → CCP/BaridiMob).
