@@ -13,6 +13,11 @@ export async function register() {
       runStartupChecks();
       // eslint-disable-next-line no-console
       console.log('[Startup] All critical env vars present.');
+
+      // GRAFT: escrow-trust-engine — start the late-return sweep (every 30s).
+      // Idempotent + build-phase guarded inside startScheduler().
+      const { startScheduler } = await import('./lib/scheduler');
+      startScheduler();
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error('[Startup] FATAL:', err);

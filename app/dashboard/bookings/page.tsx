@@ -240,8 +240,7 @@ export default function BookingsPage() {
                             <p className="font-semibold text-sm text-purple-600">{booking.custom_offer_note || 'اتفاق مباشر'}</p>
                           </div>
                         </div>
-                        </div>
-                      </div>
+                      )}
                     </div>
 
                     <div className="flex gap-2 pt-2">
