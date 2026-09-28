@@ -20,8 +20,12 @@ function getCsrfToken(): string {
 // ──── Core Fetch Helper ────
 // Returns { data, status, meta } to be compatible with axios response pattern
 // that components use: `const res = await api.get(...); const d = res.data;`
+// Generic with an axios-compatible default (`AxiosResponse<any>` semantics):
+// callers may pass an explicit DTO type, otherwise `data` stays `any` because
+// the backend payload shape is unvalidated at runtime.
 
-export async function apiFetch(
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function apiFetch<T = any>(
   path: string,
   options: {
     method?: string;
@@ -29,7 +33,7 @@ export async function apiFetch(
     params?: Record<string, unknown>;
     headers?: Record<string, string>;
   } = {},
-): Promise<{ data: unknown; status: number; meta?: unknown }> {
+): Promise<{ data: T; status: number; meta?: unknown }> {
   let url = `/api/${path.replace(/^\/+/, '')}`;
 
   // Append query params
@@ -68,7 +72,7 @@ export async function apiFetch(
 
     // Handle 204 No Content
     if (res.status === 204) {
-      return { data: { success: true }, status: 204 };
+      return { data: { success: true } as T, status: 204 };
     }
 
     const json = await res.json();
@@ -83,7 +87,7 @@ export async function apiFetch(
   } catch (error) {
     const message = (error as Error)?.message || 'Network error';
     // Silently fail — toasts shown by callers using server error messages
-    return { data: { error: message }, status: 0, meta: { failed: true } };
+    return { data: { error: message } as T, status: 0, meta: { failed: true } };
   }
 }
 
@@ -91,18 +95,18 @@ export async function apiFetch(
 // Components use: `api.get('/path')`, `api.post('/path', body)`, etc.
 // These return `{ data: ..., status: ... }` just like axios responses.
 export const api = {
-  get: (url: string, config?: { params?: Record<string, unknown>; headers?: Record<string, string> }) =>
-    apiFetch(url, { method: 'GET', params: config?.params, headers: config?.headers }),
+  get: <T = any>(url: string, config?: { params?: Record<string, unknown>; headers?: Record<string, string> }) =>
+    apiFetch<T>(url, { method: 'GET', params: config?.params, headers: config?.headers }),
 
-  post: (url: string, body?: unknown, config?: { headers?: Record<string, string> }) =>
-    apiFetch(url, { method: 'POST', body, headers: config?.headers }),
+  post: <T = any>(url: string, body?: unknown, config?: { headers?: Record<string, string> }) =>
+    apiFetch<T>(url, { method: 'POST', body, headers: config?.headers }),
 
-  put: (url: string, body?: unknown, config?: { headers?: Record<string, string> }) =>
-    apiFetch(url, { method: 'PUT', body, headers: config?.headers }),
+  put: <T = any>(url: string, body?: unknown, config?: { headers?: Record<string, string> }) =>
+    apiFetch<T>(url, { method: 'PUT', body, headers: config?.headers }),
 
-  patch: (url: string, body?: unknown, config?: { headers?: Record<string, string> }) =>
-    apiFetch(url, { method: 'PATCH', body, headers: config?.headers }),
+  patch: <T = any>(url: string, body?: unknown, config?: { headers?: Record<string, string> }) =>
+    apiFetch<T>(url, { method: 'PATCH', body, headers: config?.headers }),
 
-  delete: (url: string, config?: { headers?: Record<string, string> }) =>
-    apiFetch(url, { method: 'DELETE', headers: config?.headers }),
+  delete: <T = any>(url: string, config?: { headers?: Record<string, string> }) =>
+    apiFetch<T>(url, { method: 'DELETE', headers: config?.headers }),
 };

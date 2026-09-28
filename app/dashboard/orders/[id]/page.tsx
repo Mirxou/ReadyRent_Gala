@@ -36,6 +36,7 @@ import { cn, formatNumber } from '@/lib/utils';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import React from 'react';
+import type { SovereignResponse } from '@/types/sovereign';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -57,7 +58,7 @@ export default function BookingDetailsPage() {
   const updateStatusMutation = useMutation({
     mutationFn: ({ bookingId, status }: { bookingId: string; status: string }) =>
       bookingsApi.updateStatus(bookingId, status),
-    onSuccess: (res: Record<string, unknown>) => {
+    onSuccess: (res: SovereignResponse<unknown>) => {
       if (res?.status === 'sovereign_halt' || res?.code === 'SYSTEM_HALT' || res?.success === false || res?.error) {
         toast.error((res?.message_ar as string) || (res?.error as string) || 'فشل في تحديث حالة الحجز');
         return;
@@ -69,7 +70,7 @@ export default function BookingDetailsPage() {
 
   const createDisputeMutation = useMutation({
     mutationFn: (data: Record<string, unknown>) => disputesApi.initiateDispute(data as Parameters<typeof disputesApi.initiateDispute>[0]),
-    onSuccess: (res: Record<string, unknown>) => {
+    onSuccess: (res: SovereignResponse<unknown>) => {
       if (res?.status === 'sovereign_halt' || res?.code === 'SYSTEM_HALT' || res?.success === false || res?.error) {
         toast.error((res?.message_ar as string) || (res?.error as string) || 'فشل في رفع النزاع');
         return;
@@ -86,7 +87,7 @@ export default function BookingDetailsPage() {
       return;
     }
     createDisputeMutation.mutate({
-      booking_id: booking.id,
+      booking_id: booking?.id,
       reason: disputeReason,
       category: 'quality_issue' // MVP default
     });
@@ -231,7 +232,7 @@ export default function BookingDetailsPage() {
             <GlassPanel className="p-8 relative overflow-hidden" gradientBorder>
                 <div className="flex flex-col md:flex-row gap-10">
                     <div className="w-full md:w-64 h-80 rounded-3xl overflow-hidden shadow-2xl border border-white/5 relative">
-                        <Image src={booking.product_image || booking.product?.images?.[0]?.image} className="w-full h-full object-cover" alt={booking.product_name || 'صورة المنتج'} fill unoptimized />
+                        <Image src={(booking.product_image || booking.product?.images?.[0]?.image) as string} className="w-full h-full object-cover" alt={booking.product_name || 'صورة المنتج'} fill unoptimized />
                     </div>
                     <div className="flex-1 space-y-6">
                         <div className="flex justify-between items-start">

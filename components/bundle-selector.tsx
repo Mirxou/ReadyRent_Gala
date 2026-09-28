@@ -9,6 +9,26 @@ import { bundlesApi } from '@/lib/api';
 import { ShoppingCart, Tag, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
 
+// Bundle card shape returned by /bundles/ — fields consumed by this selector;
+// extras flow through the index signature.
+interface BundleItem {
+  product?: number | string | null;
+  item_name?: string | null;
+  quantity: number;
+  [key: string]: unknown;
+}
+interface Bundle {
+  id: number;
+  name_ar?: string | null;
+  name?: string | null;
+  description_ar?: string | null;
+  is_featured?: boolean;
+  items?: BundleItem[];
+  bundle_price?: number;
+  discount_percentage?: number;
+  [key: string]: unknown;
+}
+
 interface BundleSelectorProps {
   productId?: number;
   startDate: Date | null;
@@ -30,11 +50,11 @@ export function BundleSelector({
     queryKey: ['bundles', productId],
     queryFn: () => bundlesApi.getAll().then((res) => res.data),
     select: (data) => {
-      const bundlesList = Array.isArray(data) ? data : (data?.results || []);
+      const bundlesList = (Array.isArray(data) ? data : (data?.results || [])) as Bundle[];
       // Filter bundles that contain the product if productId provided
       if (productId) {
-        return bundlesList.filter((bundle: Record<string, unknown>) =>
-          bundle.items?.some((item: Record<string, unknown>) => item.product === productId)
+        return bundlesList.filter((bundle) =>
+          bundle.items?.some((item) => item.product === productId)
         );
       }
       return bundlesList;
@@ -79,7 +99,7 @@ export function BundleSelector({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {bundlesList.map((bundle: Record<string, unknown>) => {
+        {bundlesList.map((bundle) => {
           const isSelected = selectedBundle === bundle.id;
           const calculation = isSelected ? priceCalculation : null;
 
@@ -116,7 +136,7 @@ export function BundleSelector({
                   <div className="mb-3 space-y-1">
                     <p className="text-xs font-semibold text-muted-foreground mb-2">محتويات الباقة:</p>
                     <div className="space-y-1">
-                      {bundle.items.slice(0, 3).map((item: Record<string, unknown>, idx: number) => (
+                      {bundle.items.slice(0, 3).map((item, idx) => (
                         <div key={idx} className="text-xs text-muted-foreground">
                           • {item.item_name} {item.quantity > 1 && `(×${item.quantity})`}
                         </div>

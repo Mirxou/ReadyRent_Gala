@@ -21,7 +21,8 @@ export function ArtisanIntegration({ onSelect, selectedId }: ArtisanIntegrationP
     queryFn: () => artisansApi.getAll({ specialty: 'tailor' }).then(res => res.data),
   });
 
-  const artisansList = artisans?.results || artisans || [];
+  // green-sweep: API returns either { results: [...] } or a bare array.
+  const artisansList = ((artisans as unknown as { results?: unknown[] })?.results || (Array.isArray(artisans) ? (artisans as unknown as unknown[]) : [])) as Array<{ id: number; profile_image?: string; name_ar: string; rating?: number; bio_ar?: string; [k: string]: unknown }>;
 
   return (
     <div className="space-y-4">

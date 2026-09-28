@@ -36,7 +36,8 @@ export function BookingCalendar({
     queryKey: ['product-bookings', productId],
     queryFn: async () => {
       const response = await bookingsApi.getAll();
-      return (response.data ?? []).filter((b: { product?: number | { id: number } }) => b.product === productId || (typeof b.product === 'object' && b.product?.id === productId));
+      const rows = (response.data ?? []) as Array<{ product?: number | { id: number }; start_date: string; end_date: string }>;
+      return rows.filter((b) => b.product === productId || (typeof b.product === 'object' && b.product?.id === productId));
     },
     enabled: !!productId,
   });
@@ -56,12 +57,12 @@ export function BookingCalendar({
   // Check same-day delivery availability
   const { data: sameDayInfo } = useQuery({
     queryKey: ['same-day-delivery', deliveryZoneId],
-    queryFn: () => deliveryZoneId ? locationsApi.checkSameDayDelivery(deliveryZoneId).then((res) => res.data) : null,
+    queryFn: () => deliveryZoneId ? locationsApi.checkSameDayDelivery(String(deliveryZoneId)).then((res) => res.data) : null,
     enabled: !!deliveryZoneId,
   });
 
   // Get unavailable dates from bookings
-  const bookingDates = bookings?.reduce((dates: Date[], booking: { start_date: string; end_date: string }) => {
+  const bookingDates = bookings?.reduce((dates: Date[], booking) => {
     const start = new Date(booking.start_date);
     const end = new Date(booking.end_date);
     const current = new Date(start);
@@ -71,7 +72,7 @@ export function BookingCalendar({
       current.setDate(current.getDate() + 1);
     }
     return dates;
-  }, []) || [];
+  }, [] as Date[]) || [];
 
   // Get unavailable dates from maintenance periods
   const maintenanceDates = maintenancePeriods?.results?.reduce((dates: Date[], period: { start_datetime: string; end_datetime: string }) => {
@@ -84,7 +85,7 @@ export function BookingCalendar({
       current.setDate(current.getDate() + 1);
     }
     return dates;
-  }, []) || [];
+  }, [] as Date[]) || [];
 
   // Combine all unavailable dates
   const unavailableDates = [...bookingDates, ...maintenanceDates];

@@ -7,7 +7,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { getTrustLevel } from '@/lib/trust-score';
 
-interface Vendor {
+export interface Vendor {
   id: string;
   name: string;
   name_ar?: string;
@@ -17,6 +17,7 @@ interface Vendor {
   rating?: number;
   products_count?: number;
   location?: string;
+  city?: string;
   is_verified?: boolean;
   total_sales?: number;
   website?: string;

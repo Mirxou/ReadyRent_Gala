@@ -45,7 +45,7 @@ export function BaridiMobForm({
         payment_method: 'baridimob',
         amount,
         currency,
-        booking_id: bookingId,
+        booking_id: bookingId as unknown as string,
         phone_number: phoneNumber,
       });
 

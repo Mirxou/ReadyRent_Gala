@@ -46,13 +46,27 @@ export default function ReturnsPage() {
   const [expandedReturn, setExpandedReturn] = useState<string | null>(null);
 
   // Fetch returns
-  const { data: returnsData, isLoading: isLoadingReturns } = useQuery({
+    // green-sweep: consumed return-request row shape (snake_case from API).
+  interface ReturnRow {
+    id: string;
+    status: string;
+    booking_ref?: string | null;
+    booking_id?: string | null;
+    created_at?: string | null;
+    reason?: string | null;
+    description?: string | null;
+  }
+  const { data: returnsRes, isLoading: isLoadingReturns } = useQuery({
     queryKey: ['returns'],
     queryFn: () => returnsApi.listReturns(),
     enabled: isAuthenticated,
   });
 
-  const returns = Array.isArray(returnsData?.data) ? returnsData.data : [];
+  // green-sweep: preserve original narrowing — envelope.data may hold rows.
+  const returns = (() => {
+    const d = (returnsRes as unknown as { data?: unknown[] })?.data;
+    return (Array.isArray(d) ? d : []) as ReturnRow[];
+  })();
 
   // Create return mutation
   const createMutation = useMutation({
@@ -226,7 +240,7 @@ export default function ReturnsPage() {
         ) : returns.length > 0 ? (
           <div className="space-y-4 mb-8">
             <h2 className="text-lg font-bold text-white/60 mb-4">الطلبات المرسلة ({returns.length})</h2>
-            {returns.map((ret: Record<string, unknown>, index: number) => (
+            {returns.map((ret, index) => (
               <motion.div
                 key={ret.id}
                 initial={{ opacity: 0, y: 20 }}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ComponentProps } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ContractViewer } from '@/components/contract/contract-viewer';
 import { ContractTimeline } from '@/components/contract/contract-timeline';
@@ -11,7 +11,9 @@ import Link from 'next/link';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/lib/store';
 
-function isErrorResponse(res: { status?: string; httpStatus?: number; success?: boolean }): boolean {
+function isErrorResponse(
+  res: { status?: string; httpStatus?: number; success?: boolean; message_en?: string; message_ar?: string }
+): res is { status?: string; httpStatus?: number; success: false; message_en?: string; message_ar?: string } {
   return (
     res.status === 'sovereign_halt' ||
     (res.httpStatus !== undefined && res.httpStatus >= 400) ||
@@ -44,7 +46,7 @@ export default function ContractPage() {
     contractsApi.getContract(id as string)
       .then((res) => {
         if (isErrorResponse(res)) {
-          setResult({ contract: null, error: (res as Record<string, string>).message_en || (res as Record<string, string>).message_ar || 'العقد غير موجود' });
+          setResult({ contract: null, error: res.message_en || res.message_ar || 'العقد غير موجود' });
           return;
         }
         setResult({ contract: res.data, error: null });
@@ -58,7 +60,7 @@ export default function ContractPage() {
     if (!id) return;
     const res = await contractsApi.signContract(id as string);
     if (isErrorResponse(res)) {
-      toast.error((res as Record<string, string>).message_en || (res as Record<string, string>).message_ar || 'فشل توقيع العقد');
+      toast.error(res.message_en || res.message_ar || 'فشل توقيع العقد');
       return;
     }
     setResult({ contract: res.data, error: null });
@@ -116,10 +118,10 @@ export default function ContractPage() {
 
       <div className="max-w-6xl mx-auto px-4 grid grid-cols-1 xl:grid-cols-3 gap-8 items-start">
         <div className="xl:col-span-2">
-          <ContractViewer contract={contract} onSign={handleSign} />
+          <ContractViewer contract={contract as unknown as ComponentProps<typeof ContractViewer>['contract']} onSign={handleSign} />
         </div>
         <div className="xl:col-span-1 xl:sticky xl:top-24">
-          <ContractTimeline contract={contract as unknown as Record<string, unknown>} />
+          <ContractTimeline contract={contract as unknown as ComponentProps<typeof ContractTimeline>['contract']} />
         </div>
       </div>
     </main>

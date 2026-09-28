@@ -243,11 +243,11 @@ async function handlePaymentSuccessAtomic(
 // ═══════════════════════════════════════════════════════════════
 // Auto-generate contract on payment success (Step 2.4)
 // Creates draft contract with all 9 sections if none exists.
-// Already idempotent — uses findUnique on bookingId.
+// Already idempotent — uses findFirst on bookingId.
 // ═══════════════════════════════════════════════════════════════
 async function ensureContractForBooking(bookingId: string, userId: string) {
   // Skip if contract already exists (may have been pre-generated)
-  const existing = await db.contract.findUnique({ where: { bookingId } });
+  const existing = await db.contract.findFirst({ where: { bookingId } });
   if (existing) {
     logger.info('Webhook', 'Contract already exists for booking — skipping auto-generation', { bookingId, contractId: existing.id, status: existing.status });
     return;
@@ -284,8 +284,8 @@ async function ensureContractForBooking(bookingId: string, userId: string) {
     vendorEmail: vendor?.email || '',
     productName: booking.product.nameAr || booking.product.name || booking.productName || 'منتج',
     productDescription: booking.product.description || null,
-    startDate: booking.startDate?.toISOString().split('T')[0] || '',
-    endDate: booking.endDate?.toISOString().split('T')[0] || '',
+    startDate: booking.startDate ? new Date(booking.startDate).toISOString().split('T')[0] : '',
+    endDate: booking.endDate ? new Date(booking.endDate).toISOString().split('T')[0] : '',
     totalPrice: booking.totalPrice || 0,
     depositAmount: booking.product.depositAmount || undefined,
   });
@@ -306,8 +306,8 @@ async function ensureContractForBooking(bookingId: string, userId: string) {
     product_id: booking.productId,
     total_price: booking.totalPrice,
     deposit_amount: booking.product.depositAmount ?? null,
-    start_date: booking.startDate?.toISOString(),
-    end_date: booking.endDate?.toISOString(),
+    start_date: booking.startDate ? new Date(booking.startDate).toISOString() : undefined,
+    end_date: booking.endDate ? new Date(booking.endDate).toISOString() : undefined,
     escrow_status: 'held',
   });
 

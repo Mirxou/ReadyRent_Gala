@@ -90,7 +90,7 @@ export default function DashboardPage() {
   const trustScore = trustScoreValue;
   const isElite = trustScore >= 61; // highly_trusted tier
   const isSovereign = trustScore >= 41; // trusted tier 
-  const is2FAEnabled = (user as Record<string, unknown>)?.is_2fa_enabled;
+  const is2FAEnabled = (user as unknown as { is_2fa_enabled?: boolean } | null)?.is_2fa_enabled;
 
   if (!isAuthenticated) {
     return (
@@ -383,7 +383,7 @@ export default function DashboardPage() {
                         <span className="text-xs font-black uppercase tracking-[0.2em] opacity-40">جاري تحميل السجل الرقمي...</span>
                     </div>
                 ) : activeBookings.length > 0 ? (
-                    activeBookings.map((booking: Record<string, unknown>) => (
+                    activeBookings.map((booking) => (
                     <GlassPanel key={booking.id} className="p-8 relative group hover:border-sovereign-gold/30 transition-all duration-500 shadow-2xl" gradientBorder>
                         
                         {/* Status Identifier */}

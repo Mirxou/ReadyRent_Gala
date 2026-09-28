@@ -32,7 +32,8 @@ export async function GET(request: NextRequest) {
       where: {
         status: 'completed',
         createdAt: { gte: startDate },
-        productId: { not: null },
+        // productId is NOT NULL in the schema, so no `not: null` filter is
+        // needed (and Prisma rejects `not: null` on a required String).
       },
       select: {
         totalPrice: true,

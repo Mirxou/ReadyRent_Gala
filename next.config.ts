@@ -5,7 +5,8 @@ const withSerwist = withSerwistInit({
   swSrc: "app/sw.ts",
   swDest: "public/sw.js",
   cacheOnNavigation: true,
-  disablePrecacheWarmup: true,
+  // NOTE: `disablePrecacheWarmup` was removed — not a valid option in
+  // @serwist/next 9.5 (it silently stripped unknown keys, so this is a no-op).
   // Disable in dev when using Turbopack (not supported yet)
   disable: process.env.NODE_ENV !== 'production',
 });
@@ -20,9 +21,8 @@ const nextConfig: NextConfig = {
     typescript: {
         ignoreBuildErrors: false,
     },
-    eslint: {
-        ignoreDuringBuilds: false,
-    },
+    // NOTE: the `eslint` config key was removed in Next 16 (`next build` no
+    // longer runs ESLint) — `ignoreDuringBuilds: false` was dead config.
     // P2-42 fix: removed `experimental.serverActions.bodySizeLimit: '256kb'`
     // — it was dead config. ripgrep for 'use server' returns 0 matches, so
     // there are no Server Actions anywhere in the codebase. The 256kb limit

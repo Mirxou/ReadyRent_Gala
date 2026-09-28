@@ -10,7 +10,7 @@ import { formatNumber } from '@/lib/utils';
 import { toast } from 'sonner';
 import {
   Package, Clock, CheckCircle2, AlertTriangle, DollarSign,
-  Shield, ArrowRightLeft, Eye, Calendar, TrendingUp, RotateCcw
+  Shield, Eye, Calendar, RotateCcw
 } from 'lucide-react';
 
 // ═══════════════════════════════════════════════════════════════
@@ -80,8 +80,8 @@ export default function VendorOrdersPage() {
   }, []);
 
   useEffect(() => {
-    if (isAuthenticated) loadBookings();
-    else setLoading(false);
+    if (!isAuthenticated) return;
+    (async () => { await loadBookings(); })();
   }, [isAuthenticated, loadBookings]);
 
   // Filter bookings by status
@@ -119,7 +119,7 @@ export default function VendorOrdersPage() {
       } else {
         toast.error(res.data?.message_en || 'فشل معالجة الإرجاع');
       }
-    } catch (e: unknown) {
+    } catch {
       toast.error('فشل معالجة الإرجاع — تحقق من حالة الحجز');
     } finally {
       setProcessingId(null);
@@ -283,16 +283,16 @@ export default function VendorOrdersPage() {
                       <p className="text-[9px] text-muted-foreground uppercase">حالة الضمان</p>
                       <Badge className={escrowConf.color + ' text-[10px]'}>{escrowConf.label}</Badge>
                     </div>
-                    {b.late_fee_charged > 0 && (
+                    {(b.late_fee_charged ?? 0) > 0 && (
                       <div className="p-2 bg-red-500/5 rounded-lg border border-red-500/10">
                         <p className="text-[9px] text-red-600 uppercase">رسوم تأخير</p>
-                        <p className="font-bold text-sm text-red-600">{formatNumber(b.late_fee_charged)} دج</p>
+                        <p className="font-bold text-sm text-red-600">{formatNumber(b.late_fee_charged ?? 0)} دج</p>
                       </div>
                     )}
-                    {b.deduction_amount > 0 && (
+                    {(b.deduction_amount ?? 0) > 0 && (
                       <div className="p-2 bg-purple-500/5 rounded-lg border border-purple-500/10">
                         <p className="text-[9px] text-purple-600 uppercase">خصم تعويض</p>
-                        <p className="font-bold text-sm text-purple-600">{formatNumber(b.deduction_amount)} دج</p>
+                        <p className="font-bold text-sm text-purple-600">{formatNumber(b.deduction_amount ?? 0)} دج</p>
                       </div>
                     )}
                   </div>

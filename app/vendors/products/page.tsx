@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -56,7 +56,7 @@ const KYC_TIERS = [
 ];
 
 export default function VendorProductsPage() {
-  const { user, isAuthenticated } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   const [products, setProducts] = useState<VendorProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -82,8 +82,8 @@ export default function VendorProductsPage() {
   }, []);
 
   useEffect(() => {
-    if (isAuthenticated) loadProducts();
-    else setLoading(false);
+    if (!isAuthenticated) return;
+    (async () => { await loadProducts(); })();
   }, [isAuthenticated, loadProducts]);
 
   const startEdit = (p: VendorProduct) => {

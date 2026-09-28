@@ -1,16 +1,25 @@
+/// <reference types="@testing-library/jest-dom" />
 import { render, screen } from '@testing-library/react';
-import { ProductCard } from '../product-card';
+import { ProductCard } from '../product/product-card';
 
+// green-sweep: fixture completed to satisfy the Product interface
+// (required fields the card type demands; assertions unchanged).
 const mockProduct = {
-  id: 1,
+  id: 'test-dress-1',
   name: 'Test Dress',
   name_ar: 'فستان تجريبي',
   slug: 'test-dress',
+  description: 'وصف تجريبي',
   price_per_day: 1000,
+  owner_id: 'user-1',
+  category_name: 'فساتين',
+  location_name: 'الجزائر',
+  is_available: true,
   category: {
     name_ar: 'فساتين',
   },
   primary_image: '/test-image.jpg',
+  images: [],
   rating: 4.5,
   is_featured: false,
 };

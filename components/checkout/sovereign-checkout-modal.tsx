@@ -37,7 +37,10 @@ export function SovereignCheckoutModal({
     const [isDrawing, setIsDrawing] = React.useState(false);
 
     // Canvas Logic (Minimal for Masterpiece)
-    const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    // green-sweep: same handlers serve mouse + touch (canvas below wires both);
+    // mouse events have clientX, touch events have touches — cast per side.
+    type SignatureEvent = React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>;
+    const startDrawing = (e: SignatureEvent) => {
         const canvas = canvasRef.current;
         if (!canvas) return;
         const ctx = canvas.getContext('2d');
@@ -48,21 +51,21 @@ export function SovereignCheckoutModal({
         ctx.lineCap = 'round';
         ctx.beginPath();
         const rect = canvas.getBoundingClientRect();
-        const x = (e.clientX || e.touches[0].clientX) - rect.left;
-        const y = (e.clientY || e.touches[0].clientY) - rect.top;
+        const x = ((e as React.MouseEvent<HTMLCanvasElement>).clientX || (e as React.TouchEvent<HTMLCanvasElement>).touches[0].clientX) - rect.left;
+        const y = ((e as React.MouseEvent<HTMLCanvasElement>).clientY || (e as React.TouchEvent<HTMLCanvasElement>).touches[0].clientY) - rect.top;
         ctx.moveTo(x, y);
         setIsDrawing(true);
     };
 
-    const draw = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    const draw = (e: SignatureEvent) => {
         if (!isDrawing) return;
         const canvas = canvasRef.current;
         if (!canvas) return;
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
         const rect = canvas.getBoundingClientRect();
-        const x = (e.clientX || e.touches[0].clientX) - rect.left;
-        const y = (e.clientY || e.touches[0].clientY) - rect.top;
+        const x = ((e as React.MouseEvent<HTMLCanvasElement>).clientX || (e as React.TouchEvent<HTMLCanvasElement>).touches[0].clientX) - rect.left;
+        const y = ((e as React.MouseEvent<HTMLCanvasElement>).clientY || (e as React.TouchEvent<HTMLCanvasElement>).touches[0].clientY) - rect.top;
         ctx.lineTo(x, y);
         ctx.stroke();
     };
@@ -109,7 +112,7 @@ export function SovereignCheckoutModal({
                                     <div className="space-y-8">
                                         <div className="space-y-2">
                                             <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground opacity-40">الأصل قيد العقد</p>
-                                            <h3 className="text-2xl font-black">{product?.name_ar}</h3>
+                                            <h3 className="text-2xl font-black">{(product as { name_ar?: string } | null)?.name_ar}</h3>
                                         </div>
                                         <div className="p-8 bg-white/5 rounded-3xl border border-white/5 space-y-6">
                                             <div className="flex justify-between items-center text-sm">

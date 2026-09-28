@@ -19,6 +19,7 @@ import {
   ImageIcon,
   User,
   Bot,
+  type LucideIcon,
 } from 'lucide-react';
 import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
 import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
@@ -29,6 +30,17 @@ import { SovereignGlow } from '@/shared/components/sovereign/sovereign-sparkle';
 import Image from 'next/image';
 import { useState, useRef, useEffect } from 'react';
 import { toast } from 'sonner';
+import type { SovereignResponse } from '@/types/sovereign';
+import type { DisputeHistoryEntry } from '@/lib/api';
+
+interface TimelineStage {
+  status: string;
+  labelAr: string;
+  icon: LucideIcon;
+  date: string;
+  complete: boolean;
+  active: boolean;
+}
 
 // Status color mapping
 const STATUS_COLORS: Record<string, string> = {
@@ -57,14 +69,14 @@ const STAGE_FLOW = [
   { status: 'resolved', labelAr: 'الحكم النهائي (Final Verdict)', icon: ShieldCheck },
 ];
 
-function buildTimelineFromHistory(history: Record<string, unknown>[], disputeStatus: string): Record<string, unknown>[] {
+function buildTimelineFromHistory(history: DisputeHistoryEntry[], disputeStatus: string): TimelineStage[] {
   // Build the timeline based on status flow
   const statusOrder = ['filed', 'under_review', 'mediation', 'appealed', 'resolved', 'closed'];
   const currentIndex = statusOrder.indexOf(disputeStatus);
 
   // Find status change events from history
   const statusChanges: Record<string, string> = {};
-  history.forEach((entry: Record<string, unknown>) => {
+  history.forEach((entry) => {
     if (entry.is_status_change || entry.type === 'system') {
       const match = entry.message?.match(/(?:تم إنشاء النزاع بحالة|تم تغيير حالة النزاع من) "(\w+)"/);
       if (match) {
@@ -154,7 +166,7 @@ export default function DisputeDetailPage() {
   const sendMessageMutation = useMutation({
     mutationFn: (text: string) =>
       disputesApi.createMessage(disputeId as string, text),
-    onSuccess: (res: Record<string, unknown>) => {
+    onSuccess: (res: SovereignResponse<unknown>) => {
       if (res?.status === 'sovereign_halt' || res?.code === 'SYSTEM_HALT' || res?.success === false || res?.error) {
         toast.error((res?.message_ar as string) || (res?.error as string) || 'فشل إرسال الرسالة');
         return;
@@ -242,7 +254,7 @@ export default function DisputeDetailPage() {
                  {/* The Timeline Line */}
                  <div className="absolute top-2 right-6 bottom-2 w-px bg-white/10" />
                  
-                 {timeline.map((item: Record<string, unknown>, i: number) => (
+                 {timeline.map((item, i) => (
                    <motion.div 
                      key={i}
                      initial={{ opacity: 0, x: 20 }}
@@ -374,7 +386,7 @@ export default function DisputeDetailPage() {
                           لم يتم تبادل رسائل بعد. ابدأ المحادثة...
                         </div>
                       )}
-                      {messages.map((msg: Record<string, unknown>) => {
+                      {messages.map((msg) => {
                         const isSystem = msg.type === 'system';
                         const isAppeal = msg.type === 'appeal';
                         const isOwn = msg.sender_id === dispute.user_id;
@@ -408,7 +420,7 @@ export default function DisputeDetailPage() {
                                   <Gavel className="w-3 h-3" /> طعن (Appeal)
                                 </p>
                                 <p className="text-sm text-orange-200/80">{msg.message}</p>
-                                <p className="text-[10px] text-orange-400/50 mt-1">{formatMessageTime(msg.created_at)}</p>
+                                <p className="text-[10px] text-orange-400/50 mt-1">{formatMessageTime(msg.created_at ?? '')}</p>
                               </div>
                             </motion.div>
                           );
@@ -437,7 +449,7 @@ export default function DisputeDetailPage() {
                               )}
                             </p>
                             <p className="text-sm leading-relaxed italic opacity-90">{`"${msg.message}"`}</p>
-                            <p className="text-[10px] text-muted-foreground/50 mt-2">{formatMessageTime(msg.created_at)}</p>
+                            <p className="text-[10px] text-muted-foreground/50 mt-2">{formatMessageTime(msg.created_at ?? '')}</p>
                           </motion.div>
                         );
                       })}

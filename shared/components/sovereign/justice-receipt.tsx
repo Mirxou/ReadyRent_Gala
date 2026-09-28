@@ -3,10 +3,15 @@
 import { CheckCircle2, Clock, AlertTriangle, Gavel } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+// Widened to accept both the legacy stage shape ({label,status,date}) and the
+// dispute history entries ({label_ar,status,timestamp,…}) passed by dispute pages.
 interface Stage {
-  label: string;
-  status: string;
+  label?: string;
+  label_ar?: string;
+  status?: string;
   date?: string;
+  timestamp?: string;
+  [key: string]: unknown;
 }
 
 interface JusticeReceiptProps {
@@ -27,7 +32,7 @@ export function JusticeReceipt({ children, className = '', stages, disputeId, fi
     );
   }
 
-  const statusIcon = (status: string) => {
+  const statusIcon = (status?: string) => {
     if (status === 'completed' || status === 'approved') return <CheckCircle2 className="h-4 w-4 text-green-400" />;
     if (status === 'pending' || status === 'in_progress') return <Clock className="h-4 w-4 text-yellow-400" />;
     if (status === 'rejected' || status === 'failed') return <AlertTriangle className="h-4 w-4 text-red-400" />;

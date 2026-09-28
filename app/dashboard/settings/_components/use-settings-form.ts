@@ -43,7 +43,7 @@ export function useSettingsForm() {
     queryFn: async () => {
       const res = await authApi.getProfile();
       if (res.status === 'sovereign_halt') throw new Error('فشل في تحميل الملف الشخصي');
-      return { user: res.data as ProfileApiResponse['user'] };
+      return { user: res.data as unknown as ProfileApiResponse['user'] };
     },
   });
 

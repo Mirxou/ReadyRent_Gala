@@ -11,7 +11,7 @@ import { ar } from 'date-fns/locale';
 export function DateStep() {
   const { formData, updateFormData } = useBookingStore();
 
-  const handleSelect = (range: Record<string, unknown>) => {
+  const handleSelect = (range: { from?: Date; to?: Date } | undefined) => {
     updateFormData({
       startDate: range?.from || null,
       endDate: range?.to || null,

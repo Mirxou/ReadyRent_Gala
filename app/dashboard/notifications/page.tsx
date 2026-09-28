@@ -16,6 +16,7 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { notificationsApi } from '@/lib/api';
+import type { Notification } from '@/lib/api';
 import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
 import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
 import { Badge } from '@/components/ui/badge';
@@ -30,7 +31,7 @@ import React from 'react';
 
 
 
-const typeIconMap: Record<string, React.ReactNode> = {
+const typeIconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   trust: UserCheck,
   financial: CreditCard,
   asset: Package,
@@ -80,18 +81,18 @@ export default function NotificationsPage() {
       toast.error('فشل في تحديث الإشعار');
       return;
     }
-    queryClient.setQueryData<Record<string, unknown>[]>(['notifications'], (old) =>
+    queryClient.setQueryData<Notification[]>(['notifications'], (old) =>
       old?.map((n) => (n.id === id ? { ...n, is_read: true } : n))
     );
   };
 
   // Real stats calculated from notifications data
   const total = notifications?.length || 0;
-  const unreadCount = notifications?.filter((n: Record<string, unknown>) => !(n.is_read as boolean)).length || 0;
+  const unreadCount = notifications?.filter((n) => !(n.is_read)).length || 0;
   const readCount = total - unreadCount;
   const readPct = total > 0 ? Math.round((readCount / total) * 100) : 0;
   const unreadPct = total > 0 ? Math.round((unreadCount / total) * 100) : 0;
-  const systemCount = notifications?.filter((n: Record<string, unknown>) => (n.type as string) === 'system').length || 0;
+  const systemCount = notifications?.filter((n) => (n.type) === 'system').length || 0;
   const systemPct = total > 0 ? Math.round((systemCount / total) * 100) : 0;
 
   const formatTime = (dateStr: string) => {
@@ -175,7 +176,7 @@ export default function NotificationsPage() {
            
            <div className="space-y-10 relative z-10 pr-24">
               <AnimatePresence mode="popLayout">
-                 {notifications.map((n: Record<string, unknown>, i: number) => {
+                 {notifications.map((n, i) => {
                    const Icon = typeIconMap[n.type] || Bell;
                    const color = typeColorMap[n.type] || 'gold';
                    return (

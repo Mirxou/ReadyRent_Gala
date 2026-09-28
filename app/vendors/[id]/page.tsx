@@ -414,7 +414,7 @@ export default function VendorProfilePage() {
                         ease: [0.32, 0.72, 0, 1],
                       }}
                     >
-                      <ProductCard product={product} />
+                      <ProductCard product={product as unknown as React.ComponentProps<typeof ProductCard>['product']} />
                     </motion.div>
                   ))}
                 </div>

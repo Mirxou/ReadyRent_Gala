@@ -28,7 +28,8 @@ export function RealtimeNotifications() {
     }
 
     // Listen for notifications
-    const unsubscribeNotification = websocketClient.on('notification', (notification) => {
+    const unsubscribeNotification = websocketClient.on('notification', (raw: unknown) => {
+      const notification = raw as Parameters<typeof addNotification>[0] & { title: string; message: string };
       addNotification(notification);
       
       // Show toast notification

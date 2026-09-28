@@ -5,23 +5,22 @@ import { Badge } from '@/components/ui/badge';
 import { RatingStars } from './rating-stars';
 import { CheckCircle } from 'lucide-react';
 
-interface ReviewUser {
-  id: string;
-  username: string;
-}
-
+// Widened to also accept the API Review shape from lib/api/reviews
+// (string ids, `reviewer_id`, optional user object) alongside the legacy
+// numeric-id shape used by local fixtures.
 interface Review {
-  id: number;
-  user_id: string;
-  booking_id: number | null;
-  product_id: string;
-  reviewer_name: string;
+  id: number | string;
+  user_id?: string;
+  reviewer_id?: string;
+  booking_id?: number | string | null;
+  product_id?: string;
+  reviewer_name?: string;
   rating: number;
-  comment: string | null;
-  is_verified: boolean;
-  status: string;
+  comment?: string | null;
+  is_verified?: boolean;
+  status?: string;
   created_at: string;
-  user: ReviewUser | null;
+  user?: { id: string; username: string | null } | null;
 }
 
 interface ReviewListProps {

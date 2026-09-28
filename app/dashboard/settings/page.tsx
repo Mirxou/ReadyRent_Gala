@@ -94,7 +94,7 @@ export default function SettingsPage() {
                             <ProfileSection data={formState.profile} set={setProfileData} isPending={saveProfileMutation.isPending} onSave={() => saveProfileMutation.mutate(formState.profile)} />
                           )}
                           {section.id === 'notifications' && (
-                            <NotificationsSection data={formState.notifs} set={setNotifSettings} isPending={saveNotifsMutation.isPending} onSave={() => saveNotifsMutation.mutate(formState.notifs)} />
+                            <NotificationsSection data={formState.notifs} set={setNotifSettings as unknown as (next: Record<string, boolean>) => void} isPending={saveNotifsMutation.isPending} onSave={() => saveNotifsMutation.mutate(formState.notifs)} />
                           )}
                           {section.id === 'security' && (
                             <SecuritySection data={formState.security} set={setSecurityData} isPending={changePasswordMutation.isPending} onChangePassword={handleChangePassword} onEnable2FA={handleEnable2FA} />

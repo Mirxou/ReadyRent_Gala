@@ -8,6 +8,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { adminApi, productsApi } from '@/lib/api';
+import type { Product } from '@/lib/api';
 import {
     Plus,
     Search,
@@ -39,6 +40,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import type { SovereignResponse } from '@/types/sovereign';
 
 async function fetchProducts() {
   const res = await productsApi.getAll();
@@ -56,7 +58,7 @@ export default function ProductsPage() {
 
     const deleteMutation = useMutation({
       mutationFn: (id: string) => adminApi.deleteProduct(id),
-      onSuccess: (res: Record<string, unknown>) => {
+      onSuccess: (res: SovereignResponse<unknown>) => {
         if (res?.status === 'sovereign_halt' || res?.code === 'SYSTEM_HALT' || res?.success === false || res?.error) {
           toast.error((res?.message_ar as string) || (res?.error as string) || 'حدث خطأ أثناء حذف المنتج');
           return;
@@ -69,7 +71,7 @@ export default function ProductsPage() {
     // Show first products from API
     const myProducts = (products || []).slice(0, 5);
 
-    const filteredProducts = myProducts.filter((product: Record<string, unknown>) =>
+    const filteredProducts = myProducts.filter((product: Product) =>
         (product.name_ar || product.name || '').includes(searchTerm)
     );
 
@@ -144,7 +146,7 @@ export default function ProductsPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {filteredProducts.map((product: Record<string, unknown>) => (
+                            {filteredProducts.map((product: Product) => (
                                 <TableRow key={product.id} className="group hover:bg-white/5 transition-colors">
                                     <TableCell className="font-medium">
                                         <div className="flex items-center gap-3">

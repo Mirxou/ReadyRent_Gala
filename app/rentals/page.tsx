@@ -9,6 +9,7 @@ import { GlassPanel } from "@/shared/components/sovereign/glass-panel";
 import { SovereignGlow, SovereignSparkle } from '@/shared/components/sovereign/sovereign-sparkle';
 import { DignifiedLoader } from '@/shared/components/sovereign/dignified-loader';
 import { productsApi } from '@/lib/api';
+import type { Product } from '@/lib/api';
 import { ProductCard } from '@/components/product/product-card';
 import {
   Search,
@@ -33,6 +34,24 @@ const staggerContainer = {
   hidden: {},
   visible: { transition: { staggerChildren: 0.1 } },
 };
+
+// Envelope data may be a paginated `{ results: [...] }` object or a raw array.
+function unwrapList<T>(data: unknown): T[] {
+  if (Array.isArray(data)) return data as T[];
+  if (data && typeof data === 'object' && Array.isArray((data as { results?: unknown }).results)) {
+    return (data as { results: T[] }).results;
+  }
+  return [];
+}
+
+interface RentalCategory {
+  id: string;
+  slug: string;
+  icon?: string | null;
+  name_ar?: string | null;
+  product_count?: number;
+  [key: string]: unknown;
+}
 
 /* ════════════════════════════════════════════
    SECTION 1 — HERO
@@ -91,15 +110,14 @@ function HeroSection() {
 function CategoriesGrid() {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
-  const [categories, setCategories] = useState<Record<string, unknown>[]>([]);
+  const [categories, setCategories] = useState<RentalCategory[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     productsApi
       .getCategories()
-      .then((res: Record<string, unknown>) => {
-        const data = Array.isArray(res.data?.results) ? res.data.results : Array.isArray(res.data) ? res.data : [];
-        setCategories(data);
+      .then((res) => {
+        setCategories(unwrapList<RentalCategory>(res.data));
       })
       .catch(() => setCategories([]))
       .finally(() => setIsLoading(false));
@@ -146,8 +164,8 @@ function CategoriesGrid() {
                     <div className="space-y-3">
                       <div className="w-14 h-14 mx-auto rounded-2xl overflow-hidden border border-white/10 group-hover:border-sovereign-gold/30 transition-colors relative">
                         <Image
-                          src={cat.icon}
-                          alt={cat.name_ar}
+                          src={cat.icon || ''}
+                          alt={cat.name_ar || ''}
                           className="w-full h-full object-cover"
                           fill
                           unoptimized
@@ -177,15 +195,14 @@ function CategoriesGrid() {
 function FeaturedProducts() {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
-  const [products, setProducts] = useState<Record<string, unknown>[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     productsApi
       .getAll()
-      .then((res: Record<string, unknown>) => {
-        const data = Array.isArray(res.data?.results) ? res.data.results : Array.isArray(res.data) ? res.data : [];
-        setProducts(data);
+      .then((res) => {
+        setProducts(unwrapList<Product>(res.data));
       })
       .catch(() => setProducts([]))
       .finally(() => setIsLoading(false));
@@ -231,7 +248,7 @@ function FeaturedProducts() {
           </motion.div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-            {featured.map((product: Record<string, unknown>, i: number) => (
+            {featured.map((product, i) => (
               <motion.div
                 key={product.id}
                 initial={{ opacity: 0, y: 30 }}
