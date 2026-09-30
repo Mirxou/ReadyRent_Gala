@@ -164,12 +164,14 @@ export async function POST(
 
     // ── Single transaction: all-or-nothing ──
     const result = await db.$transaction(async (tx) => {
-      // (a) Update booking escrow + status
+      // (a) Update booking escrow + status + collateral ledger
       const updatedBooking = await tx.booking.update({
         where: { id },
         data: {
           escrowStatus: 'refunded',
           status: 'cancelled',
+          // PHASE 2: the full deposit goes back — nothing was consumed.
+          depositReturned: booking.depositHeld,
         },
       });
 
@@ -182,12 +184,13 @@ export async function POST(
         },
       });
 
-      // (d) Create ESCROW_REFUNDED transaction
+      // (d) Create ESCROW_REFUNDED transaction — PHASE 2: refunds the FULL
+      // amount actually charged (rent + deposit), not rent-only.
       const txRecord = await tx.transaction.create({
         data: {
           userId: booking.userId!,
           type: 'ESCROW_REFUNDED',
-          amount: booking.totalPrice,
+          amount: payment.amount,
           referenceId: booking.id,
           note: `استرداد ضمان — السبب: ${body.reason}${body.notes ? ` | ${body.notes}` : ''}`,
         },
@@ -199,7 +202,7 @@ export async function POST(
           where: { id: booking.userId! },
           data: {
             walletBalance: {
-              increment: booking.totalPrice,
+              increment: payment.amount,
             },
           },
         });
@@ -225,7 +228,7 @@ export async function POST(
           bookingId: booking.id,
           paymentId: payment.id,
           userId: booking.userId!,
-          amount: booking.totalPrice,
+          amount: payment.amount,
           reason: body.reason,
           status: walletCredit ? 'completed' : 'pending_manual_transfer',
           refundDeadline,

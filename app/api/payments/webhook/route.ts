@@ -9,6 +9,8 @@ import { db } from '@/lib/db';
 import { getChargilyProvider } from '@/lib/payment-provider';
 import { logger } from '@/lib/logger';
 import { generateContractTerms, computeContractHash } from '@/lib/contract-terms';
+import { computeDepositHeld, computeLateFeePerDay, countDays, formatDZD } from '@/lib/escrow';
+import { queueEmail, renderEmailHtml } from '@/lib/email-outbox';
 
 // Disable Next.js body parsing — we need raw body for HMAC verification
 export const runtime = 'nodejs';
@@ -171,11 +173,34 @@ async function handlePaymentSuccessAtomic(
 
     // Update Booking → confirmed (only if bookingId exists)
     if (bookingId) {
+      // ── GRAFT PHASE 2: land the MONEY on the booking ──
+      // escrowStatus says WHERE the money is; depositHeld/lateFeePerDay say
+      // HOW MUCH. Both frozen at capture time — auditable forever after.
+      const bk = await tx.booking.findUnique({
+        where: { id: bookingId },
+        select: {
+          startDate: true,
+          endDate: true,
+          quantity: true,
+          product: { select: { depositAmount: true, pricePerDay: true } },
+        },
+      });
+      const rentalBasis =
+        bk?.product?.pricePerDay && bk.startDate && bk.endDate
+          ? bk.product.pricePerDay *
+            countDays(new Date(bk.startDate), new Date(bk.endDate)) *
+            (bk.quantity || 1)
+          : 0;
+      const depositHeld = computeDepositHeld(bk?.product?.depositAmount, rentalBasis);
+      const lateFeePerDay = computeLateFeePerDay(bk?.product?.pricePerDay ?? 0);
+
       await tx.booking.update({
         where: { id: bookingId },
         data: {
           status: 'confirmed',
           escrowStatus: 'held',
+          depositHeld,
+          lateFeePerDay,
         },
       });
     }
@@ -197,7 +222,7 @@ async function handlePaymentSuccessAtomic(
           userId: payment.userId,
           type: 'ESCROW_HELD',
           amount: payment.amount,
-          note: `ضمان حجز #${bookingId ?? '—'}`,
+          note: `ضمان حجز #${bookingId ?? '—'} — الإيجار + الوديعة المحتجزة (تُحرَّر بعد وصول الاستلام — المادة 17)`,
           referenceId: bookingId ?? undefined,
         },
       });
@@ -221,7 +246,70 @@ async function handlePaymentSuccessAtomic(
     throw err;
   });
 
-  // ── 2. Auto-generate contract — outside the main tx, but idempotent ──
+  // ── 2. GRAFT PHASE 2: outbox emails — receipt (renter) + order alert (vendor) ──
+  // Runs AFTER the financial tx commits; queueEmail never throws, so a
+  // Resend outage degrades delivery, never the money state.
+  try {
+    const paid = await db.payment.findUnique({
+      where: { id: paymentId },
+      select: { amount: true, userId: true, bookingId: true },
+    });
+    if (paid?.userId && paid.bookingId) {
+      const bk = await db.booking.findUnique({
+        where: { id: paid.bookingId },
+        select: {
+          productName: true,
+          product: { select: { vendorId: true } },
+        },
+      });
+      const renter = await db.user.findUnique({
+        where: { id: paid.userId },
+        select: { email: true, firstName: true },
+      });
+      if (renter?.email) {
+        await queueEmail({
+          to: renter.email,
+          kind: 'PAYMENT_RECEIPT',
+          bookingId: paid.bookingId,
+          userId: paid.userId,
+          subject: 'تم استلام دفعتك — الأموال محتجزة في الضمان',
+          html: renderEmailHtml(
+            'إيصال الدفع',
+            `<p>مرحباً ${renter.firstName || ''}،</p><p>تم استلام مبلغ <b>${formatDZD(paid.amount)}</b> لحجز «${bk?.productName ?? ''}» واحتجازه في الضمان السيادي حتى تأكيد الاستلام (المادة 17 من القانون 18-05).</p><p>ستُعاد الوديعة عند التحرير بعد خصم أي غرامة تأخير مستحقة.</p>`
+          ),
+        });
+      }
+      if (bk?.product?.vendorId) {
+        const vendor = await db.vendor.findUnique({
+          where: { id: bk.product.vendorId },
+          select: { userId: true },
+        });
+        if (vendor?.userId) {
+          const vendorUser = await db.user.findUnique({
+            where: { id: vendor.userId },
+            select: { email: true },
+          });
+          if (vendorUser?.email) {
+            await queueEmail({
+              to: vendorUser.email,
+              kind: 'MERCHANT_ORDER_ALERT',
+              bookingId: paid.bookingId,
+              userId: vendor.userId,
+              subject: 'طلب جديد مدفوع — الأموال في الضمان',
+              html: renderEmailHtml(
+                'طلب جديد',
+                `<p>وصل طلب جديد لحجز «${bk.productName ?? ''}» بمبلغ محتجز في الضمان <b>${formatDZD(paid.amount)}</b>. جهّز المنتج في الموعد المتفق عليه — التأخير يفعّل غرامة يومية محسوبة من الوديعة.</p>`
+              ),
+            });
+          }
+        }
+      }
+    }
+  } catch (e) {
+    logger.error('Webhook', 'Outbox emails failed (non-fatal)', e);
+  }
+
+  // ── 3. Auto-generate contract — outside the main tx, but idempotent ──
   // Contract generation is heavy (9-section terms + SHA-256) and is idempotent
   // on its own (it checks for an existing contract by bookingId), so it can run
   // outside the main tx without breaking the financial state.

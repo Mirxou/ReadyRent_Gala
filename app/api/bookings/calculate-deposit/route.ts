@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { logger } from '@/lib/logger';
+import { computeDepositHeld } from '@/lib/escrow';
 
 // ═══════════════════════════════════════════════════════════════
 // GET /api/bookings/calculate-deposit — Calculate required deposit
@@ -25,7 +26,7 @@ export async function GET(request: NextRequest) {
 
     const product = await db.product.findUnique({
       where: { id: productId },
-      select: { name: true, nameAr: true, pricePerDay: true },
+      select: { name: true, nameAr: true, pricePerDay: true, depositAmount: true },
     });
 
     if (!product) {
@@ -37,10 +38,14 @@ export async function GET(request: NextRequest) {
     // Calculate total based on daily rate
     const totalAmount = product.pricePerDay * numberOfDays;
 
-    // Sovereign trust system: 30% deposit
+    // Sovereign trust system: explicit product deposit wins, else 30% of rental.
+    // PHASE 2: same rule that governs the actual Chargily charge — one number,
+    // one rule, everywhere (checkout route + webhook use computeDepositHeld).
     const depositPercentage = 30;
-    const depositAmount = Math.ceil((totalAmount * depositPercentage) / 100);
+    const depositAmount = computeDepositHeld(product.depositAmount, totalAmount);
+    const depositMode = (product.depositAmount ?? 0) > 0 ? 'PRODUCT_OVERRIDE' : 'SOVEREIGN_30';
     const remainingAtPickup = totalAmount - depositAmount;
+    const totalCharged = Math.ceil(totalAmount) + depositAmount;
 
     return NextResponse.json({
       success: true,
@@ -56,6 +61,13 @@ export async function GET(request: NextRequest) {
         deposit_percentage: depositPercentage,
         deposit_amount: depositAmount,
         remaining_at_pickup: remainingAtPickup,
+        // PHASE 2: fields the checkout UI already reads (breakdown lights up).
+        total_charged: totalCharged,
+        deposit_mode: depositMode,
+        breakdown: {
+          rental_fee: Math.ceil(totalAmount),
+          security_deposit: depositAmount,
+        },
       },
     });
   } catch (error) {

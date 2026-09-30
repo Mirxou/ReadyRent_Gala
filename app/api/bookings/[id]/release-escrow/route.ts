@@ -4,6 +4,8 @@ import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
 import { logger } from '@/lib/logger';
 import { computeContractHash } from '@/lib/contract-terms';
 import { checkEscrowRateLimit } from '@/lib/rate-limiter';
+import { computeAccruedLateFee, computeDepositReturn, countDays, formatDZD } from '@/lib/escrow';
+import { queueEmail, renderEmailHtml } from '@/lib/email-outbox';
 
 // ═══════════════════════════════════════════════════════════════
 // POST /api/bookings/[id]/release-escrow
@@ -86,13 +88,13 @@ export async function POST(
       );
     }
 
-    if (booking.status !== 'confirmed' && booking.status !== 'active') {
+    if (booking.status !== 'confirmed' && booking.status !== 'active' && booking.status !== 'overdue') {
       return NextResponse.json(
         {
           success: false,
           dignity_preserved: true,
-          message_ar: `حالة الحجز "${booking.status}" غير صالحة — يجب أن تكون مؤكدة أو نشطة`,
-          message_en: `Booking status "${booking.status}" is invalid — must be confirmed or active`,
+          message_ar: `حالة الحجز "${booking.status}" غير صالحة — يجب أن تكون مؤكدة أو نشطة أو متأخرة`,
+          message_en: `Booking status "${booking.status}" is invalid — must be confirmed, active or overdue`,
           code: 'INVALID_BOOKING_STATUS',
         },
         { status: 400 }
@@ -148,14 +150,28 @@ export async function POST(
 
     const vendorId = booking.product?.vendorId ?? null;
 
+    // ── GRAFT PHASE 2: final money accounting (the khatamiya settlement) ──
+    // lateFee: frozen by the sweep at overdue time. Fallback: if the booking
+    // is overdue but the sweep hasn't stamped a fee yet (30s window), compute
+    // it here — always capped at the deposit actually held.
+    let lateFee = booking.lateFee ?? 0;
+    if (lateFee === 0 && booking.status === 'overdue' && booking.endDate) {
+      const daysLate = countDays(new Date(booking.endDate), new Date());
+      lateFee = computeAccruedLateFee(daysLate, booking.lateFeePerDay, booking.depositHeld);
+    }
+    const depositHeldAmt = booking.depositHeld ?? 0;
+    const depositReturned = computeDepositReturn(depositHeldAmt, lateFee);
+
     // ── Single transaction: all-or-nothing ──
     const result = await db.$transaction(async (tx) => {
-      // (a) Update booking escrow + status
+      // (a) Update booking escrow + status + final money ledger
       const updatedBooking = await tx.booking.update({
         where: { id },
         data: {
           escrowStatus: 'released',
           status: 'completed',
+          lateFee,
+          depositReturned,
         },
       });
 
@@ -168,14 +184,18 @@ export async function POST(
         },
       });
 
-      // (c) Create ESCROW_RELEASED transaction
+      // (c) Create ESCROW_RELEASED transaction — the COLLATERAL returning
+      // to the renter (rent went to the vendor via PayoutRecord below).
       const txRecord = await tx.transaction.create({
         data: {
           userId: booking.userId!,
           type: 'ESCROW_RELEASED',
-          amount: booking.totalPrice,
+          amount: depositReturned,
           referenceId: booking.id,
-          note: 'تحرير الضمان — وصل استلام مسجل (مادة 17 من القانون 18-05)',
+          note:
+            lateFee > 0
+              ? `تحرير الضمان — وصل استلام مسجل (مادة 17 من القانون 18-05). غرامة تأخير ${formatDZD(lateFee)} خُصمت من الوديعة.`
+              : 'تحرير الضمان — وصل استلام مسجل (مادة 17 من القانون 18-05)',
         },
       });
 
@@ -198,7 +218,9 @@ export async function POST(
           type: 'financial',
           title: 'تحرير الضمان',
           message:
-            'تم تحرير المبلغ للمؤجر — وصل الاستلام مسجل (مادة 17)',
+            lateFee > 0
+              ? `تم تحرير الضمان — وصل الاستلام مسجل (مادة 17). الوديعة ${formatDZD(depositHeldAmt)} − غرامة تأخير ${formatDZD(lateFee)} = ${formatDZD(depositReturned)} تُعاد إليك خلال 48 ساعة.`
+              : `تم تحرير الضمان — وصل الاستلام مسجل (مادة 17). الوديعة ${formatDZD(depositHeldAmt)} تُعاد إليك كاملة خلال 48 ساعة.`,
         },
       });
 
@@ -216,9 +238,13 @@ export async function POST(
             bookingId: booking.id,
             vendorId,
             userId: booking.userId!,
-            amount: booking.totalPrice,
+            // PHASE 2: vendor receives rent + late-fee compensation; the
+            // deposit remainder goes back to the renter (see ESCROW_RELEASED).
+            amount: booking.totalPrice + lateFee,
             status: 'pending_payout',
-            notes: `تحرير ضمان حجز #${booking.id} — المادة 17 (وصل استلام)`,
+            notes: lateFee > 0
+              ? `تحرير ضمان حجز #${booking.id} — المادة 17 (وصل استلام). يشمل تعويض تأخير ${formatDZD(lateFee)}.`
+              : `تحرير ضمان حجز #${booking.id} — المادة 17 (وصل استلام)`,
           },
           select: { id: true },
         });
@@ -241,6 +267,46 @@ export async function POST(
       }
     );
 
+    // ── GRAFT PHASE 2: outbox emails — release statement + review invite ──
+    // Post-tx, never throws. The review gate makes every completed booking a
+    // scarce review opportunity — invite the renter while trust is warm.
+    try {
+      const renter = await db.user.findUnique({
+        where: { id: booking.userId! },
+        select: { email: true, firstName: true },
+      });
+      if (renter?.email) {
+        const lateLine =
+          lateFee > 0
+            ? `<p style="color:#b91c1c;">غرامة تأخير: −${formatDZD(lateFee)}</p>`
+            : '';
+        await queueEmail({
+          to: renter.email,
+          kind: 'ESCROW_RELEASED',
+          bookingId: booking.id,
+          userId: booking.userId!,
+          subject: 'تم تحرير الضمان — كشف الحساب الختامي',
+          html: renderEmailHtml(
+            'تحرير الضمان',
+            `<p>مرحباً ${renter.firstName || ''}،</p><p>تم تأكيد استلام «${booking.productName ?? ''}» وتحرير الضمان (المادة 17 من القانون 18-05).</p><p>الوديعة المحتجزة: ${formatDZD(depositHeldAmt)}</p>${lateLine}<p>المستحق إعادته إليك: <b>${formatDZD(depositReturned)}</b> خلال 48 ساعة.</p>`
+          ),
+        });
+        await queueEmail({
+          to: renter.email,
+          kind: 'REVIEW_INVITE',
+          bookingId: booking.id,
+          userId: booking.userId!,
+          subject: 'شاركنا تجربتك — تقييمك يبني الثقة',
+          html: renderEmailHtml(
+            'دعوة للتقييم',
+            `<p>اكتمل حجز «${booking.productName ?? ''}» بنجاح. تقييمك للمؤجر يساعد بقية المستأجرين على الإيجار بلا همّ.</p>`
+          ),
+        });
+      }
+    } catch (e) {
+      logger.error('Escrow Release', 'Outbox emails failed (non-fatal)', e);
+    }
+
     return NextResponse.json({
       success: true,
       dignity_preserved: true,
@@ -249,6 +315,10 @@ export async function POST(
         status: result.updatedBooking.status,
         escrow_status: result.updatedBooking.escrowStatus,
         payout_record_id: result.payoutRecord?.id ?? null,
+        // PHASE 2: the khatamiya settlement, in the response.
+        deposit_held: depositHeldAmt,
+        late_fee: lateFee,
+        deposit_returned: depositReturned,
       },
     });
   } catch (error) {

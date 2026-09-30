@@ -43,15 +43,30 @@ So: **feature grafting** — port the missing organs into their body.
 5. `lib/scheduler.ts` + `instrumentation.ts` — 30s sweep on boot; hot-reload
    and build-phase safe.
 
-## Phase 2 (wiring into their flows — next commits)
+## Phase 2 (WIRED — this branch, Chargily ↔ Escrow marriage)
 
-| Their file | Graft |
+The deposit is no longer phantom money. One rule (`computeDepositHeld`:
+explicit `product.depositAmount` wins, else 30% of rental basis — the same
+"sovereign 30%" their own calculate-deposit endpoint documents) now governs
+the charge, the hold, the release and the refund.
+
+| Their file | What was wired |
 |---|---|
-| `app/api/bookings/[id]/release-escrow/route.ts` | On release: `depositReturned = depositHeld − lateFee` via `computeDepositReturn`, `ESCROW_RELEASED` email + notification. Rate-limit already theirs. |
-| Chargily webhook (`checkout.paid`, dedup via `ProcessedWebhookEvent`) | On paid: capture `depositHeld = product.depositAmount` (or 30% sovereign rule from `calculate-deposit`) into the Booking, `PAYMENT_RECEIPT` + `MERCHANT_ORDER_ALERT` emails. |
-| `app/api/reviews/create/route.ts` | Require a **COMPLETED booking owned by the session user**, set `bookingId` + `isVerified=true`; unique constraint enforces one review. |
-| `refund-escrow/route.ts` | Mirror accounting: `depositReturned=0`, `escrowStatus=refunded`, notification. |
-| Storefront UI | Price breakdown + deposit badge (green "بدون وديعة" variant) on product cards; "قيّم الآن" prompt gated on completed bookings. |
+| `app/api/payments/chargily/checkout/route.ts` | Charge = `totalPrice + depositHeld` (one checkout, full hold). Response carries the honest breakdown (`amount`, `rent_amount`, `deposit_amount`). |
+| `app/api/payments/webhook/route.ts` | On `checkout.paid` (inside the atomic tx): Booking lands **`depositHeld`** + **`lateFeePerDay`** frozen at capture. After tx: `PAYMENT_RECEIPT` (renter) + `MERCHANT_ORDER_ALERT` (vendor user) via outbox. |
+| `app/api/bookings/[id]/release-escrow/route.ts` | `overdue` now releasable. Settlement: `lateFee` (sweep-frozen, with on-the-fly fallback capped at deposit) → `depositReturned = depositHeld − lateFee` persisted. `ESCROW_RELEASED` tx = collateral returning to renter; `PayoutRecord` = rent **+ late-fee compensation** to vendor. Outbox: `ESCROW_RELEASED` statement + `REVIEW_INVITE`. |
+| `app/api/bookings/[id]/refund-escrow/route.ts` | Refunds the **full captured amount** (`payment.amount` = rent + deposit); `depositReturned = depositHeld`. |
+| `app/api/reviews/create/route.ts` | **The COMPLETED gate**: `booking_id` required → exists → owned by session user → same product → `status === 'completed'`. One review per booking (`@@unique` + friendly 409). Breaking contract for anonymous product-only reviews — intentional. |
+| `app/api/bookings/calculate-deposit/route.ts` | Emits `total_charged` + `breakdown{rental_fee, security_deposit}` + `deposit_mode` — the fields the checkout UI already reads. UI lights up with zero frontend edits. |
+| `lib/escrow.ts` | + `SOVEREIGN_DEPOSIT_RATE`, `computeDepositHeld()`. |
+
+Money invariants (auditable chain): `charge = rent + deposit` →
+`release: vendor = rent + lateFee, renter = deposit − lateFee` →
+`refund: renter = rent + deposit`. Platform touches nothing; every number
+comes from `lib/escrow.ts`.
+
+Still open (P3): storefront UI badges, `PayoutRequest` merchant withdrawal
+loop (CCP/RIB/BaridiMob + admin queue), services/bundles booking parity.
 
 ## P3 roadmap (after PR merges)
 
