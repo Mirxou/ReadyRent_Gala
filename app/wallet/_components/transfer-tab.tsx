@@ -46,7 +46,11 @@ export function TransferTab({ balance, onBalanceUpdate }: TransferTabProps) {
 
   // Re-resolve on identifier change (debounced via simple effect)
   useEffect(() => {
-    if (!trRecipient.trim()) { setResolvedRecipient(null); return; }
+    if (!trRecipient.trim()) {
+      // Defer to avoid synchronous setState inside the effect body
+      queueMicrotask(() => setResolvedRecipient(null));
+      return;
+    }
     const t = setTimeout(() => { handleResolveRecipient(); }, 400);
     return () => clearTimeout(t);
   }, [trRecipient, handleResolveRecipient]);

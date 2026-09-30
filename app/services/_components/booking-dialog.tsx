@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { servicesApi } from '@/lib/api';
+import type { ServiceItem } from '@/lib/api';
 import {
   Dialog,
   DialogContent,
@@ -17,7 +18,7 @@ import { toast } from 'sonner';
 import { Sparkles, CalendarCheck, Phone, StickyNote, ArrowLeft } from 'lucide-react';
 
 interface BookingDialogProps {
-  service: Record<string, unknown>;
+  service: ServiceItem;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -45,7 +46,7 @@ export function BookingDialog({ service, open, onOpenChange }: BookingDialogProp
           phone: formData.phone,
           notes: formData.notes,
         });
-        if (res.status >= 400 || res.meta?.failed) {
+        if (res.status >= 400 || (res.meta as { failed?: boolean } | undefined)?.failed) {
           throw new Error(res.data?.message_ar || 'Booking failed');
         }
         onOpenChange(false);
@@ -79,7 +80,7 @@ export function BookingDialog({ service, open, onOpenChange }: BookingDialogProp
               اسم الخدمة
             </Label>
             <Input
-              value={service.name_ar}
+              value={service.name_ar ?? ''}
               readOnly
               className="bg-white/5 border-sovereign-gold/20 text-sovereign-white cursor-not-allowed opacity-80 h-11"
               dir="rtl"

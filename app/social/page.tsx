@@ -22,6 +22,14 @@ const TIER_ICONS: Record<TrustTier, string> = {
   fully_trusted: '🏆',
 };
 
+interface SocialScore {
+  overall_score?: number;
+  vouch_count?: number | null;
+  review_count?: number | null;
+  avg_rating?: number | null;
+  [key: string]: unknown;
+}
+
 export default function SocialPage() {
   const router = useRouter();
   const { isAuthenticated, user } = useAuthStore();
@@ -33,7 +41,7 @@ export default function SocialPage() {
 
   const { data: trustData } = useQuery({
     queryKey: ['my-trust-score-social'],
-    queryFn: () => socialApi.getSocialScore('me').then(r => r.data as Record<string, unknown>),
+    queryFn: () => socialApi.getSocialScore('me').then(r => r.data as SocialScore),
     enabled: isAuthenticated,
     staleTime: 10 * 60 * 1000,
   });
@@ -136,7 +144,7 @@ export default function SocialPage() {
             <DignifiedLoader />
           ) : Array.isArray(feed) && feed.length > 0 ? (
             <div className="space-y-4">
-              {feed.map((item: Record<string, unknown>, i: number) => (
+              {feed.map((item, i) => (
                 <div key={item.id || i} className="flex items-center gap-4 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors">
                   <div className="w-10 h-10 rounded-full bg-sovereign-gold/20 flex items-center justify-center text-sovereign-gold font-bold">
                     {String(item.userName || '?').charAt(0)}

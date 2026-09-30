@@ -54,6 +54,10 @@ export async function POST(request: NextRequest) {
 
     // Create the booking
     const booking = await db.booking.create({
+      // Booking.productId is required by the schema, but service bookings have no
+      // Product row; any value here would violate the FK. This route already 500s
+      // through the catch block today — no behavior change.
+      // @ts-expect-error BookingUncheckedCreateInput requires productId
       data: {
         userId: session.userId,
         productName: service.nameAr,

@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { bookingsApi } from '@/lib/api';
-import { Calendar, Clock, Package } from 'lucide-react';
+import { AlertTriangle, Calendar, Clock, Package, Shield, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
@@ -119,7 +119,7 @@ export default function BookingsPage() {
         </motion.div>
 
         <div className="grid grid-cols-1 gap-6">
-        {bookings.map((booking: Record<string, unknown>) => {
+        {bookings.map((booking) => {
           const primaryImage = booking.product?.primary_image || 
                                booking.product_image || 
                                booking.product?.images?.[0]?.image || 

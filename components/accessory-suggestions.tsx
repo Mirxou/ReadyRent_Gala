@@ -79,7 +79,7 @@ export function AccessorySuggestions({ productId, limit = 5 }: AccessorySuggesti
                       <div className="relative aspect-[3/4] w-full overflow-hidden rounded-t-lg">
                         {accessory.primary_image || accessory.images?.[0]?.image ? (
                           <Image
-                            src={accessory.primary_image || accessory.images[0]!.image}
+                            src={accessory.primary_image || accessory.images?.[0]?.image || ''}
                             alt={accessory.name_ar || accessory.name || ''}
                             fill
                             unoptimized

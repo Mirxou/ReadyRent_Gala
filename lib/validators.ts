@@ -122,7 +122,8 @@ export function validateBody<T>(schema: z.ZodType<T>, body: unknown): {
 } {
   const result = schema.safeParse(body);
   if (!result.success) {
-    const firstError = result.error.errors[0];
+    // zod v3+: parse issues live on `.issues` (`.errors` was removed from the types)
+    const firstError = result.error.issues[0];
     return {
       success: false,
       error: result.error,

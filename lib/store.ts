@@ -6,8 +6,9 @@ import { authApi } from './api';
 interface User {
   id: string;
   email: string;
-  username: string;
-  role: string;
+  // Optional: backend /auth/profile may not include these on every response
+  username?: string;
+  role?: string;
   is_verified?: boolean;
   trust_score?: number;
   wallet_balance?: number;

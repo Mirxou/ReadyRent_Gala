@@ -4,7 +4,10 @@ import { ShieldCheck, BadgeCheck, Award, Star } from 'lucide-react';
 
 interface SovereignSealProps {
   verified?: boolean;
-  type?: 'vendor' | 'product' | 'user' | 'contract';
+  // Seal kinds: entity badges ('vendor'…) and sovereign seal colors
+  // ('SHIELD_SILVER' | 'BALANCE_GOLD' | 'DOCUMENT_GREY') used by dispute pages.
+  // Unknown kinds fall back to the shield icon.
+  type?: string;
   refId?: string;
   animate?: boolean;
   size?: 'sm' | 'md' | 'lg';

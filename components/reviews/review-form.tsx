@@ -11,8 +11,9 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 interface ReviewFormProps {
-  productId: number;
-  bookingId?: number;
+  // Backend ids are UUID strings (consistent with productsApi/Review.id)
+  productId: string;
+  bookingId?: string;
   onSuccess?: () => void;
 }
 
@@ -23,7 +24,7 @@ export function ReviewForm({ productId, bookingId, onSuccess }: ReviewFormProps)
   const queryClient = useQueryClient();
 
   const createReviewMutation = useMutation({
-    mutationFn: () => reviewsApi.create({ product_id: productId, booking_id: bookingId || 0, rating, title, comment }),
+    mutationFn: () => reviewsApi.create({ product_id: productId, booking_id: bookingId, rating, title, comment }),
     onSuccess: (res: { dignity_preserved?: boolean; error?: string; message_ar?: string }) => {
       if (res?.dignity_preserved || res?.error) {
         toast.error(res?.message_ar || res?.error || 'حدث خطأ أثناء إضافة التقييم');

@@ -4,7 +4,8 @@ import { api } from '@/lib/api';
 import { Flame } from 'lucide-react';
 
 interface LiveViewerCountProps {
-    productId: number;
+    // Backend entity ids are UUID strings; some callers still pass numbers
+    productId: number | string;
 }
 
 export const LiveViewerCount = ({ productId }: LiveViewerCountProps) => {
