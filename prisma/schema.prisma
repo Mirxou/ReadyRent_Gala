@@ -67,6 +67,7 @@ model User {
   verificationVotes    VerificationVote[]    @relation("VerificationVoter")
   sessions             Session[]
   vendors              Vendor[]
+  payoutRequests       PayoutRequest[]
 
   @@index([role])
   @@index([isActive])
@@ -159,6 +160,8 @@ model Vendor {
   products Product[]
   // P2-29 fix: deleting the linked User nullifies vendor.userId (keep audit trail)
   user     User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  // GRAFT PHASE 3: merchant withdrawal ledger
+  payoutRequests PayoutRequest[]
 
   // P2-27 fix: index on userId FK
   @@index([userId])
@@ -861,7 +864,7 @@ model EmailLog {
   id        String   @id @default(cuid())
   to        String
   subject   String
-  kind      String // PAYMENT_RECEIPT | MERCHANT_ORDER_ALERT | LATE_WARNING | ESCROW_RELEASED | REVIEW_INVITE
+  kind      String // PAYMENT_RECEIPT | MERCHANT_ORDER_ALERT | LATE_WARNING | ESCROW_RELEASED | REVIEW_INVITE | PAYOUT_REQUESTED | PAYOUT_APPROVED | PAYOUT_PAID | PAYOUT_REJECTED
   bookingId String?  @map("booking_id")
   userId    String?  @map("user_id")
   status    String   @default("queued") // queued, sent, failed
@@ -872,4 +875,42 @@ model EmailLog {
   @@index([createdAt])
   @@index([bookingId])
   @@map("email_logs")
+}
+
+// ──── GRAFT PHASE 3: Payout Request (كراء بلا همّ) ────
+// Merchant withdrawal demand — the money-out valve of the escrow engine.
+// Chargily Pay has NO payout API ("Yassir model" per their own code), so the
+// 360° money path is completed manually: vendor asks → admin verifies →
+// human transfers via CCP / BaridiMob / RIB → reference recorded here.
+//
+// Accounting invariant (lib/payouts.ts):
+//   available = Σ PayoutRecord.amount (status != 'failed')
+//             − Σ PayoutRequest.amount (status != 'rejected')
+// PayoutRequest is the ONLY ledger of committed money — no double-spend.
+// NOTE: amounts are whole DZD integers (same unit as booking.totalPrice).
+model PayoutRequest {
+  id            String    @id @default(cuid())
+  vendorId      String    @map("vendor_id")
+  userId        String    @map("user_id") // the vendor's user account
+  amount        Int // DZD (whole dinars) — must be ≤ available balance at creation
+  method        String // ccp | baridimob | rib
+  accountName   String    @map("account_name")
+  accountNumber String    @map("account_number") // CCP number / RIP (BaridiMob) / RIB — normalized digits
+  status        String    @default("pending") // pending, approved, paid, rejected
+  adminNote     String?   @map("admin_note") // rejection reason / processing note
+  transferRef   String?   @map("transfer_ref") // transfer receipt reference (required when paid)
+  processedBy   String?   @map("processed_by") // admin/staff user id
+  processedAt   DateTime? @map("processed_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  // Financial audit rows must never cascade-delete with their owner.
+  vendor Vendor @relation(fields: [vendorId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@index([vendorId])
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("payout_requests")
 }

@@ -6,6 +6,7 @@ export * from './products';
 export * from './bookings';
 export * from './payments';
 export * from './wallet';
+export * from './payouts';
 export * from './contracts';
 export * from './disputes';
 export * from './admin';

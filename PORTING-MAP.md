@@ -70,12 +70,23 @@ loop (CCP/RIB/BaridiMob + admin queue), services/bundles booking parity.
 
 ## P3 roadmap (after PR merges)
 
-1. **Chargily ↔ Escrow bridge** — real money in, escrow capture on webhook.
-2. **Merchant payout loop** — Chargily has NO payout API (noted in their own
-   code: "Yassir model"). Build `PayoutRequest` flow: merchant CCP/RIB or
-   BaridiMob info → admin processing queue (pending → processed) → complete
-   the 360° money path.
-3. Admin panel extensions last (they already have one) — dispute + payout ops.
+1. **Chargily ↔ Escrow bridge** — ✅ DONE (phase 2, this branch).
+2. **Merchant payout loop** — ✅ DONE (phase 3, `feat/phase3-payout-requests`):
+
+   | Surface | Role |
+   |---|---|
+   | `prisma: PayoutRequest` | Withdrawal ledger — status `pending → approved → paid` / `rejected`; relations to Vendor/User (Restrict — money history never cascade-deletes) |
+   | `lib/payouts.ts` | Balance engine: `available = Σ PayoutRecord(not failed) − Σ PayoutRequest(not rejected)`; account validators (CCP 8–20 digits, RIP/RIB exactly 20); amounts are whole DZD |
+   | `app/api/vendors/payout-requests` | GET balance+list · POST create — balance re-checked **inside the tx** (no double-spend); outbox email `PAYOUT_REQUESTED` |
+   | `app/api/admin/payout-requests` | GET queue (filter/paginate) + pending stats |
+   | `app/api/admin/payout-requests/[id]` | PATCH state machine `approve/reject/mark_paid`; guarded `updateMany` (optimistic concurrency → 409 on race); transfer_ref required for paid, reason required for reject; outbox `PAYOUT_APPROVED/PAYOUT_PAID/PAYOUT_REJECTED` |
+   | `app/dashboard/payouts` | Vendor UI: balance cards + request form + history (sidebar: «أرباحي وسحبها») |
+   | `app/admin/payouts` | Admin queue: filters, pending stats, approve/reject/mark-paid dialogs |
+
+   Money path 360°: `checkout (rent+deposit)` → `escrow held` →
+   `release (vendor IOU = rent+lateFee via PayoutRecord)` →
+   **`PayoutRequest → human transfer → transfer_ref on record`**.
+3. Admin panel extensions last (they already have one) — dispute ops remain.
 
 ## Verification
 
