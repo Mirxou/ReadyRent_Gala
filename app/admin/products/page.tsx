@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Search, Plus, Edit, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import Link from 'next/link';
+import type { SovereignResponse } from '@/types/sovereign';
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
@@ -51,7 +52,7 @@ export default function AdminProductsPage() {
   const deleteMutation = useMutation({
     mutationFn: (id: string) => adminApi.deleteProduct(id),
     onMutate: () => { setDeleteTarget(null); },
-    onSuccess: (res: Record<string, unknown>) => {
+    onSuccess: (res: SovereignResponse<unknown>) => {
       // Check sovereign_halt (network error / 503)
       if (res?.status === 'sovereign_halt' || res?.code === 'SYSTEM_HALT') {
         toast.error((res?.message_ar as string) || 'حدث خطأ أثناء حذف المنتج');

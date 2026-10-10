@@ -6,10 +6,14 @@ export * from './products';
 export * from './bookings';
 export * from './payments';
 export * from './wallet';
+export * from './payouts';
 export * from './contracts';
 export * from './disputes';
 export * from './admin';
-export * from './logistics';
+// STUB: green-sweep — './logistics' and './appeals' modules were never landed on
+// main and nothing in the repo imports their exports; the re-exports only broke
+// compilation. Restore them if/when the real modules arrive.
+// export * from './logistics';
 export * from './reviews';
-export * from './appeals';
+// export * from './appeals';
 export * from './notifications';

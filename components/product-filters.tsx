@@ -66,9 +66,9 @@ export function ProductFilters({
 
   const categories = useMemo(() => {
     if (!categoriesData) return [];
-    return Array.isArray(categoriesData)
-      ? categoriesData
-      : (categoriesData?.results || []);
+    // green-sweep: legacy API returns either a bare array or { results: [...] }.
+    const raw = categoriesData as unknown as { results?: Category[] } | Category[];
+    return Array.isArray(raw) ? raw : (raw.results || []);
   }, [categoriesData]);
 
   // Fetch search suggestions

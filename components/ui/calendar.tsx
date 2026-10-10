@@ -59,7 +59,7 @@ function Calendar({
           const Icon = orientation === 'left' ? ChevronRight : ChevronLeft;
           return <Icon className="h-4 w-4" {...props} />;
         },
-      } as React.SVGProps<SVGSVGElement>}
+      } as unknown as React.ComponentProps<typeof DayPicker>['components']}
       {...props}
     />
   );

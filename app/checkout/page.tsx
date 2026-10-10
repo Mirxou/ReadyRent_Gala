@@ -25,19 +25,6 @@ export default function CheckoutPage() {
 
   const bookingId = searchParams.get('booking_id');
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/login?callback=/checkout');
-      return;
-    }
-    if (!bookingId) {
-      toast.error('معرف الحجز مفقود');
-      router.push('/dashboard');
-      return;
-    }
-    loadBookingAndDeposit();
-  }, [isAuthenticated, bookingId, router]);
-
   const loadBookingAndDeposit = async () => {
     try {
       // Fetch booking details
@@ -59,6 +46,19 @@ export default function CheckoutPage() {
     }
   };
 
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push('/login?callback=/checkout');
+      return;
+    }
+    if (!bookingId) {
+      toast.error('معرف الحجز مفقود');
+      router.push('/dashboard');
+      return;
+    }
+    (async () => { await loadBookingAndDeposit(); })();
+  }, [isAuthenticated, bookingId, router]);
+
   const handlePay = async () => {
     setRedirecting(true);
     try {
@@ -69,9 +69,9 @@ export default function CheckoutPage() {
 
       if (res.data?.data?.checkout_url) {
         // Redirect to Chargily payment page
-        window.location.href = res.data.data.checkout_url;
+        window.location.assign(res.data.data.checkout_url);
       } else if (res.data?.data?.redirect_url) {
-        window.location.href = res.data.data.redirect_url;
+        window.location.assign(res.data.data.redirect_url);
       } else {
         toast.error('فشل إنشاء جلسة الدفع — تحقق من إعدادات Chargily');
         setRedirecting(false);
@@ -143,7 +143,7 @@ export default function CheckoutPage() {
                   {(booking.product_name as string)?.charAt(0) || '?'}
                 </div>
                 <div>
-                  <h2 className="font-bold">{booking.product_name || 'منتج'}</h2>
+                  <h2 className="font-bold">{(booking.product_name as string | undefined) || 'منتج'}</h2>
                   <p className="text-xs text-muted-foreground">
                     {duration} {rentalUnit === 'HOUR' ? 'ساعة' : rentalUnit === 'MONTH' ? 'شهر' : 'يوم'}
                   </p>
@@ -195,7 +195,7 @@ export default function CheckoutPage() {
                 <CheckCircle2 className="w-4 h-4 text-blue-500 mt-0.5 shrink-0" />
                 <div className="text-xs text-blue-700">
                   <span className="font-bold">وضع الضمان: {depositMode}</span>
-                  {smartRec.conversion_lift && (
+                  {(smartRec.conversion_lift as string | undefined) && (
                     <span className="ml-2 text-emerald-600 font-bold">↑ يرفع نسبة الحجز بـ {smartRec.conversion_lift as string}</span>
                   )}
                 </div>

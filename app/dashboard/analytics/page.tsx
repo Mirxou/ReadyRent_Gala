@@ -22,17 +22,6 @@ import { motion } from 'framer-motion';
 import { cn, formatNumber } from '@/lib/utils';
 import { SovereignGlow } from '@/shared/components/sovereign/sovereign-sparkle';
 
-interface Booking {
-  id: string;
-  status: string;
-  total_price: number;
-  start_date: string;
-  end_date: string;
-  category_name?: string;
-  product_name?: string;
-  created_at: string;
-}
-
 export default function AnalyticsPage() {
   const { isAuthenticated } = useAuthStore();
 
@@ -63,13 +52,13 @@ export default function AnalyticsPage() {
   });
 
   // ──── Derived stats from real bookings ────
-  const completedBookings = bookings.filter((b: Booking) => ['completed', 'returned'].includes(b.status));
-  const totalSpent = completedBookings.reduce((sum: number, b: Booking) => sum + (b.total_price || 0), 0);
+  const completedBookings = bookings.filter((b) => ['completed', 'returned'].includes(b.status));
+  const totalSpent = completedBookings.reduce((sum: number, b) => sum + (b.total_price || 0), 0);
   const avgSpend = completedBookings.length > 0 ? Math.round(totalSpent / completedBookings.length) : null;
 
   // Average booking duration in days
   const durations = completedBookings
-    .map((b: Booking) => {
+    .map((b) => {
       const start = new Date(b.start_date).getTime();
       const end = new Date(b.end_date).getTime();
       return Math.max(1, Math.round((end - start) / (1000 * 60 * 60 * 24)));
@@ -78,7 +67,7 @@ export default function AnalyticsPage() {
 
   // Top category frequency
   const categoryCount: Record<string, number> = {};
-  bookings.forEach((b: Booking) => {
+  bookings.forEach((b) => {
     const cat = b.category_name || b.product_name || 'أخرى';
     categoryCount[cat] = (categoryCount[cat] || 0) + 1;
   });
@@ -93,8 +82,8 @@ export default function AnalyticsPage() {
   const monthlyCounts = Array.from({ length: 6 }, (_, i) => {
     const monthStart = new Date(now.getFullYear(), now.getMonth() - (5 - i), 1);
     const monthEnd = new Date(now.getFullYear(), now.getMonth() - (5 - i) + 1, 0, 23, 59, 59);
-    return bookings.filter((b: Booking) => {
-      const d = new Date(b.created_at);
+    return bookings.filter((b) => {
+      const d = new Date(b.created_at as string);
       return d >= monthStart && d <= monthEnd;
     }).length;
   });

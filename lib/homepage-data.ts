@@ -187,7 +187,7 @@ export async function getHomepageData(): Promise<HomepageData> {
       is_verified: r.isVerified,
       status: r.status,
       created_at: r.createdAt.toISOString(),
-      user: r.user ? { id: r.user.id, username: r.user.username } : null,
+      user: r.user ? { id: r.user.id, username: r.user.username as string } : null,
     })),
     stats: {
       total_products: totalProducts,

@@ -136,7 +136,7 @@ function ProductForm() {
 
     async function loadProduct() {
       try {
-        const res = await adminApi.getProduct(editId);
+        const res = await adminApi.getProduct(editId as string);
 
         // Check sovereign_halt or API failure
         if (res?.status === 'sovereign_halt' || res?.code === 'SYSTEM_HALT' || res?.success === false) {

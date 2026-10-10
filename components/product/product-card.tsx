@@ -4,22 +4,23 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { Star, Heart, MapPin } Shield, from 'lucide-react';
+import { Star, Heart, MapPin, Shield } from 'lucide-react';
 import { cn, formatNumber } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
 import { SovereignGlow, SovereignSparkle } from '@/shared/components/sovereign/sovereign-sparkle';
 import { IdentityShield } from '@/shared/components/sovereign/identity-shield';
 import { productsApi } from '@/lib/api';
+import type { Product } from '@/lib/api';
 
 interface ProductCardProps {
-  product: Record<string, unknown>;
+  product: Product;
   priority?: boolean;
 }
 
 export function ProductCard({ product, priority = false }: ProductCardProps) {
   const PLACEHOLDER = '/placeholder-product.jpg';
-  const isElite = product.is_premium || (product.vendor_trust_score && product.vendor_trust_score > 90);
+  const isElite = Boolean(product.is_premium) || (product.vendor_trust_score ?? 0) > 90;
   const vendorVerified = product.vendor_verified || product.is_verified;
   const vendorTrustScore = Number(product.vendor_trust_score || 0);
   const images = product.images as Array<{ image?: string; url?: string }> | undefined;
@@ -43,8 +44,8 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
     }
   };
 
-  const categoryDisplay = (product as Record<string, unknown>).category_name || product.category?.name_ar || 'التصنيف';
-  const locationDisplay = (product as Record<string, unknown>).location_name || product.location || 'الجزائر العاصمة';
+  const categoryDisplay = product.category_name || product.category?.name_ar || 'التصنيف';
+  const locationDisplay = product.location_name || product.location || 'الجزائر العاصمة';
 
   return (
     <SovereignGlow color={'gold'}>
@@ -124,26 +125,26 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
                             }})()}
                         </p>
                         <p className="text-2xl font-black tracking-tighter">
-                            {{formatNumber(
+                            {formatNumber(
                               (product.price_per_hour && String(product.supported_units || 'DAY').includes('HOUR'))
                                 ? product.price_per_hour
                                 : (product.price_per_month && String(product.supported_units || 'DAY').includes('MONTH'))
                                   ? product.price_per_month
                                   : product.price_per_day
-                            )}} <span className="text-xs font-normal opacity-40">دج</span>
+                            )} <span className="text-xs font-normal opacity-40">دج</span>
                         </p>
                         {/* P1: KYC badge if product requires verification */}
-                        {{product.required_kyc_tier && product.required_kyc_tier !== 'NONE' && (
+                        {product.required_kyc_tier && product.required_kyc_tier !== 'NONE' && (
                           <span className="inline-flex items-center gap-1 mt-1 text-[9px] font-bold text-amber-600 bg-amber-500/10 px-2 py-0.5 rounded-full">
                             <Shield className="w-2.5 h-2.5" /> يتطلب توثيق
                           </span>
-                        )}}
+                        )}
                         {/* P1: deposit mode badge */}
-                        {{product.deposit_mode === 'NONE' && (
+                        {product.deposit_mode === 'NONE' && (
                           <span className="inline-flex items-center gap-1 ml-1 text-[9px] font-bold text-emerald-600 bg-emerald-500/10 px-2 py-0.5 rounded-full">
                             بدون ضمان
                           </span>
-                        )}}
+                        )}
                     </div>
                     <button
                       onClick={handleToggleWishlist}

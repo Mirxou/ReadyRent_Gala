@@ -47,7 +47,7 @@ export function FeaturedProducts({ products: ssrProducts }: FeaturedProductsProp
       try {
         const res = await productsApi.getAll({ limit: 3, sort: 'newest' });
         if (res?.data && Array.isArray(res.data)) {
-          setProducts(res.data.slice(0, 3));
+          setProducts(res.data.slice(0, 3) as unknown as Product[]);
         }
       } catch (error) {
         console.error("Failed to fetch featured products:", error);
@@ -88,7 +88,7 @@ export function FeaturedProducts({ products: ssrProducts }: FeaturedProductsProp
               viewport={{ once: true }}
               transition={{ delay: i * 0.1, duration: 0.6 }}
             >
-              <ProductCard product={p as Record<string, unknown>} />
+              <ProductCard product={p as unknown as React.ComponentProps<typeof ProductCard>['product']} />
             </motion.div>
           ))}
         </div>

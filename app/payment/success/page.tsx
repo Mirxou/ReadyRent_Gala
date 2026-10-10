@@ -40,7 +40,8 @@ export default function PaymentSuccessPage() {
       };
       poll(0);
     } else {
-      setLoading(false);
+      // Defer to avoid synchronous setState inside the effect body
+      queueMicrotask(() => setLoading(false));
     }
   }, [bookingId]);
 
@@ -82,7 +83,7 @@ export default function PaymentSuccessPage() {
           <div className="bg-gray-50 rounded-2xl p-4 mb-6 text-right">
             <div className="flex items-center gap-2 mb-3">
               <Package className="w-4 h-4 text-blue-500" />
-              <span className="font-bold text-sm">{booking.product_name || 'منتج'}</span>
+              <span className="font-bold text-sm">{(booking.product_name as string | undefined) || 'منتج'}</span>
             </div>
             <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
               <Calendar className="w-3 h-3" />
