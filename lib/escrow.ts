@@ -7,6 +7,23 @@
 /** Late fee accrues at 30% of the product's daily rate, per late day. */
 export const LATE_FEE_DAILY_RATE = 0.3;
 
+/**
+ * Sovereign deposit rule (PHASE 2): the collateral actually captured at
+ * checkout. An explicit product deposit wins; otherwise 30% of the rental
+ * basis — the same 30% the platform's own calculate-deposit endpoint calls
+ * "Sovereign trust system". One number, one rule, everywhere.
+ */
+export const SOVEREIGN_DEPOSIT_RATE = 0.3;
+
+export function computeDepositHeld(
+  productDepositAmount: number | null | undefined,
+  rentalBasis: number
+): number {
+  const explicit = Math.round(Math.max(0, productDepositAmount ?? 0));
+  if (explicit > 0) return explicit;
+  return Math.ceil(Math.max(0, rentalBasis) * SOVEREIGN_DEPOSIT_RATE);
+}
+
 export interface QuoteBreakdown {
   rentalTotal: number; // pricePerDay × days
   depositAmount: number; // held, not earned
@@ -36,9 +53,9 @@ export function quoteBreakdown(
   };
 }
 
-/** Daily late fee, frozen from the daily rental rate. */
+/** Daily late fee, frozen from the daily rental rate at capture time. */
 export function computeLateFeePerDay(pricePerDay: number): number {
-  return Math.round(pricePerDay * LATE_FEE_DAILY_RATE);
+  return Math.round(Math.max(0, pricePerDay) * LATE_FEE_DAILY_RATE);
 }
 
 /**

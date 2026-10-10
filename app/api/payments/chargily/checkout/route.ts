@@ -9,6 +9,7 @@ import { getSessionFromRequest, authRequiredResponse } from '@/lib/auth-server';
 import { getChargilyProvider } from '@/lib/payment-provider';
 import { logger } from '@/lib/logger';
 import { checkPaymentRateLimit, getClientIp } from '@/lib/rate-limiter';
+import { computeDepositHeld, countDays } from '@/lib/escrow';
 
 const ALLOWED_AMOUNTS = { min: 100, max: 5_000_000 };
 
@@ -46,9 +47,20 @@ export async function POST(request: Request) {
     }
 
     // ── Verify booking ownership ──
+    // PHASE 2 (escrow marriage): the charge is no longer rent-only. The
+    // sovereign deposit is captured WITH the rent — one checkout, full hold.
     const booking = await db.booking.findUnique({
       where: { id: booking_id },
-      select: { userId: true, productName: true, status: true, totalPrice: true },
+      select: {
+        userId: true,
+        productName: true,
+        status: true,
+        totalPrice: true,
+        startDate: true,
+        endDate: true,
+        quantity: true,
+        product: { select: { depositAmount: true, pricePerDay: true } },
+      },
     });
 
     if (!booking) {
@@ -73,16 +85,24 @@ export async function POST(request: Request) {
     }
 
     // ── Server-side amount verification (prevent price manipulation) ──
-    if (amount !== booking.totalPrice) {
+    // rentalBasis excludes insurance: deposits collateralize the RENTAL.
+    const rentalBasis =
+      booking.product?.pricePerDay && booking.startDate && booking.endDate
+        ? booking.product.pricePerDay *
+          countDays(new Date(booking.startDate), new Date(booking.endDate)) *
+          (booking.quantity || 1)
+        : 0;
+    const depositHeld = computeDepositHeld(booking.product?.depositAmount, rentalBasis);
+    const safeAmount = booking.totalPrice + depositHeld;
+
+    if (amount !== safeAmount) {
       logger.warn('Chargily/Checkout', 'Amount mismatch', {
-        expected: booking.totalPrice,
+        expected: safeAmount,
         received: amount,
         bookingId: booking_id,
       });
       // Use server-side amount
     }
-
-    const safeAmount = booking.totalPrice;
 
     // ── Get user info for Chargily customer ──
     const user = await db.user.findUnique({
@@ -150,6 +170,10 @@ export async function POST(request: Request) {
         payment_id: payment.id,
         checkout_url: result.checkoutUrl,
         checkout_id: result.checkoutId,
+        // PHASE 2: honest money breakdown — the deposit is real now.
+        amount: safeAmount,
+        rent_amount: booking.totalPrice,
+        deposit_amount: depositHeld,
       },
     });
   } catch (error) {
