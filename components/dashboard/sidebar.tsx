@@ -22,6 +22,7 @@ import {
     CalendarCheck,
     Bell,
     Shield,
+    Banknote,
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/store';
 import { getTrustLevel } from '@/lib/trust-score';
@@ -38,6 +39,7 @@ const sidebarSections = [
         items: [
             { title: 'الحجوزات', href: '/dashboard/bookings', icon: CalendarCheck },
             { title: 'الخزانة', href: '/wallet', icon: Wallet },
+            { title: 'أرباحي وسحبها', href: '/dashboard/payouts', icon: Banknote },
             { title: 'الإشعارات', href: '/dashboard/notifications', icon: Bell },
             { title: 'سجل الرغبات', href: '/dashboard/wishlist', icon: Sparkles },
             { title: 'الأصول الملكية', href: '/dashboard/products', icon: Package },

@@ -16,7 +16,12 @@ export type EmailKind =
   | 'MERCHANT_ORDER_ALERT'
   | 'LATE_WARNING'
   | 'ESCROW_RELEASED'
-  | 'REVIEW_INVITE';
+  | 'REVIEW_INVITE'
+  // ──── GRAFT PHASE 3: payout loop ────
+  | 'PAYOUT_REQUESTED'
+  | 'PAYOUT_APPROVED'
+  | 'PAYOUT_PAID'
+  | 'PAYOUT_REJECTED';
 
 export interface QueueEmailInput {
   to: string;
