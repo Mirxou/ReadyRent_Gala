@@ -6,6 +6,7 @@ import { Star, MapPin, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { servicesApi } from '@/lib/api';
+import type { ServiceItem } from '@/lib/api';
 import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
 import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
 import { DignifiedLoader } from '@/shared/components/sovereign/dignified-loader';
@@ -13,13 +14,13 @@ import { serviceCategories, fadeUp, staggerContainer } from './service-data';
 
 interface FeaturedServicesProps {
   selectedCategory: string | null;
-  onBookService: (service: Record<string, unknown>) => void;
+  onBookService: (service: ServiceItem) => void;
 }
 
 export function FeaturedServices({ selectedCategory, onBookService }: FeaturedServicesProps) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: '-100px' });
-  const [services, setServices] = useState<Record<string, unknown>[]>([]);
+  const [services, setServices] = useState<ServiceItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -33,9 +34,9 @@ export function FeaturedServices({ selectedCategory, onBookService }: FeaturedSe
   }, []);
 
   const filteredServices = selectedCategory
-    ? services.filter((s: Record<string, unknown>) => {
+    ? services.filter((s) => {
         const cat = serviceCategories.find((c) => c.slug === selectedCategory);
-        return cat && cat.categoryMatch.includes(s.category_ar);
+        return cat && cat.categoryMatch.includes(s.category_ar as string);
       })
     : services.slice(0, 6);
 
@@ -94,7 +95,7 @@ export function FeaturedServices({ selectedCategory, onBookService }: FeaturedSe
           </motion.div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
-            {filteredServices.map((service: Record<string, unknown>, i: number) => (
+            {filteredServices.map((service, i) => (
               <motion.div
                 key={service.id}
                 initial={{ opacity: 0, y: 30 }}
@@ -107,8 +108,8 @@ export function FeaturedServices({ selectedCategory, onBookService }: FeaturedSe
                 >
                   <div className="relative h-48 overflow-hidden">
                     <Image
-                      src={service.image}
-                      alt={service.name_ar}
+                      src={service.image || ''}
+                      alt={service.name_ar || ''}
                       className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
                       fill
                       unoptimized

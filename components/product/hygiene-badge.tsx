@@ -16,7 +16,7 @@ interface HygieneBadgeProps {
 export function HygieneBadge({ productId, className }: HygieneBadgeProps) {
   const { data: hygiene, isLoading } = useQuery({
     queryKey: ['hygiene-latest', productId],
-    queryFn: () => hygieneApi.getLatestForProduct(productId).then(res => res.data),
+    queryFn: () => hygieneApi.getLatestForProduct(String(productId)).then(res => res.data),
     staleTime: 1000 * 60 * 60, // 1 hour cache
   });
 

@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { disputesApi } from '@/lib/api';
+import type { Dispute } from '@/lib/api';
 
 type DisputeHistoryStage = {
   phase?: string;
@@ -36,7 +37,7 @@ const STATUS_LABELS: Record<string, string> = {
   'closed': 'القضية مغلقة',
 };
 
-function buildFallbackStages(dispute: Record<string, unknown>): DisputeHistoryStage[] {
+function buildFallbackStages(dispute: Dispute): DisputeHistoryStage[] {
   return [
     {
       label_ar: 'إنشاء النزاع',
@@ -62,7 +63,7 @@ export default function DisputeDetailPage() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [dispute, setDispute] = useState<Record<string, unknown> | null>(null);
+  const [dispute, setDispute] = useState<Dispute | null>(null);
   const [receiptStages, setReceiptStages] = useState<DisputeHistoryStage[]>([]);
 
   const isResolved = dispute?.status === 'resolved' || dispute?.status === 'closed';

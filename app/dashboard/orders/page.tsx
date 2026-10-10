@@ -53,13 +53,13 @@ export default function OrdersPage() {
       enabled: isAuthenticated,
     });
 
-    const filteredBookings = (bookings || []).filter((b: Record<string, unknown>) => {
+    const filteredBookings = (bookings || []).filter((b) => {
       // Tab filter
       if (activeTab !== 'all' && (b.status as string) !== activeTab) return false;
       // Search filter
       if (searchQuery.trim()) {
         const q = searchQuery.trim().toLowerCase();
-        const productName = (b.product_name || b.product?.name_ar || '').toLowerCase();
+        const productName = String(b.product_name || b.product?.name_ar || '').toLowerCase();
         const bookingId = String(b.id).toLowerCase();
         return productName.includes(q) || bookingId.includes(q);
       }
@@ -144,7 +144,7 @@ export default function OrdersPage() {
             {/* Bookings List */}
             {!isLoading && filteredBookings.length > 0 && (
             <div className="grid gap-8">
-                {filteredBookings.map((order: Record<string, unknown>) => {
+                {filteredBookings.map((order) => {
                   const cfg = statusConfig[order.status] || statusConfig.pending;
                   return (
                     <GlassPanel key={order.id} className="p-8 group hover:border-sovereign-gold/20 transition-all duration-500 overflow-hidden relative" gradientBorder>
@@ -178,7 +178,7 @@ export default function OrdersPage() {
                                             </div>
                                             <div className="flex items-center gap-2">
                                                 <Clock className="w-4 h-4 text-sovereign-gold" />
-                                                <span>تم الإنشاء: {formatRelativeTime(order.created_at)}</span>
+                                                <span>تم الإنشاء: {formatRelativeTime(String(order.created_at || ''))}</span>
                                             </div>
                                         </div>
                                     </div>

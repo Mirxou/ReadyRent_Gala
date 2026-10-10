@@ -8,6 +8,11 @@ export interface User {
   is_verified: boolean;
   avatar_url?: string;
   phone_number?: string;
+  // Optional metadata returned by some auth endpoints and consumed by lib/store.ts
+  username?: string;
+  role?: string;
+  trust_score?: number;
+  wallet_balance?: number;
 }
 
 export interface AuthResponse {
@@ -87,17 +92,17 @@ export const verificationApi = {
 
   /** Get current verification status (used by use-verification.ts) */
   getStatus: () =>
-    sovereignClient.get<unknown>('/verification/status/'),
+    sovereignClient.get<any>('/verification/status/'),
 
   /** Submit verification with captured photo (used by use-verification.ts) */
   submit: (photo: string) =>
-    sovereignClient.post<unknown>('/verification/submit/', { photo }),
+    sovereignClient.post<any>('/verification/submit/', { photo }),
 
   /** Get pending verification requests for community voting (used by use-verification.ts) */
   getPending: () =>
-    sovereignClient.get<unknown[]>('/verification/pending/'),
+    sovereignClient.get<any[]>('/verification/pending/'),
 
   /** Vote on a community verification request (used by use-verification.ts) */
   vote: (verificationId: string, vote: string, comment?: string) =>
-    sovereignClient.post<unknown>('/verification/vote/', { verification_id: verificationId, vote, comment }),
+    sovereignClient.post<any>('/verification/vote/', { verification_id: verificationId, vote, comment }),
 };

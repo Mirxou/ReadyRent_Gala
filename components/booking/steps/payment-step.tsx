@@ -83,8 +83,8 @@ export function PaymentStep() {
     updateFormData({ signature: dataUrl });
   };
 
-  const isWalletPayment = formData.paymentMethod === 'wallet';
-  const isBaridimob = formData.paymentMethod === 'baridimob';
+  const isWalletPayment = (formData.paymentMethod as string | undefined) === 'wallet';
+  const isBaridimob = (formData.paymentMethod as string | undefined) === 'baridimob';
 
   return (
     <div className="space-y-6">

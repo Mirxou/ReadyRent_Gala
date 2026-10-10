@@ -28,7 +28,8 @@ export function EvidenceStep({ disputeId }: { disputeId?: number }) {
       let uploadedId = `ev-${Math.random().toString(36).substr(2, 9)}`;
 
       if (disputeId) {
-        const result = await disputesApi.uploadEvidence(disputeId, file);
+        const res = await disputesApi.uploadEvidence(disputeId, file);
+        const result = res?.data as { url?: string; id?: string } | undefined;
         uploadedUrl = result?.url ?? uploadedUrl;
         uploadedId = String(result?.id ?? uploadedId);
       }
@@ -43,7 +44,7 @@ export function EvidenceStep({ disputeId }: { disputeId?: number }) {
       toast.success(`تم رفع ${file.name} بنجاح.`);
     } catch (err: unknown) {
       console.error('Evidence upload failed:', err);
-      toast.error(err?.message ?? 'فشل رفع الدليل. تحقق من اتصالك.');
+      toast.error((err as Error)?.message ?? 'فشل رفع الدليل. تحقق من اتصالك.');
     } finally {
       setIsUploading(false);
       if (e.target) e.target.value = '';

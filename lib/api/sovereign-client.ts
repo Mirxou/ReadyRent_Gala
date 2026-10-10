@@ -8,7 +8,10 @@ interface SovereignRequestOptions extends Omit<RequestInit, 'body'> {
 }
 
 export class SovereignClient {
-  public async request<T>(
+  // Generic with `any` default (axios-compatible): callers that pass an
+  // explicit DTO keep typed responses; untyped callers get `data: any` since
+  // the backend payload shape is unvalidated at runtime.
+  public async request<T = any>(
     endpoint: string,
     options?: SovereignRequestOptions
   ): Promise<SovereignResponse<T>> {
@@ -90,11 +93,11 @@ export class SovereignClient {
   }
 
   // Convenience methods
-  async get<T>(endpoint: string, options?: SovereignRequestOptions) {
+  async get<T = any>(endpoint: string, options?: SovereignRequestOptions) {
     return this.request<T>(endpoint, { ...options, method: 'GET' });
   }
 
-  async post<T>(endpoint: string, data?: unknown, options?: SovereignRequestOptions) {
+  async post<T = any>(endpoint: string, data?: unknown, options?: SovereignRequestOptions) {
     return this.request<T>(endpoint, {
       ...options,
       method: 'POST',
@@ -102,7 +105,7 @@ export class SovereignClient {
     });
   }
 
-  async put<T>(endpoint: string, data?: unknown, options?: SovereignRequestOptions) {
+  async put<T = any>(endpoint: string, data?: unknown, options?: SovereignRequestOptions) {
     return this.request<T>(endpoint, {
       ...options,
       method: 'PUT',
@@ -110,7 +113,7 @@ export class SovereignClient {
     });
   }
 
-  async patch<T>(endpoint: string, data?: unknown, options?: SovereignRequestOptions) {
+  async patch<T = any>(endpoint: string, data?: unknown, options?: SovereignRequestOptions) {
     return this.request<T>(endpoint, {
       ...options,
       method: 'PATCH',
@@ -118,7 +121,7 @@ export class SovereignClient {
     });
   }
 
-  async delete<T>(endpoint: string, options?: SovereignRequestOptions) {
+  async delete<T = any>(endpoint: string, options?: SovereignRequestOptions) {
     return this.request<T>(endpoint, { ...options, method: 'DELETE' });
   }
 

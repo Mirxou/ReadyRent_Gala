@@ -72,7 +72,7 @@ export default function AppealFilingPage() {
       toast.success('تم تقديم الاستئناف بنجاح');
     },
     onError: (err: unknown) => {
-      toast.error(err?.message || 'فشل تقديم الاستئناف');
+      toast.error((err as Error)?.message || 'فشل تقديم الاستئناف');
     },
   });
 

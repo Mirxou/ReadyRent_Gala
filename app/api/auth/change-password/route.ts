@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const parsed = changePasswordSchema.safeParse(body);
     if (!parsed.success) {
-      const firstError = parsed.error.errors[0];
+      const firstError = parsed.error.issues[0];
       return NextResponse.json(
         { success: false, dignity_preserved: true, message_ar: firstError?.message || 'بيانات غير صالحة', code: 'VALIDATION_ERROR' },
         { status: 400 }

@@ -118,8 +118,8 @@ export function useVerification() {
     setLoadingQueue(true);
     try {
       const { data } = await verificationApi.getPending();
-      const rawList = Array.isArray(data) ? data : data?.results || [];
-      setPendingVerifications(rawList.map(mapPendingVerification));
+      const rawList = Array.isArray(data) ? (data as unknown[]) : ((data as unknown as { results?: unknown[] })?.results || []);
+      setPendingVerifications(rawList.map((r) => mapPendingVerification(r as Record<string, unknown>)));
     } catch { /* silently fail */ }
     finally { setLoadingQueue(false); }
   }, [user?.is_verified]);
@@ -141,7 +141,7 @@ export function useVerification() {
     verificationStatus, verificationData, isAiAnalyzing, capturedPhoto, cameraActive, cameraError,
     videoRef, canvasRef, fileInputRef,
     pendingVerifications, loadingQueue, votingId, commentModal, voteComment,
-    setCommentModal, setVoteComment,
+    setCommentModal, setVoteComment, setVerificationStatus, setVerificationData,
     startCamera, stopCamera, capturePhoto, retakePhoto, handleFileUpload, submitForAI,
     fetchStatus, handleVote, user, isAuthenticated,
   };

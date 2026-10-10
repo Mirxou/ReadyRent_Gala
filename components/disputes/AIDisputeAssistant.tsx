@@ -141,7 +141,7 @@ export function AIDisputeAssistant({
     try {
       const res = await chatbotApi.createSession({ language: 'ar' });
       const sid = res.data?.id ?? res.data?.session_id;
-      setSessionId(sid);
+      setSessionId(sid as unknown as number | null);
       return sid;
     } catch {
       return null;
@@ -184,7 +184,7 @@ export function AIDisputeAssistant({
       const sid = await initSession();
 
       if (sid) {
-        const res = await chatbotApi.sendMessage(sid, fullText);
+        const res = await chatbotApi.sendMessage(sid as string, fullText);
         reply = res.data?.response || res.data?.message || res.data?.content || '';
       } else {
         const res = await chatbotApi.quickChat(fullText, { language: 'ar' });

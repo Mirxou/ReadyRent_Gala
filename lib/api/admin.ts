@@ -13,44 +13,44 @@ function buildQuery(params?: Record<string, unknown>): string {
 
 export const adminApi = {
   getDashboardStats: () =>
-    sovereignClient.get<unknown>('/analytics/admin/dashboard'),
+    sovereignClient.get<any>('/analytics/admin/dashboard'),
 
   getRevenue: (params?: { days?: number }) =>
-    sovereignClient.get<unknown>(`/analytics/admin/revenue${buildQuery(params)}`),
+    sovereignClient.get<any>(`/analytics/admin/revenue${buildQuery(params)}`),
 
   // Bookings Admin
   getAllBookings: (params?: Record<string, unknown>) =>
-    sovereignClient.get<unknown[]>(`/admin/bookings${buildQuery(params)}`),
+    sovereignClient.get<any[]>(`/admin/bookings${buildQuery(params)}`),
 
   updateBooking: (id: string, data: Record<string, unknown>) =>
-    sovereignClient.patch<unknown>(`/admin/bookings/${id}`, data),
+    sovereignClient.patch<any>(`/admin/bookings/${id}`, data),
 
   // Products Admin
   getAllProducts: (params?: Record<string, unknown>) =>
-    sovereignClient.get<unknown[]>(`/products/admin${buildQuery(params)}`),
+    sovereignClient.get<any[]>(`/products/admin${buildQuery(params)}`),
 
   getProduct: (id: string) =>
-    sovereignClient.get<unknown>(`/products/admin/${id}`),
+    sovereignClient.get<any>(`/products/admin/${id}`),
 
   createProduct: (data: Record<string, unknown>) =>
-    sovereignClient.post<unknown>('/products/admin', data),
+    sovereignClient.post<any>('/products/admin', data),
 
   updateProduct: (id: string, data: Record<string, unknown>) =>
-    sovereignClient.put<unknown>(`/products/admin/${id}`, data),
+    sovereignClient.put<any>(`/products/admin/${id}`, data),
 
   deleteProduct: (id: string) =>
     sovereignClient.delete<void>(`/products/admin/${id}`),
 
   // Users Admin
   getAllUsers: (params?: Record<string, unknown>) =>
-    sovereignClient.get<unknown[]>(`/admin/users${buildQuery(params)}`),
+    sovereignClient.get<any[]>(`/admin/users${buildQuery(params)}`),
 
   updateUser: (id: string, data: Record<string, unknown>) =>
-    sovereignClient.patch<unknown>(`/admin/users/${id}`, data),
+    sovereignClient.patch<any>(`/admin/users/${id}`, data),
 
   getBookingStats: () =>
-    sovereignClient.get<unknown>('/admin/bookings/stats'),
+    sovereignClient.get<any>('/admin/bookings/stats'),
 
   getSalesReport: (params?: { days?: number; export?: boolean }) =>
-    sovereignClient.get<unknown>(`/analytics/admin/sales-report${buildQuery(params)}`),
+    sovereignClient.get<any>(`/analytics/admin/sales-report${buildQuery(params)}`),
 };

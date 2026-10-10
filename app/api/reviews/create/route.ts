@@ -53,13 +53,13 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { product_id, rating, comment, title } = body;
+    const { product_id, booking_id, rating, comment, title } = body;
 
-    // Validate required fields
-    if (!product_id || !rating) {
+    // Validate required fields — PHASE 2: booking_id is the trust anchor.
+    if (!product_id || !rating || !booking_id) {
       return errorResponse(
-        'معرف المنتج والتقييم مطلوبان',
-        'Product ID and rating are required',
+        'معرف المنتج والحجز والتقييم مطلوبة',
+        'Product ID, booking ID and rating are required',
         'MISSING_PARAMS',
         400
       );
@@ -91,6 +91,65 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // ── GRAFT PHASE 2: the COMPLETED gate — no booking, no review ──
+    // A review is a privilege earned by a finished rental. The chain:
+    // booking exists → renter owns it → same product → status completed.
+    const booking = await db.booking.findUnique({
+      where: { id: booking_id },
+      select: { id: true, userId: true, productId: true, status: true },
+    });
+
+    if (!booking) {
+      return errorResponse(
+        'الحجز غير موجود',
+        'Booking not found',
+        'BOOKING_NOT_FOUND',
+        404
+      );
+    }
+
+    if (booking.userId !== session.userId) {
+      return errorResponse(
+        'لا يمكنك تقييم حجز لا تملكه',
+        'You can only review your own bookings',
+        'BOOKING_FORBIDDEN',
+        403
+      );
+    }
+
+    if (booking.productId !== product_id) {
+      return errorResponse(
+        'التقييم لا يطابق منتج الحجز',
+        'Review does not match the booked product',
+        'BOOKING_MISMATCH',
+        400
+      );
+    }
+
+    if (booking.status !== 'completed') {
+      return errorResponse(
+        'لا يمكن التقييم إلا بعد اكتمال الحجز وتحرير الضمان',
+        'Only completed bookings (escrow released) can be reviewed',
+        'BOOKING_NOT_COMPLETED',
+        403
+      );
+    }
+
+    // One review per booking — DB enforces @@unique([bookingId]); pre-check
+    // gives a friendly 409 instead of a raw constraint error.
+    const existingReview = await db.review.findFirst({
+      where: { bookingId: booking.id },
+      select: { id: true },
+    });
+    if (existingReview) {
+      return errorResponse(
+        'قيمت هذا الحجز مسبقاً — تقييم واحد لكل حجز',
+        'You already reviewed this booking — one review per booking',
+        'ALREADY_REVIEWED',
+        409
+      );
+    }
+
     // Get user info for reviewer name
     const user = await db.user.findUnique({
       where: { id: session.userId },
@@ -103,6 +162,7 @@ export async function POST(request: NextRequest) {
     const review = await db.review.create({
       data: {
         userId: session.userId,
+        bookingId: booking.id,
         productId: product_id,
         reviewerName,
         rating: ratingNum,
@@ -133,6 +193,7 @@ export async function POST(request: NextRequest) {
         id: review.id,
         user_id: review.userId,
         product_id: review.productId,
+        booking_id: review.bookingId,
         reviewer_name: review.reviewerName,
         rating: review.rating,
         comment: review.comment ?? null,
