@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { BookingDialog } from './_components/booking-dialog';
+import type { ServiceItem } from '@/lib/api';
 import { HeroSection } from './_components/hero-section';
 import { ServiceCategoriesGrid } from './_components/service-categories-grid';
 import { FeaturedServices } from './_components/featured-services';
@@ -9,7 +10,7 @@ import { CTASection } from './_components/cta-section';
 
 export default function ServicesPage() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [bookingService, setBookingService] = useState<Record<string, unknown> | null>(null);
+  const [bookingService, setBookingService] = useState<ServiceItem | null>(null);
   const [bookingOpen, setBookingOpen] = useState(false);
 
   const handleSelectCategory = useCallback((slug: string | null) => {
@@ -21,7 +22,7 @@ export default function ServicesPage() {
     }
   }, []);
 
-  const handleBookService = useCallback((service: Record<string, unknown>) => {
+  const handleBookService = useCallback((service: ServiceItem) => {
     setBookingService(service);
     setBookingOpen(true);
   }, []);

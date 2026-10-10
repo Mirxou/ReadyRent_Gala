@@ -39,7 +39,7 @@ export default function LoginPage() {
 
       if (response.httpStatus === 429) {
         // Rate limited
-        const retryMs = (response as Record<string, unknown>).retry_after_ms as number || 60000;
+        const retryMs = (response as unknown as Record<string, unknown>).retry_after_ms as number || 60000;
         const retrySec = Math.ceil(retryMs / 1000);
         setRateLimitCountdown(retrySec);
         const interval = setInterval(() => {

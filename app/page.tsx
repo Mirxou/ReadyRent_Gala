@@ -4,7 +4,7 @@
 // Client sub-components handle only animations/interactivity.
 // ═══════════════════════════════════════════════════════════════════
 
-import { Suspense } from 'react';
+import { Suspense, type ComponentProps } from 'react';
 import { FeaturedProducts } from '@/components/product/featured-products';
 import { getHomepageData } from '@/lib/homepage-data';
 import { HeroEcosystem } from './_components/hero-ecosystem';
@@ -29,7 +29,7 @@ export default async function HomePage() {
             <DignifiedLoader label="جاري تحميل المنتجات..." />
           </div>
         }>
-          <FeaturedProducts products={data.products} />
+          <FeaturedProducts products={data.products as unknown as ComponentProps<typeof FeaturedProducts>['products']} />
         </Suspense>
       )}
 

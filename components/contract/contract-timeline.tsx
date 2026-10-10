@@ -263,18 +263,30 @@ interface ContractTimelineProps {
 
 export function ContractTimeline({ contract, className }: ContractTimelineProps) {
   const activeIndex = useMemo(() => deriveActivePhaseIndex(contract), [contract]);
-  const snap = (contract.snapshot || {}) as Record<string, unknown>;
+  // green-sweep: explicit snapshot shape (was Record<string, unknown>) so the
+  // timeline props typecheck without behavior changes.
+  const snap = (contract.snapshot || {}) as {
+    renter_signed_at?: string;
+    renter_signature_hash?: string;
+    escrow_locked_at?: string;
+    escrow_hash?: string;
+    active_since?: string;
+    completed_at?: string;
+    completion_hash?: string;
+    has_dispute?: boolean;
+    dispute_id?: string | number;
+  };
 
   const isVoid = contract.status === 'void' || contract.status === 'expired';
   const isDisputed = snap.has_dispute;
 
   // Timestamps from snapshot
   const timestamps: Record<string, string | undefined> = {
-    created:       contract.created_at,
-    renter_signed: snap.renter_signed_at || (contract.renter_signature ? contract.signed_at : undefined),
+    created:       contract.created_at ? String(contract.created_at) : undefined,
+    renter_signed: snap.renter_signed_at || (contract.renter_signature ? (contract.signed_at as string | undefined) : undefined),
     escrow_locked: snap.escrow_locked_at,
     active:        snap.active_since,
-    completed:     snap.completed_at || contract.signed_at,
+    completed:     snap.completed_at || (contract.signed_at as string | undefined),
   };
 
   // Hashes — contract_hash for the creation step, others from snapshot

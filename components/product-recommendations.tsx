@@ -142,8 +142,8 @@ export function ProductRecommendations({ productId }: ProductRecommendationsProp
           )}
           style={{ scrollbarWidth: 'thin' }}
         >
-          {recommendations.map((product: RecommendationProduct) => (
-            <RecommendationCard key={product.id} product={product} />
+          {recommendations.map((product) => (
+            <RecommendationCard key={product.id} product={product as unknown as RecommendationProduct} />
           ))}
         </div>
       </GlassPanel>

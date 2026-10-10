@@ -109,7 +109,7 @@ export default function BlogPostPage() {
             <div className="relative h-96 w-full overflow-hidden rounded-2xl mb-8">
               <Image
                 src={isValidImageUrl(post.featured_image) ? post.featured_image : '/placeholder.svg'}
-                alt={post.title}
+                alt={post.title as string}
                 className="w-full h-full object-cover"
                 fill
                 unoptimized

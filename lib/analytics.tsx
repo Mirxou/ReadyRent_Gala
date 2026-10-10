@@ -4,12 +4,12 @@ import { usePathname, useSearchParams } from 'next/navigation';
 import { useEffect, Suspense } from 'react';
 
 // Google Analytics helpers
+// NOTE: signature must match lib/analytics-client.ts (unknown[] args) —
+// two `declare global` blocks for Window.gtag must agree exactly.
 declare global {
     interface Window {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        gtag?: (...args: any[]) => void;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        fbq?: (...args: any[]) => void;
+        gtag?: (...args: unknown[]) => void;
+        fbq?: (...args: unknown[]) => void;
     }
 }
 
@@ -30,7 +30,8 @@ export const event = ({
     action: string;
     category: string;
     label?: string;
-    value?: number;
+    // GA accepts string | number for event value (e.g. dispute id)
+    value?: string | number;
 }) => {
     if (typeof window !== 'undefined' && window.gtag) {
         window.gtag('event', action, {

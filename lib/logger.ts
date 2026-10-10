@@ -60,8 +60,11 @@ export const logger = {
   async auditLog(action: string, userId: string, details?: Record<string, unknown>) {
     try {
       const { db } = await import('@/lib/db');
+      // NOTE: the ActivityLog table (prisma schema) has no `details` column —
+      // only action/userId/target/ip/createdAt. Persist the core fields; the
+      // structured details remain visible via the console fallback below.
       await db.activityLog.create({
-        data: { action, userId, details: details ? JSON.stringify(details) : null },
+        data: { action, userId },
       });
     } catch {
       // ActivityLog table may not exist yet — fallback to console

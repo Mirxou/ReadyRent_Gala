@@ -100,9 +100,9 @@ export function BookingTable({ bookings, onStatusUpdate, onRefresh }: BookingTab
           {bookings.map((booking) => (
             <TableRow key={booking.id}>
               <TableCell className="font-medium">
-                {booking.user?.email || booking.user?.username || 'غير معروف'}
+                {(booking.user as { email?: string; username?: string } | undefined)?.email || (booking.user as { username?: string } | undefined)?.username || 'غير معروف'}
               </TableCell>
-              <TableCell>{booking.product?.name_ar || booking.product?.name || '-'}</TableCell>
+              <TableCell>{(booking.product as { name_ar?: string | null; name?: string } | undefined)?.name_ar || (booking.product as { name?: string } | undefined)?.name || '-'}</TableCell>
               <TableCell>{formatDate(booking.start_date)}</TableCell>
               <TableCell>{formatDate(booking.end_date)}</TableCell>
               <TableCell>{getTotalDays(booking)} يوم</TableCell>

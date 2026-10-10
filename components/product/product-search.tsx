@@ -6,6 +6,7 @@ import { Search, Filter, X, LayoutGrid, List as ListIcon, Activity, MapPin } fro
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDebounce } from '@/lib/hooks/use-debounce';
 import { productsApi } from '@/lib/api';
+import type { Product } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import { ProductCard } from './product-card';
 import { Input } from '@/components/ui/input';
@@ -31,13 +32,26 @@ import {
 import { WILAYAS } from '@/lib/dz-data';
 
 
+interface SearchCategory {
+  id: string;
+  slug: string;
+  name_ar?: string | null;
+  [key: string]: unknown;
+}
+
 export function ProductSearch() {
   const [query, setQuery] = useState('');
   const [view, setView] = useState<'grid' | 'list'>('grid');
-  const [filters, setFilters] = useState<Record<string, unknown>>({
+  const [filters, setFilters] = useState<{
+    category: string;
+    priceMin: number;
+    priceMax: number | null;
+    location: string;
+    sortBy: string;
+  }>({
     category: '',
     priceMin: 0,
-    priceMax: null as number | null,
+    priceMax: null,
     location: '',
     sortBy: 'newest',
   });
@@ -47,8 +61,8 @@ export function ProductSearch() {
   const { data: categoriesRaw } = useQuery({
     queryKey: ['categories'],
     queryFn: () => productsApi.getCategories().then(res => {
-      const d = (res as Record<string, unknown>)?.data ?? res;
-      return Array.isArray(d) ? d : [];
+      const d: unknown = res?.data ?? res;
+      return Array.isArray(d) ? (d as SearchCategory[]) : [];
     }),
   });
   const categories = categoriesRaw;
@@ -67,8 +81,9 @@ export function ProductSearch() {
         params.price_max = filters.priceMax;
       }
       return productsApi.getAll(params).then(res => {
-        const d = (res as Record<string, unknown>)?.data ?? res;
-        return Array.isArray(d) ? d : (d as Record<string, unknown>)?.results ?? [];
+        const d: unknown = res?.data ?? res;
+        if (Array.isArray(d)) return d as Product[];
+        return (d as { results?: Product[] } | null)?.results ?? [];
       });
     },
   });
@@ -76,24 +91,24 @@ export function ProductSearch() {
   const products = productsData ?? [];
 
   const handleFilterChange = (key: string, value: string) => {
-    setFilters((prev: Record<string, unknown>) => ({ ...prev, [key]: value }));
+    setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
   const handlePriceMinChange = (value: string) => {
     const num = value === '' ? 0 : Number(value);
-    setFilters((prev: Record<string, unknown>) => ({ ...prev, priceMin: isNaN(num) ? 0 : num }));
+    setFilters((prev) => ({ ...prev, priceMin: isNaN(num) ? 0 : num }));
   };
 
   const handlePriceMaxChange = (value: string) => {
     const num = value === '' ? null : Number(value);
-    setFilters((prev: Record<string, unknown>) => ({ ...prev, priceMax: isNaN(num as number) ? null : num }));
+    setFilters((prev) => ({ ...prev, priceMax: isNaN(num as number) ? null : num }));
   };
 
   const clearFilters = () => {
     setFilters({
       category: '',
       priceMin: 0,
-      priceMax: null as number | null,
+      priceMax: null,
       location: '',
       sortBy: 'newest',
     });
@@ -136,7 +151,7 @@ export function ProductSearch() {
                          <div className="space-y-6">
                             <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground opacity-40">أصناف الأصول</h4>
                             <div className="flex flex-wrap gap-3">
-                               {categories?.map((cat: Record<string, unknown>) => (
+                               {categories?.map((cat) => (
                                  <Badge
                                    key={cat.id}
                                    variant="outline"
@@ -288,7 +303,7 @@ export function ProductSearch() {
               </GlassPanel>
             ))
           ) : products.length > 0 ? (
-            products.map((product: Record<string, unknown>) => (
+            products.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))
           ) : (

@@ -45,14 +45,14 @@ export function TopProductsChart({ data, limit = 10 }: TopProductsChartProps) {
               style={{ fontSize: '12px' }}
             />
             <Tooltip
-              formatter={(value: number, name: string) => {
+              formatter={((value: number, name: string) => {
                 const numValue = value || 0;
                 const nameStr = name || '';
                 if (nameStr === 'revenue') return [`${formatNumber(numValue)} دج`, 'الإيرادات'];
                 if (nameStr === 'bookings') return [numValue, 'عدد الحجوزات'];
                 if (nameStr === 'avgPrice') return [`${formatNumber(numValue)} دج`, 'متوسط السعر'];
                 return [numValue, nameStr];
-              }}
+              }) as never}
               labelStyle={{ color: '#000' }}
             />
             <Legend />

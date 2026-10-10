@@ -91,6 +91,7 @@ export function computeContractHashFromBooking(fields: {
   bookingId: string;
   renterName: string;
   renterEmail: string;
+  renterPhone?: string | null;
   vendorName: string;
   vendorEmail: string;
   productName: string;
@@ -100,6 +101,6 @@ export function computeContractHashFromBooking(fields: {
   totalPrice: number;
   depositAmount?: number;
 }): string {
-  const terms = generateContractTerms(fields);
+  const terms = generateContractTerms({ ...fields, renterPhone: fields.renterPhone ?? null });
   return computeContractHash(terms, fields.bookingId);
 }
