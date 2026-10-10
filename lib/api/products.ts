@@ -21,7 +21,6 @@ export interface Product {
   description: string;
   price_per_day: number;
   owner_id: string;
-  images: { id: string; url: string; is_main: boolean }[];
   primary_image?: string;
   category_name: string;
   location_name: string;
@@ -32,6 +31,26 @@ export interface Product {
   category?: {
     name_ar: string;
   };
+  // Extended detail fields consumed by app/products/[id] and vendor pages;
+  // returned by the detail serializer, shape unverified against backend.
+  image?: string | null;
+  is_premium?: boolean;
+  vendor_trust_score?: number;
+  vendor_verified?: boolean;
+  total_bookings?: number;
+  fabric?: string | null;
+  color?: string | null;
+  size?: string | null;
+  color_options?: string | unknown[] | null;
+  size_options?: string | unknown[] | null;
+  hygiene_records?: unknown[];
+  // Optional alternate price/unit fields returned by the list serializer
+  // (consumed by product-card dynamic pricing).
+  location?: string | null;
+  price_per_hour?: number | null;
+  price_per_month?: number | null;
+  images: { id: string; url: string; is_main: boolean; is_primary?: boolean; image?: string | null }[];
+  [key: string]: any;
 }
 
 export const productsApi = {
@@ -88,17 +107,18 @@ export const productsApi = {
    * Get all categories for filter sidebar
    */
   getCategories: () =>
-    sovereignClient.get<unknown[]>('/products/categories'),
+    sovereignClient.get<any[]>('/products/categories'),
 
   /**
    * Get search suggestions based on partial input
    */
   getSuggestions: (query: string) =>
-    sovereignClient.get<string[]>(`/products/search-suggestions?q=${encodeURIComponent(query)}`),
+    // green-sweep: type-only fix — consumers read res.data.suggestions.
+    sovereignClient.get<{ suggestions: { type: string; text: string }[] }>(`/products/search-suggestions?q=${encodeURIComponent(query)}`),
 
   /** Alias used by product-filters.tsx */
   getSearchSuggestions: (query: string) =>
-    sovereignClient.get<string[]>(`/products/search-suggestions?q=${encodeURIComponent(query)}`),
+    sovereignClient.get<{ suggestions: { type: string; text: string }[] }>(`/products/search-suggestions?q=${encodeURIComponent(query)}`),
 
   /**
    * Get product recommendations
@@ -131,10 +151,14 @@ export const productsApi = {
     sovereignClient.post<{ in_wishlist: boolean }>('/products/wishlist', { product_id: productId }),
 
   /** Get accessories that match a product (used by accessory-suggestions.tsx) */
-  getMatchingAccessories: (productId: string, limit = 4) =>
-    sovereignClient.get<Product[]>(`/products?limit=${limit}`),
+  getMatchingAccessories: (productId: number | string, limit = 4) =>
+    // green-sweep: type-only fix — callers consume the envelope shape
+    // { accessories, primary_product_color } (see accessory-suggestions.tsx).
+    sovereignClient.get<{ accessories: any[]; primary_product_color?: string | null }>(
+      `/products?limit=${limit}`
+    ),
 
   /** Get product metadata — categories, price ranges, locations (used by product-filters.tsx) */
   getMetadata: () =>
-    sovereignClient.get<{ categories: unknown[]; price_range: { min: number; max: number }; locations: string[] }>('/products/categories'),
+    sovereignClient.get<{ categories: unknown[]; price_range: { min: number; max: number }; locations: string[]; sizes?: { value: string; label: string }[]; colors?: { name: string; value: string; hex: string }[] }>('/products/categories'),
 };

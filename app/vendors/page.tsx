@@ -3,7 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { VendorCard } from '@/components/vendors/vendor-card';
+import { VendorCard, type Vendor } from '@/components/vendors/vendor-card';
 import { Store, Search, LayoutDashboard } from 'lucide-react';
 import { useState } from 'react';
 import Link from 'next/link';
@@ -13,12 +13,12 @@ import { motion } from 'framer-motion';
 export default function VendorsPage() {
   const [search, setSearch] = useState('');
 
-  const { data: vendors, isLoading } = useQuery({
+  const { data: vendors, isLoading } = useQuery<Vendor[]>({
     queryKey: ['vendors'],
-    queryFn: () => fetch('/api/vendors/vendors').then(r => r.json()).then(d => d.data || d),
+    queryFn: () => fetch('/api/vendors/vendors').then(r => r.json()).then((d: { data?: Vendor[] }) => d.data || (d as Vendor[])),
   });
 
-  const filteredVendors = vendors?.filter((vendor: Record<string, unknown>) => {
+  const filteredVendors = vendors?.filter((vendor) => {
     if (search) {
       const searchLower = search.toLowerCase();
       return (
@@ -91,7 +91,7 @@ export default function VendorsPage() {
           </div>
         ) : filteredVendors.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredVendors.map((vendor: Record<string, unknown>, index: number) => (
+            {filteredVendors.map((vendor, index) => (
               <motion.div
                 key={vendor.id}
                 initial={{ opacity: 0, y: 20 }}

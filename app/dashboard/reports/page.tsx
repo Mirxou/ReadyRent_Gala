@@ -238,7 +238,7 @@ export default function ReportsPage() {
                                                 />
                                                 <Bar dataKey="value" radius={[12, 12, 0, 0]} barSize={60}>
                                                     {regionalData?.map((entry: Record<string, unknown>, index: number) => (
-                                                        <Cell key={`cell-${index}`} fill={entry.color} fillOpacity={0.8} />
+                                                        <Cell key={`cell-${index}`} fill={entry.color as string} fillOpacity={0.8} />
                                                     ))}
                                                 </Bar>
                                             </BarChart>

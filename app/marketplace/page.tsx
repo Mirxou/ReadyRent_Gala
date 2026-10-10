@@ -75,16 +75,32 @@ function HeroSection() {
 /* ════════════════════════════════════════════
    SECTION 2 — FEATURED VENDORS
    ════════════════════════════════════════════ */
+// Vendor / artisan card shape returned by the list endpoints (fields
+// consumed by the marketplace sections; extras flow through the index).
+interface VendorCard {
+  id: string | number;
+  avatar?: string | null;
+  name_ar?: string | null;
+  is_verified?: boolean;
+  rating?: number | string | null;
+  location?: string | null;
+  description_ar?: string | null;
+  products_count?: number | string | null;
+  trust_score?: number | string | null;
+  specialty_ar?: string | null;
+  [key: string]: unknown;
+}
+
 function FeaturedVendors() {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
-  const [vendors, setVendors] = useState<Record<string, unknown>[]>([]);
+  const [vendors, setVendors] = useState<VendorCard[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     api
       .get('vendors/vendors/')
-      .then((res: Record<string, unknown>) => {
+      .then((res) => {
         const data = Array.isArray(res.data?.results) ? res.data.results : Array.isArray(res.data) ? res.data : [];
         setVendors(data);
       })
@@ -130,7 +146,7 @@ function FeaturedVendors() {
           </motion.div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
-            {vendors.map((vendor: Record<string, unknown>, i: number) => (
+            {vendors.map((vendor, i) => (
               <motion.div
                 key={vendor.id}
                 initial={{ opacity: 0, y: 30 }}
@@ -147,8 +163,8 @@ function FeaturedVendors() {
                         {/* Avatar */}
                         <div className="w-16 h-16 rounded-2xl overflow-hidden border border-white/10 group-hover:border-emerald-400/30 transition-colors flex-shrink-0 relative">
                           <Image
-                            src={vendor.avatar}
-                            alt={vendor.name_ar}
+                            src={vendor.avatar || ''}
+                            alt={vendor.name_ar || ''}
                             className="w-full h-full object-cover"
                             fill
                             unoptimized
@@ -209,13 +225,13 @@ function FeaturedVendors() {
 function FeaturedArtisans() {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
-  const [artisans, setArtisans] = useState<Record<string, unknown>[]>([]);
+  const [artisans, setArtisans] = useState<VendorCard[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     api
       .get('artisans/artisans/')
-      .then((res: Record<string, unknown>) => {
+      .then((res) => {
         const data = Array.isArray(res.data?.results) ? res.data.results : Array.isArray(res.data) ? res.data : [];
         setArtisans(data);
       })
@@ -263,7 +279,7 @@ function FeaturedArtisans() {
           </motion.div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 md:gap-6">
-            {featured.map((artisan: Record<string, unknown>, i: number) => (
+            {featured.map((artisan, i) => (
               <motion.div
                 key={artisan.id}
                 initial={{ opacity: 0, y: 30 }}
@@ -279,8 +295,8 @@ function FeaturedArtisans() {
                       {/* Avatar */}
                       <div className="w-20 h-20 mx-auto rounded-full overflow-hidden border-2 border-white/10 group-hover:border-emerald-400/50 transition-colors relative">
                         <Image
-                          src={artisan.avatar}
-                          alt={artisan.name_ar}
+                          src={artisan.avatar || ''}
+                          alt={artisan.name_ar || ''}
                           className="w-full h-full object-cover"
                           fill
                           unoptimized

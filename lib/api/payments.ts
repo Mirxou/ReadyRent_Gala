@@ -15,8 +15,8 @@ export const paymentsApi = {
     sovereignClient.get<PaymentMethod[]>('/payments/methods'),
 
   /** Create a payment */
-  create: (data: { booking_id?: string; payment_method?: string; amount?: number; [key: string]: unknown }) => 
-    sovereignClient.post<unknown>('/payments/create', data),
+  create: (data: { booking_id?: string; payment_method?: string; amount?: number; [key: string]: any }) => 
+    sovereignClient.post<any>('/payments/create', data),
 
   getStatus: (paymentId: string) => 
     sovereignClient.get<{ status: string }>(`/payments/${paymentId}/status`),
@@ -28,10 +28,10 @@ export const paymentsApi = {
     const otp = typeof paymentIdOrData === 'string' 
       ? otpCode! 
       : paymentIdOrData.otp;
-    return sovereignClient.post<unknown>(`/payments/${paymentId}/verify_otp`, { otp_code: otp });
+    return sovereignClient.post<any>(`/payments/${paymentId}/verify_otp`, { otp_code: otp });
   },
 
-  getAll: () => sovereignClient.get<unknown>('/payments/payments'),
+  getAll: () => sovereignClient.get<any>('/payments/payments'),
 
   /** Create a Chargily checkout session (redirect to hosted payment page) */
   chargilyCheckout: (data: { booking_id: string; amount: number }) =>

@@ -26,7 +26,15 @@ export default function WishlistPage() {
   const router = useRouter();
   const { isAuthenticated } = useAuthStore();
 
-  const { data: wishlist = [], isLoading } = useQuery({
+  // green-sweep: consumed wishlist row shape (snake_case from API).
+  interface WishRow {
+    id: string;
+    name?: string | null;
+    name_ar?: string | null;
+    price_per_day: number;
+    is_available?: boolean;
+  }
+  const { data: wishlistData = [], isLoading } = useQuery({
     queryKey: ['wishlist'],
     queryFn: async () => {
       const res = await productsApi.getWishlist();
@@ -38,6 +46,8 @@ export default function WishlistPage() {
     },
     enabled: isAuthenticated,
   });
+
+  const wishlist = wishlistData as WishRow[];
 
   if (isLoading) {
     return (
@@ -74,7 +84,7 @@ export default function WishlistPage() {
         <div className="lg:col-span-8">
            {wishlist.length > 0 ? (
              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                {wishlist.map((item: Record<string, unknown>, i: number) => (
+                {wishlist.map((item, i) => (
                   <SovereignGlow key={item.id} color={i % 2 === 0 ? "gold" : "blue"}>
                      <GlassPanel className="p-4 group relative h-full flex flex-col justify-between overflow-hidden" gradientBorder>
                          
@@ -151,7 +161,7 @@ export default function WishlistPage() {
                     <p className="text-xs font-black uppercase text-sovereign-gold opacity-80 tracking-widest">فرص متاحة (Hot Registry)</p>
                     <p className="text-sm italic text-muted-foreground">
                       {wishlist.length > 0
-                        ? `يوجد ${wishlist.filter((w: Record<string, unknown>) => (w.is_available as boolean)).length} قطع من أمنياتك متاحة حالياً للإيجار.`
+                        ? `يوجد ${wishlist.filter((w) => w.is_available).length} قطع من أمنياتك متاحة حالياً للإيجار.`
                         : 'أضف منتجات لقائمة أمنياتك لتتبع توافرها.'}
                     </p>
                  </div>

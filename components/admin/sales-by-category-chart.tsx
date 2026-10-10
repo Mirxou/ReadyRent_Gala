@@ -42,13 +42,13 @@ export function SalesByCategoryChart({ data }: SalesByCategoryChartProps) {
               style={{ fontSize: '12px' }}
             />
             <Tooltip
-              formatter={(value: string | number, name: string) => {
+              formatter={((value: string | number, name: string) => {
                 const numValue = value || 0;
                 const nameStr = name || '';
                 if (nameStr === 'revenue') return [`${formatNumber(numValue)} دج`, 'الإيرادات'];
                 if (nameStr === 'bookings') return [numValue, 'عدد الحجوزات'];
                 return [numValue, nameStr];
-              }}
+              }) as never}
               labelStyle={{ color: '#000' }}
             />
             <Legend />

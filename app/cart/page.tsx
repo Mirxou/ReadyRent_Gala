@@ -44,6 +44,26 @@ class SafeWrapper extends React.Component<{ children: React.ReactNode }, { hasEr
   }
 }
 
+// Cart item shape returned by /bookings/cart — rendered unconditionally by
+// this page, so required fields are typed non-optional.
+interface CartItem {
+  id: string;
+  product_id: string;
+  start_date: string;
+  end_date: string;
+  quantity?: number;
+  product: {
+    id?: string;
+    name_ar?: string | null;
+    price_per_day: number;
+    primary_image?: string | null;
+    category?: { name_ar?: string | null } | null;
+    images?: { image?: string | null; url?: string | null }[];
+    [key: string]: unknown;
+  };
+  [key: string]: unknown;
+}
+
 export default function CartPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -111,7 +131,7 @@ export default function CartPage() {
       const bookings: { id: string }[] = [];
 
       // Create a booking for each cart item
-      for (const item of items as Record<string, unknown>[]) {
+      for (const item of items as CartItem[]) {
         const res = await bookingsApi.create({
           product_id: item.product_id,
           start_date: item.start_date as string,
@@ -120,13 +140,13 @@ export default function CartPage() {
           has_insurance: false,
           extra_services: [],
         });
-        if (res.data && 'id' in (res.data as Record<string, unknown>)) {
+        if (res.data && 'id' in res.data) {
           bookings.push(res.data as { id: string });
         }
       }
 
       // Clear the cart by deleting each item
-      for (const item of items as Record<string, unknown>[]) {
+      for (const item of items as CartItem[]) {
         await fetch('/api/bookings/cart/items/' + item.id, {
           method: 'DELETE',
           credentials: 'include',
@@ -164,8 +184,8 @@ export default function CartPage() {
     );
   }
 
-  const items = Array.isArray(cart) ? cart : (cart?.items || []);
-  const totalPrice = items.reduce((sum: number, item: Record<string, unknown>) => {
+  const items = (Array.isArray(cart) ? cart : (cart?.items || [])) as CartItem[];
+  const totalPrice = items.reduce((sum, item) => {
     const days = Math.ceil(
       (new Date(item.end_date).getTime() - new Date(item.start_date).getTime()) /
       (1000 * 60 * 60 * 24)
@@ -233,7 +253,7 @@ export default function CartPage() {
             <SafeWrapper><BundleSelector startDate={null} endDate={null} /></SafeWrapper>
 
             <AnimatePresence mode="popLayout">
-              {items.map((item: Record<string, unknown>, index: number) => {
+              {items.map((item, index) => {
                 const days = Math.ceil(
                   (new Date(item.end_date).getTime() - new Date(item.start_date).getTime()) /
                   (1000 * 60 * 60 * 24)
@@ -258,7 +278,7 @@ export default function CartPage() {
                           <div className="relative w-full sm:w-48 h-64 sm:h-48 flex-shrink-0 group-hover:scale-105 transition-transform duration-500">
                             <Image
                               src={primaryImage}
-                              alt={item.product.name_ar}
+                              alt={item.product.name_ar as string}
                               fill
                               className="object-cover"
                             />
@@ -324,7 +344,7 @@ export default function CartPage() {
                 <h2 className="text-3xl font-bold bg-gradient-to-r from-sovereign-gold to-sovereign-gold bg-clip-text text-transparent">ملخص الجمال</h2>
 
                 <div className="space-y-4">
-                  {items.map((item: Record<string, unknown>) => {
+                  {items.map((item) => {
                     const days = Math.ceil(
                       (new Date(item.end_date).getTime() - new Date(item.start_date).getTime()) /
                       (1000 * 60 * 60 * 24)

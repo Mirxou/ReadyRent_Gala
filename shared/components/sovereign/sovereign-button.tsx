@@ -60,13 +60,13 @@ const SovereignButton = React.forwardRef<HTMLButtonElement, SovereignButtonProps
             ),
             whileHover: !isLoading && !(props as Record<string, unknown>).disabled ? { scale: 1.02, y: -2 } : {},
             whileTap: !isLoading && !(props as Record<string, unknown>).disabled ? { scale: 0.98 } : {},
-            transition: { duration: 0.5, ease: [0.32, 0.72, 0, 1] },
+            transition: { duration: 0.5, ease: [0.32, 0.72, 0, 1] as [number, number, number, number] },
             ...props,
         };
 
         if (href) {
             return (
-                <MotionLink href={href} {...sharedProps}>
+                <MotionLink href={href} {...(sharedProps as unknown as React.ComponentProps<typeof MotionLink>)}>
                     {variant === "primary" && withShimmer && !isLoading && (
                         <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent z-10" />
                     )}
@@ -77,7 +77,7 @@ const SovereignButton = React.forwardRef<HTMLButtonElement, SovereignButtonProps
         }
 
         return (
-            <motion.button {...sharedProps}>
+            <motion.button {...(sharedProps as unknown as Record<string, unknown>)}>
                 {variant === "primary" && withShimmer && !isLoading && (
                     <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent z-10" />
                 )}

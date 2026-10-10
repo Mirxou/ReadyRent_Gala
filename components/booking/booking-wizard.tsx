@@ -52,7 +52,7 @@ export function BookingWizard() {
     try {
       // 1. Create Booking
       const bookingRes = await bookingsApi.create({
-        product_id: Number(formData.productId),
+        product_id: Number(formData.productId) as unknown as string,
         start_date: formData.startDate?.toISOString() || '',
         end_date: formData.endDate?.toISOString() || '',
         has_insurance: formData.hasInsurance,

@@ -26,12 +26,18 @@ export interface SovereignResponse<T> {
   status?: SovereignStatus;
   code?: SovereignCode;
   success?: boolean;
+  // Error payloads returned by the gateway on failed requests; consumers
+  // (dashboard pages, mutations) check `res.error` before rendering data.
+  error?: string;
   httpStatus?: number;
   dignity_preserved?: boolean;
   timestamp?: string;
   message_ar?: string;
   message_en?: string;
   data: T;
+  // Pagination / fetch-failure metadata (mirrors lib/api/core.ts `meta` field;
+  // callers check `res.meta?.failed` for connection errors)
+  meta?: Record<string, unknown>;
   visual_assets?: VisualAssets;
   metadata?: Record<string, unknown>;
 }

@@ -26,6 +26,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { toast } from 'sonner';
+import type { SovereignResponse } from '@/types/sovereign';
 
 export default function AdminUsersPage() {
   const router = useRouter();
@@ -56,7 +57,7 @@ export default function AdminUsersPage() {
   const updateUserMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: { role?: string; is_active?: boolean } }) =>
       adminApi.updateUser(id, data),
-    onSuccess: (res: Record<string, unknown>) => {
+    onSuccess: (res: SovereignResponse<unknown>) => {
       if (res?.status === 'sovereign_halt' || res?.code === 'SYSTEM_HALT') {
         toast.error((res?.message_ar as string) || 'حدث خطأ أثناء التحديث');
         setUpdatingUserId(null);

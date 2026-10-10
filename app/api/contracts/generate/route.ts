@@ -63,7 +63,7 @@ export async function POST(request: Request) {
     }
 
     // Check for existing contract on this booking
-    const existing = await db.contract.findUnique({ where: { bookingId: booking_id } });
+    const existing = await db.contract.findFirst({ where: { bookingId: booking_id } });
     if (existing) {
       return NextResponse.json(
         { success: false, dignity_preserved: true, message_ar: 'يوجد عقد بالفعل لهذا الحجز', message_en: 'Contract already exists for this booking', code: 'DUPLICATE' },
@@ -88,8 +88,8 @@ export async function POST(request: Request) {
       vendorEmail: vendor?.email || '',
       productName: booking.product?.nameAr || booking.product?.name || booking.productName || 'منتج',
       productDescription: booking.product?.description || null,
-      startDate: booking.startDate?.toISOString().split('T')[0] || '',
-      endDate: booking.endDate?.toISOString().split('T')[0] || '',
+      startDate: booking.startDate ? new Date(booking.startDate).toISOString().split('T')[0] : '',
+      endDate: booking.endDate ? new Date(booking.endDate).toISOString().split('T')[0] : '',
       totalPrice: booking.totalPrice || 0,
       depositAmount: booking.product?.depositAmount || undefined,
     });
@@ -110,8 +110,8 @@ export async function POST(request: Request) {
       product_id: booking.productId,
       total_price: booking.totalPrice,
       deposit_amount: booking.product?.depositAmount ?? null,
-      start_date: booking.startDate?.toISOString(),
-      end_date: booking.endDate?.toISOString(),
+      start_date: booking.startDate ? new Date(booking.startDate).toISOString() : undefined,
+      end_date: booking.endDate ? new Date(booking.endDate).toISOString() : undefined,
       escrow_status: booking.escrowStatus,
     });
 
