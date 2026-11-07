@@ -99,6 +99,7 @@
     "@istanbuljs/load-nyc-config": {
       "js-yaml": "^3.15.2"
     },
-    "deepmerge-ts": "^8.0.0"
+    "deepmerge-ts": "^8.0.0",
+    "zod": "^4.6.6"
   }
 }
