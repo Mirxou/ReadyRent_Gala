@@ -10,7 +10,8 @@ import {
   Users,
   Plus,
   FileText,
-  Settings
+  Settings,
+  MessageSquareQuote
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -29,6 +30,13 @@ export function QuickActions() {
       icon: Calendar,
       href: '/admin/bookings?status=pending',
       color: 'from-orange-500 to-yellow-500',
+    },
+    {
+      title: 'التقييمات المعلّقة',
+      description: 'مراجعة تقييمات العملاء ونشرها',
+      icon: MessageSquareQuote,
+      href: '/admin/reviews',
+      color: 'from-rose-500 to-pink-500',
     },
     {
       title: 'التقارير والتحليلات',
