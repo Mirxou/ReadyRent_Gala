@@ -75,3 +75,6 @@ upload/
 !public/**/*.svg
 !public/**/*.webp
 !public/**/*.ico
+
+# Dispute evidence uploads (runtime user files)
+db/uploads/
