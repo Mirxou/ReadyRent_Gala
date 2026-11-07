@@ -1,4 +1,5 @@
 import { sovereignClient } from './sovereign-client';
+import type { SovereignResponse } from '@/types/sovereign';
 import type { TrustTier } from '@/lib/trust-score';
 
 export interface Review {
@@ -11,6 +12,28 @@ export interface Review {
   comment: string;
   is_verified: boolean;
   created_at: string;
+}
+
+export interface ModerationReview {
+  id: string;
+  user_id: string;
+  booking_id: string | null;
+  product_id: string;
+  reviewer_name: string;
+  rating: number; // 1-5
+  comment: string | null;
+  is_verified: boolean;
+  status: string; // pending | approved | rejected
+  created_at: string;
+  user: { id: string; username: string } | null;
+  product: { id: string; name_ar: string | null; name: string | null } | null;
+}
+
+export interface ModerationPagination {
+  page: number;
+  limit: number;
+  total: number;
+  total_pages: number;
 }
 
 export interface TrustScore {
@@ -63,6 +86,25 @@ export const reviewsApi = {
     rating: number;
     comment: string;
   }) => sovereignClient.post<Review>('/reviews/create', data),
+
+  /** Moderation queue — MASTERPLAN 2.2 (admin/staff: all, vendor: own products) */
+  listModeration: (params?: { status?: string; page?: number; limit?: number }) => {
+    const q = new URLSearchParams();
+    if (params?.status) q.append('status', params.status);
+    if (params?.page) q.append('page', String(params.page));
+    if (params?.limit) q.append('limit', String(params.limit));
+    // The endpoint returns pagination as a sibling of data — widen the envelope
+    return sovereignClient.get<ModerationReview[]>(
+      `/reviews/moderation?${q.toString()}`
+    ) as Promise<SovereignResponse<ModerationReview[]> & { pagination?: ModerationPagination }>;
+  },
+
+  /** Approve or reject a review — PATCH /api/reviews/[id]/moderate */
+  moderate: (id: string, status: 'approved' | 'rejected') =>
+    sovereignClient.patch<{ id: string; status: string; updated_at: string }>(
+      `/reviews/${id}/moderate`,
+      { status }
+    ),
 
   /** Get the trust score for the current user */
   getMyTrustScore: () =>
