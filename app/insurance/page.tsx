@@ -1,15 +1,36 @@
 'use client';
 
-import { formatNumber } from '@/lib/utils';
+import { useState } from 'react';
+import { cn, formatNumber } from '@/lib/utils';
 
 import { motion } from 'framer-motion';
-import { useQuery } from '@tanstack/react-query';
-import { Shield, Check, ArrowLeft, Info, Phone, FileText } from 'lucide-react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  Shield,
+  ShieldCheck,
+  Check,
+  ArrowLeft,
+  Info,
+  Phone,
+  FileText,
+  CalendarDays,
+} from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
 import { GlassPanel } from '@/shared/components/sovereign/glass-panel';
+import { useAuthStore } from '@/lib/store';
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 /* ────────────────────────────────────────────
@@ -166,6 +187,34 @@ function PlansLoadingSkeleton() {
   );
 }
 
+/* ────────────────────────────────────────────
+   Booking + purchase support
+   ──────────────────────────────────────────── */
+interface BookingRow {
+  id: string;
+  product_name: string | null;
+  start_date: string;
+  end_date: string;
+  total_price: number;
+  status: string;
+  has_insurance: boolean;
+}
+
+const bookingStatusLabels: Record<string, string> = {
+  pending: 'قيد الانتظار',
+  confirmed: 'مؤكد',
+  active: 'نشط',
+  completed: 'مكتمل',
+  cancelled: 'ملغى',
+};
+
+const purchaseErrorMessages: Record<string, string> = {
+  INSUFFICIENT_BALANCE: 'رصيد المحفظة غير كافٍ — اشحن محفظتك ثم أعد المحاولة',
+  ALREADY_INSURED: 'هذا الحجز مؤمّن بالفعل',
+  PLAN_INACTIVE: 'خطة التأمين غير مفعلة حالياً',
+  BOOKING_NOT_FOUND: 'الحجز غير موجود',
+};
+
 export default function InsurancePage() {
   // Fetch insurance plans from API
   const { data, isLoading, isError } = useQuery({
@@ -177,6 +226,68 @@ export default function InsurancePage() {
   });
 
   const plans: EnrichedPlan[] = (Array.isArray(data) ? data : []).map(mapApiToPlan);
+
+  // ── Insurance purchase wiring (POST /api/insurance/purchase) ──
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const { isAuthenticated } = useAuthStore();
+  const [purchasePlan, setPurchasePlan] = useState<EnrichedPlan | null>(null);
+  const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
+  const [purchasing, setPurchasing] = useState(false);
+
+  // Load the user's bookings only when the purchase dialog is open
+  const bookingsQuery = useQuery({
+    queryKey: ['my-bookings-for-insurance'],
+    queryFn: () =>
+      fetch('/api/bookings?limit=50', { credentials: 'include' }).then((r) => r.json()),
+    enabled: !!purchasePlan && isAuthenticated,
+  });
+
+  const insureableBookings: BookingRow[] = (
+    Array.isArray(bookingsQuery.data?.data) ? (bookingsQuery.data.data as BookingRow[]) : []
+  ).filter((b) => !b.has_insurance);
+
+  const handlePurchaseClick = (plan: EnrichedPlan) => {
+    if (!isAuthenticated) {
+      toast.error('سجّل الدخول أولاً لشراء التأمين');
+      router.push('/login?redirect=/insurance');
+      return;
+    }
+    setSelectedBookingId(null);
+    setPurchasePlan(plan);
+  };
+
+  const handleConfirmPurchase = async () => {
+    if (!purchasePlan || !selectedBookingId) return;
+    setPurchasing(true);
+    try {
+      const res = await fetch('/api/insurance/purchase', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ plan_id: purchasePlan.id, booking_id: selectedBookingId }),
+      });
+      const json = await res.json();
+      if (res.ok && json.success) {
+        toast.success(
+          `تم تفعيل تأمين "${json.data.plan_name}" على حجزك — خُصم ${formatNumber(json.data.amount_paid)} دج من محفظتك`
+        );
+        setPurchasePlan(null);
+        setSelectedBookingId(null);
+        queryClient.invalidateQueries({ queryKey: ['my-bookings-for-insurance'] });
+      } else {
+        toast.error(
+          purchaseErrorMessages[json.code as string] ||
+            json.message_ar ||
+            'فشل شراء التأمين، يرجى المحاولة لاحقاً'
+        );
+      }
+    } catch {
+      toast.error('حدث خطأ أثناء الاتصال بالخادم');
+    } finally {
+      setPurchasing(false);
+    }
+  };
 
   const handleContactSupport = () => {
     const waNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER;
@@ -288,8 +399,16 @@ export default function InsurancePage() {
                       ))}
                     </div>
 
-                    <p className="text-center text-xs text-muted-foreground">
-                      يُفعّل أثناء الحجز
+                    <SovereignButton
+                      variant="primary"
+                      className="w-full"
+                      onClick={() => handlePurchaseClick(plan)}
+                    >
+                      <ShieldCheck className="w-4 h-4 ml-2" />
+                      شراء هذه الخطة
+                    </SovereignButton>
+                    <p className="text-center text-xs text-muted-foreground mt-3">
+                      تُفعَّل على حجز قائم — الخصم من المحفظة
                     </p>
                   </CardContent>
                 </Card>
@@ -394,6 +513,83 @@ export default function InsurancePage() {
             </motion.div>
           </div>
         </motion.div>
+
+        {/* Purchase Dialog */}
+        <Dialog open={!!purchasePlan} onOpenChange={(open) => !open && setPurchasePlan(null)}>
+          <DialogContent className="max-w-lg rounded-3xl" dir="rtl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <ShieldCheck className="w-5 h-5 text-sovereign-gold" />
+                شراء {purchasePlan?.name}
+              </DialogTitle>
+              <DialogDescription>
+                اختر الحجز الذي تريد تأمينه — سيُخصم {formatNumber(purchasePlan?.price ?? 0)} دج
+                من محفظتك عند التأكيد.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="max-h-72 overflow-y-auto space-y-2 -mx-1 px-1">
+              {bookingsQuery.isLoading ? (
+                <div className="space-y-2 py-2">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <Skeleton key={i} className="h-16 w-full rounded-2xl" />
+                  ))}
+                </div>
+              ) : insureableBookings.length === 0 ? (
+                <div className="text-center py-8 text-sm text-muted-foreground">
+                  لا توجد حجوزات قابلة للتأمين — جميع حجوزاتك مؤمّنة أو لا توجد حجوزات بعد.
+                </div>
+              ) : (
+                insureableBookings.map((b) => (
+                  <button
+                    key={b.id}
+                    type="button"
+                    onClick={() => setSelectedBookingId(b.id)}
+                    className={cn(
+                      'w-full text-right rounded-2xl border p-3 transition-colors',
+                      selectedBookingId === b.id
+                        ? 'border-sovereign-gold bg-sovereign-gold/10'
+                        : 'border-border hover:border-sovereign-gold/40'
+                    )}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-bold text-sm truncate">
+                        {b.product_name || 'منتج'}
+                      </span>
+                      <span className="text-xs text-muted-foreground whitespace-nowrap">
+                        {bookingStatusLabels[b.status] || b.status}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between gap-2 mt-1 text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <CalendarDays className="w-3 h-3" />
+                        {new Date(b.start_date).toLocaleDateString('ar-DZ')} —{' '}
+                        {new Date(b.end_date).toLocaleDateString('ar-DZ')}
+                      </span>
+                      <span>{formatNumber(b.total_price)} دج</span>
+                    </div>
+                  </button>
+                ))
+              )}
+            </div>
+
+            <DialogFooter className="gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setPurchasePlan(null)}
+                disabled={purchasing}
+              >
+                إلغاء
+              </Button>
+              <SovereignButton
+                onClick={handleConfirmPurchase}
+                disabled={!selectedBookingId || purchasing}
+              >
+                تأكيد الشراء — {formatNumber(purchasePlan?.price ?? 0)} دج
+              </SovereignButton>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* CTA */}
         <motion.div
