@@ -166,17 +166,3 @@ export const returnsApi = {
   }) =>
     sovereignClient.post<any>('/returns/create/', data),
 };
-
-export const supportApi = {
-  listTickets: (params?: Record<string, unknown>) =>
-    sovereignClient.get<any[]>('/disputes/tickets/', { params }),
-
-  createTicket: (data: Record<string, unknown>) =>
-    sovereignClient.post<any>('/disputes/tickets/create/', data),
-
-  getTicket: (id: string) =>
-    sovereignClient.get<any>(`/disputes/tickets/${id}/`),
-
-  createTicketMessage: (ticketId: string, message: string) =>
-    sovereignClient.post<any>(`/disputes/tickets/${ticketId}/messages/`, { message }),
-};
