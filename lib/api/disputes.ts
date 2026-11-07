@@ -138,10 +138,6 @@ export const disputesApi = {
   fileAppeal: (disputeId: string, data: { reason: string; description: string }) =>
     sovereignClient.post<any>(`/disputes/${disputeId}/appeal/`, data),
 
-  // Public Judicial Ledger
-  getPublicLedger: (params?: { page?: number; page_size?: number }) =>
-    sovereignClient.get<any>('/disputes/public-ledger/', { params }),
-
   // green-sweep: referenced by disputes/steps/evidence-step.tsx but never landed
   // on main — the wizard step crashed at runtime calling undefined. Real endpoint
   // path restored; backend may need the matching route.
