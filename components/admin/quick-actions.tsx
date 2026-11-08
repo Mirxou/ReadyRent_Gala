@@ -11,7 +11,11 @@ import {
   Plus,
   FileText,
   Settings,
-  MessageSquareQuote
+  MessageSquareQuote,
+  UserCog,
+  ScrollText,
+  Newspaper,
+  Wallet
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -65,6 +69,34 @@ export function QuickActions() {
       icon: Settings,
       href: '/admin/branches',
       color: 'from-gray-500 to-slate-500',
+    },
+    {
+      title: 'فريق العمل',
+      description: 'إدارة حسابات الموظفين والأدوار',
+      icon: UserCog,
+      href: '/admin/staff',
+      color: 'from-teal-500 to-cyan-500',
+    },
+    {
+      title: 'سجل النشاط',
+      description: 'تتبع العمليات الإدارية في المنصة',
+      icon: ScrollText,
+      href: '/admin/activity-logs',
+      color: 'from-slate-500 to-zinc-500',
+    },
+    {
+      title: 'إدارة المحتوى',
+      description: 'تحرير صفحات المنصة الثابتة',
+      icon: Newspaper,
+      href: '/admin/cms/pages',
+      color: 'from-violet-500 to-purple-500',
+    },
+    {
+      title: 'أقساط المورّدين',
+      description: 'مراجعة طلبات صرف أرباح البائعين',
+      icon: Wallet,
+      href: '/admin/payouts',
+      color: 'from-emerald-500 to-teal-600',
     },
   ];
 
