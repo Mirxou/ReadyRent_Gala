@@ -18,9 +18,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import RoleSelector from '@/components/role-selector';
 import { getAuthHeaders } from '@/lib/auth-helpers';
 import { useAuthStore } from '@/lib/store';
+import { toast } from 'sonner';
 import {
   Dialog,
   DialogContent,
@@ -30,7 +30,7 @@ import {
 } from '@/components/ui/dialog';
 
 interface User {
-  id: number;
+  id: string;
   email: string;
   username: string;
   role: string;
@@ -38,14 +38,23 @@ interface User {
   profile?: {
     first_name_ar: string;
     last_name_ar: string;
-  };
+  } | null;
+  created_at?: string;
 }
 
-const ROLE_CHOICES: Record<string, string> = {
+// Real roles in this schema (PATCH /api/admin/users/[id] whitelist)
+const ASSIGNABLE_ROLES: Record<string, string> = {
   customer: 'عميل',
-  admin: 'مدير',
-  manager: 'مدير فرع',
+  vendor: 'بائع (vendor)',
+  admin: 'مدير النظام',
   staff: 'موظف',
+};
+
+const ROLE_CHOICES: Record<string, string> = {
+  admin: 'مدير النظام',
+  staff: 'موظف',
+  vendor: 'بائع (vendor)',
+  manager: 'مدير فرع',
   delivery: 'موظف توصيل',
   support: 'موظف دعم',
 };
@@ -58,11 +67,13 @@ export default function AdminStaffPage() {
   const [roleFilter, setRoleFilter] = useState<string>('all');
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showRoleDialog, setShowRoleDialog] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<string>('');
+  const [savingRole, setSavingRole] = useState(false);
 
   const fetchStaff = useCallback(async () => {
     setLoading(true);
     try {
-      let url = '/api/users/staff/list/';
+      let url = '/api/admin/staff';
       if (roleFilter !== 'all') {
         url += `?role=${roleFilter}`;
       }
@@ -100,7 +111,32 @@ export default function AdminStaffPage() {
 
   const handleManageRoles = (user: User) => {
     setSelectedUser(user);
+    setSelectedRole(user.role);
     setShowRoleDialog(true);
+  };
+
+  const handleSaveRole = async () => {
+    if (!selectedUser || !selectedRole) return;
+    setSavingRole(true);
+    try {
+      const res = await fetch(`/api/admin/users/${selectedUser.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+        body: JSON.stringify({ role: selectedRole }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || data?.success === false) {
+        toast.error(data?.message_ar || data?.message_en || 'فشل تحديث الدور');
+        return;
+      }
+      toast.success('تم تحديث الدور بنجاح');
+      setShowRoleDialog(false);
+      fetchStaff();
+    } catch {
+      toast.error('خطأ في الاتصال — أعد المحاولة');
+    } finally {
+      setSavingRole(false);
+    }
   };
 
   if (!isAuthenticated || (user?.role !== 'admin' && user?.role !== 'staff')) {
@@ -127,11 +163,9 @@ export default function AdminStaffPage() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">جميع الأدوار</SelectItem>
-            <SelectItem value="admin">مدير</SelectItem>
-            <SelectItem value="manager">مدير فرع</SelectItem>
+            <SelectItem value="admin">مدير النظام</SelectItem>
             <SelectItem value="staff">موظف</SelectItem>
-            <SelectItem value="delivery">موظف توصيل</SelectItem>
-            <SelectItem value="support">موظف دعم</SelectItem>
+            <SelectItem value="vendor">بائع (vendor)</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -204,13 +238,34 @@ export default function AdminStaffPage() {
             </DialogDescription>
           </DialogHeader>
           {selectedUser && (
-            <RoleSelector
-              userId={selectedUser.id}
-              onRoleAssigned={() => {
-                fetchStaff();
-                setShowRoleDialog(false);
-              }}
-            />
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">الدور الحالي: {ROLE_CHOICES[selectedUser.role] || selectedUser.role}</label>
+                <Select value={selectedRole} onValueChange={setSelectedRole}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="اختر الدور الجديد" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(ASSIGNABLE_ROLES).map(([value, label]) => (
+                      <SelectItem key={value} value={value} disabled={value === selectedUser.role}>
+                        {label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  ملاحظة: لا يمكنك تغيير دورك الشخصي — تغييرات الأدوار تؤثر فوراً على صلاحيات الحساب
+                </p>
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setShowRoleDialog(false)} disabled={savingRole}>
+                  إلغاء
+                </Button>
+                <Button onClick={handleSaveRole} disabled={savingRole || selectedRole === selectedUser.role}>
+                  {savingRole ? 'جارٍ الحفظ...' : 'حفظ الدور'}
+                </Button>
+              </div>
+            </div>
           )}
         </DialogContent>
       </Dialog>

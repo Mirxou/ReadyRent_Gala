@@ -21,13 +21,13 @@ import {
 } from '@/components/ui/select';
 
 interface ActivityLog {
-  id: number;
-  user: number | null;
+  id: string;
+  user: string | null;
   user_email: string;
   user_name?: string;
   action: string;
   model_name: string;
-  object_id: number | null;
+  object_id: string | null;
   description: string;
   ip_address: string;
   user_agent: string;
@@ -58,16 +58,16 @@ export default function AdminActivityLogsPage() {
     let cancelled = false;
     const fetchLogs = async () => {
       try {
-        let url = '/api/users/staff/activity-logs/';
+        let url = '/api/admin/activity-logs';
         const params = new URLSearchParams();
-        
+
         if (actionFilter !== 'all') {
           params.append('action', actionFilter);
         }
         if (modelFilter !== 'all') {
           params.append('model_name', modelFilter);
         }
-        
+
         if (params.toString()) {
           url += `?${params.toString()}`;
         }
