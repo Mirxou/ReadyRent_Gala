@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { AnimatePresence } from 'framer-motion';
-import { Wallet, ArrowLeftRight, Send, ShieldCheck, Database } from 'lucide-react';
+import { Wallet, ArrowLeftRight, Send, ShieldCheck, Database, Receipt } from 'lucide-react';
 import { SovereignButton } from '@/shared/components/sovereign/sovereign-button';
 import { Badge } from '@/components/ui/badge';
 import { useAuthStore } from '@/lib/store';
@@ -12,11 +12,13 @@ import { type TabKey, type Transaction } from './_components/types';
 import { BalanceTab } from './_components/balance-tab';
 import { DepositTab } from './_components/deposit-tab';
 import { TransferTab } from './_components/transfer-tab';
+import { PaymentsTab } from './_components/payments-tab';
 
 const TABS: { key: TabKey; label: string; icon: React.ElementType }[] = [
   { key: 'balance', label: 'الرصيد', icon: Wallet },
   { key: 'deposit', label: 'الإيداع والسحب', icon: ArrowLeftRight },
   { key: 'transfer', label: 'تحويل الأموال', icon: Send },
+  { key: 'payments', label: 'المدفوعات', icon: Receipt },
 ];
 
 export default function SovereignWallet() {
@@ -133,6 +135,7 @@ export default function SovereignWallet() {
           {activeTab === 'transfer' && (
             <TransferTab balance={balance} onBalanceUpdate={updateBalance} />
           )}
+          {activeTab === 'payments' && <PaymentsTab />}
         </AnimatePresence>
 
         <footer className="pt-20 pb-10 border-t border-white/5 flex flex-col items-center gap-6 text-center">
