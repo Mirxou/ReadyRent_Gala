@@ -137,18 +137,6 @@ export const artisansApi = {
     get<Record<string, unknown>[] | ArtisanList>(`/artisans${qs(params)}`),
 };
 
-// ─── Locations / delivery zones ───
-export const locationsApi = {
-  checkSameDayDelivery: (zoneId: string) =>
-    get<{ same_day?: boolean; [key: string]: any }>(`/locations/zones/${zoneId}/check-same-day/`),
-};
-
-// ─── Product hygiene certification ───
-export const hygieneApi = {
-  getLatestForProduct: (productId: string) =>
-    get<any>(`/hygiene/products/${productId}/latest/`),
-};
-
 // ─── Deposit calculation ───
 export const depositApi = {
   calculateDeposit: (params: { product_id: string; start_date: string; end_date: string }) =>

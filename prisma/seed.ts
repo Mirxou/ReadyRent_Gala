@@ -243,19 +243,6 @@ async function main() {
     await db.insurancePlan.create({ data: ip });
   }
 
-  // ──── Delivery Zones ────
-  await db.deliveryZone.createMany({
-    data: [
-      { name: 'الجزائر العاصمة', sameDayAvailable: true, deliveryFee: 500 },
-      { name: 'وهران', sameDayAvailable: false, deliveryFee: 800 },
-      { name: 'قسنطينة', sameDayAvailable: false, deliveryFee: 800 },
-      { name: 'تلمسان', sameDayAvailable: false, deliveryFee: 1000 },
-      { name: 'عنابة', sameDayAvailable: false, deliveryFee: 1000 },
-      { name: 'سطيف', sameDayAvailable: false, deliveryFee: 900 },
-      { name: 'البليدة', sameDayAvailable: true, deliveryFee: 500 },
-    ],
-  });
-
   // ──── Addresses (for demo user) ────
   await db.address.createMany({
     data: [

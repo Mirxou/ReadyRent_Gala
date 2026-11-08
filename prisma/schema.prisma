@@ -630,7 +630,6 @@ model Address {
   address        String
   city           String?
   isDefault      Boolean  @default(false) @map("is_default")
-  deliveryZoneId String?  @map("delivery_zone_id")
   createdAt      DateTime @default(now()) @map("created_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -638,17 +637,6 @@ model Address {
   // P2-27 fix: index on userId FK
   @@index([userId])
   @@map("addresses")
-}
-
-// ──── Delivery Zone ────
-model DeliveryZone {
-  id               String   @id @default(cuid())
-  name             String
-  sameDayAvailable Boolean  @default(false) @map("same_day_available")
-  deliveryFee      Int      @default(0) @map("delivery_fee")
-  createdAt        DateTime @default(now()) @map("created_at")
-
-  @@map("delivery_zones")
 }
 
 // ──── Local Guide Category ────
