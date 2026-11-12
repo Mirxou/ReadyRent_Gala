@@ -13,6 +13,14 @@ export function PaymentStep() {
   const [isDrawing, setIsDrawing] = useState(false);
   const [_signatureData, setSignatureData] = useState<string | null>(null);
 
+  // Escrow total mirrors the summary step: real per-day price × selected days
+  const escrowDays = formData.startDate && formData.endDate
+    ? Math.ceil((formData.endDate.getTime() - formData.startDate.getTime()) / (1000 * 60 * 60 * 24))
+    : 0;
+  const escrowTotal = formData.pricePerDay > 0
+    ? formData.pricePerDay * escrowDays
+    : formData.totalPrice;
+
   // Digital Signature Logic — canvas-based
   const getPos = (e: React.MouseEvent | React.TouchEvent) => {
     const canvas = canvasRef.current;
@@ -186,7 +194,7 @@ export function PaymentStep() {
       <div className="p-4 bg-gray-900 text-white rounded-2xl flex items-center justify-between">
         <div>
           <p className="text-xs text-gray-400">إجمالي المبلغ المحصن (Escrow)</p>
-          <p className="text-xl font-black">{formData.totalPrice?.toLocaleString('ar-DZ')} دج</p>
+          <p className="text-xl font-black">{escrowTotal?.toLocaleString('ar-DZ')} دج</p>
         </div>
         <div className="text-right">
           <p className="text-[10px] text-green-400">{isWalletPayment ? 'محفظة رقمية' : isBaridimob ? 'باريديموب' : 'بطاقة بنكية'}</p>

@@ -259,7 +259,7 @@ export default function ProductDetailsPage() {
                               toast.error('يجب تسجيل الدخول أولاً');
                               return;
                             }
-                            updateFormData({ productId: String(product.id) });
+                            updateFormData({ productId: String(product.id), pricePerDay: Number(product.price_per_day) || 0 });
                             setBookingOpen(true);
                           }}
                         >

@@ -11,6 +11,7 @@ export interface BookingFormData {
   ownerIdentityVerified: boolean;
   renterIdentityVerified: boolean;
   totalPrice: number;
+  pricePerDay: number;
   paymentMethod?: 'cib' | 'edahabia' | 'visa' | 'bank_transfer';
   paymentDetails?: {
     cardNumber?: string;
@@ -41,6 +42,7 @@ const initialFormData: BookingFormData = {
   ownerIdentityVerified: true, // Default to true for demo
   renterIdentityVerified: false,
   totalPrice: 0,
+  pricePerDay: 0,
 };
 
 export const useBookingStore = create<BookingState>((set) => ({

@@ -12,8 +12,12 @@ export function SummaryStep() {
     ? Math.ceil((formData.endDate.getTime() - formData.startDate.getTime()) / (1000 * 60 * 60 * 24))
     : 0;
 
-  // Use totalPrice from store (set by product page) or fallback
-  const basePrice = formData.totalPrice > 0 ? Math.round(formData.totalPrice / Math.max(days, 1)) : 5000;
+  // Use real product price (set by product page on open); fall back to stored total, never invent one
+  const basePrice = formData.pricePerDay > 0
+    ? formData.pricePerDay
+    : formData.totalPrice > 0
+      ? Math.round(formData.totalPrice / Math.max(days, 1))
+      : 0;
   const insurancePrice = formData.hasInsurance ? 0 : 0; // Insurance is calculated server-side per plan
   const subtotal = (basePrice * days) + insurancePrice;
   const deposit = subtotal > 0 ? Math.round(subtotal * 0.4) : 0;

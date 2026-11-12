@@ -29,6 +29,7 @@ export function BookingWizard() {
     nextStep, 
     prevStep, 
     formData, 
+    resetWizard,
   } = useBookingStore();
   
   const [isSubmitting, setIsSubmitting] = React.useState(false);
@@ -52,7 +53,7 @@ export function BookingWizard() {
     try {
       // 1. Create Booking
       const bookingRes = await bookingsApi.create({
-        product_id: Number(formData.productId) as unknown as string,
+        product_id: formData.productId,
         start_date: formData.startDate?.toISOString() || '',
         end_date: formData.endDate?.toISOString() || '',
         has_insurance: formData.hasInsurance,
@@ -65,9 +66,16 @@ export function BookingWizard() {
       }
       const bookingId = bookingRes.data.id;
 
-      // 3. Process Payment
+      // 3. Process Payment — escrow deposit = 40% of the server-calculated total
+      const serverTotal = bookingRes.data?.total_price ?? 0;
+      const depositAmount = Math.round(serverTotal * 0.4);
       const paymentMethodId = formData.paymentMethod ?? 'wallet';
-      const paymentRes = await paymentsApi.create({ booking_id: bookingId, payment_method: paymentMethodId });
+      const paymentRes = await paymentsApi.create({
+        booking_id: bookingId,
+        amount: depositAmount,
+        method: paymentMethodId,
+        escrow_status: 'held',
+      });
 
       // 4. Sign the contract if signature was provided
       if (formData.signature) {
@@ -211,7 +219,7 @@ export function BookingWizard() {
             <div className="flex items-center gap-4">
               <Button
                 variant="ghost"
-                onClick={() => setIsOpen(false)}
+                onClick={resetWizard}
                 className="text-muted-foreground font-medium"
               >
                 إلغاء
